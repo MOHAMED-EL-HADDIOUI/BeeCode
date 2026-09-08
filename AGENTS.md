@@ -26,6 +26,9 @@ cargo clippy -p "<crate>"                                # lint (config: clippy.
 cargo fmt --all                                          # rustfmt.toml; `use_field_init_shorthand = true`
 ```
 - Distribution builds: `cargo build --profile release-dist` (thin LTO + kept symbols for sidecars/dSYM). Plain `--release` is the fast local default.
+- Windows: run tests single-threaded (`cargo test -p <crate> -- --test-threads=1`).
+  The default parallel harness stalls with no output (verified on `wimoai-wimo-config`:
+  190/190 pass individually in <1 min, parallel run hangs indefinitely).
 
 ## Architecture entry points
 - `crates/codegen/wimoai-wimo-pager-bin/` — composition root; binary `wimoai-wimo-pager`. Exists to break the `pager ↔ pager-minimal` dependency cycle (minimal-mode hooks installed via fn-pointer seam at startup).
