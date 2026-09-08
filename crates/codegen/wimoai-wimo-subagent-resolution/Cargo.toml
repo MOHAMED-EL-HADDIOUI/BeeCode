@@ -1,0 +1,28 @@
+[package]
+license = "Apache-2.0"
+name = "wimo ai-wimo-subagent-resolution"
+version = "0.1.0"
+edition.workspace = true
+description = "Shared subagent definition, runtime, prompt, and resume resolution"
+
+[dependencies]
+chrono = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+wimo ai-wimo-agent = { path = "../wimo ai-wimo-agent" }
+wimo ai-wimo-sampling-types = { path = "../wimo ai-wimo-sampling-types" }
+wimo ai-wimo-tools = { path = "../wimo ai-wimo-tools" }
+wimo ai-tool-types.workspace = true
+
+[features]
+default = []
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }
+toml = { workspace = true }
+
+[lints]
+workspace = true

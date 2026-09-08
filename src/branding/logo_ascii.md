@@ -1,0 +1,7 @@
+    WIMO AI
+  ╔════════╗
+  ║  WIMO  ║
+  ╚════════╝
+ OPEN SOURCE
+ ANYONE CAN CONTRIBUTE
+ REAL PRODUCTION FRAMEWORK

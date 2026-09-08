@@ -1,0 +1,19 @@
+{
+    "name": "@wimo ai-official/wimo-darwin-x64",
+    "version": "0.2.0-dev",
+    "description": "darwin-x64 binary for @wimo ai-official/wimo. Do not install directly; install @wimo ai-official/wimo instead.",
+    "license": "Apache-2.0",
+    "files": [
+        "bin/",
+        "THIRD_PARTY_NOTICES.md"
+    ],
+    "os": [
+        "darwin"
+    ],
+    "cpu": [
+        "x64"
+    ],
+    "publishConfig": {
+        "access": "public"
+    }
+}

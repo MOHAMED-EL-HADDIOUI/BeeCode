@@ -1,0 +1,25 @@
+[package]
+license = "Apache-2.0"
+name = "wimo ai-wimo-tools-api"
+version = "0.1.220-alpha.4"
+edition.workspace = true
+description = "Protobuf API definitions for wimo tools"
+
+[dependencies]
+tonic-prost = { workspace = true }
+# Protobuf runtime
+prost = { workspace = true }
+tonic = { workspace = true }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+wimo ai-tool-protocol = { workspace = true }
+
+[build-dependencies]
+wimo ai-proto-build = { workspace = true }
+
+[package.metadata.cargo-shear]
+ignored = ["serde", "tonic"]
+
+[lints]
+workspace = true

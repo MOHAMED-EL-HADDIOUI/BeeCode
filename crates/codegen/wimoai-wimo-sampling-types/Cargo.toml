@@ -1,0 +1,26 @@
+[package]
+license = "Apache-2.0"
+name = "wimo ai-wimo-sampling-types"
+version = "0.1.0"
+edition.workspace = true
+description = "Pure data types for the wimo AI sampling / chat-completion API layer"
+
+[dependencies]
+async-openai = { workspace = true }
+chrono = { workspace = true }
+indexmap = { workspace = true, features = ["serde"] }
+reqwest = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["preserve_order"] }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+wimo ai-circuit-breaker = { workspace = true }
+wimo ai-wimo-compaction = { path = "../../common/wimo ai-wimo-compaction" }
+wimo ai-wimo-tools = { path = "../wimo ai-wimo-tools" }
+
+[dev-dependencies]
+assert_matches = { workspace = true }
+
+[lints]
+workspace = true
