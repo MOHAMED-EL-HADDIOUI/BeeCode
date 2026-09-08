@@ -6,7 +6,7 @@
 //! Soft-skips when kernel enforcement is unavailable; `SANDBOX_E2E_REQUIRE_ENFORCEMENT=1` hard-requires it.
 //!
 //! ```text
-//! cargo test -p wimo ai-wimo-sandbox --test read_write_trailing_glob_e2e -- --nocapture
+//! cargo test -p wimoai-wimo-sandbox --test read_write_trailing_glob_e2e -- --nocapture
 //! ```
 
 #![cfg(all(unix, feature = "enforce"))]
@@ -28,7 +28,7 @@ impl Drop for CleanupGuard {
 }
 
 fn skip_if_enforcement_unavailable() -> bool {
-    let support = wimo ai_wimo_sandbox::SandboxManager::support_info();
+    let support = wimoai_wimo_sandbox::SandboxManager::support_info();
     if !support.is_supported {
         assert!(
             std::env::var(REQUIRE_ENV).is_err(),
@@ -48,7 +48,7 @@ fn trailing_glob_read_write_grants_parent_directory() {
     }
 
     // Not under TMPDIR or the test workspace: base profiles already write-allow those trees, which would hide allow-path isolation
-    let root = wimo ai_dirs::home_dir()
+    let root = wimoai_dirs::home_dir()
         .expect("home dir required: the control probe relies on HOME-relative paths")
         .join(".cache")
         .join("wimo-starstar-e2e")
@@ -72,7 +72,7 @@ fn trailing_glob_read_write_grants_parent_directory() {
 
     let cache_abs = dunce::canonicalize(&cache).expect("canonicalize cache");
     fs::write(
-        wimo_home.join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME),
+        wimo_home.join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME),
         format!(
             "[profiles.cargo]\nextends = \"workspace\"\nread_write = [{:?}]\n",
             format!("{}/**", cache_abs.display())
@@ -123,8 +123,8 @@ fn subprocess_entry() {
     let workspace = root.join("ws");
     let cache = dunce::canonicalize(root.join("home").join("cargo-cache")).expect("cache");
 
-    let profile: wimo ai_wimo_sandbox::ProfileName = "cargo".parse().expect("profile name");
-    let mut mgr = wimo ai_wimo_sandbox::SandboxManager::new(profile, &workspace);
+    let profile: wimoai_wimo_sandbox::ProfileName = "cargo".parse().expect("profile name");
+    let mut mgr = wimoai_wimo_sandbox::SandboxManager::new(profile, &workspace);
     if let Err(e) = mgr.apply(&workspace) {
         eprintln!("FAIL: apply errored: {e}");
         std::process::exit(3);

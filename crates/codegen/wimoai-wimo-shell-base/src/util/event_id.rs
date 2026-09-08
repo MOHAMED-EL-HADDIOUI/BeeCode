@@ -26,7 +26,7 @@ pub fn generate_event_id(session_id: &str) -> String {
 ///
 /// Stamping chokepoints (stamp before the persist/broadcast fork so both copies share one id):
 /// - `SessionActor::emit_notification_direct` (all actor ACP notifications, including the buffered pipeline)
-/// - `send_wimo ai_notification` / `persist_wimo ai_update_only` / `handle_wimo ai_session_notification` (actor wimo AI)
+/// - `send_wimoai_notification` / `persist_wimoai_update_only` / `handle_wimoai_session_notification` (actor wimo AI)
 /// - `notification_bridge::stamp_event_id` (bridge)
 /// - `emit_subagent_notification` (subagent)
 /// - `GoalNotifySender::send_update` (goal mode)

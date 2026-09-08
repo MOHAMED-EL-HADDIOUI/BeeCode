@@ -1,5 +1,5 @@
 use super::{LEGACY_AGENTS_MD_REMINDER_PREFIX, conversation_has_project_instructions};
-use wimo ai_wimo_sampling_types::{ContentPart, ConversationItem, SyntheticReason, UserItem};
+use wimoai_wimo_sampling_types::{ContentPart, ConversationItem, SyntheticReason, UserItem};
 
 /// A `User` item tagged `ProjectInstructions` is how current shells record AGENTS.md and must be detected.
 #[test]

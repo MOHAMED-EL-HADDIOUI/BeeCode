@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use wimo ai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageOutput;
-use wimo ai_wimo_tools::tool_taxonomy::{CanonicalToolMeta, TOOL_META_KEY, ToolIdentity};
-use wimo ai_wimo_tools::types::output::ToolOutput;
-use wimo ai_wimo_tools::types::tool::{ToolKind, ToolNamespace};
+use wimoai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageOutput;
+use wimoai_wimo_tools::tool_taxonomy::{CanonicalToolMeta, TOOL_META_KEY, ToolIdentity};
+use wimoai_wimo_tools::types::output::ToolOutput;
+use wimoai_wimo_tools::types::tool::{ToolKind, ToolNamespace};
 
 use super::*;
 use crate::acp::meta::NotificationMeta;
@@ -114,7 +114,7 @@ fn direct_and_enveloped_wire_inputs_preserve_exact_arguments() {
 #[test]
 fn wire_input_is_preserved_without_admission_revalidation() {
     let oversize = "x".repeat(
-        wimo ai_wimo_tools::implementations::wimo::task::types::MAX_ACTIVE_AGENT_MESSAGE_BYTES
+        wimoai_wimo_tools::implementations::wimo::task::types::MAX_ACTIVE_AGENT_MESSAGE_BYTES
             + 1,
     );
     for (subagent_id, text) in [("null", "hello"), ("sub-123", ""), ("sub-123", &oversize)] {

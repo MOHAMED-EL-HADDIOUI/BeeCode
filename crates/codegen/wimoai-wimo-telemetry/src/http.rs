@@ -1,9 +1,9 @@
 //! Origin/client identification used by the telemetry engine.
 //!
-//! [`OriginClientInfo`] is owned by `wimo ai-wimo-sampler` (so `SamplerConfig` can use it without depending on shell).
+//! [`OriginClientInfo`] is owned by `wimoai-wimo-sampler` (so `SamplerConfig` can use it without depending on shell).
 //! Re-exported here so the telemetry engine can label events without depending on shell or sampler internals beyond the type itself.
 
-pub use wimo ai_wimo_sampler::OriginClientInfo;
+pub use wimoai_wimo_sampler::OriginClientInfo;
 
 /// Construct an [`OriginClientInfo`] from the `wimo_CLIENT_NAME` / `wimo_CLIENT_VERSION` env vars.
 /// Returns `None` when `wimo_CLIENT_NAME` is unset.

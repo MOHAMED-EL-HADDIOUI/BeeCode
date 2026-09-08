@@ -10,7 +10,7 @@
 ///
 /// `user_context` is the optional `/compact <text>` user-provided context,
 /// spliced inline into the structured prompt. Ported verbatim from
-/// `wimo ai-wimo-shell::session::helpers::session_compact::build_compaction_prompt`
+/// `wimoai-wimo-shell::session::helpers::session_compact::build_compaction_prompt`
 /// (the `use_short_prompt == false` branch).
 pub fn build_summary_prompt(user_context: Option<&str>) -> String {
     let user_context_section = match user_context {
@@ -26,7 +26,7 @@ pub fn build_summary_prompt(user_context: Option<&str>) -> String {
 }
 
 /// The short "self-summarization" prompt variant
-/// (mirrors `wimo ai-wimo-shell`'s `SELF_SUMMARIZATION_PROMPT`). Framed
+/// (mirrors `wimoai-wimo-shell`'s `SELF_SUMMARIZATION_PROMPT`). Framed
 /// as "summarize for a successor assistant that only sees the user's original
 /// query plus this summary." Kept here so every harness (the shell and the
 /// harness crate) shares one definition instead of each carrying a

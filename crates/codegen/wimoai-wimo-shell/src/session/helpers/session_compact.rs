@@ -7,10 +7,10 @@ use agent_client_protocol as acp;
 use async_openai::types::responses::ResponseStreamEvent;
 use futures_util::StreamExt;
 use reqwest::StatusCode;
-use wimo ai_wimo_sampler::SamplerConfig as SamplingConfig;
+use wimoai_wimo_sampler::SamplerConfig as SamplingConfig;
 
-// Re-export compaction utilities from wimo ai-chat-state so existing callers that import from this module continue to work
-pub use wimo ai_chat_state::compaction_utils::{
+// Re-export compaction utilities from wimoai-chat-state so existing callers that import from this module continue to work
+pub use wimoai_chat_state::compaction_utils::{
     AUTO_CONTINUE_PROMPT, extract_last_real_user_query, extract_last_user_query,
     extract_messages_since_last_user, extract_real_user_queries, is_synthetic_extracted_query,
 };
@@ -91,7 +91,7 @@ pub(crate) const COMPACT_ERROR_DETAIL_MAX_BYTES: usize = 300;
 pub(crate) fn normalize_compact_detail(raw: &str) -> String {
     let single_line = raw.split_whitespace().collect::<Vec<_>>().join(" ");
     let scrubbed = crate::sampling::error::rewrite_service_names(&single_line);
-    wimo ai_wimo_tools::util::truncate_str_with_marker(&scrubbed, COMPACT_ERROR_DETAIL_MAX_BYTES)
+    wimoai_wimo_tools::util::truncate_str_with_marker(&scrubbed, COMPACT_ERROR_DETAIL_MAX_BYTES)
         .into_owned()
 }
 
@@ -119,7 +119,7 @@ impl CompactFailure {
 }
 
 // Single definition so turn-path and compaction size detection can't drift.
-pub(crate) use wimo ai_wimo_compaction::is_context_length_error;
+pub(crate) use wimoai_wimo_compaction::is_context_length_error;
 
 /// Classify an upstream `SamplingError` for the compaction retry loop.
 ///
@@ -176,7 +176,7 @@ fn classify_response_event_error(code: Option<&str>, message: &str) -> CompactFa
     // real overflows wear that marker WITH size text, so letting the marker
     // veto the text would strand them off the ladder. Residual echo risk is
     // accepted — sticky Size is recoverable via manual /compact or rewind.
-    if code.is_some_and(wimo ai_wimo_sampling_types::is_size_overflow_error_code)
+    if code.is_some_and(wimoai_wimo_sampling_types::is_size_overflow_error_code)
         || is_context_length_error(message)
     {
         return CompactFailure::Overflow(acp_err);
@@ -510,9 +510,9 @@ pub(crate) async fn generate_session_compact(
 
             let sid = session_id.to_string();
             message.x_wimo_conv_id = Some(sid.clone());
-            message.x_wimo_req_id = Some(format!("wimo ai-compact-{}", uuid::Uuid::new_v4()));
+            message.x_wimo_req_id = Some(format!("wimoai-compact-{}", uuid::Uuid::new_v4()));
             message.x_wimo_session_id = Some(sid);
-            message.x_wimo_agent_id = Some(wimo ai_wimo_telemetry::id::agent_id());
+            message.x_wimo_agent_id = Some(wimoai_wimo_telemetry::id::agent_id());
 
             tracing::info!(
                 compact_model = %sampling_config.model,
@@ -575,9 +575,9 @@ pub(crate) async fn generate_session_compact(
                                 content.push_str(delta_content);
                             }
                             if let Some(fr) = choice.finish_reason {
-                                let sr = wimo ai_wimo_sampling_types::StopReason::from(fr);
+                                let sr = wimoai_wimo_sampling_types::StopReason::from(fr);
                                 truncated =
-                                    matches!(sr, wimo ai_wimo_sampling_types::StopReason::Length);
+                                    matches!(sr, wimoai_wimo_sampling_types::StopReason::Length);
                                 stop_reason = Some(sr.as_str().to_string());
                             }
                         }
@@ -605,9 +605,9 @@ pub(crate) async fn generate_session_compact(
                 model: Some(sampling_config.model.to_owned()),
                 temperature: Some(1.0),
                 x_wimo_conv_id: Some(session_id.to_string()),
-                x_wimo_req_id: Some(format!("wimo ai-compact-{}", uuid::Uuid::new_v4())),
+                x_wimo_req_id: Some(format!("wimoai-compact-{}", uuid::Uuid::new_v4())),
                 x_wimo_session_id: Some(session_id.to_string()),
-                x_wimo_agent_id: Some(wimo ai_wimo_telemetry::id::agent_id()),
+                x_wimo_agent_id: Some(wimoai_wimo_telemetry::id::agent_id()),
                 ..Default::default()
             };
             let stream_result =
@@ -728,9 +728,9 @@ pub(crate) async fn generate_session_compact(
                 model: Some(sampling_config.model.to_owned()),
                 temperature: Some(1.0),
                 x_wimo_conv_id: Some(session_id.to_string()),
-                x_wimo_req_id: Some(format!("wimo ai-compact-{}", uuid::Uuid::new_v4())),
+                x_wimo_req_id: Some(format!("wimoai-compact-{}", uuid::Uuid::new_v4())),
                 x_wimo_session_id: Some(session_id.to_string()),
-                x_wimo_agent_id: Some(wimo ai_wimo_telemetry::id::agent_id()),
+                x_wimo_agent_id: Some(wimoai_wimo_telemetry::id::agent_id()),
                 ..Default::default()
             };
             let stream_result =
@@ -774,24 +774,24 @@ pub(crate) async fn generate_session_compact(
                     Ok(event) => {
                         if !matches!(
                             &event,
-                            wimo ai_wimo_sampling_types::messages::MessageStreamEvent::Ping
+                            wimoai_wimo_sampling_types::messages::MessageStreamEvent::Ping
                         ) {
                             last_progress_at = std::time::Instant::now();
                         }
                         match event {
-                        wimo ai_wimo_sampling_types::messages::MessageStreamEvent::ContentBlockDelta {
-                            delta: wimo ai_wimo_sampling_types::messages::StreamDelta::TextDelta { text },
+                        wimoai_wimo_sampling_types::messages::MessageStreamEvent::ContentBlockDelta {
+                            delta: wimoai_wimo_sampling_types::messages::StreamDelta::TextDelta { text },
                             ..
                         } => {
                             timing.record_delta();
                             content.push_str(&text);
                         }
-                        wimo ai_wimo_sampling_types::messages::MessageStreamEvent::MessageDelta { delta, .. } => {
+                        wimoai_wimo_sampling_types::messages::MessageStreamEvent::MessageDelta { delta, .. } => {
                             if let Some(sr) = delta.stop_reason {
                                 truncated = matches!(
                                     sr,
-                                    wimo ai_wimo_sampling_types::messages::StopReason::MaxTokens
-                                        | wimo ai_wimo_sampling_types::messages::StopReason::ModelContextWindowExceeded
+                                    wimoai_wimo_sampling_types::messages::StopReason::MaxTokens
+                                        | wimoai_wimo_sampling_types::messages::StopReason::ModelContextWindowExceeded
                                 );
                                 stop_reason = Some(sr.wire_str());
                             }

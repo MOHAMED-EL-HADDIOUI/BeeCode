@@ -9,7 +9,7 @@ use toml::Value as TomlValue;
 /// - `Some("stable")` when at or behind stable,
 /// - `None` when no cached pointer is available (first launch, old cache).
 ///
-/// This is a lightweight duplicate of `wimo ai_wimo_update::channel_name()` for use in `wimo ai-wimo-shell` which cannot depend on `wimo ai-wimo-update`.
+/// This is a lightweight duplicate of `wimoai_wimo_update::channel_name()` for use in `wimoai-wimo-shell` which cannot depend on `wimoai-wimo-update`.
 pub(crate) fn channel_name_from_cache() -> Option<&'static str> {
     use std::sync::OnceLock;
     static NAME: OnceLock<Option<&'static str>> = OnceLock::new();
@@ -18,7 +18,7 @@ pub(crate) fn channel_name_from_cache() -> Option<&'static str> {
         let content = std::fs::read_to_string(&version_path).ok()?;
         let parsed: serde_json::Value = serde_json::from_str(&content).ok()?;
         let stable = parsed.get("stable_version")?.as_str()?;
-        let current = semver::Version::parse(wimo ai_wimo_version::VERSION).ok()?;
+        let current = semver::Version::parse(wimoai_wimo_version::VERSION).ok()?;
         let stable_v = semver::Version::parse(stable).ok()?;
         if current > stable_v {
             Some("alpha")

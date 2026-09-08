@@ -85,13 +85,13 @@ struct Scrubber {
 impl Scrubber {
     fn from_env() -> Self {
         Self {
-            home_dir: wimo ai_dirs::home_dir().map(|p| p.to_string_lossy().to_string()),
+            home_dir: wimoai_dirs::home_dir().map(|p| p.to_string_lossy().to_string()),
             usernames: collect_usernames_from_env(),
         }
     }
 
     fn scrub(&self, s: &str) -> String {
-        let out = wimo ai_wimo_secrets::redact_secrets(s);
+        let out = wimoai_wimo_secrets::redact_secrets(s);
         let out = match self.home_dir.as_deref() {
             Some(home) => Cow::Owned(replace_home_prefix(out.as_ref(), home)),
             None => out,
@@ -100,7 +100,7 @@ impl Scrubber {
     }
 
     fn scrub_value(&self, val: &mut Value) {
-        wimo ai_wimo_secrets::walk_json_strings(val, &mut |s| *s = self.scrub(s));
+        wimoai_wimo_secrets::walk_json_strings(val, &mut |s| *s = self.scrub(s));
     }
 }
 

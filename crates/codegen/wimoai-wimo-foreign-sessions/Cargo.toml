@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-foreign-sessions"
+name = "wimoai-wimo-foreign-sessions"
 version = "0.1.0"
 edition.workspace = true
 description = "Bounded, metadata-only discovery of foreign coding-agent sessions"
@@ -25,9 +25,9 @@ serde_json = { workspace = true }
 # Session ids are UUIDs; only parsing is used, no generation.
 uuid = { workspace = true }
 # Home-root resolution for the per-tool session stores (dirs::home_dir is banned).
-wimo ai-dirs = { workspace = true }
+wimoai-dirs = { workspace = true }
 # Journal-mode probe: foreign stores are opened only under local WAL.
-wimo ai-sqlite-journal = { workspace = true }
+wimoai-sqlite-journal = { workspace = true }
 # Codex rollout files may be zstd-compressed.
 zstd = { workspace = true }
 

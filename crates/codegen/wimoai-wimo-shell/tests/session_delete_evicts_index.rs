@@ -4,15 +4,15 @@
 use std::sync::{Arc, OnceLock};
 
 use agent_client_protocol as acp;
-use wimo ai_wimo_shell::auth::{AuthManager, wimoComConfig};
-use wimo ai_wimo_shell::session::info::Info;
-use wimo ai_wimo_shell::session::persistence::delete_session_history;
-use wimo ai_wimo_shell::session::storage::search::{
+use wimoai_wimo_shell::auth::{AuthManager, wimoComConfig};
+use wimoai_wimo_shell::session::info::Info;
+use wimoai_wimo_shell::session::persistence::delete_session_history;
+use wimoai_wimo_shell::session::storage::search::{
     IndexDecision, SearchIndex, SearchIndexManager, SessionSearchRequest, execute_search,
     start_if_enabled,
 };
-use wimo ai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
-use wimo ai_wimo_test_support::EnvGuard;
+use wimoai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
+use wimoai_wimo_test_support::EnvGuard;
 
 fn home() -> &'static std::path::Path {
     static HOME: OnceLock<(tempfile::TempDir, EnvGuard)> = OnceLock::new();
@@ -28,7 +28,7 @@ fn home() -> &'static std::path::Path {
 /// `start_if_enabled` is the only way to get a manager, so the test calls it with `wimo_SESSION_SEARCH` left at its default.
 fn start_index() -> SearchIndexManager {
     let _default_on = EnvGuard::unset("wimo_SESSION_SEARCH");
-    match start_if_enabled(&wimo ai_wimo_shell::agent::config::Config::default()) {
+    match start_if_enabled(&wimoai_wimo_shell::agent::config::Config::default()) {
         SearchIndex::Started(index) => index,
         SearchIndex::Off { reason } => {
             panic!("session search is on by default, got off: {reason}")
@@ -93,7 +93,7 @@ async fn deleting_a_session_clears_only_its_own_search_row() {
     let auth = Arc::new(AuthManager::new(root, wimoComConfig::default()));
 
     let session_dir =
-        wimo ai_wimo_shell::util::wimo_home::sessions_cwd_dir_in(root, "/ws-a").join("orphan");
+        wimoai_wimo_shell::util::wimo_home::sessions_cwd_dir_in(root, "/ws-a").join("orphan");
     std::fs::remove_dir_all(&session_dir).unwrap();
     let deletion = delete_session_history("orphan", None, false, auth.clone(), Some(&index))
         .await
@@ -160,17 +160,17 @@ fn loading_config_applies_requirement_pins() {
     let pin = home().join("requirements.toml");
     std::fs::write(&pin, "[features]\nsession_search = false\n").unwrap();
 
-    let loaded = wimo ai_wimo_shell::config::load_agent_config_disk_only();
+    let loaded = wimoai_wimo_shell::config::load_agent_config_disk_only();
     std::fs::remove_file(&pin).unwrap();
     let config = loaded.expect("config loads");
 
-    let resolved = config.feature(wimo ai_wimo_shell::agent::config::Feature::SessionSearch);
+    let resolved = config.feature(wimoai_wimo_shell::agent::config::Feature::SessionSearch);
     assert!(
         !resolved.value,
         "a one-shot command must apply pins, or the environment outranks them",
     );
     assert_eq!(
         resolved.source,
-        wimo ai_wimo_shell::agent::config::ConfigSource::Requirement
+        wimoai_wimo_shell::agent::config::ConfigSource::Requirement
     );
 }

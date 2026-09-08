@@ -1,6 +1,6 @@
 //! All colors come from the `Theme` struct; nothing else hardcodes colors.
 //!
-//! The named constants below match the TokyoNight Night/Storm palette from `wimo ai-wimo-pager/src/ui/style.rs`.
+//! The named constants below match the TokyoNight Night/Storm palette from `wimoai-wimo-pager/src/ui/style.rs`.
 //! The `Theme` struct maps these constants to semantic roles.
 
 use ratatui::style::{Color, Modifier, Style};
@@ -10,7 +10,7 @@ const fn rgb(r: u8, g: u8, b: u8) -> Color {
 }
 
 // TokyoNight palette constants (Night/Storm variant).
-// Keep in sync with wimo ai-wimo-pager TokyoNightNight.
+// Keep in sync with wimoai-wimo-pager TokyoNightNight.
 #[allow(dead_code)]
 pub mod palette {
     use super::*;

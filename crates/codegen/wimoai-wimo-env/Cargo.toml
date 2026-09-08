@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-env"
+name = "wimoai-wimo-env"
 version = "0.1.0"
 edition.workspace = true
 description = "Backend environment presets for the wimo CLI crate family: endpoint URL defaults and env-var test support."

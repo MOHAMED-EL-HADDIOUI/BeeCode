@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use wimo ai_wimo_sampling_types::{SamplingError, is_retryable_api_status};
+use wimoai_wimo_sampling_types::{SamplingError, is_retryable_api_status};
 
 pub const RATE_LIMIT_RETRY_THRESHOLD: u32 = 2;
 
@@ -340,7 +340,7 @@ pub(crate) fn clone_error(err: &SamplingError) -> SamplingError {
 mod tests {
     use super::*;
     use reqwest::StatusCode;
-    use wimo ai_wimo_sampling_types::ApiErrorCode;
+    use wimoai_wimo_sampling_types::ApiErrorCode;
 
     fn api_err(status: StatusCode, message: &str) -> SamplingError {
         SamplingError::Api {
@@ -628,8 +628,8 @@ mod tests {
             api_err(StatusCode::PAYLOAD_TOO_LARGE, "too big"),
             api_err(StatusCode::BAD_REQUEST, "Could not process image"),
             SamplingError::EmptyResponse {
-                context: wimo ai_wimo_sampling_types::EmptyResponseContext {
-                    reason: wimo ai_wimo_sampling_types::EmptyReason::NoVisibleContent,
+                context: wimoai_wimo_sampling_types::EmptyResponseContext {
+                    reason: wimoai_wimo_sampling_types::EmptyReason::NoVisibleContent,
                     had_reasoning: false,
                     content_len: 0,
                     tool_call_count: 0,
@@ -947,7 +947,7 @@ mod tests {
         let coded = SamplingError::StreamError {
             error_type: "BAD_REQUEST".into(),
             message: "request rejected".into(),
-            code: Some(wimo ai_wimo_sampling_types::ApiErrorCode::parse(
+            code: Some(wimoai_wimo_sampling_types::ApiErrorCode::parse(
                 "exceed_context_size_error",
             )),
         };
@@ -964,7 +964,7 @@ mod tests {
             let coded = SamplingError::StreamError {
                 error_type: "BAD_REQUEST".into(),
                 message: "request rejected".into(),
-                code: Some(wimo ai_wimo_sampling_types::ApiErrorCode::parse(code)),
+                code: Some(wimoai_wimo_sampling_types::ApiErrorCode::parse(code)),
             };
             assert!(
                 matches!(

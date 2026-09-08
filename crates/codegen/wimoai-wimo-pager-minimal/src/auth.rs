@@ -10,8 +10,8 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 
-use wimo ai_wimo_pager::app::app_view::{AuthState, TrustState};
-use wimo ai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::app::app_view::{AuthState, TrustState};
+use wimoai_wimo_pager::theme::Theme;
 
 /// What the minimal live region shows when there is no active agent yet.
 /// Computed before the draw closure so the closure can own it.
@@ -373,7 +373,7 @@ mod tests {
 
     #[test]
     fn auth_hint_maps_auth_state() {
-        use wimo ai_wimo_pager::app::app_view::AuthMode;
+        use wimoai_wimo_pager::app::app_view::AuthMode;
 
         let trust_done = TrustState::Done;
 

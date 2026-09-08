@@ -10,8 +10,8 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde_json::Value;
 
-use wimo ai_tool_protocol::{SessionId, ToolId, UserId};
-use wimo ai_tool_runtime::{ToolCallContext, ToolError, ToolStream, TypedToolOutput};
+use wimoai_tool_protocol::{SessionId, ToolId, UserId};
+use wimoai_tool_runtime::{ToolCallContext, ToolError, ToolStream, TypedToolOutput};
 
 use crate::resolver::CompoundResolver;
 use crate::transport::{Principal, Transport, TransportKind};

@@ -2,7 +2,7 @@
 
 use agent_client_protocol as acp;
 use serde::Deserialize;
-use wimo ai_hooks_plugins_types::{
+use wimoai_hooks_plugins_types::{
     HookStatus, McpStatus, PluginInfo, PluginOrigin, PluginScope, PluginsListResponse,
 };
 
@@ -16,8 +16,8 @@ struct ListRequest {
     session_id: String,
 }
 
-pub(crate) fn loaded_plugin_to_info(plugin: &wimo ai_wimo_agent::plugins::LoadedPlugin) -> PluginInfo {
-    use wimo ai_wimo_agent::plugins::discovery::PluginScope as AgentScope;
+pub(crate) fn loaded_plugin_to_info(plugin: &wimoai_wimo_agent::plugins::LoadedPlugin) -> PluginInfo {
+    use wimoai_wimo_agent::plugins::discovery::PluginScope as AgentScope;
 
     let scope = match plugin.scope {
         AgentScope::CliOverride => PluginScope::Cli,
@@ -71,8 +71,8 @@ pub(crate) fn loaded_plugin_to_info(plugin: &wimo ai_wimo_agent::plugins::Loaded
     }
 }
 
-fn origin_to_dto(origin: &wimo ai_wimo_agent::plugins::PluginOrigin) -> PluginOrigin {
-    use wimo ai_wimo_agent::plugins::PluginOrigin as AgentOrigin;
+fn origin_to_dto(origin: &wimoai_wimo_agent::plugins::PluginOrigin) -> PluginOrigin {
+    use wimoai_wimo_agent::plugins::PluginOrigin as AgentOrigin;
     match origin {
         AgentOrigin::CliOverride => PluginOrigin::CliOverride,
         AgentOrigin::Projectwimo => PluginOrigin::Projectwimo,
@@ -152,7 +152,7 @@ pub async fn handle(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
             super::to_ext_response(Ok::<_, anyhow::Error>(response))
         }
         "x.ai/plugins/action" => {
-            let req: wimo ai_hooks_plugins_types::PluginsActionRequest = super::parse_params(args)?;
+            let req: wimoai_hooks_plugins_types::PluginsActionRequest = super::parse_params(args)?;
             let sid = acp::SessionId::new(req.session_id);
 
             let result = agent
@@ -183,12 +183,12 @@ pub async fn handle(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_agent::plugins::PluginOrigin as AgentOrigin;
-    use wimo ai_wimo_agent::plugins::discovery::{PluginId, PluginScope as AgentScope};
+    use wimoai_wimo_agent::plugins::PluginOrigin as AgentOrigin;
+    use wimoai_wimo_agent::plugins::discovery::{PluginId, PluginScope as AgentScope};
 
-    fn make_loaded_plugin(origin: AgentOrigin) -> wimo ai_wimo_agent::plugins::LoadedPlugin {
+    fn make_loaded_plugin(origin: AgentOrigin) -> wimoai_wimo_agent::plugins::LoadedPlugin {
         let root = std::path::PathBuf::from("/tmp/test-plugin");
-        wimo ai_wimo_agent::plugins::LoadedPlugin {
+        wimoai_wimo_agent::plugins::LoadedPlugin {
             name: "test-plugin".to_string(),
             id: PluginId::new(AgentScope::User, &root, "test-plugin"),
             root: root.clone(),

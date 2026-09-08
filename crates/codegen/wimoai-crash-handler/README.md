@@ -1,4 +1,4 @@
-# wimo ai-crash-handler
+# wimoai-crash-handler
 
 Crash handler for SIGBUS/SIGSEGV with best-effort backtrace capture.
 
@@ -33,14 +33,14 @@ let crash_dir = PathBuf::from("/home/user/.myapp/crash");
 
 // check_previous_crash MUST be called before install(), because
 // install() opens last-crash.bin with O_TRUNC.
-if let Some(r) = wimo ai_crash_handler::check_previous_crash(&crash_dir) {
+if let Some(r) = wimoai_crash_handler::check_previous_crash(&crash_dir) {
     eprintln!("Crashed last session: {}", r.signal_name);
     eprintln!("Report: {}", r.report_path.display());
 }
 
 // install() before any threads or async runtime — sigaltstack is per-thread.
 // Creates crash_dir if it does not exist.
-wimo ai_crash_handler::install(wimo ai_crash_handler::CrashHandlerConfig {
+wimoai_crash_handler::install(wimoai_crash_handler::CrashHandlerConfig {
     app_version: env!("CARGO_PKG_VERSION").to_string(),
     crash_dir,
 });

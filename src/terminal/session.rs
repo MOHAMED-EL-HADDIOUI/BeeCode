@@ -1,5 +1,5 @@
 //! Multi-terminal framework — REAL terminal session management (Section 13 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub struct TerminalSession {
     pub id: u32,

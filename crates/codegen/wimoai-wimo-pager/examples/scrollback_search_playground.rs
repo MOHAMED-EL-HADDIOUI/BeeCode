@@ -20,11 +20,11 @@ use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use unicode_width::UnicodeWidthStr;
-use wimo ai_wimo_pager::scrollback::{
+use wimoai_wimo_pager::scrollback::{
     RenderBlock, ScratchBuffer, ScrollbackPane, ScrollbackSearchState, ScrollbackState,
 };
-use wimo ai_wimo_pager::theme::Theme;
-use wimo ai_wimo_pager::views::picker::render_search_bar_with_viewport;
+use wimoai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::views::picker::render_search_bar_with_viewport;
 
 struct App {
     scrollback: ScrollbackState,
@@ -226,7 +226,7 @@ fn draw(f: &mut ratatui::Frame, app: &mut App) {
         .as_deref()
         .map_or(0, |text| UnicodeWidthStr::width(text) as u16);
     let search_layout =
-        wimo ai_wimo_pager::views::picker::search_bar_layout(block_area.width, counter_width);
+        wimoai_wimo_pager::views::picker::search_bar_layout(block_area.width, counter_width);
     render_search_bar_with_viewport(
         f.buffer_mut(),
         block_area.x,

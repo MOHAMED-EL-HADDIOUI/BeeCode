@@ -1,6 +1,6 @@
 use super::*;
-use wimo ai_wimo_telemetry::events::TelemetryEvent;
-use wimo ai_wimo_tools::types::output::{SearchToolOutput, ToolOutput};
+use wimoai_wimo_telemetry::events::TelemetryEvent;
+use wimoai_wimo_tools::types::output::{SearchToolOutput, ToolOutput};
 
 fn event_name(event: &ActiveAgentMessageEvent) -> &'static str {
     match event {

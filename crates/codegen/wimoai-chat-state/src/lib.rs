@@ -1,8 +1,8 @@
-//! wimo ai-chat-state — Actor-based chat state management for wimo AI agents.
+//! wimoai-chat-state — Actor-based chat state management for wimo AI agents.
 //!
-//! This crate extracts conversation state management from `wimo ai-wimo-shell`'s
+//! This crate extracts conversation state management from `wimoai-wimo-shell`'s
 //! `acp_session.rs` into a standalone actor. It follows the same actor pattern
-//! as `wimo ai-hunk-tracker`:
+//! as `wimoai-hunk-tracker`:
 //!
 //! ```text
 //! ┌────────────────┐                  ┌──────────────────────────────────────┐
@@ -52,6 +52,6 @@ pub use persistence::{
 };
 pub use types::*;
 pub use usage::{UsageLedger, UsageTotals};
-// Re-exported so `wimo ai_chat_state::CompactionDetail` stays a working path for
+// Re-exported so `wimoai_chat_state::CompactionDetail` stays a working path for
 // existing callers.
-pub use wimo ai_compaction_transcript::CompactionDetail;
+pub use wimoai_compaction_transcript::CompactionDetail;

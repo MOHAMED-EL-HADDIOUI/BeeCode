@@ -2,7 +2,7 @@
 //! This creates new session files but does not start the session.
 
 use crate::remote::BackendClient;
-const FORK_LOG: &str = "wimo ai_fork";
+const FORK_LOG: &str = "wimoai_fork";
 use crate::session::export::ExportedMetadata;
 use crate::session::info::Info;
 use crate::session::storage::{CopySessionOptions, JsonlStorageAdapter};

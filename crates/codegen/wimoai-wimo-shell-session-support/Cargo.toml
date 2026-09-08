@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-shell-session-support"
+name = "wimoai-wimo-shell-session-support"
 version = "0.1.0"
 edition.workspace = true
 description = "Session-support modules for the wimo shell crate family: managed MCP gateway catalog/call caching and file-access tracking."
@@ -12,9 +12,9 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync", "rt", "time", "macros"] }
 tracing = { workspace = true }
-wimo ai-file-utils = { path = "../wimo ai-file-utils", optional = true }
-wimo ai-wimo-http = { workspace = true }
-wimo ai-wimo-version = { workspace = true }
+wimoai-file-utils = { path = "../wimoai-file-utils", optional = true }
+wimoai-wimo-http = { workspace = true }
+wimoai-wimo-version = { workspace = true }
 
 [features]
 default-bazel = []

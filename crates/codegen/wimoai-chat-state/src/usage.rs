@@ -26,7 +26,7 @@
 //! and scrubs costs when partial or incomplete.
 
 use indexmap::IndexMap;
-use wimo ai_wimo_sampling_types::TokenUsage;
+use wimoai_wimo_sampling_types::TokenUsage;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct UsageTotals {
@@ -48,7 +48,7 @@ impl UsageTotals {
         api_duration_ms: Option<u64>,
         cost_usd_ticks: Option<i64>,
     ) -> Self {
-        let cost_usd_ticks = wimo ai_wimo_sampling_types::reported_cost_ticks(cost_usd_ticks);
+        let cost_usd_ticks = wimoai_wimo_sampling_types::reported_cost_ticks(cost_usd_ticks);
         Self {
             input_tokens: u64::from(usage.prompt_tokens),
             output_tokens: u64::from(usage.completion_tokens),

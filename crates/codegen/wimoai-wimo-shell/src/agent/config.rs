@@ -12,14 +12,14 @@ use std::collections::BTreeMap;
 use std::num::NonZeroU64;
 use std::path::PathBuf;
 use std::sync::Arc;
-use wimo ai_wimo_agent::prompt::skills::SkillsConfig;
-use wimo ai_wimo_sampler::{AuthScheme, SamplerConfig};
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_agent::prompt::skills::SkillsConfig;
+use wimoai_wimo_sampler::{AuthScheme, SamplerConfig};
+use wimoai_wimo_sampling_types::{
     CompactionAtTokens, CompactionsRemaining, REASONING_EFFORT_META_KEY,
     REASONING_EFFORTS_META_KEY, ReasoningEffort, ReasoningEffortOption,
     reasoning_effort_meta_value, reasoning_efforts_meta_value,
 };
-use wimo ai_wimo_tools::types::compat::{
+use wimoai_wimo_tools::types::compat::{
     COMPAT_CELLS, CompatConfig, CompatConfigToml, CompatRemoteKey, CompatSurface, CompatVendor,
 };
 /// Determines behavior like relay sync enablement.
@@ -46,7 +46,7 @@ pub(crate) fn default_agent_type() -> String {
     DEFAULT_AGENT_TYPE.to_owned()
 }
 pub const CLI_CHAT_PROXY_BASE_URL_DEFAULT: &str = "https://cli-chat-proxy.wimo.com/v1";
-pub const wimo ai_API_BASE_URL_DEFAULT: &str = "https://api.x.ai/v1";
+pub const wimoai_API_BASE_URL_DEFAULT: &str = "https://api.x.ai/v1";
 const NO_INLINE_CITATIONS_RESPONSE_INCLUDE: &str = "no_inline_citations";
 /// One or more environment variable names that may hold a model API key.
 ///
@@ -143,7 +143,7 @@ pub struct EndpointsConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cli_chat_proxy_base_url: Option<String>,
     /// Base URL for the public wimo AI API.
-    pub wimo ai_api_base_url: String,
+    pub wimoai_api_base_url: String,
     /// Optional extra access-header value (applied only with the optional non-production feature, and only for matching first-party hosts).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub alpha_test_key: Option<String>,
@@ -283,7 +283,7 @@ impl EndpointsConfig {
     }
     /// The cli-chat-proxy base URL through which all auxiliary services (and OAuth/session inference) resolve.
     /// Explicit `cli_chat_proxy_base_url`, else the public default.
-    /// NEVER falls back to `wimo ai_api_base_url`: that is the inference endpoint (API-key auth) only.
+    /// NEVER falls back to `wimoai_api_base_url`: that is the inference endpoint (API-key auth) only.
     pub fn proxy_url(&self) -> String {
         blank_as_unset(&self.cli_chat_proxy_base_url)
             .unwrap_or_else(|| CLI_CHAT_PROXY_BASE_URL_DEFAULT.to_owned())
@@ -293,16 +293,16 @@ impl EndpointsConfig {
             .clone()
             .unwrap_or_else(|| self.proxy_url())
     }
-    /// Feedback endpoint, an auxiliary service, so it defaults to the cli-chat-proxy, never `wimo ai_api_base_url`.
+    /// Feedback endpoint, an auxiliary service, so it defaults to the cli-chat-proxy, never `wimoai_api_base_url`.
     pub(crate) fn resolve_feedback_base_url(&self) -> String {
         blank_as_unset(&self.feedback_base_url).unwrap_or_else(|| self.proxy_url())
     }
-    /// Trace upload endpoint, an auxiliary service, so it defaults to the cli-chat-proxy, never `wimo ai_api_base_url`.
+    /// Trace upload endpoint, an auxiliary service, so it defaults to the cli-chat-proxy, never `wimoai_api_base_url`.
     pub(crate) fn resolve_trace_upload_url(&self) -> String {
         blank_as_unset(&self.trace_upload_url).unwrap_or_else(|| self.proxy_url())
     }
     /// Managed deployment-config URL (`wimo setup`): explicit `managed_config_url`, else `proxy_url` + `/deployment/config`.
-    /// Never `wimo ai_api_base_url`, so the deployment key reaches the proxy, not the inference host.
+    /// Never `wimoai_api_base_url`, so the deployment key reaches the proxy, not the inference host.
     pub(crate) fn resolve_managed_config_url(&self) -> String {
         blank_as_unset(&self.managed_config_url).unwrap_or_else(|| {
             format!(
@@ -316,7 +316,7 @@ impl EndpointsConfig {
     /// 2. legacy `otel_exporter_otlp_traces_endpoint` (verbatim) > `otel_exporter_otlp_endpoint` + `/v1/traces` (back-compat; deprecated)
     /// 3. `proxy_url` + `/traces`.
     /// The legacy tier applies ONLY when the external-OTEL master switch is unset, keeping the internally-authed firehose off external collectors.
-    /// Uses the proxy default (not the `wimo ai_api_base_url` fallback) so telemetry reports to wimo AI even when inference is overridden.
+    /// Uses the proxy default (not the `wimoai_api_base_url` fallback) so telemetry reports to wimo AI even when inference is overridden.
     pub(crate) fn resolve_otlp_traces_endpoint(&self) -> String {
         if let Some(full) = blank_as_unset(&self.wimo_internal_otlp_traces_endpoint) {
             return full.trim_end_matches('/').to_string();
@@ -505,8 +505,8 @@ impl Default for EndpointsConfig {
     fn default() -> Self {
         Self {
             cli_chat_proxy_base_url: std::env::var("wimo_CLI_CHAT_PROXY_BASE_URL").ok(),
-            wimo ai_api_base_url: std::env::var("wimo_wimo ai_API_BASE_URL")
-                .unwrap_or_else(|_| wimo ai_API_BASE_URL_DEFAULT.to_owned()),
+            wimoai_api_base_url: std::env::var("wimo_wimoai_API_BASE_URL")
+                .unwrap_or_else(|_| wimoai_API_BASE_URL_DEFAULT.to_owned()),
             alpha_test_key: None,
             models_base_url: env_string("wimo_MODELS_BASE_URL"),
             models_list_url: env_string("wimo_MODELS_LIST_URL"),
@@ -536,7 +536,7 @@ impl Default for EndpointsConfig {
         }
     }
 }
-pub use wimo ai_wimo_config_types::{
+pub use wimoai_wimo_config_types::{
     BoolFlag, ConfigSource, FEATURES, Feature, FeatureSources, LazinessDetectorPerModelConfig,
     Resolved,
 };
@@ -650,13 +650,13 @@ pub struct RuntimeResolutionContext<'a> {
 /// First-party credential env vars scrubbed from a BYOK auth-provider helper's environment.
 /// Scrubbing keeps the helper from inheriting the keys wimo uses for its own first-party requests.
 /// Keep in sync with every first-party credential env read across the crate.
-/// Those live in `auth::manager` (`wimo_AUTH`/`wimo_AUTH_PATH`) and `auth_method` (`wimo ai_API_KEY`/legacy).
+/// Those live in `auth::manager` (`wimo_AUTH`/`wimo_AUTH_PATH`) and `auth_method` (`wimoai_API_KEY`/legacy).
 /// The credential-bearing `env_string(...)` reads in `EndpointsConfig::default` count too.
 /// The `provider_helper_env_scrubs_first_party_credentials` test pins this against an independent audited literal.
 /// Any change here must be mirrored (and re-audited) there.
 pub(crate) const FIRST_PARTY_CREDENTIAL_ENV_VARS: &[&str] = &[
-    crate::agent::auth_method::wimo ai_API_KEY_ENV_VAR,
-    crate::agent::auth_method::LEGACY_wimo ai_API_KEY_ENV_VAR,
+    crate::agent::auth_method::wimoai_API_KEY_ENV_VAR,
+    crate::agent::auth_method::LEGACY_wimoai_API_KEY_ENV_VAR,
     "wimo_AUTH",
     "wimo_AUTH_PATH",
     "wimo_DEPLOYMENT_KEY",
@@ -675,7 +675,7 @@ pub(crate) fn env_string(name: &str) -> Option<String> {
         Some(trimmed.to_string())
     }
 }
-pub use wimo ai_wimo_config::env_bool;
+pub use wimoai_wimo_config::env_bool;
 /// Compaction-mode precedence (env > config > remote settings > default, with unrecognized values at each source falling through).
 /// `remote` sits just above the default, mirroring `feature_flag` in `resolve_bool_flag`.
 /// Pure so it's unit-testable without mutating process env.
@@ -683,8 +683,8 @@ pub(crate) fn resolve_compaction_mode_from(
     env: Option<&str>,
     config: Option<&str>,
     remote: Option<&str>,
-) -> wimo ai_chat_state::CompactionMode {
-    use wimo ai_chat_state::CompactionMode;
+) -> wimoai_chat_state::CompactionMode {
+    use wimoai_chat_state::CompactionMode;
     env.and_then(CompactionMode::parse)
         .or_else(|| config.and_then(CompactionMode::parse))
         .or_else(|| remote.and_then(CompactionMode::parse))
@@ -696,8 +696,8 @@ pub(crate) fn resolve_compaction_detail_from(
     env: Option<&str>,
     config: Option<&str>,
     remote: Option<&str>,
-) -> wimo ai_chat_state::CompactionDetail {
-    use wimo ai_chat_state::CompactionDetail;
+) -> wimoai_chat_state::CompactionDetail {
+    use wimoai_chat_state::CompactionDetail;
     env.and_then(CompactionDetail::parse)
         .or_else(|| config.and_then(CompactionDetail::parse))
         .or_else(|| remote.and_then(CompactionDetail::parse))
@@ -710,7 +710,7 @@ fn resolve_compat_cell(
     remote: Option<bool>,
     default: bool,
 ) -> Resolved<bool> {
-    resolve_compat_cell_with_env(wimo ai_wimo_config::env_bool(env), cfg, remote, default)
+    resolve_compat_cell_with_env(wimoai_wimo_config::env_bool(env), cfg, remote, default)
 }
 pub(crate) fn resolve_compat_cell_with_env(
     env: Option<bool>,
@@ -776,7 +776,7 @@ pub(crate) enum CompatConfigCellError {
 }
 pub(crate) fn compat_config_cell(
     raw_config: Result<&toml::Value, ()>,
-    cell: wimo ai_wimo_tools::types::compat::CompatCell,
+    cell: wimoai_wimo_tools::types::compat::CompatCell,
 ) -> Result<Option<bool>, CompatConfigCellError> {
     let raw = raw_config.map_err(|()| CompatConfigCellError::Unavailable)?;
     let Some(compat) = raw.get("compat") else {
@@ -867,8 +867,8 @@ pub(crate) fn resolve_enabled(
         .default(default)
         .resolve()
 }
-pub(crate) use wimo ai_wimo_telemetry::config::env_telemetry_mode;
-pub use wimo ai_wimo_telemetry::config::{TelemetryConfig, TelemetryMode};
+pub(crate) use wimoai_wimo_telemetry::config::env_telemetry_mode;
+pub use wimoai_wimo_telemetry::config::{TelemetryConfig, TelemetryMode};
 /// Plugin system configuration from `[plugins]` section in config.toml.
 ///
 /// ```toml
@@ -906,12 +906,12 @@ impl PluginsConfig {
             return;
         }
         let mut paths = Vec::new();
-        if let Some(home) = wimo ai_dirs::home_dir() {
+        if let Some(home) = wimoai_dirs::home_dir() {
             paths.push(home.join(".claude").join("settings.json"));
         }
         for path in &paths {
             let (claude_enabled, claude_disabled) =
-                wimo ai_wimo_agent::plugins::marketplace::load_enabled_disabled_plugins(path);
+                wimoai_wimo_agent::plugins::marketplace::load_enabled_disabled_plugins(path);
             for name in claude_enabled {
                 if !self.disabled.contains(&name) && !self.enabled.contains(&name) {
                     self.enabled.push(name);
@@ -926,8 +926,8 @@ impl PluginsConfig {
     }
     pub(crate) fn to_discovery_config(
         &self,
-    ) -> wimo ai_wimo_agent::plugins::discovery::DiscoveryConfig {
-        wimo ai_wimo_agent::plugins::discovery::DiscoveryConfig {
+    ) -> wimoai_wimo_agent::plugins::discovery::DiscoveryConfig {
+        wimoai_wimo_agent::plugins::discovery::DiscoveryConfig {
             cli_plugin_dirs: self.cli_plugin_dirs.clone(),
             config_paths: self.paths.iter().map(std::path::PathBuf::from).collect(),
             disabled: self.disabled.clone(),
@@ -1366,7 +1366,7 @@ pub struct Config {
     pub desktop: Option<toml::Value>,
     /// Top-level `announcements` array: consumed by `resolve_announcements`.
     #[serde(default, skip_serializing)]
-    pub announcements: Vec<wimo ai_wimo_announcements::RemoteAnnouncement>,
+    pub announcements: Vec<wimoai_wimo_announcements::RemoteAnnouncement>,
     /// `[tips]` section: consumed by `merge_tips`.
     #[serde(default, skip_serializing)]
     pub tips: Option<crate::util::config::TipsOverride>,
@@ -1379,7 +1379,7 @@ pub struct Config {
     /// `[storage]`: also read by `resolve_cleanup_ttl_days()`.
     #[serde(default, skip_serializing)]
     pub storage: StorageConfig,
-    /// `[marketplace]`: also read by `wimo ai_wimo_plugin_marketplace::load_sources()`.
+    /// `[marketplace]`: also read by `wimoai_wimo_plugin_marketplace::load_sources()`.
     #[serde(default, skip_serializing)]
     pub marketplace: MarketplaceConfig,
     /// `[diagnostics]`: crash handler toggle (`load_crash_handler_enabled_sync`).
@@ -1431,7 +1431,7 @@ pub struct Config {
     #[serde(skip)]
     pub remote_settings: Option<crate::util::config::RemoteSettings>,
     #[serde(skip)]
-    pub cli_agents: Vec<wimo ai_wimo_agent::config::AgentDefinition>,
+    pub cli_agents: Vec<wimoai_wimo_agent::config::AgentDefinition>,
     #[serde(skip)]
     pub cli_agent_overrides: CliAgentOverrides,
     /// Whether subagent (task tool) support is enabled.
@@ -1450,11 +1450,11 @@ pub struct Config {
     pub subagents_sampling_limit: usize,
     #[serde(skip)]
     pub subagents_limit_behavior:
-        wimo ai_wimo_tools::implementations::wimo::task::admission::LimitBehavior,
+        wimoai_wimo_tools::implementations::wimo::task::admission::LimitBehavior,
     #[serde(skip)]
     pub workflow_max_concurrent_agents: usize,
     #[serde(skip)]
-    pub media_gen_batch_limits: wimo ai_wimo_tools::media_gen_limits::MediaGenBatchLimits,
+    pub media_gen_batch_limits: wimoai_wimo_tools::media_gen_limits::MediaGenBatchLimits,
     /// Per-subagent model ID overrides from `[subagents.models]` in config.toml.
     /// Keys are agent names, values are model IDs.
     /// Set alongside `subagents_enabled` from `SubagentsConfig::resolve()`.
@@ -1467,11 +1467,11 @@ pub struct Config {
     /// Trust-independent roles from inline, user, and bundled sources.
     #[serde(skip)]
     pub subagent_roles:
-        std::collections::HashMap<String, wimo ai_wimo_subagent_resolution::config::SubagentRole>,
+        std::collections::HashMap<String, wimoai_wimo_subagent_resolution::config::SubagentRole>,
     /// Trust-independent personas from inline, user, and bundled sources.
     #[serde(skip)]
     pub subagent_personas:
-        std::collections::HashMap<String, wimo ai_wimo_subagent_resolution::config::SubagentPersona>,
+        std::collections::HashMap<String, wimoai_wimo_subagent_resolution::config::SubagentPersona>,
     /// Whether web search is force-disabled via `--disable-web-search` CLI flag.
     /// When true, the web search tool is never added to the agent toolset regardless of available credentials.
     #[serde(default)]
@@ -1505,7 +1505,7 @@ pub struct Config {
     /// Resolved by [`crate::config::ToolsConfig::resolve`].
     #[serde(skip)]
     pub zdr_video_output_s3:
-        Option<wimo ai_wimo_tools::implementations::wimo::video_gen::ZdrVideoOutputS3Config>,
+        Option<wimoai_wimo_tools::implementations::wimo::video_gen::ZdrVideoOutputS3Config>,
     /// Whether to enrich path-not-found errors with CWD reminders, "dropped repo folder" correction, and similar-name suggestions.
     /// Default `false`.
     /// Enabled via remote settings.
@@ -1545,14 +1545,14 @@ pub struct Config {
 pub struct CliAgentOverrides {
     pub tools: Option<Vec<String>>,
     pub disallowed_tools: Option<Vec<String>>,
-    pub permission_rules: Vec<wimo ai_wimo_workspace::permission::types::PermissionRule>,
+    pub permission_rules: Vec<wimoai_wimo_workspace::permission::types::PermissionRule>,
     pub max_turns: Option<u32>,
-    pub permission_mode: Option<wimo ai_wimo_agent::config::PermissionMode>,
+    pub permission_mode: Option<wimoai_wimo_agent::config::PermissionMode>,
 }
 impl CliAgentOverrides {
     /// Apply to the *main-session* agent, which the operator defines directly: the flags are authoritative, so they replace the agent's own fields.
     /// Spawned subagents instead layer these on top of an author's definition; see [`Self::apply_to_subagent_definition`].
-    pub(crate) fn apply_to_definition(&self, def: &mut wimo ai_wimo_agent::config::AgentDefinition) {
+    pub(crate) fn apply_to_definition(&self, def: &mut wimoai_wimo_agent::config::AgentDefinition) {
         if let Some(ref tools) = self.tools {
             def.tools = tools.clone();
         }
@@ -1568,7 +1568,7 @@ impl CliAgentOverrides {
     /// See [`AgentDefinition::session_tools_allowlist`].
     pub(crate) fn apply_to_subagent_definition(
         &self,
-        def: &mut wimo ai_wimo_agent::config::AgentDefinition,
+        def: &mut wimoai_wimo_agent::config::AgentDefinition,
     ) {
         def.session_tools_allowlist = self.tools.clone();
         def.session_tools_denylist = self.disallowed_tools.clone();
@@ -1595,10 +1595,10 @@ fn resolve_subagent_permission_mode(
         _ => own,
     }
 }
-pub use wimo ai_wimo_agent::config::AgentDefinition;
-pub use wimo ai_wimo_agent::config::Effort;
-pub use wimo ai_wimo_agent::config::PermissionMode;
-pub use wimo ai_wimo_shared::ui_config::{ContextualHints, UiConfig};
+pub use wimoai_wimo_agent::config::AgentDefinition;
+pub use wimoai_wimo_agent::config::Effort;
+pub use wimoai_wimo_agent::config::PermissionMode;
+pub use wimoai_wimo_shared::ui_config::{ContextualHints, UiConfig};
 /// Set in `config.toml` under `[agent]`:
 ///
 /// ```toml
@@ -1620,7 +1620,7 @@ pub use wimo ai_wimo_shared::ui_config::{ContextualHints, UiConfig};
 #[serde(default)]
 pub struct AgentSelectionConfig {
     /// Name of a built-in or discovered agent definition.
-    /// Looked up via `wimo ai_wimo_agent::discovery::by_name_in_cwd()`.
+    /// Looked up via `wimoai_wimo_agent::discovery::by_name_in_cwd()`.
     /// Examples: "wimo", "browser-use", or a custom agent name.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -1737,7 +1737,7 @@ impl Default for Config {
             default_yolo_mode: false,
             default_auto_mode: false,
             agent_profile_path: None,
-            client_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+            client_version: Some(wimoai_wimo_version::VERSION.to_string()),
             mode: AgentMode::default(),
             remote_settings: None,
             cli_agents: Vec::new(),
@@ -1745,13 +1745,13 @@ impl Default for Config {
             subagents_enabled: true,
             subagents_max_depth: crate::config::SubagentsConfig::DEFAULT_MAX_DEPTH,
             subagents_max_concurrent:
-                wimo ai_wimo_tools::implementations::wimo::task::admission::DEFAULT_MAX_CONCURRENT,
+                wimoai_wimo_tools::implementations::wimo::task::admission::DEFAULT_MAX_CONCURRENT,
             subagents_sampling_limit:
-                wimo ai_wimo_tools::implementations::wimo::task::admission::DEFAULT_MAX_CONCURRENT,
+                wimoai_wimo_tools::implementations::wimo::task::admission::DEFAULT_MAX_CONCURRENT,
             subagents_limit_behavior: Default::default(),
             workflow_max_concurrent_agents:
                 crate::session::workflow::host_service::DEFAULT_WORKFLOW_MAX_CONCURRENT_AGENTS,
-            media_gen_batch_limits: wimo ai_wimo_tools::media_gen_limits::MediaGenBatchLimits::default(
+            media_gen_batch_limits: wimoai_wimo_tools::media_gen_limits::MediaGenBatchLimits::default(
             ),
             subagent_model_overrides: std::collections::HashMap::new(),
             subagent_toggle: std::collections::HashMap::new(),
@@ -2226,7 +2226,7 @@ impl Config {
         };
         self.disable_zdr_incompatible_tools = tools.disable_zdr_incompatible_tools;
         self.zdr_video_output_s3 = tools.zdr_video_output_s3;
-        self.media_gen_batch_limits = wimo ai_wimo_tools::media_gen_limits::MediaGenBatchLimits {
+        self.media_gen_batch_limits = wimoai_wimo_tools::media_gen_limits::MediaGenBatchLimits {
             max_image: crate::config::ToolsConfig::resolve_max_parallel_image_gen_calls(
                 std::env::var(crate::config::ToolsConfig::ENV_MAX_PARALLEL_IMAGE_GEN_CALLS)
                     .ok()
@@ -2484,8 +2484,8 @@ impl Config {
     /// Each knob resolves from its own source (the `resolve_reminder_policy` pattern).
     pub(crate) fn resolve_doom_loop_recovery(
         &self,
-    ) -> Option<wimo ai_wimo_sampling_types::DoomLoopRecoveryPolicy> {
-        use wimo ai_wimo_sampling_types::DoomLoopRecoveryPolicy as Policy;
+    ) -> Option<wimoai_wimo_sampling_types::DoomLoopRecoveryPolicy> {
+        use wimoai_wimo_sampling_types::DoomLoopRecoveryPolicy as Policy;
         let remote = self
             .remote_settings
             .as_ref()
@@ -2519,8 +2519,8 @@ impl Config {
     }
     /// Automatic worktree GC policy.
     /// Precedence: env kill/dry-run > `[worktree.auto_gc]` TOML > remote `worktree_auto_gc` > defaults.
-    /// Platform age-expiry (`process_cwd_scan_available`: linux+macos) is enforced inside `wimo ai_fast_worktree::maybe_auto_gc`, not here.
-    pub(crate) fn resolve_worktree_auto_gc(&self) -> wimo ai_fast_worktree::ResolvedWorktreeAutoGc {
+    /// Platform age-expiry (`process_cwd_scan_available`: linux+macos) is enforced inside `wimoai_fast_worktree::maybe_auto_gc`, not here.
+    pub(crate) fn resolve_worktree_auto_gc(&self) -> wimoai_fast_worktree::ResolvedWorktreeAutoGc {
         crate::util::config::resolve_worktree_auto_gc_from_settings(
             Some(&self.worktree.auto_gc),
             self.remote_settings
@@ -2581,7 +2581,7 @@ impl Config {
     /// `imagine_tools_disabled` is a remote force-off (env/config cannot re-enable).
     /// Otherwise: requirement > env > `[features]` > remote > default.
     pub(crate) fn resolve_image_gen(&self) -> Resolved<bool> {
-        use wimo ai_wimo_tools::implementations::wimo::IMAGE_GEN_TOOL_NAME;
+        use wimoai_wimo_tools::implementations::wimo::IMAGE_GEN_TOOL_NAME;
         if let Some(pinned) = self.requirements.image_gen.pinned() {
             return Resolved::new(pinned, ConfigSource::Requirement);
         }
@@ -2605,7 +2605,7 @@ impl Config {
     /// `image_edit` tool gate.
     /// Same denylist / requirement pattern as [`Self::resolve_image_gen`]; no `[features]` key (defaults on).
     pub(crate) fn resolve_image_edit(&self) -> Resolved<bool> {
-        use wimo ai_wimo_tools::implementations::wimo::IMAGE_EDIT_TOOL_NAME;
+        use wimoai_wimo_tools::implementations::wimo::IMAGE_EDIT_TOOL_NAME;
         if let Some(pinned) = self.requirements.image_edit.pinned() {
             return Resolved::new(pinned, ConfigSource::Requirement);
         }
@@ -2623,7 +2623,7 @@ impl Config {
     /// Registered as a pair; denylisting either tool name (or `video_gen`) disables both.
     /// Otherwise same precedence as [`Self::resolve_image_gen`].
     pub(crate) fn resolve_video_gen(&self) -> Resolved<bool> {
-        use wimo ai_wimo_tools::implementations::wimo::{
+        use wimoai_wimo_tools::implementations::wimo::{
             IMAGE_TO_VIDEO_TOOL_NAME, REFERENCE_TO_VIDEO_TOOL_NAME,
         };
         if let Some(pinned) = self.requirements.video_gen.pinned() {
@@ -2904,7 +2904,7 @@ impl Config {
     }
     /// Resolve the mode: env `wimo_COMPACTION_MODE` > config > remote settings > default, with unrecognized values falling through.
     /// For `Segments`, attach the separately-resolved detail level.
-    pub(crate) fn resolve_compaction_mode(&self) -> wimo ai_chat_state::CompactionMode {
+    pub(crate) fn resolve_compaction_mode(&self) -> wimoai_chat_state::CompactionMode {
         resolve_compaction_mode_from(
             env_string("wimo_COMPACTION_MODE").as_deref(),
             self.features.compaction_mode.as_deref(),
@@ -2927,7 +2927,7 @@ impl Config {
     }
     /// Precedence: env `wimo_COMPACTION_DETAIL` > config `features.compaction_detail` > remote `compaction_detail` > default (`verbose`).
     /// Drives the `segments` verbatim detail level.
-    fn resolve_compaction_detail(&self) -> wimo ai_chat_state::CompactionDetail {
+    fn resolve_compaction_detail(&self) -> wimoai_chat_state::CompactionDetail {
         resolve_compaction_detail_from(
             env_string("wimo_COMPACTION_DETAIL").as_deref(),
             self.features.compaction_detail.as_deref(),
@@ -3219,7 +3219,7 @@ pub(crate) fn read_requirements_toml() -> Option<toml::Value> {
 /// Meanwhile `internal_pipeline_consumed_otel_vars` would block the external stream, exactly the split this design forbids.
 pub(crate) fn external_otel_master_switch_resolved() -> bool {
     external_otel_master_switch_from(
-        wimo ai_wimo_config::load_merged_requirements().as_ref(),
+        wimoai_wimo_config::load_merged_requirements().as_ref(),
         env_bool("wimo_EXTERNAL_OTEL"),
         crate::config::load_effective_config().ok().as_ref(),
     )
@@ -3253,8 +3253,8 @@ fn telemetry_otel_ms(t: &toml::Value, key: &str) -> Option<String> {
 }
 fn telemetry_otel_file_config(
     t: &toml::Value,
-) -> wimo ai_wimo_telemetry::external::ExternalOtelFileConfig {
-    wimo ai_wimo_telemetry::external::ExternalOtelFileConfig {
+) -> wimoai_wimo_telemetry::external::ExternalOtelFileConfig {
+    wimoai_wimo_telemetry::external::ExternalOtelFileConfig {
         enabled: t.get("otel_enabled").and_then(toml::Value::as_bool),
         metrics_exporter: telemetry_otel_str(t, "otel_metrics_exporter"),
         logs_exporter: telemetry_otel_str(t, "otel_logs_exporter"),
@@ -3301,9 +3301,9 @@ fn telemetry_otel_file_config(
 /// That config already includes managed-config layers distributed by `wimo setup`.
 /// Requirements pins are applied on top, and the remote layer is restrictive-only and asynchronous ([`apply_external_otel_remote_policy`]).
 pub fn resolve_external_otel_config(
-    client: wimo ai_wimo_telemetry::external::config::ExternalClientInfo,
-) -> Option<wimo ai_wimo_telemetry::external::ExternalOtelConfig> {
-    let requirements = wimo ai_wimo_config::load_merged_requirements();
+    client: wimoai_wimo_telemetry::external::config::ExternalClientInfo,
+) -> Option<wimoai_wimo_telemetry::external::ExternalOtelConfig> {
+    let requirements = wimoai_wimo_config::load_merged_requirements();
     resolve_external_otel_config_with(
         crate::config::load_effective_config().ok().as_ref(),
         requirements.as_ref(),
@@ -3317,12 +3317,12 @@ pub(crate) fn resolve_external_otel_config_with(
     effective_config: Option<&toml::Value>,
     requirements: Option<&toml::Value>,
     getenv: impl Fn(&str) -> Option<String>,
-    client: wimo ai_wimo_telemetry::external::config::ExternalClientInfo,
+    client: wimoai_wimo_telemetry::external::config::ExternalClientInfo,
     internal_pipeline_consumed_otel_vars: bool,
-) -> Option<wimo ai_wimo_telemetry::external::ExternalOtelConfig> {
+) -> Option<wimoai_wimo_telemetry::external::ExternalOtelConfig> {
     let pins =
         crate::agent::external_otel_pin::RequirementOtelPins::from_requirements(requirements);
-    let file_cfg: Option<wimo ai_wimo_telemetry::external::ExternalOtelFileConfig> = effective_config
+    let file_cfg: Option<wimoai_wimo_telemetry::external::ExternalOtelFileConfig> = effective_config
         .and_then(|cfg| cfg.get("telemetry"))
         .cloned()
         .map(|mut telemetry| {
@@ -3332,7 +3332,7 @@ pub(crate) fn resolve_external_otel_config_with(
             telemetry_otel_file_config(&telemetry)
         });
     let getenv_pinned = crate::agent::external_otel_pin::getenv_with_pins(&pins, getenv);
-    let mut resolved = wimo ai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
+    let mut resolved = wimoai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
         getenv_pinned,
         file_cfg.as_ref(),
     )?;
@@ -3346,12 +3346,12 @@ pub(crate) fn apply_external_otel_remote_policy(
     settings: Option<&crate::util::config::RemoteSettings>,
 ) {
     let Some(settings) = settings else { return };
-    let policy = wimo ai_wimo_telemetry::external::ExternalOtelRemotePolicy {
+    let policy = wimoai_wimo_telemetry::external::ExternalOtelRemotePolicy {
         force_disable: settings.external_otel_disabled.unwrap_or(false),
         lock_content_gates: settings.external_otel_content_gates_locked.unwrap_or(false),
     };
     if policy.force_disable || policy.lock_content_gates {
-        wimo ai_wimo_telemetry::external::apply_remote_policy(policy);
+        wimoai_wimo_telemetry::external::apply_remote_policy(policy);
     }
 }
 /// Seed free-function remote caches after writing `Config.remote_settings`.
@@ -3368,7 +3368,7 @@ pub fn apply_remote_settings_side_effects(settings: Option<&crate::util::config:
         let origin_trusted = crate::util::is_prod_cli_chat_proxy_url(
             &EndpointsConfig::from_effective_config().proxy_url(),
         );
-        wimo ai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
+        wimoai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
             s.managed_config_signature_verification,
             origin_trusted,
         );
@@ -3399,10 +3399,10 @@ pub fn apply_remote_settings_side_effects(settings: Option<&crate::util::config:
 /// Read `env.<key>` from Claude-compat `managed_settings.json`.
 /// `Some(true)` indicates a force-off signal from a Mac-MDM-style admin policy.
 fn managed_settings_env_flag(key: &str) -> Option<bool> {
-    let path = wimo ai_wimo_config::claude_managed_settings_path()?;
+    let path = wimoai_wimo_config::claude_managed_settings_path()?;
     let content = std::fs::read_to_string(&path).ok()?;
     let json: serde_json::Value = serde_json::from_str(&content).ok()?;
-    wimo ai_wimo_workspace::permission::resolution::json_env_flag(json.get("env"), key)
+    wimoai_wimo_workspace::permission::resolution::json_env_flag(json.get("env"), key)
 }
 /// Assemble the final model map. Priority (highest wins):
 /// config.toml `[model.*]` > prefetched (remote) > hardcoded defaults.
@@ -3476,11 +3476,11 @@ pub(crate) fn resolve_model_list(
         });
         let effective = with_provider.as_ref().unwrap_or(model_override);
         let mut entry = effective.apply(key, base, &cfg.endpoints);
-        let session_bearer_unsafe = !crate::util::is_wimo ai_api_bearer_url(&entry.info.base_url)
+        let session_bearer_unsafe = !crate::util::is_wimoai_api_bearer_url(&entry.info.base_url)
             || entry
                 .api_base_url
                 .as_deref()
-                .is_some_and(|url| !crate::util::is_wimo ai_api_bearer_url(url));
+                .is_some_and(|url| !crate::util::is_wimoai_api_bearer_url(url));
         if let Some(pid) = model_override.model_provider.as_deref()
             && entry.auth_provider.is_none()
             && session_bearer_unsafe
@@ -3734,7 +3734,7 @@ fn default_models(endpoints: &EndpointsConfig) -> IndexMap<String, ModelEntryCon
                 model: m.model,
                 model_family: m.model_family,
                 base_url: endpoints.resolve_inference_base_url(),
-                api_base_url: Some(endpoints.wimo ai_api_base_url.clone()),
+                api_base_url: Some(endpoints.wimoai_api_base_url.clone()),
                 name: m.name,
                 description: m.description,
                 context_window,
@@ -3796,12 +3796,12 @@ pub struct ModelEntryConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub top_p: Option<f32>,
     /// The API key for this model's provider.
-    /// If not set, falls back to env_key, then wimo ai_API_KEY.
+    /// If not set, falls back to env_key, then wimoai_API_KEY.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub api_key: Option<String>,
     /// Environment variable name(s) that hold the provider API key.
     /// Accepts a string or an array (first set, non-empty value wins).
-    /// If not set, falls back to wimo ai_API_KEY.
+    /// If not set, falls back to wimoai_API_KEY.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub env_key: Option<EnvKeys>,
     /// Values: "chat_completions" (default), "responses"
@@ -4079,7 +4079,7 @@ pub struct ModelInfo {
     pub id: Option<String>,
     /// The routing slug sent in API requests.
     pub model: String,
-    /// Provider family that mints this model's conversation items (e.g. "wimo ai"); `None` means unknown.
+    /// Provider family that mints this model's conversation items (e.g. "wimoai"); `None` means unknown.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub model_family: Option<String>,
     /// The base URL of the model (session endpoint). e.g. "https://cli-chat-proxy.wimo.com/v1"
@@ -4361,7 +4361,7 @@ fn default_true() -> bool {
 /// ```toml
 /// codebase_indexing = false                                          # disable
 /// codebase_indexing = true                                           # any git repo (default)
-/// codebase_indexing = ["/Users/*/wimo ai*", "!/Users/*/old-*"]           # globs, ! to exclude
+/// codebase_indexing = ["/Users/*/wimoai*", "!/Users/*/old-*"]           # globs, ! to exclude
 /// ```
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -4504,7 +4504,7 @@ pub struct AutoModeConfig {
     /// How much context the classifier prompt includes.
     /// `None` means the wire fn's built-in default (`just_command`).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub prompt_type: Option<wimo ai_wimo_workspace::permission::ClassifierPromptType>,
+    pub prompt_type: Option<wimoai_wimo_workspace::permission::ClassifierPromptType>,
     /// Routing slug for a dedicated classifier model.
     /// `None` inherits the session model.
     /// Resolved via `resolve_aux_model_sampling_config`.
@@ -4698,7 +4698,7 @@ impl<'de> Deserialize<'de> for FeatureEntries {
 pub(crate) struct ResolvedCredentials {
     pub api_key: Option<String>,
     pub base_url: String,
-    pub auth_type: wimo ai_chat_state::AuthType,
+    pub auth_type: wimoai_chat_state::AuthType,
     pub auth_scheme: AuthScheme,
 }
 /// First usable BYOK credential: a non-empty (trimmed) api_key, else the first set, non-empty env_key value.
@@ -4712,7 +4712,7 @@ pub(crate) fn first_own_credential(
         .map(str::to_owned)
         .or_else(|| env_key.and_then(EnvKeys::resolve_value))
 }
-/// Priority: model api_key/env_key > cached auth-provider token > session token > wimo ai_API_KEY.
+/// Priority: model api_key/env_key > cached auth-provider token > session token > wimoai_API_KEY.
 pub(crate) fn resolve_credentials(
     model: &ModelEntry,
     session_key: Option<&str>,
@@ -4722,14 +4722,14 @@ pub(crate) fn resolve_credentials(
         (
             Some(key),
             info.base_url.clone(),
-            wimo ai_chat_state::AuthType::ApiKey,
+            wimoai_chat_state::AuthType::ApiKey,
         )
     } else if let Some(provider) = model.auth_provider.as_ref() {
         debug_assert!(model.effective_auth_provider().is_some());
         (
             provider.cached_token(),
             info.base_url.clone(),
-            wimo ai_chat_state::AuthType::ApiKey,
+            wimoai_chat_state::AuthType::ApiKey,
         )
     } else if let Some(key) = session_key
         && crate::auth::backend::AuthBackend::may_receive_session(
@@ -4740,14 +4740,14 @@ pub(crate) fn resolve_credentials(
         (
             Some(key.to_owned()),
             info.base_url.clone(),
-            wimo ai_chat_state::AuthType::SessionToken,
+            wimoai_chat_state::AuthType::SessionToken,
         )
-    } else if let Ok(key) = crate::agent::auth_method::read_wimo ai_api_key_env() {
+    } else if let Ok(key) = crate::agent::auth_method::read_wimoai_api_key_env() {
         let url = model
             .api_base_url
             .clone()
             .unwrap_or_else(|| info.base_url.clone());
-        (Some(key), url, wimo ai_chat_state::AuthType::ApiKey)
+        (Some(key), url, wimoai_chat_state::AuthType::ApiKey)
     } else {
         if let Some(ref env_keys) = model.env_key
             && !env_keys.is_empty()
@@ -4762,7 +4762,7 @@ pub(crate) fn resolve_credentials(
         (
             None,
             info.base_url.clone(),
-            wimo ai_chat_state::AuthType::ApiKey,
+            wimoai_chat_state::AuthType::ApiKey,
         )
     };
     let auth_scheme = info.auth_scheme;
@@ -4787,12 +4787,12 @@ pub(crate) fn enforce_disable_api_key_auth(
     session_key: Option<&str>,
 ) {
     if disable_api_key_auth
-        && creds.auth_type == wimo ai_chat_state::AuthType::ApiKey
-        && crate::util::is_wimo ai_api_url(&creds.base_url)
+        && creds.auth_type == wimoai_chat_state::AuthType::ApiKey
+        && crate::util::is_wimoai_api_url(&creds.base_url)
     {
-        creds.auth_type = wimo ai_chat_state::AuthType::SessionToken;
+        creds.auth_type = wimoai_chat_state::AuthType::SessionToken;
         creds.api_key = session_key.map(str::to_owned);
-        wimo ai_wimo_telemetry::unified_log::debug(
+        wimoai_wimo_telemetry::unified_log::debug(
             "auth: kill switch blocked a first-party API key at the credential seam",
             None,
             Some(serde_json::json!({
@@ -4813,7 +4813,7 @@ fn resolve_credentials_enforced(
     enforce_disable_api_key_auth(&mut credentials, disable_api_key_auth, session_key);
     credentials
 }
-pub use wimo ai_wimo_telemetry::config::deployment_id_from_key;
+pub use wimoai_wimo_telemetry::config::deployment_id_from_key;
 /// Try to resolve credentials for a model by loading the effective config.
 /// Returns `None` (with a warning) if config loading, parsing, or model lookup fails.
 /// `session_key` should only be passed when `auth_type` is `SessionToken`; callers must guard this.
@@ -4938,11 +4938,11 @@ pub(crate) fn resolve_aux_model_sampling_config(
             return None;
         }
     }
-    let wimo ai_bearer = session_key
+    let wimoai_bearer = session_key
         .map(|s| s.to_owned())
-        .or_else(|| crate::agent::auth_method::read_wimo ai_api_key_env().ok())
+        .or_else(|| crate::agent::auth_method::read_wimoai_api_key_env().ok())
         .or_else(|| endpoints.deployment_key.clone());
-    if let Some(bearer) = wimo ai_bearer {
+    if let Some(bearer) = wimoai_bearer {
         let entry = ModelEntry {
             info: ModelInfo {
                 user_selectable: false,
@@ -5019,7 +5019,7 @@ pub(crate) fn stamp_session_local_sampler_fields(
 ) {
     cfg.client_identifier = client_identifier;
     cfg.attribution_callback = active_session_config.attribution_callback.clone();
-    if crate::util::is_wimo ai_api_bearer_url(&cfg.base_url) {
+    if crate::util::is_wimoai_api_bearer_url(&cfg.base_url) {
         cfg.bearer_resolver = active_session_config.bearer_resolver.clone();
     }
     cfg.max_retries = max_retries;
@@ -5058,8 +5058,8 @@ pub(crate) fn finalize_image_describe_sampler_config(
 pub(crate) fn resolve_chat_state_auth_type(
     model_id: &str,
     session_key: Option<&str>,
-    fallback: wimo ai_chat_state::AuthType,
-) -> wimo ai_chat_state::AuthType {
+    fallback: wimoai_chat_state::AuthType,
+) -> wimoai_chat_state::AuthType {
     try_resolve_model_credentials(model_id, session_key)
         .map(|r| r.auth_type)
         .unwrap_or(fallback)
@@ -5074,7 +5074,7 @@ pub(crate) fn response_include_extensions(
     base_url: &str,
 ) -> Vec<String> {
     let is_trusted_route = crate::util::is_trusted_cli_chat_proxy_url(base_url)
-        || crate::util::is_trusted_wimo ai_https_url(base_url);
+        || crate::util::is_trusted_wimoai_https_url(base_url);
     if supports_backend_search && api_backend == &ApiBackend::Responses && is_trusted_route {
         vec![NO_INLINE_CITATIONS_RESPONSE_INCLUDE.to_owned()]
     } else {
@@ -5144,7 +5144,7 @@ pub(crate) fn sampling_config_for_model(
 /// The sampler crate is intentionally URL-agnostic: it does not inspect `base_url` to decide which auth or staging headers to add.
 /// Replicate the URL-derived header logic at the shell boundary so callers downstream see a single homogenous header bag.
 ///
-/// * cli-chat-proxy bases get `X-wimo ai-Token-Auth` and `x-authenticateresponse` headers.
+/// * cli-chat-proxy bases get `X-wimoai-Token-Auth` and `x-authenticateresponse` headers.
 ///   This mirrors the inline match in the legacy `sampling::Client::new` on `is_cli_chat_proxy_url`.
 /// * With the optional non-production feature, matching first-party hosts may get an extra access header from the corresponding key argument.
 ///
@@ -5156,8 +5156,8 @@ pub(crate) fn inject_url_derived_headers(
 ) {
     if crate::util::is_cli_chat_proxy_url(base_url) {
         headers
-            .entry("X-wimo ai-Token-Auth".to_string())
-            .or_insert_with(|| "wimo ai-wimo-cli".to_string());
+            .entry("X-wimoai-Token-Auth".to_string())
+            .or_insert_with(|| "wimoai-wimo-cli".to_string());
         headers
             .entry("x-authenticateresponse".to_string())
             .or_insert_with(|| "authenticate-response".to_string());

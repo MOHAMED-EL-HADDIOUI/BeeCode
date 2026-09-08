@@ -1,4 +1,4 @@
-//! Translates `wimo ai-wimo-tools` `ToolNotification` events into `wimo ai-wimo-shell`'s native systems (ACP gateway, hunk tracker, file state tracker).
+//! Translates `wimoai-wimo-tools` `ToolNotification` events into `wimoai-wimo-shell`'s native systems (ACP gateway, hunk tracker, file state tracker).
 use crate::session::commands::SessionCommand;
 use crate::session::commands::{NotificationPriority, NotificationSource};
 use crate::session::persistence::{DurableAppendError, PersistenceHandle, PersistenceMsg};
@@ -8,11 +8,11 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::{Mutex as TokioMutex, mpsc};
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-use wimo ai_wimo_tools::notification::types::{ToolNotification, ToolNotificationHandle};
-use wimo ai_wimo_tools::types::output::{BashOutput, ToolOutput};
-use wimo ai_wimo_workspace::session::file_state::FileStateTracker;
-use wimo ai_hunk_tracker::HunkTrackerHandle;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_wimo_tools::notification::types::{ToolNotification, ToolNotificationHandle};
+use wimoai_wimo_tools::types::output::{BashOutput, ToolOutput};
+use wimoai_wimo_workspace::session::file_state::FileStateTracker;
+use wimoai_hunk_tracker::HunkTrackerHandle;
 const TASK_WAKE_ADMISSION_TIMEOUT: std::time::Duration = std::time::Duration::from_millis(250);
 pub(crate) struct NotificationBridgeConfig {
     /// ACP gateway for sending streaming updates to TUI
@@ -47,8 +47,8 @@ pub(crate) struct NotificationBridgeConfig {
     /// Session command channel for monitor events and task-completed injections.
     pub session_cmd_tx: mpsc::UnboundedSender<SessionCommand>,
     pub task_completion_reservations:
-        wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations,
-    pub task_wake_suppressed: wimo ai_wimo_tools::reminders::task_completion::TaskWakeSuppressed,
+        wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations,
+    pub task_wake_suppressed: wimoai_wimo_tools::reminders::task_completion::TaskWakeSuppressed,
     /// Channel for requesting trace uploads for synthetic auto-wake turns.
     /// Wrapped in `Arc<Mutex<..>>` because the coordinator creates the channel after the notification bridge is spawned.
     /// The bridge reads the latest value on each notification.
@@ -115,7 +115,7 @@ fn durable_append_landed(result: Result<(), DurableAppendError>) -> Result<(), S
 }
 async fn handle_scheduled_task_removed(
     config: &NotificationBridgeConfig,
-    removed: wimo ai_wimo_tools::notification::ScheduledTaskRemoved,
+    removed: wimoai_wimo_tools::notification::ScheduledTaskRemoved,
     acknowledgement: Option<tokio::sync::oneshot::Sender<Result<(), String>>>,
 ) -> Result<(), String> {
     tracing::info!(task_id = %removed.task_id, "Scheduled task removed");
@@ -133,7 +133,7 @@ async fn handle_scheduled_task_removed(
         let params = serde_json::to_value(&notification)
             .and_then(|value| serde_json::value::to_raw_value(&value))
             .map_err(|error| format!("failed to serialize scheduled task deletion: {error}"))?;
-        let update = crate::session::storage::SessionUpdate::wimo ai(Box::new(notification));
+        let update = crate::session::storage::SessionUpdate::wimoai(Box::new(notification));
         if acknowledgement.is_some() {
             durable_append_landed(config.persistence.append_update_durably(update).await)?;
         } else {
@@ -198,7 +198,7 @@ pub(crate) fn spawn_notification_bridge(
 /// The update is persisted to `updates.jsonl` so session replay re-applies the mode, and forwarded to the gateway so the pager updates live.
 async fn emit_current_mode_update(
     config: &NotificationBridgeConfig,
-    mode: wimo ai_wimo_tools::types::SessionMode,
+    mode: wimoai_wimo_tools::types::SessionMode,
 ) {
     let mut notification = acp::SessionNotification::new(
         config.session_id.clone(),
@@ -317,7 +317,7 @@ async fn handle_notification(
                 notification.meta = meta_map.map(serde_json::Value::Object);
             }
             let _ = config.persistence.tx.send(PersistenceMsg::Update(
-                crate::session::storage::SessionUpdate::wimo ai(Box::new(notification.clone())),
+                crate::session::storage::SessionUpdate::wimoai(Box::new(notification.clone())),
             ));
             let params = serde_json::to_value(&notification)
                 .and_then(|v| serde_json::value::to_raw_value(&v))
@@ -356,14 +356,14 @@ async fn handle_notification(
         ToolNotification::SubagentCompleted(_) => {}
         ToolNotification::TaskCompleted(task_snapshot) => {
             let is_monitor =
-                task_snapshot.kind == wimo ai_wimo_tools::computer::types::TaskKind::Monitor;
+                task_snapshot.kind == wimoai_wimo_tools::computer::types::TaskKind::Monitor;
             let task_id = task_snapshot.task_id.clone();
             let goal_loop_active = config
                 .goal_loop_active
                 .load(std::sync::atomic::Ordering::Relaxed);
             let mut will_wake = false;
             if task_snapshot.is_auto_wake_suppressed() {
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "shell.task_wake.suppressed",
                     Some(config.session_id.0.as_ref()),
                     Some(serde_json::json!({
@@ -384,18 +384,18 @@ async fn handle_notification(
                 let tool_name = resolved_tool_name(&config.task_output_tool_name);
                 let read_name = resolved_tool_name(&config.read_tool_name);
                 let body = if is_monitor {
-                    wimo ai_wimo_tools::reminders::task_completion::format_monitor_completion(
+                    wimoai_wimo_tools::reminders::task_completion::format_monitor_completion(
                         &task_snapshot,
                         tool_name,
                     )
                 } else {
-                    wimo ai_wimo_tools::reminders::task_completion::format_bash_completion(
+                    wimoai_wimo_tools::reminders::task_completion::format_bash_completion(
                         &task_snapshot,
                         tool_name,
                         read_name,
                     )
                 };
-                let message = wimo ai_wimo_tools::reminders::wrap_reminder(&body);
+                let message = wimoai_wimo_tools::reminders::wrap_reminder(&body);
                 let prompt_id = format!("task-completed-{task_id}");
                 let prompt_blocks = vec![acp::ContentBlock::Text(acp::TextContent::new(message))];
                 let synthetic_trace_tx = config
@@ -421,7 +421,7 @@ async fn handle_notification(
                         client_identifier: None,
                         screen_mode: None,
                         verbatim: true,
-                        traceparent: wimo ai_file_utils::trace_context::current_traceparent(),
+                        traceparent: wimoai_file_utils::trace_context::current_traceparent(),
                         json_schema: None,
                         send_now: false,
                         tool_overrides_update: None,
@@ -466,7 +466,7 @@ async fn handle_notification(
                     false
                 };
                 will_wake = admitted;
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "shell.task_wake.bridge_admission",
                     Some(config.session_id.0.as_ref()),
                     Some(serde_json::json!({
@@ -523,12 +523,12 @@ async fn handle_notification(
                 let tool_name = resolved_tool_name(&config.task_output_tool_name);
                 let read_name = resolved_tool_name(&config.read_tool_name);
                 let message = if is_monitor {
-                    wimo ai_wimo_tools::reminders::task_completion::format_monitor_completion(
+                    wimoai_wimo_tools::reminders::task_completion::format_monitor_completion(
                         &task_snapshot,
                         tool_name,
                     )
                 } else {
-                    wimo ai_wimo_tools::reminders::task_completion::format_bash_completion(
+                    wimoai_wimo_tools::reminders::task_completion::format_bash_completion(
                         &task_snapshot,
                         tool_name,
                         read_name,
@@ -573,7 +573,7 @@ async fn handle_notification(
             }
             if let Some(params) = task_completed_frame::encode(&mut notification) {
                 let _ = config.persistence.tx.send(PersistenceMsg::Update(
-                    crate::session::storage::SessionUpdate::wimo ai(Box::new(notification.clone())),
+                    crate::session::storage::SessionUpdate::wimoai(Box::new(notification.clone())),
                 ));
                 let notification: acp::ExtNotification = acp::ExtNotification::new(
                     task_completed_frame::METHOD,
@@ -600,7 +600,7 @@ async fn handle_notification(
                     .persistence
                     .tx
                     .send(PersistenceMsg::PlanModeState(snapshot));
-                emit_current_mode_update(config, wimo ai_wimo_tools::types::SessionMode::Plan).await;
+                emit_current_mode_update(config, wimoai_wimo_tools::types::SessionMode::Plan).await;
             }
             tracing::info!(
                 tool_call_id = %entered.tool_call_id,
@@ -629,7 +629,7 @@ async fn handle_notification(
                     .persistence
                     .tx
                     .send(PersistenceMsg::PlanModeState(snapshot));
-                emit_current_mode_update(config, wimo ai_wimo_tools::types::SessionMode::Default).await;
+                emit_current_mode_update(config, wimoai_wimo_tools::types::SessionMode::Default).await;
             }
             tracing::info!(
                 tool_call_id = %exited.tool_call_id,
@@ -794,7 +794,7 @@ async fn handle_notification(
                 meta: meta.map(serde_json::Value::Object),
             };
             let _ = config.persistence.tx.send(PersistenceMsg::Update(
-                crate::session::storage::SessionUpdate::wimo ai(Box::new(notification.clone())),
+                crate::session::storage::SessionUpdate::wimoai(Box::new(notification.clone())),
             ));
             if let Ok(params) = serde_json::to_value(&notification)
                 .and_then(|v| serde_json::value::to_raw_value(&v))

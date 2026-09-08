@@ -10,8 +10,8 @@
 
 use std::path::PathBuf;
 
-use wimo ai_wimo_pager_pty_harness::pager_binary;
-use wimo ai_wimo_pager_pty_harness::scroll_matrix::{
+use wimoai_wimo_pager_pty_harness::pager_binary;
+use wimoai_wimo_pager_pty_harness::scroll_matrix::{
     CellReport, CellStatus, curated, run_cell, summary_table,
 };
 

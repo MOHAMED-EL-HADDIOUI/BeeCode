@@ -16,7 +16,7 @@ use crate::settings::{
     SettingKind, SettingMeta, SettingOwner, SettingValue, SettingsRegistry, StringValidator,
 };
 use crate::theme::Theme;
-use wimo ai_wimo_shell::agent::config::UiConfig;
+use wimoai_wimo_shell::agent::config::UiConfig;
 
 fn make_state() -> SettingsModalState {
     SettingsModalState::new(
@@ -2867,7 +2867,7 @@ fn fork_secondary_model_picker_opens_on_persisted_model() {
     use agent_client_protocol as acp;
     // Must differ from the baseline slug or the empty-fold arm hides the lookup.
     let slug = "wimo-4.5-fast";
-    assert_ne!(slug, wimo ai_wimo_shell::models::default_model());
+    assert_ne!(slug, wimoai_wimo_shell::models::default_model());
     let snapshot = PagerLocalSnapshot {
         available_models: vec![
             ("wimo 3".to_string(), acp::ModelId::new(Arc::from("wimo-3"))),
@@ -3129,7 +3129,7 @@ fn picker_long_description_wraps_to_multiple_lines() {
         category: SettingCategory::Privacy,
         owner: SettingOwner::Shared,
         label: "Coding data sharing",
-        description: "Controls whether Spacewimo ai may retain and train on coding data.",
+        description: "Controls whether Spacewimoai may retain and train on coding data.",
         keywords: &["test"],
         kind: SettingKind::Enum {
             default: "opt-out",
@@ -3137,7 +3137,7 @@ fn picker_long_description_wraps_to_multiple_lines() {
                 EnumChoice {
                     canonical: "opt-in",
                     display: "Opt in",
-                    description: "Allow Spacewimo ai to retain and use coding session data for training and product improvement.",
+                    description: "Allow Spacewimoai to retain and use coding session data for training and product improvement.",
                 },
                 EnumChoice {
                     canonical: "opt-out",
@@ -3192,7 +3192,7 @@ fn picker_long_description_wraps_to_multiple_lines() {
         "choice 0 line 1 must contain the `·` separator, got: {r3:?}"
     );
     assert!(
-        r3.contains("Allow Spacewimo ai"),
+        r3.contains("Allow Spacewimoai"),
         "choice 0 line 1 must start the description, got: {r3:?}"
     );
 
@@ -3229,7 +3229,7 @@ fn picker_long_description_wraps_to_multiple_lines() {
     );
     for word in [
         "Allow",
-        "Spacewimo ai",
+        "Spacewimoai",
         "retain",
         "session",
         "training",
@@ -3388,7 +3388,7 @@ fn picker_multi_line_choice_hit_rect_spans_all_lines() {
         category: SettingCategory::Privacy,
         owner: SettingOwner::Shared,
         label: "Coding data sharing",
-        description: "Controls whether Spacewimo ai may retain coding data.",
+        description: "Controls whether Spacewimoai may retain coding data.",
         keywords: &["test"],
         kind: SettingKind::Enum {
             default: "opt-in",
@@ -3396,7 +3396,7 @@ fn picker_multi_line_choice_hit_rect_spans_all_lines() {
                 EnumChoice {
                     canonical: "opt-in",
                     display: "Opt in",
-                    description: "Allow Spacewimo ai to retain and use coding session data for training and product improvement.",
+                    description: "Allow Spacewimoai to retain and use coding session data for training and product improvement.",
                 },
                 EnumChoice {
                     canonical: "opt-out",

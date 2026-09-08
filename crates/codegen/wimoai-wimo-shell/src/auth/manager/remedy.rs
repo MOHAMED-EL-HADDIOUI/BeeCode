@@ -105,7 +105,7 @@ impl AuthManager {
             SilentRefresh::Renewed(_) => "Renewed".to_owned(),
             SilentRefresh::Failed(remedy) => format!("Failed({remedy:?})"),
         };
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth: silent refresh",
             None,
             Some(serde_json::json!({ "outcome": logged })),
@@ -174,7 +174,7 @@ impl AuthManager {
                     is_panic = join_error.is_panic(),
                     "bounded refresh task failed"
                 );
-                wimo ai_wimo_telemetry::unified_log::error(
+                wimoai_wimo_telemetry::unified_log::error(
                     "auth: bounded refresh task failed",
                     None,
                     Some(serde_json::json!({
@@ -204,7 +204,7 @@ impl AuthManager {
             Err(_) => (BoundedRefresh::DeadlineElapsed, "timeout"),
         };
         // Log the variant only: the `Ok` payload is a credential
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth: bounded refresh",
             None,
             Some(serde_json::json!({

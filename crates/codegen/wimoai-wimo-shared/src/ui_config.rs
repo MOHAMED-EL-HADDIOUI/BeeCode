@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
-use wimo ai_wimo_config_types::DisplayRefreshSettings;
+use wimoai_wimo_config_types::DisplayRefreshSettings;
 
-use wimo ai_wimo_status_line::StatusLineConfig;
+use wimoai_wimo_status_line::StatusLineConfig;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
@@ -252,7 +252,7 @@ impl Default for UiConfig {
         Self {
             max_thoughts_width: DEFAULT_MAX_THOUGHTS_WIDTH,
             theme: None,
-            fork_secondary_model: wimo ai_wimo_models::default_model().to_string(),
+            fork_secondary_model: wimoai_wimo_models::default_model().to_string(),
             yolo: false,
             ui_theme: None,
             compact_mode: false,

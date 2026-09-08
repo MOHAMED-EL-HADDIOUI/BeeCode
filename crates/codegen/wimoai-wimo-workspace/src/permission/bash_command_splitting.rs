@@ -881,7 +881,7 @@ fn sh_split_simple(s: &str) -> Vec<String> {
 /// Given a bash *script string* like:
 ///
 /// ```bash
-/// wimo ai_API_KEY='wimo ai-some-key' cargo run --bin wimo ai-wimo-pager
+/// wimoai_API_KEY='wimoai-some-key' cargo run --bin wimoai-wimo-pager
 /// ```
 ///
 /// returns the first "important" command as a `BashCommandHighlights` where:
@@ -890,8 +890,8 @@ fn sh_split_simple(s: &str) -> Vec<String> {
 /// - `suffix`: tokens after the highlighted command.
 ///
 /// For the above example:
-///   prefix: ["wimo ai_API_KEY=wimo ai-some-key"]
-///   highlighted_words: ["cargo", "run", "--bin", "wimo ai-wimo-pager"]
+///   prefix: ["wimoai_API_KEY=wimoai-some-key"]
+///   highlighted_words: ["cargo", "run", "--bin", "wimoai-wimo-pager"]
 ///   suffix: []
 pub fn primary_command_from_script(script: &str) -> Option<BashCommandHighlights> {
     let tree = try_parse_shell(script)?;
@@ -1386,16 +1386,16 @@ mod tests {
             })
         );
 
-        let environment_key_command = "wimo ai_API_KEY='wimo ai-some-key' cargo run --bin wimo ai-wimo-pager";
+        let environment_key_command = "wimoai_API_KEY='wimoai-some-key' cargo run --bin wimoai-wimo-pager";
         assert_eq!(
             primary_command_from_script(environment_key_command),
             Some(BashCommandHighlights {
-                prefix: vec!["wimo ai_API_KEY=wimo ai-some-key".to_owned()],
+                prefix: vec!["wimoai_API_KEY=wimoai-some-key".to_owned()],
                 highlighted_words: vec![
                     "cargo".to_owned(),
                     "run".to_owned(),
                     "--bin".to_owned(),
-                    "wimo ai-wimo-pager".to_owned()
+                    "wimoai-wimo-pager".to_owned()
                 ],
                 suffix: vec![],
             })
@@ -1424,7 +1424,7 @@ mod tests {
             })
         );
 
-        let redirection_command = "cargo build --bin wimo ai-wimo-pager 2>&1";
+        let redirection_command = "cargo build --bin wimoai-wimo-pager 2>&1";
         assert_eq!(
             primary_command_from_script(redirection_command),
             Some(BashCommandHighlights {
@@ -1433,7 +1433,7 @@ mod tests {
                     "cargo".to_owned(),
                     "build".to_owned(),
                     "--bin".to_owned(),
-                    "wimo ai-wimo-pager".to_owned(),
+                    "wimoai-wimo-pager".to_owned(),
                 ],
                 suffix: vec!["2>&1".to_owned(),],
             })
@@ -1477,7 +1477,7 @@ mod tests {
             })
         );
 
-        let another_long_command = "cargo test --package wimo ai-wimo-shell --lib -- permission::bash_command_splitting::tests::test_parse_plain_commands_from_script --exact --nocapture 2>&1";
+        let another_long_command = "cargo test --package wimoai-wimo-shell --lib -- permission::bash_command_splitting::tests::test_parse_plain_commands_from_script --exact --nocapture 2>&1";
         assert_eq!(
             primary_command_from_script(another_long_command),
             Some(BashCommandHighlights {
@@ -1486,7 +1486,7 @@ mod tests {
                     "cargo".to_owned(),
                     "test".to_owned(),
                     "--package".to_owned(),
-                    "wimo ai-wimo-shell".to_owned(),
+                    "wimoai-wimo-shell".to_owned(),
                     "--lib".to_owned(),
                     "--".to_owned(),
                     "permission::bash_command_splitting::tests::test_parse_plain_commands_from_script".to_owned(),

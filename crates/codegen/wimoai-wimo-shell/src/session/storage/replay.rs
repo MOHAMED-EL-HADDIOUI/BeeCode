@@ -17,7 +17,7 @@ use super::{
     filter_rewind_lines, replay_updates_path_in_dir, strip_context_wrappers,
 };
 use crate::extensions::notification::SessionNotification;
-use crate::extensions::notification::SessionUpdate as wimo aiUpdate;
+use crate::extensions::notification::SessionUpdate as wimoaiUpdate;
 use crate::session::wire_tags::{
     AVAILABLE_COMMANDS_UPDATE, TOOL_CALL_STATUS_IN_PROGRESS, TOOL_CALL_UPDATE,
 };
@@ -84,7 +84,7 @@ pub enum ReplayedUpdate {
     /// That is how rebuilt entries keep their run-time timestamps.
     /// For a collapsed ToolCall it is the completing line's meta; `None` for start-only tools flushed at EOF.
     Acp(acp::SessionUpdate, Option<acp::Meta>),
-    wimo ai(wimo aiUpdate),
+    wimoai(wimoaiUpdate),
 }
 
 /// Collapses a ToolCall and its ToolCallUpdates into one ToolCall during replay.
@@ -203,7 +203,7 @@ fn try_fast_replay_updates_path(
         return None;
     }
     for cwd in [hint.child_cwd, hint.parent_cwd].into_iter().flatten() {
-        let encoded = wimo ai_wimo_config::encode_cwd_dirname(&cwd.to_string_lossy());
+        let encoded = wimoai_wimo_config::encode_cwd_dirname(&cwd.to_string_lossy());
         let candidate = wimo_home.join("sessions").join(encoded).join(session_id);
         if let Some(path) = replay_updates_path_in_dir(&candidate) {
             return Some(path);
@@ -325,7 +325,7 @@ pub fn stream_replay_updates_at_hinted<F: FnMut(ReplayedUpdate)>(
                     f(ReplayedUpdate::Acp(update, notif.meta));
                 }
             }
-            Ok(SessionUpdate::wimo ai(notif)) => f(ReplayedUpdate::wimo ai(notif.update)),
+            Ok(SessionUpdate::wimoai(notif)) => f(ReplayedUpdate::wimoai(notif.update)),
             Err(e) => tracing::debug!(error = %e, "skipping unparseable replay line"),
         }
     }
@@ -355,7 +355,7 @@ pub(crate) fn for_each_replay_update_in_file<F: FnMut(acp::SessionUpdate)>(
                 forwarded = true;
                 f(strip_context_wrappers(notif.update));
             }
-            Ok(SessionUpdate::wimo ai(_)) => {}
+            Ok(SessionUpdate::wimoai(_)) => {}
             Err(e) => tracing::debug!(error = %e, "skipping unparseable replay line"),
         }
     }
@@ -382,14 +382,14 @@ pub(crate) fn collect_unfinished_subagents(filtered: &[&str]) -> Vec<(String, St
             continue;
         };
         match notification.update {
-            wimo aiUpdate::SubagentSpawned {
+            wimoaiUpdate::SubagentSpawned {
                 subagent_id,
                 child_session_id,
                 ..
             } => {
                 pending.insert(subagent_id, child_session_id);
             }
-            wimo aiUpdate::SubagentFinished { subagent_id, .. } => {
+            wimoaiUpdate::SubagentFinished { subagent_id, .. } => {
                 pending.remove(&subagent_id);
             }
             _ => {}

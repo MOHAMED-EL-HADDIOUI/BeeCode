@@ -9,7 +9,7 @@ use crate::agent::mvp_agent::{
 use crate::session::SessionCommand;
 use agent_client_protocol::{self as acp};
 use tokio::sync::oneshot;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
+use wimoai_wimo_sampling_types::ReasoningEffort;
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum ConfigNotice {
     Send,
@@ -31,7 +31,7 @@ pub(crate) async fn apply(
     config_notice: ConfigNotice,
 ) -> Result<acp::SetSessionModelResponse, acp::Error> {
     tracing::info!("Received set session model request {args:?}");
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "model changed",
         Some(args.session_id.0.as_ref()),
         Some(serde_json::json!({"model": args.model_id.0.as_ref()})),
@@ -66,7 +66,7 @@ pub(crate) async fn apply(
             (Some(a), Some(b)) if a != b
         )
     };
-    let mut pending_rebuild_definition: Option<wimo ai_wimo_agent::AgentDefinition> = None;
+    let mut pending_rebuild_definition: Option<wimoai_wimo_agent::AgentDefinition> = None;
     {
         let required = &required_agent_type;
         let turn_count = handle
@@ -101,7 +101,7 @@ pub(crate) async fn apply(
                 turn_count,
                 "set_session_model: agent type mismatch rejected"
             );
-            wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::ModelSwitched {
+            wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::ModelSwitched {
                 session_id: session_id.0.to_string(),
                 previous_model_id: previous_model_id.to_string(),
                 new_model_id: model_id.0.to_string(),
@@ -121,7 +121,7 @@ pub(crate) async fn apply(
         }
         if is_mismatch && turn_count == 0 {
             let cwd = handle.tool_context.cwd.as_path();
-            let resolved = wimo ai_wimo_agent::discovery::by_name_in_cwd_with_plugins(
+            let resolved = wimoai_wimo_agent::discovery::by_name_in_cwd_with_plugins(
                 required,
                 cwd,
                 agent.plugin_registry_handle.snapshot().as_deref(),
@@ -197,8 +197,8 @@ pub(crate) async fn apply(
                     error = ?e,
                     "set_session_model: zero-turn harness rebuild failed; aborting model switch"
                 );
-                wimo ai_wimo_telemetry::session_ctx::log_event(
-                    wimo ai_wimo_telemetry::events::ModelSwitched {
+                wimoai_wimo_telemetry::session_ctx::log_event(
+                    wimoai_wimo_telemetry::events::ModelSwitched {
                         session_id: session_id.0.to_string(),
                         previous_model_id: previous_model_id.to_string(),
                         new_model_id: model_id.0.to_string(),
@@ -253,7 +253,7 @@ pub(crate) async fn apply(
     if config_notice == ConfigNotice::Send {
         notify_config_options(agent, &session_id).await;
     }
-    wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::ModelSwitched {
+    wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::ModelSwitched {
         session_id: session_id.0.to_string(),
         previous_model_id: previous_model_id.to_string(),
         new_model_id: model_id.0.to_string(),

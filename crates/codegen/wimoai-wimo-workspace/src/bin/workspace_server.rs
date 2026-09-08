@@ -6,11 +6,11 @@ use clap::Parser;
 use std::path::PathBuf;
 use std::time::Duration;
 use url::Url;
-use wimo ai_wimo_diag_server::{self as diag_server, DiagHandle, ErrorClass};
-use wimo ai_wimo_workspace::config::merge_session_metadata;
-use wimo ai_wimo_workspace::error::WorkspaceError;
-use wimo ai_wimo_workspace_daemon::daemonize;
-use wimo ai_wimo_workspace_daemon::preview_supervisor::{
+use wimoai_wimo_diag_server::{self as diag_server, DiagHandle, ErrorClass};
+use wimoai_wimo_workspace::config::merge_session_metadata;
+use wimoai_wimo_workspace::error::WorkspaceError;
+use wimoai_wimo_workspace_daemon::daemonize;
+use wimoai_wimo_workspace_daemon::preview_supervisor::{
     self, PreviewActivitySink, PreviewArgs, PreviewVisibility,
 };
 /// OTLP `service.name` for this binary's exported traces/logs/metrics and direct-OTLP fastrace export.
@@ -22,7 +22,7 @@ const WORKSPACE_HUB_AUTH_FAILED_MARKER: &str = "workspace hub auth failed";
 /// Post-failure dwell so the host can poll `/ready` before exit ([500ms, 2s]).
 const HUB_CONNECT_FAILED_DWELL: Duration = Duration::from_millis(750);
 fn server_id_startup_error(id: &str) -> Option<String> {
-    id.parse::<wimo ai_tool_protocol::ServerId>()
+    id.parse::<wimoai_tool_protocol::ServerId>()
         .err()
         .map(|e| format!("{INVALID_SERVER_ID_MARKER} {id:?}: {e}"))
 }
@@ -60,7 +60,7 @@ async fn dwell_after_hub_connect_failed() {
     tokio::time::sleep(HUB_CONNECT_FAILED_DWELL).await;
 }
 #[derive(Parser)]
-#[command(name = "wimo ai-workspace-server")]
+#[command(name = "wimoai-workspace-server")]
 #[command(about = "Standalone workspace ToolServer for the server connection")]
 struct Args {
     /// Print the capability manifest as JSON to stdout and exit 0.
@@ -149,7 +149,7 @@ struct Args {
     preview: PreviewCliArgs,
 }
 /// Preview-proxy supervision flags.
-/// Forwarded 1:1 to the `/usr/local/bin/wimo ai-wimo-preview-proxy` child (see `cli.rs` for the proxy's flag names).
+/// Forwarded 1:1 to the `/usr/local/bin/wimoai-wimo-preview-proxy` child (see `cli.rs` for the proxy's flag names).
 /// Off by default: when `--preview-enabled` is absent the supervisor is never started and startup is byte-for-byte the non-preview path.
 #[derive(clap::Args, Debug)]
 struct PreviewCliArgs {
@@ -204,8 +204,8 @@ impl PreviewCliArgs {
     }
 }
 /// Binds the preview-activity scraper to the workspace `ActivityTracker`.
-/// `wimo ai-wimo-workspace-daemon` deliberately does not depend on `wimo ai-wimo-workspace`, so this binary owns the one adapter between them.
-struct TrackerSink(std::sync::Arc<wimo ai_wimo_workspace::activity::ActivityTracker>);
+/// `wimoai-wimo-workspace-daemon` deliberately does not depend on `wimoai-wimo-workspace`, so this binary owns the one adapter between them.
+struct TrackerSink(std::sync::Arc<wimoai_wimo_workspace::activity::ActivityTracker>);
 impl PreviewActivitySink for TrackerSink {
     fn note_preview_routed_activity(&self) {
         self.0.note_preview_routed_activity();
@@ -243,7 +243,7 @@ fn main() -> anyhow::Result<()> {
         Some(ref p) => dunce::canonicalize(p)?,
         None => std::env::current_dir()?,
     };
-    let oom_protection = wimo ai_tty_utils::protect_from_oom_kill();
+    let oom_protection = wimoai_tty_utils::protect_from_oom_kill();
     let _pidfile_guard = if args.daemonize {
         let anchor = |p: PathBuf| if p.is_absolute() { p } else { cwd.join(p) };
         args.log_file = anchor(std::mem::take(&mut args.log_file));
@@ -268,13 +268,13 @@ fn main() -> anyhow::Result<()> {
     };
     #[cfg(unix)]
     if should_set_reset_child_oom(oom_protection.is_ok(), args.oom_protect) {
-        unsafe { std::env::set_var(wimo ai_tty_utils::RESET_CHILD_OOM_ENV, "1") };
+        unsafe { std::env::set_var(wimoai_tty_utils::RESET_CHILD_OOM_ENV, "1") };
     }
     let mut builder = tokio::runtime::Builder::new_multi_thread();
     builder
-        .worker_threads(wimo ai_tty_utils::runtime::capped_worker_threads().get())
+        .worker_threads(wimoai_tty_utils::runtime::capped_worker_threads().get())
         .enable_all();
-    let rt = wimo ai_tty_utils::runtime::build_with_blocking_pool(&mut builder)?;
+    let rt = wimoai_tty_utils::runtime::build_with_blocking_pool(&mut builder)?;
     rt.block_on(run(args, cwd, oom_protection, oom_protect_applied))
 }
 /// Whether to set `wimo_TOOLS_RESET_CHILD_OOM` after the always-on protect attempt.
@@ -295,12 +295,12 @@ async fn run(
     oom_protection: std::io::Result<()>,
     oom_protect_applied: Option<bool>,
 ) -> anyhow::Result<()> {
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
     use tracing_subscriber::layer::SubscriberExt as _;
     use tracing_subscriber::util::SubscriberInitExt as _;
     let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
-    let donating = wimo ai_computer_hub_sdk::DonatingLogLayer::new_inert();
+    let donating = wimoai_computer_hub_sdk::DonatingLogLayer::new_inert();
     tracing_subscriber::registry()
         .with(env_filter)
         .with(tracing_subscriber::fmt::layer())
@@ -315,7 +315,7 @@ async fn run(
     }
     let direct_otlp = match std::env::var("wimo_WORKSPACE_OTLP_ENDPOINT") {
         Ok(endpoint) if !endpoint.is_empty() => {
-            match wimo ai_tracing::init_fastrace(endpoint.clone(), SERVICE_NAME.to_owned(), None) {
+            match wimoai_tracing::init_fastrace(endpoint.clone(), SERVICE_NAME.to_owned(), None) {
                 Ok(()) => {
                     tracing::info!(%endpoint, "trace export enabled (direct OTLP)");
                     true
@@ -330,7 +330,7 @@ async fn run(
     };
     let url = Url::parse(&args.hub_url).map_err(|e| anyhow::anyhow!("invalid --hub-url: {e}"))?;
     {
-        use wimo ai_wimo_sandbox::{ProfileName, SandboxManager};
+        use wimoai_wimo_sandbox::{ProfileName, SandboxManager};
         let profile = match std::env::var("wimo_SANDBOX_PROFILE").ok() {
             Some(val) => {
                 let parsed = val
@@ -344,7 +344,7 @@ async fn run(
                     parsed
                 }
             }
-            None if wimo ai_wimo_sandbox::trust_bwrap_marker_for_devbox() => ProfileName::Devbox,
+            None if wimoai_wimo_sandbox::trust_bwrap_marker_for_devbox() => ProfileName::Devbox,
             None => ProfileName::Workspace,
         };
         let profile_name = profile.to_string();
@@ -358,7 +358,7 @@ async fn run(
                 tracing::warn!("Sandbox could not be applied (unsupported platform)");
             }
             sandbox.install();
-            let active = wimo ai_wimo_sandbox::is_active();
+            let active = wimoai_wimo_sandbox::is_active();
             let status_msg = if active {
                 "Workspace server sandbox active"
             } else {
@@ -367,14 +367,14 @@ async fn run(
             tracing::info!(
                 profile = %profile_name,
                 active,
-                restrict_network_at_known_linux_launches = wimo ai_wimo_sandbox::should_restrict_child_network(),
+                restrict_network_at_known_linux_launches = wimoai_wimo_sandbox::should_restrict_child_network(),
                 "{status_msg}"
             );
         }
     }
-    let mut status_config = wimo ai_wimo_workspace::StatusConfig::from_env();
+    let mut status_config = wimoai_wimo_workspace::StatusConfig::from_env();
     status_config.preview_control_port = args.preview.preview_control_port;
-    let auth_provider = wimo ai_wimo_workspace::hub_auth::provider(
+    let auth_provider = wimoai_wimo_workspace::hub_auth::provider(
         &url,
         args.auth_config.as_deref(),
         &status_config.oidc_refresh,
@@ -401,7 +401,7 @@ async fn run(
         .map(str::to_owned);
     let diag_handle = diag_server::DiagHandle::new(launch_id);
     {
-        let caps = wimo ai_wimo_workspace::image_capabilities::image_capabilities();
+        let caps = wimoai_wimo_workspace::image_capabilities::image_capabilities();
         diag_handle.set_image_capabilities(caps.wire(), caps.is_declared());
     }
     #[cfg(unix)]
@@ -442,12 +442,12 @@ async fn run(
         None
     };
     let preview_scrape_interval = status_config.preview_activity_scrape_interval;
-    wimo ai_wimo_workspace::init_metrics();
-    let ws_handle = match wimo ai_wimo_workspace::handle::connect_local_workspace(
+    wimoai_wimo_workspace::init_metrics();
+    let ws_handle = match wimoai_wimo_workspace::handle::connect_local_workspace(
         cwd,
         url,
         auth_provider,
-        wimo ai_wimo_workspace::LocalWorkspaceConnectOptions {
+        wimoai_wimo_workspace::LocalWorkspaceConnectOptions {
             metadata,
             server_id: server_id.clone(),
             alpha_test_key: None,
@@ -534,11 +534,11 @@ async fn run(
     diag_handle.set_shutting_down();
     tracing::info!("Received shutdown signal, draining...");
     let tracker = ws_handle.activity_tracker().clone();
-    let grace_budget = wimo ai_wimo_workspace::handle::termination_grace_from_env();
+    let grace_budget = wimoai_wimo_workspace::handle::termination_grace_from_env();
     ws_handle
         .two_phase_drain(
             grace_budget,
-            wimo ai_wimo_workspace::handle::DrainReason::Sigterm,
+            wimoai_wimo_workspace::handle::DrainReason::Sigterm,
         )
         .await;
     tracker.set_shutting_down();
@@ -547,7 +547,7 @@ async fn run(
     if let Some(pump) = &donation_pump {
         pump.drain().await;
     }
-    wimo ai_computer_hub_sdk::flush_log_layer();
+    wimoai_computer_hub_sdk::flush_log_layer();
     if let Some(pump) = &log_donation_pump {
         pump.drain().await;
     }
@@ -555,7 +555,7 @@ async fn run(
         pump.drain().await;
     }
     ws_handle.shutdown_hub().await;
-    wimo ai_wimo_sandbox::flush();
+    wimoai_wimo_sandbox::flush();
     Ok(())
 }
 #[cfg(test)]
@@ -628,7 +628,7 @@ mod tests {
     #[test]
     fn classify_from_client_error_display_round_trip() {
         let handshake = WorkspaceError::HubError(
-            wimo ai_computer_hub_sdk::ClientError::HandshakeAuthFailed { status: 401 }.to_string(),
+            wimoai_computer_hub_sdk::ClientError::HandshakeAuthFailed { status: 401 }.to_string(),
         );
         let handshake_msg = handshake.to_string();
         assert_eq!(
@@ -640,14 +640,14 @@ mod tests {
             WORKSPACE_HUB_AUTH_FAILED_MARKER
         );
         let auth = WorkspaceError::HubError(
-            wimo ai_computer_hub_sdk::ClientError::AuthError("token rejected".into()).to_string(),
+            wimoai_computer_hub_sdk::ClientError::AuthError("token rejected".into()).to_string(),
         );
         assert_eq!(
             classify_hub_connect_failure(&auth.to_string()),
             ErrorClass::HubAuth
         );
         let network = WorkspaceError::HubError(
-            wimo ai_computer_hub_sdk::ClientError::NetworkError("connection refused".into())
+            wimoai_computer_hub_sdk::ClientError::NetworkError("connection refused".into())
                 .to_string(),
         );
         assert_eq!(
@@ -802,17 +802,17 @@ mod tests {
     }
     #[test]
     fn capabilities_flag_parses_and_defaults_off() {
-        let args = Args::try_parse_from(["wimo ai-workspace-server"]).unwrap();
+        let args = Args::try_parse_from(["wimoai-workspace-server"]).unwrap();
         assert!(!args.capabilities);
-        let args = Args::try_parse_from(["wimo ai-workspace-server", "--capabilities"]).unwrap();
+        let args = Args::try_parse_from(["wimoai-workspace-server", "--capabilities"]).unwrap();
         assert!(args.capabilities);
     }
     #[test]
     fn project_lsp_trust_defaults_off_and_is_opt_in() {
         unsafe { std::env::remove_var("wimo_WORKSPACE_PROJECT_LSP_TRUSTED") };
-        let args = Args::try_parse_from(["wimo ai-workspace-server"]).unwrap();
+        let args = Args::try_parse_from(["wimoai-workspace-server"]).unwrap();
         assert!(!args.project_lsp_trusted);
-        let args = Args::try_parse_from(["wimo ai-workspace-server", "--project-lsp-trusted", "true"])
+        let args = Args::try_parse_from(["wimoai-workspace-server", "--project-lsp-trusted", "true"])
             .unwrap();
         assert!(args.project_lsp_trusted);
     }
@@ -829,7 +829,7 @@ mod tests {
             #[arg(long)]
             daemonize: bool,
         }
-        let err = LegacyArgs::try_parse_from(["wimo ai-workspace-server", "--capabilities"])
+        let err = LegacyArgs::try_parse_from(["wimoai-workspace-server", "--capabilities"])
             .expect_err("a legacy binary must reject the flag");
         assert_eq!(err.kind(), clap::error::ErrorKind::UnknownArgument);
         assert_ne!(
@@ -840,7 +840,7 @@ mod tests {
     }
     #[test]
     fn daemonize_defaults_are_inert() {
-        let args = Args::try_parse_from(["wimo ai-workspace-server"]).unwrap();
+        let args = Args::try_parse_from(["wimoai-workspace-server"]).unwrap();
         assert!(!args.daemonize);
         assert!(!args.oom_protect);
         assert_eq!(args.log_file, PathBuf::from(daemonize::DEFAULT_LOG_PATH));
@@ -866,13 +866,13 @@ mod tests {
     }
     #[test]
     fn oom_protect_flag_parses() {
-        let args = Args::try_parse_from(["wimo ai-workspace-server", "--oom-protect"]).unwrap();
+        let args = Args::try_parse_from(["wimoai-workspace-server", "--oom-protect"]).unwrap();
         assert!(args.oom_protect);
     }
     #[test]
     fn ready_file_is_accepted_as_a_deprecated_no_op() {
         let args =
-            Args::try_parse_from(["wimo ai-workspace-server", "--ready-file", "/tmp/x.ready"]).unwrap();
+            Args::try_parse_from(["wimoai-workspace-server", "--ready-file", "/tmp/x.ready"]).unwrap();
         assert_eq!(args.ready_file, Some(PathBuf::from("/tmp/x.ready")));
     }
     #[test]
@@ -889,7 +889,7 @@ mod tests {
     }
     #[test]
     fn argv_rejection_exit_code_is_distinct_from_server_id_exit_code() {
-        let err = Args::try_parse_from(["wimo ai-workspace-server", "--flag-from-the-future"])
+        let err = Args::try_parse_from(["wimoai-workspace-server", "--flag-from-the-future"])
             .err()
             .expect("unknown argv must be rejected");
         assert_eq!(err.exit_code(), 2, "clap argv rejection exits 2");
@@ -899,7 +899,7 @@ mod tests {
     }
     #[test]
     fn preview_defaults_are_inert() {
-        let args = Args::try_parse_from(["wimo ai-workspace-server"]).unwrap();
+        let args = Args::try_parse_from(["wimoai-workspace-server"]).unwrap();
         assert!(!args.preview.preview_enabled);
         let cfg = args
             .preview
@@ -913,7 +913,7 @@ mod tests {
     #[test]
     fn preview_flags_parse_and_lower_to_supervisor_config() {
         let args = Args::try_parse_from([
-            "wimo ai-workspace-server",
+            "wimoai-workspace-server",
             "--preview-enabled",
             "--preview-port",
             "6014",
@@ -968,7 +968,7 @@ mod tests {
     #[test]
     fn preview_visibility_rejects_invalid_value() {
         let err = Args::try_parse_from([
-            "wimo ai-workspace-server",
+            "wimoai-workspace-server",
             "--preview-enabled",
             "--preview-visibility",
             "nobody",
@@ -980,7 +980,7 @@ mod tests {
     #[test]
     fn preview_visibility_owner_parses_and_lowers() {
         let args = Args::try_parse_from([
-            "wimo ai-workspace-server",
+            "wimoai-workspace-server",
             "--preview-enabled",
             "--preview-visibility",
             "owner",
@@ -993,11 +993,11 @@ mod tests {
         assert_eq!(cfg.to_argv(), vec!["--visibility", "owner"]);
     }
     /// The scraper reports through `PreviewActivitySink`, so this adapter is the only place the preview signal meets the tracker's idle accounting.
-    /// The scraper's own behavior is tested in `wimo ai-wimo-workspace-daemon`, and the tracker's in `wimo ai_wimo_workspace::activity`.
+    /// The scraper's own behavior is tested in `wimoai-wimo-workspace-daemon`, and the tracker's in `wimoai_wimo_workspace::activity`.
     /// This test covers only the adapter.
     #[test]
     fn tracker_sink_forwards_every_signal_to_the_activity_tracker() {
-        use wimo ai_wimo_workspace::activity::ActivityTracker;
+        use wimoai_wimo_workspace::activity::ActivityTracker;
         let tracker = std::sync::Arc::new(ActivityTracker::new());
         let sink = TrackerSink(std::sync::Arc::clone(&tracker));
         assert_eq!(

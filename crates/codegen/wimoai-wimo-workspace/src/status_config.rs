@@ -54,7 +54,7 @@ const DEFAULT_PREVIEW_STATE_POLL_INTERVAL_MS: u64 = 5_000;
 pub(crate) const MIN_PREVIEW_STATE_POLL_INTERVAL_MS: u64 = 100;
 /// Default preview-state long-poll hold; `0` disables long-polling entirely (the watcher keeps today's fixed-interval cadence).
 const DEFAULT_PREVIEW_STATE_WAIT_SECS: u64 = 0;
-/// Ceiling on the long-poll hold, mirroring the proxy's own `?wait` clamp (`wimo ai-wimo-preview-proxy` clamps held requests to 15s).
+/// Ceiling on the long-poll hold, mirroring the proxy's own `?wait` clamp (`wimoai-wimo-preview-proxy` clamps held requests to 15s).
 const MAX_PREVIEW_STATE_WAIT_SECS: u64 = 15;
 /// Default preview-proxy discovery refresh passthrough; `0` means the supervisor omits `--discovery-refresh-ms` and the proxy uses its default.
 const DEFAULT_PREVIEW_DISCOVERY_REFRESH_MS: u64 = 0;

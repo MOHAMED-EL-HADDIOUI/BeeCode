@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use wimo ai_wimo_workspace::session::git::VcsKind;
+use wimoai_wimo_workspace::session::git::VcsKind;
 
-// Re-export from wimo ai-chat-state; the canonical definition lives there
-pub(crate) use wimo ai_chat_state::compaction_utils::extract_user_query;
+// Re-export from wimoai-chat-state; the canonical definition lives there
+pub(crate) use wimoai_chat_state::compaction_utils::extract_user_query;
 
 pub(crate) fn user_query(user_message: String) -> String {
     format!(
@@ -69,7 +69,7 @@ fn resolve_shell_display() -> String {
 
     #[cfg(not(unix))]
     {
-        wimo ai_wimo_config::shell::detect_windows_shell()
+        wimoai_wimo_config::shell::detect_windows_shell()
             .name()
             .to_string()
     }
@@ -94,6 +94,6 @@ pub(crate) fn format_vcs_status_block(status: &str, vcs_kind: VcsKind) -> String
     format!("\n\n<{tag}>\n{description}\n{status}\n</{tag}>\n")
 }
 
-// Tests for extract_user_query now live in wimo ai_chat_state::compaction_utils.
+// Tests for extract_user_query now live in wimoai_chat_state::compaction_utils.
 // The `<user_info>` + status block is assembled by `SessionActor::construct_legacy_prefix`
 // (see `acp_session_impl/prompt_build.rs`) from a single `RepoStatusSnapshot`.

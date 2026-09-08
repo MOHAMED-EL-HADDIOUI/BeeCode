@@ -13,7 +13,7 @@ use super::common::*;
 /// The TUI's settings prefetch is deliberately capped at 2s, so on a loaded runner a spawn can miss the fetch and start with an unseeded cache.
 /// The test retries with fresh TUI spawns (same leader) until a pick lands the dismissal, then proves it sticks.
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[ignore = "PTY e2e; run with cargo test -p wimo ai-wimo-pager --test leader_pty_e2e -- --ignored --test-threads=1"]
+#[ignore = "PTY e2e; run with cargo test -p wimoai-wimo-pager --test leader_pty_e2e -- --ignored --test-threads=1"]
 async fn campaign_leader_mode_remote_dismiss_on_model_pick() {
     const CONFIG_MODEL: &str = "config-model";
     const CAMPAIGN_MODEL: &str = "campaign-model";
@@ -46,7 +46,7 @@ async fn campaign_leader_mode_remote_dismiss_on_model_pick() {
     let socket = wimo_home.join("leader-e2e.sock");
     let socket = socket.to_str().expect("socket path is utf-8").to_owned();
 
-    // Use session (OAuth) auth instead of the harness's default wimo ai_API_KEY
+    // Use session (OAuth) auth instead of the harness's default wimoai_API_KEY
     // The settings fetch requires `auth_manager.auth()`: in ApiKey/BYOK mode the pager never requests `/v1/settings`
     // Without that request a remote campaign can never reach the pager (see `spawn_polling_session`'s doc)
     seed_fake_oauth(&content, "pty-campaign-leader");

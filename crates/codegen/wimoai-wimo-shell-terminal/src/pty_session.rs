@@ -14,14 +14,14 @@ use std::sync::{Arc, LazyLock};
 
 use portable_pty::{CommandBuilder, MasterPty, PtySize, native_pty_system};
 use tokio::sync::{Mutex, mpsc};
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
 
-use wimo ai_wimo_workspace::file_system::TargetClientId;
+use wimoai_wimo_workspace::file_system::TargetClientId;
 
 use crate::{TerminalExtError, TerminalInfo, TerminalStatus};
 
 /// Inject `targetClientId` into `_meta` and fire-and-forget an ext notification.
-/// Mirrors `wimo ai_wimo_shell::extensions::routing::send_routed_notification` so this crate does not depend on the shell.
+/// Mirrors `wimoai_wimo_shell::extensions::routing::send_routed_notification` so this crate does not depend on the shell.
 fn send_routed_notification(
     gateway: &GatewaySender,
     method: &str,
@@ -81,7 +81,7 @@ pub struct PtySession {
 enum Shell {
     Running {
         child: Box<dyn portable_pty::Child + Send + Sync>,
-        group: Option<Arc<wimo ai_tty_utils::ProcessGroup>>,
+        group: Option<Arc<wimoai_tty_utils::ProcessGroup>>,
     },
     Reaped(Option<portable_pty::ExitStatus>),
 }
@@ -107,7 +107,7 @@ impl Shell {
         }
     }
 
-    fn attach_group(&mut self, enrolled: Arc<wimo ai_tty_utils::ProcessGroup>) {
+    fn attach_group(&mut self, enrolled: Arc<wimoai_tty_utils::ProcessGroup>) {
         if let Shell::Running { group, .. } = self {
             *group = Some(enrolled);
         }
@@ -117,7 +117,7 @@ impl Shell {
     /// It follows the same order as [`reap`], and it has to wait: `killpg` returns before the kernel has zombified the leader.
     /// Dropping straight after would leak it and retire the group with it.
     fn reap_now(&mut self) {
-        if self.hangup() && self.wait_exit(wimo ai_tty_utils::HANGUP_GRACE) {
+        if self.hangup() && self.wait_exit(wimoai_tty_utils::HANGUP_GRACE) {
             return;
         }
         self.kill();
@@ -190,7 +190,7 @@ impl UnregisteredShell {
         self.0.pid()
     }
 
-    fn attach_group(&mut self, enrolled: Arc<wimo ai_tty_utils::ProcessGroup>) {
+    fn attach_group(&mut self, enrolled: Arc<wimoai_tty_utils::ProcessGroup>) {
         self.0.attach_group(enrolled);
     }
 
@@ -293,7 +293,7 @@ pub async fn create_pty(
     if let Some(pid) = shell.pid() {
         // `enroll_terminal_pid` reaps with a grace wait if it loses the close race, so run it off-task
         let enrolled = tokio::task::spawn_blocking(move || {
-            wimo ai_tty_utils::global_process_scope().enroll_terminal_pid(pid)
+            wimoai_tty_utils::global_process_scope().enroll_terminal_pid(pid)
         })
         .await
         .map_err(|e| TerminalExtError::Internal(format!("enroll task failed: {e}")))?
@@ -344,7 +344,7 @@ pub async fn create_pty(
     let mut registry = PTY_REGISTRY.lock().await;
 
     // The scope can close during the setup above, and teardown has already run by then: publishing here would advertise a shell it just killed
-    if wimo ai_tty_utils::global_process_scope().is_closed() {
+    if wimoai_tty_utils::global_process_scope().is_closed() {
         return Err(TerminalExtError::Internal(
             "process scope closed while the shell was starting".to_string(),
         ));
@@ -652,7 +652,7 @@ fn reap(entry: &Arc<Mutex<PtySession>>) {
         session.input_tx.take();
         session.shell.hangup()
     };
-    if hung_up && wait_for_exit(entry, wimo ai_tty_utils::HANGUP_GRACE) {
+    if hung_up && wait_for_exit(entry, wimoai_tty_utils::HANGUP_GRACE) {
         return;
     }
     entry.blocking_lock().shell.kill();
@@ -699,7 +699,7 @@ fn resolve_pty_shell(shell: Option<&str>) -> (String, Vec<String>) {
 
     #[cfg(not(unix))]
     {
-        use wimo ai_wimo_config::shell::{WindowsShell, detect_windows_shell};
+        use wimoai_wimo_config::shell::{WindowsShell, detect_windows_shell};
         match detect_windows_shell() {
             WindowsShell::GitBash(path) => (path.clone(), vec!["-l".to_string()]),
             WindowsShell::Pwsh => ("pwsh".to_string(), vec!["-NoLogo".to_string()]),
@@ -826,7 +826,7 @@ mod tests {
     use std::time::Duration;
 
     use agent_client_protocol as acp;
-    use wimo ai_acp_lib::acp_gateway;
+    use wimoai_acp_lib::acp_gateway;
 
     type RecordedNotifications = Rc<RefCell<Vec<(String, serde_json::Value)>>>;
 
@@ -1019,7 +1019,7 @@ mod tests {
                     "background job did not get its own process group"
                 );
 
-                let scope = wimo ai_tty_utils::ProcessScope::new();
+                let scope = wimoai_tty_utils::ProcessScope::new();
                 let _group = scope.enroll_terminal_pid(shell).expect("enroll");
                 scope.kill_all();
 

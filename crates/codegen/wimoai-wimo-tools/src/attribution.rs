@@ -2,9 +2,9 @@
 
 use std::sync::Arc;
 
-use wimo ai_wimo_auth::bearer_suffix;
+use wimoai_wimo_auth::bearer_suffix;
 
-pub use wimo ai_wimo_auth::bearer_fragment::BEARER_SUFFIX_LEN;
+pub use wimoai_wimo_auth::bearer_fragment::BEARER_SUFFIX_LEN;
 
 /// Which tool endpoint produced the 401.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

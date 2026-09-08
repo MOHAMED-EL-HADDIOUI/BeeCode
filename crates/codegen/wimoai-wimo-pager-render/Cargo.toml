@@ -1,5 +1,5 @@
 [package]
-name = "wimo ai-wimo-pager-render"
+name = "wimoai-wimo-pager-render"
 version = "0.1.0"
 edition.workspace = true
 license = "Apache-2.0"
@@ -7,7 +7,7 @@ license = "Apache-2.0"
 [dependencies]
 # TTY safety
 dunce = { workspace = true }
-wimo ai-tty-utils = { workspace = true }
+wimoai-tty-utils = { workspace = true }
 
 # Rendering
 ratatui = { workspace = true, features = [
@@ -27,7 +27,7 @@ linkify = { workspace = true }
 tui-scrollbar = { workspace = true }
 
 # Markdown / syntax highlighting
-wimo ai-wimo-markdown = { workspace = true }
+wimoai-wimo-markdown = { workspace = true }
 syntect = { workspace = true }
 anstyle = { workspace = true }
 supports-color = { workspace = true }
@@ -61,18 +61,18 @@ tokio = { workspace = true, features = [
 tracing = { workspace = true }
 
 # Prompt text input
-wimo ai-ratatui-textarea = { workspace = true }
-wimo ai-ratatui-inline = { workspace = true }
+wimoai-ratatui-textarea = { workspace = true }
+wimoai-ratatui-inline = { workspace = true }
 
 # ACP
 agent-client-protocol = { workspace = true }
-wimo ai-wimo-config = { workspace = true }
-wimo ai-wimo-shared = { workspace = true }
-wimo ai-wimo-workspace = { workspace = true }
-wimo ai-wimo-telemetry = { workspace = true }
-wimo ai-wimo-tools = { workspace = true }
-wimo ai-wimo-paths = { path = "../wimo ai-wimo-paths" }
-wimo ai-wimo-gboom = { path = "../wimo ai-wimo-gboom" }
+wimoai-wimo-config = { workspace = true }
+wimoai-wimo-shared = { workspace = true }
+wimoai-wimo-workspace = { workspace = true }
+wimoai-wimo-telemetry = { workspace = true }
+wimoai-wimo-tools = { workspace = true }
+wimoai-wimo-paths = { path = "../wimoai-wimo-paths" }
+wimoai-wimo-gboom = { path = "../wimoai-wimo-gboom" }
 
 # Base64 encoding for image data
 base64 = { workspace = true }
@@ -84,7 +84,7 @@ image = { workspace = true, features = ["png", "jpeg", "tiff", "gif", "webp"] }
 uuid = { workspace = true, features = ["v4"] }
 
 # Path computation
-wimo ai-dirs = { workspace = true }
+wimoai-dirs = { workspace = true }
 shellexpand = "3.1"
 
 # Parsing

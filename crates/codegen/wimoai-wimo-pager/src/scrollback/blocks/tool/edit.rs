@@ -39,7 +39,7 @@ use crate::scrollback::types::{
 };
 use crate::syntax::{Syntect, get_syntect};
 use crate::theme::{Theme, ThemeKind};
-use wimo ai_wimo_pager_diff::{DiffHunk, diff_hunks_to_patch};
+use wimoai_wimo_pager_diff::{DiffHunk, diff_hunks_to_patch};
 
 /// Skip full-file HL when the post-edit file exceeds this size (2 MiB).
 /// Full-file syntect on multi-MB sources is poor background work vs staying hunk-only; see `benches/edit_highlight`.
@@ -195,7 +195,7 @@ fn render_diff_hunks_core(
         let mut new_highlighter = syntect.highlight_lines_by_file_path(path);
         for line in hunk {
             let trimmed = line.text.trim_end_matches(['\r', '\n']);
-            let text = wimo ai_wimo_pager_render::appearance::expand_tabs(trimmed);
+            let text = wimoai_wimo_pager_render::appearance::expand_tabs(trimmed);
             // Cold spans render unconditionally so Delete lines and any map miss (text drift) paint exactly like the hunk-only phase
             let mut content_spans = match line.tag {
                 ChangeTag::Delete => {
@@ -255,7 +255,7 @@ fn hunk_new_line_texts(hunks: &[DiffHunk]) -> HashMap<usize, String> {
                 let trimmed = line.text.trim_end_matches(['\r', '\n']);
                 out.insert(
                     line.ln,
-                    wimo ai_wimo_pager_render::appearance::expand_tabs(trimmed).into_owned(),
+                    wimoai_wimo_pager_render::appearance::expand_tabs(trimmed).into_owned(),
                 );
             }
         }
@@ -304,7 +304,7 @@ pub fn compute_file_scoped_styles(
         if ln > max_needed {
             break;
         }
-        let expanded = wimo ai_wimo_pager_render::appearance::expand_tabs(line);
+        let expanded = wimoai_wimo_pager_render::appearance::expand_tabs(line);
         let owned = format!("{expanded}\n");
         let ranges = highlighter
             .highlight_line(&owned, &syntect.syntax_set)
@@ -357,7 +357,7 @@ pub fn render_diff_hunks_with_styles(
 /// Delete never: it keeps the per-hunk syntect paint the user already saw.
 /// `None` (missing line, text drift, or nothing visible) keeps the cold spans.
 fn map_spans_for_line(
-    line: &wimo ai_wimo_pager_diff::DiffLine,
+    line: &wimoai_wimo_pager_diff::DiffLine,
     expanded: &str,
     by_new_line: &HashMap<usize, EditLineStyles>,
     theme: &Theme,
@@ -388,7 +388,7 @@ fn map_spans_for_line(
 
 /// Assemble gutter + content spans into one or more wrapped [`DiffLineOutput`]s.
 fn assemble_diff_line_outputs(
-    line: &wimo ai_wimo_pager_diff::DiffLine,
+    line: &wimoai_wimo_pager_diff::DiffLine,
     content_spans: Vec<Span<'static>>,
     layout: &GutterLayout,
     indent_width: usize,
@@ -617,7 +617,7 @@ fn gutter_layout(hunk: &DiffHunk, config: &DiffRenderConfig) -> GutterLayout {
 /// Render the line number gutter.
 fn render_gutter(
     spans: &mut Vec<Span<'static>>,
-    line: &wimo ai_wimo_pager_diff::DiffLine,
+    line: &wimoai_wimo_pager_diff::DiffLine,
     layout: &GutterLayout,
     theme: &Theme,
     config: &DiffRenderConfig,
@@ -1458,7 +1458,7 @@ mod tests {
     use super::*;
     use crate::appearance::AppearanceConfig;
     use crate::scrollback::types::DisplayMode;
-    use wimo ai_wimo_pager_diff::DiffLine;
+    use wimoai_wimo_pager_diff::DiffLine;
 
     fn test_ctx() -> BlockContext {
         BlockContext {

@@ -13,7 +13,7 @@ use crate::render::wrapping::word_wrap_lines;
 use crate::scrollback::block::BlockContent;
 use crate::scrollback::types::{AccentStyle, BlockContext, BlockLine, BlockOutput};
 use crate::theme::{Theme, quantize};
-use wimo ai_wimo_shell::session::{ContextInfo, count_detail};
+use wimoai_wimo_shell::session::{ContextInfo, count_detail};
 
 /// Block that renders a `/context` snapshot in scrollback.
 ///
@@ -443,7 +443,7 @@ impl ContextInfoBlock {
         lines.push(Line::from(""));
 
         // Auto-compact estimate: tokens until we hit the auto-compact threshold
-        // Uses the *live* value from the session snapshot (it comes from wimo ai-wimo-shell's model config resolution)
+        // Uses the *live* value from the session snapshot (it comes from wimoai-wimo-shell's model config resolution)
         // The “Auto-compact at X%” line and the tip therefore match whatever the current model has configured
         // Remote settings, user TOML, and env all feed that value (e.g. 65 for wimo).
         //
@@ -622,7 +622,7 @@ impl BlockContent for ContextInfoBlock {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_shell::session::TokenUsageCategory;
+    use wimoai_wimo_shell::session::TokenUsageCategory;
 
     fn snapshot() -> ContextInfo {
         ContextInfo {

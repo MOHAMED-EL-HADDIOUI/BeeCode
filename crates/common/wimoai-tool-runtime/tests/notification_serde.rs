@@ -6,7 +6,7 @@ use std::time::{Duration, SystemTime};
 
 use serde_json::{Value, json};
 
-use wimo ai_tool_runtime::{
+use wimoai_tool_runtime::{
     BashExecutionBackgrounded, BashExecutionComplete, BashExecutionFailed, BashExecutionTimeout,
     BashNotificationBase, BashOutputChunk, FileWritten, LspServerCrashed, LspServerFailed,
     LspServerReady, LspServerRetrying, LspServerStarting, MonitorEvent, PlanModeEntered,
@@ -351,7 +351,7 @@ fn variant_count_matches_variant_name() {
 #[test]
 fn handle_send_helpers_round_trip_through_channel() {
     use futures::stream::StreamExt;
-    use wimo ai_tool_runtime::ToolNotificationHandle;
+    use wimoai_tool_runtime::ToolNotificationHandle;
 
     let (handle, mut rx) = ToolNotificationHandle::channel();
     handle.send_bash_output_chunk(BashOutputChunk { base: base() });

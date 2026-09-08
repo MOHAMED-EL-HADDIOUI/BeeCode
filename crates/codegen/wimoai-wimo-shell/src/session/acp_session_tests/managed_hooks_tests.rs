@@ -2,7 +2,7 @@
 //!
 //! These tests drive the shipped `handle_hooks_action` with a real registry whose hook carries requirements provenance.
 //! The per-hook `Disable` action must be refused and the bulk `ToggleSource` must skip it, both before writing any disable state.
-//! The dispatcher-level exemption and the display predicate are covered with a sandboxed `wimo_HOME` in `wimo ai_wimo_hooks::dispatcher` tests.
+//! The dispatcher-level exemption and the display predicate are covered with a sandboxed `wimo_HOME` in `wimoai_wimo_hooks::dispatcher` tests.
 
 use super::support::*;
 use super::*;
@@ -22,7 +22,7 @@ struct DisabledHooksGuard {
 
 impl DisabledHooksGuard {
     fn capture() -> Self {
-        let path = wimo ai_wimo_config::user_wimo_home().map(|home| home.join("disabled-hooks"));
+        let path = wimoai_wimo_config::user_wimo_home().map(|home| home.join("disabled-hooks"));
         let before = path.as_ref().and_then(|p| std::fs::read_to_string(p).ok());
         Self { path, before }
     }
@@ -54,11 +54,11 @@ impl Drop for DisabledHooksGuard {
 }
 
 /// Builds a registry with one command hook whose provenance is `Requirements`.
-fn managed_registry() -> wimo ai_wimo_hooks::discovery::HookRegistry {
-    wimo ai_wimo_hooks::discovery::registry_from_specs_deduped(vec![wimo ai_wimo_hooks::config::HookSpec {
+fn managed_registry() -> wimoai_wimo_hooks::discovery::HookRegistry {
+    wimoai_wimo_hooks::discovery::registry_from_specs_deduped(vec![wimoai_wimo_hooks::config::HookSpec {
         name: MANAGED_HOOK.to_string(),
-        event: wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
-        handler_type: wimo ai_wimo_hooks::config::HandlerType::Command,
+        event: wimoai_wimo_hooks::event::HookEventName::PreToolUse,
+        handler_type: wimoai_wimo_hooks::config::HandlerType::Command,
         configured_matcher: None,
         matcher: None,
         enabled: true,
@@ -69,7 +69,7 @@ fn managed_registry() -> wimo ai_wimo_hooks::discovery::HookRegistry {
         timeout_ms: 5000,
         source_dir: std::env::temp_dir(),
         extra_env: std::collections::HashMap::new(),
-        layer: wimo ai_wimo_hooks::config::HookProvenance::Requirements,
+        layer: wimoai_wimo_hooks::config::HookProvenance::Requirements,
     }])
 }
 
@@ -81,20 +81,20 @@ async fn managed_policy_hook_disable_actions_are_refused() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             *actor.hook_registry.borrow_mut() = Some(Arc::new(managed_registry()));
             let actor = Arc::new(actor);
 
             let outcome = actor
-                .handle_hooks_action(wimo ai_hooks_plugins_types::HooksAction::Disable {
+                .handle_hooks_action(wimoai_hooks_plugins_types::HooksAction::Disable {
                     hook_name: MANAGED_HOOK.to_string(),
                 })
                 .await;
             assert_eq!(
                 outcome.status,
-                wimo ai_hooks_plugins_types::OutcomeStatus::ValidationError,
+                wimoai_hooks_plugins_types::OutcomeStatus::ValidationError,
                 "disable of a managed-policy hook must be refused: {}",
                 outcome.message
             );
@@ -105,7 +105,7 @@ async fn managed_policy_hook_disable_actions_are_refused() {
             );
 
             let outcome = actor
-                .handle_hooks_action(wimo ai_hooks_plugins_types::HooksAction::ToggleSource {
+                .handle_hooks_action(wimoai_hooks_plugins_types::HooksAction::ToggleSource {
                     hook_names: vec![MANAGED_HOOK.to_string()],
                     disable: true,
                 })

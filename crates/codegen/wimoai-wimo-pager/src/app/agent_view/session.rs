@@ -19,7 +19,7 @@ use crate::views::todo_pane::TodoPane;
 use ratatui::layout::Rect;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::time::Instant;
-use wimo ai_wimo_telemetry::events::{CancellationCompleted, CancellationScope};
+use wimoai_wimo_telemetry::events::{CancellationCompleted, CancellationScope};
 impl AgentView {
     /// Always bumps [`Self::last_turn_summary_gen`] so a concurrent disk hydrate that captured an older generation cannot overwrite this write.
     pub(crate) fn set_last_turn_summary(&mut self, summary: Option<String>) {
@@ -35,7 +35,7 @@ impl AgentView {
             self.last_seen_event_id = None;
             self.last_seen_event_seq = None;
             self.last_applied_event_seq = None;
-            self.last_applied_wimo ai_event_seq = None;
+            self.last_applied_wimoai_event_seq = None;
             self.deferred_subagent_finishes.clear();
             self.clear_minimal_btw_lifecycle();
         }
@@ -121,7 +121,7 @@ impl AgentView {
             self_originated_prompt_ids: VecDeque::new(),
             rewound_prompt_ids: VecDeque::new(),
             last_applied_event_seq: None,
-            last_applied_wimo ai_event_seq: None,
+            last_applied_wimoai_event_seq: None,
             last_seen_event_id: None,
             last_seen_event_seq: None,
             deferred_subagent_finishes: HashMap::new(),
@@ -427,7 +427,7 @@ impl AgentView {
         self.turn_start_ms_prompt = None;
         self.last_active_at = Some(now);
         if let Some(event) = self.settle_cancel(end, now) {
-            wimo ai_wimo_telemetry::session_ctx::log_event(event);
+            wimoai_wimo_telemetry::session_ctx::log_event(event);
         }
     }
     /// Cancel the running work and set its latency anchor in one place, so the action and the `CancellationScope` it measures cannot drift apart.
@@ -577,7 +577,7 @@ impl AgentView {
             last_seen_event_id: self.last_seen_event_id.clone(),
             last_seen_event_seq: self.last_seen_event_seq,
             last_applied_event_seq: self.last_applied_event_seq,
-            last_applied_wimo ai_event_seq: self.last_applied_wimo ai_event_seq,
+            last_applied_wimoai_event_seq: self.last_applied_wimoai_event_seq,
             saw_replay: false,
             saw_todo_update: false,
             replayed_expiry_notices: Vec::new(),
@@ -869,7 +869,7 @@ impl AgentView {
             self.last_seen_event_id = reload.last_seen_event_id;
             self.last_seen_event_seq = reload.last_seen_event_seq;
             self.last_applied_event_seq = reload.last_applied_event_seq;
-            self.last_applied_wimo ai_event_seq = reload.last_applied_wimo ai_event_seq;
+            self.last_applied_wimoai_event_seq = reload.last_applied_wimoai_event_seq;
             dropped_heavy = true;
         }
         self.session.loading_replay = false;
@@ -1107,7 +1107,7 @@ impl AgentView {
     /// Update context state with a full snapshot from live callers.
     ///
     /// No-op for gateway/chat-kind sessions: local GetSessionInfo / sampler breakdowns must not populate the context bar (remote owns context).
-    pub fn apply_full_context_info(&mut self, next: wimo ai_wimo_shell::session::ContextInfo) {
+    pub fn apply_full_context_info(&mut self, next: wimoai_wimo_shell::session::ContextInfo) {
         if self.chat_kind {
             self.context_state = None;
             return;
@@ -1133,11 +1133,11 @@ impl AgentView {
                 if total > 0 {
                     snap.total = total;
                 }
-                snap.usage_pct = wimo ai_token_estimation::usage_percentage_u8(used, snap.total);
-                snap.free_tokens = wimo ai_token_estimation::free_tokens(snap.total, used);
+                snap.usage_pct = wimoai_token_estimation::usage_percentage_u8(used, snap.total);
+                snap.free_tokens = wimoai_token_estimation::free_tokens(snap.total, used);
             }
             None => {
-                self.context_state = Some(wimo ai_wimo_shell::session::ContextInfo::from_notification(
+                self.context_state = Some(wimoai_wimo_shell::session::ContextInfo::from_notification(
                     used, total,
                 ));
             }
@@ -1254,7 +1254,7 @@ impl AgentView {
         usage_command_visible: bool,
         chat_mode: bool,
         screen_mode: crate::app::ScreenMode,
-        announcements: &[wimo ai_wimo_announcements::RemoteAnnouncement],
+        announcements: &[wimoai_wimo_announcements::RemoteAnnouncement],
         restricted_commands: &[String],
     ) {
         self.set_sharing_enabled(sharing_enabled);
@@ -1269,11 +1269,11 @@ impl AgentView {
         self.set_restricted_commands(restricted_commands);
     }
     /// ACP `kind` for `x.ai/session/rename`: which list (Chat or Build) this session opened on.
-    pub(crate) fn rename_kind(&self) -> wimo ai_wimo_shell::session::unified_list::SessionKind {
+    pub(crate) fn rename_kind(&self) -> wimoai_wimo_shell::session::unified_list::SessionKind {
         if self.conversation_entry {
-            wimo ai_wimo_shell::session::unified_list::SessionKind::Chat
+            wimoai_wimo_shell::session::unified_list::SessionKind::Chat
         } else {
-            wimo ai_wimo_shell::session::unified_list::SessionKind::Build
+            wimoai_wimo_shell::session::unified_list::SessionKind::Build
         }
     }
     /// Show or hide the `/recap` slash command in this agent's registry.

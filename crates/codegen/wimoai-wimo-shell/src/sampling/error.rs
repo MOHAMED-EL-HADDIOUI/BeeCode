@@ -1,12 +1,12 @@
 //! Sampling error types.
 //!
-//! The canonical error types live in `wimo ai_wimo_sampling_types::error`.
+//! The canonical error types live in `wimoai_wimo_sampling_types::error`.
 //! This module re-exports them and adds `map_sampling_err_to_acp`, which depends on `agent_client_protocol::Error` (a wimo-shell dependency).
 
-pub use wimo ai_wimo_sampling_types::error::*;
+pub use wimoai_wimo_sampling_types::error::*;
 
 // Clients carry this typed kind from parsing the wire error to choosing the user-facing copy; re-exported so the pager shares the exact type
-pub use wimo ai_wimo_sampler::SamplingErrorKind;
+pub use wimoai_wimo_sampler::SamplingErrorKind;
 
 use agent_client_protocol as acp;
 
@@ -96,7 +96,7 @@ fn pushes_consumer_subscription_upsell(detail: &str) -> bool {
 pub const OVERLOADED_USER_MESSAGE: &str = "Model is temporarily overloaded. Try again in a moment.";
 
 /// Map a `SamplingError` to an ACP `Error` for client-facing responses.
-/// This stays in wimo ai-wimo-shell because it depends on `agent_client_protocol::Error`.
+/// This stays in wimoai-wimo-shell because it depends on `agent_client_protocol::Error`.
 pub(crate) fn map_sampling_err_to_acp(err: SamplingError) -> acp::Error {
     use reqwest::StatusCode;
     // Capacity/overload gets the same short copy everywhere
@@ -123,10 +123,10 @@ pub(crate) fn map_sampling_err_to_acp(err: SamplingError) -> acp::Error {
             // Passing the proxy's message via internal_error keeps the explanation visible without triggering the client's re-auth flow on -32000
             StatusCode::FORBIDDEN => {
                 let message = if message.contains("requires a wimo subscription")
-                    && crate::agent::auth_method::has_wimo ai_api_key_env()
+                    && crate::agent::auth_method::has_wimoai_api_key_env()
                 {
                     format!(
-                        "{message}\n\nYou have an API key set (wimo ai_API_KEY). \
+                        "{message}\n\nYou have an API key set (wimoai_API_KEY). \
                          Your cached OAuth session is being used instead. \
                          To use your API key, run `wimo logout` or type /logout in the TUI."
                     )
@@ -163,7 +163,7 @@ pub(crate) fn map_sampling_err_to_acp(err: SamplingError) -> acp::Error {
             acp::Error::internal_error().data(terminal_error_data(
                 err.to_string(),
                 None,
-                wimo ai_wimo_sampler::SamplingErrorKind::MaxTokensTruncation,
+                wimoai_wimo_sampler::SamplingErrorKind::MaxTokensTruncation,
             ))
         }
         SamplingError::IdleTimeout { elapsed_secs } => acp::Error::internal_error().data(format!(
@@ -441,10 +441,10 @@ mod tests {
 
     #[test]
     fn attach_prompt_usage_preserves_error_kind_and_round_trips() {
-        let mut ledger = wimo ai_chat_state::UsageLedger::default();
+        let mut ledger = wimoai_chat_state::UsageLedger::default();
         ledger.record_main_loop_call(
             "m",
-            &wimo ai_wimo_sampling_types::TokenUsage {
+            &wimoai_wimo_sampling_types::TokenUsage {
                 prompt_tokens: 3,
                 completion_tokens: 1,
                 total_tokens: 4,
@@ -460,7 +460,7 @@ mod tests {
             acp::Error::internal_error().data(terminal_error_data(
                 "truncated".into(),
                 None,
-                wimo ai_wimo_sampler::SamplingErrorKind::MaxTokensTruncation,
+                wimoai_wimo_sampler::SamplingErrorKind::MaxTokensTruncation,
             )),
             Some(usage.clone()),
         );
@@ -766,29 +766,29 @@ mod tests {
         );
     }
 
-    /// Helper: run a closure with wimo ai_API_KEY temporarily set (or cleared).
+    /// Helper: run a closure with wimoai_API_KEY temporarily set (or cleared).
     /// Cleans up even if the closure panics.
     fn with_api_key_env<F: FnOnce()>(key: Option<&str>, f: F) {
-        let prev = std::env::var("wimo ai_API_KEY").ok();
-        let prev_legacy = std::env::var("wimo_CODE_wimo ai_API_KEY").ok();
+        let prev = std::env::var("wimoai_API_KEY").ok();
+        let prev_legacy = std::env::var("wimo_CODE_wimoai_API_KEY").ok();
         // SAFETY: serial_test ensures no concurrent env mutation.
         unsafe {
-            std::env::remove_var("wimo ai_API_KEY");
-            std::env::remove_var("wimo_CODE_wimo ai_API_KEY");
+            std::env::remove_var("wimoai_API_KEY");
+            std::env::remove_var("wimo_CODE_wimoai_API_KEY");
             if let Some(k) = key {
-                std::env::set_var("wimo ai_API_KEY", k);
+                std::env::set_var("wimoai_API_KEY", k);
             }
         }
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(f));
         // Restore original state.
         unsafe {
-            std::env::remove_var("wimo ai_API_KEY");
-            std::env::remove_var("wimo_CODE_wimo ai_API_KEY");
+            std::env::remove_var("wimoai_API_KEY");
+            std::env::remove_var("wimo_CODE_wimoai_API_KEY");
             if let Some(v) = prev {
-                std::env::set_var("wimo ai_API_KEY", v);
+                std::env::set_var("wimoai_API_KEY", v);
             }
             if let Some(v) = prev_legacy {
-                std::env::set_var("wimo_CODE_wimo ai_API_KEY", v);
+                std::env::set_var("wimo_CODE_wimoai_API_KEY", v);
             }
         }
         if let Err(e) = result {
@@ -799,7 +799,7 @@ mod tests {
     #[test]
     #[serial_test::serial]
     fn forbidden_subscription_error_includes_api_key_hint_when_env_set() {
-        with_api_key_env(Some("wimo ai-test"), || {
+        with_api_key_env(Some("wimoai-test"), || {
             let err = SamplingError::Api {
                 status: StatusCode::FORBIDDEN,
                 message: "The model 'wimo' requires a wimo subscription.".into(),
@@ -847,7 +847,7 @@ mod tests {
     #[test]
     #[serial_test::serial]
     fn forbidden_non_subscription_error_no_hint() {
-        with_api_key_env(Some("wimo ai-test"), || {
+        with_api_key_env(Some("wimoai-test"), || {
             let err = SamplingError::Api {
                 status: StatusCode::FORBIDDEN,
                 message: "Content violates usage guidelines.".into(),

@@ -1,6 +1,6 @@
 //! Shared reasoning-effort dropdown levels for `/model` and `/effort`.
 
-use wimo ai_wimo_shell::sampling::types::{ReasoningEffort, ReasoningEffortOption};
+use wimoai_wimo_shell::sampling::types::{ReasoningEffort, ReasoningEffortOption};
 
 use crate::slash::command::ArgItem;
 

@@ -649,22 +649,22 @@ mod fallback_gate_tests {
     #[cfg(target_os = "macos")]
     #[test]
     fn adopted_nfs_create_does_not_enter_copy() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let tmp = TempDir::new().unwrap();
         let repo = tmp.path().join("repo");
         std::fs::create_dir(&repo).unwrap();
-        wimo ai_test_utils::git::init_git_repo(&repo);
+        wimoai_test_utils::git::init_git_repo(&repo);
         std::fs::write(repo.join("marker.txt"), "copied-if-entered").unwrap();
-        wimo ai_test_utils::git::git_commit_all(&repo, "c");
+        wimoai_test_utils::git::git_commit_all(&repo, "c");
         let sock = tmp.path().join("c.sock");
         let creates = Arc::new(AtomicUsize::new(0));
         let _h = spawn_counting_daemon(sock.clone(), Arc::clone(&creates));
         thread::sleep(Duration::from_millis(20));
         let dest = tmp.path().join("dest");
         std::fs::create_dir(&dest).unwrap();
-        wimo ai_test_utils::git::init_git_repo(&dest);
+        wimoai_test_utils::git::init_git_repo(&dest);
         std::fs::write(dest.join("adopted.txt"), "nfs").unwrap();
-        wimo ai_test_utils::git::git_commit_all(&dest, "adopted");
+        wimoai_test_utils::git::git_commit_all(&dest, "adopted");
         let opts = NfsWorktreeOpts {
             enabled: true,
             control_sock: Some(sock),
@@ -704,13 +704,13 @@ mod fallback_gate_tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn linux_dispatch_invokes_grove_after_overlay_and_btrfs_none() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let tmp = TempDir::new().unwrap();
         let repo = tmp.path().join("repo");
         std::fs::create_dir(&repo).unwrap();
-        wimo ai_test_utils::git::init_git_repo(&repo);
+        wimoai_test_utils::git::init_git_repo(&repo);
         std::fs::write(repo.join("marker.txt"), "copied-if-entered").unwrap();
-        wimo ai_test_utils::git::git_commit_all(&repo, "c");
+        wimoai_test_utils::git::git_commit_all(&repo, "c");
         let sock = tmp.path().join("c.sock");
         let creates = Arc::new(AtomicUsize::new(0));
         let listener = UnixListener::bind(&sock).unwrap();
@@ -741,9 +741,9 @@ mod fallback_gate_tests {
         thread::sleep(Duration::from_millis(20));
         let dest = tmp.path().join("dest");
         std::fs::create_dir(&dest).unwrap();
-        wimo ai_test_utils::git::init_git_repo(&dest);
+        wimoai_test_utils::git::init_git_repo(&dest);
         std::fs::write(dest.join("adopted.txt"), "fuse").unwrap();
-        wimo ai_test_utils::git::git_commit_all(&dest, "adopted");
+        wimoai_test_utils::git::git_commit_all(&dest, "adopted");
         let opts = NfsWorktreeOpts {
             enabled: true,
             control_sock: Some(sock),
@@ -781,7 +781,7 @@ mod fallback_gate_tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn overlay_some_does_not_invoke_grove() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         crate::worktree::execute::set_inject_overlay_some(true);
         let _reset = scopeguard_reset_injects();
         let (strategy, creates) = dispatch_with_mock_daemon();
@@ -791,7 +791,7 @@ mod fallback_gate_tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn btrfs_some_does_not_invoke_grove() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         crate::worktree::execute::set_inject_btrfs_some(true);
         let _reset = scopeguard_reset_injects();
         let (strategy, creates) = dispatch_with_mock_daemon();
@@ -814,9 +814,9 @@ mod fallback_gate_tests {
         let tmp = TempDir::new().unwrap();
         let repo = tmp.path().join("repo");
         std::fs::create_dir(&repo).unwrap();
-        wimo ai_test_utils::git::init_git_repo(&repo);
+        wimoai_test_utils::git::init_git_repo(&repo);
         std::fs::write(repo.join("marker.txt"), "x").unwrap();
-        wimo ai_test_utils::git::git_commit_all(&repo, "c");
+        wimoai_test_utils::git::git_commit_all(&repo, "c");
         let sock = tmp.path().join("c.sock");
         let creates = Arc::new(AtomicUsize::new(0));
         let _h = spawn_counting_daemon(sock.clone(), Arc::clone(&creates));
@@ -852,13 +852,13 @@ mod fallback_gate_tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn linked_grove_declined_does_not_copy() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let tmp = TempDir::new().unwrap();
         let repo = tmp.path().join("repo");
         std::fs::create_dir(&repo).unwrap();
-        wimo ai_test_utils::git::init_git_repo(&repo);
+        wimoai_test_utils::git::init_git_repo(&repo);
         std::fs::write(repo.join("marker.txt"), "copied-if-entered").unwrap();
-        wimo ai_test_utils::git::git_commit_all(&repo, "c");
+        wimoai_test_utils::git::git_commit_all(&repo, "c");
         let sock = tmp.path().join("c.sock");
         let listener = UnixListener::bind(&sock).unwrap();
         thread::spawn(move || {

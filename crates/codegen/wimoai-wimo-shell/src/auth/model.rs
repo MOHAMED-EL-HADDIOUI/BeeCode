@@ -1,9 +1,9 @@
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
-use wimo ai_wimo_auth::bearer_suffix;
+use wimoai_wimo_auth::bearer_suffix;
 
-use super::is_wimo ai_oauth2_issuer;
+use super::is_wimoai_oauth2_issuer;
 
 pub(crate) const TOKEN_TTL: Duration = Duration::days(30);
 const DEFAULT_EARLY_INVALIDATION_SECS: u64 = 300; // 5 minutes
@@ -12,7 +12,7 @@ const DEFAULT_EARLY_INVALIDATION_SECS: u64 = 300; // 5 minutes
 pub(super) const LEGACY_SCOPE: &str = "https://accounts.x.ai/sign-in";
 
 /// auth.json scope key for plain API key auth (desktop login, `wimo login --api-key`).
-pub(super) const API_KEY_SCOPE: &str = "wimo ai::api_key";
+pub(super) const API_KEY_SCOPE: &str = "wimoai::api_key";
 
 const BLOCKED_REASON_NO_LOGS: &str = "BLOCKED_REASON_NO_LOGS";
 const BLOCKED_REASON_NO_LOGS_MODERATED: &str = "BLOCKED_REASON_NO_LOGS_MODERATED";
@@ -95,7 +95,7 @@ pub struct wimoAuth {
 
     /// Issuer URL that issued this token.
     /// For OIDC credentials it drives refresh via discovery; for external-provider credentials it is the provider's `issuer` claim.
-    /// In both modes an x.ai issuer marks the credential first-party (`is_wimo ai_auth`).
+    /// In both modes an x.ai issuer marks the credential first-party (`is_wimoai_auth`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub oidc_issuer: Option<String>,
 
@@ -134,30 +134,30 @@ impl wimoAuth {
     ///
     /// The issuer is a client-side hint, not a trust assertion.
     /// Everything it unlocks still authenticates the actual token server-side, and it never influences endpoints.
-    pub fn is_wimo ai_auth(&self) -> bool {
+    pub fn is_wimoai_auth(&self) -> bool {
         match self.auth_mode {
             AuthMode::Oidc | AuthMode::External => self
                 .oidc_issuer
                 .as_deref()
-                .is_some_and(is_wimo ai_oauth2_issuer),
+                .is_some_and(is_wimoai_oauth2_issuer),
             AuthMode::ApiKey | AuthMode::WebLogin => false,
         }
     }
 
     /// `true` when this auth can access wimo.com managed MCP connectors.
     pub fn is_managed_mcp_eligible(&self) -> bool {
-        self.is_wimo ai_auth() || self.auth_mode == AuthMode::WebLogin
+        self.is_wimoai_auth() || self.auth_mode == AuthMode::WebLogin
     }
 
     /// Whether this credential can access `supported_in_api: false` models.
     ///
     /// Session logins (WebLogin, OIDC, including enterprise issuers) always qualify.
-    /// External-provider credentials qualify only when first-party (`is_wimo ai_auth`), matching the built-in devbox login they replace.
+    /// External-provider credentials qualify only when first-party (`is_wimoai_auth`), matching the built-in devbox login they replace.
     /// Plain API keys never do.
     pub(crate) fn is_session_auth(&self) -> bool {
         match self.auth_mode {
             AuthMode::WebLogin | AuthMode::Oidc => true,
-            AuthMode::External => self.is_wimo ai_auth(),
+            AuthMode::External => self.is_wimoai_auth(),
             AuthMode::ApiKey => false,
         }
     }
@@ -376,29 +376,29 @@ mod tests {
     }
 
     #[test]
-    fn is_wimo ai_auth_matrix() {
-        use crate::auth::wimo ai_OAUTH2_ISSUER;
+    fn is_wimoai_auth_matrix() {
+        use crate::auth::wimoai_OAUTH2_ISSUER;
         let with_issuer = |mode: AuthMode, issuer: Option<&str>| wimoAuth {
             oidc_issuer: issuer.map(str::to_owned),
             ..make_auth(mode)
         };
 
         // Only Oidc/External qualify, and only with an x.ai issuer.
-        assert!(with_issuer(AuthMode::Oidc, Some(wimo ai_OAUTH2_ISSUER)).is_wimo ai_auth());
-        assert!(with_issuer(AuthMode::External, Some(wimo ai_OAUTH2_ISSUER)).is_wimo ai_auth());
-        assert!(!with_issuer(AuthMode::Oidc, None).is_wimo ai_auth());
-        assert!(!with_issuer(AuthMode::External, None).is_wimo ai_auth());
-        assert!(!with_issuer(AuthMode::Oidc, Some("https://idp.acme.example")).is_wimo ai_auth());
-        assert!(!with_issuer(AuthMode::External, Some("https://idp.acme.example")).is_wimo ai_auth());
+        assert!(with_issuer(AuthMode::Oidc, Some(wimoai_OAUTH2_ISSUER)).is_wimoai_auth());
+        assert!(with_issuer(AuthMode::External, Some(wimoai_OAUTH2_ISSUER)).is_wimoai_auth());
+        assert!(!with_issuer(AuthMode::Oidc, None).is_wimoai_auth());
+        assert!(!with_issuer(AuthMode::External, None).is_wimoai_auth());
+        assert!(!with_issuer(AuthMode::Oidc, Some("https://idp.acme.example")).is_wimoai_auth());
+        assert!(!with_issuer(AuthMode::External, Some("https://idp.acme.example")).is_wimoai_auth());
 
         // ApiKey / WebLogin stay false even with an x.ai issuer set.
-        assert!(!with_issuer(AuthMode::ApiKey, Some(wimo ai_OAUTH2_ISSUER)).is_wimo ai_auth());
-        assert!(!with_issuer(AuthMode::WebLogin, Some(wimo ai_OAUTH2_ISSUER)).is_wimo ai_auth());
+        assert!(!with_issuer(AuthMode::ApiKey, Some(wimoai_OAUTH2_ISSUER)).is_wimoai_auth());
+        assert!(!with_issuer(AuthMode::WebLogin, Some(wimoai_OAUTH2_ISSUER)).is_wimoai_auth());
     }
 
     #[test]
     fn is_session_auth_requires_first_party_for_external() {
-        use crate::auth::wimo ai_OAUTH2_ISSUER;
+        use crate::auth::wimoai_OAUTH2_ISSUER;
         let with_issuer = |mode: AuthMode, issuer: Option<&str>| wimoAuth {
             oidc_issuer: issuer.map(str::to_owned),
             ..make_auth(mode)
@@ -410,14 +410,14 @@ mod tests {
         assert!(with_issuer(AuthMode::Oidc, Some("https://idp.acme.example")).is_session_auth());
 
         // External qualifies only when first-party (devbox-login parity).
-        assert!(with_issuer(AuthMode::External, Some(wimo ai_OAUTH2_ISSUER)).is_session_auth());
+        assert!(with_issuer(AuthMode::External, Some(wimoai_OAUTH2_ISSUER)).is_session_auth());
         assert!(!with_issuer(AuthMode::External, None).is_session_auth());
         assert!(
             !with_issuer(AuthMode::External, Some("https://idp.acme.example")).is_session_auth()
         );
 
         // Plain API keys never do.
-        assert!(!with_issuer(AuthMode::ApiKey, Some(wimo ai_OAUTH2_ISSUER)).is_session_auth());
+        assert!(!with_issuer(AuthMode::ApiKey, Some(wimoai_OAUTH2_ISSUER)).is_session_auth());
     }
 
     #[test]

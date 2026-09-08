@@ -22,7 +22,7 @@ use prod_mc_cli_chat_proxy_types::feedback_types::{
 const CLIENT_VERSION_HEADER: &str = "x-wimo-client-version";
 
 // ============================================================================
-// Turn delta wire types (local to wimo ai-wimo-shell until cli-chat-proxy catches up)
+// Turn delta wire types (local to wimoai-wimo-shell until cli-chat-proxy catches up)
 // ============================================================================
 
 /// Per-turn delta sent at the end of every turn via `POST /v1/sessions/{session_id}/turn-deltas`.
@@ -383,13 +383,13 @@ impl FeedbackClient {
         // Those first wait for the proactive refresh to complete before falling back to active recovery
         // Otherwise the middleware's eager ServerRejected refresh would race every other auth consumer during token-expiry windows and amplify 401s
         reqwest_middleware::ClientBuilder::new(http.clone())
-            .with(wimo ai_wimo_auth::AuthRetryMiddleware::new(provider, 0))
+            .with(wimoai_wimo_auth::AuthRetryMiddleware::new(provider, 0))
             .build()
     }
 
     fn make_auth_provider(
         credentials: &crate::util::wimo_auth_credentials::wimoAuthCredentials,
-    ) -> Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider> {
+    ) -> Arc<dyn wimoai_wimo_auth::AuthCredentialProvider> {
         if let Some(am) = credentials.auth_manager() {
             Arc::new(
                 crate::auth::credential_provider::ShellAuthCredentialProvider::new(
@@ -403,7 +403,7 @@ impl FeedbackClient {
                 .deployment_key
                 .clone()
                 .or(credentials.user_token.clone());
-            Arc::new(wimo ai_wimo_auth::StaticAuthCredentialProvider::new(
+            Arc::new(wimoai_wimo_auth::StaticAuthCredentialProvider::new(
                 Box::new(credentials.clone()),
                 wire_bearer,
             ))
@@ -413,7 +413,7 @@ impl FeedbackClient {
     fn record_401_attribution_if_needed(
         &self,
         response: &reqwest::Response,
-        stamp: Option<&wimo ai_wimo_auth::StampedBearerSuffix>,
+        stamp: Option<&wimoai_wimo_auth::StampedBearerSuffix>,
         op: &str,
     ) {
         if response.status() == reqwest::StatusCode::UNAUTHORIZED
@@ -469,7 +469,7 @@ impl FeedbackClient {
 
     fn add_common_headers(&self, builder: RequestBuilder) -> RequestBuilder {
         let builder = builder
-            .header(CLIENT_VERSION_HEADER, wimo ai_wimo_version::VERSION)
+            .header(CLIENT_VERSION_HEADER, wimoai_wimo_version::VERSION)
             .header(
                 crate::http::CLIENT_MODE_HEADER,
                 crate::http::process_client_mode(),
@@ -477,7 +477,7 @@ impl FeedbackClient {
         // User-token auth requires the companion marker header for proxy routing
         // Deployment keys do not need it
         if self.credentials.deployment_key.is_none() {
-            builder.header("X-wimo ai-Token-Auth", "wimo ai-wimo-cli")
+            builder.header("X-wimoai-Token-Auth", "wimoai-wimo-cli")
         } else {
             builder
         }
@@ -488,9 +488,9 @@ impl FeedbackClient {
         request: RequestBuilder,
         context: &'static str,
     ) -> Result<T> {
-        let request = wimo ai_file_utils::trace_context::inject_trace_context_into_request(request);
+        let request = wimoai_file_utils::trace_context::inject_trace_context_into_request(request);
         let req = request.build().context(context)?;
-        let (response, stamp) = wimo ai_wimo_auth::execute_with_stamp(&self.client, req)
+        let (response, stamp) = wimoai_wimo_auth::execute_with_stamp(&self.client, req)
             .await
             .context(context)?;
 
@@ -522,9 +522,9 @@ impl FeedbackClient {
     }
 
     async fn send_empty(&self, request: RequestBuilder, context: &'static str) -> Result<()> {
-        let request = wimo ai_file_utils::trace_context::inject_trace_context_into_request(request);
+        let request = wimoai_file_utils::trace_context::inject_trace_context_into_request(request);
         let req = request.build().context(context)?;
-        let (response, stamp) = wimo ai_wimo_auth::execute_with_stamp(&self.client, req)
+        let (response, stamp) = wimoai_wimo_auth::execute_with_stamp(&self.client, req)
             .await
             .context(context)?;
 

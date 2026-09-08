@@ -2,13 +2,13 @@
 //!
 //! This test has its own binary: `set_configured_profile` writes a process-global `OnceLock` that other unit tests in this crate also set.
 
-use wimo ai_wimo_shell::leader::{
+use wimoai_wimo_shell::leader::{
     ClientCapabilities, ClientMode, ConnectionError, LeaderEnvUrls, connect_or_spawn,
 };
 
 #[tokio::test]
 async fn connect_or_spawn_refuses_when_sandbox_confinement_requested() {
-    wimo ai_wimo_sandbox::set_configured_profile("strict");
+    wimoai_wimo_sandbox::set_configured_profile("strict");
 
     let env_urls = LeaderEnvUrls {
         // Guard returns before LeaderLock / socket paths touch the filesystem.

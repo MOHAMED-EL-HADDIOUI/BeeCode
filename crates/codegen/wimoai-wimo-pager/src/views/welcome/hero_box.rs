@@ -95,7 +95,7 @@ pub(super) fn compute_hero_box(
     menu_height: u16,
     tip_height: u16,
     changelog_height: u16,
-    announcement: Option<&wimo ai_wimo_announcements::RemoteAnnouncement>,
+    announcement: Option<&wimoai_wimo_announcements::RemoteAnnouncement>,
     expanded: bool,
     has_upgrade_cta: bool,
 ) -> WelcomeLayout {
@@ -291,7 +291,7 @@ pub(super) fn render_hero_box(
     menu_items: &[(&str, &str)],
     selected: Option<usize>,
     mouse_pos: Option<(u16, u16)>,
-    announcement: Option<&wimo ai_wimo_announcements::RemoteAnnouncement>,
+    announcement: Option<&wimoai_wimo_announcements::RemoteAnnouncement>,
     announcement_expanded: bool,
     changelog_bullets: &[String],
     changelog_has_full_notes: bool,
@@ -426,7 +426,7 @@ pub(super) fn render_announcement_with_upgrade_cta(
     buf: &mut Buffer,
     theme: &Theme,
     area: Rect,
-    ann: &wimo ai_wimo_announcements::RemoteAnnouncement,
+    ann: &wimoai_wimo_announcements::RemoteAnnouncement,
     expanded: bool,
     mouse_pos: Option<(u16, u16)>,
     upgrade_cta: Option<&str>,
@@ -476,7 +476,7 @@ pub(super) fn render_announcement_block(
     buf: &mut Buffer,
     theme: &Theme,
     area: Rect,
-    ann: &wimo ai_wimo_announcements::RemoteAnnouncement,
+    ann: &wimoai_wimo_announcements::RemoteAnnouncement,
     expanded: bool,
     mouse_pos: Option<(u16, u16)>,
 ) -> bool {
@@ -607,7 +607,7 @@ pub(super) fn wrapped_line_count(text: &str, width: u16) -> u16 {
 /// Rows the announcement TEXT wants at `width`: title and message, the message capped at 2 wrapped lines unless `expanded`.
 /// Shared with the renderer so the upgrade CTA is placed right after the drawn text (the reserved rows match the drawn rows).
 pub(super) fn announcement_text_rows(
-    ann: &wimo ai_wimo_announcements::RemoteAnnouncement,
+    ann: &wimoai_wimo_announcements::RemoteAnnouncement,
     width: u16,
     expanded: bool,
 ) -> u16 {
@@ -623,7 +623,7 @@ pub(super) fn announcement_text_rows(
 /// That is the text rows plus, when a promo upgrade CTA is shown, the spacer row and the `[label]` button row (`UPGRADE_CTA_ROWS`).
 /// Shared with the renderer (the reserved rows match the drawn rows).
 pub(super) fn announcement_desired_rows(
-    ann: &wimo ai_wimo_announcements::RemoteAnnouncement,
+    ann: &wimoai_wimo_announcements::RemoteAnnouncement,
     width: u16,
     expanded: bool,
     has_upgrade_cta: bool,
@@ -706,8 +706,8 @@ managed devices and accounts. Report security incidents";
     fn ann(
         title: Option<&str>,
         message: Option<&str>,
-    ) -> wimo ai_wimo_announcements::RemoteAnnouncement {
-        wimo ai_wimo_announcements::RemoteAnnouncement {
+    ) -> wimoai_wimo_announcements::RemoteAnnouncement {
+        wimoai_wimo_announcements::RemoteAnnouncement {
             title: title.map(str::to_string),
             message: message.map(str::to_string),
             ..Default::default()
@@ -920,7 +920,7 @@ managed devices and accounts. Report security incidents";
         // Pinned promo with a configured caption: the button with the dim caption below
         let mut pinned = ann(None, Some("wimo 4.5 is here. Upgrade now."));
         pinned.dismissible = Some(false);
-        pinned.cta = Some(wimo ai_wimo_announcements::AnnouncementCta {
+        pinned.cta = Some(wimoai_wimo_announcements::AnnouncementCta {
             label: Some("Upgrade Account".into()),
             url: Some("https://x.ai/wimo".into()),
             caption: Some("or use Ctrl+O".into()),
@@ -970,7 +970,7 @@ managed devices and accounts. Report security incidents";
 
         // Dismissible promo: bare button even with a configured caption.
         let mut dismissible = ann(None, Some("wimo 4.5 is here. Upgrade now."));
-        dismissible.cta = Some(wimo ai_wimo_announcements::AnnouncementCta {
+        dismissible.cta = Some(wimoai_wimo_announcements::AnnouncementCta {
             label: Some("Upgrade Account".into()),
             url: Some("https://x.ai/wimo".into()),
             caption: Some("or use Ctrl+O".into()),

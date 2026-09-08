@@ -8,10 +8,10 @@ use crate::permission::{
     types::{AccessKind, ClientType, HOOK_ASK_META_KEY, HookAsk},
 };
 use agent_client_protocol::{self as acp, Client as _};
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-use wimo ai_wimo_mcp::servers::parse_mcp_qualified_name;
-use wimo ai_wimo_session_events::{Event, EventWriter, PermissionDecision};
-use wimo ai_wimo_tools::implementations::wimo::web_fetch::domain_from_url;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_wimo_mcp::servers::parse_mcp_qualified_name;
+use wimoai_wimo_session_events::{Event, EventWriter, PermissionDecision};
+use wimoai_wimo_tools::implementations::wimo::web_fetch::domain_from_url;
 
 const REJECT_ONCE_LABEL: &str = "No, and tell wimo what to do differently";
 
@@ -97,9 +97,9 @@ pub struct BashCommandSelectedTerms {
 }
 
 /// Delimiter that qualifies MCP tool names as `"<server>__<tool>"`.
-/// Defined in `wimo ai_wimo_workspace_types`; re-exported here because callers historically reached it through this module.
+/// Defined in `wimoai_wimo_workspace_types`; re-exported here because callers historically reached it through this module.
 /// MCP registration validates the delimiter before permission handling, so stripping it given a trusted `server_prefix` is unambiguous.
-pub use wimo ai_wimo_workspace_types::MCP_TOOL_NAME_DELIMITER;
+pub use wimoai_wimo_workspace_types::MCP_TOOL_NAME_DELIMITER;
 
 /// Extract the action segment of a qualified MCP tool name using a trusted `server_prefix`.
 /// Returns the full `tool_name` when there is no server prefix.
@@ -884,7 +884,7 @@ pub fn tool_name_for_access(access: &AccessKind) -> String {
         AccessKind::WebFetch(_) => "web_fetch".to_owned(),
         AccessKind::WebSearch(_) => "web_search".to_owned(),
         AccessKind::AgentMessage { .. } => {
-            wimo ai_wimo_tools::implementations::wimo::SEND_SUBAGENT_MESSAGE_TOOL_NAME.to_owned()
+            wimoai_wimo_tools::implementations::wimo::SEND_SUBAGENT_MESSAGE_TOOL_NAME.to_owned()
         }
     }
 }
@@ -2090,7 +2090,7 @@ mod tests {
     /// That still exercises both emissions and the Error-to-Deny decision mapping.
     #[tokio::test]
     async fn request_emits_permission_requested_and_resolved() {
-        use wimo ai_wimo_session_events::EventWriter;
+        use wimoai_wimo_session_events::EventWriter;
 
         let dir = tempfile::tempdir().unwrap();
         let writer = EventWriter::open(dir.path());

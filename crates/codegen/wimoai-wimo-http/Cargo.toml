@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-http"
+name = "wimoai-wimo-http"
 version = "0.1.0"
 edition.workspace = true
 description = "Shared reqwest HTTP clients and User-Agent construction for the wimo CLI."
@@ -12,12 +12,12 @@ reqwest-middleware = { workspace = true }
 rustls = { workspace = true }
 serde_json = { workspace = true }
 tracing = { workspace = true }
-wimo ai-wimo-auth = { workspace = true, features = ["middleware"] }
-wimo ai-wimo-extra-ca = { workspace = true }
-wimo ai-wimo-sampler = { path = "../wimo ai-wimo-sampler" }
-wimo ai-wimo-telemetry = { workspace = true }
-wimo ai-wimo-version = { workspace = true }
-wimo ai-wimo-workspace = { workspace = true }
+wimoai-wimo-auth = { workspace = true, features = ["middleware"] }
+wimoai-wimo-extra-ca = { workspace = true }
+wimoai-wimo-sampler = { path = "../wimoai-wimo-sampler" }
+wimoai-wimo-telemetry = { workspace = true }
+wimoai-wimo-version = { workspace = true }
+wimoai-wimo-workspace = { workspace = true }
 
 [dev-dependencies]
 rcgen = { workspace = true }

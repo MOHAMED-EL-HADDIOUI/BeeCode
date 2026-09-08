@@ -9,12 +9,12 @@ pub const DEFAULT_SAMPLE_RATE: u32 = 16_000;
 ///
 /// Prefer **https** `api_base` (same shape as chat). [`Self::stt_ws_url`] derives
 /// `wss://`. When `[voice].api_base` is unset, inherits
-/// `[endpoints].wimo ai_api_base_url` so enterprise proxies need no second knob.
+/// `[endpoints].wimoai_api_base_url` so enterprise proxies need no second knob.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct VoiceConfig {
     /// HTTPS API root (or bare host).
-    /// Bases may end in `/v1` or `/wimo ai/v1`; the default STT path de-duplicates a leading `v1/` so both become `…/v1/stt`.
+    /// Bases may end in `/v1` or `/wimoai/v1`; the default STT path de-duplicates a leading `v1/` so both become `…/v1/stt`.
     pub api_base: String,
     pub stt_ws_path: String,
     /// Preferred STT language (catalog code or `"auto"`). [`crate::language_for_api`] resolves it at connect time.
@@ -51,7 +51,7 @@ impl VoiceConfig {
         ws_url(&self.api_base, &self.stt_ws_path)
     }
 
-    /// `api_base`: non-empty `[voice].api_base`, else `[endpoints].wimo ai_api_base_url` from `root`, else `resolved_endpoints_base`, else the default.
+    /// `api_base`: non-empty `[voice].api_base`, else `[endpoints].wimoai_api_base_url` from `root`, else `resolved_endpoints_base`, else the default.
     ///
     /// `resolved_endpoints_base` carries the caller's env/CLI overrides; it ranks below the raw table so config keeps beating env (shell precedence).
     pub fn from_config_table(root: &toml::Table, resolved_endpoints_base: Option<&str>) -> Self {
@@ -69,7 +69,7 @@ impl VoiceConfig {
         .or_else(|| {
             non_empty_str(
                 root.get("endpoints")
-                    .and_then(|e| e.get("wimo ai_api_base_url"))
+                    .and_then(|e| e.get("wimoai_api_base_url"))
                     .and_then(|v| v.as_str()),
             )
         })
@@ -105,7 +105,7 @@ fn ws_url(api_base: &str, path: &str) -> Result<String, VoiceError> {
     let rest = strip_scheme(base, "https://")
         .or_else(|| strip_scheme(base, "wss://"))
         .unwrap_or(base);
-    // The default path is `/v1/stt`; bases often end in `/v1` or `/wimo ai/v1`
+    // The default path is `/v1/stt`; bases often end in `/v1` or `/wimoai/v1`
     let path = match (rest.ends_with("/v1"), path.strip_prefix("v1/")) {
         (true, Some(rest_path)) => rest_path,
         _ => path,
@@ -146,14 +146,14 @@ mod tests {
     }
 
     #[test]
-    fn wimo ai_v1_base_preserves_prefix() {
+    fn wimoai_v1_base_preserves_prefix() {
         let cfg = VoiceConfig {
-            api_base: "https://proxy.example.com/wimo ai/v1".into(),
+            api_base: "https://proxy.example.com/wimoai/v1".into(),
             ..VoiceConfig::default()
         };
         assert_eq!(
             cfg.stt_ws_url().unwrap(),
-            "wss://proxy.example.com/wimo ai/v1/stt"
+            "wss://proxy.example.com/wimoai/v1/stt"
         );
     }
 
@@ -178,15 +178,15 @@ mod tests {
         let table: toml::Table = toml::from_str(
             r#"
 [endpoints]
-wimo ai_api_base_url = "https://proxy.example.com/wimo ai/v1"
+wimoai_api_base_url = "https://proxy.example.com/wimoai/v1"
 "#,
         )
         .unwrap();
         let cfg = VoiceConfig::from_config_table(&table, None);
-        assert_eq!(cfg.api_base, "https://proxy.example.com/wimo ai/v1");
+        assert_eq!(cfg.api_base, "https://proxy.example.com/wimoai/v1");
         assert_eq!(
             cfg.stt_ws_url().unwrap(),
-            "wss://proxy.example.com/wimo ai/v1/stt"
+            "wss://proxy.example.com/wimoai/v1/stt"
         );
     }
 
@@ -195,7 +195,7 @@ wimo ai_api_base_url = "https://proxy.example.com/wimo ai/v1"
         let table: toml::Table = toml::from_str(
             r#"
 [endpoints]
-wimo ai_api_base_url = "https://proxy.example.com/wimo ai/v1"
+wimoai_api_base_url = "https://proxy.example.com/wimoai/v1"
 [voice]
 api_base = "  "
 language = "fr"
@@ -203,7 +203,7 @@ language = "fr"
         )
         .unwrap();
         let cfg = VoiceConfig::from_config_table(&table, None);
-        assert_eq!(cfg.api_base, "https://proxy.example.com/wimo ai/v1");
+        assert_eq!(cfg.api_base, "https://proxy.example.com/wimoai/v1");
         assert_eq!(cfg.language, "fr");
     }
 
@@ -241,7 +241,7 @@ api_base = "  "
         let table: toml::Table = toml::from_str(
             r#"
 [endpoints]
-wimo ai_api_base_url = "https://config.example.com"
+wimoai_api_base_url = "https://config.example.com"
 "#,
         )
         .unwrap();
@@ -254,7 +254,7 @@ wimo ai_api_base_url = "https://config.example.com"
         let table: toml::Table = toml::from_str(
             r#"
 [endpoints]
-wimo ai_api_base_url = "https://proxy.example.com/wimo ai/v1"
+wimoai_api_base_url = "https://proxy.example.com/wimoai/v1"
 [voice]
 api_base = "https://api.x.ai"
 language = "es"

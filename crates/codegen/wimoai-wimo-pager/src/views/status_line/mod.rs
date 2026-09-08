@@ -11,7 +11,7 @@ use ratatui::style::Style;
 use ratatui::text::{Line, Span};
 use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::UnicodeWidthStr;
-use wimo ai_ratatui_inline::LinkSpan;
+use wimoai_ratatui_inline::LinkSpan;
 
 use crate::theme::Theme;
 
@@ -263,8 +263,8 @@ fn themed<'a>(line: &'a Line<'static>, theme: &Theme) -> Line<'a> {
         );
         // Quantized like every other ANSI-bearing output, so a script's colour obeys `NO_COLOR` and a terminal locked to 16 colours
         // This runs before the background fallback, which supplies a theme colour that is already quantized
-        style.fg = style.fg.map(wimo ai_wimo_pager_render::theme::quantize);
-        style.bg = style.bg.map(wimo ai_wimo_pager_render::theme::quantize);
+        style.fg = style.fg.map(wimoai_wimo_pager_render::theme::quantize);
+        style.bg = style.bg.map(wimoai_wimo_pager_render::theme::quantize);
         // `\x1b[0m`, which every powerline script emits, parses to an explicit `Color::Reset` background that seams against the bar below
         if matches!(style.bg, None | Some(ratatui::style::Color::Reset)) {
             style = style.bg(theme.bg_base);

@@ -5,11 +5,11 @@ use std::sync::Arc;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use wimo ai_tool_protocol::ToolId;
-use wimo ai_tool_runtime::{
+use wimoai_tool_protocol::ToolId;
+use wimoai_tool_runtime::{
     ArcTool, Cwd, ListToolsContext, Tool, ToolCallContext, ToolError, ToolOutput,
 };
-use wimo ai_tool_types::ToolDescription;
+use wimoai_tool_types::ToolDescription;
 
 #[derive(Deserialize, JsonSchema)]
 struct NoArgs {}

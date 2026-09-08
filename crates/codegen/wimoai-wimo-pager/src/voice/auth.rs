@@ -10,8 +10,8 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use wimo ai_wimo_tools::types::SharedApiKeyProvider;
-use wimo ai_wimo_voice::{SharedVoiceAuth, VoiceAuthProvider};
+use wimoai_wimo_tools::types::SharedApiKeyProvider;
+use wimoai_wimo_voice::{SharedVoiceAuth, VoiceAuthProvider};
 
 /// Adapts the shell's `ApiKeyProvider` onto [`VoiceAuthProvider`].
 ///
@@ -33,9 +33,9 @@ impl VoiceAuthProvider for AuthManagerVoiceAuth {
 
 /// Build the voice bearer provider from the connection's `AuthManager`.
 ///
-/// Works for every auth method: OAuth / wimo.com / OIDC session tokens and `wimo ai_API_KEY` / per-model BYOK keys.
-pub fn build_voice_auth(auth_manager: Arc<wimo ai_wimo_shell::auth::AuthManager>) -> SharedVoiceAuth {
+/// Works for every auth method: OAuth / wimo.com / OIDC session tokens and `wimoai_API_KEY` / per-model BYOK keys.
+pub fn build_voice_auth(auth_manager: Arc<wimoai_wimo_shell::auth::AuthManager>) -> SharedVoiceAuth {
     Arc::new(AuthManagerVoiceAuth(
-        wimo ai_wimo_shell::auth::shared_api_key_provider(auth_manager),
+        wimoai_wimo_shell::auth::shared_api_key_provider(auth_manager),
     ))
 }

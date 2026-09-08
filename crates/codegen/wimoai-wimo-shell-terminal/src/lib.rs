@@ -1,6 +1,6 @@
 //! Local, ACP, and PTY terminal runners for the wimo shell.
 //!
-//! `wimo ai-wimo-shell` re-exports this crate as `wimo ai_wimo_shell::terminal`.
+//! `wimoai-wimo-shell` re-exports this crate as `wimoai_wimo_shell::terminal`.
 
 use std::sync::Arc;
 
@@ -39,13 +39,13 @@ pub const DEFAULT_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(
 pub const DEFAULT_OUTPUT_BYTE_LIMIT: usize = 30_000;
 
 /// Resolved absolute path to bash.
-/// On Unix uses the `wimo ai_wimo_config` cascade (`$wimo_SHELL` > `$SHELL` > `which` > common dirs > `/bin/bash`), cached process-wide.
+/// On Unix uses the `wimoai_wimo_config` cascade (`$wimo_SHELL` > `$SHELL` > `which` > common dirs > `/bin/bash`), cached process-wide.
 /// On non-Unix returns `"/bin/bash"`.
 /// Every caller in this crate is gated behind `#[cfg(unix)]`, so the non-Unix value should not be observed in practice.
 pub(crate) fn default_shell_path() -> &'static str {
     #[cfg(unix)]
     {
-        wimo ai_wimo_config::shell::unix_shell_path(wimo ai_wimo_config::shell::UnixShellKind::Bash)
+        wimoai_wimo_config::shell::unix_shell_path(wimoai_wimo_config::shell::UnixShellKind::Bash)
     }
     #[cfg(not(unix))]
     {
@@ -119,7 +119,7 @@ pub async fn list_terminals() -> Vec<TerminalInfo> {
 }
 
 /// Returns environment variables that prevent CLI tools from launching any blocking/waiting programs.
-pub use wimo ai_wimo_tools::util::pager_env;
+pub use wimoai_wimo_tools::util::pager_env;
 
 /// Returns environment variables that encourage CLI tools to emit color and progress bars/spinners even when running through pipes (non-TTY).
 pub fn color_env() -> std::collections::HashMap<String, String> {
@@ -149,7 +149,7 @@ pub fn color_env() -> std::collections::HashMap<String, String> {
 }
 
 /// Returns environment variables that disable colors and ANSI escape codes in CLI tool output.
-/// Used when the client sets `x.ai/bashOutputNoColor: true` (e.g. wimo ai-wimo-pager which renders its own UI and doesn't need raw ANSI codes).
+/// Used when the client sets `x.ai/bashOutputNoColor: true` (e.g. wimoai-wimo-pager which renders its own UI and doesn't need raw ANSI codes).
 /// Follows the <https://no-color.org/> convention plus tool-specific overrides.
 pub fn no_color_env() -> std::collections::HashMap<String, String> {
     std::collections::HashMap::from([

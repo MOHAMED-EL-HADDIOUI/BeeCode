@@ -4,7 +4,7 @@
 //! ```toml
 //! [[marketplace.sources]]
 //! name = "wimo AI Official"
-//! git = "https://github.com/wimo ai-org/wimo ai-plugin-marketplace.git"
+//! git = "https://github.com/wimoai-org/wimoai-plugin-marketplace.git"
 //!
 //! [[marketplace.sources]]
 //! name = "Local Dev"
@@ -41,7 +41,7 @@ pub fn load_require_sha(config: &toml::Value) -> bool {
 }
 
 pub fn env_require_sha() -> bool {
-    wimo ai_wimo_config::env_bool("wimo_MARKETPLACE_REQUIRE_SHA").unwrap_or(false)
+    wimoai_wimo_config::env_bool("wimo_MARKETPLACE_REQUIRE_SHA").unwrap_or(false)
 }
 
 /// Reads `[marketplace].sources` array. Returns empty vec if not configured.
@@ -81,7 +81,7 @@ pub fn load_sources(config: &toml::Value) -> Vec<MarketplaceSource> {
             } else if let Some(path_str) = raw.path {
                 // Expand ~ to home directory.
                 let expanded = if let Some(rest) = path_str.strip_prefix('~') {
-                    wimo ai_dirs::home_dir()
+                    wimoai_dirs::home_dir()
                         .map(|h| {
                             h.join(rest.strip_prefix('/').unwrap_or(rest))
                                 .to_string_lossy()
@@ -156,7 +156,7 @@ fn extract_marketplace_entries(
             }
             SettingsSource::Local { path: path_str } => {
                 let expanded = if let Some(rest) = path_str.strip_prefix('~') {
-                    wimo ai_dirs::home_dir()
+                    wimoai_dirs::home_dir()
                         .map(|h| {
                             h.join(rest.strip_prefix('/').unwrap_or(rest))
                                 .to_string_lossy()
@@ -181,8 +181,8 @@ fn extract_marketplace_entries(
 /// and `known_marketplaces.json` files under `~/.wimo/` and `~/.claude/`.
 pub fn load_extra_sources_from_settings(existing: &[MarketplaceSource]) -> Vec<MarketplaceSource> {
     let roots: Vec<PathBuf> = [
-        wimo ai_wimo_config::user_wimo_home(),
-        wimo ai_dirs::home_dir().map(|h| h.join(".claude")),
+        wimoai_wimo_config::user_wimo_home(),
+        wimoai_dirs::home_dir().map(|h| h.join(".claude")),
     ]
     .into_iter()
     .flatten()
@@ -290,7 +290,7 @@ mod tests {
             r#"
             [[marketplace.sources]]
             name = "wimo AI Official"
-            git = "https://github.com/wimo ai-org/wimo ai-plugin-marketplace.git"
+            git = "https://github.com/wimoai-org/wimoai-plugin-marketplace.git"
             branch = "main"
             "#,
         )
@@ -299,7 +299,7 @@ mod tests {
         assert_eq!(sources.len(), 1);
         assert_eq!(sources[0].name, "wimo AI Official");
         assert!(
-            matches!(&sources[0].kind, SourceKind::Git { url, branch } if url.contains("wimo ai-org") && branch.as_deref() == Some("main"))
+            matches!(&sources[0].kind, SourceKind::Git { url, branch } if url.contains("wimoai-org") && branch.as_deref() == Some("main"))
         );
     }
 
@@ -361,7 +361,7 @@ mod tests {
             .unwrap_or_else(|p| p.into_inner());
         unsafe { std::env::remove_var("wimo_MARKETPLACE_REQUIRE_SHA") };
 
-        let layers = wimo ai_wimo_config::ConfigLayers {
+        let layers = wimoai_wimo_config::ConfigLayers {
             user: toml::from_str("[marketplace]\nrequire_sha = true\n").unwrap(),
             env_overlay: Some(toml::from_str("[marketplace]\nrequire_sha = false\n").unwrap()),
             ..Default::default()

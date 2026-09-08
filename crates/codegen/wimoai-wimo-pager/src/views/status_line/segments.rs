@@ -2,7 +2,7 @@
 
 use std::time::Duration;
 
-use wimo ai_wimo_status_line::{StatusLineContext, StatusLineItem};
+use wimoai_wimo_status_line::{StatusLineContext, StatusLineItem};
 
 use super::fit_columns;
 

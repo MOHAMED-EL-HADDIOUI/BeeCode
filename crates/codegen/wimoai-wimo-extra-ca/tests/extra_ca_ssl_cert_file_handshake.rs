@@ -20,18 +20,18 @@ fn handshake_succeeds_against_ca_loaded_from_ssl_cert_file() {
 
     // Safety: sole test in this binary; set before any OnceLock resolve.
     unsafe {
-        std::env::remove_var(wimo ai_wimo_extra_ca::ENV_wimo_EXTRA_CA_BUNDLE);
-        std::env::set_var(wimo ai_wimo_extra_ca::ENV_SSL_CERT_FILE, ca_path.as_os_str());
+        std::env::remove_var(wimoai_wimo_extra_ca::ENV_wimo_EXTRA_CA_BUNDLE);
+        std::env::set_var(wimoai_wimo_extra_ca::ENV_SSL_CERT_FILE, ca_path.as_os_str());
     }
 
     // The loader read the CA from SSL_CERT_FILE and attributes it to that var.
     assert_eq!(
-        wimo ai_wimo_extra_ca::extra_root_ders(),
+        wimoai_wimo_extra_ca::extra_root_ders(),
         &[ca_cert.der().as_ref().to_vec()]
     );
     assert_eq!(
-        wimo ai_wimo_extra_ca::configured_bundle_env(),
-        Some(wimo ai_wimo_extra_ca::ENV_SSL_CERT_FILE)
+        wimoai_wimo_extra_ca::configured_bundle_env(),
+        Some(wimoai_wimo_extra_ca::ENV_SSL_CERT_FILE)
     );
 
     let server_config = rustls::ServerConfig::builder_with_provider(
@@ -61,7 +61,7 @@ fn handshake_succeeds_against_ca_loaded_from_ssl_cert_file() {
     // Native roots off: the CA is trusted only if the crate's SSL_CERT_FILE loader added it
     // rustls-native-certs also reads SSL_CERT_FILE, so leaving native roots on would let the handshake pass without the loader
     #[expect(clippy::expect_used)]
-    let client = wimo ai_wimo_extra_ca::build_blocking_reqwest_client(|builder| {
+    let client = wimoai_wimo_extra_ca::build_blocking_reqwest_client(|builder| {
         builder
             .timeout(std::time::Duration::from_secs(10))
             .no_proxy()

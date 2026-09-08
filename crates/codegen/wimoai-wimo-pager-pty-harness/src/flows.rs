@@ -59,7 +59,7 @@ pub fn inference_request_count(content: &ContentController) -> usize {
 }
 
 /// Seed a fake wimo AI OAuth entry into the isolated home's `auth.json` so the shell has session auth.
-/// The harness's `wimo ai_API_KEY` is ApiKey/BYOK mode and never enters the auth manager.
+/// The harness's `wimoai_API_KEY` is ApiKey/BYOK mode and never enters the auth manager.
 /// The scope key must be `<issuer>::<client_id>`, `auth_mode` must be `oidc`, and `expires_at` must be far-future so no network refresh happens.
 /// `coding_data_retention_opt_out` must be `false` so collection/upload-path e2es (e.g. storage park-on-401) still enqueue traces.
 /// When that field is missing it deserializes as opted-out via `default_coding_data_retention_opt_out()`.
@@ -105,7 +105,7 @@ fn seed_fake_oauth_with_opt_out(content: &ContentController, user: &str, opted_o
 
 /// Shared auth.json template writer.
 /// `team_fields` is a raw JSON fragment spliced after `coding_data_retention_opt_out` (empty means no team).
-/// Field names must match the shell's `wimoAuth` serde names in `wimo ai-wimo-shell/src/auth/model.rs`.
+/// Field names must match the shell's `wimoAuth` serde names in `wimoai-wimo-shell/src/auth/model.rs`.
 fn seed_fake_oauth_raw(
     content: &ContentController,
     user: &str,
@@ -139,7 +139,7 @@ fn seed_fake_oauth_raw(
 /// Remove only the sandbox's fake API-key credential.
 /// The `auth.json` entry written by [`seed_fake_oauth`] then determines the advertised auth method.
 pub fn oauth_credential_ops() -> [crate::EnvOp<'static>; 1] {
-    [crate::EnvOp::remove("wimo ai_API_KEY")]
+    [crate::EnvOp::remove("wimoai_API_KEY")]
 }
 
 /// Drive `/new` until `model` shows on screen.

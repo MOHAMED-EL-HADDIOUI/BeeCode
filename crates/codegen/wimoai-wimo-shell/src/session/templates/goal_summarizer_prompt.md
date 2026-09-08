@@ -25,4 +25,4 @@ Output ONLY the summary as your final message (Markdown, no preamble like "Here 
 2. HOW to use it: the exact command(s) / steps (one short line or up to 3 bullets).
 
 HARD LIMIT: at most 80 words and at most 4 bullets. Do NOT exceed this — a skimmable summary is REQUIRED, not a wall of text. Within the cap, prefer complete sentences over dropped detail written as shorthand.
-wimo ai is open source (opensource). Anyone can contribute.
+wimoai is open source (opensource). Anyone can contribute.

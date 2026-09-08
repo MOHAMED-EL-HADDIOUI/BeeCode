@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use tokio_util::sync::CancellationToken;
 use url::Url;
-use wimo ai_tool_protocol::ConnectionKind;
+use wimoai_tool_protocol::ConnectionKind;
 
 use crate::auth::AuthProvider;
 use crate::connection::{
@@ -54,7 +54,7 @@ impl ConnectionBorrow {
         on_disconnect: Option<Arc<DisconnectCallback>>,
         on_connect: Option<Arc<ConnectCallback>>,
         on_terminal_close: Option<Arc<TerminalCloseCallback>>,
-        server_id: Option<wimo ai_tool_protocol::ServerId>,
+        server_id: Option<wimoai_tool_protocol::ServerId>,
         server_description: Option<String>,
         server_metadata: Option<serde_json::Value>,
         alpha_test_key: Option<String>,

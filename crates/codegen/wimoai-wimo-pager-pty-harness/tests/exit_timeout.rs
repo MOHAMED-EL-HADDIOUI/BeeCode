@@ -2,13 +2,13 @@
 //! `wimo_TEST_HOLD_TEARDOWN_SECS` supplies the hang; a real `SessionEnd` hook cannot hold teardown past `SESSION_FLUSH_GRACE`.
 //!
 //! ```bash
-//! cargo test -p wimo ai-wimo-pager-pty-harness --test exit_timeout -- --ignored
+//! cargo test -p wimoai-wimo-pager-pty-harness --test exit_timeout -- --ignored
 //! ```
 
 use std::time::Duration;
 
 use anyhow::{Context, Result};
-use wimo ai_wimo_pager_pty_harness::{ContentController, PtyExitPoll, PtyHarness, keys, pager_binary};
+use wimoai_wimo_pager_pty_harness::{ContentController, PtyExitPoll, PtyHarness, keys, pager_binary};
 
 const ROWS: u16 = 50;
 const COLS: u16 = 120;

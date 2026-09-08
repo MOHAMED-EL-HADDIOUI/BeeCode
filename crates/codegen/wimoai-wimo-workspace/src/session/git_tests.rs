@@ -2,31 +2,31 @@ use super::*;
 
 #[test]
 fn strip_url_credentials_removes_token() {
-    let url_with_token = "https://x-access-token:secret-token@github.com/wimo ai-org/example.git";
+    let url_with_token = "https://x-access-token:secret-token@github.com/wimoai-org/example.git";
     assert_eq!(
         strip_url_credentials(url_with_token),
-        "https://github.com/wimo ai-org/example.git"
+        "https://github.com/wimoai-org/example.git"
     );
 }
 
 #[test]
 fn strip_url_credentials_preserves_clean_https_url() {
-    let clean_url = "https://github.com/wimo ai-org/example.git";
+    let clean_url = "https://github.com/wimoai-org/example.git";
     assert_eq!(strip_url_credentials(clean_url), clean_url);
 }
 
 #[test]
 fn strip_url_credentials_preserves_ssh_url() {
-    let ssh_url = "git@github.com:wimo ai-org/example.git";
+    let ssh_url = "git@github.com:wimoai-org/example.git";
     assert_eq!(strip_url_credentials(ssh_url), ssh_url);
 }
 
 #[test]
 fn strip_url_credentials_removes_username_password() {
-    let url_with_creds = "https://alice:secret@github.com/wimo ai-org/example.git";
+    let url_with_creds = "https://alice:secret@github.com/wimoai-org/example.git";
     assert_eq!(
         strip_url_credentials(url_with_creds),
-        "https://github.com/wimo ai-org/example.git"
+        "https://github.com/wimoai-org/example.git"
     );
 }
 
@@ -233,14 +233,14 @@ fn test_resolve_persisted_session_git_metadata_collects_sorted_unique_remotes() 
     let repo = git2::Repository::init(tmp.path()).unwrap();
     repo.remote(
         "origin",
-        "https://x-access-token:secret-token@github.com/wimo ai-org/example.git",
+        "https://x-access-token:secret-token@github.com/wimoai-org/example.git",
     )
     .unwrap();
     // Use a different host to avoid CI insteadOf rules collapsing URLs.
-    repo.remote("backup", "https://gitlab.com/wimo ai-org/example.git")
+    repo.remote("backup", "https://gitlab.com/wimoai-org/example.git")
         .unwrap();
     // Same effective URL as origin after credential stripping, so it tests dedup
-    repo.remote("duplicate", "https://github.com/wimo ai-org/example.git")
+    repo.remote("duplicate", "https://github.com/wimoai-org/example.git")
         .unwrap();
 
     let metadata = resolve_persisted_session_git_metadata_sync(tmp.path());
@@ -253,8 +253,8 @@ fn test_resolve_persisted_session_git_metadata_collects_sorted_unique_remotes() 
     assert_eq!(
         metadata.git_remotes,
         vec![
-            "https://github.com/wimo ai-org/example.git".to_string(),
-            "https://gitlab.com/wimo ai-org/example.git".to_string(),
+            "https://github.com/wimoai-org/example.git".to_string(),
+            "https://gitlab.com/wimoai-org/example.git".to_string(),
         ]
     );
 }
@@ -263,7 +263,7 @@ fn test_resolve_persisted_session_git_metadata_collects_sorted_unique_remotes() 
 fn test_resolve_persisted_session_git_metadata_captures_head() {
     let tmp = tempfile::tempdir().unwrap();
     let repo = git2::Repository::init(tmp.path()).unwrap();
-    repo.remote("origin", "https://github.com/wimo ai-org/example.git")
+    repo.remote("origin", "https://github.com/wimoai-org/example.git")
         .unwrap();
 
     // Before any commit, HEAD is unborn, so both fields are None
@@ -334,7 +334,7 @@ fn test_resolve_persisted_session_git_metadata_worktree_resolves_remotes() {
     std::fs::create_dir_all(&main_path).unwrap();
 
     let repo = git2::Repository::init(&main_path).unwrap();
-    repo.remote("origin", "https://github.com/wimo ai-org/example.git")
+    repo.remote("origin", "https://github.com/wimoai-org/example.git")
         .unwrap();
 
     // Create an initial commit so we can create a worktree.
@@ -376,7 +376,7 @@ fn test_resolve_persisted_session_git_metadata_worktree_resolves_remotes() {
     );
     assert_eq!(
         metadata.git_remotes,
-        vec!["https://github.com/wimo ai-org/example.git".to_string()],
+        vec!["https://github.com/wimoai-org/example.git".to_string()],
     );
 }
 
@@ -440,8 +440,8 @@ fn collapse_home_for_test(path: &Path) -> String {
 fn collapse_home_path_requires_whole_component() {
     let home = Path::new("/Users/u");
     assert_eq!(
-        collapse_home_path(Path::new("/Users/user/wimo ai"), Some(home)),
-        "/Users/user/wimo ai"
+        collapse_home_path(Path::new("/Users/user/wimoai"), Some(home)),
+        "/Users/user/wimoai"
     );
     assert_eq!(
         collapse_home_path(Path::new("/Users/u/src/repo"), Some(home)),
@@ -511,13 +511,13 @@ async fn get_worktree_info_nested_plain_repo_does_not_inherit_marker() {
 
 #[tokio::test]
 async fn get_worktree_info_tilde_collapses_home_prefix() {
-    let Some(home) = wimo ai_dirs::home_dir() else {
+    let Some(home) = wimoai_dirs::home_dir() else {
         return;
     };
     let tmp = tempfile::tempdir().unwrap();
     let clone = tmp.path().join("clone");
     init_repo_on_branch(&clone, "wt-branch");
-    let fake_main = home.join("wimo ai-fake-main-repo-for-wt-display");
+    let fake_main = home.join("wimoai-fake-main-repo-for-wt-display");
     std::fs::write(
         clone.join(".git").join("wimo-worktree-source"),
         fake_main.display().to_string(),
@@ -527,7 +527,7 @@ async fn get_worktree_info_tilde_collapses_home_prefix() {
     assert!(is_wt);
     assert_eq!(
         main_repo.as_deref(),
-        Some("~/wimo ai-fake-main-repo-for-wt-display")
+        Some("~/wimoai-fake-main-repo-for-wt-display")
     );
 }
 
@@ -547,13 +547,13 @@ fn block_on_worktree_info(cwd: &Path) -> Option<(bool, Option<String>)> {
 }
 
 fn register_db_worktree(home: &Path, wt: &Path, source: &Path, label: &str) {
-    let db = wimo ai_fast_worktree::db::WorktreeDb::open(home).unwrap();
-    db.register(&wimo ai_fast_worktree::db::WorktreeRecord {
+    let db = wimoai_fast_worktree::db::WorktreeDb::open(home).unwrap();
+    db.register(&wimoai_fast_worktree::db::WorktreeRecord {
         id: "db-wt".into(),
         path: dunce::canonicalize(wt).unwrap_or_else(|_| wt.to_path_buf()),
         source_repo: source.to_path_buf(),
         repo_name: "main-repo".into(),
-        kind: wimo ai_fast_worktree::db::WorktreeKind::Session,
+        kind: wimoai_fast_worktree::db::WorktreeKind::Session,
         creation_mode: "standalone".into(),
         git_ref: None,
         head_commit: None,
@@ -561,7 +561,7 @@ fn register_db_worktree(home: &Path, wt: &Path, source: &Path, label: &str) {
         creator_pid: None,
         created_at: 1,
         last_accessed_at: None,
-        status: wimo ai_fast_worktree::db::WorktreeStatus::Alive,
+        status: wimoai_fast_worktree::db::WorktreeStatus::Alive,
         metadata: Some(serde_json::json!({ "label": label })),
     })
     .unwrap();
@@ -1257,95 +1257,95 @@ async fn test_status_double_failure_preserves_original_error() {
 #[test]
 fn normalize_ssh_scp_url() {
     assert_eq!(
-        normalize_repo_url("git@github.com:wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("git@github.com:wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_https_url() {
     assert_eq!(
-        normalize_repo_url("https://github.com/wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("https://github.com/wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_ssh_and_https_produce_same_result() {
-    let ssh = normalize_repo_url("git@github.com:wimo ai-org/example.git");
-    let https = normalize_repo_url("https://github.com/wimo ai-org/example.git");
+    let ssh = normalize_repo_url("git@github.com:wimoai-org/example.git");
+    let https = normalize_repo_url("https://github.com/wimoai-org/example.git");
     assert_eq!(ssh, https);
 }
 
 #[test]
 fn normalize_https_without_git_suffix() {
     assert_eq!(
-        normalize_repo_url("https://github.com/wimo ai-org/example"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("https://github.com/wimoai-org/example"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_https_with_credentials() {
     assert_eq!(
-        normalize_repo_url("https://x-access-token:secret@github.com/wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("https://x-access-token:secret@github.com/wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_ssh_scheme_url() {
     assert_eq!(
-        normalize_repo_url("ssh://git@github.com/wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("ssh://git@github.com/wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_ssh_scheme_with_port() {
     assert_eq!(
-        normalize_repo_url("ssh://git@github.com:22/wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("ssh://git@github.com:22/wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_git_scheme_url() {
     assert_eq!(
-        normalize_repo_url("git://github.com/wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("git://github.com/wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_http_url() {
     assert_eq!(
-        normalize_repo_url("http://github.com/wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("http://github.com/wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_strips_trailing_slash() {
     assert_eq!(
-        normalize_repo_url("https://github.com/wimo ai-org/example/"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("https://github.com/wimoai-org/example/"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_strips_dot_git_with_trailing_slash() {
     assert_eq!(
-        normalize_repo_url("https://github.com/wimo ai-org/example.git/"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("https://github.com/wimoai-org/example.git/"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_lowercases_host() {
     assert_eq!(
-        normalize_repo_url("git@GitHub.COM:wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("git@GitHub.COM:wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
@@ -1367,24 +1367,24 @@ fn normalize_whitespace_only_returns_none() {
 #[test]
 fn normalize_git_plus_ssh_scheme() {
     assert_eq!(
-        normalize_repo_url("git+ssh://git@github.com/wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("git+ssh://git@github.com/wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_git_plus_https_scheme() {
     assert_eq!(
-        normalize_repo_url("git+https://github.com/wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("git+https://github.com/wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
 #[test]
 fn normalize_scp_no_user() {
     assert_eq!(
-        normalize_repo_url("github.com:wimo ai-org/example.git"),
-        Some("github.com/wimo ai-org/example".into()),
+        normalize_repo_url("github.com:wimoai-org/example.git"),
+        Some("github.com/wimoai-org/example".into()),
     );
 }
 
@@ -1434,13 +1434,13 @@ fn normalize_scp_leading_slash_in_path() {
 fn resolve_normalized_remote_urls_deduplicates_across_transports() {
     let tmp = tempfile::tempdir().unwrap();
     let repo = git2::Repository::init(tmp.path()).unwrap();
-    repo.remote("origin", "git@github.com:wimo ai-org/example.git")
+    repo.remote("origin", "git@github.com:wimoai-org/example.git")
         .unwrap();
-    repo.remote("https-mirror", "https://github.com/wimo ai-org/example.git")
+    repo.remote("https-mirror", "https://github.com/wimoai-org/example.git")
         .unwrap();
 
     let urls = resolve_normalized_remote_urls(tmp.path());
-    assert_eq!(urls, vec!["github.com/wimo ai-org/example"]);
+    assert_eq!(urls, vec!["github.com/wimoai-org/example"]);
 }
 
 // A well-formed OID that no fresh repo has an object for.
@@ -1519,7 +1519,7 @@ async fn get_current_commit_reads_head_from_refs() {
 /// libgit2's status tolerates a missing HEAD tree (it diffs against an empty tree), so the refs-only OID read supplies the hash.
 #[tokio::test]
 async fn status_reports_head_oid_when_object_missing() {
-    wimo ai_test_utils::require_git!();
+    wimoai_test_utils::require_git!();
     let tmp = tempfile::tempdir().expect("tempdir");
     let (repo, _) = init_git2_repo_with_commit(tmp.path());
     point_head_at_missing_object(&repo, MISSING_OID);
@@ -1540,7 +1540,7 @@ async fn status_reports_head_oid_when_object_missing() {
 /// The fast path falls through to the repair fetch, which fails here because the repo has no origin.
 #[tokio::test]
 async fn checkout_commit_with_fetch_repairs_missing_head_object() {
-    wimo ai_test_utils::require_git!();
+    wimoai_test_utils::require_git!();
     let tmp = tempfile::tempdir().expect("tempdir");
     let (repo, _) = init_git2_repo_with_commit(tmp.path());
     point_head_at_missing_object(&repo, MISSING_OID);

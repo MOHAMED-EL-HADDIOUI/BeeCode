@@ -127,7 +127,7 @@ fn terminal_supports_truecolor() -> bool {
 /// Process-wide upper bound on the effective color level, stored as the `ColorLevel` declaration-order discriminant.
 static COLOR_LEVEL_CAP: AtomicU8 = AtomicU8::new(ColorLevel::TrueColor as u8);
 
-/// When set, RGB syntax colors are remapped with [`polarity_safe_syntax_ansi`] instead of nearest-ANSI16 (see `wimo ai-wimo-pager-render` syntax docs).
+/// When set, RGB syntax colors are remapped with [`polarity_safe_syntax_ansi`] instead of nearest-ANSI16 (see `wimoai-wimo-pager-render` syntax docs).
 /// Used by pager minimal mode: the canvas is the terminal's own bg, so night-theme pastels quantized to White vanish on light profiles.
 static POLARITY_SAFE_SYNTAX: AtomicU8 = AtomicU8::new(0);
 

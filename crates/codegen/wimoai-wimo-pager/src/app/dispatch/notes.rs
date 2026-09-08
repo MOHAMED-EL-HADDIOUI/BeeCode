@@ -9,7 +9,7 @@ use crate::scrollback::block::RenderBlock;
 use crate::scrollback::blocks::{SessionEvent, ToolCallBlock};
 use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
 use std::sync::atomic::{AtomicU64, Ordering};
-use wimo ai_wimo_tools::implementations::wimo::ask_user_question::Question;
+use wimoai_wimo_tools::implementations::wimo::ask_user_question::Question;
 
 /// Monotonic counter for correlating async rewrite responses with the modal that requested them.
 /// It prevents stale results from populating a different note's review modal when the user closes and re-opens quickly.
@@ -158,8 +158,8 @@ pub(super) fn dispatch_enter_remember_mode(app: &mut AppView) -> Vec<Effect> {
 /// Close the trace-consent funnel opened by `FeedbackTraceCardShown`.
 /// Every outcome of a shown card (answer, Esc, displacement) must log exactly once.
 pub(crate) fn log_trace_consent_selected(reenables_sharing: bool, choice: FeedbackTraceChoice) {
-    use wimo ai_wimo_telemetry::events::{FeedbackTraceConsentChoice, FeedbackTraceConsentSelected};
-    wimo ai_wimo_telemetry::session_ctx::log_event(FeedbackTraceConsentSelected {
+    use wimoai_wimo_telemetry::events::{FeedbackTraceConsentChoice, FeedbackTraceConsentSelected};
+    wimoai_wimo_telemetry::session_ctx::log_event(FeedbackTraceConsentSelected {
         choice: match choice {
             FeedbackTraceChoice::AlwaysUpload => FeedbackTraceConsentChoice::TurnOn,
             FeedbackTraceChoice::NeverAsk => FeedbackTraceConsentChoice::NeverAsk,
@@ -175,7 +175,7 @@ pub(crate) fn feedback_send_effect(
     agent_id: AgentId,
     session_id: agent_client_protocol::SessionId,
     text: String,
-    images: Vec<wimo ai_wimo_shell::session::FeedbackImage>,
+    images: Vec<wimoai_wimo_shell::session::FeedbackImage>,
     trace: Option<FeedbackTraceChoice>,
     displaced: bool,
 ) -> Effect {
@@ -315,7 +315,7 @@ pub(super) fn dispatch_send_feedback(
                 let (sharing, outcome) = super::status::set_coding_data_sharing_tracked(
                     app,
                     true,
-                    wimo ai_wimo_telemetry::events::CodingDataConsentSource::FeedbackTraceCard,
+                    wimoai_wimo_telemetry::events::CodingDataConsentSource::FeedbackTraceCard,
                 );
                 effects.extend(sharing);
                 match outcome {
@@ -369,9 +369,9 @@ pub(super) fn dispatch_send_remember_note_from_command(
 
 fn encode_feedback_images(
     images: crate::views::prompt_widget::FeedbackImages,
-) -> (Vec<wimo ai_wimo_shell::session::FeedbackImage>, Option<String>) {
+) -> (Vec<wimoai_wimo_shell::session::FeedbackImage>, Option<String>) {
     use base64::Engine as _;
-    use wimo ai_wimo_shell::session::{
+    use wimoai_wimo_shell::session::{
         MAX_FEEDBACK_IMAGE_BYTES, MAX_FEEDBACK_IMAGE_TOTAL_BYTES, MAX_FEEDBACK_IMAGES,
         feedback_image_extension,
     };
@@ -402,7 +402,7 @@ fn encode_feedback_images(
             continue;
         }
         total_bytes += bytes.len();
-        encoded.push(wimo ai_wimo_shell::session::FeedbackImage {
+        encoded.push(wimoai_wimo_shell::session::FeedbackImage {
             data: base64::engine::general_purpose::STANDARD.encode(&bytes),
             mime_type,
             file_name: image

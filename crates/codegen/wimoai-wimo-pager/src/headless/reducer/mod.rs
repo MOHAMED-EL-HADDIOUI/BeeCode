@@ -13,7 +13,7 @@ mod messages;
 
 use self::acp::AcpReducer;
 use self::messages::MessagesReducer;
-use wimo ai_wimo_shell::extensions::notification::ResponseUsage;
+use wimoai_wimo_shell::extensions::notification::ResponseUsage;
 
 /// Serialize a wire line, degrading to an `error` line rather than panicking.
 pub(crate) fn to_line<T: Serialize>(value: &T) -> Value {

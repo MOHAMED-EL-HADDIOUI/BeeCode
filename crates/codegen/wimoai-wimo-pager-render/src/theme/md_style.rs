@@ -2,7 +2,7 @@
 //! Colors come from the `md_*` fields on the current [`Theme`], which are already quantized to the terminal's color capability level.
 
 use anstyle::{Ansi256Color, AnsiColor, Color, Style};
-use wimo ai_wimo_markdown::MarkdownStyle;
+use wimoai_wimo_markdown::MarkdownStyle;
 
 /// Convert `ratatui::style::Color` to `anstyle::Color`.
 ///
@@ -125,7 +125,7 @@ fn build_style() -> MarkdownStyle {
         strikethrough_outer: Style::new().dimmed().hidden(),
         inline_code_inner: fg(theme.md_code).bold(),
         inline_code_outer: fg(theme.md_code).dimmed().hidden(),
-        // The selection-side bar detection in wimo ai-wimo-pager (scrollback/blocks/quote_bar.rs, `quote_bar_style`) mirrors this exact style
+        // The selection-side bar detection in wimoai-wimo-pager (scrollback/blocks/quote_bar.rs, `quote_bar_style`) mirrors this exact style
         // Its end-to-end tests fail if this line changes
         blockquote_outer: fg(theme.md_muted).dimmed(),
         task_checked: fg(theme.md_task_checked),

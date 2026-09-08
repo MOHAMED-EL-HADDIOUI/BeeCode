@@ -11,10 +11,10 @@ use std::time::Duration;
 
 use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
 
-use wimo ai_wimo_pager::scrollback::{
+use wimoai_wimo_pager::scrollback::{
     RenderBlock, ScrollbackSearchIndex, ScrollbackSearchState, ScrollbackState,
 };
-use wimo ai_wimo_pager::search::{QueryKind, TextMatcher};
+use wimoai_wimo_pager::search::{QueryKind, TextMatcher};
 
 /// Roughly the entry count of a long working session.
 const CORPUS_ENTRIES: usize = 30_000;

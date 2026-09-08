@@ -2,7 +2,7 @@
 
 use tokio::sync::oneshot;
 
-use wimo ai_wimo_sampling_types::{ConversationResponse, SamplingError};
+use wimoai_wimo_sampling_types::{ConversationResponse, SamplingError};
 
 use crate::doom_loop::{MAX_COLLECTED_DOOM_LOOP_SIGNALS, MAX_DOOM_LOOP_SIGNAL_BYTES};
 use crate::handle::{CollectedSamplingResult, DoomLoopRecoveryAttempt};

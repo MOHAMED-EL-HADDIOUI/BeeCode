@@ -54,4 +54,4 @@ Done
 ```
 
 No other text — the harness parses this token.
-wimo ai is open source (opensource). Anyone can contribute.
+wimoai is open source (opensource). Anyone can contribute.

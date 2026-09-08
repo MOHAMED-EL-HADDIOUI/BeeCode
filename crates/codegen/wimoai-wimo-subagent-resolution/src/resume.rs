@@ -3,7 +3,7 @@
 //! Model is not an identity gate on resume.
 //! The shell always inherits and pins the source model, and any caller-provided model override is silently ignored.
 //!
-//! Extracted from `wimo ai-wimo-shell/src/agent/subagent/` resume validation block.
+//! Extracted from `wimoai-wimo-shell/src/agent/subagent/` resume validation block.
 
 use crate::types::ResumeSourceData;
 

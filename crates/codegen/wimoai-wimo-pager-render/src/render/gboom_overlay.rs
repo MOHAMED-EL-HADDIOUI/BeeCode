@@ -8,7 +8,7 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, Widget};
 
-use wimo ai_wimo_gboom::GboomHud;
+use wimoai_wimo_gboom::GboomHud;
 
 use crate::render::safe_buf::SafeBuf;
 
@@ -51,7 +51,7 @@ pub fn render_gboom_overlay(
 
     // Title centered in the top border, in the logo red
     let title = " GBOOM ";
-    let [r, g, b] = wimo ai_wimo_gboom::GBOOM_RED;
+    let [r, g, b] = wimoai_wimo_gboom::GBOOM_RED;
     let title_style = Style::default()
         .fg(Color::Rgb(r, g, b))
         .bg(bg)
@@ -80,7 +80,7 @@ fn render_hud_bar(buf: &mut Buffer, popup_rect: Rect, hud: &GboomHud, dim_fg: Co
     } else if hud.hp > 30 {
         Color::Rgb(235, 198, 82)
     } else {
-        let [r, g, b] = wimo ai_wimo_gboom::GBOOM_RED;
+        let [r, g, b] = wimoai_wimo_gboom::GBOOM_RED;
         Color::Rgb(r, g, b)
     };
     let stats = format!(

@@ -3,8 +3,8 @@
 use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Utc};
-use wimo ai_file_utils::workspace_classifier::is_project_dir;
-use wimo ai_wimo_shell::session::persistence::list_recent_summaries;
+use wimoai_file_utils::workspace_classifier::is_project_dir;
+use wimoai_wimo_shell::session::persistence::list_recent_summaries;
 
 pub async fn collect_recent_dirs(limit: usize) -> Vec<(PathBuf, DateTime<Utc>)> {
     let summaries = match list_recent_summaries(500).await {
@@ -41,7 +41,7 @@ pub async fn collect_recent_dirs(limit: usize) -> Vec<(PathBuf, DateTime<Utc>)> 
 }
 
 pub fn display_path(path: &Path) -> String {
-    if let Some(home) = wimo ai_dirs::home_dir()
+    if let Some(home) = wimoai_dirs::home_dir()
         && let Ok(rel) = path.strip_prefix(&home)
     {
         return format!("~/{}", rel.display());

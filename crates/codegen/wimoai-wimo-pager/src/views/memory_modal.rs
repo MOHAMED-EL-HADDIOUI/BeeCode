@@ -135,7 +135,7 @@ impl MemoryModalState {
     }
 
     #[cfg(test)]
-    fn query_viewport(&self, width: usize) -> wimo ai_ratatui_textarea::SingleLineViewport {
+    fn query_viewport(&self, width: usize) -> wimoai_ratatui_textarea::SingleLineViewport {
         self.query.viewport(width)
     }
 
@@ -318,7 +318,7 @@ fn compute_filtered(entries: &[MemoryFileEntry], query: &str) -> Vec<usize> {
 }
 
 pub fn build_entries(
-    files: Vec<wimo ai_wimo_shell::extensions::notification::MemoryFileInfo>,
+    files: Vec<wimoai_wimo_shell::extensions::notification::MemoryFileInfo>,
 ) -> Vec<MemoryFileEntry> {
     let now_secs = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -1143,7 +1143,7 @@ fn format_modified(epoch_secs: Option<u64>, now_secs: u64) -> String {
 
 fn load_fullscreen_pref() -> bool {
     let path =
-        wimo ai_wimo_tools::util::wimo_home::wimo_home().join(wimo ai_wimo_config::USER_CONFIG_FILENAME);
+        wimoai_wimo_tools::util::wimo_home::wimo_home().join(wimoai_wimo_config::USER_CONFIG_FILENAME);
     let Some(doc) = crate::config_toml_edit::read_config_document_for_edit(&path) else {
         return false;
     };
@@ -1179,7 +1179,7 @@ mod tests {
 
     #[test]
     fn build_entries_groups_by_source() {
-        use wimo ai_wimo_shell::extensions::notification::MemoryFileInfo;
+        use wimoai_wimo_shell::extensions::notification::MemoryFileInfo;
 
         let files = vec![
             MemoryFileInfo {

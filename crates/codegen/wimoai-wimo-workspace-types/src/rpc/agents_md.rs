@@ -16,7 +16,7 @@ impl WorkspaceRpc for DiscoverAgentsMdReq {
     type Response = Vec<AgentConfigFile>;
 }
 
-/// Mirrors the serde shape of `wimo ai-wimo-agent`'s `AgentConfigFile`.
+/// Mirrors the serde shape of `wimoai-wimo-agent`'s `AgentConfigFile`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentConfigFile {
     pub file_name: String,

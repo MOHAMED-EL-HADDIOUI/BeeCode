@@ -4,8 +4,8 @@
 use std::sync::Arc;
 use std::sync::Once;
 
-use wimo ai_wimo_sampler::{SamplerConfig, SamplingClient};
-use wimo ai_wimo_sampling_types::{ContentPart, ConversationItem, ConversationRequest, UserItem};
+use wimoai_wimo_sampler::{SamplerConfig, SamplingClient};
+use wimoai_wimo_sampling_types::{ContentPart, ConversationItem, ConversationRequest, UserItem};
 
 /// These wire tests own a dedicated binary: the pinned env latches
 /// process-wide at first use and must not leak into or be poisoned by other

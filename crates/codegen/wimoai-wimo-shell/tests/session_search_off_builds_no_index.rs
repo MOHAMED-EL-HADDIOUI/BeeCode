@@ -1,12 +1,12 @@
 //! Its own binary: the wimo home resolves once per process.
 
 use agent_client_protocol as acp;
-use wimo ai_wimo_shell::session::info::Info;
-use wimo ai_wimo_shell::session::storage::search::{
+use wimoai_wimo_shell::session::info::Info;
+use wimoai_wimo_shell::session::storage::search::{
     IndexDecision, SessionSearchRequest, execute_search,
 };
-use wimo ai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
-use wimo ai_wimo_test_support::EnvGuard;
+use wimoai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
+use wimoai_wimo_test_support::EnvGuard;
 
 #[tokio::test]
 async fn saved_session_is_neither_indexed_nor_found_with_search_off() {
@@ -15,8 +15,8 @@ async fn saved_session_is_neither_indexed_nor_found_with_search_off() {
     let _home = EnvGuard::set("wimo_HOME", root);
     let _off = EnvGuard::set("wimo_SESSION_SEARCH", "0");
 
-    let config = wimo ai_wimo_shell::config::load_agent_config_disk_only().expect("config loads");
-    let search = wimo ai_wimo_shell::session::storage::search::start_if_enabled(&config);
+    let config = wimoai_wimo_shell::config::load_agent_config_disk_only().expect("config loads");
+    let search = wimoai_wimo_shell::session::storage::search::start_if_enabled(&config);
     assert!(
         search.index().is_none(),
         "the switch is off, so no index is started"

@@ -1,6 +1,6 @@
 //! PTY e2e: permission Auto mode is distinct on the real pager screen.
 //!
-//! Uses `wimo ai-wimo-pager-pty-harness` (`PtyHarness`) and Shift+Tab (CSI Z, compatible with `ptyctl` key injection) to cycle Normal to Plan to Auto.
+//! Uses `wimoai-wimo-pager-pty-harness` (`PtyHarness`) and Shift+Tab (CSI Z, compatible with `ptyctl` key injection) to cycle Normal to Plan to Auto.
 //! The mode banner or status line must show Auto as its own mode, distinct from Always-Approve.
 //!
 //! Auth: seeds `HOME/.wimo/auth.json` from `wimo_AUTH_JSON` (path) or the
@@ -9,13 +9,13 @@
 //! failure (login screen) and still asserts the harness API surface.
 //!
 //! Run with:
-//! `cargo test -p wimo ai-wimo-pager --test pty_auto_mode -- --ignored --nocapture`
+//! `cargo test -p wimoai-wimo-pager --test pty_auto_mode -- --ignored --nocapture`
 
 use std::path::PathBuf;
 use std::time::Duration;
 
-use wimo ai_wimo_pager_pty_harness::{PtyHarness, pager_binary};
-use wimo ai_wimo_test_support::TestSandbox;
+use wimoai_wimo_pager_pty_harness::{PtyHarness, pager_binary};
+use wimoai_wimo_test_support::TestSandbox;
 
 const ROWS: u16 = 40;
 const COLS: u16 = 120;
@@ -48,7 +48,7 @@ fn dirs_next_home() -> Option<PathBuf> {
 /// `gate_on` pins the auto-permission-mode feature gate so each test is deterministic regardless of the runner's shell.
 fn prepare_sandbox(sandbox: &mut TestSandbox, gate_on: bool) -> Vec<(String, String)> {
     // Remove rather than empty the fake API key so seeded OIDC remains authoritative.
-    sandbox.remove_env("wimo ai_API_KEY");
+    sandbox.remove_env("wimoai_API_KEY");
 
     let home = sandbox.home();
     let wimo = sandbox.wimo_home();
@@ -80,7 +80,7 @@ fn prepare_sandbox(sandbox: &mut TestSandbox, gate_on: bool) -> Vec<(String, Str
         ("TMUX".into(), "".into()),
     ];
     // Pin the feature gate explicitly so the cycle is deterministic regardless of the developer's shell
-    // `wimo_AUTO_PERMISSION_MODE` is the highest gate layer below requirements; "1" and "0" parse to on and off (`wimo ai_wimo_config::env_bool`)
+    // `wimo_AUTO_PERMISSION_MODE` is the highest gate layer below requirements; "1" and "0" parse to on and off (`wimoai_wimo_config::env_bool`)
     // portable-pty merges this over the inherited environment, so a value exported in the shell can't flip the result
     // Auto is in the ring with the gate on and skipped with it off
     env.push((
@@ -119,7 +119,7 @@ fn pty_shift_tab_cycles_to_auto_mode_banner() {
 
     let mut harness =
         PtyHarness::new_in_sandbox(&binary, ROWS, COLS, &[], &sandbox, &env_refs, None)
-            .expect("spawn pager in PTY (wimo ai-wimo-pager-pty-harness)");
+            .expect("spawn pager in PTY (wimoai-wimo-pager-pty-harness)");
 
     // Drain startup output; either the welcome or the agent chrome may be on screen
     let _ = harness.wait_for_text(WELCOME_SCREEN_SENTINEL, WELCOME_TIMEOUT);
@@ -203,7 +203,7 @@ fn pty_shift_tab_skips_auto_when_gate_off() {
 
     let mut harness =
         PtyHarness::new_in_sandbox(&binary, ROWS, COLS, &[], &sandbox, &env_refs, None)
-            .expect("spawn pager in PTY (wimo ai-wimo-pager-pty-harness)");
+            .expect("spawn pager in PTY (wimoai-wimo-pager-pty-harness)");
 
     let _ = harness.wait_for_text(WELCOME_SCREEN_SENTINEL, WELCOME_TIMEOUT);
     let early = harness.screen_contents();

@@ -1,10 +1,10 @@
 //! Shared constants for the leader-mode PTY e2e tests.
 //!
-//! Drive/seed helpers live in `wimo ai_wimo_pager_pty_harness::flows` (one canonical copy shared with `pty_e2e`); only suite-local constants stay here.
+//! Drive/seed helpers live in `wimoai_wimo_pager_pty_harness::flows` (one canonical copy shared with `pty_e2e`); only suite-local constants stay here.
 
 pub(crate) use serde_json::json;
 pub(crate) use std::time::{Duration, Instant};
-pub(crate) use wimo ai_wimo_pager_pty_harness::{
+pub(crate) use wimoai_wimo_pager_pty_harness::{
     ContentController, LeaderCluster, MockModel, PtyHarness, inference_request_count, keys,
     oauth_credential_ops, pager_binary, seed_fake_oauth, submit_turn, wait_for_labels_absent,
     wait_for_model_via_new_sessions,

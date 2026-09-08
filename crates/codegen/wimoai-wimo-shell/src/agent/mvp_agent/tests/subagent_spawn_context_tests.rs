@@ -1,9 +1,9 @@
 use super::{build_minimal_agent_for_tests, make_test_handle};
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
 #[tokio::test]
 async fn subagent_spawn_context_inherits_parent_permission_handle() {
-    use wimo ai_wimo_workspace::permission::types::{
+    use wimoai_wimo_workspace::permission::types::{
         PatternMode, PermissionConfig, PermissionRule, RuleAction, ToolFilter,
     };
     let local = tokio::task::LocalSet::new();
@@ -13,13 +13,13 @@ async fn subagent_spawn_context_inherits_parent_permission_handle() {
             let sid = acp::SessionId::new("parent-permission");
             let (tx, _rx) = tokio::sync::mpsc::unbounded_channel();
             let gateway = GatewaySender::new(tx);
-            let cwd = wimo ai_wimo_paths::AbsPathBuf::new(std::path::PathBuf::from("/tmp"))
+            let cwd = wimoai_wimo_paths::AbsPathBuf::new(std::path::PathBuf::from("/tmp"))
                 .expect("absolute cwd");
-            let (permission_handle, _events_rx) = wimo ai_wimo_workspace::permission::spawn_permission_manager(
+            let (permission_handle, _events_rx) = wimoai_wimo_workspace::permission::spawn_permission_manager(
                 sid.clone(),
                 gateway,
                 cwd,
-                wimo ai_wimo_workspace::permission::types::ClientType::Generic,
+                wimoai_wimo_workspace::permission::types::ClientType::Generic,
                 Some(
                     PermissionConfig::new(
                         vec![PermissionRule {
@@ -43,17 +43,17 @@ async fn subagent_spawn_context_inherits_parent_permission_handle() {
                 .permission_handle
                 .expect("subagent context must inherit parent permission handle");
             for access in [
-                wimo ai_wimo_workspace::permission::AccessKind::Read(Some(".env".into())),
-                wimo ai_wimo_workspace::permission::AccessKind::Bash("cat .env".into()),
+                wimoai_wimo_workspace::permission::AccessKind::Read(Some(".env".into())),
+                wimoai_wimo_workspace::permission::AccessKind::Bash("cat .env".into()),
             ] {
                 let decision = inherited
-                    .request(wimo ai_wimo_workspace::permission::PermissionRequest {
+                    .request(wimoai_wimo_workspace::permission::PermissionRequest {
                         session_id: Some("child-session".to_owned()),
                         subagent_type: Some("general-purpose".to_owned()),
                         subagent_description: Some(
                             "permission inheritance regression".to_owned(),
                         ),
-                        ..wimo ai_wimo_workspace::permission::PermissionRequest::new(
+                        ..wimoai_wimo_workspace::permission::PermissionRequest::new(
                             access.clone(),
                             acp::ToolCallUpdate::new(
                                 acp::ToolCallId::new("tc"),
@@ -66,7 +66,7 @@ async fn subagent_spawn_context_inherits_parent_permission_handle() {
                 assert!(
                     matches!(
                         decision,
-                        wimo ai_wimo_workspace::permission::Decision::PolicyDeny(_)
+                        wimoai_wimo_workspace::permission::Decision::PolicyDeny(_)
                     ),
                     "subagent-inherited handle must enforce parent deny for {access:?}, got {decision:?}"
                 );
@@ -144,10 +144,10 @@ async fn subagent_spawn_context_copies_parent_non_interactive() {
 #[tokio::test]
 async fn subagent_spawn_context_inherits_parent_configured_cutoff() {
     let agent = build_minimal_agent_for_tests();
-    let cutoff = wimo ai_wimo_sampling_types::ToolOverrides {
-        x_search: Some(wimo ai_wimo_sampling_types::XSearchOptions {
+    let cutoff = wimoai_wimo_sampling_types::ToolOverrides {
+        x_search: Some(wimoai_wimo_sampling_types::XSearchOptions {
             date_bound: Some(
-                wimo ai_wimo_sampling_types::SearchDateBound::new(None, Some("2020-01-01".to_string()))
+                wimoai_wimo_sampling_types::SearchDateBound::new(None, Some("2020-01-01".to_string()))
                     .unwrap(),
             ),
         }),
@@ -178,10 +178,10 @@ async fn subagent_spawn_context_inherits_parent_process_scope() {
     let agent = build_minimal_agent_for_tests();
     let sid = acp::SessionId::new("parent-process-scope");
     let mut handle = make_test_handle("test-model", false, None);
-    let parent_scope = wimo ai_tty_utils::ProcessScope::new();
+    let parent_scope = wimoai_tty_utils::ProcessScope::new();
     handle.tool_context.process_scope = Some(parent_scope.clone());
     agent.insert_resident(&sid, handle);
-    let owner = std::sync::Arc::new(wimo ai_tty_utils::ProcessGroup::new().expect("process group"));
+    let owner = std::sync::Arc::new(wimoai_tty_utils::ProcessGroup::new().expect("process group"));
     parent_scope.register(&owner);
     let ctx = agent.build_subagent_spawn_context(sid.0.as_ref());
     let inherited = ctx
@@ -238,8 +238,8 @@ async fn subagent_spawn_context_resolves_rate_limit_attempts_against_child_model
 #[serial_test::serial]
 fn subagent_spawn_context_resolves_compaction_mode_like_parent() {
     use crate::agent::config::Config;
-    use wimo ai_chat_state::{CompactionDetail, CompactionMode};
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_chat_state::{CompactionDetail, CompactionMode};
+    use wimoai_wimo_test_support::EnvGuard;
     let _mode = EnvGuard::unset("wimo_COMPACTION_MODE");
     let _detail = EnvGuard::unset("wimo_COMPACTION_DETAIL");
     let mut ctx = crate::test_support::lsp_runtime::ctx_with_toggle(Default::default());
@@ -287,8 +287,8 @@ fn subagent_spawn_context_resolves_compaction_mode_like_parent() {
 fn run_shell_child_passes_parent_compaction_pins_into_spawn() {
     use crate::agent::subagent::SubagentSpawnContext;
     use crate::session::CompactionPins;
-    use wimo ai_chat_state::CompactionMode;
-    use wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate;
+    use wimoai_chat_state::CompactionMode;
+    use wimoai_wimo_agent::prompt::user_message::UserMessageTemplate;
     let default_child = UserMessageTemplate::Default;
     let mut ctx = crate::test_support::lsp_runtime::ctx_with_toggle(Default::default());
     ctx.parent_compaction = CompactionPins {

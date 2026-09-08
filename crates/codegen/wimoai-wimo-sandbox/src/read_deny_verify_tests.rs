@@ -12,7 +12,7 @@ fn temp_workspace(tag: &str, toml_body: &str) -> PathBuf {
     let wimo = ws.join(".wimo");
     std::fs::create_dir_all(&wimo).unwrap();
     std::fs::write(
-        wimo.join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME),
+        wimo.join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME),
         toml_body,
     )
     .unwrap();

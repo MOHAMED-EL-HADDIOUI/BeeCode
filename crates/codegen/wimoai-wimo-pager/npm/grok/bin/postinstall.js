@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Runs once after npm install/update. Reads the wimo binary from the
-// matching per-platform optional dependency (@wimo ai-official/wimo-<platform>)
+// matching per-platform optional dependency (@wimoai-official/wimo-<platform>)
 // and installs it to ~/.wimo/bin/ using versioned filenames:
 //
 //   Unix:    wimo-<version>  +  wimo  (symlink)
@@ -36,7 +36,7 @@ const SUPPORTED = new Set([
     'win32-arm64',
 ]);
 if (!SUPPORTED.has(key)) {
-    console.error(`@wimo ai-official/wimo: unsupported platform ${key}`);
+    console.error(`@wimoai-official/wimo: unsupported platform ${key}`);
     process.exit(0);
 }
 
@@ -45,7 +45,7 @@ if (!SUPPORTED.has(key)) {
 // other five are silently skipped. If the matching one is missing, npm was
 // likely invoked with --no-optional or the platform is unsupported.
 function resolvePlatformPackageDir() {
-    const platformPkg = `@wimo ai-official/wimo-${key}`;
+    const platformPkg = `@wimoai-official/wimo-${key}`;
     try {
         return path.dirname(require.resolve(`${platformPkg}/package.json`));
     } catch {
@@ -56,7 +56,7 @@ function resolvePlatformPackageDir() {
 let version;
 try { version = require('../package.json').version; } catch {}
 if (!version) {
-    console.error('@wimo ai-official/wimo: unable to determine version');
+    console.error('@wimoai-official/wimo: unable to determine version');
     process.exit(0);
 }
 
@@ -96,7 +96,7 @@ function installBinary(binName, sourceDir, vendorSubpath) {
 
     // Skip if this exact version is already installed.
     if (!fs.existsSync(versionedPath) && !writeVendorBinary(brotliPath, binaryPath, versionedPath)) {
-        console.error(`@wimo ai-official/wimo: missing binary at ${brotliPath}`);
+        console.error(`@wimoai-official/wimo: missing binary at ${brotliPath}`);
         return false;
     }
 
@@ -119,7 +119,7 @@ function installBinary(binName, sourceDir, vendorSubpath) {
                     throw copyErr;
                 }
             } catch (e2) {
-                console.error(`@wimo ai-official/wimo: failed to update ${canonicalPath}: ${e2.message}`);
+                console.error(`@wimoai-official/wimo: failed to update ${canonicalPath}: ${e2.message}`);
                 console.error('Close all running wimo processes and try again.');
                 return false;
             }
@@ -134,7 +134,7 @@ function installBinary(binName, sourceDir, vendorSubpath) {
 
     // Don't report a broken wire-up as success.
     if (!fs.existsSync(canonicalPath)) {
-        console.error(`@wimo ai-official/wimo: ${canonicalName} did not resolve after install`);
+        console.error(`@wimoai-official/wimo: ${canonicalName} did not resolve after install`);
         return false;
     }
 
@@ -180,9 +180,9 @@ function cleanupOldVersions(binName) {
 
 const platformDir = resolvePlatformPackageDir();
 if (!platformDir) {
-    console.error(`@wimo ai-official/wimo: platform package @wimo ai-official/wimo-${key} not installed.`);
+    console.error(`@wimoai-official/wimo: platform package @wimoai-official/wimo-${key} not installed.`);
     console.error('  This usually means npm was invoked with --no-optional, or the install failed.');
-    console.error('  Try: npm install -g @wimo ai-official/wimo');
+    console.error('  Try: npm install -g @wimoai-official/wimo');
     process.exit(0);
 }
 
@@ -207,7 +207,7 @@ function installBinLink(platformDir) {
         fs.renameSync(tmp, entryPath);
     } catch (e) {
         // Losing the link only costs latency; the node launcher still works.
-        console.error(`@wimo ai-official/wimo: bin link not installed: ${e.message}`);
+        console.error(`@wimoai-official/wimo: bin link not installed: ${e.message}`);
         try { fs.unlinkSync(tmp); } catch {}
     }
 }
@@ -231,7 +231,7 @@ const npmRegistry = process.env.wimo_NPM_REGISTRY
     || (() => {
         try {
             const resolved = execSync(
-                'npm config get @wimo ai-official:registry',
+                'npm config get @wimoai-official:registry',
                 { encoding: 'utf8', timeout: 5000 }
             ).trim();
             if (resolved && resolved !== 'undefined') return resolved;

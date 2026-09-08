@@ -2,8 +2,8 @@
 #[allow(unused_imports)]
 use super::common::*;
 
-/// Regression guard for the `wimo ai-ratatui-inline` rewrite (termwiz to anstyle-parse).
-/// Minimal mode commits finalized assistant blocks into the terminal's NATIVE scrollback through `wimo ai_ratatui_inline::Terminal::insert_before`.
+/// Regression guard for the `wimoai-ratatui-inline` rewrite (termwiz to anstyle-parse).
+/// Minimal mode commits finalized assistant blocks into the terminal's NATIVE scrollback through `wimoai_ratatui_inline::Terminal::insert_before`.
 /// That call is the rewritten crate's production entry point.
 /// A parsing or offset regression there shows up as truncated, duplicated, or corrupted committed content.
 ///

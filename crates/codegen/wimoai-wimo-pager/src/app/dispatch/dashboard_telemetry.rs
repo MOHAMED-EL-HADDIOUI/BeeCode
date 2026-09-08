@@ -1,9 +1,9 @@
 use crate::app::app_view::AppView;
 use crate::views::dashboard::DashboardRowId;
-use wimo ai_wimo_telemetry::events::{
+use wimoai_wimo_telemetry::events::{
     DashboardAgentAttached, DashboardAgentLaunched, DashboardClosed, DashboardOpened,
 };
-use wimo ai_wimo_telemetry::session_ctx::log_event;
+use wimoai_wimo_telemetry::session_ctx::log_event;
 
 pub(super) fn log_dashboard_opened(app: &AppView) {
     let subagents: usize = app.agents.values().map(|a| a.subagent_sessions.len()).sum();

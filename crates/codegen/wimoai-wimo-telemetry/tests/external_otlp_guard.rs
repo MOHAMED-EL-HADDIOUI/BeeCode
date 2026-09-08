@@ -8,7 +8,7 @@
 mod otlp_collector;
 
 use otlp_collector as col;
-use wimo ai_wimo_telemetry::external;
+use wimoai_wimo_telemetry::external;
 
 #[test]
 fn refuses_to_activate_when_internal_consumed_standard_vars() {
@@ -42,12 +42,12 @@ fn refuses_to_activate_when_internal_consumed_standard_vars() {
     );
 
     // Emit through the real funnel; with the stream inert this must be a no-op.
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::SessionNew {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::SessionNew {
         session_id: "sess-guard".into(),
         client_identifier: None,
         client_version: None,
         is_git_repo: true,
-        permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+        permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
     });
     external::flush();
 

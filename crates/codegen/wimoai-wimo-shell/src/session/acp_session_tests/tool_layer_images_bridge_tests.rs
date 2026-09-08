@@ -1,9 +1,9 @@
 //! Wiring tests for MCP tool-layer images through `handle_bridge_tool_success`.
 use super::support::*;
 use super::*;
-use wimo ai_wimo_sampling_types::{ContentPart, ConversationItem};
-use wimo ai_wimo_tools::types::output::{MCPOutput, ToolOutput, ToolRunResult};
-use wimo ai_wimo_tools::util::base64_images::{ExtractedImage, IMAGE_CONTENT_PLACEHOLDER};
+use wimoai_wimo_sampling_types::{ContentPart, ConversationItem};
+use wimoai_wimo_tools::types::output::{MCPOutput, ToolOutput, ToolRunResult};
+use wimoai_wimo_tools::util::base64_images::{ExtractedImage, IMAGE_CONTENT_PLACEHOLDER};
 /// A 32×32 solid PNG, above the vision minimum side and area, so normalize keeps it.
 fn vision_ok_png_b64() -> String {
     use image::{ImageBuffer, Rgba};
@@ -60,7 +60,7 @@ async fn handle_bridge_tool_success_multimodal_mcp_image_deferred_followup() {
     local
         .run_until(async {
             let (gateway_tx, _) = tokio::sync::mpsc::unbounded_channel::<
-                wimo ai_acp_lib::AcpClientMessage,
+                wimoai_acp_lib::AcpClientMessage,
             >();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<
                 PersistenceMsg,
@@ -126,7 +126,7 @@ async fn handle_bridge_tool_success_replacement_drops_images_and_keeps_reminders
     local
         .run_until(async {
             let (gateway_tx, _) = tokio::sync::mpsc::unbounded_channel::<
-                wimo ai_acp_lib::AcpClientMessage,
+                wimoai_acp_lib::AcpClientMessage,
             >();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<
                 PersistenceMsg,
@@ -226,7 +226,7 @@ async fn post_tool_use_replacement_reaches_model_original_stays_on_record() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) = tokio::sync::mpsc::unbounded_channel::<
-                wimo ai_acp_lib::AcpClientMessage,
+                wimoai_acp_lib::AcpClientMessage,
             >();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<
                 PersistenceMsg,
@@ -308,12 +308,12 @@ async fn post_tool_use_rejection_downgrades_only_the_producing_run() {
     local
         .run_until(async {
             let (gateway_tx, gateway_rx) = tokio::sync::mpsc::unbounded_channel::<
-                wimo ai_acp_lib::AcpClientMessage,
+                wimoai_acp_lib::AcpClientMessage,
             >();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<
                 PersistenceMsg,
             >();
-            let (_acp_updates, wimo ai_updates) = spawn_capturing_gateway_loop(gateway_rx);
+            let (_acp_updates, wimoai_updates) = spawn_capturing_gateway_loop(gateway_rx);
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx)
                 .await;
             install_pre_tool_use_hooks(
@@ -343,7 +343,7 @@ async fn post_tool_use_rejection_downgrades_only_the_producing_run() {
                 actor.emit_post_tool_use_scrollback(scrollback).await;
             }
             drain_gateway_turns().await;
-            let updates = wimo ai_updates.lock().unwrap();
+            let updates = wimoai_updates.lock().unwrap();
             let mut failed = 0usize;
             let mut success = 0usize;
             for update in updates.iter() {

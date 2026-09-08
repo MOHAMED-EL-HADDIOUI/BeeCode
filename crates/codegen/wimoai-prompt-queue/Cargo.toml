@@ -1,9 +1,9 @@
 [package]
 edition.workspace = true
 license = "Apache-2.0"
-name = "wimo ai-prompt-queue"
+name = "wimoai-prompt-queue"
 version = "0.1.0"
-description = "Shared prompt-queue wire types for wimo ai-wimo-shell and wimo ai-wimo-pager"
+description = "Shared prompt-queue wire types for wimoai-wimo-shell and wimoai-wimo-pager"
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }

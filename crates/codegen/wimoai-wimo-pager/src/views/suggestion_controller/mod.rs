@@ -48,7 +48,7 @@ pub struct GhostSuggestionParsed {
 
 /// A single completion item from an ACP `x.ai/suggest` response.
 // `Default` (empty item) exists for downstream test fixtures
-// With `..Default::default()`, out-of-crate literals (e.g. wimo ai-wimo-pager-minimal's) keep compiling when optional fields are added.
+// With `..Default::default()`, out-of-crate literals (e.g. wimoai-wimo-pager-minimal's) keep compiling when optional fields are added.
 #[derive(Debug, Clone, Default)]
 pub struct CompletionItemParsed {
     pub display: String,
@@ -307,9 +307,9 @@ impl SuggestionController {
             generation: 0,
             last_request_text: String::new(),
             tab_pending: None,
-            enabled: wimo ai_wimo_config::env_bool("wimo_SUGGESTIONS").unwrap_or(false),
+            enabled: wimoai_wimo_config::env_bool("wimo_SUGGESTIONS").unwrap_or(false),
             dropdown: CompletionDropdownState::default(),
-            ai_enabled: wimo ai_wimo_config::env_bool("wimo_SUGGESTIONS_AI").unwrap_or(false),
+            ai_enabled: wimoai_wimo_config::env_bool("wimo_SUGGESTIONS_AI").unwrap_or(false),
             ai_model: std::env::var("wimo_SUGGESTIONS_AI_MODEL")
                 .ok()
                 .filter(|s| !s.is_empty()),

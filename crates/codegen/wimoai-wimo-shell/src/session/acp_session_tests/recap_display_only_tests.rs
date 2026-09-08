@@ -5,12 +5,12 @@
 
 use super::support::*;
 use super::*;
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_wimo_sampling_types::ConversationItem;
 
 /// Serializes `items` the way a main turn would, so auxiliary calls can be compared against the real wire shape.
 fn main_turn_input(items: Vec<ConversationItem>) -> Vec<serde_json::Value> {
-    let request = wimo ai_wimo_sampling_types::ConversationRequest {
-        items: wimo ai_chat_state::compaction_utils::ModelRequestHistory::from_raw(items).into_items(),
+    let request = wimoai_wimo_sampling_types::ConversationRequest {
+        items: wimoai_chat_state::compaction_utils::ModelRequestHistory::from_raw(items).into_items(),
         model: Some("test-model".to_string()),
         ..Default::default()
     };
@@ -70,13 +70,13 @@ fn assert_messages_rides_parent_prefix(
     parent: Vec<ConversationItem>,
     label: &str,
 ) {
-    let request = wimo ai_wimo_sampling_types::ConversationRequest {
-        items: wimo ai_chat_state::compaction_utils::ModelRequestHistory::from_raw(parent).into_items(),
+    let request = wimoai_wimo_sampling_types::ConversationRequest {
+        items: wimoai_chat_state::compaction_utils::ModelRequestHistory::from_raw(parent).into_items(),
         model: Some("test".to_string()),
-        reasoning_effort: Some(wimo ai_wimo_sampling_types::ReasoningEffort::High),
+        reasoning_effort: Some(wimoai_wimo_sampling_types::ReasoningEffort::High),
         ..Default::default()
     };
-    let expected = serde_json::to_value(wimo ai_wimo_sampling_types::build_messages_request(&request))
+    let expected = serde_json::to_value(wimoai_wimo_sampling_types::build_messages_request(&request))
         .expect("main Messages request serializes");
     let expected_messages = without_cache_control(expected["messages"].clone());
     let actual_messages = without_cache_control(body["messages"].clone());
@@ -132,13 +132,13 @@ fn assert_messages_reasoning_stripped(body: &serde_json::Value, label: &str) {
 /// Reasoning effort sits ahead of the conversation in the prompt, so an auxiliary call that drops it diverges from the main turn right away.
 #[tokio::test(flavor = "current_thread")]
 async fn side_question_projects_agent_messages_without_mutating_history() {
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             *actor.agent.borrow_mut() = test_agent_with_goal_tool().await;
@@ -147,7 +147,7 @@ async fn side_question_projects_agent_messages_without_mutating_history() {
             server.set_response("an answer");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             actor.chat_state_handle.update_sampling_config(cfg);
 
             let raw = vec![
@@ -170,7 +170,7 @@ async fn side_question_projects_agent_messages_without_mutating_history() {
                 .and_then(|request| request.body.as_ref())
                 .expect("btw body must be JSON")
                 .to_string();
-            assert!(body.contains(wimo ai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL));
+            assert!(body.contains(wimoai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL));
             assert_eq!(
                 serde_json::to_vec(&actor.chat_state_handle.get_conversation().await).unwrap(),
                 raw_bytes
@@ -181,13 +181,13 @@ async fn side_question_projects_agent_messages_without_mutating_history() {
 
 #[tokio::test(flavor = "current_thread")]
 async fn auxiliary_calls_send_the_session_reasoning_effort() {
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             *actor.agent.borrow_mut() = test_agent_with_goal_tool().await;
@@ -196,9 +196,9 @@ async fn auxiliary_calls_send_the_session_reasoning_effort() {
             server.set_response("an answer");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             // Low is not the model default, so a fallback would show up in the assert below.
-            cfg.reasoning_effort = Some(wimo ai_wimo_sampling_types::ReasoningEffort::Low);
+            cfg.reasoning_effort = Some(wimoai_wimo_sampling_types::ReasoningEffort::Low);
             actor.chat_state_handle.update_sampling_config(cfg);
 
             actor.chat_state_handle.replace_conversation(vec![
@@ -232,13 +232,13 @@ async fn auxiliary_calls_send_the_session_reasoning_effort() {
 /// When a backend drops `prompt_cache_key`, the conv id is all that ties the call to its conversation, so it must be the parent session id.
 #[tokio::test(flavor = "current_thread")]
 async fn side_question_routes_on_the_session_id_when_the_key_is_not_forwarded() {
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             *actor.agent.borrow_mut() = test_agent_with_goal_tool().await;
@@ -247,7 +247,7 @@ async fn side_question_routes_on_the_session_id_when_the_key_is_not_forwarded() 
             server.set_response("an answer");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::ChatCompletions;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::ChatCompletions;
             actor.chat_state_handle.update_sampling_config(cfg);
 
             actor.chat_state_handle.replace_conversation(vec![
@@ -273,7 +273,7 @@ async fn side_question_routes_on_the_session_id_when_the_key_is_not_forwarded() 
                 .header("x-wimo-req-id")
                 .expect("req id must still be sent");
             assert!(
-                req_id.starts_with("wimo ai-btw-"),
+                req_id.starts_with("wimoai-btw-"),
                 "the btw label moves to the req id: {req_id}"
             );
         })
@@ -286,7 +286,7 @@ async fn new_prompt_cancels_in_flight_recap_epoch() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
 
@@ -316,7 +316,7 @@ async fn queue_input_user_prompt_bumps_recap_epoch() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
 
@@ -340,7 +340,7 @@ async fn queue_input_synthetic_does_not_bump_recap_epoch() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
 
@@ -370,7 +370,7 @@ async fn skipped_auto_recap_leaves_in_flight_claim() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
 
@@ -391,7 +391,7 @@ async fn try_commit_recap_cancelled_clears_in_flight_without_watermark() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
 
@@ -424,7 +424,7 @@ async fn try_commit_recap_live_advances_watermark() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
 
@@ -446,7 +446,7 @@ async fn drop_recap_after_cancel_auto_silent_manual_unavailable() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, mut persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -482,7 +482,7 @@ async fn drop_recap_after_cancel_auto_silent_manual_unavailable() {
 fn drained_session_recap(rx: &mut tokio::sync::mpsc::UnboundedReceiver<PersistenceMsg>) -> bool {
     let mut saw = false;
     while let Ok(msg) = rx.try_recv() {
-        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(n)) = msg
+        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(n)) = msg
             && matches!(
                 n.update,
                 crate::extensions::notification::SessionUpdate::SessionRecap { .. }
@@ -501,7 +501,7 @@ async fn auto_recap_below_min_turns_is_noop_and_display_only() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, mut persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -542,7 +542,7 @@ async fn manual_recap_never_mutates_conversation() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
 
@@ -576,7 +576,7 @@ fn drained_recap_unavailable(
 ) -> bool {
     let mut saw = false;
     while let Ok(msg) = rx.try_recv() {
-        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(n)) = msg
+        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(n)) = msg
             && matches!(
                 n.update,
                 crate::extensions::notification::SessionUpdate::SessionRecapUnavailable
@@ -597,7 +597,7 @@ async fn manual_recap_with_no_turns_emits_unavailable() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, mut persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -623,7 +623,7 @@ async fn manual_recap_generation_failure_emits_unavailable() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, mut persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -653,7 +653,7 @@ async fn manual_recap_generation_failure_persists_request_artifact() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, mut persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -683,7 +683,7 @@ async fn manual_recap_generation_failure_persists_request_artifact() {
                         "artifact must include the recap request items"
                     );
                     assert!(
-                        artifact.x_wimo_req_id.starts_with("wimo ai-recap-"),
+                        artifact.x_wimo_req_id.starts_with("wimoai-recap-"),
                         "req id: {}",
                         artifact.x_wimo_req_id
                     );
@@ -706,7 +706,7 @@ async fn auto_recap_gated_does_not_emit_unavailable() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, mut persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -734,7 +734,7 @@ async fn manual_recap_over_budget_trims_persisted_request_and_is_display_only() 
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, mut persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             // A window of 8_000 gives prompt_budget = 8_000 * 85 / 100 - 4_000 = 2_800
@@ -762,7 +762,7 @@ async fn manual_recap_over_budget_trims_persisted_request_and_is_display_only() 
             let mut saw_recap_request = false;
             while let Ok(msg) = persistence_rx.try_recv() {
                 if let PersistenceMsg::RecapRequest(artifact) = msg {
-                    let est = wimo ai_chat_state::estimate_conversation_tokens(&artifact.chat_history);
+                    let est = wimoai_chat_state::estimate_conversation_tokens(&artifact.chat_history);
                     assert!(
                         est <= PROMPT_BUDGET,
                         "persisted recap request must be within budget: {est} > {PROMPT_BUDGET}"
@@ -796,8 +796,8 @@ async fn manual_recap_over_budget_trims_persisted_request_and_is_display_only() 
 #[test]
 fn over_budget_recap_serializes_to_well_formed_messages_request() {
     use crate::session::helpers::session_recap;
-    use wimo ai_wimo_sampling_types::messages::{ContentBlock, MessageContent, MessageRole};
-    use wimo ai_wimo_sampling_types::{ConversationRequest, ToolCall, rs};
+    use wimoai_wimo_sampling_types::messages::{ContentBlock, MessageContent, MessageRole};
+    use wimoai_wimo_sampling_types::{ConversationRequest, ToolCall, rs};
 
     let mk_reasoning = |id: &str| {
         ConversationItem::Reasoning(rs::ReasoningItem {
@@ -833,7 +833,7 @@ fn over_budget_recap_serializes_to_well_formed_messages_request() {
     // The wimo backend sets `strip_reasoning` to false; the over-budget branch strips anyway
     let items = session_recap::budget_recap_items(conv, "system-reminder", false, 8_000);
     let req = ConversationRequest::from_items(items);
-    let msg = wimo ai_wimo_sampling_types::build_messages_request(&req);
+    let msg = wimoai_wimo_sampling_types::build_messages_request(&req);
 
     assert!(msg.system.is_some(), "system prompt must be preserved");
 
@@ -886,13 +886,13 @@ fn over_budget_recap_serializes_to_well_formed_messages_request() {
 /// The recap sends the main turn's tools and the session id as `prompt_cache_key`, so it rides the parent turn's prefix cache.
 #[tokio::test(flavor = "current_thread")]
 async fn recap_request_rides_parent_prompt_cache() {
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             // Register a real tool so the "recap sends the main turn's tools" assertion is non-vacuous
@@ -902,7 +902,7 @@ async fn recap_request_rides_parent_prompt_cache() {
             server.set_response("You asked about the borrow checker.");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             actor.chat_state_handle.update_sampling_config(cfg);
 
             actor.chat_state_handle.replace_conversation(vec![
@@ -955,14 +955,14 @@ async fn recap_request_rides_parent_prompt_cache() {
 /// A recap in a backend-search session must send the main turn's hosted tools or its prefix diverges and misses the cache.
 #[tokio::test(flavor = "current_thread")]
 async fn recap_request_sends_hosted_tools_under_backend_search() {
-    use wimo ai_wimo_sampling_types::HostedTool;
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_sampling_types::HostedTool;
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             *actor.agent.borrow_mut() = test_agent_with_goal_tool().await;
@@ -971,7 +971,7 @@ async fn recap_request_sends_hosted_tools_under_backend_search() {
             {
                 let mut agent_slot = actor.agent.borrow_mut();
                 let agent = &*agent_slot;
-                *agent_slot = wimo ai_wimo_agent::Agent::new(
+                *agent_slot = wimoai_wimo_agent::Agent::new(
                     agent.definition().clone(),
                     agent.prompt_context().clone(),
                     agent.system_prompt().to_string(),
@@ -988,7 +988,7 @@ async fn recap_request_sends_hosted_tools_under_backend_search() {
             server.set_response("You asked about the borrow checker.");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             actor.chat_state_handle.update_sampling_config(cfg);
 
             actor.chat_state_handle.replace_conversation(vec![
@@ -1042,7 +1042,7 @@ async fn turn_summary_bails_when_newer_turn_already_running() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let disabled = std::sync::Arc::new(
                 create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await,
@@ -1054,7 +1054,7 @@ async fn turn_summary_bails_when_newer_turn_already_running() {
             );
 
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, mut prx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -1087,7 +1087,7 @@ async fn new_prompt_aborts_in_flight_turn_summary() {
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             actor.turn_summary_enabled = true;
@@ -1109,13 +1109,13 @@ async fn new_prompt_aborts_in_flight_turn_summary() {
 /// Happy path: a successful side-call persists the summary and broadcasts it transiently, then clears the task slot.
 #[tokio::test(flavor = "current_thread")]
 async fn turn_summary_generate_persists_and_broadcasts() {
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, mut grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, mut prx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -1126,7 +1126,7 @@ async fn turn_summary_generate_persists_and_broadcasts() {
             server.set_response("Fixed the parser race; suite green");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             actor.chat_state_handle.update_sampling_config(cfg);
 
             actor.chat_state_handle.replace_conversation(vec![
@@ -1168,7 +1168,7 @@ async fn turn_summary_generate_persists_and_broadcasts() {
 
             let mut found_broadcast = false;
             while let Ok(msg) = grx.try_recv() {
-                let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
+                let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
                     continue;
                 };
                 if args.request.method.as_ref() != "x.ai/session_notification" {
@@ -1204,14 +1204,14 @@ async fn turn_summary_generate_persists_and_broadcasts() {
 /// An active per-turn cutoff must reach the recap's `x_search` entry rather than an unbounded tool.
 #[tokio::test(flavor = "current_thread")]
 async fn recap_hosted_tools_reflect_the_active_per_turn_override() {
-    use wimo ai_wimo_sampling_types::{HostedTool, SearchDateBound, ToolOverrides, XSearchOptions};
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_sampling_types::{HostedTool, SearchDateBound, ToolOverrides, XSearchOptions};
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             *actor.agent.borrow_mut() = test_agent_with_goal_tool().await;
@@ -1221,7 +1221,7 @@ async fn recap_hosted_tools_reflect_the_active_per_turn_override() {
             {
                 let mut agent_slot = actor.agent.borrow_mut();
                 let agent = &*agent_slot;
-                *agent_slot = wimo ai_wimo_agent::Agent::new(
+                *agent_slot = wimoai_wimo_agent::Agent::new(
                     agent.definition().clone(),
                     agent.prompt_context().clone(),
                     agent.system_prompt().to_string(),
@@ -1248,7 +1248,7 @@ async fn recap_hosted_tools_reflect_the_active_per_turn_override() {
             server.set_response("recap summary");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             actor.chat_state_handle.update_sampling_config(cfg);
 
             actor.chat_state_handle.replace_conversation(vec![
@@ -1283,13 +1283,13 @@ async fn recap_hosted_tools_reflect_the_active_per_turn_override() {
 /// A `/btw` call sends the main turn's tools and the session id as `prompt_cache_key`, so it reuses the parent's cached prefix.
 #[tokio::test(flavor = "current_thread")]
 async fn side_question_request_rides_parent_prompt_cache() {
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             *actor.agent.borrow_mut() = test_agent_with_goal_tool().await;
@@ -1298,7 +1298,7 @@ async fn side_question_request_rides_parent_prompt_cache() {
             server.set_response("The borrow checker enforces shared-xor-mutable.");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             actor.chat_state_handle.update_sampling_config(cfg);
 
             actor.chat_state_handle.replace_conversation(vec![
@@ -1387,13 +1387,13 @@ async fn side_question_request_rides_parent_prompt_cache() {
 /// Recap and `/btw` must replay the parent conversation verbatim and append one instruction. The cache key buys nothing if the prefix moved.
 #[tokio::test(flavor = "current_thread")]
 async fn auxiliary_calls_keep_the_main_turn_prefix() {
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             *actor.agent.borrow_mut() = test_agent_with_goal_tool().await;
@@ -1402,14 +1402,14 @@ async fn auxiliary_calls_keep_the_main_turn_prefix() {
             server.set_response("a summary");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             actor.chat_state_handle.update_sampling_config(cfg);
 
             // The Responses backend keeps reasoning, so it belongs in the prefix both calls have to reproduce.
             let parent = vec![
                 ConversationItem::system("you are a coding agent"),
                 ConversationItem::user("explain the borrow checker"),
-                ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item(
+                ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item(
                     "recalling the aliasing rules",
                 )),
                 ConversationItem::assistant("it enforces shared-xor-mutable"),
@@ -1444,14 +1444,14 @@ async fn auxiliary_calls_keep_the_main_turn_prefix() {
 
 #[tokio::test(flavor = "current_thread")]
 async fn messages_side_calls_preserve_completed_reasoning() {
-    use wimo ai_wimo_sampling_types::{ReasoningEffort, rs};
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_sampling_types::{ReasoningEffort, rs};
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             actor.turn_summary_enabled = true;
@@ -1463,7 +1463,7 @@ async fn messages_side_calls_preserve_completed_reasoning() {
             server.set_response("a short summary");
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Messages;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Messages;
             cfg.reasoning_effort = Some(ReasoningEffort::High);
             actor.chat_state_handle.update_sampling_config(cfg);
 
@@ -1560,8 +1560,8 @@ async fn messages_side_calls_preserve_completed_reasoning() {
 
 #[tokio::test(flavor = "current_thread")]
 async fn messages_side_calls_strip_reasoning_without_supported_thinking_effort() {
-    use wimo ai_wimo_sampling_types::{ReasoningEffort, synthesized_reasoning_item};
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_sampling_types::{ReasoningEffort, synthesized_reasoning_item};
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
@@ -1572,7 +1572,7 @@ async fn messages_side_calls_strip_reasoning_without_supported_thinking_effort()
                 Some(ReasoningEffort::Minimal),
             ] {
                 let (gateway_tx, _grx) =
-                    tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                    tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
                 let (persistence_tx, _prx) =
                     tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
                 let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -1585,7 +1585,7 @@ async fn messages_side_calls_strip_reasoning_without_supported_thinking_effort()
                 server.set_response("a short summary");
                 let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
                 cfg.base_url = server.url();
-                cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Messages;
+                cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Messages;
                 cfg.reasoning_effort = reasoning_effort;
                 actor.chat_state_handle.update_sampling_config(cfg);
 
@@ -1672,14 +1672,14 @@ async fn messages_side_calls_strip_reasoning_without_supported_thinking_effort()
 /// A mid-turn `/btw` must not send a reasoning item whose assistant the trim removed, or the request goes out with an unpaired prefix.
 #[tokio::test(flavor = "current_thread")]
 async fn side_question_trims_reasoning_orphaned_by_mid_turn_truncation() {
-    use wimo ai_wimo_sampling_types::conversation::{AssistantItem, ToolCall};
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_sampling_types::conversation::{AssistantItem, ToolCall};
+    use wimoai_wimo_test_support::MockInferenceServer;
 
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let (gateway_tx, _grx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             *actor.agent.borrow_mut() = test_agent_with_goal_tool().await;
@@ -1689,14 +1689,14 @@ async fn side_question_trims_reasoning_orphaned_by_mid_turn_truncation() {
             let mut cfg = actor.chat_state_handle.get_sampling_config().await.unwrap();
             cfg.base_url = server.url();
             // Responses backend keeps reasoning, which is what creates the orphan.
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             actor.chat_state_handle.update_sampling_config(cfg);
 
             // Mid-turn shape: the tool call is still in flight, so the reasoning before it has no result behind it.
             actor.chat_state_handle.replace_conversation(vec![
                 ConversationItem::system("you are a coding agent"),
                 ConversationItem::user("explain the borrow checker"),
-                ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item(
+                ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item(
                     "planning the file read",
                 )),
                 ConversationItem::Assistant(AssistantItem {
@@ -1759,6 +1759,6 @@ async fn parent_cached_request_pins_fail_length_policy() {
     });
     assert_eq!(
         request.length_policy,
-        wimo ai_wimo_sampling_types::LengthPolicy::Fail
+        wimoai_wimo_sampling_types::LengthPolicy::Fail
     );
 }

@@ -1,4 +1,4 @@
-wimo ai-ratatui-inline includes code derived from the Ratatui terminal UI library.
+wimoai-ratatui-inline includes code derived from the Ratatui terminal UI library.
 
 Ratatui is dual-licensed under the MIT License and the Apache License, Version 2.0.
 This crate’s forked Terminal / viewport implementation is based on Ratatui source

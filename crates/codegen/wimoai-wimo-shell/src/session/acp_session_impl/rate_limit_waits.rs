@@ -2,8 +2,8 @@
 
 use std::time::Duration;
 
-use wimo ai_wimo_sampler::{SamplingErrorInfo, SamplingErrorKind};
-use wimo ai_wimo_telemetry::events::{
+use wimoai_wimo_sampler::{SamplingErrorInfo, SamplingErrorKind};
+use wimoai_wimo_telemetry::events::{
     RateLimitWaitOutcome as ReportedOutcome, SubagentRateLimitWaited,
 };
 
@@ -194,7 +194,7 @@ impl BudgetState {
             };
         }
         let attempt = self.attempts + 1;
-        let wait = wimo ai_wimo_sampler::retry_after_or_backoff(attempt, retry_after_secs);
+        let wait = wimoai_wimo_sampler::retry_after_or_backoff(attempt, retry_after_secs);
         // An over-budget wait stops rather than truncating, which would resubmit before the server's window clears
         if self.total_waited + wait > self.config.max_total_wait {
             self.outcome = WaitOutcome::BudgetSpent;
@@ -219,7 +219,7 @@ impl BudgetState {
 impl Drop for RateLimitWaitBudget {
     fn drop(&mut self) {
         if let Some(event) = self.telemetry_event() {
-            wimo ai_wimo_telemetry::session_ctx::log_event(event);
+            wimoai_wimo_telemetry::session_ctx::log_event(event);
         }
     }
 }

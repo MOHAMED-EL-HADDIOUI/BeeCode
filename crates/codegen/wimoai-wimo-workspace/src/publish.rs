@@ -9,7 +9,7 @@
 
 use async_trait::async_trait;
 
-pub use wimo ai_wimo_workspace_types::rpc::git::GitMergeToMainOutcome;
+pub use wimoai_wimo_workspace_types::rpc::git::GitMergeToMainOutcome;
 
 /// The result of a `MergeToMain` step, decoupled from the wire type.
 #[derive(Debug, Clone, PartialEq, Eq)]

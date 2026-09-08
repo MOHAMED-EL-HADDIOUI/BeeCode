@@ -450,7 +450,7 @@ pub(crate) fn edit_target_protection(path: &Path) -> Option<ProtectedEditReason>
     if !path.is_absolute() {
         return Some(ProtectedEditReason::Sensitive);
     }
-    let lexical = wimo ai_wimo_paths::normalize_lexically(path);
+    let lexical = wimoai_wimo_paths::normalize_lexically(path);
     if let Some(reason) = protected_edit_reason(&lexical) {
         return Some(reason);
     }
@@ -530,7 +530,7 @@ fn protected_wimo_config_file(path: &Path, components: &[&str]) -> Option<Protec
     protected_wimo_config_file_with_home(
         path,
         components,
-        wimo ai_wimo_config::user_wimo_home().as_deref(),
+        wimoai_wimo_config::user_wimo_home().as_deref(),
     )
 }
 
@@ -541,11 +541,11 @@ fn protected_wimo_config_file_with_home(
 ) -> Option<ProtectedEditReason> {
     let reason = match components.last().copied() {
         Some(
-            wimo ai_wimo_config::USER_CONFIG_FILENAME
-            | wimo ai_wimo_config::MANAGED_CONFIG_FILENAME
-            | wimo ai_wimo_config::REQUIREMENTS_FILENAME,
+            wimoai_wimo_config::USER_CONFIG_FILENAME
+            | wimoai_wimo_config::MANAGED_CONFIG_FILENAME
+            | wimoai_wimo_config::REQUIREMENTS_FILENAME,
         ) => ProtectedEditReason::wimoConfig,
-        Some(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME) => ProtectedEditReason::wimoSandbox,
+        Some(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME) => ProtectedEditReason::wimoSandbox,
         _ => return None,
     };
     let in_dot_wimo = components.len() >= 2 && components[components.len() - 2] == ".wimo";
@@ -558,7 +558,7 @@ fn protected_wimo_config_file_with_home(
 /// The comparison is byte-exact (no case folding), like every other resolved-path check in this module.
 fn wimo_home_matches(home: Option<&Path>, pred: impl Fn(&Path) -> bool) -> bool {
     home.is_some_and(|home| {
-        let lexical = wimo ai_wimo_paths::normalize_lexically(home);
+        let lexical = wimoai_wimo_paths::normalize_lexically(home);
         pred(&lexical)
             || resolve_following_symlinks(&lexical).is_some_and(|resolved| pred(&resolved))
     })
@@ -571,7 +571,7 @@ fn path_is_under_user_wimo_hook_root(path: &Path, wimo_home: &Path) -> bool {
 fn protected_wimo_hook_root(path: &Path, components: &[&str]) -> bool {
     components.windows(2).any(|pair| pair == [".wimo", "hooks"])
         || components.ends_with(&[".wimo", "hooks-paths"])
-        || wimo_home_matches(wimo ai_wimo_config::user_wimo_home().as_deref(), |home| {
+        || wimo_home_matches(wimoai_wimo_config::user_wimo_home().as_deref(), |home| {
             path_is_under_user_wimo_hook_root(path, home)
         })
 }
@@ -1591,19 +1591,19 @@ mod tests {
         let home_path = home.path();
         for (file, reason) in [
             (
-                wimo ai_wimo_config::USER_CONFIG_FILENAME,
+                wimoai_wimo_config::USER_CONFIG_FILENAME,
                 ProtectedEditReason::wimoConfig,
             ),
             (
-                wimo ai_wimo_config::MANAGED_CONFIG_FILENAME,
+                wimoai_wimo_config::MANAGED_CONFIG_FILENAME,
                 ProtectedEditReason::wimoConfig,
             ),
             (
-                wimo ai_wimo_config::REQUIREMENTS_FILENAME,
+                wimoai_wimo_config::REQUIREMENTS_FILENAME,
                 ProtectedEditReason::wimoConfig,
             ),
             (
-                wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME,
+                wimoai_wimo_config::SANDBOX_CONFIG_FILENAME,
                 ProtectedEditReason::wimoSandbox,
             ),
         ] {
@@ -1618,19 +1618,19 @@ mod tests {
         // Same file names elsewhere (or with no resolvable home) stay ordinary.
         let elsewhere = home_path
             .join("sub")
-            .join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME);
+            .join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME);
         assert_eq!(
             protected_wimo_config_file_with_home(
                 &elsewhere,
-                &["sub", wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME],
+                &["sub", wimoai_wimo_config::SANDBOX_CONFIG_FILENAME],
                 Some(home_path)
             ),
             None
         );
         assert_eq!(
             protected_wimo_config_file_with_home(
-                &home_path.join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME),
-                &[wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME],
+                &home_path.join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME),
+                &[wimoai_wimo_config::SANDBOX_CONFIG_FILENAME],
                 None
             ),
             None
@@ -1653,8 +1653,8 @@ mod tests {
         let physical_home = resolve_following_symlinks(&real_home).unwrap();
         assert_eq!(
             protected_wimo_config_file_with_home(
-                &physical_home.join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME),
-                &[wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME],
+                &physical_home.join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME),
+                &[wimoai_wimo_config::SANDBOX_CONFIG_FILENAME],
                 Some(&link)
             ),
             Some(ProtectedEditReason::wimoSandbox)
@@ -1666,9 +1666,9 @@ mod tests {
     #[test]
     fn protected_config_filename_constants_are_lowercase() {
         for name in [
-            wimo ai_wimo_config::USER_CONFIG_FILENAME,
-            wimo ai_wimo_config::MANAGED_CONFIG_FILENAME,
-            wimo ai_wimo_config::REQUIREMENTS_FILENAME,
+            wimoai_wimo_config::USER_CONFIG_FILENAME,
+            wimoai_wimo_config::MANAGED_CONFIG_FILENAME,
+            wimoai_wimo_config::REQUIREMENTS_FILENAME,
         ] {
             assert_eq!(name, name.to_ascii_lowercase(), "{name}");
         }

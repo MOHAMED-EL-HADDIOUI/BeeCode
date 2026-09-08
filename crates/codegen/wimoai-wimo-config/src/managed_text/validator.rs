@@ -21,19 +21,19 @@ pub(super) fn validate_temp(
 }
 
 trait ProcessOps {
-    fn attach_group(&self, child: &Child) -> Result<wimo ai_tty_utils::ProcessGroup, std::io::Error>;
+    fn attach_group(&self, child: &Child) -> Result<wimoai_tty_utils::ProcessGroup, std::io::Error>;
     fn try_wait(&self, child: &mut Child) -> std::io::Result<Option<ExitStatus>>;
     fn teardown(
         &self,
         child: &mut Child,
-        group: Option<&wimo ai_tty_utils::ProcessGroup>,
+        group: Option<&wimoai_tty_utils::ProcessGroup>,
     ) -> Result<(), String>;
 }
 
 struct RealProcessOps;
 impl ProcessOps for RealProcessOps {
-    fn attach_group(&self, child: &Child) -> Result<wimo ai_tty_utils::ProcessGroup, std::io::Error> {
-        let mut group = wimo ai_tty_utils::ProcessGroup::new()?;
+    fn attach_group(&self, child: &Child) -> Result<wimoai_tty_utils::ProcessGroup, std::io::Error> {
+        let mut group = wimoai_tty_utils::ProcessGroup::new()?;
         group.attach_std(child)?;
         Ok(group)
     }
@@ -45,7 +45,7 @@ impl ProcessOps for RealProcessOps {
     fn teardown(
         &self,
         child: &mut Child,
-        group: Option<&wimo ai_tty_utils::ProcessGroup>,
+        group: Option<&wimoai_tty_utils::ProcessGroup>,
     ) -> Result<(), String> {
         teardown_child(child, group)
     }
@@ -63,8 +63,8 @@ fn validate_with_ops(
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
-        .envs(wimo ai_tty_utils::pager_env());
-    wimo ai_tty_utils::detach_std_command(&mut command);
+        .envs(wimoai_tty_utils::pager_env());
+    wimoai_tty_utils::detach_std_command(&mut command);
     #[allow(clippy::disallowed_methods)]
     // The config validator child is waited on with a timeout below
     let mut child = command
@@ -118,7 +118,7 @@ fn validation_error(path: &Path, primary: String, teardown: Option<String>) -> M
 
 fn teardown_child(
     child: &mut Child,
-    group: Option<&wimo ai_tty_utils::ProcessGroup>,
+    group: Option<&wimoai_tty_utils::ProcessGroup>,
 ) -> Result<(), String> {
     let mut errors = Vec::new();
     if let Some(group) = group {
@@ -175,7 +175,7 @@ mod tests {
         fn attach_group(
             &self,
             child: &Child,
-        ) -> Result<wimo ai_tty_utils::ProcessGroup, std::io::Error> {
+        ) -> Result<wimoai_tty_utils::ProcessGroup, std::io::Error> {
             if self.attach_fails {
                 Err(std::io::Error::other("injected attach failure"))
             } else {
@@ -194,7 +194,7 @@ mod tests {
         fn teardown(
             &self,
             child: &mut Child,
-            group: Option<&wimo ai_tty_utils::ProcessGroup>,
+            group: Option<&wimoai_tty_utils::ProcessGroup>,
         ) -> Result<(), String> {
             self.teardown_called.store(true, Ordering::SeqCst);
             teardown_child(child, group)

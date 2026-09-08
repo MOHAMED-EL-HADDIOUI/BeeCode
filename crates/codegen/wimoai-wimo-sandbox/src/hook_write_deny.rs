@@ -5,15 +5,15 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use wimo ai_wimo_config::{
+use wimoai_wimo_config::{
     GlobalHookSource, missing_configured_sources, resolve_global_hook_sources,
     resolve_trust_boundary_sources,
 };
 
 #[cfg(unix)]
-use wimo ai_wimo_config::validated_hook_json_files_for_sources;
+use wimoai_wimo_config::validated_hook_json_files_for_sources;
 #[cfg(target_os = "linux")]
-use wimo ai_wimo_config::{ensure_wimo_hook_slots, unique_ancestors_rootward};
+use wimoai_wimo_config::{ensure_wimo_hook_slots, unique_ancestors_rootward};
 
 use crate::paths::wimo_home;
 use crate::profiles::ProfileName;
@@ -52,8 +52,8 @@ pub enum HookWriteDenyError {
     JsonSnapshotChanged { dir: PathBuf },
 }
 
-impl From<wimo ai_wimo_config::GlobalHookSourceError> for HookWriteDenyError {
-    fn from(e: wimo ai_wimo_config::GlobalHookSourceError) -> Self {
+impl From<wimoai_wimo_config::GlobalHookSourceError> for HookWriteDenyError {
+    fn from(e: wimoai_wimo_config::GlobalHookSourceError) -> Self {
         Self::Resolve(e.to_string())
     }
 }
@@ -130,7 +130,7 @@ pub fn revalidate_path_identity(id: &PathIdentity) -> Result<(), HookWriteDenyEr
 #[cfg(unix)]
 fn reject_hardlinked_files(sources: &[GlobalHookSource]) -> Result<(), HookWriteDenyError> {
     use std::os::unix::fs::MetadataExt;
-    use wimo ai_wimo_config::GlobalHookSourceKind;
+    use wimoai_wimo_config::GlobalHookSourceKind;
     for s in sources {
         let is_file_slot = matches!(
             s.kind,
@@ -253,7 +253,7 @@ pub fn enforcement_leaf_paths(
 
 #[cfg(target_os = "linux")]
 fn capture_dir_json_snapshot(dir: &Path) -> Result<DirJsonSnapshot, HookWriteDenyError> {
-    use wimo ai_wimo_config::{list_direct_hook_json_files, validate_direct_hook_json_file};
+    use wimoai_wimo_config::{list_direct_hook_json_files, validate_direct_hook_json_file};
     let listed = list_direct_hook_json_files(dir).map_err(|e| HookWriteDenyError::VerifyIo {
         path: dir.to_path_buf(),
         detail: e.to_string(),

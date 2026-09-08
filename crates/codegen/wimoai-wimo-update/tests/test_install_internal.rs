@@ -15,9 +15,9 @@ use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 use common::{reset_home, test_home};
-use wimo ai_wimo_telemetry::events::CliUpdateErrorKind;
-use wimo ai_wimo_update::UpdateConfig;
-use wimo ai_wimo_update::auto_update::{
+use wimoai_wimo_telemetry::events::CliUpdateErrorKind;
+use wimoai_wimo_update::UpdateConfig;
+use wimoai_wimo_update::auto_update::{
     classify_install_error, install_internal_from_base, install_internal_from_bases,
 };
 

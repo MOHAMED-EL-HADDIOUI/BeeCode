@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 
 use crate::prompt::ignore::{build_gitignore, is_ignored};
 
-use wimo ai_wimo_tools::types::compat::CompatConfig;
+use wimoai_wimo_tools::types::compat::CompatConfig;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AgentConfigFile {
@@ -155,8 +155,8 @@ async fn read_agents_config_with_options(
         working_directory,
         workspace_user_dir,
         compat,
-        wimo ai_wimo_tools::util::wimo_home::wimo_home(),
-        wimo ai_dirs::home_dir(),
+        wimoai_wimo_tools::util::wimo_home::wimo_home(),
+        wimoai_dirs::home_dir(),
     )
     .await
 }
@@ -277,7 +277,7 @@ async fn read_agents_config_with_roots(
         .filter_map(|candidate| {
             let content = std::fs::read_to_string(&candidate.path).ok()?;
             let content = if candidate.is_rule {
-                wimo ai_wimo_tools::implementations::skills::skill::extract_skill_body(&content)
+                wimoai_wimo_tools::implementations::skills::skill::extract_skill_body(&content)
             } else {
                 content
             };
@@ -302,7 +302,7 @@ pub fn format_agents_md_section(configs: &[AgentConfigFile]) -> Option<String> {
 }
 
 /// Verbatim leading bytes [`render_agents_md`] emits for every reminder block.
-/// Used by `wimo ai-wimo-shell` to structurally detect legacy untagged AGENTS.md copies (pre-`SyntheticReason::ProjectInstructions`) on resumed sessions.
+/// Used by `wimoai-wimo-shell` to structurally detect legacy untagged AGENTS.md copies (pre-`SyntheticReason::ProjectInstructions`) on resumed sessions.
 pub const LEGACY_AGENTS_MD_REMINDER_PREFIX: &str =
     "\n\n<system-reminder>\nAs you answer the user's questions, you can use the following context";
 

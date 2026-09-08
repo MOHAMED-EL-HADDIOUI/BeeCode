@@ -39,7 +39,7 @@ enum CancelFinalization {
 pub(super) struct CancelledTurn<'a> {
     pub(super) prompt_id: &'a str,
     pub(super) epoch: TurnEpoch,
-    pub(super) reason: wimo ai_wimo_hooks::event::StopCancelledReason,
+    pub(super) reason: wimoai_wimo_hooks::event::StopCancelledReason,
     pub(super) trigger: Option<String>,
     pub(super) last_assistant_message: Option<String>,
 }
@@ -65,7 +65,7 @@ impl SessionActor {
     /// Uses the session-bound backend API so the cancel cannot touch other sessions.
     pub(super) fn cancel_all_session_subagents(&self) {
         if let Some(event_tx) = self.tool_context.subagent_event_tx.clone() {
-            use wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend;
+            use wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend;
             let backend = ChannelBackend::for_session(event_tx, self.session_id_string());
             let _ = backend.request_cancel_parent_session(tokio::sync::oneshot::channel().0);
         }
@@ -74,7 +74,7 @@ impl SessionActor {
     /// Re-open Task spawns for this session after a prior user Stop.
     pub(super) fn open_subagent_spawn_admission(&self) {
         if let Some(event_tx) = self.tool_context.subagent_event_tx.clone() {
-            use wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend;
+            use wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend;
             let backend = ChannelBackend::for_session(event_tx, self.session_id_string());
             let _ = backend.open_spawn_admission();
         }
@@ -82,7 +82,7 @@ impl SessionActor {
 
     fn cancel_subagents_for_prompt_id(&self, parent_prompt_id: &str) {
         if let Some(event_tx) = self.tool_context.subagent_event_tx.clone() {
-            use wimo ai_wimo_tools::implementations::wimo::task::types::{
+            use wimoai_wimo_tools::implementations::wimo::task::types::{
                 SubagentCancelRequest, SubagentCancelTarget, SubagentEvent,
             };
             let _ = event_tx.send(SubagentEvent::Cancel(SubagentCancelRequest {
@@ -100,7 +100,7 @@ impl SessionActor {
         }
         let mut state = self.state.try_lock().expect("session state is actor-owned");
         state.notifications_suppressed = true;
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "shell.task_wake.cancel_barrier",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -137,7 +137,7 @@ impl SessionActor {
         }
         let flushed = self.flush_stranded_interjections().await;
         if flushed > 0 {
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "shell.prompt.send_now_flushed_interjections",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({ "count": flushed })),
@@ -159,14 +159,14 @@ impl SessionActor {
             let mut state = self.state.lock().await;
             state.notifications_suppressed = false;
             if state.take_hook_block_hold() {
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "shell.prompt.hook_block_hold_released",
                     Some(self.session_info.id.0.as_ref()),
                     Some(serde_json::json!({ "reason": "send_now" })),
                 );
             }
         }
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "shell.task_wake.gate_cleared",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({ "reason": "send_now" })),
@@ -195,7 +195,7 @@ impl SessionActor {
         front_prompt_id: Option<&str>,
         rewind_disposition: &str,
     ) {
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "shell.cancel.rewind_decision",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -306,7 +306,7 @@ impl SessionActor {
                     gate.set(false);
                 }
                 state.notifications_suppressed = false;
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "shell.task_wake.gate_cleared",
                     Some(self.session_info.id.0.as_ref()),
                     Some(serde_json::json!({ "reason": "rewind" })),
@@ -319,11 +319,11 @@ impl SessionActor {
                     .await
                     .saturating_sub(1);
                 let binding =
-                    wimo ai_message_delivery_core::TurnBinding::new(requested.to_owned(), turn_epoch);
+                    wimoai_message_delivery_core::TurnBinding::new(requested.to_owned(), turn_epoch);
                 let (message_completions, had_fallbacks) = self.transition_parent_messages(
                     &mut state,
-                    wimo ai_message_delivery_core::TerminalTarget::Turn(&binding),
-                    wimo ai_message_delivery_core::TerminalCause::Rewind,
+                    wimoai_message_delivery_core::TerminalTarget::Turn(&binding),
+                    wimoai_message_delivery_core::TerminalCause::Rewind,
                 );
                 claimed_rewound = state
                     .pending_inputs
@@ -354,7 +354,7 @@ impl SessionActor {
             let _strip_guard = self.prepare_image_strips_for_rewind().await;
             self.cancel_active_sampling_requests();
             self.cancel_pending_image_strips_for_rewind();
-            self.notify_turn_abort(epoch, wimo ai_agent_lifecycle::TurnAbortReason::Interrupted)
+            self.notify_turn_abort(epoch, wimoai_agent_lifecycle::TurnAbortReason::Interrupted)
                 .await;
             let total_tokens = self.chat_state_handle.get_total_tokens().await;
             let result = Ok(PromptTurnOk {
@@ -407,7 +407,7 @@ impl SessionActor {
             .expect("current_prompt_id mutex poisoned")
             .clone();
         {
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "shell.cancel.processing",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -557,7 +557,7 @@ impl SessionActor {
                     gate.set(false);
                 }
                 state.notifications_suppressed = false;
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "shell.task_wake.gate_cleared",
                     Some(self.session_info.id.0.as_ref()),
                     Some(serde_json::json!({ "reason": "rewind" })),
@@ -594,7 +594,7 @@ impl SessionActor {
                     if let Some(epoch) = turn_epoch {
                         self.abort_turn_task(task, epoch);
                     }
-                    binding = Some(wimo ai_message_delivery_core::TurnBinding::new(
+                    binding = Some(wimoai_message_delivery_core::TurnBinding::new(
                         task.prompt_id.clone(),
                         task.epoch,
                     ));
@@ -605,7 +605,7 @@ impl SessionActor {
                     if let Some(epoch) = turn_epoch {
                         self.abort_turn_task(&task, epoch);
                     }
-                    binding = Some(wimo ai_message_delivery_core::TurnBinding::new(
+                    binding = Some(wimoai_message_delivery_core::TurnBinding::new(
                         task.prompt_id.clone(),
                         task.epoch,
                     ));
@@ -649,19 +649,19 @@ impl SessionActor {
             // Gating on `running_task` there would drop the front's `respond_to` and hang the client's `session/prompt` forever
             // The TUI spinner would never return to idle
             let message_cause = if kill_background_tasks {
-                wimo ai_message_delivery_core::TerminalCause::HardTeardown
+                wimoai_message_delivery_core::TerminalCause::HardTeardown
             } else if rewound_input.is_some() {
-                wimo ai_message_delivery_core::TerminalCause::Rewind
+                wimoai_message_delivery_core::TerminalCause::Rewind
             } else {
-                wimo ai_message_delivery_core::TerminalCause::SoftCancel
+                wimoai_message_delivery_core::TerminalCause::SoftCancel
             };
             let message_target =
-                if message_cause == wimo ai_message_delivery_core::TerminalCause::HardTeardown {
-                    wimo ai_message_delivery_core::TerminalTarget::All
+                if message_cause == wimoai_message_delivery_core::TerminalCause::HardTeardown {
+                    wimoai_message_delivery_core::TerminalTarget::All
                 } else {
                     binding.as_ref().map_or(
-                        wimo ai_message_delivery_core::TerminalTarget::All,
-                        wimo ai_message_delivery_core::TerminalTarget::Turn,
+                        wimoai_message_delivery_core::TerminalTarget::All,
+                        wimoai_message_delivery_core::TerminalTarget::Turn,
                     )
                 };
             let (message_completions, had_message_fallbacks) =
@@ -831,7 +831,7 @@ impl SessionActor {
         if cancelled_prompt_id.is_some()
             && let Some(epoch) = turn_epoch
         {
-            self.notify_turn_abort(epoch, wimo ai_agent_lifecycle::TurnAbortReason::Interrupted)
+            self.notify_turn_abort(epoch, wimoai_agent_lifecycle::TurnAbortReason::Interrupted)
                 .await;
         }
         // Rewind rails hold no lease, so clear the aborted turn's exact

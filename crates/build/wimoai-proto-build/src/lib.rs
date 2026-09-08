@@ -31,7 +31,7 @@ fn find_protoc_include_dir(protoc: Option<&Path>) -> Option<PathBuf> {
     }
 }
 
-pub struct wimo aiProtoBuilder {
+pub struct wimoaiProtoBuilder {
     builder: tonic_prost_build::Builder,
     file_descriptor_set_path: Option<PathBuf>,
     gen_pbjson: bool,
@@ -41,7 +41,7 @@ pub struct wimo aiProtoBuilder {
     honor_debug_redact: bool,
 }
 
-impl wimo aiProtoBuilder {
+impl wimoaiProtoBuilder {
     fn map_builder(
         self,
         f: impl FnOnce(tonic_prost_build::Builder) -> tonic_prost_build::Builder,
@@ -143,10 +143,19 @@ impl wimo aiProtoBuilder {
 
         // Can only process one input file when using --dependency_out=FILE.
         for proto in protos {
+            // Write both the depfile and the descriptor set to temp files:
+            // neither /dev/stdout nor /dev/null exists on Windows, and the
+            // NUL device is unreliable there (protoc materializes a real file
+            // named NUL). protoc names the depfile target after
+            // --descriptor_set_out, so expect `<fds-tmp>:` as its prefix.
+            let dep_tmp = tempfile::NamedTempFile::new()?;
+            let fds_tmp = tempfile::NamedTempFile::new()?;
+            let fds_arg = fds_tmp.path().display().to_string();
+            let prefix = format!("{fds_arg}:");
             let mut command = Command::new(protoc.unwrap_or(Path::new("protoc")));
             command
-                .arg("--dependency_out=/dev/stdout")
-                .arg("--descriptor_set_out=/dev/null");
+                .arg(format!("--dependency_out={}", dep_tmp.path().display()))
+                .arg(format!("--descriptor_set_out={fds_arg}"));
 
             // Add protoc's well-known types include directory first (if found).
             // This is needed for Bazel sandboxed builds where protoc and its
@@ -172,14 +181,13 @@ impl wimo aiProtoBuilder {
                 return Err(anyhow::anyhow!("protoc command failed"));
             }
 
-            let output =
-                String::from_utf8(output.stdout).context("protoc command output not UTF-8")?;
+            let dep_output =
+                std::fs::read_to_string(dep_tmp.path()).context("protoc depfile not UTF-8")?;
 
-            let mut lines = output.lines();
-            let first_line = lines.next().context("protoc command output is empty")?;
-            let prefix = "/dev/null:";
-            let rem = first_line.strip_prefix(prefix).with_context(|| {
-                format!("protoc command output must start with /dev/null: {output:?}")
+            let mut lines = dep_output.lines();
+            let first_line = lines.next().context("protoc depfile is empty")?;
+            let rem = first_line.strip_prefix(&prefix).with_context(|| {
+                format!("protoc depfile must start with {prefix} {dep_output:?}")
             })?;
             for line in iter::once(rem).chain(lines) {
                 let line = line.trim();
@@ -217,7 +225,7 @@ impl wimo aiProtoBuilder {
             }
         }
 
-        let wimo aiProtoBuilder {
+        let wimoaiProtoBuilder {
             builder,
             gen_pbjson,
             file_descriptor_set_path,
@@ -256,7 +264,7 @@ impl wimo aiProtoBuilder {
                 Some(file_descriptor_set_path)
             } else if gen_pbjson {
                 tempfile = tempfile::TempDir::new()?;
-                let file_descriptor_set_path = tempfile.path().join("wimo ai-proto-build.pbbin");
+                let file_descriptor_set_path = tempfile.path().join("wimoai-proto-build.pbbin");
                 builder = builder.file_descriptor_set_path(&file_descriptor_set_path);
                 Some(file_descriptor_set_path)
             } else {
@@ -331,13 +339,13 @@ impl wimo aiProtoBuilder {
     }
 }
 
-pub fn configure() -> wimo aiProtoBuilder {
+pub fn configure() -> wimoaiProtoBuilder {
     let builder = tonic_prost_build::configure()
         .compile_well_known_types(true)
         .extern_path(".google.protobuf", "::pbjson_types")
         .extern_path(".google.protobuf.Empty", "()")
         .protoc_arg("--experimental_allow_proto3_optional");
-    wimo aiProtoBuilder {
+    wimoaiProtoBuilder {
         builder,
         gen_pbjson: false,
         pbjson_ignore_unknown_fields: false,

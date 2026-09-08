@@ -3,7 +3,7 @@
 //!
 //! ## When to use
 //!
-//! Use regular `tracing::info!` / `tracing::debug!` / `tracing::warn!` with targets `wimo ai_wimo_hooks` or `wimo ai_wimo_agent::plugins`.
+//! Use regular `tracing::info!` / `tracing::debug!` / `tracing::warn!` with targets `wimoai_wimo_hooks` or `wimoai_wimo_agent::plugins`.
 //! Log at discovery, dispatch, execution, and error points.
 //!
 //! ## Enabling
@@ -27,7 +27,7 @@ use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::layer::Layer;
 use tracing_subscriber::registry::LookupSpan;
 
-use wimo ai_wimo_config::wimo_home;
+use wimoai_wimo_config::wimo_home;
 
 const ENV_HOOKS_LOG: &str = "wimo_HOOKS_LOG";
 
@@ -55,7 +55,7 @@ impl FormatTime for UptimeTimer {
 }
 
 /// Writes to `~/.wimo/logs/hooks.log` (or custom path via `wimo_HOOKS_LOG`).
-/// Filters to hooks (`wimo ai_wimo_hooks`) and plugins (`wimo ai_wimo_agent::plugins`) targets.
+/// Filters to hooks (`wimoai_wimo_hooks`) and plugins (`wimoai_wimo_agent::plugins`) targets.
 /// Set `wimo_HOOKS_LOG=0` to disable, `wimo_HOOKS_LOG=/path` to redirect.
 pub fn layer<S>() -> Option<impl Layer<S>>
 where
@@ -86,7 +86,7 @@ where
     }
 
     let filter = tracing_subscriber::filter::EnvFilter::new(
-        "wimo ai_wimo_hooks=debug,wimo ai_wimo_agent::plugins=debug",
+        "wimoai_wimo_hooks=debug,wimoai_wimo_agent::plugins=debug",
     );
     let fmt_layer = tracing_subscriber::fmt::layer()
         .with_target(true)

@@ -1,8 +1,8 @@
 //! Compaction mode — how much structure the model gets to recover detail the
-//! lossy summary dropped. In `wimo ai-chat-state` so flag resolution and the
+//! lossy summary dropped. In `wimoai-chat-state` so flag resolution and the
 //! transcript-hint builder share one definition.
 
-use wimo ai_compaction_transcript::CompactionDetail;
+use wimoai_compaction_transcript::CompactionDetail;
 
 /// How compaction exposes pre-compaction history to the model afterwards.
 /// `Segments` carries its verbatim detail level inline, since detail is
@@ -62,7 +62,7 @@ impl CompactionMode {
     /// at (raw transcript path or `compaction/` folder). `None` if the mode adds
     /// no pointer (`Summary`) or the location is absent.
     pub fn transcript_hint(self, location: Option<&str>) -> Option<String> {
-        use wimo ai_compaction_transcript::INDEX_FILE;
+        use wimoai_compaction_transcript::INDEX_FILE;
         let loc = location?;
         Some(match self {
             Self::Summary => return None,

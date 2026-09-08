@@ -6,7 +6,7 @@ use super::rate_limit_backoff_tests::{
 };
 use super::*;
 use std::time::Duration;
-use wimo ai_wimo_test_support::{MockInferenceServer, MockModelEntry, ScriptedResponse};
+use wimoai_wimo_test_support::{MockInferenceServer, MockModelEntry, ScriptedResponse};
 
 /// The turn future needs a session-sized stack (spawn.rs: 8 MiB); default test stacks overflow.
 fn on_session_stack(test: impl FnOnce() + Send + 'static) {
@@ -31,8 +31,8 @@ fn run_paused<F: std::future::Future>(fut: impl FnOnce() -> F) {
 }
 
 /// No sampler-internal retries: request counts map 1:1 to submissions.
-fn sampler_surfaces_5xx() -> wimo ai_wimo_sampler::RetryPolicy {
-    wimo ai_wimo_sampler::RetryPolicy {
+fn sampler_surfaces_5xx() -> wimoai_wimo_sampler::RetryPolicy {
+    wimoai_wimo_sampler::RetryPolicy {
         max_retries: 0,
         ..Default::default()
     }

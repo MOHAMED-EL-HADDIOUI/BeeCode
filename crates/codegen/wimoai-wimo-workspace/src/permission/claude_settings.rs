@@ -311,7 +311,7 @@ impl JsonTypeName for serde_json::Value {
 // TODO(follow-up): The discovery logic here (find_claude_settings_paths,
 // collect_project_claude_paths, find_repo_root) is local to this module.
 // If the Claude settings compatibility surface grows (more consumers beyond
-// permissions), consider extracting to a shared helper (e.g., in wimo ai-wimo-hooks
+// permissions), consider extracting to a shared helper (e.g., in wimoai-wimo-hooks
 // or a new claude-discovery crate).
 
 /// Discover `.claude/settings.json` and `.claude/settings.local.json` paths for permission loading.
@@ -340,11 +340,11 @@ pub fn find_claude_settings_paths(cwd: &Path) -> Vec<PathBuf> {
 /// Global (user-tier) `~/.claude` settings paths, highest-priority-first.
 /// Split out of [`find_claude_settings_paths`] so [`claude_settings_paths_for_trust`] can load ONLY the user tier when a folder is untrusted.
 ///
-/// `wimo ai_dirs::home_dir()` matches Node's `os.homedir()` (`USERPROFILE` on Windows), used by both the settings' authoring tool and the import scanner.
+/// `wimoai_dirs::home_dir()` matches Node's `os.homedir()` (`USERPROFILE` on Windows), used by both the settings' authoring tool and the import scanner.
 /// A path returned here therefore tests as global in the scanner's `is_global` check (`claude_import.rs::scan_importable_settings`).
 fn global_claude_settings_paths() -> Vec<PathBuf> {
     let mut paths = Vec::new();
-    if let Some(home) = wimo ai_dirs::home_dir() {
+    if let Some(home) = wimoai_dirs::home_dir() {
         let global = home.join(".claude");
         paths.push(global.join("settings.local.json"));
         paths.push(global.join("settings.json"));
@@ -465,19 +465,19 @@ pub fn load_claude_env_with_project(cwd: &Path, project_trusted: bool) -> HashMa
 // Phase 2 cutoff marker
 // =============================================================================
 //
-// `wimo ai-wimo-shell::claude_import` writes the marker
+// `wimoai-wimo-shell::claude_import` writes the marker
 // We re-implement a small reader here because the gate consumers live in this crate and can't depend on shell (it would create a cycle)
 // Caching is intentionally omitted; if this becomes a hotspot we can lift it into a shared crate
 
 /// True when the user marked Claude settings imported (`[claude_compat].imported` in config.toml, or the test override).
 /// Public so callers that mirror this gate elsewhere use the same check.
 pub fn is_claude_import_marked() -> bool {
-    // Test escape hatch: shell tests call `refresh_marker_cache(true)`, which lives in wimo ai-wimo-shell (inaccessible from here at runtime)
+    // Test escape hatch: shell tests call `refresh_marker_cache(true)`, which lives in wimoai-wimo-shell (inaccessible from here at runtime)
     // They also set this env var so the gate in this crate honours the override without a cross-crate dependency
     if std::env::var("_wimo_CLAUDE_MARKER_OVERRIDE").as_deref() == Ok("1") {
         return true;
     }
-    let Some(config_path) = wimo ai_wimo_config::user_wimo_home().map(|g| g.join("config.toml")) else {
+    let Some(config_path) = wimoai_wimo_config::user_wimo_home().map(|g| g.join("config.toml")) else {
         return false;
     };
     let Ok(contents) = std::fs::read_to_string(&config_path) else {

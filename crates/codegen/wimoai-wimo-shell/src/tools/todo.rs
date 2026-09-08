@@ -1,11 +1,11 @@
-//! Types are canonical in `wimo ai-wimo-tools`.
-//! This module adds conversions between ACP plan entries and `TodoItem` since `wimo ai-wimo-tools` is protocol-agnostic.
+//! Types are canonical in `wimoai-wimo-tools`.
+//! This module adds conversions between ACP plan entries and `TodoItem` since `wimoai-wimo-tools` is protocol-agnostic.
 
-pub use wimo ai_wimo_tools::implementations::wimo::todo::TodoId;
-pub use wimo ai_wimo_tools::implementations::wimo::todo::TodoItem;
-pub use wimo ai_wimo_tools::implementations::wimo::todo::TodoPriority;
-pub use wimo ai_wimo_tools::implementations::wimo::todo::TodoState;
-pub use wimo ai_wimo_tools::implementations::wimo::todo::TodoStatus;
+pub use wimoai_wimo_tools::implementations::wimo::todo::TodoId;
+pub use wimoai_wimo_tools::implementations::wimo::todo::TodoItem;
+pub use wimoai_wimo_tools::implementations::wimo::todo::TodoPriority;
+pub use wimoai_wimo_tools::implementations::wimo::todo::TodoState;
+pub use wimoai_wimo_tools::implementations::wimo::todo::TodoStatus;
 
 use agent_client_protocol as acp;
 

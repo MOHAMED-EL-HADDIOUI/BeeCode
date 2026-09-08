@@ -6,7 +6,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use parking_lot::Mutex;
 use tokio::sync::Semaphore;
-use wimo ai_wimo_foreign_sessions::{
+use wimoai_wimo_foreign_sessions::{
     EnabledForeignSessionSources, ForeignSessionSummary, ForeignSessionTool, RecentForeignSession,
 };
 
@@ -521,7 +521,7 @@ mod tests {
     use std::cell::RefCell;
     use std::time::{Duration, UNIX_EPOCH};
 
-    use wimo ai_wimo_foreign_sessions::ForeignSessionSource;
+    use wimoai_wimo_foreign_sessions::ForeignSessionSource;
 
     use super::*;
 

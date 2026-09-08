@@ -5,7 +5,7 @@
 pub(crate) use serde_json::json;
 pub(crate) use std::path::{Path, PathBuf};
 pub(crate) use std::time::{Duration, Instant};
-pub(crate) use wimo ai_wimo_pager_pty_harness::{
+pub(crate) use wimoai_wimo_pager_pty_harness::{
     AgentTurnExpectation, ContentController, EnvOp, MockModel, PtyExitPoll, PtyHarness,
     ScriptedResponse, SseEvent, keys, oauth_credential_ops, pager_binary, seed_fake_oauth, sse,
     wait_for_labels_absent, wait_for_model_via_new_sessions,
@@ -46,13 +46,13 @@ pub(crate) const MOCK_RESPONSE_SENTINEL: &str = "MOCKRESPONSE";
 
 /// The sandbox's unified log (shell-written; forwarded pager entries land here too).
 /// No cross-process helper exists to reuse whole.
-/// `wimo ai_wimo_telemetry::unified_log::path()` resolves the calling process's own wimo home and the file-name const is private.
+/// `wimoai_wimo_telemetry::unified_log::path()` resolves the calling process's own wimo home and the file-name const is private.
 /// So this composes the sandbox wimo home with the exported `LOG_DIR`.
 pub(crate) fn unified_log_path(content: &ContentController) -> PathBuf {
     content
         .sandbox()
         .wimo_home()
-        .join(wimo ai_wimo_telemetry::unified_log::LOG_DIR)
+        .join(wimoai_wimo_telemetry::unified_log::LOG_DIR)
         .join("unified.jsonl")
 }
 
@@ -144,11 +144,11 @@ pub(crate) fn tall_response(sentinel: &str, rows: usize) -> String {
 }
 
 // ── Fake session-auth (OAuth) seeding ───────────────────────────────────
-// `seed_fake_oauth` / `oauth_credential_ops` live in `wimo ai_wimo_pager_pty_harness::flows` (re-exported above)
+// `seed_fake_oauth` / `oauth_credential_ops` live in `wimoai_wimo_pager_pty_harness::flows` (re-exported above)
 
 /// Spawn a pager with fake session (OAuth) auth and a 1s announcements poll, then drive it into a live session (welcome, prompt, mock response).
 /// Session auth matters: the settings poll requires `auth_manager.auth()`.
-/// The harness's default `wimo ai_API_KEY` (ApiKey/BYOK mode, no auth.json entry) would never fetch `/v1/settings`.
+/// The harness's default `wimoai_API_KEY` (ApiKey/BYOK mode, no auth.json entry) would never fetch `/v1/settings`.
 /// Spawns WITHOUT `wimo_ANNOUNCEMENTS_OVERRIDE` (the env override beats pushed lists in the pager and would mask updates).
 /// Call `content.set_response(..)` BEFORE this so the entry prompt streams.
 pub(crate) fn spawn_polling_session(content: &ContentController, oauth_user: &str) -> PtyHarness {
@@ -232,9 +232,9 @@ pub(crate) fn folder_is_trusted(content: &ContentController, repo: &std::path::P
     let store_path = content
         .home()
         .join(".wimo")
-        .join(wimo ai_wimo_workspace::trust::TRUST_FILE_NAME);
-    let store = wimo ai_wimo_workspace::trust::TrustStore::load_from(store_path);
-    store.is_trusted(&wimo ai_wimo_workspace::trust::workspace_key(repo))
+        .join(wimoai_wimo_workspace::trust::TRUST_FILE_NAME);
+    let store = wimoai_wimo_workspace::trust::TrustStore::load_from(store_path);
+    store.is_trusted(&wimoai_wimo_workspace::trust::workspace_key(repo))
 }
 
 // ── Leader mode e2e ─────────────────────────────────────────────────────
@@ -247,7 +247,7 @@ pub(crate) fn turn_sentinel(n: u8) -> String {
     format!("{MOCK_RESPONSE_SENTINEL}_T{n}")
 }
 
-// `wait_for_labels_absent` lives in `wimo ai_wimo_pager_pty_harness::flows` (re-exported above)
+// `wait_for_labels_absent` lives in `wimoai_wimo_pager_pty_harness::flows` (re-exported above)
 
 // ── MCP menu loading e2e tests ──────────────────────────────────────────
 
@@ -381,7 +381,7 @@ pub(crate) const CTRL_O: &[u8] = b"\x0f";
 pub(crate) const SEND_NOW_TIP_SENTINEL: &str = "to send now";
 
 // NOTE: There is no SessionStart hook exactly-once e2e test
-// Deduplication in load_hooks_from_sources is covered by unit tests in wimo ai-wimo-hooks::discovery::tests
+// Deduplication in load_hooks_from_sources is covered by unit tests in wimoai-wimo-hooks::discovery::tests
 // A PTY e2e test would need careful environment variable setup to avoid static caching issues with wimo_HOME
 
 // ── Mouse reporting toggle (opt-in scrollback Ctrl+R) ───────────────────
@@ -458,7 +458,7 @@ pub(crate) const ESC_DOUBLE_PRESS_ENV: &str = "wimo_ESC_DOUBLE_PRESS_MS";
 /// Spawn the pager with [`ESC_DOUBLE_PRESS_ENV`] set to the 60s cap.
 pub(crate) fn spawn_esc_double_press_pager(content: &ContentController) -> PtyHarness {
     let binary = pager_binary().expect("resolve pager binary");
-    let value = wimo ai_wimo_pager::app::app_view::ESC_DOUBLE_PRESS_TEST_MS.to_string();
+    let value = wimoai_wimo_pager::app::app_view::ESC_DOUBLE_PRESS_TEST_MS.to_string();
     PtyHarness::spawn_with_content_env_ops(
         &binary,
         DEFAULT_ROWS,
@@ -1288,12 +1288,12 @@ pub(crate) fn all_user_message_blobs(content: &ContentController) -> Vec<String>
 // They are OS-native and mutate the machine-global clipboard (pbcopy/osascript on macOS, PowerShell on Windows)
 // They hold `#[serial_test::serial(host_clipboard)]` so two clipboard tests never interleave within one test process
 #[cfg(any(target_os = "macos", target_os = "windows"))]
-pub(crate) use wimo ai_wimo_pager_pty_harness::host_clipboard::{
+pub(crate) use wimoai_wimo_pager_pty_harness::host_clipboard::{
     HostClipboardTextGuard, pbcopy, set_clipboard_png, write_fixture_png,
 };
 // Windows CI sessions may lack a usable clipboard; the windows twins gate on this and SKIP instead of failing on environment
 #[cfg(target_os = "windows")]
-pub(crate) use wimo ai_wimo_pager_pty_harness::host_clipboard::clipboard_roundtrip_works;
+pub(crate) use wimoai_wimo_pager_pty_harness::host_clipboard::clipboard_roundtrip_works;
 
 #[cfg(test)]
 mod exit_status_wait_policy_tests {

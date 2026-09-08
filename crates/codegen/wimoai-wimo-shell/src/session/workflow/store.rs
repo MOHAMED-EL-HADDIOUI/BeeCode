@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, oneshot};
-use wimo ai_wimo_sampling_types::ReasoningEffort;
+use wimoai_wimo_sampling_types::ReasoningEffort;
 
 use crate::session::persistence::PersistenceMsg;
 

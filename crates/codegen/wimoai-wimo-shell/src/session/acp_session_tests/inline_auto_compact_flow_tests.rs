@@ -3,9 +3,9 @@ use super::*;
 use crate::terminal::AsyncTerminalRunner;
 use crate::terminal::runner::{TerminalError, TerminalRunRequest, TerminalRunResult};
 use tokio::sync::mpsc;
-use wimo ai_wimo_paths::AbsPathBuf;
-use wimo ai_wimo_workspace::file_system::MockFs;
-use wimo ai_wimo_workspace::permission::PermissionHandle;
+use wimoai_wimo_paths::AbsPathBuf;
+use wimoai_wimo_workspace::file_system::MockFs;
+use wimoai_wimo_workspace::permission::PermissionHandle;
 #[derive(Debug)]
 struct DummyTerminal;
 #[async_trait::async_trait]
@@ -19,18 +19,18 @@ async fn create_test_actor(
     total_tokens: u64,
     context_window: u64,
     threshold_percent: u8,
-    gateway_tx: mpsc::UnboundedSender<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_tx: mpsc::UnboundedSender<wimoai_acp_lib::AcpClientMessage>,
     persistence_tx: mpsc::UnboundedSender<PersistenceMsg>,
 ) -> SessionActor {
     let cwd = AbsPathBuf::new(std::path::PathBuf::from("/tmp")).unwrap();
     let fs = Arc::new(MockFs::new(cwd.to_path_buf()));
     let terminal = Arc::new(DummyTerminal {});
     let (hunk_tx, _hunk_rx) = tokio::sync::mpsc::unbounded_channel();
-    let hunk_tracker_handle = wimo ai_hunk_tracker::HunkTrackerActor::spawn(
+    let hunk_tracker_handle = wimoai_hunk_tracker::HunkTrackerActor::spawn(
         "test-auto-compact".to_string(),
         cwd.to_path_buf(),
         hunk_tx,
-        wimo ai_hunk_tracker::TrackingMode::AgentOnly,
+        wimoai_hunk_tracker::TrackingMode::AgentOnly,
         tokio_util::sync::CancellationToken::new(),
     );
     let tool_context = ToolContext::new(cwd.clone(), None, None, fs, terminal, hunk_tracker_handle);
@@ -48,9 +48,9 @@ async fn create_test_actor(
         nudges_used_this_session: 0,
     });
     let (event_tx, _event_rx) = tokio::sync::mpsc::unbounded_channel();
-    let chat_state_handle = wimo ai_chat_state::ChatStateActor::spawn(
+    let chat_state_handle = wimoai_chat_state::ChatStateActor::spawn(
         vec![],
-        wimo ai_wimo_sampling_types::SamplingConfig {
+        wimoai_wimo_sampling_types::SamplingConfig {
             base_url: "http://localhost".to_string(),
             model: "test".to_string(),
             max_completion_tokens: None,
@@ -65,7 +65,7 @@ async fn create_test_actor(
             reasoning_effort: None,
             stream_tool_calls: None,
         },
-        Box::new(wimo ai_chat_state::NullChatPersistence),
+        Box::new(wimoai_chat_state::NullChatPersistence),
         event_tx,
         tokio_util::sync::CancellationToken::new(),
     );
@@ -130,7 +130,7 @@ async fn create_test_actor(
             count: std::sync::atomic::AtomicU64::new(0),
             auto_compact_suppressed: std::sync::atomic::AtomicU8::new(0),
             previous_model: std::cell::Cell::new(None),
-            compaction_mode: wimo ai_chat_state::CompactionMode::Transcript,
+            compaction_mode: wimoai_chat_state::CompactionMode::Transcript,
             verbatim_input: true,
             tool_choice: crate::util::config::CompactionToolChoice::Auto,
             prefire: crate::session::compaction_config::PrefireState::default(),
@@ -235,7 +235,7 @@ async fn create_test_actor(
         laziness_debug_log: None,
         last_live_orphan_reconcile: std::cell::Cell::new(None),
         deferred_prefix: TaskSlot::new(),
-        extension_registry: wimo ai_agent_lifecycle::LocalExtensionRegistry::default(),
+        extension_registry: wimoai_agent_lifecycle::LocalExtensionRegistry::default(),
         last_announced_local_date: std::cell::Cell::new(chrono::Local::now().date_naive()),
         prefix_carries_fallback_date: std::cell::Cell::new(false),
         last_search_prompt_index: std::sync::atomic::AtomicI64::new(-1),
@@ -246,7 +246,7 @@ async fn create_test_actor(
         turn_end_tx: Default::default(),
         client_hooks: Default::default(),
         hook_resolved_workspace_root: String::new(),
-        vcs_kind: wimo ai_wimo_workspace::session::git::VcsKind::Git,
+        vcs_kind: wimoai_wimo_workspace::session::git::VcsKind::Git,
         hook_load_errors: std::cell::RefCell::new(Vec::new()),
         plugin_registry: std::cell::RefCell::new(None),
         plugin_registry_handle: None,
@@ -268,12 +268,12 @@ async fn create_test_actor(
         turn_stream_drained: parking_lot::Mutex::new(std::collections::HashMap::new()),
         pending_image_strip: parking_lot::Mutex::new(std::collections::HashMap::new()),
         image_strip_rewrite_barrier: ImageStripRewriteBarrier::new(),
-        sampler_handle: wimo ai_wimo_sampler::SamplerHandle::noop(),
+        sampler_handle: wimoai_wimo_sampler::SamplerHandle::noop(),
         sampling_gate: None,
         image_description_model: crate::test_support::TEST_MODEL.to_owned(),
         image_describe_cache: Arc::new(crate::session::image_describe::ImageDescribeCache::new()),
         subagent_token_records: parking_lot::Mutex::new(HashMap::new()),
-        workspace_ops: wimo ai_wimo_workspace::WorkspaceOps::for_test(),
+        workspace_ops: wimoai_wimo_workspace::WorkspaceOps::for_test(),
         trace_config_template: std::cell::RefCell::new(None),
     }
 }
@@ -283,7 +283,7 @@ async fn test_should_auto_compact_triggers_at_threshold() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(85_000, 100_000, 85, gateway_tx, persistence_tx).await;
             let result =
@@ -302,7 +302,7 @@ async fn test_should_auto_compact_below_threshold() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(84_000, 100_000, 85, gateway_tx, persistence_tx).await;
             let result =
@@ -317,7 +317,7 @@ async fn test_check_auto_compact_needed_uses_state() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(90_000, 100_000, 85, gateway_tx, persistence_tx).await;
             let result = actor.check_auto_compact_needed().await;
@@ -335,7 +335,7 @@ async fn test_context_window_override_affects_auto_compact() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(86_000, 100_000, 85, gateway_tx, persistence_tx).await;
             let result = actor.check_auto_compact_needed().await;
@@ -360,7 +360,7 @@ async fn test_context_window_override_to_smaller_triggers_compact() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(86_000, 200_000, 85, gateway_tx, persistence_tx).await;
             let result = actor.check_auto_compact_needed().await;
@@ -385,7 +385,7 @@ async fn test_response_header_context_window_downgrade_rejected() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(200_000, 500_000, 85, gateway_tx, persistence_tx).await;
             let cfg_before = actor.chat_state_handle.get_sampling_config().await.unwrap();
@@ -424,7 +424,7 @@ async fn create_test_actor_with_memory(
     total_tokens: u64,
     context_window: u64,
     threshold_percent: u8,
-    gateway_tx: mpsc::UnboundedSender<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_tx: mpsc::UnboundedSender<wimoai_acp_lib::AcpClientMessage>,
     persistence_tx: mpsc::UnboundedSender<PersistenceMsg>,
     memory_config: Option<crate::config::MemoryConfig>,
 ) -> SessionActor {
@@ -434,11 +434,11 @@ async fn create_test_actor_with_memory(
     let fs = Arc::new(MockFs::new(cwd.to_path_buf()));
     let terminal = Arc::new(DummyTerminal {});
     let (hunk_tx, _) = tokio::sync::mpsc::unbounded_channel();
-    let hunk_tracker_handle = wimo ai_hunk_tracker::HunkTrackerActor::spawn(
+    let hunk_tracker_handle = wimoai_hunk_tracker::HunkTrackerActor::spawn(
         "test-memory".to_string(),
         cwd.to_path_buf(),
         hunk_tx,
-        wimo ai_hunk_tracker::TrackingMode::AgentOnly,
+        wimoai_hunk_tracker::TrackingMode::AgentOnly,
         tokio_util::sync::CancellationToken::new(),
     );
     let tool_context = ToolContext::new(cwd.clone(), None, None, fs, terminal, hunk_tracker_handle);
@@ -460,9 +460,9 @@ async fn create_test_actor_with_memory(
         nudges_used_this_session: 0,
     });
     let (event_tx, _event_rx) = tokio::sync::mpsc::unbounded_channel();
-    let chat_state_handle = wimo ai_chat_state::ChatStateActor::spawn(
+    let chat_state_handle = wimoai_chat_state::ChatStateActor::spawn(
         vec![],
-        wimo ai_wimo_sampling_types::SamplingConfig {
+        wimoai_wimo_sampling_types::SamplingConfig {
             base_url: "http://localhost".to_string(),
             model: "test".to_string(),
             max_completion_tokens: None,
@@ -477,7 +477,7 @@ async fn create_test_actor_with_memory(
             reasoning_effort: None,
             stream_tool_calls: None,
         },
-        Box::new(wimo ai_chat_state::NullChatPersistence),
+        Box::new(wimoai_chat_state::NullChatPersistence),
         event_tx,
         tokio_util::sync::CancellationToken::new(),
     );
@@ -543,7 +543,7 @@ async fn create_test_actor_with_memory(
             count: std::sync::atomic::AtomicU64::new(0),
             auto_compact_suppressed: std::sync::atomic::AtomicU8::new(0),
             previous_model: std::cell::Cell::new(None),
-            compaction_mode: wimo ai_chat_state::CompactionMode::Transcript,
+            compaction_mode: wimoai_chat_state::CompactionMode::Transcript,
             verbatim_input: true,
             tool_choice: crate::util::config::CompactionToolChoice::Auto,
             prefire: crate::session::compaction_config::PrefireState::default(),
@@ -661,7 +661,7 @@ async fn create_test_actor_with_memory(
         laziness_debug_log: None,
         last_live_orphan_reconcile: std::cell::Cell::new(None),
         deferred_prefix: TaskSlot::new(),
-        extension_registry: wimo ai_agent_lifecycle::LocalExtensionRegistry::default(),
+        extension_registry: wimoai_agent_lifecycle::LocalExtensionRegistry::default(),
         last_announced_local_date: std::cell::Cell::new(chrono::Local::now().date_naive()),
         prefix_carries_fallback_date: std::cell::Cell::new(false),
         last_search_prompt_index: std::sync::atomic::AtomicI64::new(-1),
@@ -672,7 +672,7 @@ async fn create_test_actor_with_memory(
         turn_end_tx: Default::default(),
         client_hooks: Default::default(),
         hook_resolved_workspace_root: String::new(),
-        vcs_kind: wimo ai_wimo_workspace::session::git::VcsKind::Git,
+        vcs_kind: wimoai_wimo_workspace::session::git::VcsKind::Git,
         hook_load_errors: std::cell::RefCell::new(Vec::new()),
         plugin_registry: std::cell::RefCell::new(None),
         plugin_registry_handle: None,
@@ -694,12 +694,12 @@ async fn create_test_actor_with_memory(
         turn_stream_drained: parking_lot::Mutex::new(std::collections::HashMap::new()),
         pending_image_strip: parking_lot::Mutex::new(std::collections::HashMap::new()),
         image_strip_rewrite_barrier: ImageStripRewriteBarrier::new(),
-        sampler_handle: wimo ai_wimo_sampler::SamplerHandle::noop(),
+        sampler_handle: wimoai_wimo_sampler::SamplerHandle::noop(),
         sampling_gate: None,
         image_description_model: crate::test_support::TEST_MODEL.to_owned(),
         image_describe_cache: Arc::new(crate::session::image_describe::ImageDescribeCache::new()),
         subagent_token_records: parking_lot::Mutex::new(HashMap::new()),
-        workspace_ops: wimo ai_wimo_workspace::WorkspaceOps::for_test(),
+        workspace_ops: wimoai_wimo_workspace::WorkspaceOps::for_test(),
         trace_config_template: std::cell::RefCell::new(None),
     }
 }
@@ -890,9 +890,9 @@ async fn test_idle_flush_conversation_len_reset_after_compaction() {
         })
         .await;
 }
-fn api_error_with_context_window(context_window: u64) -> wimo ai_wimo_sampler::SamplingErrorInfo {
-    wimo ai_wimo_sampler::SamplingErrorInfo {
-        kind: wimo ai_wimo_sampler::SamplingErrorKind::Api,
+fn api_error_with_context_window(context_window: u64) -> wimoai_wimo_sampler::SamplingErrorInfo {
+    wimoai_wimo_sampler::SamplingErrorInfo {
+        kind: wimoai_wimo_sampler::SamplingErrorKind::Api,
         status_code: Some(400),
         message: "prompt is too long".into(),
         is_retryable: false,
@@ -907,7 +907,7 @@ fn api_error_with_context_window(context_window: u64) -> wimo ai_wimo_sampler::S
         empty_response_context: None,
         doom_loop_triggers: None,
         doom_loop_aborted_at_chunk: None,
-        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
     }
 }
 /// Primary scenario: remote settings shrinks the context window mid-session.
@@ -917,7 +917,7 @@ async fn test_compact_on_error_triggers_when_tokens_exceed_new_window() {
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
-            let (gateway_tx, _) = mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+            let (gateway_tx, _) = mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(214_000, 1_000_000, 85, gateway_tx, persistence_tx).await;
             let err = api_error_with_context_window(200_000);
@@ -931,7 +931,7 @@ async fn test_compact_on_error_no_trigger_when_tokens_within_new_window() {
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
-            let (gateway_tx, _) = mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+            let (gateway_tx, _) = mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(150_000, 1_000_000, 85, gateway_tx, persistence_tx).await;
             let err = api_error_with_context_window(200_000);
@@ -945,11 +945,11 @@ async fn test_compact_on_error_noop_without_model_metadata() {
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
-            let (gateway_tx, _) = mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+            let (gateway_tx, _) = mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(500_000, 200_000, 85, gateway_tx, persistence_tx).await;
-            let err = wimo ai_wimo_sampler::SamplingErrorInfo {
-                kind: wimo ai_wimo_sampler::SamplingErrorKind::Api,
+            let err = wimoai_wimo_sampler::SamplingErrorInfo {
+                kind: wimoai_wimo_sampler::SamplingErrorKind::Api,
                 status_code: Some(400),
                 message: "prompt is too long".into(),
                 is_retryable: false,
@@ -960,7 +960,7 @@ async fn test_compact_on_error_noop_without_model_metadata() {
                 empty_response_context: None,
                 doom_loop_triggers: None,
                 doom_loop_aborted_at_chunk: None,
-                credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+                credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
             };
             assert!(!actor.should_compact_on_error(&err).await);
         })
@@ -969,7 +969,7 @@ async fn test_compact_on_error_noop_without_model_metadata() {
 /// A fresh session emits `x-compactions-remaining: 1`; once the chat-state reflects a compaction, the next reconstructed config emits `0`.
 #[tokio::test(flavor = "current_thread")]
 async fn compactions_remaining_header_flips_after_compaction() {
-    use wimo ai_wimo_sampling_types::CompactionsRemaining;
+    use wimoai_wimo_sampling_types::CompactionsRemaining;
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -1008,7 +1008,7 @@ async fn compactions_remaining_header_flips_after_compaction() {
 /// `Fixed(n)` sends the constant `n` and never flips: the header stays the same across a compaction, unlike the dynamic variant's 1 to 0.
 #[tokio::test(flavor = "current_thread")]
 async fn compactions_remaining_fixed_does_not_flip_after_compaction() {
-    use wimo ai_wimo_sampling_types::CompactionsRemaining;
+    use wimoai_wimo_sampling_types::CompactionsRemaining;
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -1048,7 +1048,7 @@ async fn compactions_remaining_fixed_does_not_flip_after_compaction() {
 /// Once the chat-state reflects a compaction, the next reconstructed config drops the header.
 #[tokio::test(flavor = "current_thread")]
 async fn compaction_at_tokens_header_flips_after_compaction() {
-    use wimo ai_wimo_sampling_types::CompactionAtTokens;
+    use wimoai_wimo_sampling_types::CompactionAtTokens;
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -1085,7 +1085,7 @@ async fn compaction_at_tokens_header_flips_after_compaction() {
 /// `Fixed(n)` sends the exact constant; the default (`None`) never emits the header.
 #[tokio::test(flavor = "current_thread")]
 async fn compaction_at_tokens_fixed_and_disabled() {
-    use wimo ai_wimo_sampling_types::CompactionAtTokens;
+    use wimoai_wimo_sampling_types::CompactionAtTokens;
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {

@@ -2,8 +2,8 @@
 
 mod common;
 
-use wimo ai_wimo_shell::agent::models::startup_prefetch;
-use wimo ai_wimo_shell::util::config::RemoteSettings;
+use wimoai_wimo_shell::agent::models::startup_prefetch;
+use wimoai_wimo_shell::util::config::RemoteSettings;
 
 #[test]
 fn one_fetch_serves_begin_wait_and_bootstrap() {

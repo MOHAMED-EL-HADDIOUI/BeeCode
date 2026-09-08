@@ -27,12 +27,12 @@ pub use mcp::*;
 pub(crate) use mcp_reenable::reenableable_disabled_stubs;
 pub use permissions::*;
 pub use persist::*;
-// These types live in `wimo ai-wimo-config-types`; the re-export keeps `crate::util::config::{RemoteSettings, GoalRoleModel}` working
+// These types live in `wimoai-wimo-config-types`; the re-export keeps `crate::util::config::{RemoteSettings, GoalRoleModel}` working
 pub use resolve::*;
 pub use settings_writes::*;
 pub use tips::*;
 pub use worktree::*;
-pub use wimo ai_wimo_config_types::{
+pub use wimoai_wimo_config_types::{
     CampaignOverride, ConsentGate, ContextualHintsRemote, DisplayRefreshSettings,
     DoomLoopRecoverySettings, GoalRoleModel, RemoteSettings, WorktreeAutoGcSettings,
     WorktreeKindMaxAge, deserialize_tolerant,

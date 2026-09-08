@@ -15,10 +15,10 @@
 //! ## Typical use
 //!
 //! ```bash
-//! cargo bench -p wimo ai-wimo-pager-pty-harness --bench paste_latency -- --iterations 10
+//! cargo bench -p wimoai-wimo-pager-pty-harness --bench paste_latency -- --iterations 10
 //!
 //! # Compare an old release artifact, text mode only, JSON to a file:
-//! cargo bench -p wimo ai-wimo-pager-pty-harness --bench paste_latency -- \
+//! cargo bench -p wimoai-wimo-pager-pty-harness --bench paste_latency -- \
 //!   --binary ~/Downloads/wimo-old --mode text --json /tmp/paste-old.json
 //! ```
 
@@ -28,7 +28,7 @@ use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, bail};
 use clap::Parser as ClapParser;
-use wimo ai_wimo_pager_pty_harness::{
+use wimoai_wimo_pager_pty_harness::{
     ContentController, PtyHarness,
     host_clipboard::{HostClipboardTextGuard, pbcopy, set_clipboard_png, write_fixture_png},
     pager_binary,
@@ -47,7 +47,7 @@ const TURN_SENTINEL: &str = "PASTEBENCHTURNDONE";
 #[derive(ClapParser, Debug)]
 #[command(
     name = "paste-latency",
-    about = "Clipboard paste latency benchmark for wimo ai-wimo-pager (macOS, real pasteboard)",
+    about = "Clipboard paste latency benchmark for wimoai-wimo-pager (macOS, real pasteboard)",
     long_about = None,
 )]
 struct Cli {

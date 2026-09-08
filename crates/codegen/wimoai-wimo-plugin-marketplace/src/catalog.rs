@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use serde::Deserialize;
-use wimo ai_hooks_plugins_types::PluginComponents;
+use wimoai_hooks_plugins_types::PluginComponents;
 
 /// Catalog format version this client understands.
 const SUPPORTED_VERSION: u64 = 1;

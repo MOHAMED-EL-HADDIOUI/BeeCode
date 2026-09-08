@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-voice"
+name = "wimoai-wimo-voice"
 version = "0.1.0"
 edition.workspace = true
 description = "Voice dictation (streaming STT) for wimo Build CLI"
@@ -21,12 +21,12 @@ toml = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 url = { workspace = true }
-wimo ai-dirs = { workspace = true }
-wimo ai-wimo-extra-ca = { workspace = true }
+wimoai-dirs = { workspace = true }
+wimoai-wimo-extra-ca = { workspace = true }
 # Sanctioned TTY detach for the capture subprocesses (Linux system recorders,
 # macOS `__mic-capture` self-exec helper) — workspace rule: never spawn a raw
 # `std::process::Command`.
-wimo ai-tty-utils = { workspace = true }
+wimoai-tty-utils = { workspace = true }
 
 [features]
 # `audio` = "microphone capture is compiled in". It's enabled on every OS for

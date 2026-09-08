@@ -6,10 +6,10 @@
 //! Run with:
 //! ```bash
 //! # On a Linux machine (as root or with cgroup delegation):
-//! cargo test -p wimo ai-wimo-tools --test cgroup_memory_test -- --ignored --nocapture
+//! cargo test -p wimoai-wimo-tools --test cgroup_memory_test -- --ignored --nocapture
 //!
 //! # If you need root:
-//! sudo -E cargo test -p wimo ai-wimo-tools --test cgroup_memory_test -- --ignored --nocapture
+//! sudo -E cargo test -p wimoai-wimo-tools --test cgroup_memory_test -- --ignored --nocapture
 //! ```
 //!
 //! The cgroup-dependent tests (1–5) are `#[ignore]`d by default so they don't
@@ -27,10 +27,10 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::Duration;
 
-use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-use wimo ai_wimo_tools::computer::local::cgroup::{CgroupMemoryConfig, PROCESS_OOM_EXIT_CODE};
-use wimo ai_wimo_tools::computer::types::{TerminalBackend, TerminalRunRequest, TerminalRunResult};
-use wimo ai_wimo_tools::notification::types::ToolNotificationHandle;
+use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+use wimoai_wimo_tools::computer::local::cgroup::{CgroupMemoryConfig, PROCESS_OOM_EXIT_CODE};
+use wimoai_wimo_tools::computer::types::{TerminalBackend, TerminalRunRequest, TerminalRunResult};
+use wimoai_wimo_tools::notification::types::ToolNotificationHandle;
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 

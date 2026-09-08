@@ -279,12 +279,12 @@ mod tests {
     fn glob_grants_must_cover_the_prompted_script() {
         // The editor's legitimate output: a glob widening the primary's args.
         assert!(bash_glob_covers_script(
-            "gh api repos/owner/wimo ai/pulls",
+            "gh api repos/owner/wimoai/pulls",
             "gh api repos/owner/*"
         ));
         // Chains verify against any non-setup segment.
         assert!(bash_glob_covers_script(
-            "cd /tmp && gh api repos/owner/wimo ai",
+            "cd /tmp && gh api repos/owner/wimoai",
             "gh api *"
         ));
         // A forged scope naming commands the prompt never showed is refused.
@@ -293,7 +293,7 @@ mod tests {
         // Catch-all patterns "match the prompted script" only by matching everything, so a forged reply cannot mint a blanket grant
         for catchall in ["*", "**", "* *", "?*"] {
             assert!(
-                !bash_glob_covers_script("gh api repos/owner/wimo ai", catchall),
+                !bash_glob_covers_script("gh api repos/owner/wimoai", catchall),
                 "catch-all {catchall:?} must not cover the script",
             );
         }
@@ -387,7 +387,7 @@ mod tests {
             "python3 -u foo.py arg",
             "sudo git status",
             "ssh host uname -a",
-            "gh api repos/owner/wimo ai/pulls",
+            "gh api repos/owner/wimoai/pulls",
             r#"terraform plan -var "x=1 2" | head"#,
         ] {
             if !always_allow_row_is_effective(cmd) {

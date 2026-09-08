@@ -15,8 +15,8 @@ struct PromptCacheUsage {
     cache_write_rate: f64,
 }
 
-impl From<&wimo ai_wimo_sampling_types::TokenUsage> for PromptCacheUsage {
-    fn from(usage: &wimo ai_wimo_sampling_types::TokenUsage) -> Self {
+impl From<&wimoai_wimo_sampling_types::TokenUsage> for PromptCacheUsage {
+    fn from(usage: &wimoai_wimo_sampling_types::TokenUsage) -> Self {
         let prompt_tokens = usage.prompt_tokens;
         let uncached_prompt_tokens = prompt_tokens
             .saturating_sub(usage.cached_prompt_tokens)
@@ -43,7 +43,7 @@ impl From<&wimo ai_wimo_sampling_types::TokenUsage> for PromptCacheUsage {
 pub(crate) fn log_prompt_cache_usage(
     call: &str,
     backend: crate::sampling::ApiBackend,
-    response: &wimo ai_wimo_sampling_types::ConversationResponse,
+    response: &wimoai_wimo_sampling_types::ConversationResponse,
 ) {
     let Some(usage) = response.usage.as_ref() else {
         return;
@@ -68,10 +68,10 @@ pub(crate) fn log_prompt_cache_usage(
 pub(crate) struct AuxCall {
     pub(crate) items: Vec<ConversationItem>,
     pub(crate) tools: Vec<ToolSpec>,
-    pub(crate) hosted_tools: Vec<wimo ai_wimo_sampling_types::HostedTool>,
+    pub(crate) hosted_tools: Vec<wimoai_wimo_sampling_types::HostedTool>,
     pub(crate) model: String,
     /// Must match the main turn's, or the prompt differs before the conversation history even starts.
-    pub(crate) reasoning_effort: Option<wimo ai_wimo_sampling_types::ReasoningEffort>,
+    pub(crate) reasoning_effort: Option<wimoai_wimo_sampling_types::ReasoningEffort>,
     /// Says whether the cache key gets sent, which is what decides the conv id below.
     pub(crate) backend: crate::sampling::ApiBackend,
     pub(crate) conv_id: String,
@@ -80,17 +80,17 @@ pub(crate) struct AuxCall {
 
 /// Shared setup for a recap-style side-call; see [`SessionActor::prepare_side_call`].
 pub(crate) struct SideCallSetup {
-    pub(crate) client: wimo ai_wimo_sampler::SamplingClient,
+    pub(crate) client: wimoai_wimo_sampler::SamplingClient,
     pub(crate) strip_reasoning: bool,
     pub(crate) context_window: u64,
     pub(crate) model: String,
     /// Must match the main turn so the side-call shares the prompt-cache prefix.
-    pub(crate) reasoning_effort: Option<wimo ai_wimo_sampling_types::ReasoningEffort>,
+    pub(crate) reasoning_effort: Option<wimoai_wimo_sampling_types::ReasoningEffort>,
 }
 
 pub(super) fn should_strip_side_call_reasoning(
     backend: crate::sampling::ApiBackend,
-    reasoning_effort: Option<wimo ai_wimo_sampling_types::ReasoningEffort>,
+    reasoning_effort: Option<wimoai_wimo_sampling_types::ReasoningEffort>,
 ) -> bool {
     matches!(backend, crate::sampling::ApiBackend::Messages)
         && reasoning_effort
@@ -112,7 +112,7 @@ impl SessionActor {
             session_id.clone()
         };
         ConversationRequest {
-            items: wimo ai_chat_state::compaction_utils::ModelRequestHistory::from_raw(call.items)
+            items: wimoai_chat_state::compaction_utils::ModelRequestHistory::from_raw(call.items)
                 .into_items(),
             tools: call.tools,
             hosted_tools: call.hosted_tools,
@@ -123,11 +123,11 @@ impl SessionActor {
             x_wimo_conv_id: Some(conv_id),
             x_wimo_req_id: Some(call.req_id),
             x_wimo_session_id: Some(session_id.clone()),
-            x_wimo_agent_id: Some(wimo ai_wimo_telemetry::id::agent_id()),
+            x_wimo_agent_id: Some(wimoai_wimo_telemetry::id::agent_id()),
             prompt_cache_key: Some(session_id),
             // Side calls persist text and never execute tools (the attached tools only align the prompt-cache prefix)
             // A Length sample must fail rather than salvage
-            length_policy: wimo ai_wimo_sampling_types::LengthPolicy::Fail,
+            length_policy: wimoai_wimo_sampling_types::LengthPolicy::Fail,
             ..Default::default()
         }
     }
@@ -205,7 +205,7 @@ impl SessionActor {
 #[cfg(test)]
 mod tests {
     use super::PromptCacheUsage;
-    use wimo ai_wimo_sampling_types::TokenUsage;
+    use wimoai_wimo_sampling_types::TokenUsage;
 
     #[test]
     fn prompt_cache_usage_projects_provider_buckets_and_rates() {

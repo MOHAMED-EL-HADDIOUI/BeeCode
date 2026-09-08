@@ -76,7 +76,7 @@ pub unsafe fn isolate_wimo_env(home: &Path) {
             "wimo_CLI_CHAT_PROXY_BASE_URL",
             "wimo_MODELS_BASE_URL",
             "wimo_MODELS_LIST_URL",
-            "wimo ai_API_KEY",
+            "wimoai_API_KEY",
             "wimo_API_KEY",
             "HTTP_PROXY",
             "HTTPS_PROXY",
@@ -108,7 +108,7 @@ fn target_dir() -> PathBuf {
 fn local_wimo_binary_path() -> PathBuf {
     target_dir()
         .join("debug")
-        .join(format!("wimo ai-wimo-pager{}", std::env::consts::EXE_SUFFIX))
+        .join(format!("wimoai-wimo-pager{}", std::env::consts::EXE_SUFFIX))
 }
 
 fn ensure_local_wimo_binary(binary: &Path) {
@@ -122,32 +122,32 @@ fn ensure_local_wimo_binary(binary: &Path) {
         .args([
             "build",
             "-p",
-            "wimo ai-wimo-pager-bin",
+            "wimoai-wimo-pager-bin",
             "--bin",
-            "wimo ai-wimo-pager",
+            "wimoai-wimo-pager",
         ])
         .stdin(std::process::Stdio::null())
-        .envs(wimo ai_tty_utils::pager_env());
-    wimo ai_tty_utils::detach_std_command(&mut cmd);
+        .envs(wimoai_tty_utils::pager_env());
+    wimoai_tty_utils::detach_std_command(&mut cmd);
     let output = cmd
         .output()
-        .unwrap_or_else(|e| panic!("failed to spawn {cargo} to build wimo ai-wimo-pager: {e}"));
+        .unwrap_or_else(|e| panic!("failed to spawn {cargo} to build wimoai-wimo-pager: {e}"));
 
     assert!(
         output.status.success(),
-        "failed to build wimo ai-wimo-pager for lifecycle tests (exit {:?})\nstdout:\n{}\nstderr:\n{}",
+        "failed to build wimoai-wimo-pager for lifecycle tests (exit {:?})\nstdout:\n{}\nstderr:\n{}",
         output.status.code(),
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr),
     );
     assert!(
         binary.exists(),
-        "wimo ai-wimo-pager build completed but binary missing at {}",
+        "wimoai-wimo-pager build completed but binary missing at {}",
         binary.display()
     );
 }
 
-/// Resolve wimo binary: `wimo_BINARY` env (CI) or a locally built `wimo ai-wimo-pager` binary.
+/// Resolve wimo binary: `wimo_BINARY` env (CI) or a locally built `wimoai-wimo-pager` binary.
 pub fn wimo_binary() -> PathBuf {
     if let Ok(path) = std::env::var("wimo_BINARY") {
         let p = PathBuf::from(path);
@@ -157,7 +157,7 @@ pub fn wimo_binary() -> PathBuf {
         return std::path::absolute(&p).unwrap_or(p);
     }
 
-    if let Ok(path) = std::env::var("CARGO_BIN_EXE_wimo ai-wimo-pager") {
+    if let Ok(path) = std::env::var("CARGO_BIN_EXE_wimoai-wimo-pager") {
         let p = PathBuf::from(path);
         if p.exists() {
             return p;

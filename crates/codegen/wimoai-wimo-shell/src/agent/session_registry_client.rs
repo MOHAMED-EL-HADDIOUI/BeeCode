@@ -171,7 +171,7 @@ impl SessionRegistryClient {
 
     /// Attach an `AuthManager` so request signing and 401 recovery go through the shared auth path.
     pub fn with_auth(mut self, auth_manager: std::sync::Arc<crate::auth::AuthManager>) -> Self {
-        let provider: std::sync::Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider> =
+        let provider: std::sync::Arc<dyn wimoai_wimo_auth::AuthCredentialProvider> =
             std::sync::Arc::new(
                 crate::auth::credential_provider::ShellAuthCredentialProvider::new(
                     auth_manager.clone(),
@@ -192,11 +192,11 @@ impl SessionRegistryClient {
         op: &'static str,
     ) -> Result<(
         reqwest::Response,
-        Option<wimo ai_wimo_auth::StampedBearerSuffix>,
+        Option<wimoai_wimo_auth::StampedBearerSuffix>,
     )> {
-        let builder = wimo ai_file_utils::trace_context::inject_trace_context_into_request(builder);
+        let builder = wimoai_file_utils::trace_context::inject_trace_context_into_request(builder);
         let request = builder.build().context(op)?;
-        wimo ai_wimo_auth::execute_with_stamp(&self.client, request)
+        wimoai_wimo_auth::execute_with_stamp(&self.client, request)
             .await
             .map_err(|e| match e {
                 reqwest_middleware::Error::Middleware(e) => e.context(op),
@@ -212,7 +212,7 @@ impl SessionRegistryClient {
     fn check_response(
         &self,
         response: reqwest::Response,
-        stamp: Option<&wimo ai_wimo_auth::StampedBearerSuffix>,
+        stamp: Option<&wimoai_wimo_auth::StampedBearerSuffix>,
         op: &str,
     ) -> anyhow::Error {
         if response.status() == reqwest::StatusCode::UNAUTHORIZED {
@@ -225,8 +225,8 @@ impl SessionRegistryClient {
 
     /// Emit a single `auth 401 attribution` log entry tagged with `consumer = "SessionRegistryClient.<op>"`.
     /// The op string is the operation name passed to `check_response`, e.g. `"session register"`.
-    /// `stamp` is what the middleware put on the wire; [`wimo ai_wimo_auth::StampedBearerSuffix`] explains why it is never re-resolved.
-    fn record_401_attribution(&self, op: &str, stamp: Option<&wimo ai_wimo_auth::StampedBearerSuffix>) {
+    /// `stamp` is what the middleware put on the wire; [`wimoai_wimo_auth::StampedBearerSuffix`] explains why it is never re-resolved.
+    fn record_401_attribution(&self, op: &str, stamp: Option<&wimoai_wimo_auth::StampedBearerSuffix>) {
         if let Some(manager) = self.credentials.auth_manager() {
             crate::auth::attribution::record_consumer_401(
                 manager.as_ref(),

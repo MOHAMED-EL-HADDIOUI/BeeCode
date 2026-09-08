@@ -5,7 +5,7 @@
 #[allow(unused_imports)]
 use super::common::*;
 
-use wimo ai_wimo_pager_pty_harness::StyledLine;
+use wimoai_wimo_pager_pty_harness::StyledLine;
 
 /// Typed prompt: plain text with the skill referenced mid-message.
 const TYPED: &str = "great /test-skill do it";

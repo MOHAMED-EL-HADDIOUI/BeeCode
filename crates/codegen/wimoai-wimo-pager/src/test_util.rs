@@ -51,8 +51,8 @@ pub fn make_worktree_record(
     id: &str,
     path: &std::path::Path,
     label: &str,
-) -> wimo ai_fast_worktree::WorktreeRecord {
-    use wimo ai_fast_worktree::{WorktreeKind, WorktreeRecord, WorktreeStatus};
+) -> wimoai_fast_worktree::WorktreeRecord {
+    use wimoai_fast_worktree::{WorktreeKind, WorktreeRecord, WorktreeStatus};
     WorktreeRecord {
         id: id.to_owned(),
         path: path.to_path_buf(),
@@ -191,8 +191,8 @@ impl wimoHomeFixture {
         let _ = std::fs::remove_dir_all(Self::sessions_cwd_dir(cwd).join(id));
     }
     fn sessions_cwd_dir(cwd: &str) -> std::path::PathBuf {
-        let encoded = wimo ai_wimo_shell::util::wimo_home::encode_cwd_dirname(cwd);
-        wimo ai_wimo_shell::util::wimo_home::wimo_home()
+        let encoded = wimoai_wimo_shell::util::wimo_home::encode_cwd_dirname(cwd);
+        wimoai_wimo_shell::util::wimo_home::wimo_home()
             .join("sessions")
             .join(&encoded)
     }

@@ -23,7 +23,7 @@ mod tests {
         for (input, expected) in [
             // The tail, not the head: JWT headers and wimo AI key prefixes are shared.
             ("eyJ0eXAiOiJh.shared-head.tail-distinct", "ail-distinct"),
-            ("wimo ai-key-aaaaaaaaaaadistinct1", "aaadistinct1"),
+            ("wimoai-key-aaaaaaaaaaadistinct1", "aaadistinct1"),
             // Shorter than the fragment: returned whole.
             ("abc", "abc"),
             ("", ""),

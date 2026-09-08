@@ -33,29 +33,29 @@ impl ModelSource for OaiModelSource {
         let mut request = client.get(&self.endpoint.url);
         match self.endpoint.auth {
             EndpointAuth::ApiKey => {
-                let api_key = crate::agent::auth_method::read_wimo ai_api_key_env()
+                let api_key = crate::agent::auth_method::read_wimoai_api_key_env()
                     .or_else(|_| {
                         auth.map(|a| a.key.clone())
                             .ok_or(std::env::VarError::NotPresent)
                     })
                     .map_err(|_| {
                         BackendError::Auth(
-                            "No API key for custom models endpoint. Set wimo ai_API_KEY.".into(),
+                            "No API key for custom models endpoint. Set wimoai_API_KEY.".into(),
                         )
                     })?;
                 request = request.header("Authorization", format!("Bearer {}", api_key));
             }
             EndpointAuth::Session => {
                 let auth = auth
-                    .filter(|_| ActiveAuthBackend::default().is_wimo ai_authority())
+                    .filter(|_| ActiveAuthBackend::default().is_wimoai_authority())
                     .ok_or_else(|| {
                         BackendError::Auth("No auth credentials for cli-chat-proxy".into())
                     })?;
                 request = request
                     .header("Authorization", format!("Bearer {}", &auth.key))
-                    .header("X-wimo ai-Token-Auth", "wimo ai-wimo-cli")
+                    .header("X-wimoai-Token-Auth", "wimoai-wimo-cli")
                     .header("x-userid", &auth.user_id)
-                    .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+                    .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
                     .header(
                         crate::http::CLIENT_MODE_HEADER,
                         crate::http::process_client_mode(),
@@ -116,7 +116,7 @@ impl ListModelsEndpoint {
             }
         } else if fetch_auth == ModelFetchAuth::ApiKey {
             Self {
-                url: format!("{}/models", endpoints.wimo ai_api_base_url),
+                url: format!("{}/models", endpoints.wimoai_api_base_url),
                 auth: EndpointAuth::ApiKey,
             }
         } else {
@@ -137,7 +137,7 @@ mod tests {
         use crate::agent::models::ModelFetchAuth;
         for k in [
             "wimo_CLI_CHAT_PROXY_BASE_URL",
-            "wimo_wimo ai_API_BASE_URL",
+            "wimo_wimoai_API_BASE_URL",
             "wimo_MODELS_LIST_URL",
         ] {
             unsafe { std::env::remove_var(k) };
@@ -145,7 +145,7 @@ mod tests {
         let cfg = EndpointsConfig::from_config_value(
             &toml::from_str(
                 r#"[endpoints]
-                    wimo ai_api_base_url = "https://inference.acme-corp.example/wimo ai/v1""#,
+                    wimoai_api_base_url = "https://inference.acme-corp.example/wimoai/v1""#,
             )
             .unwrap(),
         );
@@ -156,7 +156,7 @@ mod tests {
         assert_eq!(deployment.url, "https://cli-chat-proxy.wimo.com/v1/models");
         assert_eq!(deployment.auth, EndpointAuth::Session);
         let api = ListModelsEndpoint::from_endpoints(&cfg, ModelFetchAuth::ApiKey);
-        assert_eq!(api.url, "https://inference.acme-corp.example/wimo ai/v1/models");
+        assert_eq!(api.url, "https://inference.acme-corp.example/wimoai/v1/models");
         assert_eq!(api.auth, EndpointAuth::ApiKey);
         let default = EndpointsConfig::from_config_value(&toml::Value::Table(Default::default()));
         assert_eq!(

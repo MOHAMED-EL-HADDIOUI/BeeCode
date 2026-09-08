@@ -1,5 +1,5 @@
 //! Self-healing /fix — REAL automatic debugging loop (Section 17 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub struct FixResult {
     pub fixed: bool,

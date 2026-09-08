@@ -1,7 +1,7 @@
 //! Parent/subagent boundary: every parent-side lifecycle call site, in order.
 //!
 //! 1. `MvpAgent::start_subagent_coordinator` (parent thread, in `mvp_agent`) hands the event receiver and concurrency limit here.
-//!    `spawn_subagent_coordinator` drives the coordinator (living in `wimo ai-wimo-tools`).
+//!    `spawn_subagent_coordinator` drives the coordinator (living in `wimoai-wimo-tools`).
 //! 2. `ShellChildRunner::run` (parent thread) gathers what a child needs from the parent via `MvpAgent::try_build_subagent_spawn_context`.
 //!    That is the parent-to-child snapshot, built by the owner in `mvp_agent`.
 //!    It then runs the spawn work on the worker pool (`worker_runtime()`, built on first use).
@@ -16,11 +16,11 @@ use crate::extensions::notification::{SessionNotification, SessionUpdate};
 use crate::session::SessionCommand;
 use agent_client_protocol as acp;
 use tokio::sync::mpsc;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-pub(crate) use wimo ai_wimo_tools::implementations::wimo::task::coordinator::{
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+pub(crate) use wimoai_wimo_tools::implementations::wimo::task::coordinator::{
     self, ChildCompletion, ChildRunOutput, StartedChild,
 };
-use wimo ai_wimo_tools::implementations::wimo::task::types::{SubagentRequest, SubagentResult};
+use wimoai_wimo_tools::implementations::wimo::task::types::{SubagentRequest, SubagentResult};
 /// Floor keeps the pool responsive when `available_parallelism` is tiny.
 const MIN_WORKER_THREADS: usize = 2;
 /// Four suffice for 32 children (each runs on its own OS thread); `wimo_SUBAGENT_WORKER_THREADS` overrides.
@@ -57,7 +57,7 @@ fn build_worker_runtime() -> std::io::Result<tokio::runtime::Runtime> {
     builder
         .worker_threads(workers)
         .thread_name("subagent-worker");
-    wimo ai_tty_utils::runtime::apply_blocking_pool(builder.enable_all()).build()
+    wimoai_tty_utils::runtime::apply_blocking_pool(builder.enable_all()).build()
 }
 struct ShellChildRunner {
     agent_ref: LocalRef<MvpAgent>,
@@ -65,7 +65,7 @@ struct ShellChildRunner {
     presentations: std::cell::RefCell<Vec<tokio_util::task::AbortOnDropHandle<()>>>,
 }
 pub(crate) fn subagent_coordinator_channel() -> (
-    wimo ai_wimo_tools::implementations::wimo::task::backend::SubagentCoordinatorSender,
+    wimoai_wimo_tools::implementations::wimo::task::backend::SubagentCoordinatorSender,
     coordinator::SubagentCoordinatorReceiver,
 ) {
     coordinator::SubagentCoordinator::<ShellChildRunner>::channel()
@@ -84,10 +84,10 @@ impl coordinator::ChildRunner for ShellChildRunner {
     type CompletionData = crate::agent::subagent::ShellCompletionData;
     type RunFuture = coordinator::LocalBoxFuture<coordinator::ChildRunOutput<Self::CompletionData>>;
     type ValidateFuture = coordinator::LocalBoxFuture<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentValidateTypeOutcome,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentValidateTypeOutcome,
     >;
     type DescribeFuture = coordinator::LocalBoxFuture<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome,
     >;
     fn run(&self, run: coordinator::ChildRunRequest<Self::Control>) -> Self::RunFuture {
         let agent_ref = self.agent_ref.clone();
@@ -101,7 +101,7 @@ impl coordinator::ChildRunner for ShellChildRunner {
                     "Spawn for unknown or evicted parent session"
                 );
                 return coordinator::ChildRunOutput {
-                    result: wimo ai_wimo_tools::implementations::wimo::task::types::SubagentResult {
+                    result: wimoai_wimo_tools::implementations::wimo::task::types::SubagentResult {
                         success: false,
                         error: Some(
                             "Parent session not found (evicted or torn down); cannot spawn subagent."
@@ -141,7 +141,7 @@ impl coordinator::ChildRunner for ShellChildRunner {
                         "subagent worker runtime failed to build"
                     );
                     return coordinator::ChildRunOutput {
-                        result: wimo ai_wimo_tools::implementations::wimo::task::types::SubagentResult {
+                        result: wimoai_wimo_tools::implementations::wimo::task::types::SubagentResult {
                             success: false,
                             error: Some(
                                 format!(
@@ -196,7 +196,7 @@ impl coordinator::ChildRunner for ShellChildRunner {
                         subagent_type,
                         "DescribeType for unknown/evicted parent session, replying Unavailable",
                     );
-                    wimo ai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome::Unavailable
+                    wimoai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome::Unavailable
                 }
             }
         })
@@ -254,7 +254,7 @@ impl coordinator::ChildRunner for ShellChildRunner {
 /// Coordinator limit sink; the coordinator cannot link telemetry directly.
 fn log_limit_notice(notice: coordinator::SubagentLimitNotice) {
     use coordinator::{LimitedSpawnOrigin, SubagentLimitDecision};
-    use wimo ai_wimo_telemetry::events::{
+    use wimoai_wimo_telemetry::events::{
         SubagentLimitDisposition, SubagentLimitHit, SubagentOwnerKind,
     };
     let (disposition, limit) = match notice.decision {
@@ -265,7 +265,7 @@ fn log_limit_notice(notice: coordinator::SubagentLimitNotice) {
             (SubagentLimitDisposition::Failed, limit as u64)
         }
     };
-    wimo ai_wimo_telemetry::session_ctx::log_event(SubagentLimitHit::session_concurrent(
+    wimoai_wimo_telemetry::session_ctx::log_event(SubagentLimitHit::session_concurrent(
         notice.parent_session_id,
         disposition,
         limit,
@@ -284,7 +284,7 @@ fn log_limit_notice(notice: coordinator::SubagentLimitNotice) {
 pub(crate) fn spawn_subagent_coordinator(
     agent_ref: LocalRef<MvpAgent>,
     rx: coordinator::SubagentCoordinatorReceiver,
-    limits: wimo ai_wimo_tools::implementations::wimo::task::admission::SubagentLimits,
+    limits: wimoai_wimo_tools::implementations::wimo::task::admission::SubagentLimits,
 ) {
     let runner = ShellChildRunner {
         agent_ref,
@@ -293,7 +293,7 @@ pub(crate) fn spawn_subagent_coordinator(
     let limit_sink: coordinator::SubagentLimitSink = std::sync::Arc::new(log_limit_notice);
     let config = coordinator::CoordinatorConfig {
         foreground_budget:
-            wimo ai_wimo_tools::implementations::wimo::task::backend::env_duration_or(
+            wimoai_wimo_tools::implementations::wimo::task::backend::env_duration_or(
                 "wimo_SUBAGENT_AWAIT_BUDGET_MS",
                 std::time::Duration::from_secs(600),
             ),
@@ -405,7 +405,7 @@ pub(crate) struct InjectParams<'a> {
     pub result: &'a SubagentResult,
     pub request: &'a SubagentRequest,
     pub task_completion_reservations:
-        &'a Option<wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations>,
+        &'a Option<wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations>,
     pub parent_cmd_tx: Option<&'a mpsc::UnboundedSender<SessionCommand>>,
     pub task_output_tool_name: &'a str,
     pub scheduler_delete_tool_name: Option<&'a str>,
@@ -439,13 +439,13 @@ pub(crate) fn inject_subagent_completed_prompt(params: InjectParams) {
         return;
     };
     let summary =
-        wimo ai_wimo_tools::implementations::wimo::task::completion_summary(request, result);
-    let message = wimo ai_wimo_tools::reminders::task_completion::format_subagent_completion(
+        wimoai_wimo_tools::implementations::wimo::task::completion_summary(request, result);
+    let message = wimoai_wimo_tools::reminders::task_completion::format_subagent_completion(
         &summary,
         Some(task_output_tool_name),
         scheduler_delete_tool_name,
     );
-    let wrapped = wimo ai_wimo_tools::reminders::wrap_reminder(&message);
+    let wrapped = wimoai_wimo_tools::reminders::wrap_reminder(&message);
     let prompt_id = format!("subagent-completed-{subagent_id}");
     let before_rx = if synthetic_trace_tx.is_some() {
         let (before_tx, before_rx) = tokio::sync::oneshot::channel();
@@ -508,7 +508,7 @@ pub(crate) fn emit_subagent_notification(
         meta: meta.map(serde_json::Value::Object),
     };
     if let Some(cmd_tx) = parent_cmd_tx {
-        let _ = cmd_tx.send(SessionCommand::wimo aiSessionNotification {
+        let _ = cmd_tx.send(SessionCommand::wimoaiSessionNotification {
             notification: notification.clone(),
         });
     }

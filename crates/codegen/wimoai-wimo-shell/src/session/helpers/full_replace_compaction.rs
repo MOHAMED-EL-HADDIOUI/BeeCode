@@ -1,26 +1,26 @@
-//! wimo's L5 wiring onto the shared full-replace engine (`wimo ai_wimo_compaction::code_compaction`).
+//! wimo's L5 wiring onto the shared full-replace engine (`wimoai_wimo_compaction::code_compaction`).
 //!
 //! The shared engine drives the loop: sample, retry, then classify the result as degenerate or failed.
-//! The loop lives in [`sample_full_replace_summary`](wimo ai_wimo_compaction::sample_full_replace_summary).
+//! The loop lives in [`sample_full_replace_summary`](wimoai_wimo_compaction::sample_full_replace_summary).
 //! This module adapts wimo's transport and telemetry to the engine's two traits: [`ShellCompactionSampler`] and [`ShellFullReplaceObserver`].
 //!
 //! The **input ladder** (verbatim, then fitted, then lossy) and auto-compaction suppression stay in L5 (`compaction.rs`).
-//! Both are driven by the `context_overflow` / `deterministic` flags on [`FullReplaceError`](wimo ai_wimo_compaction::FullReplaceError).
+//! Both are driven by the `context_overflow` / `deterministic` flags on [`FullReplaceError`](wimoai_wimo_compaction::FullReplaceError).
 
 use std::sync::Mutex;
 use std::time::Duration;
 
 use agent_client_protocol as acp;
 use async_trait::async_trait;
-use wimo ai_wimo_compaction::{
+use wimoai_wimo_compaction::{
     CompactionPrompt, CompactionSampleError, CompactionSampler, FullReplaceAttemptOutcome,
     FullReplaceObserver, LlmCompactionOutput,
 };
-use wimo ai_wimo_sampler::SamplerConfig as SamplingConfig;
-use wimo ai_wimo_sampling_types::{ConversationItem, HostedTool, ToolSpec};
-use wimo ai_wimo_telemetry::events::{CompactionRetryDegraded, CompactionTrigger};
+use wimoai_wimo_sampler::SamplerConfig as SamplingConfig;
+use wimoai_wimo_sampling_types::{ConversationItem, HostedTool, ToolSpec};
+use wimoai_wimo_telemetry::events::{CompactionRetryDegraded, CompactionTrigger};
 
-use wimo ai_chat_state::compaction_utils::{
+use wimoai_chat_state::compaction_utils::{
     CompactionAttempt, MAX_CAPTURED_SUMMARY_CHARS, bound_captured_output,
 };
 
@@ -313,7 +313,7 @@ impl FullReplaceObserver for ShellFullReplaceObserver {
                     self.estimated_input_tokens
                 ));
                 if *will_retry {
-                    wimo ai_wimo_telemetry::session_ctx::log_event(CompactionRetryDegraded {
+                    wimoai_wimo_telemetry::session_ctx::log_event(CompactionRetryDegraded {
                         trigger: self.trigger,
                         reason: "degenerate_summary",
                         from_stage: None,

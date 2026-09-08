@@ -14,8 +14,8 @@ use crate::upload::gcs::WithAuth as _;
 use agent_client_protocol as acp;
 use std::sync::Arc;
 use tokio::sync::oneshot;
-use wimo ai_file_utils::gcs::upload_bytes;
-use wimo ai_wimo_telemetry::id::agent_id;
+use wimoai_file_utils::gcs::upload_bytes;
+use wimoai_wimo_telemetry::id::agent_id;
 #[tracing::instrument(skip_all, fields(method = %args.method))]
 pub async fn handle(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
     match args.method.as_ref() {
@@ -356,7 +356,7 @@ async fn handle_upload_trace(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtRes
     let auth_manager = Some(agent.auth_manager.clone());
     match tokio::time::timeout(
         std::time::Duration::from_secs(FEEDBACK_TRACE_UPLOAD_TIMEOUT_SECS),
-        wimo ai_file_utils::gcs::upload_bytes(
+        wimoai_file_utils::gcs::upload_bytes(
             &gcs_config.with_auth(auth_manager),
             &object_path,
             &archive,

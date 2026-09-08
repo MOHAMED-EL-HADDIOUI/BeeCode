@@ -3,7 +3,7 @@ fn earlier_ring_install_is_preserved() {
     rustls::crypto::ring::default_provider()
         .install_default()
         .expect("first install wins");
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
     let provider = rustls::crypto::CryptoProvider::get_default().expect("default installed");
     assert!(
         !provider

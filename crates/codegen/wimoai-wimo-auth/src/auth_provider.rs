@@ -42,7 +42,7 @@ pub trait AuthCredentialProvider: HttpAuth + Send + Sync + 'static {
     /// Returns `false` if no refresher is configured or refresh failed.
     async fn refresh_after_unauthorized(&self) -> bool;
 
-    /// Whether `X-wimo ai-Token-Auth` should be sent with the bearer token.
+    /// Whether `X-wimoai-Token-Auth` should be sent with the bearer token.
     /// `false` for deployment keys (bare Bearer), `true` for user/OAuth tokens.
     /// See `wimoAuthCredentials::apply()` for the wire format contract.
     fn needs_token_auth_header(&self) -> bool {

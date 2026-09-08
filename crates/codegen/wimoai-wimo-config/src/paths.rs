@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-pub use wimo ai_dirs::{default_wimo_home, wimo_home, user_wimo_home};
+pub use wimoai_dirs::{default_wimo_home, wimo_home, user_wimo_home};
 
 #[cfg(target_os = "macos")]
 const CLAUDE_MANAGED_SETTINGS_PATH: &str =

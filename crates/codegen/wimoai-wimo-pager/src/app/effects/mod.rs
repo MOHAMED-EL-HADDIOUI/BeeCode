@@ -20,8 +20,8 @@ use helpers::*;
 use std::path::{Path, PathBuf};
 use agent_client_protocol as acp;
 use tokio::task::JoinSet;
-use wimo ai_acp_lib::{AcpAgentTx, acp_send};
-use wimo ai_wimo_telemetry::startup::{self, StartupPhase};
+use wimoai_acp_lib::{AcpAgentTx, acp_send};
+use wimoai_wimo_telemetry::startup::{self, StartupPhase};
 use actions::{
     ClipboardPasteTarget, Effect, ProbedAttachment, SubagentKillOutcome,
     SwitchModelError, TaskResult, WorkspaceMemberUpsertFailure,
@@ -33,8 +33,8 @@ use actions::PermissionModePersist;
 #[cfg(test)]
 use agent::AgentId;
 use crate::unified_log as ulog;
-use wimo ai_wimo_shell::sampling::error::http_status_from_error;
-use wimo ai_wimo_shell::session::{ExtMethodResult, SessionInfoResponse};
+use wimoai_wimo_shell::sampling::error::http_status_from_error;
+use wimoai_wimo_shell::session::{ExtMethodResult, SessionInfoResponse};
 fn apply_permission_mode_override(
     meta: &mut Option<acp::Meta>,
     permission_mode_override: Option<PermissionModeKind>,
@@ -59,7 +59,7 @@ pub(crate) fn execute(
     match effect {
         Effect::RegisterActiveSession { session_id, cwd } => {
             crate::app::signal_handler::set_current_session_id(Some(session_id.clone()));
-            if let Err(e) = wimo ai_wimo_active_sessions::register(wimo ai_wimo_active_sessions::ActiveSession {
+            if let Err(e) = wimoai_wimo_active_sessions::register(wimoai_wimo_active_sessions::ActiveSession {
                 session_id,
                 pid: std::process::id(),
                 cwd,
@@ -156,8 +156,8 @@ pub(crate) fn execute(
             chat_kind,
         } => {
             let tx = acp_tx.clone();
-            let compat = wimo ai_wimo_tools::types::compat::CompatConfig::default();
-            let mcp_servers = wimo ai_wimo_shell::util::config::load_mcp_servers(
+            let compat = wimoai_wimo_tools::types::compat::CompatConfig::default();
+            let mcp_servers = wimoai_wimo_shell::util::config::load_mcp_servers(
                 &session_cwd,
                 &compat,
             );
@@ -292,7 +292,7 @@ pub(crate) fn execute(
                             .as_deref()
                             .filter(|t| *t == sid);
                         let resume_started = std::time::Instant::now();
-                        let wt_type = wimo ai_wimo_shell::util::config::worktree_type();
+                        let wt_type = wimoai_wimo_shell::util::config::worktree_type();
                         let copy_mode = if git_ref.is_some() {
                             "clean"
                         } else {
@@ -511,9 +511,9 @@ pub(crate) fn execute(
                             };
                         }
                     }
-                    let mcp_servers = wimo ai_wimo_shell::util::config::load_mcp_servers(
+                    let mcp_servers = wimoai_wimo_shell::util::config::load_mcp_servers(
                         &session_cwd,
-                        &wimo ai_wimo_tools::types::compat::CompatConfig::default(),
+                        &wimoai_wimo_tools::types::compat::CompatConfig::default(),
                     );
                     let _phase = startup::phase_scope(StartupPhase::SessionCreate);
                     let result = helpers::acp_send_bounded(
@@ -561,9 +561,9 @@ pub(crate) fn execute(
             }
             let cwd = session_cwd.unwrap_or_else(|| cwd.to_path_buf());
             let mcp_started = std::time::Instant::now();
-            let mcp_servers = wimo ai_wimo_shell::util::config::load_mcp_servers(
+            let mcp_servers = wimoai_wimo_shell::util::config::load_mcp_servers(
                 &cwd,
-                &wimo ai_wimo_tools::types::compat::CompatConfig::default(),
+                &wimoai_wimo_tools::types::compat::CompatConfig::default(),
             );
             tracing::info!(
                 elapsed_ms = mcp_started.elapsed().as_millis() as u64,
@@ -673,7 +673,7 @@ pub(crate) fn execute(
                     }
                     let summaries = tokio::task::spawn_blocking(move || {
                             let _permit = permit;
-                            wimo ai_wimo_foreign_sessions::scan_foreign_sessions(
+                            wimoai_wimo_foreign_sessions::scan_foreign_sessions(
                                 &cwd,
                                 enabled,
                             )
@@ -726,7 +726,7 @@ pub(crate) fn execute(
                             compat,
                             &wimo_home,
                             |enabled| async move {
-                                tokio::task::spawn_blocking(move || wimo ai_wimo_foreign_sessions::most_recent_foreign_session(
+                                tokio::task::spawn_blocking(move || wimoai_wimo_foreign_sessions::most_recent_foreign_session(
                                         &cwd_for_scan,
                                         enabled,
                                         crate::app::foreign_sessions::RESUME_HINT_WINDOW,
@@ -892,7 +892,7 @@ pub(crate) fn execute(
                     let params = serde_json::json!({
                     "cwd": cwd.to_string_lossy(),
                     "limit": 30,
-                    "headless": wimo ai_wimo_shell::session::unified_list::HeadlessPolicy::Exclude
+                    "headless": wimoai_wimo_shell::session::unified_list::HeadlessPolicy::Exclude
                         .as_wire_str(),
                 });
                     let request = acp::ExtRequest::new(
@@ -933,13 +933,13 @@ pub(crate) fn execute(
             tasks
                 .spawn(async move {
                     match tokio::task::spawn_blocking(move || {
-                            let store = wimo ai_wimo_dashboard_store::WorkspaceStore::open(
+                            let store = wimoai_wimo_dashboard_store::WorkspaceStore::open(
                                 &db_path,
                             )?;
                             let snapshot = store.snapshot()?;
                             Ok::<
                                 _,
-                                wimo ai_wimo_dashboard_store::StoreError,
+                                wimoai_wimo_dashboard_store::StoreError,
                             >((store, snapshot))
                         })
                         .await
@@ -975,7 +975,7 @@ pub(crate) fn execute(
                                 if let Err(error) = store.insert_member(member) {
                                     let retryable = matches!(
                                 &error,
-                                wimo ai_wimo_dashboard_store::StoreError::Busy { .. }
+                                wimoai_wimo_dashboard_store::StoreError::Busy { .. }
                             );
                                     failures
                                         .push(WorkspaceMemberUpsertFailure {
@@ -1010,14 +1010,14 @@ pub(crate) fn execute(
                 });
         }
         Effect::RestoreAndLoadSession { agent_id, session_id, session_cwd: _ } => {
-            use wimo ai_wimo_shell::agent::session_registry_client::SessionRegistryClient;
-            use wimo ai_wimo_shell::session::restore::restore_session_with_storage;
+            use wimoai_wimo_shell::agent::session_registry_client::SessionRegistryClient;
+            use wimoai_wimo_shell::session::restore::restore_session_with_storage;
             let setup_started = std::time::Instant::now();
-            let raw_config = wimo ai_wimo_shell::config::load_effective_config();
+            let raw_config = wimoai_wimo_shell::config::load_effective_config();
             let setup = raw_config
                 .ok()
                 .and_then(|raw| {
-                    let cfg = wimo ai_wimo_shell::agent::config::Config::new_from_toml_cfg(
+                    let cfg = wimoai_wimo_shell::agent::config::Config::new_from_toml_cfg(
                             &raw,
                         )
                         .ok()?;
@@ -1032,7 +1032,7 @@ pub(crate) fn execute(
                         .with_alpha_test_key(alpha_test_key.clone())
                         .with_session_id(session_id.clone())
                         .with_auth(auth_manager.clone());
-                    let storage = wimo ai_wimo_shell::auth::credential_provider::build_storage_client_for_proxy(
+                    let storage = wimoai_wimo_shell::auth::credential_provider::build_storage_client_for_proxy(
                         &proxy_base,
                         deployment_key,
                         alpha_test_key,
@@ -1061,9 +1061,9 @@ pub(crate) fn execute(
                     };
                     let _ = auth_manager.auth().await;
                     let progress: Option<
-                        wimo ai_wimo_shell::session::restore::ProgressCallback,
+                        wimoai_wimo_shell::session::restore::ProgressCallback,
                     > = {
-                        use wimo ai_wimo_shell::session::restore::{PhaseStep, RestorePhase};
+                        use wimoai_wimo_shell::session::restore::{PhaseStep, RestorePhase};
                         Some(
                             Box::new(move |event| {
                                 let msg = match (event.phase, event.step) {
@@ -1136,7 +1136,7 @@ pub(crate) fn execute(
                             &storage_client,
                             &session_id,
                             &cwd_str,
-                            wimo ai_wimo_shell::session::restore::RestoreSessionOpts {
+                            wimoai_wimo_shell::session::restore::RestoreSessionOpts {
                                 turn_override: None,
                                 progress,
                                 restore_code: true,
@@ -1170,11 +1170,11 @@ pub(crate) fn execute(
                     use crate::app::app_view::CardDetail;
                     let result_session_id = session_id.clone();
                     let detail = tokio::task::spawn_blocking(move || {
-                            let info = wimo ai_wimo_shell::session::info::Info {
+                            let info = wimoai_wimo_shell::session::info::Info {
                                 id: acp::SessionId::new(session_id),
                                 cwd,
                             };
-                            let history_path = wimo ai_wimo_shell::session::persistence::session_dir(
+                            let history_path = wimoai_wimo_shell::session::persistence::session_dir(
                                     &info,
                                 )
                                 .join("chat_history.jsonl");
@@ -1334,7 +1334,7 @@ pub(crate) fn execute(
             let is_api_key_auth = session_flags.is_api_key_auth;
             tasks
                 .spawn(async move {
-                    use wimo ai_wimo_shell::extensions::prompt_meta::PromptBlockMeta;
+                    use wimoai_wimo_shell::extensions::prompt_meta::PromptBlockMeta;
                     ulog::info(
                         "prompt.acp_send.start",
                         Some(&session_id.0),
@@ -1735,7 +1735,7 @@ pub(crate) fn execute(
             let sid = session_id.0.to_string();
             tasks
                 .spawn(async move {
-                    let params = wimo ai_wimo_shell::extensions::task::KillTaskRequest {
+                    let params = wimoai_wimo_shell::extensions::task::KillTaskRequest {
                         session_id: sid.clone(),
                         task_id: task_id.clone(),
                         source,
@@ -1845,7 +1845,7 @@ pub(crate) fn execute(
                 .spawn(async move {
                     let meta = effort
                         .map(|eff| {
-                            use wimo ai_wimo_shell::sampling::types::{
+                            use wimoai_wimo_shell::sampling::types::{
                                 REASONING_EFFORT_META_KEY, reasoning_effort_meta_value,
                             };
                             let mut m = acp::Meta::new();
@@ -1864,7 +1864,7 @@ pub(crate) fn execute(
                         .await
                         .map(|_| ())
                         .map_err(|e| {
-                            use wimo ai_wimo_shell::agent::config::ModelSwitchIncompatibleAgentError;
+                            use wimoai_wimo_shell::agent::config::ModelSwitchIncompatibleAgentError;
                             if let Some(typed) = ModelSwitchIncompatibleAgentError::from_acp_error(
                                 &e,
                             ) {
@@ -2051,13 +2051,13 @@ pub(crate) fn execute(
             tasks
                 .spawn(async move {
                     let changelog = tokio::task::spawn_blocking(|| {
-                            wimo ai_wimo_shell::util::changelog::ChangelogManager::new()
+                            wimoai_wimo_shell::util::changelog::ChangelogManager::new()
                                 .fetch()
                         })
                         .await
                         .unwrap_or_else(|e| {
                             tracing::warn!(error = %e, "changelog fetch task failed");
-                            wimo ai_wimo_shell::util::changelog::Changelog {
+                            wimoai_wimo_shell::util::changelog::Changelog {
                                 markdown: None,
                                 entries: None,
                             }
@@ -2071,7 +2071,7 @@ pub(crate) fn execute(
         Effect::PersistAnnouncementsHidden { hidden_ids } => {
             tasks
                 .spawn(async move {
-                    wimo ai_wimo_announcements::write_hidden_announcement_ids(&hidden_ids)
+                    wimoai_wimo_announcements::write_hidden_announcement_ids(&hidden_ids)
                         .await;
                     TaskResult::AnnouncementsHiddenPersisted {
                         result: Ok(()),
@@ -2081,7 +2081,7 @@ pub(crate) fn execute(
         Effect::PersistPrivacyBannerAcked { acked_at } => {
             tasks
                 .spawn(async move {
-                    if let Err(e) = wimo ai_wimo_shell::util::config::set_privacy_banner_acked(
+                    if let Err(e) = wimoai_wimo_shell::util::config::set_privacy_banner_acked(
                             acked_at,
                         )
                         .await
@@ -2094,7 +2094,7 @@ pub(crate) fn execute(
         Effect::PersistConsentAnswer { account, notice_id, version, acked } => {
             tasks
                 .spawn(async move {
-                    match wimo ai_wimo_shell::util::config::set_consent_answer(
+                    match wimoai_wimo_shell::util::config::set_consent_answer(
                             account,
                             notice_id,
                             version,
@@ -2180,7 +2180,7 @@ pub(crate) fn execute(
             let model_id_str = model_id.0.to_string();
             tasks
                 .spawn(async move {
-                    let result = wimo ai_wimo_shell::util::config::persist_models_default(
+                    let result = wimoai_wimo_shell::util::config::persist_models_default(
                             Some(model_id_str),
                             reasoning_effort,
                         )
@@ -2502,7 +2502,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::HooksListResponse,
+                                wimoai_hooks_plugins_types::HooksListResponse,
                             >(inner.clone())
                                 .map_err(|_| "couldn't load hooks".to_string())
                         }
@@ -2539,7 +2539,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::PluginsListResponse,
+                                wimoai_hooks_plugins_types::PluginsListResponse,
                             >(inner.clone())
                                 .map_err(|_| "couldn't load plugins".to_string())
                         }
@@ -2559,7 +2559,7 @@ pub(crate) fn execute(
             let tx = acp_tx.clone();
             tasks
                 .spawn(async move {
-                    let req_body = wimo ai_hooks_plugins_types::HooksActionRequest {
+                    let req_body = wimoai_hooks_plugins_types::HooksActionRequest {
                         session_id: session_id.0.to_string(),
                         action,
                     };
@@ -2577,7 +2577,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::ActionOutcome,
+                                wimoai_hooks_plugins_types::ActionOutcome,
                             >(inner.clone())
                                 .map_err(|_| "couldn't complete hooks action".to_string())
                         }
@@ -2601,7 +2601,7 @@ pub(crate) fn execute(
             let tx = acp_tx.clone();
             tasks
                 .spawn(async move {
-                    let req_body = wimo ai_hooks_plugins_types::PluginsActionRequest {
+                    let req_body = wimoai_hooks_plugins_types::PluginsActionRequest {
                         session_id: session_id.0.to_string(),
                         action,
                     };
@@ -2619,7 +2619,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::ActionOutcome,
+                                wimoai_hooks_plugins_types::ActionOutcome,
                             >(inner.clone())
                                 .map_err(|_| "couldn't complete plugins action".to_string())
                         }
@@ -2660,7 +2660,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::MarketplaceListResponse,
+                                wimoai_hooks_plugins_types::MarketplaceListResponse,
                             >(inner.clone())
                                 .map_err(|_| "couldn't load marketplace".to_string())
                         }
@@ -2701,7 +2701,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::MarketplaceListResponse,
+                                wimoai_hooks_plugins_types::MarketplaceListResponse,
                             >(inner.clone())
                                 .map_err(|_| "couldn't load marketplace".to_string())
                         }
@@ -2743,7 +2743,7 @@ pub(crate) fn execute(
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
                                 Vec<
-                                    wimo ai_wimo_tools::implementations::skills::types::SkillInfo,
+                                    wimoai_wimo_tools::implementations::skills::types::SkillInfo,
                                 >,
                             >(inner.get("skills").cloned().unwrap_or_default())
                                 .map_err(|_| "couldn't load skills".to_string())
@@ -2826,7 +2826,7 @@ pub(crate) fn execute(
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             let parsed = serde_json::from_value::<
                                 Vec<
-                                    wimo ai_wimo_tools::implementations::skills::types::SkillInfo,
+                                    wimoai_wimo_tools::implementations::skills::types::SkillInfo,
                                 >,
                             >(inner.get("skills").cloned().unwrap_or_default())
                                 .map_err(|_| "couldn't toggle skill".to_string());
@@ -2874,7 +2874,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::MarketplaceListResponse,
+                                wimoai_hooks_plugins_types::MarketplaceListResponse,
                             >(inner.clone())
                                 .ok()
                                 .map(|r| {
@@ -2913,11 +2913,11 @@ pub(crate) fn execute(
                     }
                     let mut succeeded = Vec::new();
                     for (name, old, new, source_url, rel_path) in outdated {
-                        let action = wimo ai_hooks_plugins_types::MarketplaceAction::Update {
+                        let action = wimoai_hooks_plugins_types::MarketplaceAction::Update {
                             source_url_or_path: source_url.clone(),
                             plugin_relative_path: rel_path.clone(),
                         };
-                        let req_body = wimo ai_hooks_plugins_types::MarketplaceActionRequest {
+                        let req_body = wimoai_hooks_plugins_types::MarketplaceActionRequest {
                             session_id: session_id.0.to_string(),
                             action,
                         };
@@ -2935,7 +2935,7 @@ pub(crate) fn execute(
                                     .unwrap_or_default();
                                 let inner = wrapper.get("result").unwrap_or(&wrapper);
                                 serde_json::from_value::<
-                                    wimo ai_hooks_plugins_types::ActionOutcome,
+                                    wimoai_hooks_plugins_types::ActionOutcome,
                                 >(inner.clone())
                                     .is_ok_and(|outcome| marketplace_outcome_succeeded(
                                         &outcome,
@@ -2970,7 +2970,7 @@ pub(crate) fn execute(
             let tx = acp_tx.clone();
             tasks
                 .spawn(async move {
-                    let req_body = wimo ai_hooks_plugins_types::MarketplaceActionRequest {
+                    let req_body = wimoai_hooks_plugins_types::MarketplaceActionRequest {
                         session_id: session_id.0.to_string(),
                         action,
                     };
@@ -2988,7 +2988,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::ActionOutcome,
+                                wimoai_hooks_plugins_types::ActionOutcome,
                             >(inner.clone())
                                 .map_err(|e| {
                                     tracing::debug!("failed to parse marketplace action response: {e}");
@@ -3025,11 +3025,11 @@ pub(crate) fn execute(
                         .next()
                         .unwrap_or(plugin_relative_path.as_str())
                         .to_string();
-                    let action = wimo ai_hooks_plugins_types::MarketplaceAction::Install {
+                    let action = wimoai_hooks_plugins_types::MarketplaceAction::Install {
                         source_url_or_path,
                         plugin_relative_path,
                     };
-                    let req_body = wimo ai_hooks_plugins_types::MarketplaceActionRequest {
+                    let req_body = wimoai_hooks_plugins_types::MarketplaceActionRequest {
                         session_id: session_id.0.to_string(),
                         action,
                     };
@@ -3047,7 +3047,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::ActionOutcome,
+                                wimoai_hooks_plugins_types::ActionOutcome,
                             >(inner.clone())
                                 .map_err(|e| {
                                     tracing::debug!("failed to parse marketplace action response: {e}");
@@ -3075,9 +3075,9 @@ pub(crate) fn execute(
             let tx = acp_tx.clone();
             tasks
                 .spawn(async move {
-                    let req_body = wimo ai_hooks_plugins_types::PluginsActionRequest {
+                    let req_body = wimoai_hooks_plugins_types::PluginsActionRequest {
                         session_id: session_id.0.to_string(),
-                        action: wimo ai_hooks_plugins_types::PluginsAction::Reload,
+                        action: wimoai_hooks_plugins_types::PluginsAction::Reload,
                     };
                     let req = acp::ExtRequest::new(
                         "x.ai/plugins/action",
@@ -3093,7 +3093,7 @@ pub(crate) fn execute(
                                 .unwrap_or_default();
                             let inner = wrapper.get("result").unwrap_or(&wrapper);
                             serde_json::from_value::<
-                                wimo ai_hooks_plugins_types::ActionOutcome,
+                                wimoai_hooks_plugins_types::ActionOutcome,
                             >(inner.clone())
                                 .map_err(|_| "couldn't complete plugins action".to_string())
                         }
@@ -3151,7 +3151,7 @@ pub(crate) fn execute(
                         session_id: String,
                         server_name: String,
                         #[serde(flatten)]
-                        config: wimo ai_wimo_shell::util::config::McpServerConfig,
+                        config: wimoai_wimo_shell::util::config::McpServerConfig,
                     }
                     let req_body = McpUpsertRequest {
                         session_id: session_id.0.to_string(),
@@ -3278,7 +3278,7 @@ pub(crate) fn execute(
                 });
         }
         Effect::ShareSession { agent_id, session_id } => {
-            use wimo ai_wimo_shell::session::{ShareSessionRequest, ShareSessionResponse};
+            use wimoai_wimo_shell::session::{ShareSessionRequest, ShareSessionResponse};
             let tx = acp_tx.clone();
             tasks
                 .spawn(async move {
@@ -3360,7 +3360,7 @@ pub(crate) fn execute(
         }
         Effect::ShowSessionInfo { agent_id, session_id, show_resolved_model, nonce } => {
             let is_api_key_auth = session_flags.is_api_key_auth;
-            let api_key_env_set = wimo ai_wimo_shell::agent::auth_method::has_wimo ai_api_key_env();
+            let api_key_env_set = wimoai_wimo_shell::agent::auth_method::has_wimoai_api_key_env();
             let tx = acp_tx.clone();
             tasks
                 .spawn(async move {
@@ -3644,8 +3644,8 @@ pub(crate) fn execute(
                 });
         }
         Effect::SendFeedback { agent_id, session_id, feedback_text, images } => {
-            use wimo ai_wimo_shell::session::ClientType;
-            use wimo ai_wimo_shell::session::acp_types::ClientFeedbackInput;
+            use wimoai_wimo_shell::session::ClientType;
+            use wimoai_wimo_shell::session::acp_types::ClientFeedbackInput;
             let terminal_info = Some(
                 crate::terminal::terminal_context().feedback_info(),
             );
@@ -3663,7 +3663,7 @@ pub(crate) fn execute(
                         context_type: None,
                         turn_number: None,
                         request_id: None,
-                        client_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+                        client_version: Some(wimoai_wimo_version::VERSION.to_string()),
                         metadata: None,
                         terminal_info,
                     };
@@ -3812,13 +3812,13 @@ pub(crate) fn execute(
             tasks
                 .spawn(async move {
                     let result = tokio::task::spawn_blocking(move || {
-                            let storage = wimo ai_wimo_shell::session::memory::MemoryStorage::new(
+                            let storage = wimoai_wimo_shell::session::memory::MemoryStorage::new(
                                 &cwd,
                                 None,
                             );
                             storage
                                 .append_to_memory(
-                                    wimo ai_wimo_shell::session::memory::MemoryScope::Global,
+                                    wimoai_wimo_shell::session::memory::MemoryScope::Global,
                                     &text,
                                 )
                         })
@@ -4250,7 +4250,7 @@ pub(crate) fn execute(
                                 if let Some(hits) = payload.get("results") {
                                     results = serde_json::from_value::<
                                         Vec<
-                                            wimo ai_wimo_shell::extensions::session_search::SearchSessionHit,
+                                            wimoai_wimo_shell::extensions::session_search::SearchSessionHit,
                                         >,
                                     >(hits.clone())
                                         .unwrap_or_default();
@@ -4364,18 +4364,18 @@ pub(crate) fn execute(
         } => {
             tasks
                 .spawn(async move {
-                    let info = wimo ai_wimo_shell::session::info::Info {
+                    let info = wimoai_wimo_shell::session::info::Info {
                         id: session_id,
                         cwd: cwd.to_string_lossy().to_string(),
                     };
-                    let path = wimo ai_wimo_shell::session::persistence::session_dir(&info)
+                    let path = wimoai_wimo_shell::session::persistence::session_dir(&info)
                         .join("summary.json");
                     type DiskTitle = (Option<(String, bool)>, Option<String>);
                     let (title, last_turn_summary) = tokio::task::spawn_blocking(move || -> Option<
                             DiskTitle,
                         > {
                             let raw = std::fs::read_to_string(path).ok()?;
-                            let summary: wimo ai_wimo_shell::session::persistence::Summary = serde_json::from_str(
+                            let summary: wimoai_wimo_shell::session::persistence::Summary = serde_json::from_str(
                                     &raw,
                                 )
                                 .ok()?;
@@ -4402,7 +4402,7 @@ pub(crate) fn execute(
             let tx = acp_tx.clone();
             tasks
                 .spawn(async move {
-                    use wimo ai_wimo_shell::extensions::billing::BillingConfigResponse;
+                    use wimoai_wimo_shell::extensions::billing::BillingConfigResponse;
                     let req = acp::ExtRequest::new(
                         "x.ai/billing",
                         serde_json::value::to_raw_value(&serde_json::json!({}))
@@ -4461,17 +4461,17 @@ pub(crate) fn execute(
             tasks
                 .spawn(async move {
                     let settings = tokio::task::spawn_blocking(|| {
-                            if !wimo ai_wimo_shell::util::config::resolve_remote_fetch_enabled() {
+                            if !wimoai_wimo_shell::util::config::resolve_remote_fetch_enabled() {
                                 return None;
                             }
-                            let wimo_home = wimo ai_wimo_shell::util::wimo_home::wimo_home();
-                            let store = wimo ai_wimo_shell::auth::read_auth_json(
+                            let wimo_home = wimoai_wimo_shell::util::wimo_home::wimo_home();
+                            let store = wimoai_wimo_shell::auth::read_auth_json(
                                     &wimo_home.join("auth.json"),
                                 )
                                 .ok()?;
-                            let scope = wimo ai_wimo_shell::auth::wimoComConfig::default()
+                            let scope = wimoai_wimo_shell::auth::wimoComConfig::default()
                                 .auth_scope();
-                            let auth = wimo ai_wimo_shell::auth::lookup_auth(
+                            let auth = wimoai_wimo_shell::auth::lookup_auth(
                                 &store,
                                 &scope,
                             )?;
@@ -4479,10 +4479,10 @@ pub(crate) fn execute(
                                     "wimo_CLI_CHAT_PROXY_BASE_URL",
                                 )
                                 .unwrap_or_else(|_| {
-                                    wimo ai_wimo_shell::agent::config::CLI_CHAT_PROXY_BASE_URL_DEFAULT
+                                    wimoai_wimo_shell::agent::config::CLI_CHAT_PROXY_BASE_URL_DEFAULT
                                         .to_owned()
                                 });
-                            wimo ai_wimo_shell::remote::fetch_settings_blocking(
+                            wimoai_wimo_shell::remote::fetch_settings_blocking(
                                     &proxy_base,
                                     &auth,
                                     None,
@@ -4501,7 +4501,7 @@ pub(crate) fn execute(
             let tx = acp_tx.clone();
             tasks
                 .spawn(async move {
-                    use wimo ai_wimo_shell::extensions::billing::BillingConfigResponse;
+                    use wimoai_wimo_shell::extensions::billing::BillingConfigResponse;
                     let req = acp::ExtRequest::new(
                         "x.ai/billing",
                         serde_json::value::to_raw_value(&serde_json::json!({}))
@@ -4702,7 +4702,7 @@ async fn fetch_session_info(
 async fn fetch_session_usage(
     session_id: &acp::SessionId,
     tx: &AcpAgentTx,
-) -> Result<wimo ai_wimo_shell::extensions::notification::PromptUsage, String> {
+) -> Result<wimoai_wimo_shell::extensions::notification::PromptUsage, String> {
     let request = acp::ExtRequest::new(
         "x.ai/session/usage",
         serde_json::value::to_raw_value(
@@ -4722,7 +4722,7 @@ async fn fetch_session_usage(
                 sanitize_user_error(&e.to_string())
             }
         })?;
-    let parsed: wimo ai_wimo_shell::extensions::usage::SessionUsageResponse = serde_json::from_str(
+    let parsed: wimoai_wimo_shell::extensions::usage::SessionUsageResponse = serde_json::from_str(
             resp.0.get(),
         )
         .map_err(|e| {
@@ -4767,7 +4767,7 @@ async fn session_rename_rpc(
 /// `cwd` comes from the `x.ai/session/info` response.
 async fn lookup_session_title(session_id: &acp::SessionId, cwd: &str) -> Option<String> {
     lookup_session_title_in(
-            wimo ai_wimo_shell::util::wimo_home::wimo_home(),
+            wimoai_wimo_shell::util::wimo_home::wimo_home(),
             session_id,
             cwd,
         )
@@ -4779,8 +4779,8 @@ async fn lookup_session_title_in(
     session_id: &acp::SessionId,
     cwd: &str,
 ) -> Option<String> {
-    use wimo ai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
-    let info = wimo ai_wimo_shell::session::info::Info {
+    use wimoai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
+    let info = wimoai_wimo_shell::session::info::Info {
         id: session_id.clone(),
         cwd: cwd.to_string(),
     };
@@ -4816,7 +4816,7 @@ fn session_info_fields(
     }
     push(
         "Shell version",
-        wimo ai_wimo_version::display_version(wimo ai_wimo_update::channel_label()),
+        wimoai_wimo_version::display_version(wimoai_wimo_update::channel_label()),
         false,
     );
     push("Session ID", info.session_id.to_string(), false);
@@ -4825,7 +4825,7 @@ fn session_info_fields(
     }
     push("Working directory", info.cwd.to_string(), false);
     let model = info.data.model.as_deref().unwrap_or("unknown");
-    let model_display = wimo ai_wimo_shell::session::model_display_name(
+    let model_display = wimoai_wimo_shell::session::model_display_name(
         info.data.model_display_name.as_deref(),
         model,
         info.data.resolved_model_id.as_deref(),
@@ -4840,7 +4840,7 @@ fn session_info_fields(
     if let Some(b) = info.data.api_backend.as_deref() {
         push("API Backend", b.to_string(), true);
     }
-    if let Some(profile) = wimo ai_wimo_sandbox::profile_name() {
+    if let Some(profile) = wimoai_wimo_sandbox::profile_name() {
         push("Sandbox", profile.to_string(), true);
     }
     push("Turn", info.data.turn_index.to_string(), true);
@@ -4883,7 +4883,7 @@ fn format_session_info(
 fn format_auth_lines(is_api_key_auth: bool, api_key_env_set: bool) -> String {
     if is_api_key_auth {
         let method = if api_key_env_set {
-            "  Auth method: API key (wimo ai_API_KEY)\n"
+            "  Auth method: API key (wimoai_API_KEY)\n"
         } else {
             "  Auth method: API key\n"
         };

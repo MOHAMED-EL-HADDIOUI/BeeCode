@@ -38,7 +38,7 @@ use std::path::Path;
 use std::sync::OnceLock;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tokio::process::Command;
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_wimo_sampling_types::ConversationItem;
 
 use crate::util::subprocess::git_bin;
 
@@ -697,7 +697,7 @@ fn walkdir_changes_blocking(
                 .to_str()
                 .map(|name| {
                     name != ".git"
-                        && !wimo ai_file_utils::skip_dir_set().contains(name.to_lowercase().as_str())
+                        && !wimoai_file_utils::skip_dir_set().contains(name.to_lowercase().as_str())
                 })
                 .unwrap_or(true)
         });
@@ -997,7 +997,7 @@ pub(crate) fn sanitize_final_response(text: &str) -> Cow<'_, str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_sampling_types::{AssistantItem, UserItem};
+    use wimoai_wimo_sampling_types::{AssistantItem, UserItem};
 
     fn assistant(text: &str) -> ConversationItem {
         ConversationItem::Assistant(AssistantItem {
@@ -1012,7 +1012,7 @@ mod tests {
     fn assistant_tool_call_only() -> ConversationItem {
         ConversationItem::Assistant(AssistantItem {
             content: "".into(),
-            tool_calls: vec![wimo ai_wimo_sampling_types::ToolCall {
+            tool_calls: vec![wimoai_wimo_sampling_types::ToolCall {
                 id: "call_1".into(),
                 name: "read_file".to_string(),
                 arguments: "{\"target_file\":\"x\"}".into(),
@@ -1025,7 +1025,7 @@ mod tests {
 
     fn user(text: &str) -> ConversationItem {
         ConversationItem::User(UserItem {
-            content: vec![wimo ai_wimo_sampling_types::ContentPart::Text { text: text.into() }],
+            content: vec![wimoai_wimo_sampling_types::ContentPart::Text { text: text.into() }],
             synthetic_reason: None,
             ..Default::default()
         })
@@ -1703,7 +1703,7 @@ mod tests {
     async fn capture_changes_diff_walkdir_skips_all_well_known_directories() {
         let tmp = tempfile::tempdir().unwrap();
         let goal_created_at = now_unix_seconds() - 60;
-        for sub in wimo ai_file_utils::SKIP_DIR_NAMES {
+        for sub in wimoai_file_utils::SKIP_DIR_NAMES {
             let dir = tmp.path().join(sub);
             tokio::fs::create_dir_all(&dir).await.unwrap();
             tokio::fs::write(dir.join("blob.bin"), b"skipped\n")
@@ -1731,7 +1731,7 @@ mod tests {
             .expect("walkdir fallback must succeed")
             .diff;
         assert!(diff.contains("real.txt"));
-        for sub in wimo ai_file_utils::SKIP_DIR_NAMES {
+        for sub in wimoai_file_utils::SKIP_DIR_NAMES {
             assert!(
                 !diff.contains(&format!("b/{sub}/blob.bin")),
                 "walkdir must skip {sub}/; diff was: {diff}"

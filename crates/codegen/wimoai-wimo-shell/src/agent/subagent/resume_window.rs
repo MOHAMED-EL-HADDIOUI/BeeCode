@@ -29,7 +29,7 @@ impl ResumeWindowPolicy {
     }
 
     fn over_auto_compact_threshold(&self, estimated_tokens: u64) -> bool {
-        wimo ai_token_estimation::exceeds_threshold(
+        wimoai_token_estimation::exceeds_threshold(
             estimated_tokens,
             self.context_window,
             self.auto_compact_threshold_percent,
@@ -70,9 +70,9 @@ pub(super) fn arm_force_compact(force_compact: &AtomicBool, should_force: bool) 
 /// Leading items to preserve across compaction on resume: the System head only, so the resumed body (the child's own work) stays compactable.
 /// Returns 0 when there's no leading System; the spawn path then inserts one and bumps the prefix to 1.
 pub(super) fn resume_inherited_prefix_len(
-    conversation: &[wimo ai_wimo_sampling_types::conversation::ConversationItem],
+    conversation: &[wimoai_wimo_sampling_types::conversation::ConversationItem],
 ) -> usize {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
 
     conversation
         .iter()

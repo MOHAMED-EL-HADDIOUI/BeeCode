@@ -4,7 +4,7 @@
 use std::path::{Path, PathBuf};
 
 use agent_client_protocol::{self as acp};
-use wimo ai_wimo_workspace::session::file_state::{FileSnapshot, FlexiblePath, RewindPoint};
+use wimoai_wimo_workspace::session::file_state::{FileSnapshot, FlexiblePath, RewindPoint};
 
 use crate::session::info::Info;
 use crate::session::storage::{JsonlStorageAdapter, StorageAdapter};

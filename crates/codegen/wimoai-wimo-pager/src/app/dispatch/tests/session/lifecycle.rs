@@ -4,11 +4,11 @@ use crate::app::dispatch::session::lifecycle::dispatch_accept_consent;
 /// Simulate a release-stamped build so folder-trust is active (a local/dev build auto-trusts and persists nothing).
 /// Mirrors this module's raw env idiom.
 fn simulate_release_build() {
-    unsafe { std::env::set_var(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0.0-sim") };
+    unsafe { std::env::set_var(wimoai_wimo_version::TEST_VERSION_ENV, "0.0.0-sim") };
 }
 #[test]
 fn voice_on_welcome_creates_session_and_records() {
-    if !wimo ai_wimo_voice::AUDIO_SUPPORTED {
+    if !wimoai_wimo_voice::AUDIO_SUPPORTED {
         return;
     }
     let mut app = test_app();
@@ -24,7 +24,7 @@ fn voice_on_welcome_creates_session_and_records() {
     assert_eq!(app.voice_recording_target(), Some(VoiceTarget::Agent(id)));
     assert!(matches!(
         rx.try_recv(),
-        Ok(wimo ai_wimo_voice::VoiceCommand::PttPress)
+        Ok(wimoai_wimo_voice::VoiceCommand::PttPress)
     ));
 }
 #[test]
@@ -42,7 +42,7 @@ fn voice_final_routes_to_recording_session_not_active_view() {
     };
     crate::voice::handle_voice_event(
         &mut app,
-        wimo ai_wimo_voice::VoiceEvent::UtteranceFinal {
+        wimoai_wimo_voice::VoiceEvent::UtteranceFinal {
             text: "hello".into(),
         },
     );
@@ -56,7 +56,7 @@ fn voice_final_dropped_after_recording_session_cleared() {
     app.voice_state = VoiceState::Idle;
     crate::voice::handle_voice_event(
         &mut app,
-        wimo ai_wimo_voice::VoiceEvent::UtteranceFinal {
+        wimoai_wimo_voice::VoiceEvent::UtteranceFinal {
             text: "late".into(),
         },
     );
@@ -87,7 +87,7 @@ fn voice_auto_stops_when_leaving_recording_session() {
     );
     assert!(matches!(
         rx.try_recv(),
-        Ok(wimo ai_wimo_voice::VoiceCommand::PttRelease)
+        Ok(wimoai_wimo_voice::VoiceCommand::PttRelease)
     ));
 }
 #[test]
@@ -381,7 +381,7 @@ fn worktree_session_created_clears_sticky_branch_from_main_repo() {
 #[test]
 fn worktree_session_preserves_subdirectory_offset() {
     let mut app = test_app();
-    app.cwd = PathBuf::from("/repo/crates/codegen/wimo ai-wimo-pager");
+    app.cwd = PathBuf::from("/repo/crates/codegen/wimoai-wimo-pager");
     app.cwd_has_git_ancestor = true;
     dispatch(
         Action::NewWorktreeSession {
@@ -393,7 +393,7 @@ fn worktree_session_preserves_subdirectory_offset() {
     );
     let id = AgentId(0);
     let worktree_root = PathBuf::from("/home/user/.wimo/worktrees/repo/pager-123");
-    let session_cwd = worktree_root.join("crates/codegen/wimo ai-wimo-pager");
+    let session_cwd = worktree_root.join("crates/codegen/wimoai-wimo-pager");
     let effects = dispatch(
         Action::TaskComplete(TaskResult::WorktreeSessionCreated {
             agent_id: id,
@@ -1352,7 +1352,7 @@ fn finish_trust_resolves_and_replays_startup() {
 #[serial_test::serial(wimo_HOME)]
 #[test]
 fn trust_folder_grants_and_resolves() {
-    use wimo ai_wimo_workspace::trust::{TrustStore, workspace_key};
+    use wimoai_wimo_workspace::trust::{TrustStore, workspace_key};
     let home = tempfile::tempdir().expect("home tempdir");
     unsafe { std::env::set_var("wimo_HOME", home.path()) };
     simulate_release_build();
@@ -2081,7 +2081,7 @@ fn dispatch_new_worktree_session_repoints_dashboard_attached_agent() {
 #[test]
 fn translate_local_submit_always_returns_persist_always_for_new_session() {
     use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
     let q = Question {
@@ -2123,7 +2123,7 @@ fn translate_local_submit_always_returns_persist_always_for_new_session() {
 #[test]
 fn translate_local_submit_never_returns_persist_never_for_new_session() {
     use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
     let q = Question {
@@ -2249,7 +2249,7 @@ fn delete_current_session_confirm_emits_effect() {
 /// Session delete must kill background tasks as `Teardown`; the wire default (`ClientUi`) would auto-wake.
 #[test]
 fn delete_current_session_kills_bg_tasks_as_teardown() {
-    use wimo ai_wimo_shell::extensions::task::TaskKillSource;
+    use wimoai_wimo_shell::extensions::task::TaskKillSource;
     let mut app = test_app_with_agent();
     {
         let a = app.agents.get_mut(&AgentId(0)).unwrap();
@@ -2507,7 +2507,7 @@ fn bg_task_killed_no_op_for_unknown_session() {
         Action::TaskComplete(TaskResult::BgTaskKilled {
             session_id: "nonexistent".into(),
             task_id: "task-B-1".into(),
-            outcome: Some(wimo ai_wimo_tools::types::KillOutcome::AlreadyExited),
+            outcome: Some(wimoai_wimo_tools::types::KillOutcome::AlreadyExited),
         }),
         &mut app,
     );
@@ -2577,7 +2577,7 @@ fn cycle_mode_pre_session_blocked_by_policy_pin() {
         let agent = app.agents.get_mut(&AgentId(0)).unwrap();
         agent.session.session_id = None;
         agent.plan_mode_pending = Some(true);
-        agent.deferred_session_mode = Some(wimo ai_wimo_tools::types::SessionMode::Plan);
+        agent.deferred_session_mode = Some(wimoai_wimo_tools::types::SessionMode::Plan);
     }
     let _ = dispatch(Action::CycleMode, &mut app);
     let agent = &app.agents[&AgentId(0)];
@@ -2606,7 +2606,7 @@ fn cycle_mode_pre_session_clears_stale_yolo_under_pin() {
         let agent = app.agents.get_mut(&AgentId(0)).unwrap();
         agent.session.session_id = None;
         agent.plan_mode_pending = Some(true);
-        agent.deferred_session_mode = Some(wimo ai_wimo_tools::types::SessionMode::Plan);
+        agent.deferred_session_mode = Some(wimoai_wimo_tools::types::SessionMode::Plan);
         agent.session.yolo_mode = true;
     }
     let _ = dispatch(Action::CycleMode, &mut app);
@@ -2638,7 +2638,7 @@ fn dispatch_cycle_mode_pre_session_cycles_locally() {
     );
     assert_eq!(
         agent.deferred_session_mode,
-        Some(wimo ai_wimo_tools::types::SessionMode::Plan),
+        Some(wimoai_wimo_tools::types::SessionMode::Plan),
         "Plan must be deferred to SessionCreated"
     );
     assert!(
@@ -2936,7 +2936,7 @@ mod welcome_workspace_mode {
     #[test]
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ACK)]
     fn welcome_new_session_sets_own_override() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::set(
+        let _ack = wimoai_wimo_test_support::EnvGuard::set(
             crate::app::session_startup::wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV,
             "1",
         );
@@ -3043,12 +3043,12 @@ mod welcome_workspace_mode {
     #[test]
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ACK)]
     fn confirm_ack_skips_reapply_and_sets_oneshot() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::unset(
+        let _ack = wimoai_wimo_test_support::EnvGuard::unset(
             crate::app::session_startup::wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV,
         );
         let home = tempfile::tempdir().unwrap();
         let _home =
-            wimo ai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path().to_str().unwrap());
+            wimoai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path().to_str().unwrap());
         set_active_local_workspace(None).unwrap();
         let tmp = tempfile::tempdir().unwrap();
         let mut app = test_app();
@@ -3080,7 +3080,7 @@ mod welcome_workspace_mode {
     #[test]
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ACK)]
     fn welcome_local_worktree_always_keeps_oneshot_until_create() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::set(
+        let _ack = wimoai_wimo_test_support::EnvGuard::set(
             crate::app::session_startup::wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV,
             "1",
         );
@@ -3121,7 +3121,7 @@ mod welcome_workspace_mode {
     #[test]
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ACK)]
     fn failed_worktree_create_clears_welcome_oneshot() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::set(
+        let _ack = wimoai_wimo_test_support::EnvGuard::set(
             crate::app::session_startup::wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV,
             "1",
         );
@@ -3156,12 +3156,12 @@ mod welcome_workspace_mode {
     #[test]
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ACK)]
     fn confirm_ack_honors_worktree_always() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::unset(
+        let _ack = wimoai_wimo_test_support::EnvGuard::unset(
             crate::app::session_startup::wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV,
         );
         let home = tempfile::tempdir().unwrap();
         let _home =
-            wimo ai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path().to_str().unwrap());
+            wimoai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path().to_str().unwrap());
         set_active_local_workspace(None).unwrap();
         let tmp = tempfile::tempdir().unwrap();
         let mut app = test_app();
@@ -3409,7 +3409,7 @@ mod welcome_workspace_mode {
     #[test]
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ACK)]
     fn pick_in_worktree_no_git_clears_history_bypass() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::set(
+        let _ack = wimoai_wimo_test_support::EnvGuard::set(
             crate::app::session_startup::wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV,
             "1",
         );

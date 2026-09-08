@@ -1,0 +1,8 @@
+# Windows needs a bigger main-thread stack (1 MB default overflows on debug
+# builds). Applied at link time so every fresh `cargo build` carries it —
+# no editbin step needed after this file exists.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "link-args=/STACK:16777216"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "link-args=/STACK:16777216"]

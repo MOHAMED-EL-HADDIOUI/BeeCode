@@ -22,7 +22,7 @@
 //!
 //! Host-specific concerns (triggers, transport, persistence/replay, state
 //! commit, metrics observer) stay in the product host (for example
-//! `wimo ai-wimo-shell`).
+//! `wimoai-wimo-shell`).
 
 pub mod assemble;
 pub mod compact;

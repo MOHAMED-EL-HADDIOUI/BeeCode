@@ -15,12 +15,12 @@ use ratatui::layout::{Constraint, Layout};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
-use wimo ai_wimo_pager::scrollback::text_selection::{
+use wimoai_wimo_pager::scrollback::text_selection::{
     PersistentTextSelection, RangeHit, ResolvedSelectionModel, SelectionEndpoint, SelectionOrigin,
     configured_word_separators, render_persistent_selection_overlay, semantic_selection_at,
     url_range_at_col,
 };
-use wimo ai_wimo_pager::scrollback::{RenderBlock, ScratchBuffer, ScrollbackPane, ScrollbackState};
+use wimoai_wimo_pager::scrollback::{RenderBlock, ScratchBuffer, ScrollbackPane, ScrollbackState};
 
 /// Maximum time (ms) between consecutive clicks to count as a multi-click.
 const MULTI_CLICK_TIMEOUT_MS: u128 = 300;
@@ -31,7 +31,7 @@ const MAX_DISPLAY_TEXT_LEN: usize = 60;
 /// Playground highlight TTL: 0 under `hold`/`word_select`, 500ms under flash so it stays visible.
 fn selection_highlight_duration_ms() -> u64 {
     const PLAYGROUND_FLASH_MS: u64 = 500;
-    if wimo ai_wimo_pager::appearance::cache::load_keep_text_selection().holds() {
+    if wimoai_wimo_pager::appearance::cache::load_keep_text_selection().holds() {
         0
     } else {
         PLAYGROUND_FLASH_MS
@@ -40,7 +40,7 @@ fn selection_highlight_duration_ms() -> u64 {
 
 /// Whether double-click does terminal-like word/line selection (`word_select`) or fold toggle, per the unified `keep_text_selection` setting.
 fn double_click_action_label() -> &'static str {
-    if wimo ai_wimo_pager::appearance::cache::load_keep_text_selection().selects_word() {
+    if wimoai_wimo_pager::appearance::cache::load_keep_text_selection().selects_word() {
         "word_select"
     } else {
         "toggle_fold"

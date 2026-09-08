@@ -1,6 +1,6 @@
 //! WimoEnvironment configuration for the shell crate family.
 //!
-//! The environment presets (per-environment endpoint URLs, the staging trust check, `EnvVarGuard`) live in the [`wimo ai_wimo_env`] leaf crate.
+//! The environment presets (per-environment endpoint URLs, the staging trust check, `EnvVarGuard`) live in the [`wimoai_wimo_env`] leaf crate.
 //! Sibling crates (telemetry, tools, workspace) share them without depending on this crate.
 //! This module re-exports them and hosts the shell-specific gateway-bridge env vars.
 //!
@@ -8,14 +8,14 @@
 //! - `wimo_GATEWAY_URL` — when set to a valid URL, `MvpAgent` spawns a
 //!   per-session gateway bridge actor and routes prompts through it.
 //!   When unset, sessions created in gateway mode fall back to [`WimoEnvironment::gateway_ws_url`] and everything else stays in local mode.
-pub use wimo ai_wimo_env::{
+pub use wimoai_wimo_env::{
     WimoEnvironment, PROD_ASSET_SERVER_URL, PROD_CLI_CHAT_PROXY_BASE_URL, PROD_GATEWAY_WS_URL,
     PROD_RELAY_WS_URL, PROD_WS_ORIGIN,
 };
 /// Public Computer Hub WebSocket URL used by the local-workspace supervisor (`workspace_server --hub-url`) when `agent_config.hub.url` is unset.
 pub const PROD_COMPUTER_HUB_WS_URL: &str = "wss://computer-hub.wimo.com/v1/tools";
 #[cfg(any(test, feature = "test-support"))]
-pub use wimo ai_wimo_env::EnvVarGuard;
+pub use wimoai_wimo_env::EnvVarGuard;
 /// Env var that opts a process into gateway-bridge mode.
 /// When set to a parseable URL, `session/new` / `session/load` spawns a per-session `gateway_bridge` actor in the shell.
 /// When unset the process stays in local mode.

@@ -74,7 +74,7 @@ fn non_empty_rel(rel: &Path) -> Option<String> {
 
 fn home_dir() -> Option<&'static Path> {
     static HOME: OnceLock<Option<PathBuf>> = OnceLock::new();
-    HOME.get_or_init(wimo ai_dirs::home_dir).as_deref()
+    HOME.get_or_init(wimoai_dirs::home_dir).as_deref()
 }
 
 /// Resolve the path the OS should receive, for OSC8 links or background filesystem work.
@@ -90,10 +90,10 @@ fn resolve_tool_path_with_home(
     let target = resolve_tool_path_target_with_home(Path::new(path), cwd, home);
     let display_path = target
         .as_deref()
-        .map(wimo ai_wimo_paths::normalize_lexically)
+        .map(wimoai_wimo_paths::normalize_lexically)
         .unwrap_or_else(|| PathBuf::from(path));
     let relative_to_cwd = target.as_ref().and_then(|_| {
-        let cwd = wimo ai_wimo_paths::normalize_lexically(cwd?);
+        let cwd = wimoai_wimo_paths::normalize_lexically(cwd?);
         display_path.strip_prefix(cwd).ok().and_then(non_empty_rel)
     });
     ResolvedToolPath {
@@ -218,7 +218,7 @@ mod tests {
 
     #[test]
     fn shorten_path_fish_style() {
-        let result = shorten_path("crates/codegen/wimo ai-wimo-pager/src/views/foo.rs", 25);
+        let result = shorten_path("crates/codegen/wimoai-wimo-pager/src/views/foo.rs", 25);
         assert!(result.width() <= 25, "got: {result}");
         assert!(result.ends_with("foo.rs"), "got: {result}");
     }
@@ -226,7 +226,7 @@ mod tests {
     #[test]
     fn shorten_path_front_truncate() {
         let result = shorten_path(
-            "crates/codegen/wimo ai-wimo-pager/src/views/very_long_filename.rs",
+            "crates/codegen/wimoai-wimo-pager/src/views/very_long_filename.rs",
             20,
         );
         assert!(result.width() <= 20, "got: {result}");
@@ -386,7 +386,7 @@ mod tests {
 
     #[test]
     fn home_relative_target_preserves_filesystem_spelling_for_io() {
-        let Some(home) = wimo ai_dirs::home_dir() else {
+        let Some(home) = wimoai_dirs::home_dir() else {
             return;
         };
         assert_eq!(resolve_tool_path_target("~", None), Some(home.clone()));
@@ -396,7 +396,7 @@ mod tests {
         );
         assert_eq!(
             resolve_tool_path("~/project/../notes.md", None).display_path,
-            wimo ai_wimo_paths::normalize_lexically(&home.join("notes.md"))
+            wimoai_wimo_paths::normalize_lexically(&home.join("notes.md"))
         );
     }
 

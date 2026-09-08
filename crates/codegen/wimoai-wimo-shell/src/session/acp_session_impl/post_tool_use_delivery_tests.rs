@@ -1,13 +1,13 @@
 use super::{PostToolUseDelivery, plan_post_tool_use_delivery, substitute_rendered_output};
-use wimo ai_wimo_hooks::dispatcher::{
+use wimoai_wimo_hooks::dispatcher::{
     AdditionalContext, OutputReplacement, PostToolUseBlock, PostToolUseResult, ReplacementKind,
     SelectedReplacement,
 };
-use wimo ai_wimo_hooks::event::MAX_HOOK_OUTPUT_REPLACEMENT_CHARS;
-use wimo ai_wimo_hooks::result::HookRunResult;
-use wimo ai_wimo_tools::types::output::{MCPOutput, ToolOutput as ToolsToolOutput};
+use wimoai_wimo_hooks::event::MAX_HOOK_OUTPUT_REPLACEMENT_CHARS;
+use wimoai_wimo_hooks::result::HookRunResult;
+use wimoai_wimo_tools::types::output::{MCPOutput, ToolOutput as ToolsToolOutput};
 
-const TAG: &str = wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG;
+const TAG: &str = wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG;
 
 fn plan(result: PostToolUseResult, output: &ToolsToolOutput) -> PostToolUseDelivery {
     plan_post_tool_use_delivery(result, output, TAG, &mut [])

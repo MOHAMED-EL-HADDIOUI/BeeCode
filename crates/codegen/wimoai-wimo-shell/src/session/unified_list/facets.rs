@@ -402,7 +402,7 @@ mod tests {
             first_prompt: None,
             updated_at: "2026-06-01T00:00:00Z".into(),
             created_at: "2026-01-01T00:00:00Z".into(),
-            cwd: "/Users/me/wimo ai".into(),
+            cwd: "/Users/me/wimoai".into(),
             hostname: None,
             source: "local".into(),
             model_id: None,
@@ -476,7 +476,7 @@ mod tests {
             num_messages: 0,
             last_active_at: None,
             branch: Some("main".into()),
-            repo_name: Some("wimo ai".into()),
+            repo_name: Some("wimoai".into()),
             worktree_label: None,
             git_root_dir: None,
             git_remotes: Vec::new(),
@@ -521,7 +521,7 @@ mod tests {
     fn project_filter_is_partition_aware_keeps_local_rows() {
         let reg = build_facet_registry();
         let rows = vec![
-            local_row("local-1", Some("wimo ai"), Some("main")),
+            local_row("local-1", Some("wimoai"), Some("main")),
             conv_row("conv-match", &["ws_9f3a"]),
             conv_row("conv-other", &["ws_zzz"]),
         ];
@@ -541,15 +541,15 @@ mod tests {
     fn repo_filter_is_partition_aware_keeps_conversation_rows() {
         let reg = build_facet_registry();
         let rows = vec![
-            local_row("local-wimo ai", Some("wimo ai"), Some("main")),
+            local_row("local-wimoai", Some("wimoai"), Some("main")),
             local_row("local-other", Some("other"), Some("main")),
             conv_row("conv-1", &["ws_9f3a"]),
         ];
         let mut filters = BTreeMap::new();
-        filters.insert(REPO_FACET_KEY.to_owned(), vec![serde_json::json!("wimo ai")]);
+        filters.insert(REPO_FACET_KEY.to_owned(), vec![serde_json::json!("wimoai")]);
         let kept = reg.apply_in_memory_filters(&filters, rows);
         let ids: Vec<&str> = kept.iter().map(|r| r.legacy.session_id.as_str()).collect();
-        assert!(ids.contains(&"local-wimo ai"));
+        assert!(ids.contains(&"local-wimoai"));
         assert!(!ids.contains(&"local-other"));
         assert!(ids.contains(&"conv-1"));
     }
@@ -621,7 +621,7 @@ mod tests {
     fn starred_filter_is_partition_aware_keeps_local_rows() {
         let reg = build_facet_registry();
         let rows = vec![
-            local_row("local-1", Some("wimo ai"), Some("main")),
+            local_row("local-1", Some("wimoai"), Some("main")),
             conv_row_starred("conv-starred", true),
             conv_row_starred("conv-plain", false),
         ];
@@ -645,14 +645,14 @@ mod tests {
             first_prompt: None,
             updated_at: "2026-06-01T00:00:00Z".into(),
             created_at: "2026-01-01T00:00:00Z".into(),
-            cwd: "/Users/me/wimo ai".into(),
+            cwd: "/Users/me/wimoai".into(),
             hostname: None,
             source: "local".into(),
             model_id: None,
             num_messages: 1,
             last_active_at: Some("2026-06-01T00:00:00Z".into()),
             branch: Some("main".into()),
-            repo_name: Some("wimo ai".into()),
+            repo_name: Some("wimoai".into()),
             worktree_label: None,
             git_root_dir: git_root.map(Into::into),
             git_remotes: Vec::new(),
@@ -682,9 +682,9 @@ mod tests {
             branch: None,
             repo_name: None,
             worktree_label: None,
-            git_root_dir: Some("/Users/me/wimo ai".into()),
+            git_root_dir: Some("/Users/me/wimoai".into()),
             git_remotes: Vec::new(),
-            source_workspace_dir: Some("/Users/me/wimo ai-main".into()),
+            source_workspace_dir: Some("/Users/me/wimoai-main".into()),
             last_turn_summary: None,
             last_recap: None,
             session_kind: Some("worktree".into()),
@@ -692,11 +692,11 @@ mod tests {
         let f = reg.extract_all(&local);
         assert!(matches!(
             f.get(GIT_ROOT_FACET_KEY),
-            Some(FacetValue::One(serde_json::Value::String(s))) if s == "/Users/me/wimo ai"
+            Some(FacetValue::One(serde_json::Value::String(s))) if s == "/Users/me/wimoai"
         ));
         assert!(matches!(
             f.get(SOURCE_WORKSPACE_FACET_KEY),
-            Some(FacetValue::One(serde_json::Value::String(s))) if s == "/Users/me/wimo ai-main"
+            Some(FacetValue::One(serde_json::Value::String(s))) if s == "/Users/me/wimoai-main"
         ));
 
         // Conversations carry no local git data
@@ -713,13 +713,13 @@ mod tests {
     fn git_root_filter_keeps_matching_local_rows() {
         let reg = build_facet_registry();
         let rows = vec![
-            local_row_with_git("a", Some("/Users/me/wimo ai"), None),
+            local_row_with_git("a", Some("/Users/me/wimoai"), None),
             local_row_with_git("b", Some("/Users/me/other"), None),
         ];
         let mut filters = BTreeMap::new();
         filters.insert(
             GIT_ROOT_FACET_KEY.to_owned(),
-            vec![serde_json::json!("/Users/me/wimo ai")],
+            vec![serde_json::json!("/Users/me/wimoai")],
         );
         let kept = reg.apply_in_memory_filters(&filters, rows);
         let ids: Vec<&str> = kept.iter().map(|r| r.legacy.session_id.as_str()).collect();

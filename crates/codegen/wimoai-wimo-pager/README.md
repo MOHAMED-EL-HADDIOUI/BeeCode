@@ -1,4 +1,4 @@
-# wimo ai-wimo-pager
+# wimoai-wimo-pager
 
 Terminal UI (TUI) for wimo Build. Provides the interactive full-screen interface
 including the scrollback view, prompt input, session management, and all modal
@@ -61,6 +61,6 @@ src/
 - [Terminal Support & Troubleshooting](docs/user-guide/21-terminal-support.md) — tmux/SSH truecolor, clipboard, mouse, diagnostics, `/doctor`
 - [Hooks & Plugins Guide](docs/hooks-and-plugins.md) — managing hooks, plugins, and marketplace sources
 - [Custom Hooks Guide](docs/custom-hooks.md) — creating, configuring, and writing your own hooks
-- [Hook Examples](../wimo ai-wimo-hooks/examples/README.md) — sample hooks for common workflows
-- [Hooks Crate (`wimo ai-wimo-hooks`)](../wimo ai-wimo-hooks/) — hook runtime, event types, and execution engine
-- [Plugin Marketplace Crate (`wimo ai-wimo-plugin-marketplace`)](../wimo ai-wimo-plugin-marketplace/) — marketplace source loading, scanning, and install
+- [Hook Examples](../wimoai-wimo-hooks/examples/README.md) — sample hooks for common workflows
+- [Hooks Crate (`wimoai-wimo-hooks`)](../wimoai-wimo-hooks/) — hook runtime, event types, and execution engine
+- [Plugin Marketplace Crate (`wimoai-wimo-plugin-marketplace`)](../wimoai-wimo-plugin-marketplace/) — marketplace source loading, scanning, and install

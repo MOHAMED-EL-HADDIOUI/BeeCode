@@ -143,7 +143,7 @@ fn sanitize_summary_for_host(summary: &mut serde_json::Map<String, Value>, id: &
     set_or_remove(
         summary,
         "sandbox_profile",
-        wimo ai_wimo_sandbox::configured_profile_name().map(String::from),
+        wimoai_wimo_sandbox::configured_profile_name().map(String::from),
     );
 }
 

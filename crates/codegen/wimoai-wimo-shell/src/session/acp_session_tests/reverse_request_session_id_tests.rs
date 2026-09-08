@@ -1,10 +1,10 @@
 //! Regression guard: every blocking reverse-request (permission, `ask_user_question`, plan-approval) must carry a non-empty `sessionId`.
 //! Otherwise Tier-2 routing silently drops it (`server.rs`).
 //! The invariant holds today; these tests pin it.
-use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
     AskUserQuestionExtRequest, AskUserQuestionMode,
 };
-use wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtRequest;
+use wimoai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtRequest;
 
 #[test]
 fn ask_user_question_request_carries_session_id() {

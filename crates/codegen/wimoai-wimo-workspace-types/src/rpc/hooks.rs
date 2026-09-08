@@ -1,5 +1,5 @@
 //! Wire mirror of the `workspace.hook_registry` response.
-//! It is kept byte-identical to the upstream serde shape so this lean crate avoids the heavy `wimo ai_wimo_hooks` dep.
+//! It is kept byte-identical to the upstream serde shape so this lean crate avoids the heavy `wimoai_wimo_hooks` dep.
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -136,7 +136,7 @@ mod tests {
         assert_eq!(HookRegistryReq::METHOD, "workspace.hook_registry");
     }
 
-    /// Mirrors `event_name_deser_all_variants` in wimo ai-wimo-hooks; the two lists move together.
+    /// Mirrors `event_name_deser_all_variants` in wimoai-wimo-hooks; the two lists move together.
     #[test]
     fn hook_event_name_wire_snake_case_round_trip() {
         for (variant, wire) in [

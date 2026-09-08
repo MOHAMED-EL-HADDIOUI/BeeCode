@@ -50,7 +50,7 @@ pub struct RelayConfig {
     auth_manager: Option<Arc<AuthManager>>,
 }
 impl RelayConfig {
-    /// Session gate: builds only for a wimo.com first-party session (`is_wimo ai_auth`: x.ai-issuer OIDC or external credential) with a non-empty bearer.
+    /// Session gate: builds only for a wimo.com first-party session (`is_wimoai_auth`: x.ai-issuer OIDC or external credential) with a non-empty bearer.
     /// BYOK/ApiKey, non-x.ai issuers (enterprise OIDC, third-party external providers), and deprecated WebLogin get `None`.
     /// With relay off, the leader still serves clients over IPC.
     pub(crate) fn for_session(
@@ -59,7 +59,7 @@ impl RelayConfig {
         alpha_test_key: Option<String>,
         auth_manager: Option<Arc<AuthManager>>,
     ) -> Option<Self> {
-        if !session.is_wimo ai_auth() || session.key.is_empty() {
+        if !session.is_wimoai_auth() || session.key.is_empty() {
             return None;
         }
         let _ = alpha_test_key;
@@ -179,7 +179,7 @@ async fn attempt_auth_recovery(
                 timeout_secs = AUTH_RECOVERY_TIMEOUT_SECS,
                 "auth recovery: relay {context}, refresh timed out"
             );
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth recovery: relay refresh timed out",
                 None,
                 Some(serde_json::json!({
@@ -193,24 +193,24 @@ async fn attempt_auth_recovery(
     match recovered {
         Ok(new_auth) if new_auth.key == config.auth.key => {
             info!("auth recovery: relay {context}, token unchanged, backing off");
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth recovery: relay token unchanged, backing off",
                 None,
                 Some(serde_json::json!({
                     "context": context,
-                    "key_prefix": wimo ai_wimo_auth::bearer_suffix(&new_auth.key),
+                    "key_prefix": wimoai_wimo_auth::bearer_suffix(&new_auth.key),
                 })),
             );
             false
         }
         Ok(new_auth) => {
             info!("auth recovery: relay {context}, recovered, reconnecting");
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth recovery: relay recovered",
                 None,
                 Some(serde_json::json!({
                     "context": context,
-                    "new_key_prefix": wimo ai_wimo_auth::bearer_suffix(&new_auth.key),
+                    "new_key_prefix": wimoai_wimo_auth::bearer_suffix(&new_auth.key),
                 })),
             );
             config.auth = new_auth;
@@ -218,7 +218,7 @@ async fn attempt_auth_recovery(
         }
         Err(e) if crate::auth::recovery::relay_should_cancel(&e) => {
             teprintln!("{e}");
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth recovery: relay giving up (terminal)",
                 None,
                 Some(serde_json::json!({ "context": context, "error": format!("{e}") })),
@@ -228,7 +228,7 @@ async fn attempt_auth_recovery(
         }
         Err(e) => {
             warn!(error = %e, "auth recovery: relay {context}, refresh failed");
-            wimo ai_wimo_telemetry::unified_log::debug(
+            wimoai_wimo_telemetry::unified_log::debug(
                 "auth recovery: relay refresh failed",
                 None,
                 Some(serde_json::json!({ "context": context, "error": format!("{e}") })),
@@ -368,7 +368,7 @@ fn build_relay_request(config: &RelayConfig) -> anyhow::Result<axum::http::Reque
         axum::http::header::HeaderValue::from_str(&format!("Bearer {}", config.auth.key))?,
     );
     req.headers_mut().insert(
-        "X-wimo ai-Token-Auth",
+        "X-wimoai-Token-Auth",
         axum::http::header::HeaderValue::from_str(&config.token_header)?,
     );
     req.headers_mut().insert(
@@ -377,7 +377,7 @@ fn build_relay_request(config: &RelayConfig) -> anyhow::Result<axum::http::Reque
     );
     req.headers_mut().insert(
         "x-wimo-client-version",
-        axum::http::header::HeaderValue::from_static(wimo ai_wimo_version::VERSION),
+        axum::http::header::HeaderValue::from_static(wimoai_wimo_version::VERSION),
     );
     req.headers_mut().insert(
         crate::http::CLIENT_MODE_HEADER,
@@ -421,7 +421,7 @@ async fn connect_to_relay(
             } else {
                 // The default connector never sees the shared trust config.
                 let connector =
-                    tokio_tungstenite::Connector::Rustls(wimo ai_wimo_extra_ca::rustls_client_config());
+                    tokio_tungstenite::Connector::Rustls(wimoai_wimo_extra_ca::rustls_client_config());
                 connect_async_tls_with_config(req, None, false, Some(connector))
                     .await
                     .map_err(|e| anyhow::Error::from(e).context("WebSocket connection failed"))
@@ -486,7 +486,7 @@ where
                             timeout_secs = liveness.as_secs(),
                             "no WS traffic within liveness window, treating connection as dead"
                         );
-                        wimo ai_wimo_telemetry::unified_log::warn(
+                        wimoai_wimo_telemetry::unified_log::warn(
                             "relay: read liveness timeout, reconnecting",
                             None,
                             Some(serde_json::json!({
@@ -898,27 +898,27 @@ mod tests {
         }
     }
     #[test]
-    fn for_session_builds_only_for_wimo ai_issuer() {
-        use crate::auth::wimo ai_OAUTH2_ISSUER;
+    fn for_session_builds_only_for_wimoai_issuer() {
+        use crate::auth::wimoai_OAUTH2_ISSUER;
         let cfg = wimoComConfig::default();
         let builds = |a: &wimoAuth| RelayConfig::for_session(a, &cfg, None, None).is_some();
-        let wimo ai = wimoAuth {
+        let wimoai = wimoAuth {
             auth_mode: AuthMode::Oidc,
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
-            ..test_auth("wimo ai-bearer")
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
+            ..test_auth("wimoai-bearer")
         };
-        assert!(wimo ai.is_wimo ai_auth(), "precondition: is_wimo ai_auth");
-        assert!(builds(&wimo ai));
-        let external_wimo ai = wimoAuth {
+        assert!(wimoai.is_wimoai_auth(), "precondition: is_wimoai_auth");
+        assert!(builds(&wimoai));
+        let external_wimoai = wimoAuth {
             auth_mode: AuthMode::External,
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
             ..test_auth("ext-bearer")
         };
-        assert!(external_wimo ai.is_wimo ai_auth(), "precondition: is_wimo ai_auth");
-        assert!(builds(&external_wimo ai));
+        assert!(external_wimoai.is_wimoai_auth(), "precondition: is_wimoai_auth");
+        assert!(builds(&external_wimoai));
         assert!(!builds(&wimoAuth {
             key: String::new(),
-            ..wimo ai.clone()
+            ..wimoai.clone()
         }));
         assert!(!builds(&wimoAuth {
             auth_mode: AuthMode::ApiKey,
@@ -957,7 +957,7 @@ mod tests {
     /// A relay holding a private, refresher-less `AuthManager` fails this: it can only adopt sibling disk tokens, and there are none.
     #[tokio::test]
     async fn auth_recovery_refreshes_and_heals_missing_auth_json() {
-        use crate::auth::wimo ai_OAUTH2_ISSUER;
+        use crate::auth::wimoai_OAUTH2_ISSUER;
         use crate::auth::refresh::{RefreshOutcome, TokenRefresher};
         use std::sync::atomic::AtomicU32;
         struct CountingRefresher {
@@ -973,7 +973,7 @@ mod tests {
                 RefreshOutcome::Success(Box::new(wimoAuth {
                     key: "fresh-from-authority".into(),
                     auth_mode: AuthMode::Oidc,
-                    oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+                    oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
                     refresh_token: Some("rt-rotated".into()),
                     expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
                     ..wimoAuth::test_default()
@@ -988,7 +988,7 @@ mod tests {
         );
         let expired_session = wimoAuth {
             auth_mode: AuthMode::Oidc,
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
             refresh_token: Some("rt-valid-unconsumed".into()),
             expires_at: Some(chrono::Utc::now() - chrono::Duration::hours(14)),
             ..test_auth("expired-overnight")
@@ -1020,7 +1020,7 @@ mod tests {
     /// The caller then backs off before reconnecting instead of tight-looping.
     #[tokio::test]
     async fn attempt_auth_recovery_same_key_backs_off_without_cancel() {
-        use crate::auth::wimo ai_OAUTH2_ISSUER;
+        use crate::auth::wimoai_OAUTH2_ISSUER;
         use crate::auth::refresh::{RefreshOutcome, TokenRefresher};
         struct PanicRefresher;
         #[async_trait::async_trait]
@@ -1037,7 +1037,7 @@ mod tests {
         let am = Arc::new(AuthManager::new(dir.path(), cfg.clone()));
         let fresh_session = wimoAuth {
             auth_mode: AuthMode::Oidc,
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
             refresh_token: Some("rt-valid".into()),
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
             ..test_auth("fresh-key")

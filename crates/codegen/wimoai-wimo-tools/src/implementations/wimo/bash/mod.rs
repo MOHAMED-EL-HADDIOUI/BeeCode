@@ -26,7 +26,7 @@ use std::sync::LazyLock;
 use std::time::Duration;
 
 use regex::Regex;
-use wimo ai_wimo_config::shell::AmpersandSemantics;
+use wimoai_wimo_config::shell::AmpersandSemantics;
 
 use crate::DEFAULT_TOOL_OUTPUT_CHARS;
 use crate::computer::types::{ComputerError, TerminalRunRequest};
@@ -73,11 +73,11 @@ const MAX_PROGRESS_DELTA_BYTES: usize = 16 * 1024;
 /// Bash's capabilities incl. its streaming spec (single source of truth):
 /// raw stdout is the terminal projection, so `RawTerminal` / `Append`,
 /// capped per frame at [`MAX_PROGRESS_DELTA_BYTES`].
-static BASH_CAPABILITIES: LazyLock<wimo ai_tool_protocol::ToolCapabilities> =
-    LazyLock::new(|| wimo ai_tool_protocol::ToolCapabilities {
+static BASH_CAPABILITIES: LazyLock<wimoai_tool_protocol::ToolCapabilities> =
+    LazyLock::new(|| wimoai_tool_protocol::ToolCapabilities {
         is_read_only: false,
-        tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
-        streaming: Some(wimo ai_tool_protocol::StreamingSpec {
+        tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
+        streaming: Some(wimoai_tool_protocol::StreamingSpec {
             subkind: "bash_output_chunk".to_owned(),
             max_delta_bytes: Some(MAX_PROGRESS_DELTA_BYTES as u32),
         }),
@@ -86,13 +86,13 @@ static BASH_CAPABILITIES: LazyLock<wimo ai_tool_protocol::ToolCapabilities> =
 
 /// One `ToolProgress` delta from a `BashOutputChunk`; `None` when no new bytes.
 fn bash_output_chunk_progress(
-    spec: &wimo ai_tool_protocol::StreamingSpec,
+    spec: &wimoai_tool_protocol::StreamingSpec,
     chunk: &BashOutputChunk,
     last_total: &mut usize,
-) -> Option<wimo ai_tool_runtime::ToolProgress> {
+) -> Option<wimoai_tool_runtime::ToolProgress> {
     // `stream_chunk` counts in `u64`; convert at the boundary.
     let mut cursor = *last_total as u64;
-    let progress = wimo ai_tool_runtime::stream_chunk(
+    let progress = wimoai_tool_runtime::stream_chunk(
         spec,
         &chunk.base.output,
         chunk.base.total_bytes as u64,
@@ -142,7 +142,7 @@ pub struct BashParams {
     pub timeout_secs: Option<f64>,
     /// **Foreground-only** ceiling for model-provided `timeout` (seconds).
     /// None → built-in [`DEFAULT_MAX_TIMEOUT_MS`] (5 minutes); production
-    /// wimo opts up to 10h via wimo ai-wimo-shell's `BashToolConfig`.
+    /// wimo opts up to 10h via wimoai-wimo-shell's `BashToolConfig`.
     ///
     /// When set:
     /// - Positive model `timeout` values are clamped to this ceiling (ms).
@@ -318,10 +318,10 @@ pub enum BashToolOutput {
     Background(BackgroundTaskStarted),
 }
 
-impl wimo ai_tool_runtime::ToolOutput for BashToolOutput {
-    fn chat_completion_output(&self) -> Option<wimo ai_tool_runtime::ToolChatCompletionResponse> {
+impl wimoai_tool_runtime::ToolOutput for BashToolOutput {
+    fn chat_completion_output(&self) -> Option<wimoai_tool_runtime::ToolChatCompletionResponse> {
         match self {
-            Self::Foreground(bash) => wimo ai_tool_runtime::ToolOutput::chat_completion_output(bash),
+            Self::Foreground(bash) => wimoai_tool_runtime::ToolOutput::chat_completion_output(bash),
             Self::Background(_) => None,
         }
     }
@@ -467,7 +467,7 @@ pub(crate) fn format_default_prompt(bash: &BashOutput) -> String {
 // Default upper bound for model-provided *foreground* command timeouts when
 // `BashParams.max_timeout_secs` is unset: a transport-safe **5 minutes**.
 // Consumers that want longer opt in per session via `max_timeout_secs` — in
-// particular production wimo sets it to 10h in wimo ai-wimo-shell's
+// particular production wimo sets it to 10h in wimoai-wimo-shell's
 // `BashToolConfig`. `max_timeout_secs` only lowers/raises this *foreground*
 // ceiling; background tasks (`timeout: 0` / omitted in background mode) are
 // always unbounded regardless of this value — the model owns their lifetime via
@@ -546,7 +546,7 @@ fn contains_unwaited_background_operator(command: &str) -> bool {
 /// Whether `command` uses `&` as a bash background operator under the given
 /// contract version: legacy (0.4.10) flags only a trailing `&`; current flags
 /// an unwaited `&` anywhere. Callers apply this only when
-/// [`wimo ai_wimo_config::shell::ampersand_semantics`] reports POSIX `&` semantics
+/// [`wimoai_wimo_config::shell::ampersand_semantics`] reports POSIX `&` semantics
 /// (Unix + Git Bash).
 fn command_has_bash_background_operator(command: &str, is_legacy: bool) -> bool {
     if is_legacy {
@@ -1214,7 +1214,7 @@ impl BashTool {
     /// here keeps the advertised max equal to the enforced max (≥1ms).
     ///
     /// `pub` (not `pub(crate)`): the cursor `Shell` adapter
-    /// (wimo ai-wimo-cursor) uses this ceiling to report the true FG wait in
+    /// (wimoai-wimo-cursor) uses this ceiling to report the true FG wait in
     /// its auto-background template.
     pub fn effective_max_timeout_ms(params: &BashParams) -> u64 {
         let configured = params
@@ -1365,7 +1365,7 @@ impl BashTool {
     async fn background_retrieval_hint(
         resources: &SharedResources,
         task_id: &str,
-    ) -> Result<String, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<String, wimoai_tool_runtime::ToolError> {
         let res = resources.lock().await;
         let renderer = res.require::<TemplateRenderer>()?;
         // Presence-aware lookup (not a template render): a missing kind
@@ -1552,7 +1552,7 @@ ${%- endif %}"#
     fn get_prefixed_command(cmd_prefix: &Option<String>, command: &str) -> String {
         match cmd_prefix {
             Some(prefix) => {
-                let sep = wimo ai_wimo_config::shell::chain_separator();
+                let sep = wimoai_wimo_config::shell::chain_separator();
                 format!("{prefix} {sep} {command}")
             }
             None => command.to_string(),
@@ -1634,25 +1634,25 @@ impl crate::types::tool_metadata::ToolMetadata for BashTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for BashTool {
+impl wimoai_tool_runtime::Tool for BashTool {
     type Args = BashToolInput;
     type Output = BashToolOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("run_terminal_cmd").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("run_terminal_cmd").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "run_terminal_cmd",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
         // Clone of `BASH_CAPABILITIES`; read at registration time only.
         BASH_CAPABILITIES.clone()
     }
@@ -1682,16 +1682,16 @@ impl wimo ai_tool_runtime::Tool for BashTool {
     /// Absent extension = no emission (pre-streaming behavior).
     async fn execute(
         &self,
-        mut ctx: wimo ai_tool_runtime::ToolCallContext,
+        mut ctx: wimoai_tool_runtime::ToolCallContext,
         input: BashToolInput,
-    ) -> wimo ai_tool_runtime::ToolStream<BashToolOutput> {
+    ) -> wimoai_tool_runtime::ToolStream<BashToolOutput> {
         // Background / monitor calls reach their single `Terminal` immediately
         // (the task continues asynchronously on the side-channel). Owned ZST,
         // no `&self` capture.
         if input.is_background {
             let this = BashTool;
             return Box::pin(async_stream::stream! {
-                yield wimo ai_tool_runtime::ToolStreamItem::Terminal(this.run(ctx, input).await);
+                yield wimoai_tool_runtime::ToolStreamItem::Terminal(this.run(ctx, input).await);
             });
         }
 
@@ -1700,7 +1700,7 @@ impl wimo ai_tool_runtime::Tool for BashTool {
         // non-streaming fast path below without paying for a sink, channel,
         // or `select!` loop it would only drain-and-discard from.
         let stream_progress = ctx
-            .get::<wimo ai_tool_runtime::WorkspaceViewerContext>()
+            .get::<wimoai_tool_runtime::WorkspaceViewerContext>()
             .map(|c| c.stream_tool_progress)
             .unwrap_or(false);
 
@@ -1716,15 +1716,15 @@ impl wimo ai_tool_runtime::Tool for BashTool {
         if !stream_progress {
             let this = BashTool;
             return Box::pin(async_stream::stream! {
-                yield wimo ai_tool_runtime::ToolStreamItem::Terminal(this.run(ctx, input).await);
+                yield wimoai_tool_runtime::ToolStreamItem::Terminal(this.run(ctx, input).await);
             });
         }
 
         // Absent spec is a can't-happen bug → terminal error, not a panic.
         let Some(spec) = BASH_CAPABILITIES.streaming.as_ref() else {
             return Box::pin(async_stream::stream! {
-                yield wimo ai_tool_runtime::ToolStreamItem::Terminal(Err(
-                    wimo ai_tool_runtime::ToolError::custom(
+                yield wimoai_tool_runtime::ToolStreamItem::Terminal(Err(
+                    wimoai_tool_runtime::ToolError::custom(
                         "internal_error",
                         "BASH_CAPABILITIES has no StreamingSpec",
                     ),
@@ -1760,7 +1760,7 @@ impl wimo ai_tool_runtime::Tool for BashTool {
                                     && let Some(p) =
                                         bash_output_chunk_progress(spec, &latest, &mut last_total)
                                 {
-                                    yield wimo ai_tool_runtime::ToolStreamItem::Progress(p);
+                                    yield wimoai_tool_runtime::ToolStreamItem::Progress(p);
                                 }
                             }
                             Some(notif) => {
@@ -1779,7 +1779,7 @@ impl wimo ai_tool_runtime::Tool for BashTool {
                                     if let Some(p) =
                                         bash_output_chunk_progress(spec, &synthetic, &mut last_total)
                                     {
-                                        yield wimo ai_tool_runtime::ToolStreamItem::Progress(p);
+                                        yield wimoai_tool_runtime::ToolStreamItem::Progress(p);
                                     }
                                 }
                             }
@@ -1804,7 +1804,7 @@ impl wimo ai_tool_runtime::Tool for BashTool {
                                         if let Some(p) =
                                             bash_output_chunk_progress(spec, &chunk, &mut last_total)
                                         {
-                                            yield wimo ai_tool_runtime::ToolStreamItem::Progress(p);
+                                            yield wimoai_tool_runtime::ToolStreamItem::Progress(p);
                                         }
                                     }
                                     other => {
@@ -1816,14 +1816,14 @@ impl wimo ai_tool_runtime::Tool for BashTool {
                                                 &synthetic,
                                                 &mut last_total,
                                             ) {
-                                                yield wimo ai_tool_runtime::ToolStreamItem::Progress(p);
+                                                yield wimoai_tool_runtime::ToolStreamItem::Progress(p);
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                        yield wimo ai_tool_runtime::ToolStreamItem::Terminal(result);
+                        yield wimoai_tool_runtime::ToolStreamItem::Terminal(result);
                         break;
                     }
                 }
@@ -1840,9 +1840,9 @@ impl wimo ai_tool_runtime::Tool for BashTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: BashToolInput,
-    ) -> Result<BashToolOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<BashToolOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -1905,7 +1905,7 @@ impl wimo ai_tool_runtime::Tool for BashTool {
         // shell-specific: bash/POSIX backgrounds with a bare `&`; PowerShell
         // backgrounds only with a trailing `&` (a leading `&` is the call
         // operator); cmd.exe uses `&` as a sequential separator (never rejected).
-        let ampersand = wimo ai_wimo_config::shell::ampersand_semantics();
+        let ampersand = wimoai_wimo_config::shell::ampersand_semantics();
         if let Some(violation) = should_reject_background_op(
             input.is_background,
             params.allow_background_operator,
@@ -1939,7 +1939,7 @@ impl wimo ai_tool_runtime::Tool for BashTool {
                     trailing_is_syntax_error,
                 ),
             };
-            return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(message));
+            return Err(wimoai_tool_runtime::ToolError::invalid_arguments(message));
         }
 
         // --- Validate: reject self-matching pkill/pgrep -f <pat> ---
@@ -1959,11 +1959,11 @@ impl wimo ai_tool_runtime::Tool for BashTool {
                  -r kill` invoked from a separate command, a fully-qualified path that \
                  does not appear later in the script, or kill by PID file."
             );
-            return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(message));
+            return Err(wimoai_tool_runtime::ToolError::invalid_arguments(message));
         }
 
         if input.is_background && !background_enabled {
-            return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(
+            return Err(wimoai_tool_runtime::ToolError::invalid_arguments(
                 "Background execution is disabled.".to_string(),
             ));
         }
@@ -2639,9 +2639,9 @@ mod tests {
 
     /// Destructure a `bash_output_chunk` payload, asserting the canonical
     /// `raw_terminal` / `append` envelope.
-    fn read_chunk_progress(p: &wimo ai_tool_runtime::ToolProgress) -> (String, usize, bool, bool) {
+    fn read_chunk_progress(p: &wimoai_tool_runtime::ToolProgress) -> (String, usize, bool, bool) {
         match p {
-            wimo ai_tool_runtime::ToolProgress::Custom { subkind, payload } => {
+            wimoai_tool_runtime::ToolProgress::Custom { subkind, payload } => {
                 assert_eq!(subkind, "bash_output_chunk", "unexpected subkind");
                 (
                     payload["delta"].as_str().unwrap().to_owned(),
@@ -2729,7 +2729,7 @@ mod tests {
         let mut last = 0usize;
         let p = bash_output_chunk_progress(spec, &chunk, &mut last).unwrap();
         match p {
-            wimo ai_tool_runtime::ToolProgress::Custom { subkind, payload } => {
+            wimoai_tool_runtime::ToolProgress::Custom { subkind, payload } => {
                 assert_eq!(subkind, "bash_output_chunk");
                 let delta = payload["delta"].as_str().unwrap();
                 // Capped: never larger than the per-frame limit.
@@ -2761,7 +2761,7 @@ mod tests {
         reassembled.push_str(&payload_str[..last]);
         while last < total {
             let p = bash_output_chunk_progress(spec, &chunk, &mut last).unwrap();
-            let wimo ai_tool_runtime::ToolProgress::Custom { payload, .. } = p else {
+            let wimoai_tool_runtime::ToolProgress::Custom { payload, .. } = p else {
                 panic!("expected Custom progress");
             };
             let delta = payload["delta"].as_str().unwrap().to_owned();
@@ -2780,10 +2780,10 @@ mod tests {
 
         let (resources, _tmp) = make_real_resources(None);
         // No streaming gate stamped — exercises the default path.
-        let mut ctx = wimo ai_tool_runtime::ToolCallContext::default();
+        let mut ctx = wimoai_tool_runtime::ToolCallContext::default();
         ctx.extensions.insert(resources.into_shared());
         let tool = BashTool;
-        let mut stream = wimo ai_tool_runtime::Tool::execute(
+        let mut stream = wimoai_tool_runtime::Tool::execute(
             &tool,
             ctx,
             make_input("for i in 1 2 3; do echo $i; sleep 0.1; done"),
@@ -2791,13 +2791,13 @@ mod tests {
         .await;
 
         let mut progress = 0usize;
-        let mut terminal: Option<Result<BashToolOutput, wimo ai_tool_runtime::ToolError>> = None;
+        let mut terminal: Option<Result<BashToolOutput, wimoai_tool_runtime::ToolError>> = None;
         while let Some(item) = stream.next().await {
             match item {
-                wimo ai_tool_runtime::ToolStreamItem::Progress(_) => {
+                wimoai_tool_runtime::ToolStreamItem::Progress(_) => {
                     progress += 1;
                 }
-                wimo ai_tool_runtime::ToolStreamItem::Terminal(r) => {
+                wimoai_tool_runtime::ToolStreamItem::Terminal(r) => {
                     assert!(terminal.is_none(), "more than one Terminal yielded");
                     terminal = Some(r);
                 }
@@ -2828,7 +2828,7 @@ mod tests {
 
         let (resources, _tmp) = make_real_resources(None);
         let tool = BashTool;
-        let mut stream = wimo ai_tool_runtime::Tool::execute(
+        let mut stream = wimoai_tool_runtime::Tool::execute(
             &tool,
             test_ctx(resources.into_shared()),
             make_input("for i in 1 2 3; do echo $i; sleep 0.1; done"),
@@ -2836,16 +2836,16 @@ mod tests {
         .await;
 
         let mut progress = 0usize;
-        let mut terminal: Option<Result<BashToolOutput, wimo ai_tool_runtime::ToolError>> = None;
+        let mut terminal: Option<Result<BashToolOutput, wimoai_tool_runtime::ToolError>> = None;
         while let Some(item) = stream.next().await {
             match item {
-                wimo ai_tool_runtime::ToolStreamItem::Progress(p) => {
+                wimoai_tool_runtime::ToolStreamItem::Progress(p) => {
                     assert!(terminal.is_none(), "Progress arrived after Terminal");
                     // Asserts subkind == "bash_output_chunk".
                     let _ = read_chunk_progress(&p);
                     progress += 1;
                 }
-                wimo ai_tool_runtime::ToolStreamItem::Terminal(r) => {
+                wimoai_tool_runtime::ToolStreamItem::Terminal(r) => {
                     assert!(terminal.is_none(), "more than one Terminal yielded");
                     terminal = Some(r);
                 }
@@ -2878,7 +2878,7 @@ mod tests {
         // ~1.8s easily exceeds it and keeps emitting across the shrinking tail.
         let (resources, _tmp) = make_real_resources(Some(200));
         let tool = BashTool;
-        let mut stream = wimo ai_tool_runtime::Tool::execute(
+        let mut stream = wimoai_tool_runtime::Tool::execute(
             &tool,
             test_ctx(resources.into_shared()),
             make_input(
@@ -2889,15 +2889,15 @@ mod tests {
 
         // (total_bytes, truncated, gap, delta_len)
         let mut deltas: Vec<(usize, bool, bool, usize)> = Vec::new();
-        let mut terminal: Option<Result<BashToolOutput, wimo ai_tool_runtime::ToolError>> = None;
+        let mut terminal: Option<Result<BashToolOutput, wimoai_tool_runtime::ToolError>> = None;
         while let Some(item) = stream.next().await {
             match item {
-                wimo ai_tool_runtime::ToolStreamItem::Progress(p) => {
+                wimoai_tool_runtime::ToolStreamItem::Progress(p) => {
                     assert!(terminal.is_none(), "Progress arrived after Terminal");
                     let (delta, total, truncated, gap) = read_chunk_progress(&p);
                     deltas.push((total, truncated, gap, delta.len()));
                 }
-                wimo ai_tool_runtime::ToolStreamItem::Terminal(r) => {
+                wimoai_tool_runtime::ToolStreamItem::Terminal(r) => {
                     assert!(terminal.is_none(), "more than one Terminal yielded");
                     terminal = Some(r);
                 }
@@ -2989,7 +2989,7 @@ mod tests {
         // exercises the "drained after the last periodic chunk" path that the
         // bug missed. ASCII so lossy UTF-8 conversion is exact.
         let cmd = "printf 'tail-bytes-after-final-tick\\n'";
-        let mut stream = wimo ai_tool_runtime::Tool::execute(
+        let mut stream = wimoai_tool_runtime::Tool::execute(
             &tool,
             test_ctx(resources.into_shared()),
             make_input(cmd),
@@ -2998,10 +2998,10 @@ mod tests {
 
         let mut concatenated = String::new();
         let mut last_delta_total: Option<usize> = None;
-        let mut terminal: Option<Result<BashToolOutput, wimo ai_tool_runtime::ToolError>> = None;
+        let mut terminal: Option<Result<BashToolOutput, wimoai_tool_runtime::ToolError>> = None;
         while let Some(item) = stream.next().await {
             match item {
-                wimo ai_tool_runtime::ToolStreamItem::Progress(p) => {
+                wimoai_tool_runtime::ToolStreamItem::Progress(p) => {
                     assert!(terminal.is_none(), "Progress arrived after Terminal");
                     let (delta, total, _truncated, gap) = read_chunk_progress(&p);
                     assert!(
@@ -3011,7 +3011,7 @@ mod tests {
                     concatenated.push_str(&delta);
                     last_delta_total = Some(total);
                 }
-                wimo ai_tool_runtime::ToolStreamItem::Terminal(r) => {
+                wimoai_tool_runtime::ToolStreamItem::Terminal(r) => {
                     assert!(terminal.is_none(), "more than one Terminal yielded");
                     terminal = Some(r);
                 }
@@ -3048,7 +3048,7 @@ mod tests {
         let resources = make_resources(MockTerminal::success("hello world\n", 0));
         let tool = BashTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_input("echo hello"),
@@ -3074,7 +3074,7 @@ mod tests {
         let resources = make_resources(MockTerminal::timed_out("partial output"));
         let tool = BashTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_input("sleep 999"),
@@ -3096,7 +3096,7 @@ mod tests {
         let resources = make_resources(MockTerminal::failing());
         let tool = BashTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_input("bad_cmd"),
@@ -3111,7 +3111,7 @@ mod tests {
         let resources = make_resources(MockTerminal::background_ok("bg-task-42"));
         let tool = BashTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_bg_input("sleep 3600"),
@@ -3139,7 +3139,7 @@ mod tests {
         let resources = make_resources(mock);
         let tool = BashTool;
 
-        let _ = wimo ai_tool_runtime::Tool::run(
+        let _ = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_bg_input("python3 script.py"),
@@ -3163,7 +3163,7 @@ mod tests {
         let resources = make_resources_reject_bg_op(MockTerminal::success("", 0));
         let tool = BashTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_input("sleep 10 &"),
@@ -3187,7 +3187,7 @@ mod tests {
 
         // Previously this would pass because the old check only looked at
         // trailing `&`. Now the parser detects mid-command `&` too.
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_input("sleep 600 &; echo done"),
@@ -3211,7 +3211,7 @@ mod tests {
         let resources = make_resources(MockTerminal::success("hi\n", 0));
         let tool = BashTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_input("make & echo hi"),
@@ -3235,7 +3235,7 @@ mod tests {
         );
         let tool = BashTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_bg_input("sleep 3600"),
@@ -3258,7 +3258,7 @@ mod tests {
         );
         let tool = BashTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_input("sleep 10 &"),
@@ -3285,7 +3285,7 @@ mod tests {
     async fn background_operator_rejection_names_is_background_param() {
         let resources = make_resources_reject_bg_op(MockTerminal::success("", 0));
         let tool = BashTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_input("sleep 10 &"),
@@ -3321,7 +3321,7 @@ mod tests {
         let tool = BashTool;
 
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), make_input("ls"))
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), make_input("ls"))
                 .await;
         assert!(result.is_err());
         assert!(
@@ -3347,7 +3347,7 @@ mod tests {
         ));
 
         let tool = BashTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_bg_input("sleep 60"),
@@ -3383,7 +3383,7 @@ mod tests {
         resources.insert(TemplateRenderer::new(HashMap::new(), HashMap::new()));
 
         let tool = BashTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             make_bg_input("sleep 60"),
@@ -3431,7 +3431,7 @@ mod tests {
 
     #[test]
     fn foreground_chat_completion_emits_code_execution_result() {
-        let resp = wimo ai_tool_runtime::ToolOutput::chat_completion_output(
+        let resp = wimoai_tool_runtime::ToolOutput::chat_completion_output(
             &BashToolOutput::Foreground(make_bash_output(0, "hi\n")),
         )
         .unwrap();
@@ -3458,7 +3458,7 @@ mod tests {
             pre_formatted: None,
             pid: None,
         });
-        assert!(wimo ai_tool_runtime::ToolOutput::chat_completion_output(&out).is_none());
+        assert!(wimoai_tool_runtime::ToolOutput::chat_completion_output(&out).is_none());
     }
 
     #[test]
@@ -4711,11 +4711,11 @@ mod tests {
 
         fn legacy_rt_ctx(
             resources: crate::types::resources::SharedResources,
-        ) -> wimo ai_tool_runtime::ToolCallContext {
+        ) -> wimoai_tool_runtime::ToolCallContext {
             let mut ctx =
-                wimo ai_tool_runtime::ToolCallContext::new(wimo ai_tool_protocol::ToolCallId::new_v7());
+                wimoai_tool_runtime::ToolCallContext::new(wimoai_tool_protocol::ToolCallId::new_v7());
             ctx.extensions.insert(resources);
-            ctx.extensions.insert(wimo ai_tool_runtime::BehaviorVersion(
+            ctx.extensions.insert(wimoai_tool_runtime::BehaviorVersion(
                 "legacy-0.4.10".to_string(),
             ));
             ctx
@@ -4728,7 +4728,7 @@ mod tests {
         async fn current_rejects_mid_command_ampersand() {
             let resources = make_resources_reject_bg_op(MockTerminal::success("", 0));
             let tool = BashTool;
-            let result = wimo ai_tool_runtime::Tool::run(
+            let result = wimoai_tool_runtime::Tool::run(
                 &tool,
                 test_ctx(resources.into_shared()),
                 make_input("echo a & echo b"),
@@ -4747,7 +4747,7 @@ mod tests {
         async fn legacy_allows_mid_command_ampersand() {
             let resources = make_resources_reject_bg_op(MockTerminal::success("output", 0));
             let tool = BashTool;
-            let result = wimo ai_tool_runtime::Tool::run(
+            let result = wimoai_tool_runtime::Tool::run(
                 &tool,
                 legacy_rt_ctx(resources.into_shared()),
                 make_input("echo a & echo b"),
@@ -4766,7 +4766,7 @@ mod tests {
         async fn legacy_rejects_trailing_ampersand() {
             let resources = make_resources_reject_bg_op(MockTerminal::success("", 0));
             let tool = BashTool;
-            let result = wimo ai_tool_runtime::Tool::run(
+            let result = wimoai_tool_runtime::Tool::run(
                 &tool,
                 legacy_rt_ctx(resources.into_shared()),
                 make_input("sleep 600 &"),
@@ -4785,7 +4785,7 @@ mod tests {
         async fn legacy_allows_logical_and() {
             let resources = make_resources_reject_bg_op(MockTerminal::success("output", 0));
             let tool = BashTool;
-            let result = wimo ai_tool_runtime::Tool::run(
+            let result = wimoai_tool_runtime::Tool::run(
                 &tool,
                 legacy_rt_ctx(resources.into_shared()),
                 make_input("ls && echo done"),

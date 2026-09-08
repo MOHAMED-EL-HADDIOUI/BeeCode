@@ -8,8 +8,8 @@ use async_trait::async_trait;
 use futures::StreamExt;
 use serde_json::{Value, json};
 
-use wimo ai_tool_protocol::ToolId;
-use wimo ai_tool_runtime::{
+use wimoai_tool_protocol::ToolId;
+use wimoai_tool_runtime::{
     ToolCallContext, ToolDispatch, ToolError, ToolErrorKind, ToolProgress, ToolStream,
     ToolStreamItem, TypedToolOutput, terminal_only, with_progress,
 };

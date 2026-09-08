@@ -10,8 +10,8 @@ use crate::session::file_state::{FileRewindResponse, RewindPoint, rewind_files};
 use crate::session::git;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use wimo ai_hunk_tracker::{HunkId, HunkTrackerSnapshot, HunkTurnDelta};
-use wimo ai_tool_protocol::turn_hook::TurnHookOutcome;
+use wimoai_hunk_tracker::{HunkId, HunkTrackerSnapshot, HunkTurnDelta};
+use wimoai_tool_protocol::turn_hook::TurnHookOutcome;
 /// A turn/prompt boundary routed through [`WorkspaceHandle::on_turn_boundary`].
 ///
 /// `prompt_index` selects the origin and keeps the two effect sets disjoint:
@@ -94,12 +94,12 @@ pub struct RewindCheckpoint {
 }
 /// Resolve `workspace_rewind_hunks` from `wimo_WORKSPACE_REWIND_HUNKS` (default off).
 pub(crate) fn rewind_hunks_enabled() -> bool {
-    wimo ai_wimo_config::env_bool("wimo_WORKSPACE_REWIND_HUNKS").unwrap_or(false)
+    wimoai_wimo_config::env_bool("wimo_WORKSPACE_REWIND_HUNKS").unwrap_or(false)
 }
 /// Resolve `workspace_rewind_durable` from `wimo_WORKSPACE_REWIND_DURABLE` (default off).
 /// Off keeps the legacy in-memory-only path with no disk I/O.
 pub(crate) fn rewind_durable_enabled() -> bool {
-    wimo ai_wimo_config::env_bool("wimo_WORKSPACE_REWIND_DURABLE").unwrap_or(false)
+    wimoai_wimo_config::env_bool("wimo_WORKSPACE_REWIND_DURABLE").unwrap_or(false)
 }
 impl WorkspaceSession {
     /// Capture the hunk delta for `prompt_index` into the in-memory store.
@@ -154,7 +154,7 @@ impl WorkspaceSession {
             return;
         }
         prompts.sort_unstable();
-        let mut file_states: HashMap<std::path::PathBuf, wimo ai_hunk_tracker::FileHunkStateSnapshot> =
+        let mut file_states: HashMap<std::path::PathBuf, wimoai_hunk_tracker::FileHunkStateSnapshot> =
             HashMap::new();
         let mut turn_index: HashMap<usize, HashSet<HunkId>> = HashMap::new();
         for idx in prompts {
@@ -228,7 +228,7 @@ impl WorkspaceHandle {
         &self,
         session_id: &str,
         boundary: TurnBoundary,
-    ) -> Option<tokio::task::JoinHandle<wimo ai_file_utils::queue::EnqueueOutcome>> {
+    ) -> Option<tokio::task::JoinHandle<wimoai_file_utils::queue::EnqueueOutcome>> {
         match boundary {
             TurnBoundary::Start {
                 prompt_index: Some(idx),
@@ -979,7 +979,7 @@ mod tests {
             .create_session_with_tracker_and_viewer_ctx(
                 "main",
                 handle.root_cwd().unwrap(),
-                wimo ai_hunk_tracker::HunkTrackerHandle::noop(),
+                wimoai_hunk_tracker::HunkTrackerHandle::noop(),
                 None,
                 crate::capability::CapabilityMode::All,
                 None,

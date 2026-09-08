@@ -3,8 +3,8 @@
 #![allow(clippy::items_after_test_module)]
 use super::*;
 use crate::session::repo_status_prefix::RepoStatusSnapshot;
-use wimo ai_wimo_telemetry::region;
-use wimo ai_wimo_telemetry::region::Parent;
+use wimoai_wimo_telemetry::region;
+use wimoai_wimo_telemetry::region::Parent;
 /// Normalize a free-form name (e.g. an MCP server identifier) into a single safe filesystem segment.
 ///
 /// Replaces anything outside `[A-Za-z0-9._-]` with `_` so the result is a portable directory name on macOS/Linux.
@@ -29,13 +29,13 @@ pub(super) fn pick_user_image_url(image: &agent_client_protocol::ImageContent) -
     }
 }
 fn partition_rules_by_scope(
-    files: Vec<wimo ai_wimo_agent::prompt::agents_md::AgentConfigFile>,
+    files: Vec<wimoai_wimo_agent::prompt::agents_md::AgentConfigFile>,
     wimo_home: &std::path::Path,
     vendor_homes: &[(std::path::PathBuf, bool)],
     workspace_roots: &[&std::path::Path],
 ) -> (
-    Vec<wimo ai_wimo_agent::prompt::user_message::RuleEntry>,
-    Vec<wimo ai_wimo_agent::prompt::user_message::RuleEntry>,
+    Vec<wimoai_wimo_agent::prompt::user_message::RuleEntry>,
+    Vec<wimoai_wimo_agent::prompt::user_message::RuleEntry>,
 ) {
     let mut workspace = Vec::new();
     let mut user = Vec::new();
@@ -46,7 +46,7 @@ fn partition_rules_by_scope(
             vendor_homes,
             workspace_roots,
         );
-        let entry = wimo ai_wimo_agent::prompt::user_message::RuleEntry::from(file);
+        let entry = wimoai_wimo_agent::prompt::user_message::RuleEntry::from(file);
         if is_user_rule {
             user.push(entry);
         } else {
@@ -59,7 +59,7 @@ fn partition_rules_by_scope(
 mod partition_rules_by_scope_tests {
     use super::partition_rules_by_scope;
     use std::path::Path;
-    use wimo ai_wimo_agent::prompt::agents_md::AgentConfigFile;
+    use wimoai_wimo_agent::prompt::agents_md::AgentConfigFile;
     fn file(path: &str) -> AgentConfigFile {
         AgentConfigFile {
             file_name: Path::new(path)
@@ -71,7 +71,7 @@ mod partition_rules_by_scope_tests {
             content: path.to_string(),
         }
     }
-    fn paths(entries: &[wimo ai_wimo_agent::prompt::user_message::RuleEntry]) -> Vec<&str> {
+    fn paths(entries: &[wimoai_wimo_agent::prompt::user_message::RuleEntry]) -> Vec<&str> {
         entries.iter().map(|entry| entry.content.as_str()).collect()
     }
     #[test]
@@ -214,8 +214,8 @@ mod partition_rules_by_scope_tests {
             &[Path::new("/repo")],
         );
         let rules =
-            wimo ai_wimo_agent::prompt::user_message::format_rules_section(&workspace, &user).unwrap();
-        let reminder = wimo ai_wimo_agent::prompt::agents_md::format_agents_md_section(&files).unwrap();
+            wimoai_wimo_agent::prompt::user_message::format_rules_section(&workspace, &user).unwrap();
+        let reminder = wimoai_wimo_agent::prompt::agents_md::format_agents_md_section(&files).unwrap();
         for body in [
             "repo-agents-body",
             "repo-claude-body",
@@ -306,7 +306,7 @@ pub(super) fn install_system_prompt(
 #[cfg(test)]
 mod install_system_prompt_tests {
     use super::install_system_prompt;
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     fn system_text(item: &ConversationItem) -> &str {
         match item {
             ConversationItem::System(s) => s.content.as_ref(),
@@ -522,7 +522,7 @@ impl SessionActor {
                     item,
                     ConversationItem::User(u)
                         if u.synthetic_reason
-                            == Some(wimo ai_wimo_sampling_types::SyntheticReason::SystemReminder)
+                            == Some(wimoai_wimo_sampling_types::SyntheticReason::SystemReminder)
                 )
             });
         }
@@ -535,7 +535,7 @@ impl SessionActor {
             .map(|s| s.as_str())
             .unwrap_or(&self.session_info.cwd);
         let cwd = std::path::Path::new(display_path);
-        use wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate;
+        use wimoai_wimo_agent::prompt::user_message::UserMessageTemplate;
         let (template, include_verification) = {
             let agent = self.agent.borrow();
             let def = agent.definition();
@@ -566,9 +566,9 @@ impl SessionActor {
             let (workspace_rules, mut user_rules) = self.gather_partitioned_rules();
             user_rules.splice(
                 0..0,
-                wimo ai_wimo_agent::prompt::browser_verification::synthetic_user_rules(),
+                wimoai_wimo_agent::prompt::browser_verification::synthetic_user_rules(),
             );
-            wimo ai_wimo_agent::prompt::user_message::append_rules_section(
+            wimoai_wimo_agent::prompt::user_message::append_rules_section(
                 &mut out,
                 &workspace_rules,
                 &user_rules,
@@ -583,12 +583,12 @@ impl SessionActor {
     fn gather_partitioned_rules(
         &self,
     ) -> (
-        Vec<wimo ai_wimo_agent::prompt::user_message::RuleEntry>,
-        Vec<wimo ai_wimo_agent::prompt::user_message::RuleEntry>,
+        Vec<wimoai_wimo_agent::prompt::user_message::RuleEntry>,
+        Vec<wimoai_wimo_agent::prompt::user_message::RuleEntry>,
     ) {
         let files = self.agent.borrow().prompt_context().agents_md_files.clone();
-        let wimo_home = wimo ai_wimo_config::wimo_home();
-        let vendor_homes = wimo ai_dirs::home_dir()
+        let wimo_home = wimoai_wimo_config::wimo_home();
+        let vendor_homes = wimoai_dirs::home_dir()
             .map(|home_dir| {
                 vec![
                     (
@@ -625,10 +625,10 @@ impl SessionActor {
     async fn build_templated_user_message(
         &self,
         cwd: &std::path::Path,
-        template: wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate,
+        template: wimoai_wimo_agent::prompt::user_message::UserMessageTemplate,
         repo_status: Option<&RepoStatusSnapshot>,
     ) -> Option<String> {
-        use wimo ai_wimo_agent::prompt::user_message::UserMessageContext;
+        use wimoai_wimo_agent::prompt::user_message::UserMessageContext;
         self.wait_for_mcp_templated_prefix_ready(&template).await;
         let bridge = self.agent.borrow().tool_bridge().clone();
         let (vcs_root, vcs_status) = match repo_status {
@@ -647,7 +647,7 @@ impl SessionActor {
         {
             user_rules.splice(
                 0..0,
-                wimo ai_wimo_agent::prompt::browser_verification::synthetic_user_rules(),
+                wimoai_wimo_agent::prompt::browser_verification::synthetic_user_rules(),
             );
         }
         let shell = resolve_session_shell();
@@ -746,8 +746,8 @@ impl SessionActor {
     async fn gather_mcp_servers(
         &self,
         workspace: &std::path::Path,
-    ) -> Vec<wimo ai_wimo_agent::prompt::user_message::McpServerEntry> {
-        use wimo ai_wimo_agent::prompt::user_message::McpServerEntry;
+    ) -> Vec<wimoai_wimo_agent::prompt::user_message::McpServerEntry> {
+        use wimoai_wimo_agent::prompt::user_message::McpServerEntry;
         let mcps_root = Self::workspace_mcps_root(workspace);
         let clients: Vec<(
             String,
@@ -787,8 +787,8 @@ impl SessionActor {
     async fn gather_gateway_mcp_servers(
         &self,
         mcps_root: Option<&std::path::Path>,
-    ) -> Vec<wimo ai_wimo_agent::prompt::user_message::McpServerEntry> {
-        use wimo ai_wimo_agent::prompt::user_message::McpServerEntry;
+    ) -> Vec<wimoai_wimo_agent::prompt::user_message::McpServerEntry> {
+        use wimoai_wimo_agent::prompt::user_message::McpServerEntry;
         let disabled_gateway_tools = crate::util::config::get_all_mcp_disabled_tools(
             std::path::Path::new(&self.session_info.cwd),
         );
@@ -954,7 +954,7 @@ impl SessionActor {
             .map(|p| p.path.to_string_lossy().into_owned())
             .collect();
         let current_query = crate::session::image_describe::strip_template_context_tags(
-            &wimo ai_chat_state::compaction_utils::extract_user_query(&original_user_message),
+            &wimoai_chat_state::compaction_utils::extract_user_query(&original_user_message),
         );
         let active_session_config = self.reconstruct_full_config().await;
         let resolved_describe = self
@@ -967,7 +967,7 @@ impl SessionActor {
                 self.client_identifier.clone(),
                 Some(self.max_retries),
             );
-        let client = wimo ai_wimo_sampler::SamplingClient::new(sampler_config).map_err(|e| {
+        let client = wimoai_wimo_sampler::SamplingClient::new(sampler_config).map_err(|e| {
             acp::Error::internal_error().data(format!(
                 "failed to build image-describe sampling client: {e}"
             ))

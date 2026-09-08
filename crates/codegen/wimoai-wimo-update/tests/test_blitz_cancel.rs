@@ -26,7 +26,7 @@ use common::{
     can_exec_shell_scripts, host_platform, make_update_config, reset_home, small_good_artifact,
     test_home,
 };
-use wimo ai_wimo_update::auto_update::install_internal_from_base;
+use wimoai_wimo_update::auto_update::install_internal_from_base;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Artifacts + fixtures
@@ -368,7 +368,7 @@ async fn blitz_fuzz_bounded() {
 }
 
 /// The "test it a million times, cancelling at every point" stress run.
-/// Gated behind `#[ignore]`; invoke via `just blitz-stress` or `cargo nextest run -p wimo ai-wimo-update --run-ignored all`.
+/// Gated behind `#[ignore]`; invoke via `just blitz-stress` or `cargo nextest run -p wimoai-wimo-update --run-ignored all`.
 #[tokio::test(flavor = "multi_thread")]
 #[serial]
 #[ignore = "stress: 100k iterations, run via `just blitz-stress`"]

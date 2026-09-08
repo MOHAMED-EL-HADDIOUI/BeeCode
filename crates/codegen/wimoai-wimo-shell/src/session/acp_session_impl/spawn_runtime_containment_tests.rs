@@ -1,14 +1,14 @@
 //! Containment tests for [`super::build_session_runtime`].
 //!
-//! Cases run in a re-exec'd child (the `wimo ai-gix-status` pattern) so parallel tests are unaffected.
+//! Cases run in a re-exec'd child (the `wimoai-gix-status` pattern) so parallel tests are unaffected.
 //! Stdout markers distinguish skip (unenforceable environment) from pass/fail.
 
 use super::build_session_runtime;
-use wimo ai_tty_utils::runtime::MAX_BLOCKING_THREADS;
+use wimoai_tty_utils::runtime::MAX_BLOCKING_THREADS;
 
 /// This env var routes the re-exec'd test binary into the child logic.
-const CHILD_ENV: &str = "wimo ai_wimo_SHELL_RUNTIME_CONTAINMENT_CHILD";
-const BLOCKING_POOL_CHILD_ENV: &str = "wimo ai_wimo_SHELL_BLOCKING_POOL_CONTAINMENT_CHILD";
+const CHILD_ENV: &str = "wimoai_wimo_SHELL_RUNTIME_CONTAINMENT_CHILD";
+const BLOCKING_POOL_CHILD_ENV: &str = "wimoai_wimo_SHELL_BLOCKING_POOL_CONTAINMENT_CHILD";
 const PASS_MARK: &str = "runtime-build-contained:";
 const BLOCKING_PASS_MARK: &str = "blocking-pool-contained:";
 const SKIP_MARK: &str = "skip-child:";
@@ -27,7 +27,7 @@ fn reexec_child(test_name: &str, env: &str) -> std::process::Output {
         .arg("--test-threads=1")
         .env(env, "1")
         .stdin(std::process::Stdio::null());
-    wimo ai_tty_utils::detach_std_command(&mut cmd);
+    wimoai_tty_utils::detach_std_command(&mut cmd);
     cmd.output().expect("spawn child test process")
 }
 
@@ -97,10 +97,10 @@ fn run_child() -> ! {
 }
 
 fn thread_count() -> Option<u64> {
-    wimo ai_tty_utils::sample_process_resources().threads
+    wimoai_tty_utils::sample_process_resources().threads
 }
 
-/// Child: the session runtime must not pre-warm a 16-wide blocking pool (the cap proof lives in `wimo ai-tty-utils`).
+/// Child: the session runtime must not pre-warm a 16-wide blocking pool (the cap proof lives in `wimoai-tty-utils`).
 /// `spawn_blocking` must still run.
 fn run_blocking_pool_child() -> ! {
     let Some(before) = thread_count() else {

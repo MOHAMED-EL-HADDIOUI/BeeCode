@@ -14,49 +14,49 @@ pub(crate) fn test_auth_method_id(id: &str) -> crate::agent::auth_method::Shared
     crate::agent::auth_method::new_shared_auth_method_id(Some(acp::AuthMethodId::new(id)))
 }
 #[cfg(test)]
-pub(crate) fn noop_observability_bridge() -> wimo ai_computer_hub_sdk::ObservabilityBridge {
-    wimo ai_computer_hub_sdk::ObservabilityBridge::new(
+pub(crate) fn noop_observability_bridge() -> wimoai_computer_hub_sdk::ObservabilityBridge {
+    wimoai_computer_hub_sdk::ObservabilityBridge::new(
         None,
-        wimo ai_tool_protocol::SessionId::new("test").expect("valid"),
+        wimoai_tool_protocol::SessionId::new("test").expect("valid"),
     )
 }
 #[cfg(test)]
-pub(crate) async fn test_agent_default() -> wimo ai_wimo_agent::Agent {
+pub(crate) async fn test_agent_default() -> wimoai_wimo_agent::Agent {
     test_agent_with_tools(vec![]).await
 }
 #[cfg(test)]
 pub(crate) async fn test_agent_backend_search(
-    hosted_tools: Vec<wimo ai_wimo_sampling_types::HostedTool>,
-) -> wimo ai_wimo_agent::Agent {
+    hosted_tools: Vec<wimoai_wimo_sampling_types::HostedTool>,
+) -> wimoai_wimo_agent::Agent {
     let base = test_agent_default().await;
-    wimo ai_wimo_agent::Agent::new(
+    wimoai_wimo_agent::Agent::new(
         base.definition().clone(),
-        wimo ai_wimo_agent::PromptContext::default(),
+        wimoai_wimo_agent::PromptContext::default(),
         String::new(),
         base.tool_bridge().clone(),
-        wimo ai_wimo_agent::ReminderPolicy::default(),
-        wimo ai_wimo_agent::CompactionPolicy::default(),
+        wimoai_wimo_agent::ReminderPolicy::default(),
+        wimoai_wimo_agent::CompactionPolicy::default(),
         hosted_tools,
         true,
     )
 }
 #[cfg(test)]
-pub(crate) async fn test_agent_with_goal_tool() -> wimo ai_wimo_agent::Agent {
-    use wimo ai_wimo_tools::implementations::wimo::update_goal::UpdateGoalTool;
-    use wimo ai_wimo_tools::registry::types::ToolConfig;
+pub(crate) async fn test_agent_with_goal_tool() -> wimoai_wimo_agent::Agent {
+    use wimoai_wimo_tools::implementations::wimo::update_goal::UpdateGoalTool;
+    use wimoai_wimo_tools::registry::types::ToolConfig;
     test_agent_with_tools(vec![ToolConfig::for_tool::<UpdateGoalTool>()]).await
 }
 #[cfg(test)]
-pub(crate) async fn test_wimo_agent_with_todo() -> wimo ai_wimo_agent::Agent {
-    use wimo ai_wimo_tools::implementations::wimo::todo::TodoWriteTool;
-    use wimo ai_wimo_tools::registry::types::ToolConfig;
+pub(crate) async fn test_wimo_agent_with_todo() -> wimoai_wimo_agent::Agent {
+    use wimoai_wimo_tools::implementations::wimo::todo::TodoWriteTool;
+    use wimoai_wimo_tools::registry::types::ToolConfig;
     test_agent_with_tools(vec![ToolConfig::for_tool::<TodoWriteTool>()]).await
 }
 #[cfg(test)]
-pub(crate) async fn test_agent_with_active_message_tool() -> wimo ai_wimo_agent::Agent {
-    use wimo ai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageTool;
-    use wimo ai_wimo_tools::implementations::wimo::todo::TodoWriteTool;
-    use wimo ai_wimo_tools::registry::types::ToolConfig;
+pub(crate) async fn test_agent_with_active_message_tool() -> wimoai_wimo_agent::Agent {
+    use wimoai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageTool;
+    use wimoai_wimo_tools::implementations::wimo::todo::TodoWriteTool;
+    use wimoai_wimo_tools::registry::types::ToolConfig;
     test_agent_with_tools(vec![
         ToolConfig::for_tool::<SendSubagentMessageTool>(),
         ToolConfig::for_tool::<TodoWriteTool>(),
@@ -64,10 +64,10 @@ pub(crate) async fn test_agent_with_active_message_tool() -> wimo ai_wimo_agent:
     .await
 }
 #[cfg(test)]
-pub(crate) async fn test_agent_with_plan_tools() -> wimo ai_wimo_agent::Agent {
-    use wimo ai_wimo_tools::implementations::wimo::enter_plan_mode::EnterPlanModeTool;
-    use wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeTool;
-    use wimo ai_wimo_tools::registry::types::ToolConfig;
+pub(crate) async fn test_agent_with_plan_tools() -> wimoai_wimo_agent::Agent {
+    use wimoai_wimo_tools::implementations::wimo::enter_plan_mode::EnterPlanModeTool;
+    use wimoai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeTool;
+    use wimoai_wimo_tools::registry::types::ToolConfig;
     test_agent_with_tools(vec![
         ToolConfig::for_tool::<EnterPlanModeTool>(),
         ToolConfig::for_tool::<ExitPlanModeTool>(),
@@ -76,44 +76,44 @@ pub(crate) async fn test_agent_with_plan_tools() -> wimo ai_wimo_agent::Agent {
 }
 #[cfg(test)]
 pub(crate) async fn test_agent_with_tools(
-    tools: Vec<wimo ai_wimo_tools::registry::types::ToolConfig>,
-) -> wimo ai_wimo_agent::Agent {
+    tools: Vec<wimoai_wimo_tools::registry::types::ToolConfig>,
+) -> wimoai_wimo_agent::Agent {
     test_agent_from_config(
-        wimo ai_wimo_tools::registry::types::ToolServerConfig {
+        wimoai_wimo_tools::registry::types::ToolServerConfig {
             tools,
             behavior_preset: None,
         },
-        wimo ai_wimo_agent::AgentDefinition::default_wimo(),
-        std::sync::Arc::new(wimo ai_wimo_tools::computer::local::LocalTerminalBackend::new()),
+        wimoai_wimo_agent::AgentDefinition::default_wimo(),
+        std::sync::Arc::new(wimoai_wimo_tools::computer::local::LocalTerminalBackend::new()),
     )
     .await
 }
 #[cfg(test)]
 pub(crate) async fn test_agent_with_user_message_template(
-    template: wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate,
-) -> wimo ai_wimo_agent::Agent {
-    let mut definition = wimo ai_wimo_agent::AgentDefinition::default_wimo();
+    template: wimoai_wimo_agent::prompt::user_message::UserMessageTemplate,
+) -> wimoai_wimo_agent::Agent {
+    let mut definition = wimoai_wimo_agent::AgentDefinition::default_wimo();
     definition.user_message_template = template;
     test_agent_from_config(
-        wimo ai_wimo_tools::registry::types::ToolServerConfig {
+        wimoai_wimo_tools::registry::types::ToolServerConfig {
             tools: vec![],
             behavior_preset: None,
         },
         definition,
-        std::sync::Arc::new(wimo ai_wimo_tools::computer::local::LocalTerminalBackend::new()),
+        std::sync::Arc::new(wimoai_wimo_tools::computer::local::LocalTerminalBackend::new()),
     )
     .await
 }
 #[cfg(test)]
 async fn test_agent_from_config(
-    config: wimo ai_wimo_tools::registry::types::ToolServerConfig,
-    definition: wimo ai_wimo_agent::AgentDefinition,
-    backend: std::sync::Arc<dyn wimo ai_wimo_tools::computer::types::TerminalBackend>,
-) -> wimo ai_wimo_agent::Agent {
-    use wimo ai_wimo_tools::computer::local::LocalFs;
-    use wimo ai_wimo_tools::computer::types::AsyncFileSystem;
-    use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-    use wimo ai_wimo_tools::registry::types::SessionContext;
+    config: wimoai_wimo_tools::registry::types::ToolServerConfig,
+    definition: wimoai_wimo_agent::AgentDefinition,
+    backend: std::sync::Arc<dyn wimoai_wimo_tools::computer::types::TerminalBackend>,
+) -> wimoai_wimo_agent::Agent {
+    use wimoai_wimo_tools::computer::local::LocalFs;
+    use wimoai_wimo_tools::computer::types::AsyncFileSystem;
+    use wimoai_wimo_tools::notification::ToolNotificationHandle;
+    use wimoai_wimo_tools::registry::types::SessionContext;
     let builder = crate::tools::bridge::ToolBridge::get_builder();
     let fs: std::sync::Arc<dyn AsyncFileSystem> = std::sync::Arc::new(LocalFs);
     let ctx = SessionContext {
@@ -138,20 +138,20 @@ async fn test_agent_from_config(
         api_key_provider: None,
         auth_provider: None,
         attribution_callback: None,
-        system_reminder_tag: wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
+        system_reminder_tag: wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
     };
     let tool_bridge = crate::tools::bridge::ToolBridge::finalize_builder(builder, config, ctx)
         .await
         .expect("finalize_builder should succeed for tests");
     #[allow(clippy::arc_with_non_send_sync)]
     let tool_bridge = std::sync::Arc::new(tool_bridge);
-    wimo ai_wimo_agent::Agent::new(
+    wimoai_wimo_agent::Agent::new(
         definition,
-        wimo ai_wimo_agent::PromptContext::default(),
+        wimoai_wimo_agent::PromptContext::default(),
         String::new(),
         tool_bridge,
-        wimo ai_wimo_agent::ReminderPolicy::default(),
-        wimo ai_wimo_agent::CompactionPolicy::default(),
+        wimoai_wimo_agent::ReminderPolicy::default(),
+        wimoai_wimo_agent::CompactionPolicy::default(),
         vec![],
         false,
     )
@@ -177,7 +177,7 @@ pub(crate) async fn create_test_actor_ex(
     total_tokens: u64,
     context_window: u64,
     threshold_percent: u8,
-    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimoai_acp_lib::AcpClientMessage>,
     persistence_tx: tokio::sync::mpsc::UnboundedSender<PersistenceMsg>,
 ) -> (
     SessionActor,
@@ -189,7 +189,7 @@ pub(crate) async fn create_test_actor_ex(
         threshold_percent,
         gateway_tx,
         persistence_tx,
-        Box::new(wimo ai_chat_state::NullChatPersistence),
+        Box::new(wimoai_chat_state::NullChatPersistence),
     )
     .await
 }
@@ -198,9 +198,9 @@ pub(crate) async fn create_test_actor_with_chat_persistence(
     total_tokens: u64,
     context_window: u64,
     threshold_percent: u8,
-    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimoai_acp_lib::AcpClientMessage>,
     persistence_tx: tokio::sync::mpsc::UnboundedSender<PersistenceMsg>,
-    chat_persistence: Box<dyn wimo ai_chat_state::ChatPersistence>,
+    chat_persistence: Box<dyn wimoai_chat_state::ChatPersistence>,
 ) -> (
     SessionActor,
     tokio::sync::mpsc::UnboundedReceiver<SessionEvent>,
@@ -221,7 +221,7 @@ pub(crate) async fn create_test_actor_with_terminal(
     total_tokens: u64,
     context_window: u64,
     threshold_percent: u8,
-    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimoai_acp_lib::AcpClientMessage>,
     persistence_tx: tokio::sync::mpsc::UnboundedSender<PersistenceMsg>,
     terminal: Arc<dyn crate::terminal::AsyncTerminalRunner>,
 ) -> (
@@ -235,7 +235,7 @@ pub(crate) async fn create_test_actor_with_terminal(
         gateway_tx,
         persistence_tx,
         terminal,
-        Box::new(wimo ai_chat_state::NullChatPersistence),
+        Box::new(wimoai_chat_state::NullChatPersistence),
     )
     .await
 }
@@ -244,32 +244,32 @@ async fn create_test_actor_inner(
     total_tokens: u64,
     context_window: u64,
     threshold_percent: u8,
-    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimoai_acp_lib::AcpClientMessage>,
     persistence_tx: tokio::sync::mpsc::UnboundedSender<PersistenceMsg>,
     terminal: Arc<dyn crate::terminal::AsyncTerminalRunner>,
-    chat_persistence: Box<dyn wimo ai_chat_state::ChatPersistence>,
+    chat_persistence: Box<dyn wimoai_chat_state::ChatPersistence>,
 ) -> (
     SessionActor,
     tokio::sync::mpsc::UnboundedReceiver<SessionEvent>,
 ) {
-    let cwd = wimo ai_wimo_paths::AbsPathBuf::new(std::path::PathBuf::from("/tmp")).unwrap();
-    let fs = Arc::new(wimo ai_wimo_workspace::file_system::MockFs::new(
+    let cwd = wimoai_wimo_paths::AbsPathBuf::new(std::path::PathBuf::from("/tmp")).unwrap();
+    let fs = Arc::new(wimoai_wimo_workspace::file_system::MockFs::new(
         cwd.to_path_buf(),
     ));
     let (hunk_tx, _hunk_rx) = tokio::sync::mpsc::unbounded_channel();
-    let hunk_tracker_handle = wimo ai_hunk_tracker::HunkTrackerActor::spawn(
+    let hunk_tracker_handle = wimoai_hunk_tracker::HunkTrackerActor::spawn(
         "test-actor".to_string(),
         cwd.to_path_buf(),
         hunk_tx,
-        wimo ai_hunk_tracker::TrackingMode::AgentOnly,
+        wimoai_hunk_tracker::TrackingMode::AgentOnly,
         tokio_util::sync::CancellationToken::new(),
     );
     let mut tool_context =
         ToolContext::new(cwd.clone(), None, None, fs, terminal, hunk_tracker_handle);
     tool_context.task_completion_reservations =
-        Some(wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default());
+        Some(wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default());
     tool_context.task_wake_suppressed =
-        Some(wimo ai_wimo_tools::reminders::task_completion::TaskWakeSuppressed::default());
+        Some(wimoai_wimo_tools::reminders::task_completion::TaskWakeSuppressed::default());
     let state = TokioMutex::new(State {
         running_task: None,
         finalization_gate: Default::default(),
@@ -285,9 +285,9 @@ async fn create_test_actor_inner(
     });
     let (chat_event_tx, _chat_event_rx) = tokio::sync::mpsc::unbounded_channel();
     let (event_tx, event_rx) = tokio::sync::mpsc::unbounded_channel::<SessionEvent>();
-    let chat_state_handle = wimo ai_chat_state::ChatStateActor::spawn(
+    let chat_state_handle = wimoai_chat_state::ChatStateActor::spawn(
         vec![],
-        wimo ai_wimo_sampling_types::SamplingConfig {
+        wimoai_wimo_sampling_types::SamplingConfig {
             base_url: "http://localhost".to_string(),
             model: "test".to_string(),
             max_completion_tokens: None,
@@ -330,7 +330,7 @@ async fn create_test_actor_inner(
             persistence_tx,
             disk_full: crate::session::notifications::idle_disk_full_rx(),
         },
-        permissions: wimo ai_wimo_workspace::permission::PermissionHandle::allow_all(),
+        permissions: wimoai_wimo_workspace::permission::PermissionHandle::allow_all(),
         tool_context,
         deny_read_globs: Vec::new(),
         mcp_state: Arc::new(TokioMutex::new(McpState::new(vec![]))),
@@ -363,7 +363,7 @@ async fn create_test_actor_inner(
             count: std::sync::atomic::AtomicU64::new(0),
             auto_compact_suppressed: std::sync::atomic::AtomicU8::new(0),
             previous_model: std::cell::Cell::new(None),
-            compaction_mode: wimo ai_chat_state::CompactionMode::Transcript,
+            compaction_mode: wimoai_chat_state::CompactionMode::Transcript,
             verbatim_input: true,
             tool_choice: crate::util::config::CompactionToolChoice::Auto,
             prefire: crate::session::compaction_config::PrefireState::default(),
@@ -468,7 +468,7 @@ async fn create_test_actor_inner(
         laziness_debug_log: None,
         last_live_orphan_reconcile: std::cell::Cell::new(None),
         deferred_prefix: TaskSlot::new(),
-        extension_registry: wimo ai_agent_lifecycle::LocalExtensionRegistry::default(),
+        extension_registry: wimoai_agent_lifecycle::LocalExtensionRegistry::default(),
         last_announced_local_date: std::cell::Cell::new(chrono::Local::now().date_naive()),
         prefix_carries_fallback_date: std::cell::Cell::new(false),
         last_search_prompt_index: std::sync::atomic::AtomicI64::new(-1),
@@ -479,7 +479,7 @@ async fn create_test_actor_inner(
         turn_end_tx: Default::default(),
         client_hooks: Default::default(),
         hook_resolved_workspace_root: String::new(),
-        vcs_kind: wimo ai_wimo_workspace::session::git::VcsKind::Git,
+        vcs_kind: wimoai_wimo_workspace::session::git::VcsKind::Git,
         hook_load_errors: std::cell::RefCell::new(Vec::new()),
         plugin_registry: std::cell::RefCell::new(None),
         plugin_registry_handle: None,
@@ -501,13 +501,13 @@ async fn create_test_actor_inner(
         turn_stream_drained: parking_lot::Mutex::new(std::collections::HashMap::new()),
         pending_image_strip: parking_lot::Mutex::new(HashMap::new()),
         image_strip_rewrite_barrier: ImageStripRewriteBarrier::new(),
-        sampler_handle: wimo ai_wimo_sampler::SamplerHandle::noop(),
+        sampler_handle: wimoai_wimo_sampler::SamplerHandle::noop(),
         sampling_gate: None,
         rebuild_spec: crate::session::agent_rebuild::test_rebuild_spec_default(),
         image_description_model: crate::test_support::TEST_MODEL.to_owned(),
         image_describe_cache: Arc::new(crate::session::image_describe::ImageDescribeCache::new()),
         subagent_token_records: parking_lot::Mutex::new(HashMap::new()),
-        workspace_ops: wimo ai_wimo_workspace::WorkspaceOps::for_test(),
+        workspace_ops: wimoai_wimo_workspace::WorkspaceOps::for_test(),
         trace_config_template: std::cell::RefCell::new(None),
     };
     if let Some(reservations) = actor.tool_context.task_completion_reservations.clone() {
@@ -533,7 +533,7 @@ pub(crate) async fn create_test_actor(
     total_tokens: u64,
     context_window: u64,
     threshold_percent: u8,
-    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_tx: tokio::sync::mpsc::UnboundedSender<wimoai_acp_lib::AcpClientMessage>,
     persistence_tx: tokio::sync::mpsc::UnboundedSender<PersistenceMsg>,
 ) -> SessionActor {
     create_test_actor_ex(
@@ -647,10 +647,10 @@ pub(crate) fn running_task_stub(prompt_id: &str) -> AgentTask {
 #[cfg(test)]
 pub(crate) async fn build_actor() -> (
     std::sync::Arc<SessionActor>,
-    tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) {
     let (gateway_tx, gateway_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+        tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
     let (persistence_tx, mut persistence_rx) =
         tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
     tokio::spawn(async move {
@@ -708,10 +708,10 @@ pub(crate) async fn prepare_call(
 pub(crate) fn install_permission_manager(
     actor: &mut SessionActor,
     yolo: bool,
-    gateway: wimo ai_acp_lib::AcpAgentGatewaySender,
+    gateway: wimoai_acp_lib::AcpAgentGatewaySender,
 ) {
-    use wimo ai_wimo_paths::AbsPathBuf;
-    use wimo ai_wimo_workspace::permission::{ClientType, spawn_permission_manager};
+    use wimoai_wimo_paths::AbsPathBuf;
+    use wimoai_wimo_workspace::permission::{ClientType, spawn_permission_manager};
     let cwd = AbsPathBuf::new(std::path::PathBuf::from(actor.session_info.cwd.clone()))
         .unwrap_or_else(|_| AbsPathBuf::new(std::path::PathBuf::from("/tmp")).unwrap());
     let (handle, _ev) = spawn_permission_manager(
@@ -759,8 +759,8 @@ pub(crate) fn search_replace_call_at(id: &str, path: &str) -> ToolCallResponse {
     }
 }
 #[cfg(test)]
-pub(crate) fn read_and_edit_toolset() -> Vec<wimo ai_wimo_tools::registry::types::ToolConfig> {
-    use wimo ai_wimo_tools::registry::types::ToolConfig;
+pub(crate) fn read_and_edit_toolset() -> Vec<wimoai_wimo_tools::registry::types::ToolConfig> {
+    use wimoai_wimo_tools::registry::types::ToolConfig;
     vec![
         ToolConfig::from_id("Wimo:read_file"),
         ToolConfig {
@@ -784,13 +784,13 @@ pub(crate) fn pre_tool_use_spec(
     name: &str,
     matcher: Option<&str>,
     script: &str,
-) -> wimo ai_wimo_hooks::config::HookSpec {
-    wimo ai_wimo_hooks::config::HookSpec {
+) -> wimoai_wimo_hooks::config::HookSpec {
+    wimoai_wimo_hooks::config::HookSpec {
         name: name.into(),
-        event: wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
-        handler_type: wimo ai_wimo_hooks::config::HandlerType::Command,
+        event: wimoai_wimo_hooks::event::HookEventName::PreToolUse,
+        handler_type: wimoai_wimo_hooks::config::HandlerType::Command,
         configured_matcher: matcher.map(str::to_string),
-        matcher: matcher.map(|m| wimo ai_wimo_hooks::matcher::HookMatcher::new(m).unwrap()),
+        matcher: matcher.map(|m| wimoai_wimo_hooks::matcher::HookMatcher::new(m).unwrap()),
         enabled: true,
         command: Some(std::path::PathBuf::from(script)),
         command_raw: Some(script.to_string()),
@@ -799,7 +799,7 @@ pub(crate) fn pre_tool_use_spec(
         timeout_ms: 5000,
         source_dir: std::path::PathBuf::from("/tmp"),
         extra_env: std::collections::HashMap::new(),
-        layer: wimo ai_wimo_hooks::config::HookProvenance::File,
+        layer: wimoai_wimo_hooks::config::HookProvenance::File,
     }
 }
 #[cfg(test)]
@@ -807,9 +807,9 @@ pub(crate) fn post_tool_use_spec(
     name: &str,
     matcher: Option<&str>,
     script: &str,
-) -> wimo ai_wimo_hooks::config::HookSpec {
-    wimo ai_wimo_hooks::config::HookSpec {
-        event: wimo ai_wimo_hooks::event::HookEventName::PostToolUse,
+) -> wimoai_wimo_hooks::config::HookSpec {
+    wimoai_wimo_hooks::config::HookSpec {
+        event: wimoai_wimo_hooks::event::HookEventName::PostToolUse,
         ..pre_tool_use_spec(name, matcher, script)
     }
 }
@@ -818,18 +818,18 @@ pub(crate) fn post_tool_use_failure_spec(
     name: &str,
     matcher: Option<&str>,
     script: &str,
-) -> wimo ai_wimo_hooks::config::HookSpec {
-    wimo ai_wimo_hooks::config::HookSpec {
-        event: wimo ai_wimo_hooks::event::HookEventName::PostToolUseFailure,
+) -> wimoai_wimo_hooks::config::HookSpec {
+    wimoai_wimo_hooks::config::HookSpec {
+        event: wimoai_wimo_hooks::event::HookEventName::PostToolUseFailure,
         ..pre_tool_use_spec(name, matcher, script)
     }
 }
 #[cfg(test)]
 pub(crate) fn install_pre_tool_use_hooks(
     actor: &mut SessionActor,
-    specs: Vec<wimo ai_wimo_hooks::config::HookSpec>,
+    specs: Vec<wimoai_wimo_hooks::config::HookSpec>,
 ) {
-    let (mut registry, _) = wimo ai_wimo_hooks::discovery::load_hooks(None, None);
+    let (mut registry, _) = wimoai_wimo_hooks::discovery::load_hooks(None, None);
     registry.append_specs(specs);
     actor.hook_resolved_workspace_root = "/tmp".to_string();
     *actor.hook_registry.borrow_mut() = Some(Arc::new(registry));
@@ -847,7 +847,7 @@ pub(crate) async fn tool_result_text(actor: &SessionActor, call_id: &str) -> Str
         .iter()
         .rev()
         .find_map(|item| match item {
-            wimo ai_wimo_sampling_types::ConversationItem::ToolResult(result)
+            wimoai_wimo_sampling_types::ConversationItem::ToolResult(result)
                 if result.tool_call_id == call_id =>
             {
                 Some(result.content.to_string())
@@ -858,7 +858,7 @@ pub(crate) async fn tool_result_text(actor: &SessionActor, call_id: &str) -> Str
 }
 #[cfg(test)]
 pub(crate) fn spawn_gateway_loop(
-    gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) -> Arc<std::sync::Mutex<Vec<serde_json::Value>>> {
     spawn_gateway_loop_counting_prompt_hooks(
         gateway_rx,
@@ -868,7 +868,7 @@ pub(crate) fn spawn_gateway_loop(
 }
 #[cfg(test)]
 pub(crate) fn spawn_gateway_loop_counting_prompt_hooks(
-    gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
     permission_prompt_hooks: Arc<std::sync::atomic::AtomicUsize>,
     park_until_hook: bool,
 ) -> Arc<std::sync::Mutex<Vec<serde_json::Value>>> {
@@ -879,7 +879,7 @@ pub(crate) fn spawn_gateway_loop_counting_prompt_hooks(
     tokio::task::spawn_local(async move {
         while let Some(msg) = gateway_rx.recv().await {
             match msg {
-                wimo ai_acp_lib::AcpClientMessage::RequestPermission(args) => {
+                wimoai_acp_lib::AcpClientMessage::RequestPermission(args) => {
                     let hooks = permission_prompt_hooks.clone();
                     tokio::task::spawn_local(async move {
                         if park_until_hook {
@@ -903,7 +903,7 @@ pub(crate) fn spawn_gateway_loop_counting_prompt_hooks(
                             )));
                     });
                 }
-                wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) => {
+                wimoai_acp_lib::AcpClientMessage::ExtNotification(args) => {
                     let params: serde_json::Value =
                         serde_json::from_str(args.request.params.get()).unwrap_or_default();
                     match args.request.method.as_ref() {
@@ -918,7 +918,7 @@ pub(crate) fn spawn_gateway_loop_counting_prompt_hooks(
                         _ => {}
                     }
                 }
-                wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                     let _ = args.response_tx.send(Ok(()));
                 }
                 _ => {}
@@ -930,11 +930,11 @@ pub(crate) fn spawn_gateway_loop_counting_prompt_hooks(
 /// Ack every gateway `SessionNotification` so a driven turn never blocks on the client.
 /// Spawned on the current `LocalSet`.
 pub(crate) fn drain_gateway(
-    mut rx: tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    mut rx: tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) {
     tokio::task::spawn_local(async move {
         while let Some(msg) = rx.recv().await {
-            if let wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) = msg {
+            if let wimoai_acp_lib::AcpClientMessage::SessionNotification(args) = msg {
                 let _ = args.response_tx.send(Ok(()));
             }
         }
@@ -956,42 +956,42 @@ pub(crate) fn drain_persistence(mut rx: tokio::sync::mpsc::UnboundedReceiver<Per
 #[cfg(test)]
 #[allow(clippy::type_complexity)]
 pub(crate) fn spawn_capturing_gateway_loop(
-    gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) -> (
     Arc<std::sync::Mutex<Vec<serde_json::Value>>>,
     Arc<std::sync::Mutex<Vec<serde_json::Value>>>,
 ) {
     let acp_updates: Arc<std::sync::Mutex<Vec<serde_json::Value>>> = Arc::default();
-    let wimo ai_updates: Arc<std::sync::Mutex<Vec<serde_json::Value>>> = Arc::default();
+    let wimoai_updates: Arc<std::sync::Mutex<Vec<serde_json::Value>>> = Arc::default();
     let acp_captured = acp_updates.clone();
-    let wimo ai_captured = wimo ai_updates.clone();
+    let wimoai_captured = wimoai_updates.clone();
     let mut gateway_rx = gateway_rx;
     tokio::task::spawn_local(async move {
         while let Some(msg) = gateway_rx.recv().await {
             match msg {
-                wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                     if let Ok(v) = serde_json::to_value(&args.request) {
                         acp_captured.lock().unwrap().push(v);
                     }
                     let _ = args.response_tx.send(Ok(()));
                 }
-                wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) => {
+                wimoai_acp_lib::AcpClientMessage::ExtNotification(args) => {
                     if args.request.method.as_ref() == "x.ai/session_notification" {
                         let params: serde_json::Value =
                             serde_json::from_str(args.request.params.get()).unwrap_or_default();
-                        wimo ai_captured.lock().unwrap().push(params["update"].clone());
+                        wimoai_captured.lock().unwrap().push(params["update"].clone());
                     }
                 }
                 _ => {}
             }
         }
     });
-    (acp_updates, wimo ai_updates)
+    (acp_updates, wimoai_updates)
 }
 #[cfg(test)]
 pub(crate) async fn actor_with_persistence_drain() -> std::sync::Arc<SessionActor> {
     let (gateway_tx, mut gateway_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+        tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
     tokio::task::spawn_local(async move { while gateway_rx.recv().await.is_some() {} });
     let (persistence_tx, mut persistence_rx) =
         tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();

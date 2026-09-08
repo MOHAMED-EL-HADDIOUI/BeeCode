@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-use wimo ai_sqlite_journal::JournalMode;
+use wimoai_sqlite_journal::JournalMode;
 
 use super::WorkspaceStore;
 use crate::error::{Result, classify_open_error};
@@ -25,7 +25,7 @@ impl WorkspaceStore {
     /// [`crate::StoreError::Sqlite`] otherwise.
     pub fn open(db_path: &Path) -> Result<Self> {
         if let Some(parent) = db_path.parent() {
-            wimo ai_wimo_config::create_dir_all_owner_only(parent)?;
+            wimoai_wimo_config::create_dir_all_owner_only(parent)?;
         }
         let mode = JournalMode::for_db_path(db_path);
         let effective = mode.effective_db_path(db_path);

@@ -64,9 +64,9 @@ pub fn sync_source_cache_with_mode(
     cache_root: &Path,
     mode: SyncMode,
 ) -> Result<SourceCacheLease, String> {
-    let url = wimo ai_wimo_agent::plugins::git_install::validate_git_url(url)?;
+    let url = wimoai_wimo_agent::plugins::git_install::validate_git_url(url)?;
     let branch = branch
-        .map(wimo ai_wimo_agent::plugins::git_install::validate_git_ref)
+        .map(wimoai_wimo_agent::plugins::git_install::validate_git_ref)
         .transpose()?;
     let hash = cache_hash(url);
     let cache_dir = cache_root.join(&hash);
@@ -98,9 +98,9 @@ fn sync_cache_locked(
     cache_dir: &Path,
     mode: SyncMode,
 ) -> Result<(), String> {
-    let url = wimo ai_wimo_agent::plugins::git_install::validate_git_url(url)?;
+    let url = wimoai_wimo_agent::plugins::git_install::validate_git_url(url)?;
     let branch = branch
-        .map(wimo ai_wimo_agent::plugins::git_install::validate_git_ref)
+        .map(wimoai_wimo_agent::plugins::git_install::validate_git_ref)
         .transpose()?;
     if cache_dir.join(".git").exists() {
         if mode == SyncMode::UseTtl && is_cache_fresh(cache_dir) {
@@ -156,7 +156,7 @@ fn is_cache_fresh(cache_dir: &Path) -> bool {
 }
 
 pub fn default_cache_root() -> PathBuf {
-    wimo ai_wimo_config::wimo_home().join("marketplace-cache")
+    wimoai_wimo_config::wimo_home().join("marketplace-cache")
 }
 
 /// Deterministic hash for a URL (used as cache directory name).
@@ -171,9 +171,9 @@ fn cache_hash(url: &str) -> String {
 /// Clone a git repo with depth 1.
 /// Uses the git CLI (not libgit2): a libgit2 clone cannot be killed on timeout, so a hung remote would pin a thread forever.
 fn clone_repo(url: &str, branch: Option<&str>, dest: &Path) -> Result<(), String> {
-    let url = wimo ai_wimo_agent::plugins::git_install::validate_git_url(url)?;
+    let url = wimoai_wimo_agent::plugins::git_install::validate_git_url(url)?;
     let branch = branch
-        .map(wimo ai_wimo_agent::plugins::git_install::validate_git_ref)
+        .map(wimoai_wimo_agent::plugins::git_install::validate_git_ref)
         .transpose()?;
     let mut cmd = clone_cli_command(url, branch, dest);
     run_git_timed(&mut cmd, "clone", NETWORK_OP_TIMEOUT).inspect_err(|_| {
@@ -233,7 +233,7 @@ fn unique_reclone_suffix() -> u128 {
         .unwrap_or(0)
 }
 
-pub use wimo ai_tty_utils::{GIT_AUTH_SUPPRESSION_ENVS, git_command, git_command_locking};
+pub use wimoai_tty_utils::{GIT_AUTH_SUPPRESSION_ENVS, git_command, git_command_locking};
 
 fn clone_cli_command(url: &str, branch: Option<&str>, dest: &Path) -> std::process::Command {
     let mut cmd = git_command();
@@ -248,7 +248,7 @@ fn clone_cli_command(url: &str, branch: Option<&str>, dest: &Path) -> std::proce
 /// Probe whether `url` is a reachable git repository via a timed `git ls-remote`, without touching any cache.
 /// Used to reject non-git URLs (e.g. MCP endpoints) at add time instead of persisting a source that fails on every scan.
 pub fn probe_git_remote(url: &str) -> Result<(), String> {
-    let url = wimo ai_wimo_agent::plugins::git_install::validate_git_url(url)?;
+    let url = wimoai_wimo_agent::plugins::git_install::validate_git_url(url)?;
     let mut cmd = git_command();
     cmd.args(["ls-remote", "--", url, "HEAD"]);
     run_git_timed(&mut cmd, "ls-remote", NETWORK_OP_TIMEOUT)
@@ -276,12 +276,12 @@ fn run_git_timed(cmd: &mut Command, what: &str, timeout: Duration) -> Result<(),
     let mut child = cmd
         .spawn()
         .map_err(|e| format!("failed to run git {what}: {e}"))?;
-    let group = match wimo ai_tty_utils::global_process_scope().enroll_std(&child) {
+    let group = match wimoai_tty_utils::global_process_scope().enroll_std(&child) {
         Ok(group) => group,
         Err(error) => {
             let _ = child.kill();
             if !matches!(
-                wimo ai_tty_utils::wait_child_bounded(&mut child, wimo ai_tty_utils::KILL_REAP_TIMEOUT,),
+                wimoai_tty_utils::wait_child_bounded(&mut child, wimoai_tty_utils::KILL_REAP_TIMEOUT,),
                 Ok(Some(_))
             ) {
                 transfer_git_cleanup(
@@ -311,7 +311,7 @@ fn run_git_timed(cmd: &mut Command, what: &str, timeout: Duration) -> Result<(),
         }
     };
 
-    match wimo ai_tty_utils::wait_child_bounded(&mut child, timeout) {
+    match wimoai_tty_utils::wait_child_bounded(&mut child, timeout) {
         Ok(Some(status)) => {
             drop(group);
             finish_git_status(what, status, stderr)
@@ -325,7 +325,7 @@ fn run_git_timed(cmd: &mut Command, what: &str, timeout: Duration) -> Result<(),
             ))
         }
         Err(error) => {
-            let identity = if wimo ai_tty_utils::is_child_wait_identity_uncertain(&error) {
+            let identity = if wimoai_tty_utils::is_child_wait_identity_uncertain(&error) {
                 CleanupIdentity::Uncertain
             } else {
                 CleanupIdentity::Certain
@@ -356,7 +356,7 @@ fn finish_git_status(what: &str, status: ExitStatus, stderr: StderrReader) -> Re
 
 // Inherited writers (persistent ssh) never EOF; bound the drain and reap a still-blocked reader.
 fn finish_stderr_or_reap(what: &str, mut stderr: StderrReader) -> Option<Vec<u8>> {
-    match stderr.finish_bounded(wimo ai_tty_utils::KILL_REAP_TIMEOUT) {
+    match stderr.finish_bounded(wimoai_tty_utils::KILL_REAP_TIMEOUT) {
         Some(Ok(bytes)) => Some(bytes),
         Some(Err(error)) => {
             tracing::debug!(
@@ -389,7 +389,7 @@ enum CleanupIdentity {
 fn kill_git_child(
     what: &str,
     mut child: Child,
-    group: Arc<wimo ai_tty_utils::ProcessGroup>,
+    group: Arc<wimoai_tty_utils::ProcessGroup>,
     stderr: Option<StderrReader>,
     identity: CleanupIdentity,
 ) -> Option<Vec<u8>> {
@@ -413,7 +413,7 @@ fn kill_git_child(
         }
     };
     let child =
-        match wimo ai_tty_utils::wait_child_bounded(&mut child, wimo ai_tty_utils::KILL_REAP_TIMEOUT) {
+        match wimoai_tty_utils::wait_child_bounded(&mut child, wimoai_tty_utils::KILL_REAP_TIMEOUT) {
             Ok(Some(_)) => {
                 drop(group);
                 None
@@ -432,7 +432,7 @@ fn kill_git_child(
 }
 
 struct GitReaperOwners {
-    child: Option<(Child, Option<Arc<wimo ai_tty_utils::ProcessGroup>>)>,
+    child: Option<(Child, Option<Arc<wimoai_tty_utils::ProcessGroup>>)>,
     stderr: Option<StderrReader>,
 }
 
@@ -453,7 +453,7 @@ fn transfer_git_cleanup(what: &str, mut owners: GitReaperOwners) {
         && let Some((child, group)) = owners.child.take()
     {
         if let Err((error, child, group)) =
-            wimo ai_tty_utils::spawn_child_reaper("marketplace-git-reaper", child, group)
+            wimoai_tty_utils::spawn_child_reaper("marketplace-git-reaper", child, group)
         {
             tracing::error!(error = %error, operation = what, child_id = child.id(), has_group = group.is_some(), "git cleanup bounded abandonment: reaper thread spawn failed");
         }
@@ -637,7 +637,7 @@ fn git_message_with_stderr(prefix: String, what: &str, stderr: Option<&[u8]>) ->
 
 fn fetch_reset_cached_repo(repo_dir: &Path, branch: Option<&str>) -> Result<(), String> {
     let branch = branch
-        .map(wimo ai_wimo_agent::plugins::git_install::validate_git_ref)
+        .map(wimoai_wimo_agent::plugins::git_install::validate_git_ref)
         .transpose()?;
     run_git_timed(
         &mut fetch_cli_command(repo_dir, branch),
@@ -664,7 +664,7 @@ mod tests {
 
     #[test]
     fn cache_hash_is_deterministic() {
-        let url = "https://github.com/wimo ai-org/wimo ai-plugin-marketplace.git";
+        let url = "https://github.com/wimoai-org/wimoai-plugin-marketplace.git";
         let h1 = cache_hash(url);
         let h2 = cache_hash(url);
         assert_eq!(h1, h2);
@@ -900,7 +900,7 @@ mod tests {
     fn run_git_timed_drains_more_than_a_pipe_buffer_without_false_timeout() {
         let mut cmd = Command::new("sh");
         cmd.args(["-c", "head -c 262144 /dev/zero >&2"]);
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
 
         run_git_timed(&mut cmd, "stderr-flood", Duration::from_secs(3)).expect("git command");
     }
@@ -910,7 +910,7 @@ mod tests {
     fn run_git_timed_timeout_includes_captured_stderr() {
         let mut cmd = Command::new("sh");
         cmd.args(["-c", "printf 'fatal: still cloning\\n' >&2; exec sleep 30"]);
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
 
         let err = run_git_timed(&mut cmd, "clone", Duration::from_secs(1)).unwrap_err();
         assert!(err.contains("timed out"), "{err}");
@@ -925,7 +925,7 @@ mod tests {
             "-c",
             "head -c 262144 /dev/zero >&2; printf '\\nfatal: late failure\\n' >&2; exit 1",
         ]);
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
 
         let err = run_git_timed(&mut cmd, "fetch", Duration::from_secs(3)).unwrap_err();
         assert!(err.contains("fatal: late failure"), "{err}");

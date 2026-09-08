@@ -1,5 +1,5 @@
 //! The scroll matrix drives the pager binary in a PTY with `wimo_SCROLL_LOG` pointed at a tempfile.
-//! It then validates the pager's flight-recorder JSONL (producer: `wimo ai-wimo-pager/src/input/scroll_log.rs`) against gesture invariants.
+//! It then validates the pager's flight-recorder JSONL (producer: `wimoai-wimo-pager/src/input/scroll_log.rs`) against gesture invariants.
 //!
 //! [`runner::run_cell`] executes the per-cell flow.
 //! [`session`] spawns the primed pager and the cell's [`gestures`] table is replayed as timed SGR reports.
@@ -13,7 +13,7 @@
 //! This module deliberately re-declares the wire schema instead of importing pager types.
 //! [`log::ScrollLogLine`] keeps every always-emitted producer field **required**, so a pager-side rename or removal fails deserialization here.
 //! Unknown fields are tolerated so additive producer changes don't break older matrix code.
-//! The producer-side twin lives in `wimo ai-wimo-pager/src/input/mouse/tests.rs` (a wire-format fixture test asserting the same key set on raw JSON).
+//! The producer-side twin lives in `wimoai-wimo-pager/src/input/mouse/tests.rs` (a wire-format fixture test asserting the same key set on raw JSON).
 
 pub mod cells;
 pub mod gestures;

@@ -1,7 +1,7 @@
 use super::*;
 
-const CHILD_WORKTREE: &str = "wimo ai_FAST_WORKTREE_SAFETY_CHILD_WORKTREE";
-const CHILD_SOURCE: &str = "wimo ai_FAST_WORKTREE_SAFETY_CHILD_SOURCE";
+const CHILD_WORKTREE: &str = "wimoai_FAST_WORKTREE_SAFETY_CHILD_WORKTREE";
+const CHILD_SOURCE: &str = "wimoai_FAST_WORKTREE_SAFETY_CHILD_SOURCE";
 const CHILD_TEST: &str = "git::safety::tests::gate::verdict_under_a_foreign_git_dir";
 const CHILD_SNAPSHOT_TEST: &str = "git::safety::tests::gate::snapshot_under_a_foreign_clean_filter";
 

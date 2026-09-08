@@ -7,7 +7,7 @@ fn upsert_workflow_block(
     name: &str,
     objective: &str,
     status: &str,
-    phases: &[wimo ai_wimo_shell::extensions::notification::WorkflowPhaseInfo],
+    phases: &[wimoai_wimo_shell::extensions::notification::WorkflowPhaseInfo],
     current_phase: Option<&str>,
     active_agents: u32,
     elapsed_ms: u64,
@@ -81,8 +81,8 @@ fn upsert_workflow_block(
     }
 }
 
-pub(super) fn ingest_workflow_update(agent: &mut AgentView, update: wimo aiSessionUpdate) -> bool {
-    let wimo aiSessionUpdate::WorkflowUpdated {
+pub(super) fn ingest_workflow_update(agent: &mut AgentView, update: wimoaiSessionUpdate) -> bool {
+    let wimoaiSessionUpdate::WorkflowUpdated {
         run_id,
         revision,
         name,

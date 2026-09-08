@@ -127,7 +127,7 @@ impl SessionActor {
             if state.running_task.is_some() || state.finalization_gate.is_active() {
                 let queue_depth = state.pending_inputs.len();
                 if queue_depth > 0 {
-                    wimo ai_wimo_telemetry::unified_log::debug(
+                    wimoai_wimo_telemetry::unified_log::debug(
                         "shell.prompt.start_blocked",
                         Some(self.session_info.id.0.as_ref()),
                         Some(serde_json::json!({
@@ -176,7 +176,7 @@ impl SessionActor {
         }
 
         if state.hook_block_held() {
-            wimo ai_wimo_telemetry::unified_log::debug(
+            wimoai_wimo_telemetry::unified_log::debug(
                 "shell.prompt.start_blocked",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -252,7 +252,7 @@ impl SessionActor {
         {
             let front_prompt_id = front.prompt_id.as_str();
             let queue_depth = state.pending_inputs.len();
-            wimo ai_wimo_telemetry::unified_log::debug(
+            wimoai_wimo_telemetry::unified_log::debug(
                 "shell.prompt.start_blocked",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -331,7 +331,7 @@ impl SessionActor {
                 gate.set(false);
             }
             state.notifications_suppressed = false;
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "shell.task_wake.gate_cleared",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({ "reason": "queued_user_promotion" })),
@@ -350,7 +350,7 @@ impl SessionActor {
             .borrow()
             .tool_bridge()
             .update_resource(
-                wimo ai_wimo_tools::implementations::wimo::task::types::CurrentPromptIdResource(
+                wimoai_wimo_tools::implementations::wimo::task::types::CurrentPromptIdResource(
                     prompt_id.clone(),
                 ),
             )
@@ -411,7 +411,7 @@ impl SessionActor {
         };
         let session_dir = crate::session::persistence::session_dir(&self.session_info);
         let backend =
-            wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
+            wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
                 event_tx,
             );
         let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel();
@@ -426,8 +426,8 @@ impl SessionActor {
         .await;
         drop(cmd_tx);
         while let Ok(cmd) = cmd_rx.try_recv() {
-            if let SessionCommand::wimo aiSessionNotification { notification } = cmd {
-                self.handle_wimo ai_session_notification(notification).await;
+            if let SessionCommand::wimoaiSessionNotification { notification } = cmd {
+                self.handle_wimoai_session_notification(notification).await;
             }
         }
     }
@@ -436,12 +436,12 @@ impl SessionActor {
     #[cfg(test)]
     pub(super) async fn list_running_subagents(
         &self,
-    ) -> Vec<wimo ai_wimo_tools::implementations::wimo::task::types::SubagentInspection> {
+    ) -> Vec<wimoai_wimo_tools::implementations::wimo::task::types::SubagentInspection> {
         self.reconcile_live_orphaned_subagents().await;
         let Some(event_tx) = self.tool_context.subagent_event_tx.clone() else {
             return Vec::new();
         };
-        wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(event_tx)
+        wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(event_tx)
             .list_running(self.session_info.id.0.as_ref())
             .await
     }
@@ -566,7 +566,7 @@ impl SessionActor {
         }
         for contributor in self.extension_registry.session_lifecycle_contributors() {
             contributor
-                .on_session_idle(&wimo ai_agent_lifecycle::SessionIdleInput)
+                .on_session_idle(&wimoai_agent_lifecycle::SessionIdleInput)
                 .await;
         }
     }
@@ -582,7 +582,7 @@ impl SessionActor {
         let Some(buffer) = &self.tool_context.monitor_event_buffer else {
             return;
         };
-        for event in wimo ai_wimo_tools::implementations::wimo::monitor::types::drain_owned(
+        for event in wimoai_wimo_tools::implementations::wimo::monitor::types::drain_owned(
             buffer,
             Some(self.session_info.id.0.as_ref()),
         ) {
@@ -633,7 +633,7 @@ impl SessionActor {
         notifications: &[PendingNotification],
         task_output_tool_name: &str,
     ) -> Vec<acp::ContentBlock> {
-        use wimo ai_wimo_tools::implementations::wimo::monitor::types::MonitorEventNotification;
+        use wimoai_wimo_tools::implementations::wimo::monitor::types::MonitorEventNotification;
 
         let completion_task_ids: std::collections::HashSet<&str> = notifications
             .iter()
@@ -679,7 +679,7 @@ impl SessionActor {
         }
         if let (Some(index), Some(batch)) = (
             monitor_section_idx,
-            wimo ai_wimo_tools::reminders::task_completion::format_monitor_events(
+            wimoai_wimo_tools::reminders::task_completion::format_monitor_events(
                 &monitor_events,
                 Some(task_output_tool_name),
             ),
@@ -764,7 +764,7 @@ mod live_orphan_hook_tests {
     use crate::agent::subagent::{LIVE_ORPHAN_RECONCILE_REASON, SubagentMeta};
     use crate::extensions::notification::SessionUpdate;
     use crate::session::persistence::PersistenceMsg;
-    use wimo ai_wimo_tools::implementations::wimo::task::types::{
+    use wimoai_wimo_tools::implementations::wimo::task::types::{
         SubagentEvent, SubagentInspection, SubagentSnapshot, SubagentSnapshotStatus,
     };
 
@@ -883,7 +883,7 @@ mod live_orphan_hook_tests {
     ) -> usize {
         let mut count = 0;
         while let Ok(msg) = persistence_rx.try_recv() {
-            let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(notif)) = msg
+            let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(notif)) = msg
             else {
                 continue;
             };

@@ -15,7 +15,7 @@ use super::common::*;
 /// That flake showed up as the "C replayed the cancelled transcript" timeout.
 /// Replaying while A is still up, then proving C survives A's exit, covers the durable-log replay and the multi-client survival without that race.
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
-#[ignore = "PTY e2e; run with cargo test -p wimo ai-wimo-pager --test leader_pty_e2e -- --ignored --test-threads=1"]
+#[ignore = "PTY e2e; run with cargo test -p wimoai-wimo-pager --test leader_pty_e2e -- --ignored --test-threads=1"]
 async fn leader_reattach_cancellation_roundtrips_durable_log() {
     let cluster = LeaderCluster::start(DEFAULT_ROWS, DEFAULT_COLS)
         .await

@@ -45,8 +45,8 @@ pub fn bootstrap(
     auth_manager: &Arc<AuthManager>,
     prefetched: Option<IndexMap<String, ModelEntry>>,
 ) -> Result<(AgentConfig, ModelsManager), BootstrapError> {
-    wimo ai_wimo_telemetry::id::prefetch_agent_id();
-    wimo ai_wimo_telemetry::startup::enter(wimo ai_wimo_telemetry::startup::StartupPhase::Bootstrap);
+    wimoai_wimo_telemetry::id::prefetch_agent_id();
+    wimoai_wimo_telemetry::startup::enter(wimoai_wimo_telemetry::startup::StartupPhase::Bootstrap);
     let mut cfg = cfg.clone();
     let pre_gate_prefetch = {
         let _timer = crate::instrumentation_timer!("startup.bootstrap.remote_settings");
@@ -67,7 +67,7 @@ pub fn bootstrap(
         let _timer = crate::instrumentation_timer!("startup.bootstrap.init_process");
         init_process(&cfg, auth_manager);
     }
-    wimo ai_wimo_telemetry::startup::enter(wimo ai_wimo_telemetry::startup::StartupPhase::ModelCatalog);
+    wimoai_wimo_telemetry::startup::enter(wimoai_wimo_telemetry::startup::StartupPhase::ModelCatalog);
     let models_manager = {
         let _timer = crate::instrumentation_timer!("startup.bootstrap.models_manager");
         ModelsManager::from_config(&cfg, prefetched, auth_manager.clone())?
@@ -82,7 +82,7 @@ pub fn bootstrap(
 
 /// Prints the error to the user's real stderr (undoing any TUI redirect) and exits.
 pub(crate) fn exit_on_config_error<T>(e: BootstrapError) -> T {
-    wimo ai_tty_utils::restore_native_stderr();
+    wimoai_tty_utils::restore_native_stderr();
     eprintln!("\nConfiguration error:\n\n    {e}\n");
     std::process::exit(1);
 }
@@ -170,15 +170,15 @@ fn resolve_config(
     crate::util::config::sync_campaign_fields(&mut cfg);
 
     // env var > remote settings > Local. Skip remote settings for Generic (wimo -p, subagents).
-    let has_wimo ai_auth = auth_manager.current().is_some_and(|a| a.is_wimo ai_auth());
+    let has_wimoai_auth = auth_manager.current().is_some_and(|a| a.is_wimoai_auth());
     if cfg.storage_mode == StorageMode::Local
         && cfg.mode != crate::agent::config::AgentMode::Generic
     {
         cfg.storage_mode =
-            StorageMode::from_remote_gated(cfg.remote_settings.as_ref(), has_wimo ai_auth);
+            StorageMode::from_remote_gated(cfg.remote_settings.as_ref(), has_wimoai_auth);
     }
     // A CLI/env-set Writeback still requires wimo.com auth.
-    if cfg.storage_mode == StorageMode::Writeback && !has_wimo ai_auth {
+    if cfg.storage_mode == StorageMode::Writeback && !has_wimoai_auth {
         tracing::info!("Writeback is disabled: requires auth with wimo.com");
         cfg.storage_mode = StorageMode::Local;
     }
@@ -202,7 +202,7 @@ fn init_process(cfg: &AgentConfig, auth_manager: &AuthManager) {
         // Every agent mode (stdio/headless/leader and the in-process TUI
         // agent) passes through here, so diagnostic uploads always carry
         // the version stamp and the resource ceilings in effect.
-        wimo ai_wimo_telemetry::unified_log::set_version(wimo ai_wimo_version::VERSION);
+        wimoai_wimo_telemetry::unified_log::set_version(wimoai_wimo_version::VERSION);
         let limits = crate::util::limits::ProcessLimits::read();
         limits.log();
 
@@ -247,7 +247,7 @@ fn init_process(cfg: &AgentConfig, auth_manager: &AuthManager) {
         }
         update_telemetry_config(cfg, auth_manager);
         // Emitted here: the event needs the client update_telemetry_config installs.
-        wimo ai_wimo_telemetry::session_ctx::log_event(limits.into_event());
+        wimoai_wimo_telemetry::session_ctx::log_event(limits.into_event());
     });
 }
 
@@ -263,7 +263,7 @@ pub fn update_telemetry_config(config: &AgentConfig, auth_manager: &AuthManager)
         tracing::warn!("telemetry init skipped: wimo_CLIENT_NAME yields an invalid user agent");
         return;
     }
-    let wimo_auth = auth_manager.current().filter(|a| a.is_wimo ai_auth());
+    let wimo_auth = auth_manager.current().filter(|a| a.is_wimoai_auth());
     let user_id = wimo_auth.as_ref().map(|a| a.user_id.clone());
     let team_id = wimo_auth.as_ref().and_then(|a| a.team_id.clone());
     let subscription_tier = super::mvp_agent::resolve_subscription_tier_for_telemetry(
@@ -273,14 +273,14 @@ pub fn update_telemetry_config(config: &AgentConfig, auth_manager: &AuthManager)
             .and_then(|rs| rs.subscription_tier_display.clone()),
         auth_manager.current_or_expired().as_ref(),
     );
-    wimo ai_wimo_telemetry::client::init(
+    wimoai_wimo_telemetry::client::init(
         config.telemetry.clone(),
         config.resolve_telemetry_mode().value,
         user_id,
         team_id,
         config.endpoints.deployment_key.clone(),
         crate::http::origin_client_info_from_env(),
-        wimo ai_wimo_version::VERSION.to_owned(),
+        wimoai_wimo_version::VERSION.to_owned(),
         subscription_tier,
         crate::http::shared_client(),
     );

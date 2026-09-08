@@ -39,7 +39,7 @@ rm -f "$DST"/*.ts
 for f in "${bindings[@]}"; do
   {
     echo "// generated — do NOT edit by hand."
-    echo "// Regenerate via generate.sh in the wimo ai-wimo-announcements package."
+    echo "// Regenerate via generate.sh in the wimoai-wimo-announcements package."
     cat "$f"
   } >"$DST/$(basename "$f")"
 done

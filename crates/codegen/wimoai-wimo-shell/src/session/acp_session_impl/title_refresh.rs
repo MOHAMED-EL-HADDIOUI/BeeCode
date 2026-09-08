@@ -145,7 +145,7 @@ impl SessionActor {
             reasoning_effort: setup.reasoning_effort,
             backend: setup.client.api_backend(),
             conv_id: format!("title-refresh-{}", uuid::Uuid::new_v4()),
-            req_id: format!("wimo ai-title-refresh-{}", uuid::Uuid::new_v4()),
+            req_id: format!("wimoai-title-refresh-{}", uuid::Uuid::new_v4()),
         });
 
         let response = match tokio::time::timeout(

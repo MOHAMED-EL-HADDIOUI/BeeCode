@@ -1,6 +1,6 @@
 # wimo Build User Guide
 
-Learn how to install, configure, and extend wimo Build, the terminal-based AI coding assistant from Spacewimo ai.
+Learn how to install, configure, and extend wimo Build, the terminal-based AI coding assistant from Spacewimoai.
 
 ---
 

@@ -300,8 +300,8 @@ pub struct AgentArgs {
     #[arg(long = "cli-chat-proxy-base-url")]
     pub cli_chat_proxy_base_url: Option<String>,
     /// Override the public wimo AI API base URL.
-    #[arg(long = "wimo ai-api-base-url")]
-    pub wimo ai_api_base_url: Option<String>,
+    #[arg(long = "wimoai-api-base-url")]
+    pub wimoai_api_base_url: Option<String>,
     /// Agent runtime mode
     #[command(subcommand)]
     pub mode: Option<AgentCmd>,
@@ -400,7 +400,7 @@ pub struct LeaderArgs {
 #[derive(Debug, Clone, Parser)]
 #[command(
     name = "wimo",
-    version = wimo ai_wimo_version::full_version(),
+    version = wimoai_wimo_version::full_version(),
     about = "wimo Build TUI",
     disable_version_flag = true,
     next_display_order = None,
@@ -677,7 +677,7 @@ pub struct PagerArgs {
         long = "permission-mode",
         value_name = "MODE",
         value_parser = clap::builder::PossibleValuesParser::new(
-            wimo ai_wimo_shell::agent::config::PermissionMode::VALID_VALUES
+            wimoai_wimo_shell::agent::config::PermissionMode::VALID_VALUES
         )
     )]
     pub permission_mode_flag: Option<String>,
@@ -898,8 +898,8 @@ impl PagerArgs {
     }
     pub(crate) fn local_resume_selection(
         &self,
-    ) -> wimo ai_wimo_shell::session::persistence::RecentSessionSelection {
-        use wimo ai_wimo_shell::session::unified_list::HeadlessPolicy;
+    ) -> wimoai_wimo_shell::session::persistence::RecentSessionSelection {
+        use wimoai_wimo_shell::session::unified_list::HeadlessPolicy;
         let policy = if self.single.is_some()
             || self.prompt_json.is_some()
             || self.prompt_file.is_some()
@@ -909,7 +909,7 @@ impl PagerArgs {
         } else {
             HeadlessPolicy::Exclude
         };
-        wimo ai_wimo_shell::session::persistence::RecentSessionSelection::from_headless_policy(policy)
+        wimoai_wimo_shell::session::persistence::RecentSessionSelection::from_headless_policy(policy)
     }
     /// Classify flags for sandbox profile lookup on an existing session.
     ///
@@ -1006,13 +1006,13 @@ impl PagerArgs {
         }
         match self.resume_target() {
             ResumeTarget::SessionId(id) => {
-                wimo ai_wimo_shell::session::persistence::resumed_session_sandbox_profile(
+                wimoai_wimo_shell::session::persistence::resumed_session_sandbox_profile(
                     Some(&id),
                     cwd,
                 )
             }
             ResumeTarget::MostRecentForCwd => {
-                wimo ai_wimo_shell::session::persistence::resolve_recent_session_sandbox_profile(
+                wimoai_wimo_shell::session::persistence::resolve_recent_session_sandbox_profile(
                     cwd,
                     self.local_resume_selection(),
                 )
@@ -1025,8 +1025,8 @@ impl PagerArgs {
     fn resolve_startup_sandbox(explicit: Option<&str>, saved: Option<String>) -> SandboxStartup {
         match (explicit, saved) {
             (Some(x), Some(s))
-                if x.parse::<wimo ai_wimo_sandbox::ProfileName>().ok()
-                    != s.parse::<wimo ai_wimo_sandbox::ProfileName>().ok() =>
+                if x.parse::<wimoai_wimo_sandbox::ProfileName>().ok()
+                    != s.parse::<wimoai_wimo_sandbox::ProfileName>().ok() =>
             {
                 SandboxStartup::Conflict {
                     requested: x.to_owned(),

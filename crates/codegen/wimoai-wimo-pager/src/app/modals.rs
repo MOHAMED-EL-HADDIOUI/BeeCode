@@ -853,7 +853,7 @@ impl AgentView {
                                 self.active_modal = None;
                                 InputOutcome::Action(Action::OpenExtensionsModal {
                                     tab,
-                                    trigger: wimo ai_wimo_telemetry::events::ExtensionsModalTrigger::CommandPalette,
+                                    trigger: wimoai_wimo_telemetry::events::ExtensionsModalTrigger::CommandPalette,
                                 })
                             }
                             PaletteCommand::OpenSettings => {
@@ -3216,7 +3216,7 @@ mod settings_memory_paste_routing_tests {
     use crate::views::modal::ActiveModal;
     use crate::views::settings_modal::SettingsModalState;
     use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
-    use wimo ai_wimo_shell::agent::config::UiConfig;
+    use wimoai_wimo_shell::agent::config::UiConfig;
 
     fn left() -> Event {
         Event::Key(KeyEvent::new(KeyCode::Left, KeyModifiers::NONE))

@@ -8,12 +8,12 @@ use std::time::{Duration, Instant};
 use agent_client_protocol::{self as acp, Agent as _};
 use serde_json::{Value, json};
 use tempfile::TempDir;
-use wimo ai_wimo_shell::waterfall;
-use wimo ai_wimo_test_support::{
+use wimoai_wimo_shell::waterfall;
+use wimoai_wimo_test_support::{
     InferenceEndpoint, InferenceRequestMatcher, MockInferenceServer, ResourceSnapshot, RssSampler,
     ScriptedResponse, SseEvent,
 };
-use wimo ai_test_utils::env::env_usize;
+use wimoai_test_utils::env::env_usize;
 
 use crate::acp_harness;
 use crate::perf_harness::{PerfRecorder, spawn_agent_thread};
@@ -71,11 +71,11 @@ pub fn burst_tool_calls_sse(n: usize, isolation: &str) -> ScriptedResponse {
 pub fn build_repo(files: usize) -> TempDir {
     let dir = TempDir::new().expect("repo tempdir");
     let wd = dir.path();
-    let git = |args: &[&str]| wimo ai_test_utils::git::run_git(wd, args);
+    let git = |args: &[&str]| wimoai_test_utils::git::run_git(wd, args);
     git(&["init"]);
     git(&["config", "user.name", "Sweep User"]);
     git(&["config", "user.email", "sweep@test.com"]);
-    wimo ai_test_utils::git::write_fanout_tree(wd, files, 100);
+    wimoai_test_utils::git::write_fanout_tree(wd, files, 100);
     git(&["add", "."]);
     git(&["commit", "-m", "populate tree"]);
     dir
@@ -396,7 +396,7 @@ pub fn sweep_env_init() -> SweepEnv {
     let wimo_home = TempDir::new().expect("wimo home");
     unsafe {
         std::env::set_var("wimo_HOME", wimo_home.path());
-        std::env::set_var("wimo ai_API_KEY", "test-key-for-ci");
+        std::env::set_var("wimoai_API_KEY", "test-key-for-ci");
         std::env::set_var("wimo_TELEMETRY_ENABLED", "false");
         std::env::set_var("wimo_FEEDBACK_ENABLED", "false");
         std::env::set_var("wimo_TRACE_UPLOAD", "false");
@@ -417,7 +417,7 @@ pub fn burst_on_fresh_mock(env: &SweepEnv, n: usize, isolation: &str) -> BurstOu
         .expect("mock server");
     unsafe {
         std::env::set_var("wimo_CLI_CHAT_PROXY_BASE_URL", server.url());
-        std::env::set_var("wimo_wimo ai_API_BASE_URL", server.url());
+        std::env::set_var("wimo_wimoai_API_BASE_URL", server.url());
     }
     let outcome = run_burst(&server, n, isolation, env.deadline);
     std::thread::sleep(Duration::from_secs(1));

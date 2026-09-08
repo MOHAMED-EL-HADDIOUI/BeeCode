@@ -33,10 +33,10 @@ fn spawn_probe(socket: &Path, filtered: bool) -> std::process::Output {
         .args(["--ignored", "--exact", "--nocapture", "subprocess_entry"]);
     if filtered {
         // Built in the parent, as production spawns do: the post-fork install must not allocate
-        let filter = wimo ai_wimo_sandbox::child_net::prebuilt_child_network_filter();
+        let filter = wimoai_wimo_sandbox::child_net::prebuilt_child_network_filter();
         // SAFETY: the closure only runs prctl against the parent-built program.
         unsafe {
-            cmd.pre_exec(move || wimo ai_wimo_sandbox::child_net::install_child_network_filter(filter));
+            cmd.pre_exec(move || wimoai_wimo_sandbox::child_net::install_child_network_filter(filter));
         }
     }
     cmd.output().expect("spawn probe")
@@ -87,14 +87,14 @@ fn filtered_child_cannot_connect_to_socket_created_after_launch() {
 /// This covers the degraded state (Landlock unavailable, apply failed) where the per-spawn filter is the only remaining child-network control.
 #[test]
 fn restrict_child_network_std_arms_from_config_without_apply() {
-    let manager = wimo ai_wimo_sandbox::SandboxManager::new(
-        wimo ai_wimo_sandbox::ProfileName::ReadOnly,
+    let manager = wimoai_wimo_sandbox::SandboxManager::new(
+        wimoai_wimo_sandbox::ProfileName::ReadOnly,
         Path::new("/tmp"),
     );
     assert!(!manager.is_applied(), "no kernel apply in this test");
     manager.install();
     assert!(
-        wimo ai_wimo_sandbox::should_restrict_child_network(),
+        wimoai_wimo_sandbox::should_restrict_child_network(),
         "resolved restrict_network alone must arm the filter"
     );
 
@@ -104,7 +104,7 @@ fn restrict_child_network_std_arms_from_config_without_apply() {
     let mut cmd = Command::new(exe);
     cmd.env(SOCKET_ENV, &sock)
         .args(["--ignored", "--exact", "--nocapture", "subprocess_entry"]);
-    wimo ai_wimo_sandbox::child_net::restrict_child_network_std(&mut cmd);
+    wimoai_wimo_sandbox::child_net::restrict_child_network_std(&mut cmd);
     let denied = cmd.output().expect("spawn probe");
     assert_eq!(
         denied.status.code(),

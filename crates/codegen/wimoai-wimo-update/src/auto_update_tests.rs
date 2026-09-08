@@ -921,7 +921,7 @@ fn test_reinstall_hint_npm_mentions_npm_command() {
     let hint = reinstall_hint("npm", "stable");
     assert!(hint.contains("npm i -g"), "should suggest npm i -g: {hint}");
     assert!(
-        hint.contains("@wimo ai-official/wimo"),
+        hint.contains("@wimoai-official/wimo"),
         "should name the package: {hint}"
     );
 }
@@ -934,7 +934,7 @@ fn test_reinstall_hint_gh_release_mentions_gh_command() {
         "should suggest gh release download: {hint}"
     );
     assert!(
-        hint.contains("wimo ai-org-shared/wimo"),
+        hint.contains("wimoai-org-shared/wimo"),
         "should name the repo: {hint}"
     );
 }
@@ -2428,7 +2428,7 @@ fn cli_object_candidates_try_windows_exe_first() {
 fn npm_entry_is_recognized_by_the_binary_location() {
     let temp = tempfile::tempdir().unwrap();
     let root = temp.path();
-    let native = root.join("lib/node_modules/@wimo ai-official/wimo/bin/wimo-native");
+    let native = root.join("lib/node_modules/@wimoai-official/wimo/bin/wimo-native");
     std::fs::create_dir_all(native.parent().unwrap()).unwrap();
     std::fs::write(&native, "bin").unwrap();
     let path_entry = root.join("prefix-bin/wimo");

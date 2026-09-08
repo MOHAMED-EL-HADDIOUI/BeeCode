@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-telemetry"
+name = "wimoai-wimo-telemetry"
 version = "0.1.0"
 edition.workspace = true
 description = "Telemetry engine: product events + Mixpanel emission + Sentry error reporting for wimo Build sessions"
@@ -31,14 +31,14 @@ git2 = { version = "0.20", default-features = false, features = [
 ] }
 reqwest = { workspace = true }
 url = { workspace = true }
-wimo ai-wimo-env = { workspace = true }
-wimo ai-wimo-secrets = { workspace = true }
-wimo ai-mixpanel = { workspace = true }
-wimo ai-wimo-config = { workspace = true }
-wimo ai-wimo-extra-ca = { workspace = true }
-wimo ai-wimo-sampler = { workspace = true }
-wimo ai-token-estimation = { workspace = true }
-wimo ai-dirs = { workspace = true }
+wimoai-wimo-env = { workspace = true }
+wimoai-wimo-secrets = { workspace = true }
+wimoai-mixpanel = { workspace = true }
+wimoai-wimo-config = { workspace = true }
+wimoai-wimo-extra-ca = { workspace = true }
+wimoai-wimo-sampler = { workspace = true }
+wimoai-token-estimation = { workspace = true }
+wimoai-dirs = { workspace = true }
 sentry = { version = "0.42.0", default-features = false, features = [
     "panic",
     "anyhow",
@@ -50,22 +50,22 @@ sentry = { version = "0.42.0", default-features = false, features = [
     "debug-images",
 ] }
 # Single cross-edge: `events::ToolCallCompleted.outcome` reuses
-# `wimo ai_wimo_session_events::types::ToolOutcome` so the local event log and
+# `wimoai_wimo_session_events::types::ToolOutcome` so the local event log and
 # the product telemetry event share the same enum surface.
-wimo ai-wimo-session-events = { workspace = true }
+wimoai-wimo-session-events = { workspace = true }
 # `session_metrics::TraceUploadReason::from_upload_method` matches on the shared
 # `UploadMethod` enum (small, dependency-light types crate) so the reason->wire
 # mapping lives next to the trace-upload lifecycle events it labels.
-wimo ai-file-utils = { path = "../wimo ai-file-utils" }
-wimo ai-tty-utils = { workspace = true }
-wimo ai-wimo-version = { workspace = true }
+wimoai-file-utils = { path = "../wimoai-file-utils" }
+wimoai-tty-utils = { workspace = true }
+wimoai-wimo-version = { workspace = true }
 whoami = { workspace = true }
 uuid = { workspace = true, features = ["v5", "v7"] }
 obfstr = { workspace = true, optional = true }
 mid = "4.0.0"
 tokio = { workspace = true, features = ["macros", "sync", "rt", "time"] }
 parking_lot = { workspace = true }
-wimo ai-wimo-auth = { workspace = true }
+wimoai-wimo-auth = { workspace = true }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = [
     "experimental_logs_batch_log_processor_with_async_runtime",

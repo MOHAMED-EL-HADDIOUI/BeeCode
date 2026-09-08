@@ -18,7 +18,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, Mutex};
 
-use wimo ai_wimo_sampling_types::{ConversationItem, ConversationRequest, rs};
+use wimoai_wimo_sampling_types::{ConversationItem, ConversationRequest, rs};
 
 pub(crate) const RECOVERY_REMINDER: &str = "<system_reminder>Your messages have been flagged as looping. Your response has been flagged as repeating the same text pattern. Avoid excessive repetition. If you are having trouble ask the user for guidance.</system_reminder>";
 

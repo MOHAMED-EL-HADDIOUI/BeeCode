@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::Subcommand;
-use wimo ai_wimo_shell::session::memory::storage::MemoryStorage;
+use wimoai_wimo_shell::session::memory::storage::MemoryStorage;
 
 #[derive(Debug, clap::Args, Clone)]
 pub struct MemoryArgs {

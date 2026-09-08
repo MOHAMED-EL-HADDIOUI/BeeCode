@@ -46,7 +46,7 @@ pub(super) fn ensure_login_method(app: &mut AppView) {
 /// When the list is empty, prefer the shell's `PREFERRED_API_KEY_UNAVAILABLE` copy.
 fn no_login_method_error(app: &AppView) -> String {
     if app.auth_methods.is_empty() {
-        wimo ai_wimo_shell::agent::auth_method::PREFERRED_API_KEY_UNAVAILABLE.to_string()
+        wimoai_wimo_shell::agent::auth_method::PREFERRED_API_KEY_UNAVAILABLE.to_string()
     } else {
         "No login method available".to_string()
     }
@@ -317,7 +317,7 @@ pub(super) fn handle_auth_complete(
     {
         if let Some(meta_val) = meta.as_ref()
             && let Ok(auth_meta) =
-                serde_json::from_value::<wimo ai_wimo_shell::auth::AuthMeta>(meta_val.clone())
+                serde_json::from_value::<wimoai_wimo_shell::auth::AuthMeta>(meta_val.clone())
         {
             app.apply_auth_meta(&auth_meta);
         }

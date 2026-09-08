@@ -1,7 +1,7 @@
 //! Minimal (scrollback-native) render mode: `wimo --minimal`.
 //!
 //! In this mode finalized conversation blocks are printed once into the terminal's *native* scrollback.
-//! The printing goes through `wimo ai_ratatui_inline::Terminal::insert_before` and reuses `EntryRenderer`.
+//! The printing goes through `wimoai_ratatui_inline::Terminal::insert_before` and reuses `EntryRenderer`.
 //! A small pinned live region holds the running-turn status, the prompt, and a minimal status line.
 //! The interactive `ScrollbackPane` (scroll, fold, selection, mouse) is not used; the terminal owns history.
 //!
@@ -13,10 +13,10 @@
 //!
 //! # Wiring
 //!
-//! `wimo ai-wimo-pager` (the lib) does **not** depend on this crate: this crate reads deeply into the pager's [`AppView`] / view model.
+//! `wimoai-wimo-pager` (the lib) does **not** depend on this crate: this crate reads deeply into the pager's [`AppView`] / view model.
 //! A reverse dependency would be a cargo cycle.
-//! Instead the pager exposes function-pointer hooks ([`wimo ai_wimo_pager::minimal_hook`]).
-//! The composition-root binary (`wimo ai-wimo-pager-bin`) calls [`install`] once at startup to register this crate's [`draw`] entry point.
+//! Instead the pager exposes function-pointer hooks ([`wimoai_wimo_pager::minimal_hook`]).
+//! The composition-root binary (`wimoai-wimo-pager-bin`) calls [`install`] once at startup to register this crate's [`draw`] entry point.
 //! When the hooks are not installed the pager's minimal-mode branches are inert.
 
 pub mod auth;
@@ -35,8 +35,8 @@ mod guard;
 use crossterm::QueueableCommand;
 use crossterm::terminal::BeginSynchronizedUpdate;
 
-use wimo ai_wimo_pager::app::PagerTerminal;
-use wimo ai_wimo_pager::app::app_view::AppView;
+use wimoai_wimo_pager::app::PagerTerminal;
+use wimoai_wimo_pager::app::app_view::AppView;
 
 /// Per-frame entry point for minimal mode, called from [`AppView::draw`].
 ///
@@ -82,11 +82,11 @@ pub fn draw(app: &mut AppView, terminal: &mut PagerTerminal) {
     live::draw_live(app, terminal);
 }
 
-/// Register the minimal-mode render hooks with `wimo ai-wimo-pager`.
+/// Register the minimal-mode render hooks with `wimoai-wimo-pager`.
 ///
 /// Call this exactly once, early in the binary's `main`, before any frame is drawn.
 /// It installs the function-pointer hooks so the pager's `ScreenMode::Minimal` branches dispatch into this crate.
-/// Idempotent: subsequent calls are ignored (see [`wimo ai_wimo_pager::minimal_hook`]).
+/// Idempotent: subsequent calls are ignored (see [`wimoai_wimo_pager::minimal_hook`]).
 pub fn install() {
-    wimo ai_wimo_pager::minimal_hook::install(wimo ai_wimo_pager::minimal_hook::MinimalHooks { draw });
+    wimoai_wimo_pager::minimal_hook::install(wimoai_wimo_pager::minimal_hook::MinimalHooks { draw });
 }

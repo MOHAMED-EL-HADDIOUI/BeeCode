@@ -1,7 +1,7 @@
 use toml::Value as TomlValue;
 
 /// Announcement entry received from cli-chat-proxy `/v1/settings`.
-pub use wimo ai_wimo_announcements::RemoteAnnouncement;
+pub use wimoai_wimo_announcements::RemoteAnnouncement;
 
 // ---------------------------------------------------------------------------
 // Announcements & tips from TOML

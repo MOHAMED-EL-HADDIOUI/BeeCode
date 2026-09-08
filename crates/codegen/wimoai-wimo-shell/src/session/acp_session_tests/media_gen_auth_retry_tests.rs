@@ -1,7 +1,7 @@
 use super::*;
 use crate::auth::{AuthManager, AuthMode, wimoAuth, wimoComConfig};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use wimo ai_wimo_tools::types::output::{ToolOutput, ToolRunResult};
+use wimoai_wimo_tools::types::output::{ToolOutput, ToolRunResult};
 
 fn succeeding_am() -> Arc<AuthManager> {
     let dir = tempfile::tempdir().unwrap();
@@ -63,7 +63,7 @@ fn failing_am() -> Arc<AuthManager> {
     am
 }
 
-fn ok_result(text: &str) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolError> {
+fn ok_result(text: &str) -> Result<ToolRunResult, wimoai_tool_runtime::ToolError> {
     Ok(ToolRunResult {
         output: ToolOutput::Text(text.to_owned().into()),
         prompt_text: text.to_owned(),
@@ -71,17 +71,17 @@ fn ok_result(text: &str) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolErro
     })
 }
 
-fn err(msg: &str) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolError> {
-    Err(wimo ai_tool_runtime::ToolError::invalid_arguments(
+fn err(msg: &str) -> Result<ToolRunResult, wimoai_tool_runtime::ToolError> {
+    Err(wimoai_tool_runtime::ToolError::invalid_arguments(
         msg.to_owned(),
     ))
 }
 
 /// Build the HTTP failure shape that image_gen and video_gen emit on any non-success status.
 /// Use for retry tests that should exercise the structured status-code path rather than the string fallback.
-fn http_err(status: u16, msg: &str) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolError> {
+fn http_err(status: u16, msg: &str) -> Result<ToolRunResult, wimoai_tool_runtime::ToolError> {
     Err(
-        wimo ai_tool_runtime::ToolError::new(wimo ai_tool_runtime::ToolErrorKind::Custom, msg.to_owned())
+        wimoai_tool_runtime::ToolError::new(wimoai_tool_runtime::ToolErrorKind::Custom, msg.to_owned())
             .with_details(
                 serde_json::json!({"code": "http_failure", HTTP_STATUS_DETAILS_KEY: status}),
             ),
@@ -95,13 +95,13 @@ fn http_err(status: u16, msg: &str) -> Result<ToolRunResult, wimo ai_tool_runtim
 #[test]
 fn is_auth_tool_error_classification() {
     // (expected, error) pairs: covers every branch and a sample of negatives a careless edit could plausibly break
-    let cases: Vec<(bool, wimo ai_tool_runtime::ToolError)> = vec![
+    let cases: Vec<(bool, wimoai_tool_runtime::ToolError)> = vec![
         // Primary path: image_gen and video_gen surface 401s as structured custom errors with the status in details
         // The classifier matches the status code, not the rendered string
         (
             true,
-            wimo ai_tool_runtime::ToolError::new(
-                wimo ai_tool_runtime::ToolErrorKind::Custom,
+            wimoai_tool_runtime::ToolError::new(
+                wimoai_tool_runtime::ToolErrorKind::Custom,
                 "Image generation failed with HTTP 401 Unauthorized: missing token",
             )
             .with_details(
@@ -109,13 +109,13 @@ fn is_auth_tool_error_classification() {
             ),
         ),
         // Negative: 403 Forbidden must NOT trigger a refresh
-        // This mirrors the inference path's gate in wimo ai-wimo-sampling-types/src/error.rs
+        // This mirrors the inference path's gate in wimoai-wimo-sampling-types/src/error.rs
         // 403 means "authenticated but not permitted" (content safety, ZDR, remote settings gates)
         // Refreshing the token is a no-op that surfaces as a spurious auth_required teardown
         (
             false,
-            wimo ai_tool_runtime::ToolError::new(
-                wimo ai_tool_runtime::ToolErrorKind::Custom,
+            wimoai_tool_runtime::ToolError::new(
+                wimoai_tool_runtime::ToolErrorKind::Custom,
                 "Forbidden: ZDR-blocked operation",
             )
             .with_details(
@@ -126,8 +126,8 @@ fn is_auth_tool_error_classification() {
         // Without the structured-variant short-circuit in is_auth_tool_error, the keyword fallback would mis-fire here
         (
             false,
-            wimo ai_tool_runtime::ToolError::new(
-                wimo ai_tool_runtime::ToolErrorKind::Custom,
+            wimoai_tool_runtime::ToolError::new(
+                wimoai_tool_runtime::ToolErrorKind::Custom,
                 "Forbidden: unauthorized to perform this action",
             )
             .with_details(
@@ -137,8 +137,8 @@ fn is_auth_tool_error_classification() {
         // Negative: any other non-success HTTP status falls through.
         (
             false,
-            wimo ai_tool_runtime::ToolError::new(
-                wimo ai_tool_runtime::ToolErrorKind::Custom,
+            wimoai_tool_runtime::ToolError::new(
+                wimoai_tool_runtime::ToolErrorKind::Custom,
                 "internal server error",
             )
             .with_details(
@@ -149,28 +149,28 @@ fn is_auth_tool_error_classification() {
         // The classifier still catches it via the message-string fallback
         (
             true,
-            wimo ai_tool_runtime::ToolError::invalid_arguments("response: invalid api key for project"),
+            wimoai_tool_runtime::ToolError::invalid_arguments("response: invalid api key for project"),
         ),
         // Fallback path: an OAuth 2.0 `invalid_token` payload (RFC 6749) surfaced as raw JSON without a structured status code
         (
             true,
-            wimo ai_tool_runtime::ToolError::invalid_arguments(r#"{"error":"invalid_token"}"#),
+            wimoai_tool_runtime::ToolError::invalid_arguments(r#"{"error":"invalid_token"}"#),
         ),
         // Fallback path: case-insensitive "unauthorized" anywhere in the message body
         (
             true,
-            wimo ai_tool_runtime::ToolError::invalid_arguments("UNAUTHORIZED"),
+            wimoai_tool_runtime::ToolError::invalid_arguments("UNAUTHORIZED"),
         ),
         // Negative: transport failure must not trigger a token refresh.
         (
             false,
-            wimo ai_tool_runtime::ToolError::invalid_arguments("Image generation timed out after 60s"),
+            wimoai_tool_runtime::ToolError::invalid_arguments("Image generation timed out after 60s"),
         ),
         // Negative: structural not-found error; not a network response.
         (
             false,
-            wimo ai_tool_runtime::ToolError::not_found(
-                wimo ai_tool_protocol::ToolId::new("image_gen").expect("valid"),
+            wimoai_tool_runtime::ToolError::not_found(
+                wimoai_tool_protocol::ToolId::new("image_gen").expect("valid"),
                 "Tool not found: image_gen",
             ),
         ),
@@ -178,7 +178,7 @@ fn is_auth_tool_error_classification() {
         // Regression guard for a bare-`401` substring match accidentally re-introduced into the fallback path
         (
             false,
-            wimo ai_tool_runtime::ToolError::invalid_arguments("request id req_401abc failed"),
+            wimoai_tool_runtime::ToolError::invalid_arguments("request id req_401abc failed"),
         ),
     ];
 

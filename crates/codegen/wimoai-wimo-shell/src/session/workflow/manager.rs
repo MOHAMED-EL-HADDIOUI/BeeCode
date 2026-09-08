@@ -5,8 +5,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use tokio::sync::{mpsc, oneshot};
 use tokio_util::sync::CancellationToken;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
-use wimo ai_workflow::{Journal, WorkflowOutcome, WorkflowRunParams};
+use wimoai_wimo_sampling_types::ReasoningEffort;
+use wimoai_workflow::{Journal, WorkflowOutcome, WorkflowRunParams};
 
 use super::host_service::{
     HostDrainOutcome, TelemetryHook, WorkflowHostParams, spawn_workflow_host_service,
@@ -17,11 +17,11 @@ use super::store::WorkflowRunStore;
 use super::tracker::WorkflowTracker;
 
 pub(crate) const WORKFLOW_MAX_ACTIVE_RUNS_PER_SESSION: usize = 4;
-pub(crate) const WORKFLOW_DEFAULT_AGENT_BUDGET: u64 = wimo ai_workflow::DEFAULT_AGENT_BUDGET;
+pub(crate) const WORKFLOW_DEFAULT_AGENT_BUDGET: u64 = wimoai_workflow::DEFAULT_AGENT_BUDGET;
 
-static WORKFLOW_RUNS_ACTIVE: wimo ai_wimo_telemetry::activity::ActivityGauge =
-    wimo ai_wimo_telemetry::activity::ActivityGauge::work(
-        wimo ai_wimo_telemetry::activity::WORKFLOW_RUNS_ACTIVE_KEY,
+static WORKFLOW_RUNS_ACTIVE: wimoai_wimo_telemetry::activity::ActivityGauge =
+    wimoai_wimo_telemetry::activity::ActivityGauge::work(
+        wimoai_wimo_telemetry::activity::WORKFLOW_RUNS_ACTIVE_KEY,
     );
 
 struct ActiveRun {
@@ -68,7 +68,7 @@ pub(crate) struct WorkflowManager {
     store: WorkflowRunStore,
     notify: WorkflowNotifySender,
     subagent_event_tx: mpsc::UnboundedSender<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
     >,
     telemetry: TelemetryHook,
     session_cmd_tx: mpsc::UnboundedSender<crate::session::commands::SessionCommand>,
@@ -89,7 +89,7 @@ impl WorkflowManager {
         store: WorkflowRunStore,
         notify: WorkflowNotifySender,
         subagent_event_tx: mpsc::UnboundedSender<
-            wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+            wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
         >,
         telemetry: TelemetryHook,
         session_cmd_tx: mpsc::UnboundedSender<crate::session::commands::SessionCommand>,
@@ -153,7 +153,7 @@ impl WorkflowManager {
                 }
                 if existing.status
                     == crate::session::workflow::tracker::WorkflowRunStatus::BudgetLimited
-                    && existing.agents_used >= wimo ai_workflow::MAX_AGENT_BUDGET
+                    && existing.agents_used >= wimoai_workflow::MAX_AGENT_BUDGET
                 {
                     return Err(LaunchError::NotResumable(
                         "maximum agent budget reached; start a new run".into(),
@@ -303,7 +303,7 @@ impl WorkflowManager {
         let args = spec.args;
         let exec_cancel = cancel.clone();
         let exec = tokio::task::spawn_blocking(move || {
-            wimo ai_workflow::run_workflow(WorkflowRunParams {
+            wimoai_workflow::run_workflow(WorkflowRunParams {
                 script,
                 args,
                 journal,
@@ -398,7 +398,7 @@ impl WorkflowManager {
                     RunEndMetadata {
                         run_id: &watcher_run_id,
                         parent_session_id: &watcher_session_id,
-                        status: wimo ai_wimo_telemetry::events::WorkflowRunEndStatus::Superseded,
+                        status: wimoai_wimo_telemetry::events::WorkflowRunEndStatus::Superseded,
                         duration_ms: elapsed,
                         agents_used,
                         agent_budget,
@@ -415,7 +415,7 @@ impl WorkflowManager {
                     RunEndMetadata {
                         run_id: &watcher_run_id,
                         parent_session_id: &watcher_session_id,
-                        status: wimo ai_wimo_telemetry::events::WorkflowRunEndStatus::Interrupted,
+                        status: wimoai_wimo_telemetry::events::WorkflowRunEndStatus::Interrupted,
                         duration_ms: 0,
                         agents_used: 0,
                         agent_budget: None,
@@ -502,7 +502,7 @@ impl WorkflowManager {
         let store = WorkflowRunStore::new(session_dir.clone(), persist_tx.clone());
         let notify = super::notify::WorkflowNotifySender::new(
             agent_client_protocol::SessionId::new("test-session"),
-            wimo ai_acp_lib::AcpAgentGatewaySender::new(gateway_tx),
+            wimoai_acp_lib::AcpAgentGatewaySender::new(gateway_tx),
             persist_tx,
             store.clone(),
         );
@@ -563,10 +563,10 @@ impl WorkflowManager {
         let (respond_to, _response) = oneshot::channel();
         self.subagent_event_tx
             .send(
-                wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent::Cancel(
-                    wimo ai_wimo_tools::implementations::wimo::task::types::SubagentCancelRequest {
+                wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent::Cancel(
+                    wimoai_wimo_tools::implementations::wimo::task::types::SubagentCancelRequest {
                         parent_session_id: Some(self.session_id.clone()),
-                        target: wimo ai_wimo_tools::implementations::wimo::task::types::SubagentCancelTarget::WorkflowRunId(
+                        target: wimoai_wimo_tools::implementations::wimo::task::types::SubagentCancelTarget::WorkflowRunId(
                             run_id.to_owned(),
                         ),
                         respond_to,
@@ -761,8 +761,8 @@ fn log_run_started(
     max_concurrent_agents: usize,
     resumed: bool,
 ) {
-    use wimo ai_wimo_telemetry::events::{WorkflowRunStarted, WorkflowSourceKind};
-    wimo ai_wimo_telemetry::session_ctx::log_event(WorkflowRunStarted {
+    use wimoai_wimo_telemetry::events::{WorkflowRunStarted, WorkflowSourceKind};
+    wimoai_wimo_telemetry::session_ctx::log_event(WorkflowRunStarted {
         run_id: run_id.to_owned(),
         parent_session_id: parent_session_id.to_owned(),
         source: match source {
@@ -781,14 +781,14 @@ fn log_run_started(
 struct RunEndMetadata<'a> {
     run_id: &'a str,
     parent_session_id: &'a str,
-    status: wimo ai_wimo_telemetry::events::WorkflowRunEndStatus,
+    status: wimoai_wimo_telemetry::events::WorkflowRunEndStatus,
     duration_ms: u64,
     agents_used: u64,
     agent_budget: Option<u64>,
 }
 
 fn log_run_ended(episode: RunEndMetadata<'_>, stats: &super::host_service::WorkflowAgentStats) {
-    wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::WorkflowRunEnded {
+    wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::WorkflowRunEnded {
         run_id: episode.run_id.to_owned(),
         parent_session_id: episode.parent_session_id.to_owned(),
         status: episode.status,
@@ -806,9 +806,9 @@ fn log_run_ended(episode: RunEndMetadata<'_>, stats: &super::host_service::Workf
 /// Exhaustive so a new tracker status forces a decision here.
 fn run_ended_status(
     status: crate::session::workflow::tracker::WorkflowRunStatus,
-) -> wimo ai_wimo_telemetry::events::WorkflowRunEndStatus {
+) -> wimoai_wimo_telemetry::events::WorkflowRunEndStatus {
     use crate::session::workflow::tracker::WorkflowRunStatus as S;
-    use wimo ai_wimo_telemetry::events::WorkflowRunEndStatus as E;
+    use wimoai_wimo_telemetry::events::WorkflowRunEndStatus as E;
     match status {
         S::Active => E::Active,
         S::UserPaused => E::UserPaused,
@@ -831,11 +831,11 @@ mod tests {
     use crate::session::workflow::registry::resolve_inline;
 
     type SubagentEventRx = mpsc::UnboundedReceiver<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
     >;
     type CancelLog = Arc<
         parking_lot::Mutex<
-            Vec<wimo ai_wimo_tools::implementations::wimo::task::types::SubagentCancelTarget>,
+            Vec<wimoai_wimo_tools::implementations::wimo::task::types::SubagentCancelTarget>,
         >,
     >;
 
@@ -847,7 +847,7 @@ mod tests {
     fn test_manager_with_cancels(
         session_dir: Option<PathBuf>,
     ) -> (WorkflowManager, SubagentEventRx, CancelLog) {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentCancelOutcome, SubagentEvent,
         };
 
@@ -883,7 +883,7 @@ mod tests {
         let store = WorkflowRunStore::new(session_dir.clone(), persist_tx.clone());
         let notify = WorkflowNotifySender::new(
             agent_client_protocol::SessionId::new("test-session"),
-            wimo ai_acp_lib::AcpAgentGatewaySender::new(gateway_tx),
+            wimoai_acp_lib::AcpAgentGatewaySender::new(gateway_tx),
             persist_tx,
             store.clone(),
         );
@@ -931,8 +931,8 @@ mod tests {
 
     async fn recv_spawn(
         rx: &mut SubagentEventRx,
-    ) -> wimo ai_wimo_tools::implementations::wimo::task::types::SubagentSpawnRequest {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent;
+    ) -> wimoai_wimo_tools::implementations::wimo::task::types::SubagentSpawnRequest {
+        use wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent;
         match tokio::time::timeout(std::time::Duration::from_secs(2), rx.recv()).await {
             Ok(Some(SubagentEvent::Spawn(req))) => req,
             Ok(Some(_)) => panic!("expected spawn, got a non-spawn event"),
@@ -942,9 +942,9 @@ mod tests {
     }
 
     fn complete_spawn(
-        req: wimo ai_wimo_tools::implementations::wimo::task::types::SubagentSpawnRequest,
+        req: wimoai_wimo_tools::implementations::wimo::task::types::SubagentSpawnRequest,
     ) {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentResult;
+        use wimoai_wimo_tools::implementations::wimo::task::types::SubagentResult;
         let id = req.id.clone();
         let _ = req.result_tx.send(SubagentResult {
             success: true,
@@ -1062,7 +1062,7 @@ mod tests {
 
     #[tokio::test]
     async fn resume_reuses_immutable_launch_effort() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent;
+        use wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent;
 
         let dir = tempfile::tempdir().unwrap();
         let (mut manager, mut subagent_rx) = test_manager(Some(dir.path().to_path_buf()));
@@ -1155,7 +1155,7 @@ mod tests {
         let resolved = resolve_inline(script.into()).unwrap();
         let (run_id, outcome_rx) = manager.launch(resolved, spec()).unwrap();
 
-        use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent;
+        use wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent;
         let spawn_req = subagent_rx.recv().await.expect("spawn request");
         let SubagentEvent::Spawn(_spawn) = spawn_req else {
             panic!("expected spawn request");
@@ -1186,7 +1186,7 @@ mod tests {
             )
             .unwrap();
         let spawn_req = subagent_rx.recv().await.expect("respawned agent");
-        use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentResult;
+        use wimoai_wimo_tools::implementations::wimo::task::types::SubagentResult;
         if let SubagentEvent::Spawn(req) = spawn_req {
             let id = req.id.clone();
             let _ = req.result_tx.send(SubagentResult {
@@ -1209,7 +1209,7 @@ mod tests {
 
     #[tokio::test]
     async fn resume_reconciles_agents_used_from_journal_no_double_charge() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
 
@@ -1300,7 +1300,7 @@ mod tests {
         assert!(
             std::fs::read_to_string(&journal_path)
                 .unwrap()
-                .contains("__wimo ai_workflow_host_error"),
+                .contains("__wimoai_workflow_host_error"),
             "the uncaught host error must be journaled as a trailing sentinel"
         );
 
@@ -1334,14 +1334,14 @@ mod tests {
         assert!(
             !std::fs::read_to_string(&journal_path)
                 .unwrap()
-                .contains("__wimo ai_workflow_host_error"),
+                .contains("__wimoai_workflow_host_error"),
             "the trailing sentinel must be pruned and replaced by the live result"
         );
     }
 
     #[tokio::test]
     async fn completed_and_interrupted_runs_are_not_resumable() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
 
@@ -1448,7 +1448,7 @@ mod tests {
 
     #[tokio::test]
     async fn workflow_spawns_await_to_completion() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
 
@@ -1477,7 +1477,7 @@ mod tests {
         );
         assert_eq!(
             req.runtime_overrides.model_override_provenance,
-            wimo ai_wimo_tools::implementations::wimo::task::types::ModelOverrideProvenance::Tool,
+            wimoai_wimo_tools::implementations::wimo::task::types::ModelOverrideProvenance::Tool,
             "script model overrides are untrusted tool provenance"
         );
         assert_eq!(req.runtime_overrides.reasoning_effort, None);
@@ -1494,7 +1494,7 @@ mod tests {
 
     #[tokio::test]
     async fn launch_effort_applies_to_children_and_child_override_wins() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent;
+        use wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent;
 
         let dir = tempfile::tempdir().unwrap();
         let (mut manager, mut subagent_rx) = test_manager(Some(dir.path().to_path_buf()));
@@ -1682,7 +1682,7 @@ mod tests {
 
     #[tokio::test]
     async fn output_schema_stays_host_side_with_one_corrective_retry() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
 
@@ -1764,7 +1764,7 @@ mod tests {
 
     #[tokio::test]
     async fn explicit_max_output_tokens_is_ignored_and_run_charges_totals() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
 
@@ -1811,7 +1811,7 @@ mod tests {
 
     #[tokio::test]
     async fn children_spawn_without_output_clamp() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
 
@@ -1841,7 +1841,7 @@ mod tests {
 
     #[tokio::test]
     async fn cancellation_uses_run_owned_cancel_event_without_parent_detach() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentCancelTarget, SubagentEvent,
         };
 
@@ -1884,7 +1884,7 @@ mod tests {
 
     #[tokio::test]
     async fn backgrounded_stub_fails_loudly() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
 

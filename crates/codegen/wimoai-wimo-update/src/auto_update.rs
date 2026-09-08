@@ -14,10 +14,10 @@ use crate::version::{
     UpdateConfig, fetch_latest_version, get_installed_wimo_version, get_latest_version,
     is_version_cache_fresh, try_fetch_stable_pointer, write_version_cache,
 };
-use wimo ai_wimo_shell::util::config;
-use wimo ai_wimo_shell::util::wimo_home::{wimo_application, wimo_home};
-pub use wimo ai_wimo_telemetry::events::CliUpdateTrigger;
-use wimo ai_wimo_telemetry::events::{
+use wimoai_wimo_shell::util::config;
+use wimoai_wimo_shell::util::wimo_home::{wimo_application, wimo_home};
+pub use wimoai_wimo_telemetry::events::CliUpdateTrigger;
+use wimoai_wimo_telemetry::events::{
     CliUpdate, CliUpdateChannel, CliUpdateErrorKind, CliUpdateInstaller, CliUpdateOutcome,
 };
 
@@ -71,8 +71,8 @@ fn manual_install_cmd(channel: &str) -> String {
 
 fn reinstall_hint(installer: &str, channel: &str) -> String {
     match installer {
-        "npm" => "Please reinstall via npm:\n  npm i -g @wimo ai-official/wimo".to_string(),
-        "gh-release" => "Please reinstall via GitHub Releases:\n  gh release download --repo wimo ai-org-shared/wimo --pattern 'wimo-*' --output wimo && chmod +x wimo".to_string(),
+        "npm" => "Please reinstall via npm:\n  npm i -g @wimoai-official/wimo".to_string(),
+        "gh-release" => "Please reinstall via GitHub Releases:\n  gh release download --repo wimoai-org-shared/wimo --pattern 'wimo-*' --output wimo && chmod +x wimo".to_string(),
         _ => format!("Please reinstall via:\n  {}", manual_install_cmd(channel)),
     }
 }
@@ -424,7 +424,7 @@ pub async fn ensure_latest_on_disk(update_config: &UpdateConfig) -> Result<Ensur
         .await?;
         // The leader relaunches right after a successful converge and would die with the event still in flight
         // Failures keep it alive, so successes would under-report. The install is already done.
-        wimo ai_wimo_telemetry::session_ctx::drain_pending(wimo ai_wimo_telemetry::session_ctx::CLI_DRAIN)
+        wimoai_wimo_telemetry::session_ctx::drain_pending(wimoai_wimo_telemetry::session_ctx::CLI_DRAIN)
             .await;
         outcome.installed = Some(target.clone());
     }
@@ -806,7 +806,7 @@ async fn run_update_subcommand(
     // Hand the resolved telemetry mode to the child, which cannot see the remote-settings layer (requirement pins still beat env)
     // None at the startup spawns: they run before the settings prefetch, when this process knows no more than the child
     // Waiting would let telemetry delay an update
-    if let Some(mode) = wimo ai_wimo_telemetry::client::current_mode() {
+    if let Some(mode) = wimoai_wimo_telemetry::client::current_mode() {
         cmd.env("wimo_TELEMETRY_ENABLED", mode.to_string());
     }
     match run_mode {
@@ -838,7 +838,7 @@ async fn run_update_subcommand(
                 .stdout(Stdio::null())
                 .stderr(Stdio::null());
             // Detach means a new session (Ctrl+C isolation), not handle abandonment: the child is still ours to wait() on
-            wimo ai_wimo_tools::util::detach_command(&mut cmd);
+            wimoai_wimo_tools::util::detach_command(&mut cmd);
             #[allow(clippy::disallowed_methods)] // the caller owns the returned handle
             let child = cmd.spawn()?;
             Ok(Some(child))
@@ -929,7 +929,7 @@ pub async fn run_install_script(
         Ok(Some(installed)) => Some(installed.clone()),
         _ => target.map(str::to_string),
     };
-    wimo ai_wimo_telemetry::session_ctx::log_event(CliUpdate {
+    wimoai_wimo_telemetry::session_ctx::log_event(CliUpdate {
         outcome,
         trigger,
         from_version,
@@ -992,7 +992,7 @@ const STALE_TMP_AGE: Duration = Duration::from_secs(60 * 60);
 const DOWNLOAD_REQUEST_TIMEOUT: Duration = Duration::from_secs(20 * 60);
 
 fn download_client() -> reqwest::Result<reqwest::Client> {
-    wimo ai_wimo_extra_ca::build_reqwest_client(|builder| builder.timeout(DOWNLOAD_REQUEST_TIMEOUT))
+    wimoai_wimo_extra_ca::build_reqwest_client(|builder| builder.timeout(DOWNLOAD_REQUEST_TIMEOUT))
 }
 
 /// Unique temp path for an in-flight download of `dest`.
@@ -1515,7 +1515,7 @@ async fn smoke_test_binary(binary_path: &std::path::Path) -> Result<(), SmokeTes
             .stdout(std::process::Stdio::null())
             .stderr(std::process::Stdio::piped())
             .kill_on_drop(true);
-        wimo ai_wimo_tools::util::detach_command(&mut cmd);
+        wimoai_wimo_tools::util::detach_command(&mut cmd);
         match tokio::time::timeout(SMOKE_TEST_TIMEOUT, cmd.output()).await {
             Err(_) => return Err(SmokeTestFailure::Timeout),
             Ok(Ok(output)) if output.status.success() => return Ok(()),
@@ -1652,7 +1652,7 @@ async fn activate_verified_download(download: &VerifiedDownload) -> Result<()> {
 /// Failures are silently ignored: completions are a nice-to-have, not a requirement for a successful update.
 async fn regenerate_completions(binary: &std::path::Path, wimo_home: &std::path::Path) {
     // Derive $HOME independently: wimo_home may be overridden via wimo_HOME env var, so wimo_home.parent() isn't necessarily the user's home dir
-    let user_home = wimo ai_dirs::home_dir().unwrap_or_default();
+    let user_home = wimoai_dirs::home_dir().unwrap_or_default();
 
     let completions: &[(&str, std::path::PathBuf)] = &[
         ("bash", wimo_home.join("completions/bash/wimo.bash")),
@@ -1669,7 +1669,7 @@ async fn regenerate_completions(binary: &std::path::Path, wimo_home: &std::path:
             .stdin(std::process::Stdio::null())
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::null());
-        wimo ai_wimo_tools::util::detach_command(&mut cmd);
+        wimoai_wimo_tools::util::detach_command(&mut cmd);
         let Ok(output) = cmd.output().await else {
             continue;
         };
@@ -2333,8 +2333,8 @@ async fn gh_release_download(tag: &str, pattern: &str, dest: &std::path::Path) -
     .stdin(Stdio::null())
     .stdout(Stdio::null())
     .stderr(Stdio::piped());
-    wimo ai_wimo_tools::util::detach_command(&mut cmd);
-    cmd.envs(wimo ai_wimo_tools::util::pager_env());
+    wimoai_wimo_tools::util::detach_command(&mut cmd);
+    cmd.envs(wimoai_wimo_tools::util::pager_env());
     let output = cmd.output().await?;
 
     pb.finish_and_clear();
@@ -2352,7 +2352,7 @@ async fn gh_release_download(tag: &str, pattern: &str, dest: &std::path::Path) -
     Ok(())
 }
 
-/// Download and install wimo from GitHub Releases (wimo ai-org-shared/wimo).
+/// Download and install wimo from GitHub Releases (wimoai-org-shared/wimo).
 ///
 /// Uses `gh release download` to fetch the binary matching the current platform.
 /// This works anywhere the `gh` CLI is authenticated, without needing npm or internal network access.
@@ -2481,7 +2481,7 @@ fn warn_if_other_wimo_processes_running() {
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null());
-    wimo ai_wimo_tools::util::detach_std_command(&mut cmd);
+    wimoai_wimo_tools::util::detach_std_command(&mut cmd);
     if let Ok(output) = cmd.output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         let other_pids: Vec<&str> = stdout
@@ -2517,7 +2517,7 @@ fn install_npm(target: Option<&str>, channel: &str, npm_registry: Option<&str>) 
     warn_if_other_wimo_processes_running();
 
     let version_arg = match target {
-        Some(ver) => format!("@wimo ai-official/wimo@{ver}"),
+        Some(ver) => format!("@wimoai-official/wimo@{ver}"),
         None => {
             // All current callers resolve the version via get_latest_version (max(stable, alpha) for the alpha channel) before reaching here
             // Falling back to a raw dist-tag would bypass that logic, so warn loudly if this path is ever hit
@@ -2526,7 +2526,7 @@ fn install_npm(target: Option<&str>, channel: &str, npm_registry: Option<&str>) 
                 "install_npm called without a resolved version, falling back to dist-tag"
             );
             format!(
-                "@wimo ai-official/wimo@{}",
+                "@wimoai-official/wimo@{}",
                 if channel == "alpha" {
                     "alpha"
                 } else {
@@ -2560,7 +2560,7 @@ fn install_npm(target: Option<&str>, channel: &str, npm_registry: Option<&str>) 
         .stdout(Stdio::null())
         // inherit, not piped; same rationale as run_update_subcommand
         .stderr(Stdio::inherit());
-    wimo ai_wimo_tools::util::detach_std_command(&mut cmd);
+    wimoai_wimo_tools::util::detach_std_command(&mut cmd);
     let status = cmd.status()?;
 
     if let Some(path) = temp_npmrc
@@ -2781,20 +2781,20 @@ pub async fn run_update(
 
 /// Refresh managed config post-update (best-effort, staleness-gated), for deployment-key and team principals alike.
 async fn refresh_deployment_config() {
-    if !wimo ai_wimo_shell::managed_config::has_principal() {
+    if !wimoai_wimo_shell::managed_config::has_principal() {
         return;
     }
-    if !wimo ai_wimo_shell::managed_config::is_fetch_enabled() {
+    if !wimoai_wimo_shell::managed_config::is_fetch_enabled() {
         return;
     }
     // Clear a logged-out team's files before deciding to fetch (mirrors the loop).
-    wimo ai_wimo_shell::managed_config::clear_orphan();
-    if !wimo ai_wimo_shell::config::is_managed_config_stale_for(
-        &wimo ai_wimo_shell::managed_config::current_serving_identity(),
+    wimoai_wimo_shell::managed_config::clear_orphan();
+    if !wimoai_wimo_shell::config::is_managed_config_stale_for(
+        &wimoai_wimo_shell::managed_config::current_serving_identity(),
     ) {
         return;
     }
-    match wimo ai_wimo_shell::managed_config::sync().await {
+    match wimoai_wimo_shell::managed_config::sync().await {
         Ok(true) => eprintln!("  Applied managed configuration."),
         Ok(false) => tracing::debug!("no managed configuration to apply"),
         // Auth issues aren't actionable mid-update: quiet here, loud on `wimo setup`.

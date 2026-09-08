@@ -64,28 +64,28 @@ impl crate::types::tool_metadata::ToolMetadata for WriteTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for WriteTool {
+impl wimoai_tool_runtime::Tool for WriteTool {
     type Args = WriteInput;
     type Output = WriteOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("write").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("write").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "write",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -93,9 +93,9 @@ impl wimo ai_tool_runtime::Tool for WriteTool {
     #[tracing::instrument(name = "tool.write", skip_all)]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: WriteInput,
-    ) -> Result<WriteOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<WriteOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -124,8 +124,8 @@ impl wimo ai_tool_runtime::Tool for WriteTool {
         {
             tokio::fs::create_dir_all(parent).await.map_err(|e| {
                 let ce = crate::computer::types::ComputerError::from(e);
-                wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("write").expect("valid"),
+                wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("write").expect("valid"),
                     ce.to_string(),
                 )
             })?;
@@ -135,8 +135,8 @@ impl wimo ai_tool_runtime::Tool for WriteTool {
         fs.write_file(&path, input.content.as_bytes())
             .await
             .map_err(|e| {
-                wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("write").expect("valid"),
+                wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("write").expect("valid"),
                     e.to_string(),
                 )
             })?;
@@ -230,7 +230,7 @@ mod tests {
             file_path: tmp.path().join("new.txt").to_string_lossy().into_owned(),
             content: "hello\nworld\n".to_string(),
         };
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared_resources.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared_resources.clone()), input)
             .await
             .unwrap();
 
@@ -259,7 +259,7 @@ mod tests {
             file_path: file_path.to_string_lossy().into_owned(),
             content: "new content\n".to_string(),
         };
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -286,7 +286,7 @@ mod tests {
             file_path: nested.to_string_lossy().into_owned(),
             content: "nested\n".to_string(),
         };
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -301,7 +301,7 @@ mod tests {
     fn tool_metadata() {
         use crate::types::tool_metadata::ToolMetadata;
         let tool = WriteTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "write");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "write");
         assert!(matches!(tool.kind(), ToolKind::Write));
         assert!(matches!(tool.tool_namespace(), ToolNamespace::OpenCode));
     }
@@ -334,7 +334,7 @@ mod tests {
             file_path: file_path.to_string_lossy().into_owned(),
             content: String::new(),
         };
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -359,7 +359,7 @@ mod tests {
             file_path: file_path.to_string_lossy().into_owned(),
             content: "new\n".to_string(),
         };
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -390,7 +390,7 @@ mod tests {
             file_path: "subdir/relative.txt".to_string(),
             content: "resolved\n".to_string(),
         };
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -420,7 +420,7 @@ mod tests {
             content: "data".to_string(),
         };
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input).await;
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input).await;
 
         assert!(result.is_err());
         assert!(
@@ -446,7 +446,7 @@ mod tests {
             content: "data".to_string(),
         };
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input).await;
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input).await;
 
         assert!(result.is_err());
         assert!(

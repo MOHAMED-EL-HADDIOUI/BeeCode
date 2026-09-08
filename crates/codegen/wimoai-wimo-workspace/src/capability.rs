@@ -1,7 +1,7 @@
 //! Capability-mode filtering for session toolsets.
 
-use wimo ai_wimo_tools::registry::types::{ToolConfig, ToolServerConfig};
-use wimo ai_wimo_tools::types::tool::ToolKind;
+use wimoai_wimo_tools::registry::types::{ToolConfig, ToolServerConfig};
+use wimoai_wimo_tools::types::tool::ToolKind;
 
 /// A partial order is defined via [`CapabilityMode::is_subset_of`]: `ReadOnly < ReadWrite < All` and `ReadOnly < Execute < All`.
 /// `ReadWrite` and `Execute` are *incomparable* (neither is a subset of the other).
@@ -158,7 +158,7 @@ pub(crate) fn kind_allowed(mode: CapabilityMode, kind: ToolKind) -> bool {
 mod tests {
     use super::*;
     use crate::session::tool_config::test_support;
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::tool::ToolKind;
 
     fn make_cfg(tools: Vec<ToolConfig>) -> ToolServerConfig {
         ToolServerConfig {

@@ -19,13 +19,13 @@
 //!
 //! let crash_dir = PathBuf::from("/home/user/.myapp/crash");
 //!
-//! if let Some(report) = wimo ai_crash_handler::check_previous_crash(&crash_dir) {
+//! if let Some(report) = wimoai_crash_handler::check_previous_crash(&crash_dir) {
 //!     eprintln!("Application crashed during your last session.");
 //!     eprintln!("  Signal: {}", report.signal_name);
 //!     eprintln!("  Report: {}", report.report_path.display());
 //! }
 //!
-//! wimo ai_crash_handler::install(wimo ai_crash_handler::CrashHandlerConfig {
+//! wimoai_crash_handler::install(wimoai_crash_handler::CrashHandlerConfig {
 //!     app_version: "0.1.0".to_string(),
 //!     crash_dir: crash_dir.clone(),
 //! });
@@ -208,14 +208,14 @@ mod tests {
 
     #[test]
     fn check_previous_crash_returns_none_when_no_file() {
-        let dir = PathBuf::from("/tmp/wimo ai-crash-handler-test-nonexistent");
+        let dir = PathBuf::from("/tmp/wimoai-crash-handler-test-nonexistent");
         assert!(check_previous_crash(&dir).is_none());
     }
 
     #[cfg(unix)]
     fn unique_tmp_dir(label: &str) -> PathBuf {
         let dir = std::env::temp_dir().join(format!(
-            "wimo ai-crash-handler-{label}-{}-{}",
+            "wimoai-crash-handler-{label}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

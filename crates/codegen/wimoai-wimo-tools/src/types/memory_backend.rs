@@ -1,17 +1,17 @@
 //! Backend-agnostic trait for memory search and retrieval.
 //!
-//! `MemoryBackend` is defined in `wimo ai-wimo-tools` to keep the tool crate
+//! `MemoryBackend` is defined in `wimoai-wimo-tools` to keep the tool crate
 //! backend-agnostic. The concrete implementation (`MemoryIndex`) lives in
-//! `wimo ai-wimo-shell`.
+//! `wimoai-wimo-shell`.
 //!
 //! All methods are `&self` (read-only). Write operations (record_access,
 //! memory flush writes) go through the session actor directly.
 
 /// Tracing target for memory system events.
 ///
-/// Use `tracing::info!(target: MEMORY_LOG_TARGET, ...)` in `wimo ai-wimo-tools`.
-/// Mirrors `wimo ai_wimo_shell::session::memory_log::TARGET`.
-pub const MEMORY_LOG_TARGET: &str = "wimo ai_memory";
+/// Use `tracing::info!(target: MEMORY_LOG_TARGET, ...)` in `wimoai-wimo-tools`.
+/// Mirrors `wimoai_wimo_shell::session::memory_log::TARGET`.
+pub const MEMORY_LOG_TARGET: &str = "wimoai_memory";
 
 /// Staleness threshold (days): show a note suggesting verification.
 const STALE_NOTE_DAYS: f64 = 1.0;

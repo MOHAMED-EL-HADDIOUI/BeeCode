@@ -32,7 +32,7 @@ impl WebSearchClient {
     pub fn new(
         config: &WebSearchConfig,
         api_key_provider: Option<SharedApiKeyProvider>,
-    ) -> Result<Self, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<Self, wimoai_tool_runtime::ToolError> {
         let WebSearchConfig::Enabled {
             api_key,
             base_url,
@@ -43,8 +43,8 @@ impl WebSearchClient {
             excluded_domains,
         } = config
         else {
-            return Err(wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            return Err(wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 "Cannot create WebSearchClient from disabled config".to_string(),
             ));
         };
@@ -53,22 +53,22 @@ impl WebSearchClient {
         headers.insert(
             AUTHORIZATION,
             HeaderValue::from_str(&format!("Bearer {api_key}")).map_err(|e| {
-                wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+                wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                     format!("Invalid API key for header: {e}"),
                 )
             })?,
         );
         for (key, value) in extra_headers {
             let header_name = HeaderName::from_bytes(key.as_bytes()).map_err(|e| {
-                wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+                wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                     format!("Invalid header name '{key}': {e}"),
                 )
             })?;
             let header_value = HeaderValue::from_str(value).map_err(|e| {
-                wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+                wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                     format!("Invalid header value for '{key}': {e}"),
                 )
             })?;
@@ -77,13 +77,13 @@ impl WebSearchClient {
         let _ = alpha_test_key;
         let key = crate::util::shared_http::cache_key("web_search", &headers);
         let http = crate::util::shared_http::cached_client(key, || {
-            wimo ai_wimo_extra_ca::build_reqwest_client(|builder| {
+            wimoai_wimo_extra_ca::build_reqwest_client(|builder| {
                 builder.default_headers(headers.clone())
             })
         })
         .map_err(|e| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 format!("Failed to build HTTP client: {e}"),
             )
         })?;
@@ -142,10 +142,10 @@ impl WebSearchClient {
         query: &str,
         allowed_domains: Option<Vec<String>>,
         excluded_domains: Option<Vec<String>>,
-    ) -> Result<serde_json::Value, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<serde_json::Value, wimoai_tool_runtime::ToolError> {
         let err = |msg: String| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 msg,
             )
         };
@@ -207,7 +207,7 @@ impl WebSearchClient {
         &self,
         query: &str,
         allowed_domains: Option<Vec<String>>,
-    ) -> Result<(String, Vec<String>), wimo ai_tool_runtime::ToolError> {
+    ) -> Result<(String, Vec<String>), wimoai_tool_runtime::ToolError> {
         let (allowed, excluded) = self.resolve_filters(allowed_domains);
         let request = self.build_request_json(query, allowed, excluded)?;
         let url = format!("{}/responses", self.base_url.trim_end_matches('/'));
@@ -217,8 +217,8 @@ impl WebSearchClient {
             req = req.header(AUTHORIZATION, format!("Bearer {key}"));
         }
         let response = req.send().await.map_err(|e| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 format!("HTTP request failed: {e}"),
             )
         })?;
@@ -229,7 +229,7 @@ impl WebSearchClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Failed to read error body".to_string());
-            return Err(wimo ai_tool_runtime::ToolError::unauthorized(format!(
+            return Err(wimoai_tool_runtime::ToolError::unauthorized(format!(
                 "Responses API returned 401 Unauthorized: {body}"
             ))
             .with_details(serde_json::json!({
@@ -242,20 +242,20 @@ impl WebSearchClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Failed to read error body".to_string());
-            return Err(wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            return Err(wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 format!("Responses API returned {status}: {body}"),
             ));
         }
         let bytes = response.bytes().await.map_err(|e| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 format!("Failed to read response body: {e}"),
             )
         })?;
         let response_obj: rs::Response = serde_json::from_slice(&bytes).map_err(|e| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 format!("Failed to parse response: {e}"),
             )
         })?;
@@ -276,7 +276,7 @@ impl WebSearchClient {
         &self,
         query: &str,
         allowed_domains: Option<Vec<String>>,
-    ) -> Result<(String, Vec<(String, String)>), wimo ai_tool_runtime::ToolError> {
+    ) -> Result<(String, Vec<(String, String)>), wimoai_tool_runtime::ToolError> {
         let (allowed, excluded) = self.resolve_filters(allowed_domains);
         let request = self.build_request_json(query, allowed, excluded)?;
         let url = format!("{}/responses", self.base_url.trim_end_matches('/'));
@@ -286,8 +286,8 @@ impl WebSearchClient {
             req = req.header(AUTHORIZATION, format!("Bearer {key}"));
         }
         let response = req.send().await.map_err(|e| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 format!("HTTP request failed: {e}"),
             )
         })?;
@@ -298,7 +298,7 @@ impl WebSearchClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Failed to read error body".to_string());
-            return Err(wimo ai_tool_runtime::ToolError::unauthorized(format!(
+            return Err(wimoai_tool_runtime::ToolError::unauthorized(format!(
                 "Responses API returned 401 Unauthorized: {body}"
             ))
             .with_details(serde_json::json!({
@@ -311,20 +311,20 @@ impl WebSearchClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Failed to read error body".to_string());
-            return Err(wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            return Err(wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 format!("Responses API returned {status}: {body}"),
             ));
         }
         let bytes = response.bytes().await.map_err(|e| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 format!("Failed to read response body: {e}"),
             )
         })?;
         let response_obj: rs::Response = serde_json::from_slice(&bytes).map_err(|e| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                 format!("Failed to parse response: {e}"),
             )
         })?;

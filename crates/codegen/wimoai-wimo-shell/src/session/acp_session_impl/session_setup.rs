@@ -18,7 +18,7 @@ impl SessionActor {
             } else {
                 crate::agent::auth_method::AUTH_ERROR_API_KEY
             };
-            wimo ai_wimo_telemetry::unified_log::error(
+            wimoai_wimo_telemetry::unified_log::error(
                 "sampling auth error",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -68,7 +68,7 @@ impl SessionActor {
     pub(super) async fn inject_baseline_skill_reminder(
         &self,
         conversation: &mut Vec<ConversationItem>,
-    ) -> Option<wimo ai_wimo_tools::types::skill_discovery_tracker::SkillUpdateEffects> {
+    ) -> Option<wimoai_wimo_tools::types::skill_discovery_tracker::SkillUpdateEffects> {
         let bridge = self.agent.borrow().tool_bridge().clone();
         let is_cursor = self.is_cursor_harness();
         if is_cursor {
@@ -79,7 +79,7 @@ impl SessionActor {
                 item,
                 ConversationItem::User(u)
                     if u.synthetic_reason
-                        == Some(wimo ai_wimo_sampling_types::SyntheticReason::SystemReminder)
+                        == Some(wimoai_wimo_sampling_types::SyntheticReason::SystemReminder)
             )
         });
         let effects = bridge.apply_pending_skill_update().await;
@@ -88,7 +88,7 @@ impl SessionActor {
             .and_then(|update| {
                 if is_cursor
                     && update.kind
-                        == wimo ai_wimo_tools::types::skill_discovery_tracker::SkillUpdateKind::BaselineChange
+                        == wimoai_wimo_tools::types::skill_discovery_tracker::SkillUpdateKind::BaselineChange
                 {
                     None
                 } else {
@@ -110,7 +110,7 @@ impl SessionActor {
     pub(super) async fn build_prefix_background(&self) -> String {
         let start = std::time::Instant::now();
         if matches!(self.mcp_strategy.get(), McpInitStrategy::Blocking) {
-            use wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate;
+            use wimoai_wimo_agent::prompt::user_message::UserMessageTemplate;
             let mcp_wait = match self.agent.borrow().definition().user_message_template {
                 UserMessageTemplate::Default => std::time::Duration::from_secs(15),
                 _ => std::time::Duration::from_secs(60),
@@ -198,7 +198,7 @@ impl SessionActor {
         let cwd = &self.session_info.cwd;
         let skills_config = crate::util::config::load_config().await.skills;
         let plugin_snapshot = self.plugin_registry.borrow().clone();
-        let new_skills = wimo ai_wimo_agent::prompt::skills::list_skills_with_plugins(
+        let new_skills = wimoai_wimo_agent::prompt::skills::list_skills_with_plugins(
             Some(cwd),
             &skills_config,
             plugin_snapshot.as_deref(),
@@ -224,7 +224,7 @@ impl SessionActor {
     #[tracing::instrument(level = "debug", skip_all)]
     pub(crate) async fn slash_skills_for_resolve(
         &self,
-    ) -> Vec<wimo ai_wimo_tools::implementations::skills::types::SkillInfo> {
+    ) -> Vec<wimoai_wimo_tools::implementations::skills::types::SkillInfo> {
         #[cfg(test)]
         crate::session::slash_authority::record_skill_catalog_call();
         match slash_commands::acu_skill_source(self.is_chat_kind) {
@@ -288,9 +288,9 @@ impl SessionActor {
     /// The preamble cannot list those.
     pub(super) fn wrap_skill_reminder(
         &self,
-        effects: &wimo ai_wimo_tools::types::skill_discovery_tracker::SkillUpdateEffects,
+        effects: &wimoai_wimo_tools::types::skill_discovery_tracker::SkillUpdateEffects,
     ) -> Option<ConversationItem> {
-        use wimo ai_wimo_tools::types::skill_discovery_tracker::SkillUpdateKind;
+        use wimoai_wimo_tools::types::skill_discovery_tracker::SkillUpdateKind;
         let is_cursor = self.is_cursor_harness();
         if is_cursor && effects.kind == SkillUpdateKind::BaselineChange {
             return None;
@@ -316,7 +316,7 @@ impl SessionActor {
     #[tracing::instrument(level = "debug", skip_all)]
     pub(super) async fn apply_skill_update_effects(
         &self,
-        effects: wimo ai_wimo_tools::types::skill_discovery_tracker::SkillUpdateEffects,
+        effects: wimoai_wimo_tools::types::skill_discovery_tracker::SkillUpdateEffects,
     ) {
         if effects.send_available_commands {
             self.send_available_commands_update().await;
@@ -404,7 +404,7 @@ impl SessionActor {
             return;
         };
         let _ = am.auth().await;
-        let provider: Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider> = Arc::new(
+        let provider: Arc<dyn wimoai_wimo_auth::AuthCredentialProvider> = Arc::new(
             crate::auth::credential_provider::ShellAuthCredentialProvider::new(
                 am.clone(),
                 None,
@@ -428,8 +428,8 @@ impl SessionActor {
         #[allow(unused_mut)]
         let mut request = middleware_client
             .get(&url)
-            .header("X-wimo ai-Token-Auth", "wimo ai-wimo-cli")
-            .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+            .header("X-wimoai-Token-Auth", "wimoai-wimo-cli")
+            .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
             .header(
                 crate::http::CLIENT_MODE_HEADER,
                 crate::http::process_client_mode(),
@@ -443,7 +443,7 @@ impl SessionActor {
             }
         };
         let (response, stamp) =
-            match wimo ai_wimo_auth::execute_with_stamp(&middleware_client, built).await {
+            match wimoai_wimo_auth::execute_with_stamp(&middleware_client, built).await {
                 Ok(r) => r,
                 Err(e) => {
                     tracing::warn!(error = %e, "Failed to fetch models for idle refresh");
@@ -555,7 +555,7 @@ impl SessionActor {
         if !config_changed {
             return;
         }
-        let updated_config = wimo ai_wimo_sampling_types::SamplingConfig {
+        let updated_config = wimoai_wimo_sampling_types::SamplingConfig {
             context_window: new_context_window,
             max_completion_tokens: new_max_completion_tokens,
             ..current_config
@@ -574,7 +574,7 @@ impl SessionActor {
         self.agent
             .borrow()
             .tool_bridge()
-            .update_resource(wimo ai_wimo_tools::types::resources::DenyReadGlobs(
+            .update_resource(wimoai_wimo_tools::types::resources::DenyReadGlobs(
                 self.deny_read_globs.clone(),
             ))
             .await;
@@ -608,7 +608,7 @@ impl SessionActor {
         let system_message = self.chat_state_handle.get_system_message().await;
         let system_prompt_tokens = system_message
             .as_ref()
-            .map(wimo ai_chat_state::estimate_system_message_tokens)
+            .map(wimoai_chat_state::estimate_system_message_tokens)
             .unwrap_or(0);
         let backend_search_active = self.backend_search_active();
         let tool_defs: Vec<_> = self
@@ -618,12 +618,12 @@ impl SessionActor {
             .filter(|td| !backend_search_active || td.function.name != "web_search")
             .collect();
         let tool_definitions_count = tool_defs.len();
-        let tool_definitions_tokens = wimo ai_chat_state::estimate_tool_definitions_tokens(&tool_defs);
+        let tool_definitions_tokens = wimoai_chat_state::estimate_tool_definitions_tokens(&tool_defs);
         let message_count = self.chat_state_handle.get_conversation_len().await;
         let message_tokens = self.chat_state_handle.get_estimated_messages_tokens().await;
         let usage_categories = self.usage_categories().await;
-        let free_tokens = wimo ai_token_estimation::free_tokens(context_window, total_tokens);
-        let usage_pct = wimo ai_token_estimation::usage_percentage_u8(total_tokens, context_window);
+        let free_tokens = wimoai_token_estimation::free_tokens(context_window, total_tokens);
+        let usage_pct = wimoai_token_estimation::usage_percentage_u8(total_tokens, context_window);
         let api_backend = config.as_ref().map(|c| format!("{:?}", c.api_backend));
         let agent_name = self.agent.borrow().definition().name.clone();
         let conversation_id = None;

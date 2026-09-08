@@ -1,6 +1,6 @@
 //! One-child supervisor for the in-sandbox preview-proxy.
 //!
-//! After the workspace-server self-daemonizes (see [`crate::daemonize`]) it spawns the unchanged `/usr/local/bin/wimo ai-wimo-preview-proxy` binary.
+//! After the workspace-server self-daemonizes (see [`crate::daemonize`]) it spawns the unchanged `/usr/local/bin/wimoai-wimo-preview-proxy` binary.
 //! It supervises exactly that one child: fork/exec, `wait`, then restart on exit with a capped backoff that resets after a healthy run.
 //!
 //! Two properties depend on *where* this runs:
@@ -23,7 +23,7 @@ use prometheus::{IntCounterVec, register_int_counter_vec};
 use tokio::sync::watch;
 
 /// Absolute path of the preview-proxy binary the supervisor execs.
-pub const PREVIEW_PROXY_BIN_PATH: &str = "/usr/local/bin/wimo ai-wimo-preview-proxy";
+pub const PREVIEW_PROXY_BIN_PATH: &str = "/usr/local/bin/wimoai-wimo-preview-proxy";
 
 /// The workspace-server owns this log; it captures the proxy's stdout and stderr and is truncated on every restart.
 /// It sits beside `WORKSPACE_SERVER_LOG_PATH` on the snapshot-excluded `/var/tmp` overlay (NOT `/tmp`, which is the in-namespace tmpfs rebind).
@@ -121,7 +121,7 @@ pub struct PreviewArgs {
 }
 
 impl PreviewArgs {
-    /// Map the forwarded fields to the proxy's exact CLI flag names (see `wimo ai-wimo-preview-proxy/src/cli.rs`).
+    /// Map the forwarded fields to the proxy's exact CLI flag names (see `wimoai-wimo-preview-proxy/src/cli.rs`).
     /// Absent options and a false `allow_public` contribute nothing; the `enabled` gate is never emitted.
     pub fn to_argv(&self) -> Vec<String> {
         let mut argv = Vec::new();
@@ -255,7 +255,7 @@ fn build_preview_command(cfg: &PreviewArgs) -> io::Result<tokio::process::Comman
     {
         use std::os::unix::process::CommandExt;
 
-        // Raw pre_exec, NOT wimo ai_tty_utils::detach_command
+        // Raw pre_exec, NOT wimoai_tty_utils::detach_command
         // The proxy must stay in the workspace-server's session/pgid to share its escape from the launcher's process-group reap
         // The setsid that detach_command performs would be actively wrong here
         // The daemonized server also owns no controlling TTY, so the detach rationale does not apply
@@ -265,7 +265,7 @@ fn build_preview_command(cfg: &PreviewArgs) -> io::Result<tokio::process::Comman
         let parent_pid = std::process::id();
         // Read env pre-fork: env access is not async-signal-safe inside pre_exec.
         // It is set when the always-on protect succeeds and/or `--oom-protect` forces it
-        let oom_protect = std::env::var_os(wimo ai_tty_utils::RESET_CHILD_OOM_ENV).is_some();
+        let oom_protect = std::env::var_os(wimoai_tty_utils::RESET_CHILD_OOM_ENV).is_some();
         // SAFETY: the closure runs in the forked child between fork and exec, so
         // it calls only async-signal-safe libc functions (`prctl`, `getppid`,
         // `open`/`write`/`close`, `_exit`) and touches no allocation/locks/Rust
@@ -292,7 +292,7 @@ fn build_preview_command(cfg: &PreviewArgs) -> io::Result<tokio::process::Comman
                     // "-500\n" matches PREVIEW_PROXY_OOM_SCORE_ADJ; the bytes are static because pre_exec allows no formatting or allocation
                     write_oom_score_adj_raw(b"-500\n")?;
                 } else {
-                    wimo ai_tty_utils::reset_oom_score_adj()?;
+                    wimoai_tty_utils::reset_oom_score_adj()?;
                 }
                 Ok(())
             });
@@ -400,16 +400,16 @@ async fn sleep_or_shutdown(delay: Duration, shutdown: &mut watch::Receiver<bool>
 //
 // Polls the proxy's loopback `/__control/activity` and reports through `PreviewActivitySink` so in-sandbox preview traffic withholds idle
 
-/// The proxy's control path for the last-activity stamp; mirrors `wimo ai-wimo-preview-proxy`'s `/__control/activity` route.
+/// The proxy's control path for the last-activity stamp; mirrors `wimoai-wimo-preview-proxy`'s `/__control/activity` route.
 const PREVIEW_ACTIVITY_PATH: &str = "/__control/activity";
 
-/// Effective proxy `--control-port` when the supervisor didn't set one (mirrors the default in `wimo ai-wimo-preview-proxy/src/cli.rs`).
+/// Effective proxy `--control-port` when the supervisor didn't set one (mirrors the default in `wimoai-wimo-preview-proxy/src/cli.rs`).
 pub const DEFAULT_PREVIEW_CONTROL_PORT: u16 = 6015;
 
 /// Where the scraper reports what it read off the proxy.
 ///
 /// The workspace-server implements this over its `ActivityTracker`, whose idle-withhold accounting is the only consumer today.
-/// It is a trait rather than the concrete tracker so this crate stays free of `wimo ai-wimo-workspace`.
+/// It is a trait rather than the concrete tracker so this crate stays free of `wimoai-wimo-workspace`.
 /// The daemon code is used by the server binary alone, and a dependency on the library would put it back into every downstream build.
 pub trait PreviewActivitySink: Send + Sync + 'static {
     /// A request was routed through the proxy since the previous scrape.
@@ -633,7 +633,7 @@ pub async fn supervise_preview_metrics(control_port: Option<u16>, shutdown: watc
         PREVIEW_METRICS_SCRAPE_INTERVAL,
         shutdown,
         |body| {
-            if let Some(sink) = wimo ai_computer_hub_sdk::metric_donate::active_metrics_sink() {
+            if let Some(sink) = wimoai_computer_hub_sdk::metric_donate::active_metrics_sink() {
                 sink.export_text_exposition(body, PREVIEW_METRICS_PREFIX);
             }
         },
@@ -700,8 +700,8 @@ mod tests {
 
     /// Stand-in for the workspace-server's `ActivityTracker`.
     /// It records exactly what the scraper reported, so these tests assert the scraper's contract without linking the workspace library.
-    /// The tracker's own idle-withhold accounting is covered by `wimo ai_wimo_workspace::activity`.
-    /// The wiring between the two is covered by the `wimo ai-workspace-server` binary's own tests.
+    /// The tracker's own idle-withhold accounting is covered by `wimoai_wimo_workspace::activity`.
+    /// The wiring between the two is covered by the `wimoai-workspace-server` binary's own tests.
     struct TestSink {
         window_ms: u64,
         routed_notes: AtomicU64,
@@ -788,7 +788,7 @@ mod tests {
 
     #[test]
     fn to_argv_maps_every_flag_to_the_proxy_cli_names() {
-        // Flag names must match wimo ai-wimo-preview-proxy/src/cli.rs exactly.
+        // Flag names must match wimoai-wimo-preview-proxy/src/cli.rs exactly.
         assert_eq!(
             sample_cfg().to_argv(),
             vec![

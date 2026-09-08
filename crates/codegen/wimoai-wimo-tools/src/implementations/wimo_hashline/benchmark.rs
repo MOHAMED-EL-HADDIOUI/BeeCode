@@ -6,7 +6,7 @@
 //! ## Usage
 //!
 //! ```rust,ignore
-//! use wimo ai_wimo_tools::implementations::wimo_hashline::benchmark::*;
+//! use wimoai_wimo_tools::implementations::wimo_hashline::benchmark::*;
 //!
 //! let corpus = vec![
 //!     ("small.rs", "fn main() {}\n"),

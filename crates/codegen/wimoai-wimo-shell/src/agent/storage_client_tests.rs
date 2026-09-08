@@ -17,7 +17,7 @@ use axum::{
 };
 use tokio::net::TcpListener;
 
-use wimo ai_file_utils::storage_client::{RetryConfig, StorageClient};
+use wimoai_file_utils::storage_client::{RetryConfig, StorageClient};
 
 /// Shared state for tracking request counts in tests.
 #[derive(Clone, Default)]

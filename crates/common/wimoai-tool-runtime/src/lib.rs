@@ -42,4 +42,4 @@ pub use tool::{
     ToolStreamItem, ToolVariant, TypedToolOutput, terminal_only, with_progress,
 };
 
-pub use wimo ai_tool_protocol::{StreamingSpec, ToolCallId, ToolCapabilities, ToolId, ToolScope};
+pub use wimoai_tool_protocol::{StreamingSpec, ToolCallId, ToolCapabilities, ToolId, ToolScope};

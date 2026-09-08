@@ -1,5 +1,5 @@
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::types::TaskSnapshot;
+use wimoai_wimo_tools::types::TaskSnapshot;
 
 use crate::session::feedback::FeedbackRequest as FeedbackRequestData;
 
@@ -49,7 +49,7 @@ pub fn title_is_unpinned_meta() -> serde_json::Value {
 }
 
 /// wimo AI-specific session notification (parallel to acp::SessionNotification).
-/// This wraps an wimo aiSessionUpdate with session context for persistence and replay.
+/// This wraps an wimoaiSessionUpdate with session context for persistence and replay.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionNotification {
@@ -105,7 +105,7 @@ impl PromptUsage {
     /// Project a ledger snapshot for the wire. Always scrubs untrustworthy costs.
     /// Returns `Some` whenever `incomplete` is set (even if `ledger` is `None`) so the flag is never dropped by omission.
     pub(crate) fn project_from_ledger(
-        ledger: Option<&wimo ai_chat_state::UsageLedger>,
+        ledger: Option<&wimoai_chat_state::UsageLedger>,
         incomplete: bool,
     ) -> Option<Self> {
         let mut usage = match ledger {
@@ -129,7 +129,7 @@ impl PromptUsage {
     /// On the error path any open ledger is always incomplete (it may under-count without a freeze drain).
     /// `may_undercount` only matters when the ledger is empty.
     pub(crate) fn for_error_path(
-        ledger: Option<&wimo ai_chat_state::UsageLedger>,
+        ledger: Option<&wimoai_chat_state::UsageLedger>,
         may_undercount: bool,
     ) -> Option<Self> {
         match (ledger, may_undercount) {
@@ -233,11 +233,11 @@ pub struct ResponseUsage {
     pub reasoning_tokens: u64,
 }
 
-impl From<&wimo ai_chat_state::UsageTotals> for PromptUsageModel {
-    fn from(t: &wimo ai_chat_state::UsageTotals) -> Self {
+impl From<&wimoai_chat_state::UsageTotals> for PromptUsageModel {
+    fn from(t: &wimoai_chat_state::UsageTotals) -> Self {
         // Exhaustive destructure: a new ledger field cannot silently miss the wire
         // When one is added here, also extend `project_result_usage`
-        let wimo ai_chat_state::UsageTotals {
+        let wimoai_chat_state::UsageTotals {
             input_tokens,
             output_tokens,
             cached_read_tokens,
@@ -264,8 +264,8 @@ impl From<&wimo ai_chat_state::UsageTotals> for PromptUsageModel {
     }
 }
 
-impl From<&wimo ai_chat_state::UsageLedger> for PromptUsage {
-    fn from(ledger: &wimo ai_chat_state::UsageLedger) -> Self {
+impl From<&wimoai_chat_state::UsageLedger> for PromptUsage {
+    fn from(ledger: &wimoai_chat_state::UsageLedger) -> Self {
         let mut usage = Self {
             totals: PromptUsageModel::from(&ledger.totals),
             model_usage: ledger
@@ -557,7 +557,7 @@ pub enum SessionUpdate {
     /// Hooks registry changed (after reload or trust/untrust).
     /// Sent so the pager modal can auto-refresh if open.
     HooksChanged {
-        hooks: Vec<wimo ai_hooks_plugins_types::HookInfo>,
+        hooks: Vec<wimoai_hooks_plugins_types::HookInfo>,
         project_trusted: bool,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         load_errors: Vec<String>,
@@ -565,7 +565,7 @@ pub enum SessionUpdate {
     /// Plugins registry changed (after reload).
     /// Sent so the pager modal can auto-refresh if open.
     PluginsChanged {
-        plugins: Vec<wimo ai_hooks_plugins_types::PluginInfo>,
+        plugins: Vec<wimoai_hooks_plugins_types::PluginInfo>,
     },
     /// Marketplace plugin updates were auto-installed on session start.
     /// Sent so desktop/pager can show a notification to the user.
@@ -574,7 +574,7 @@ pub enum SessionUpdate {
         updates: Vec<(String, String, String)>,
     },
     /// Status snapshot for client status lines. Send-only: never persisted, since the next emit supersedes it.
-    SessionStatus(Box<wimo ai_wimo_status_line::StatusLineContext>),
+    SessionStatus(Box<wimoai_wimo_status_line::StatusLineContext>),
     /// Session summary was generated for a new session.
     /// Sent after the first user prompt when the LLM generates a title.
     SessionSummaryGenerated {
@@ -780,7 +780,7 @@ pub enum SessionUpdate {
         task_id: String,
         /// `Unknown` on rows persisted before the reason field existed.
         #[serde(default)]
-        reason: wimo ai_wimo_tools::notification::ScheduledTaskRemovedReason,
+        reason: wimoai_wimo_tools::notification::ScheduledTaskRemovedReason,
     },
     /// A monitor event (stdout line from a monitor background process).
     MonitorEvent {
@@ -1305,10 +1305,10 @@ pub struct CompactionCheckpointFile {
 /// The caller therefore supplies the render inputs.
 #[derive(Debug, Clone)]
 pub struct CompactionSegmentFile {
-    pub items: Vec<wimo ai_wimo_sampling_types::ConversationItem>,
+    pub items: Vec<wimoai_wimo_sampling_types::ConversationItem>,
     /// Curated summary, analysis tags already stripped.
     pub summary: String,
-    pub detail: wimo ai_chat_state::CompactionDetail,
+    pub detail: wimoai_chat_state::CompactionDetail,
     /// ISO-8601, for the segment metadata.
     pub timestamp: String,
 }
@@ -1361,7 +1361,7 @@ pub struct CompactionRequestFile {
     /// Records each rejected/degraded attempt so retries aren't bumped invisibly.
     /// Empty on artifacts written before schema v2.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub attempt_details: Vec<wimo ai_chat_state::compaction_utils::CompactionAttempt>,
+    pub attempt_details: Vec<wimoai_chat_state::compaction_utils::CompactionAttempt>,
 }
 
 /// On-disk artifact capturing the exact recap request sent to the model plus the response (or final error) it produced.
@@ -1384,7 +1384,7 @@ pub struct RecapRequestFile {
     pub trigger: String,
     /// The model id used for the recap side-call.
     pub model: String,
-    /// Sampling request id sent to the proxy (`wimo ai-recap-{uuid}`).
+    /// Sampling request id sent to the proxy (`wimoai-recap-{uuid}`).
     pub x_wimo_req_id: String,
     /// Sampling conversation id (`recap-{uuid}`).
     pub x_wimo_conv_id: String,
@@ -1426,7 +1426,7 @@ mod tests {
             created_at: "2026-06-30T00:00:00Z".into(),
             trigger: "auto".into(),
             model: "v9-zingster".into(),
-            x_wimo_req_id: "wimo ai-recap-abc".into(),
+            x_wimo_req_id: "wimoai-recap-abc".into(),
             x_wimo_conv_id: "recap-abc".into(),
             strip_reasoning: false,
             reminder_tag: "system-reminder".into(),
@@ -1439,7 +1439,7 @@ mod tests {
         let parsed: RecapRequestFile = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.schema_version, 1);
         assert_eq!(parsed.trigger, "auto");
-        assert_eq!(parsed.x_wimo_req_id, "wimo ai-recap-abc");
+        assert_eq!(parsed.x_wimo_req_id, "wimoai-recap-abc");
         assert_eq!(
             parsed.summary.as_deref(),
             Some("We fixed the flaky test in queue_worker.")
@@ -1449,7 +1449,7 @@ mod tests {
 
     #[test]
     fn compaction_request_file_v2_roundtrips_attempt_details() {
-        use wimo ai_chat_state::compaction_utils::CompactionAttempt;
+        use wimoai_chat_state::compaction_utils::CompactionAttempt;
         let artifact = CompactionRequestFile {
             schema_version: 2,
             request_id: "req-1".into(),

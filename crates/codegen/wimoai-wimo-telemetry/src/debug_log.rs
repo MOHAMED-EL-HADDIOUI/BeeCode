@@ -22,7 +22,7 @@ use tracing_subscriber::layer::{Context, Layer};
 use tracing_subscriber::registry::LookupSpan;
 
 use crate::session_ctx::SESSION_ID_FIELD;
-use wimo ai_wimo_config::wimo_home;
+use wimoai_wimo_config::wimo_home;
 
 /// Which env var requested a single-file debug log (drives filter and diagnostics).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -42,7 +42,7 @@ impl DebugSource {
 
 /// Target for the pager's always-on compact ACP update summary line (kind, ids, status, payload sizes).
 ///
-/// Lives here (not in `wimo ai-wimo-pager`) so the firehose directives below and the pager's own filter are built from the same constants.
+/// Lives here (not in `wimoai-wimo-pager`) so the firehose directives below and the pager's own filter are built from the same constants.
 /// A rename can't silently turn the directive into a no-op.
 pub const ACP_UPDATE_TARGET: &str = "acp_update";
 
@@ -50,7 +50,7 @@ pub const ACP_UPDATE_TARGET: &str = "acp_update";
 ///
 /// Off in the pager's release filter.
 /// The firehose is the always-available subscriber for full payloads, and it writes to disk, where the volume is safe.
-/// See `wimo ai-wimo-pager/src/tracing.rs` for the consumer side.
+/// See `wimoai-wimo-pager/src/tracing.rs` for the consumer side.
 pub const ACP_UPDATE_PAYLOAD_TARGET: &str = "acp_update_payload";
 
 /// Module path of rmcp 2.1's per-reconnect SSE warn (`sse stream error: ...`), which subscribers demote to `error` to drop the flood.
@@ -60,7 +60,7 @@ pub const RMCP_SSE_NOISE_TARGET: &str = "rmcp::transport::common::client_side_ss
 // Broad firehose filter for the routing and wimo_DEBUG_LOG sources
 // Capture our crates at debug regardless of a narrowing RUST_LOG, with deps at info so they don't flood
 // Curated first-party allowlist: new wimo crates default to `info` until added here
-const FIREHOSE_BASE_DIRECTIVES: &str = "info,wimo ai_wimo_pager=debug,wimo ai_wimo_shell=debug,wimo ai_wimo_tools=debug,wimo ai_wimo_telemetry=debug,wimo ai_wimo_agent=debug,wimo ai_wimo_mcp=debug,wimo ai_wimo_session_search=debug,wimo ai_acp_lib=debug,sampling_log=off";
+const FIREHOSE_BASE_DIRECTIVES: &str = "info,wimoai_wimo_pager=debug,wimoai_wimo_shell=debug,wimoai_wimo_tools=debug,wimoai_wimo_telemetry=debug,wimoai_wimo_agent=debug,wimoai_wimo_mcp=debug,wimoai_wimo_session_search=debug,wimoai_acp_lib=debug,sampling_log=off";
 
 // Full firehose directives: the curated crate list plus the pager's ACP update target (built from the constant above, not a literal)
 fn firehose_directives() -> String {
@@ -664,9 +664,9 @@ mod tests {
         tracing::subscriber::with_default(subscriber, || {
             // `%` mirrors production's `info_span!("session", session_id = %...)`.
             tracing::info_span!("session", session_id = %"sess-xyz").in_scope(|| {
-                tracing::info!(target: "wimo ai_wimo_shell", "inside session");
+                tracing::info!(target: "wimoai_wimo_shell", "inside session");
             });
-            tracing::info!(target: "wimo ai_wimo_shell", "outside session");
+            tracing::info!(target: "wimoai_wimo_shell", "outside session");
         });
         crate::appender::flush_file_log_guards();
 
@@ -692,7 +692,7 @@ mod tests {
         let _lock = flush_test_lock();
         let dir = tempfile::tempdir().unwrap();
         // Exactly the production wrapper: routing layer behind FIREHOSE_DIRECTIVES.
-        // Pins at the unit level that the `session` span (INFO, target `wimo ai_wimo_telemetry::session_ctx`) survives the real filter
+        // Pins at the unit level that the `session` span (INFO, target `wimoai_wimo_telemetry::session_ctx`) survives the real filter
         // `event_scope` can only find the session id if the filter keeps that span
         let layer = RoutingLayer::new(dir.path().to_path_buf(), "agent".to_owned(), 7)
             .with_filter(firehose_filter());
@@ -700,12 +700,12 @@ mod tests {
 
         tracing::subscriber::with_default(subscriber, || {
             tracing::info_span!(
-                target: "wimo ai_wimo_telemetry::session_ctx",
+                target: "wimoai_wimo_telemetry::session_ctx",
                 "session",
                 session_id = %"sid-real"
             )
             .in_scope(|| {
-                tracing::debug!(target: "wimo ai_wimo_shell", "filtered routing works");
+                tracing::debug!(target: "wimoai_wimo_shell", "filtered routing works");
             });
         });
         crate::appender::flush_file_log_guards();
@@ -733,11 +733,11 @@ mod tests {
         tracing::subscriber::with_default(subscriber, || {
             tracing::info_span!("session", session_id = %"sid-one").in_scope(|| {
                 // Two events in one session also prove within-session accumulation.
-                tracing::info!(target: "wimo ai_wimo_shell", "one first");
-                tracing::info!(target: "wimo ai_wimo_shell", "one second");
+                tracing::info!(target: "wimoai_wimo_shell", "one first");
+                tracing::info!(target: "wimoai_wimo_shell", "one second");
             });
             tracing::info_span!("session", session_id = %"sid-two").in_scope(|| {
-                tracing::info!(target: "wimo ai_wimo_shell", "two only");
+                tracing::info!(target: "wimoai_wimo_shell", "two only");
             });
         });
         crate::appender::flush_file_log_guards();

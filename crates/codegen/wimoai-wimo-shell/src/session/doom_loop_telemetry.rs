@@ -7,7 +7,7 @@ const MAX_TRIGGER_LABEL_BYTES: usize = 256;
 
 /// Fold `new` trigger labels into `current`, keeping the tightest (lowest-threshold) raw label overall.
 pub(crate) fn merge_tightest_trigger(current: Option<String>, new: &[String]) -> Option<String> {
-    wimo ai_wimo_sampling_types::doom_loop::DoomLoopSignal::tightest(
+    wimoai_wimo_sampling_types::doom_loop::DoomLoopSignal::tightest(
         current
             .iter()
             .map(String::as_str)
@@ -47,7 +47,7 @@ pub(crate) fn reconcile_request_metadata(
     request_owned: bool,
     request_id: &str,
     signals: &[String],
-    attempts: &[wimo ai_wimo_sampler::DoomLoopRecoveryAttempt],
+    attempts: &[wimoai_wimo_sampler::DoomLoopRecoveryAttempt],
 ) -> Vec<(Vec<String>, Option<u64>)> {
     if !request_owned {
         return Vec::new();
@@ -136,7 +136,7 @@ impl DoomLoopTurnTally {
     }
 
     pub(crate) fn detection_summary(&self) -> DoomLoopDetectionSummary {
-        use wimo ai_wimo_sampling_types::doom_loop::{DoomLoopSignal, DoomLoopSignalKind};
+        use wimoai_wimo_sampling_types::doom_loop::{DoomLoopSignal, DoomLoopSignalKind};
 
         let mut summary = DoomLoopDetectionSummary::default();
         for raw in &self.triggers {

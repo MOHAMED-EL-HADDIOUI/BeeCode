@@ -277,7 +277,7 @@ pub fn render_search_bar_with_viewport(
     active: bool,
     show_hint: bool,
     bg: Option<ratatui::style::Color>,
-    viewport: wimo ai_ratatui_textarea::SingleLineViewport,
+    viewport: wimoai_ratatui_textarea::SingleLineViewport,
 ) {
     render_search_bar_with_label_viewport(
         buf,
@@ -439,7 +439,7 @@ fn render_search_bar_with_label_viewport(
     show_hint: bool,
     query_cursor: usize,
     bg: Option<ratatui::style::Color>,
-    viewport: Option<wimo ai_ratatui_textarea::SingleLineViewport>,
+    viewport: Option<wimoai_ratatui_textarea::SingleLineViewport>,
 ) {
     // Minimal mode renders every UI element background-free.
     let bg = if crate::views::modal_window::embedded() {

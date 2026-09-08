@@ -1,7 +1,7 @@
 //! Memory concern for `SessionActor`: memory flush, the dream pipeline, memory tool registration, and note rewriting.
 
 use super::*;
-use wimo ai_wimo_telemetry::session_end::{self, Phase};
+use wimoai_wimo_telemetry::session_end::{self, Phase};
 
 const DREAM_MODEL_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30 * 60);
 /// Stale-lock floor: the whole dream (model call plus post-call reindex) must finish inside this, so it must exceed the model timeout; doubling it leaves reindex headroom.
@@ -16,7 +16,7 @@ enum DreamAttempt {
 
 #[derive(Debug)]
 pub(super) struct MemoryFlushSnapshot {
-    counts: wimo ai_chat_state::ConversationCounts,
+    counts: wimoai_chat_state::ConversationCounts,
     chat_history: Vec<ConversationItem>,
 }
 
@@ -48,16 +48,16 @@ impl SessionActor {
     /// The memory backend itself is already in `Resources`, inserted by the caller before this method.
     pub(super) async fn register_memory_tools(
         &self,
-        bridge: &wimo ai_wimo_tools::bridge::ToolBridge,
+        bridge: &wimoai_wimo_tools::bridge::ToolBridge,
     ) -> Result<(), String> {
-        use wimo ai_wimo_tools::implementations::memory::{
+        use wimoai_wimo_tools::implementations::memory::{
             MEMORY_GET_TOOL_NAME, MEMORY_SEARCH_TOOL_NAME,
         };
 
         bridge
             .register_mcp_tools(
                 MEMORY_SEARCH_TOOL_NAME.to_owned(),
-                wimo ai_wimo_tools::implementations::memory::search_tool::MemorySearchImpl,
+                wimoai_wimo_tools::implementations::memory::search_tool::MemorySearchImpl,
                 None,
             )
             .await
@@ -65,7 +65,7 @@ impl SessionActor {
         bridge
             .register_mcp_tools(
                 MEMORY_GET_TOOL_NAME.to_owned(),
-                wimo ai_wimo_tools::implementations::memory::get_tool::MemoryGetImpl,
+                wimoai_wimo_tools::implementations::memory::get_tool::MemoryGetImpl,
                 None,
             )
             .await
@@ -79,8 +79,8 @@ impl SessionActor {
         total_chunks_at_end: usize,
         session_end_result: &str,
     ) {
-        wimo ai_wimo_telemetry::session_ctx::log_event(
-            wimo ai_wimo_telemetry::memory_telemetry::MemorySessionSummary {
+        wimoai_wimo_telemetry::session_ctx::log_event(
+            wimoai_wimo_telemetry::memory_telemetry::MemorySessionSummary {
                 session_id: self.session_info.id.to_string(),
                 memory_enabled: self.memory.is_enabled(),
                 session_duration_secs: self.session_start.elapsed().as_secs(),
@@ -106,12 +106,12 @@ impl SessionActor {
     pub(super) async fn run_session_end_memory_pipeline(
         &self,
         log_suffix: &str,
-        timer: &wimo ai_wimo_telemetry::session_end::SharedSessionEndTimer,
+        timer: &wimoai_wimo_telemetry::session_end::SharedSessionEndTimer,
     ) {
         let span = session_end::span(Phase::Memory);
         if self.startup_hints.is_subagent {
             tracing::debug!(
-                target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                target: wimoai_wimo_telemetry::memory_log::TARGET,
                 "MEMORY_SUBAGENT_SKIP: skipping on_session_end for subagent session"
             );
             return;
@@ -132,7 +132,7 @@ impl SessionActor {
                     session_end_result = "written";
                     self.reindex_and_embed(std::path::Path::new(path_str), "session")
                         .await;
-                    self.send_wimo ai_notification(wimo aiSessionUpdate::MemorySessionSaved {
+                    self.send_wimoai_notification(wimoaiSessionUpdate::MemorySessionSaved {
                         path: path_str.clone(),
                     })
                     .await;
@@ -148,7 +148,7 @@ impl SessionActor {
             let telem = self.memory.telemetry_snapshot();
             let msg = format!("MEMORY_SESSION_END: {log_suffix}");
             tracing::info!(
-                target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                target: wimoai_wimo_telemetry::memory_log::TARGET,
                 result = ?result,
                 tool_searches = telem.tool_search_count,
                 injection_searches = telem.injection_count,
@@ -188,7 +188,7 @@ impl SessionActor {
     pub(super) async fn maybe_run_dream(&self) {
         if self.startup_hints.is_subagent {
             tracing::debug!(
-                target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                target: wimoai_wimo_telemetry::memory_log::TARGET,
                 "MEMORY_SUBAGENT_SKIP: skipping dream for subagent session"
             );
             return;
@@ -207,7 +207,7 @@ impl SessionActor {
             DreamGate::Open { sessions } => sessions,
             other => {
                 tracing::info!(
-                    target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                    target: wimoai_wimo_telemetry::memory_log::TARGET,
                     gate = ?other,
                     "MEMORY_DREAM: gate check result, skipping"
                 );
@@ -216,7 +216,7 @@ impl SessionActor {
         };
 
         tracing::info!(
-            target: wimo ai_wimo_telemetry::memory_log::TARGET,
+            target: wimoai_wimo_telemetry::memory_log::TARGET,
             session_count = sessions.len(),
             "MEMORY_DREAM: gates passed, starting consolidation"
         );
@@ -247,7 +247,7 @@ impl SessionActor {
         ) {
             Ok(s) if s.is_empty() => {
                 tracing::info!(
-                    target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                    target: wimoai_wimo_telemetry::memory_log::TARGET,
                     "MEMORY_DREAM_SLASH: no session logs found, nothing to consolidate"
                 );
                 return;
@@ -255,7 +255,7 @@ impl SessionActor {
             Ok(s) => s,
             Err(e) => {
                 tracing::warn!(
-                    target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                    target: wimoai_wimo_telemetry::memory_log::TARGET,
                     error = %e,
                     "MEMORY_DREAM_SLASH: failed to list sessions"
                 );
@@ -264,7 +264,7 @@ impl SessionActor {
         };
 
         tracing::info!(
-            target: wimo ai_wimo_telemetry::memory_log::TARGET,
+            target: wimoai_wimo_telemetry::memory_log::TARGET,
             session_count = sessions.len(),
             "MEMORY_DREAM_SLASH: starting manual consolidation"
         );
@@ -281,7 +281,7 @@ impl SessionActor {
             )
             .await
         {
-            self.send_wimo ai_notification(wimo aiSessionUpdate::MemoryDreamCompleted {
+            self.send_wimoai_notification(wimoaiSessionUpdate::MemoryDreamCompleted {
                 result: format!("skipped: {reason}"),
                 path: None,
             })
@@ -318,14 +318,14 @@ impl SessionActor {
             Ok(Some(g)) => g,
             Ok(None) => {
                 tracing::info!(
-                    target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                    target: wimoai_wimo_telemetry::memory_log::TARGET,
                     "{log_prefix}: lock held by another process, skipping"
                 );
                 return DreamAttempt::Skipped("another consolidation is already running");
             }
             Err(e) => {
                 tracing::warn!(
-                    target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                    target: wimoai_wimo_telemetry::memory_log::TARGET,
                     error = %e,
                     "{log_prefix}: lock acquire failed"
                 );
@@ -345,7 +345,7 @@ impl SessionActor {
                     }
                     other => {
                         tracing::info!(
-                            target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                            target: wimoai_wimo_telemetry::memory_log::TARGET,
                             gate = ?other,
                             "{log_prefix}: gate closed under lock, skipping"
                         );
@@ -363,7 +363,7 @@ impl SessionActor {
                 Some(msg) => msg,
                 None => {
                     tracing::info!(
-                        target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                        target: wimoai_wimo_telemetry::memory_log::TARGET,
                         "{log_prefix}: no readable session content, skipping"
                     );
                     return DreamAttempt::Skipped("no readable session content");
@@ -379,7 +379,7 @@ impl SessionActor {
             Ok(Ok(r)) => r,
             Ok(Err(e)) => {
                 tracing::warn!(
-                    target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                    target: wimoai_wimo_telemetry::memory_log::TARGET,
                     error = %e,
                     "{log_prefix}: model call failed"
                 );
@@ -388,7 +388,7 @@ impl SessionActor {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                    target: wimoai_wimo_telemetry::memory_log::TARGET,
                     "{log_prefix}: model call timed out (30m)"
                 );
                 self.memory.record_dream_result(false);
@@ -425,7 +425,7 @@ impl SessionActor {
                     Some(path.display().to_string())
                 } else {
                     tracing::warn!(
-                        target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                        target: wimoai_wimo_telemetry::memory_log::TARGET,
                         "{log_prefix}: consolidation marker failed to write; gate stays open to retry"
                     );
                     None
@@ -436,7 +436,7 @@ impl SessionActor {
                     self.memory.record_dream_neutral();
                 } else {
                     tracing::warn!(
-                        target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                        target: wimoai_wimo_telemetry::memory_log::TARGET,
                         "{log_prefix}: consolidation marker failed to write; gate stays open to retry"
                     );
                 }
@@ -453,14 +453,14 @@ impl SessionActor {
             DreamStatus::NothingToConsolidate => "nothing to consolidate".into(),
             DreamStatus::Failed(err) => format!("failed: {err}"),
         };
-        self.send_wimo ai_notification(wimo aiSessionUpdate::MemoryDreamCompleted {
+        self.send_wimoai_notification(wimoaiSessionUpdate::MemoryDreamCompleted {
             result: dream_result_str,
             path: dream_path,
         })
         .await;
 
         tracing::info!(
-            target: wimo ai_wimo_telemetry::memory_log::TARGET,
+            target: wimoai_wimo_telemetry::memory_log::TARGET,
             status = ?result.status,
             sessions_eligible = result.sessions_eligible,
             sessions_cleaned = cleaned_stems.len(),
@@ -487,9 +487,9 @@ impl SessionActor {
             ],
             model: Some(model),
             x_wimo_conv_id: Some(format!("dream-{}", uuid::Uuid::new_v4())),
-            x_wimo_req_id: Some(format!("wimo ai-dream-{}", uuid::Uuid::new_v4())),
+            x_wimo_req_id: Some(format!("wimoai-dream-{}", uuid::Uuid::new_v4())),
             x_wimo_session_id: Some(session_id),
-            x_wimo_agent_id: Some(wimo ai_wimo_telemetry::id::agent_id()),
+            x_wimo_agent_id: Some(wimoai_wimo_telemetry::id::agent_id()),
             ..Default::default()
         };
         let response = sampling_client
@@ -512,21 +512,21 @@ impl SessionActor {
         trigger: &str,
         snapshot: Option<MemoryFlushSnapshot>,
     ) -> bool {
-        use wimo ai_wimo_memory::flush::*;
+        use wimoai_wimo_memory::flush::*;
 
         // Atomically acquire the flushing lock. If another flush is already running (idle timer, pre-compaction, or user-requested), skip.
         if !self.memory.try_acquire_flush_lock() {
             tracing::info!(
-                target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                target: wimoai_wimo_telemetry::memory_log::TARGET,
                 "MEMORY_FLUSH: skipped — another flush is already in progress (trigger={trigger})"
             );
             return false;
         }
 
-        tracing::info!(target: wimo ai_wimo_telemetry::memory_log::TARGET, "MEMORY_FLUSH: starting");
+        tracing::info!(target: wimoai_wimo_telemetry::memory_log::TARGET, "MEMORY_FLUSH: starting");
         let flush_start = std::time::Instant::now();
 
-        self.send_wimo ai_notification(wimo aiSessionUpdate::MemoryFlushStarted)
+        self.send_wimoai_notification(wimoaiSessionUpdate::MemoryFlushStarted)
             .await;
 
         let result = async {
@@ -538,8 +538,8 @@ impl SessionActor {
                 Some(snapshot) => snapshot,
                 None => self.snapshot_memory_flush_state().await,
             };
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::memory_telemetry::MemoryFlushStart {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::memory_telemetry::MemoryFlushStart {
                     session_id: self.session_info.id.to_string(),
                     trigger: trigger.to_owned(),
                     conversation_len: counts.total,
@@ -547,7 +547,7 @@ impl SessionActor {
                 },
             );
             tracing::info!(
-                target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                target: wimoai_wimo_telemetry::memory_log::TARGET,
                 "MEMORY_FLUSH: conversation has {user} user, {assistant} assistant, {tool} tool messages ({total} total)",
                 user = counts.user,
                 assistant = counts.assistant,
@@ -571,12 +571,12 @@ impl SessionActor {
             };
             let mut items: Vec<ConversationItem> = vec![ConversationItem::system(system_prompt)];
             tracing::info!(
-                target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                target: wimoai_wimo_telemetry::memory_log::TARGET,
                 "MEMORY_FLUSH: sending {n} recent messages to model (+ system prompt + user closer)",
                 n = recent.len(),
             );
             items.extend(
-                wimo ai_chat_state::compaction_utils::ModelRequestHistory::from_raw(recent).into_items(),
+                wimoai_chat_state::compaction_utils::ModelRequestHistory::from_raw(recent).into_items(),
             );
             items.push(ConversationItem::user(
                 "Now write the memory summary as described in the system prompt.",
@@ -589,7 +589,7 @@ impl SessionActor {
                     .unwrap_or_default(),
             };
             tracing::info!(
-                target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                target: wimoai_wimo_telemetry::memory_log::TARGET,
                 "MEMORY_FLUSH: using model={model}"
             );
             let session_id = self.session_info.id.to_string();
@@ -597,9 +597,9 @@ impl SessionActor {
                 items,
                 model: Some(model),
                 x_wimo_conv_id: Some(format!("flush-{}", uuid::Uuid::new_v4())),
-                x_wimo_req_id: Some(format!("wimo ai-flush-{}", uuid::Uuid::new_v4())),
+                x_wimo_req_id: Some(format!("wimoai-flush-{}", uuid::Uuid::new_v4())),
                 x_wimo_session_id: Some(session_id.clone()),
-                x_wimo_agent_id: Some(wimo ai_wimo_telemetry::id::agent_id()),
+                x_wimo_agent_id: Some(wimoai_wimo_telemetry::id::agent_id()),
                 ..Default::default()
             };
 
@@ -739,7 +739,7 @@ impl SessionActor {
             }
         };
 
-        tracing::info!(target: wimo ai_wimo_telemetry::memory_log::TARGET, outcome = %outcome, "MEMORY_FLUSH: completed");
+        tracing::info!(target: wimoai_wimo_telemetry::memory_log::TARGET, outcome = %outcome, "MEMORY_FLUSH: completed");
         let flush_outcome = if outcome.starts_with("written") {
             "written"
         } else if outcome.starts_with("nothing") {
@@ -752,8 +752,8 @@ impl SessionActor {
             "error"
         };
         self.memory.record_flush_result(flush_outcome);
-        wimo ai_wimo_telemetry::session_ctx::log_event(
-            wimo ai_wimo_telemetry::memory_telemetry::MemoryFlushComplete {
+        wimoai_wimo_telemetry::session_ctx::log_event(
+            wimoai_wimo_telemetry::memory_telemetry::MemoryFlushComplete {
                 session_id: self.session_info.id.to_string(),
                 trigger: trigger.to_owned(),
                 outcome: flush_outcome.to_owned(),
@@ -765,12 +765,12 @@ impl SessionActor {
         );
 
         let flush_trigger = match trigger {
-            "slash_command" => wimo ai_wimo_telemetry::events::MemoryFlushTrigger::SlashCommand,
-            "interval" => wimo ai_wimo_telemetry::events::MemoryFlushTrigger::Interval,
-            "pre_compaction" => wimo ai_wimo_telemetry::events::MemoryFlushTrigger::PreCompaction,
-            _ => wimo ai_wimo_telemetry::events::MemoryFlushTrigger::UserRequested,
+            "slash_command" => wimoai_wimo_telemetry::events::MemoryFlushTrigger::SlashCommand,
+            "interval" => wimoai_wimo_telemetry::events::MemoryFlushTrigger::Interval,
+            "pre_compaction" => wimoai_wimo_telemetry::events::MemoryFlushTrigger::PreCompaction,
+            _ => wimoai_wimo_telemetry::events::MemoryFlushTrigger::UserRequested,
         };
-        wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::MemoryFlushed {
+        wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::MemoryFlushed {
             trigger: flush_trigger,
             success: flush_outcome == "written",
             duration_ms: flush_start.elapsed().as_millis() as u64,
@@ -778,7 +778,7 @@ impl SessionActor {
         });
 
         self.memory.release_flush_lock();
-        self.send_wimo ai_notification(wimo aiSessionUpdate::MemoryFlushCompleted {
+        self.send_wimoai_notification(wimoaiSessionUpdate::MemoryFlushCompleted {
             result: outcome,
             path: flush_path,
         })
@@ -793,7 +793,7 @@ impl SessionActor {
             self.chat_state_handle.get_conversation(),
         );
         let chat_history =
-            wimo ai_chat_state::compaction_utils::prepare_conversation_for_summarization(conversation);
+            wimoai_chat_state::compaction_utils::prepare_conversation_for_summarization(conversation);
         MemoryFlushSnapshot {
             counts,
             chat_history,

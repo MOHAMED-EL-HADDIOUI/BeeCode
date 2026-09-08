@@ -5,6 +5,6 @@
     unreachable_code,
     dead_code
 )]
-//! Session-support modules extracted from `wimo ai-wimo-shell`'s `session/` tree so they build in parallel and stop rebuilding on shell edits.
+//! Session-support modules extracted from `wimoai-wimo-shell`'s `session/` tree so they build in parallel and stop rebuilding on shell edits.
 //! Shell re-exports them at their original paths.
 pub mod managed_mcp;

@@ -6,7 +6,7 @@
 use std::fs;
 use std::path::Path;
 use tempfile::tempdir;
-use wimo ai_codebase_graph::{
+use wimoai_codebase_graph::{
     FileEvent, IndexBuilder, IndexManager, IndexManagerConfig, load_index, save_index,
 };
 

@@ -406,10 +406,10 @@ pub(in crate::app::dispatch) fn dispatch_pick_session(
         return dispatch_load_session(app, session_id, None, true);
     }
     let local_cwd = app.cwd.to_string_lossy().to_string();
-    if wimo ai_wimo_shell::session::resolve_local_session(&session_id, &local_cwd).is_some() {
+    if wimoai_wimo_shell::session::resolve_local_session(&session_id, &local_cwd).is_some() {
         return dispatch_load_session(app, session_id, None, false);
     }
-    if let Some(original_cwd) = wimo ai_wimo_shell::session::resolve_local_session_any_cwd(&session_id)
+    if let Some(original_cwd) = wimoai_wimo_shell::session::resolve_local_session_any_cwd(&session_id)
     {
         return dispatch_load_session(
             app,
@@ -1022,10 +1022,10 @@ pub(in crate::app::dispatch) fn dispatch_pick_content_session(
         return dispatch_load_session(app, session_id, None, true);
     }
     let local_cwd = app.cwd.to_string_lossy().to_string();
-    if wimo ai_wimo_shell::session::resolve_local_session(&session_id, &local_cwd).is_some() {
+    if wimoai_wimo_shell::session::resolve_local_session(&session_id, &local_cwd).is_some() {
         return dispatch_load_session(app, session_id, None, false);
     }
-    if let Some(original_cwd) = wimo ai_wimo_shell::session::resolve_local_session_any_cwd(&session_id)
+    if let Some(original_cwd) = wimoai_wimo_shell::session::resolve_local_session_any_cwd(&session_id)
     {
         return dispatch_load_session(
             app,
@@ -1192,7 +1192,7 @@ pub(in crate::app::dispatch) fn handle_session_loaded(
     new_models: Option<acp::SessionModelState>,
     code_restored: bool,
     restore_summary: Option<String>,
-    restore_degree: Option<wimo ai_wimo_workspace::session::git::RestoreDegree>,
+    restore_degree: Option<wimoai_wimo_workspace::session::git::RestoreDegree>,
     running_prompt_id: Option<String>,
     scheduler_background_loops: Option<bool>,
 ) -> Vec<Effect> {
@@ -1524,7 +1524,7 @@ pub(in crate::app::dispatch) fn handle_session_restore_failed(
 pub(in crate::app::dispatch) fn handle_deep_search_results(
     app: &mut AppView,
     request: PickerRequest,
-    results: Vec<wimo ai_wimo_shell::extensions::session_search::SearchSessionHit>,
+    results: Vec<wimoai_wimo_shell::extensions::session_search::SearchSessionHit>,
 ) -> Vec<Effect> {
     let Some(target) = accept_picker_result(
         app,

@@ -188,9 +188,9 @@ where
         ))),
     }
 }
-/// Lenient boolean deserializers (shared via `wimo ai-tool-types`), re-exported so
+/// Lenient boolean deserializers (shared via `wimoai-tool-types`), re-exported so
 /// fields reference them under the same `crate::types::schema::` path as above.
-pub use wimo ai_tool_types::{deserialize_lenient_bool, deserialize_lenient_option_bool};
+pub use wimoai_tool_types::{deserialize_lenient_bool, deserialize_lenient_option_bool};
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -250,28 +250,28 @@ impl crate::types::tool_metadata::ToolMetadata for HashlineEditTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for HashlineEditTool {
+impl wimoai_tool_runtime::Tool for HashlineEditTool {
     type Args = HashlineEditInput;
     type Output = crate::types::output::SearchReplaceOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("hashline_edit").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("hashline_edit").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "hashline_edit",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -283,9 +283,9 @@ impl wimo ai_tool_runtime::Tool for HashlineEditTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: HashlineEditInput,
-    ) -> Result<crate::types::output::SearchReplaceOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<crate::types::output::SearchReplaceOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -297,7 +297,7 @@ impl wimo ai_tool_runtime::Tool for HashlineEditTool {
 
         let (cwd, display_cwd, fs, scheme, hints_enabled) = {
             let res = resources.lock().await;
-            let cwd = match ctx.extensions.get::<wimo ai_tool_runtime::Cwd>() {
+            let cwd = match ctx.extensions.get::<wimoai_tool_runtime::Cwd>() {
                 Some(dir) => dir.0.clone(),
                 None => res.require::<Cwd>()?.0.clone(),
             };
@@ -310,7 +310,7 @@ impl wimo ai_tool_runtime::Tool for HashlineEditTool {
             let scheme = params
                 .0
                 .build_scheme()
-                .map_err(wimo ai_tool_runtime::ToolError::invalid_arguments)?;
+                .map_err(wimoai_tool_runtime::ToolError::invalid_arguments)?;
             let hints_enabled = res.get::<PathNotFoundHints>().is_some_and(|h| h.0);
             (cwd, display_cwd, fs, scheme, hints_enabled)
         };
@@ -516,7 +516,7 @@ mod tests {
             }],
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -554,7 +554,7 @@ mod tests {
             ],
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -593,7 +593,7 @@ mod tests {
             }],
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -635,7 +635,7 @@ mod tests {
         };
 
         let result: crate::types::output::SearchReplaceOutput =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
                 .await
                 .unwrap();
 

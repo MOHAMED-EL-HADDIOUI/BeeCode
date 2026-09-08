@@ -1,7 +1,7 @@
 {
-    "name": "@wimo ai-official/wimo-linux-arm64",
+    "name": "@wimoai-official/wimo-linux-arm64",
     "version": "0.2.0-dev",
-    "description": "linux-arm64 binary for @wimo ai-official/wimo. Do not install directly; install @wimo ai-official/wimo instead.",
+    "description": "linux-arm64 binary for @wimoai-official/wimo. Do not install directly; install @wimoai-official/wimo instead.",
     "license": "Apache-2.0",
     "files": [
         "bin/",

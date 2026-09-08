@@ -1587,7 +1587,7 @@
 ## Bug Fixes
 
 - **Local MCP servers** now auto-recover after disconnects or session expiry.
-- **OIDC sessions** with wimo ai_API_KEY present no longer lose refresh on idle.
+- **OIDC sessions** with wimoai_API_KEY present no longer lose refresh on idle.
 - **Inline video previews** now show an install command only when the package manager is on PATH.
 - **list_dir** now reliably shows all immediate child directories even inside large monorepos.
 - **Clicking a model** in the dashboard /model dropdown no longer opens the wrong session.

@@ -13,9 +13,9 @@ arch name — `linux-x86_64`, `linux-aarch64`, `macos-aarch64`.
 Run the full bench suite on a quiet machine:
 
 ```bash
-cargo run -p wimo ai-wimo-pager --release --bin pty-bench -- \
+cargo run -p wimoai-wimo-pager --release --bin pty-bench -- \
   --all \
-  --write-baseline crates/codegen/wimo ai-wimo-pager-pty-harness/benches/pty_baselines/<platform>.json
+  --write-baseline crates/codegen/wimoai-wimo-pager-pty-harness/benches/pty_baselines/<platform>.json
 ```
 
 ## Overwriting after an intentional perf change

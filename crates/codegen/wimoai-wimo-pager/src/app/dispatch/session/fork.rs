@@ -83,8 +83,8 @@ pub(in crate::app::dispatch) fn apply_persist_worktree_mode(
 }
 /// Build the two persistence options shared by the fork and new-session worktree question modals ("Always worktree" / "Never worktree").
 pub(super) fn worktree_persist_options()
--> [wimo ai_wimo_tools::implementations::wimo::ask_user_question::QuestionOption; 2] {
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::QuestionOption;
+-> [wimoai_wimo_tools::implementations::wimo::ask_user_question::QuestionOption; 2] {
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::QuestionOption;
     [
         QuestionOption {
             label: "Always worktree".into(),
@@ -104,7 +104,7 @@ pub(super) fn worktree_persist_options()
 /// Refuses with a toast if a question (ACP or local) is already on screen, so two questions never collide.
 fn open_fork_question(app: &mut AppView, directive: Option<String>) -> Vec<Effect> {
     use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
     let ActiveView::Agent(id) = app.active_view else {
@@ -380,7 +380,7 @@ pub(in crate::app::dispatch) fn handle_worktree_forked(
     session_cwd: std::path::PathBuf,
     code_restored: bool,
     restore_summary: Option<String>,
-    restore_degree: Option<wimo ai_wimo_workspace::session::git::RestoreDegree>,
+    restore_degree: Option<wimoai_wimo_workspace::session::git::RestoreDegree>,
     resume_session_id: Option<String>,
 ) -> Vec<Effect> {
     let session_id_str = session_id.0.to_string();

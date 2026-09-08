@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 /// wimo state directory (`$wimo_HOME` or `~/.wimo`).
 pub(crate) fn wimo_home() -> PathBuf {
-    wimo ai_wimo_config::wimo_home()
+    wimoai_wimo_config::wimo_home()
 }
 
 /// On-disk JSONL audit log under the sessions directory.

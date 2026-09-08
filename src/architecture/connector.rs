@@ -1,5 +1,5 @@
 //! Main architecture connector — connects all framework modules (l.txt Sections 43-49)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub mod indexer;
 pub mod agent;

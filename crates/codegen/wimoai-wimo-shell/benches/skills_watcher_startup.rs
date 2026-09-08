@@ -8,9 +8,9 @@
 //! Medians land under `target/criterion/skills_watcher_startup/`.
 //!
 //! ```text
-//! cargo bench -p wimo ai-wimo-shell --bench skills_watcher_startup
+//! cargo bench -p wimoai-wimo-shell --bench skills_watcher_startup
 //! # optional scale:
-//! wimo_SKILLS_WATCHER_BENCH_DIRS=12000 cargo bench -p wimo ai-wimo-shell --bench skills_watcher_startup
+//! wimo_SKILLS_WATCHER_BENCH_DIRS=12000 cargo bench -p wimoai-wimo-shell --bench skills_watcher_startup
 //! ```
 //!
 //! On macOS, recursive FSEvents is cheap so both arms may be close.
@@ -24,7 +24,7 @@ use criterion::{BatchSize, BenchmarkId, Criterion, Throughput, criterion_group, 
 use notify::RecursiveMode;
 use notify_debouncer_mini::new_debouncer;
 use tempfile::TempDir;
-use wimo ai_wimo_shell::config::watcher::SkillsFileWatcher;
+use wimoai_wimo_shell::config::watcher::SkillsFileWatcher;
 
 /// Default directory count under `.claude/worktrees/` (override with `wimo_SKILLS_WATCHER_BENCH_DIRS`).
 const DEFAULT_WORKTREE_DIRS: usize = 6_000;

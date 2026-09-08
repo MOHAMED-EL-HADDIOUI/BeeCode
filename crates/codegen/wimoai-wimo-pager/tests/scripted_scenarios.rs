@@ -1,11 +1,11 @@
 //! Declarative end-to-end TUI scenario tests.
 //!
-//! These tests exercise the real `wimo ai-wimo-pager` binary through a PTY using YAML scenarios under `tests/scenarios/`.
+//! These tests exercise the real `wimoai-wimo-pager` binary through a PTY using YAML scenarios under `tests/scenarios/`.
 //! They are ignored by default because they build and spawn the pager and stream through a mock inference server.
 
 use std::path::PathBuf;
 
-use wimo ai_wimo_pager_pty_harness::{
+use wimoai_wimo_pager_pty_harness::{
     ScriptedRunConfig, ScriptedRunStatus, ScriptedScenario, ScriptedScenarioRunner, pager_binary,
 };
 

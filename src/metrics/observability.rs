@@ -1,5 +1,5 @@
 //! Metrics / Observability — REAL tracking (Section 29 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub struct Metrics {
     pub startup_time_ms: u64,

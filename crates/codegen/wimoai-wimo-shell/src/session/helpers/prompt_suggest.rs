@@ -3,7 +3,7 @@
 use crate::config::PromptSuggestModelPin;
 use crate::sampling::ConversationItem;
 use crate::session::helpers::chat::floor_char_boundary;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
+use wimoai_wimo_sampling_types::ReasoningEffort;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct SuggestReasoning {

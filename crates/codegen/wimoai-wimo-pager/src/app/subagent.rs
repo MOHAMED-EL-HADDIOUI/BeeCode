@@ -20,7 +20,7 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use serde::Deserialize;
-use wimo ai_wimo_shell::session::storage::{
+use wimoai_wimo_shell::session::storage::{
     ReplayEmission, ReplayLookupFallback, ReplayPathHint, ReplayedUpdate, replay_would_emit,
     stream_replay_updates_at_hinted,
 };
@@ -219,7 +219,7 @@ struct SubagentMetaSlice {
 /// wimo home for the replay path (overridable in tests).
 #[cfg(not(test))]
 fn effective_wimo_home() -> std::path::PathBuf {
-    wimo ai_wimo_shell::util::wimo_home::wimo_home()
+    wimoai_wimo_shell::util::wimo_home::wimo_home()
 }
 
 #[cfg(test)]
@@ -239,7 +239,7 @@ fn effective_wimo_home() -> std::path::PathBuf {
     if let Some(home) = REPLAY_wimo_HOME.with(|h| h.borrow().clone()) {
         return home;
     }
-    wimo ai_wimo_shell::util::wimo_home::wimo_home()
+    wimoai_wimo_shell::util::wimo_home::wimo_home()
 }
 
 /// Best-effort enrichment from the shell's on-disk `meta.json`.
@@ -318,7 +318,7 @@ fn replay_inherited_updates(
                     .session
                     .handle_update(update, &meta, &mut child_view.scrollback);
             }
-            ReplayedUpdate::wimo ai(update) => {
+            ReplayedUpdate::wimoai(update) => {
                 crate::app::acp_handler::apply_child_view_session_event(child_view, &update, false);
             }
         }

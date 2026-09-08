@@ -4,7 +4,7 @@
 use super::*;
 use futures_util::stream;
 use std::pin::pin;
-use wimo ai_wimo_sampling_types::messages::{
+use wimoai_wimo_sampling_types::messages::{
     ContentBlock, MessageDeltaBody, MessageDeltaUsage, MessagesResponse, MessagesUsage,
     StreamDelta, StreamError,
 };
@@ -273,7 +273,7 @@ async fn tool_use_block_assembles_into_tool_call() {
             name: "do_thing".into(),
             input: serde_json::json!({}),
             // Set: a parser matching only the absent case must fail here.
-            cache_control: Some(wimo ai_wimo_sampling_types::messages::CacheControl::ephemeral()),
+            cache_control: Some(wimoai_wimo_sampling_types::messages::CacheControl::ephemeral()),
         },
     };
     let arg_delta_1 = MessageStreamEvent::ContentBlockDelta {

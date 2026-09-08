@@ -6,7 +6,7 @@ mod permission;
 pub(crate) use active_agent_message::*;
 pub(crate) use permission::*;
 
-use wimo ai_wimo_telemetry::events::SessionHarness;
+use wimoai_wimo_telemetry::events::SessionHarness;
 
 /// `duration_ms`, `tool_count`, and `error_type` are status-specific; pass `None` when not applicable.
 pub(crate) fn emit_mcp_connection_span(
@@ -78,7 +78,7 @@ pub(crate) fn is_same_skill_file(
     }
 }
 
-pub(crate) fn format_hook_name(spec: &wimo ai_wimo_hooks::config::HookSpec) -> String {
+pub(crate) fn format_hook_name(spec: &wimoai_wimo_hooks::config::HookSpec) -> String {
     let scope = spec.name.split(':').next().unwrap_or("unknown");
     match spec.configured_matcher.as_deref() {
         Some(m) if !m.is_empty() => format!("{scope}:{}:{}", spec.event, m.to_lowercase()),
@@ -87,9 +87,9 @@ pub(crate) fn format_hook_name(spec: &wimo ai_wimo_hooks::config::HookSpec) -> S
 }
 
 /// Provenance for telemetry, mapped from the shared [`hook_origin`] classifier so this and `/hooks` inspect can't diverge.
-fn format_hook_source(spec: &wimo ai_wimo_hooks::config::HookSpec) -> &'static str {
-    use wimo ai_wimo_hooks::config::HookOrigin as O;
-    match wimo ai_wimo_hooks::config::hook_origin(spec) {
+fn format_hook_source(spec: &wimoai_wimo_hooks::config::HookSpec) -> &'static str {
+    use wimoai_wimo_hooks::config::HookOrigin as O;
+    match wimoai_wimo_hooks::config::hook_origin(spec) {
         O::SystemManaged | O::Managed => "managedConfig",
         O::Requirements => "requirementsConfig",
         O::UserConfig => "userConfig",
@@ -110,7 +110,7 @@ pub(crate) struct HookRegInfo {
 }
 
 impl HookRegInfo {
-    pub(crate) fn from_spec(spec: &wimo ai_wimo_hooks::config::HookSpec) -> Self {
+    pub(crate) fn from_spec(spec: &wimoai_wimo_hooks::config::HookSpec) -> Self {
         Self {
             name: format_hook_name(spec),
             event: spec.event.to_string(),
@@ -126,18 +126,18 @@ pub(crate) struct SessionHarnessMetrics {
     pub client_identifier: Option<String>,
     pub model_id: String,
     pub agent_name: String,
-    pub permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode,
+    pub permission_mode: wimoai_wimo_telemetry::enums::PermissionMode,
     pub mcp_server_names: Vec<String>,
     pub lsp_server_names: Vec<String>,
     pub memory_enabled: bool,
-    pub memory_retrieval_mode: wimo ai_wimo_telemetry::events::MemoryRetrievalMode,
+    pub memory_retrieval_mode: wimoai_wimo_telemetry::events::MemoryRetrievalMode,
     pub auto_update: Option<bool>,
     pub cwd: String,
     /// Filled from the built agent's bridge so `into_event` doesn't re-walk the disk.
     pub skill_names: Vec<String>,
     /// Resolved vendor-compat config, so recorded AGENTS.md names match what the session actually discovers.
-    pub compat: wimo ai_wimo_tools::types::compat::CompatConfig,
-    pub plugin_registry: Option<std::sync::Arc<wimo ai_wimo_agent::plugins::PluginRegistry>>,
+    pub compat: wimoai_wimo_tools::types::compat::CompatConfig,
+    pub plugin_registry: Option<std::sync::Arc<wimoai_wimo_agent::plugins::PluginRegistry>>,
     pub plugin_names: Vec<String>,
 }
 
@@ -174,7 +174,7 @@ impl SessionHarnessMetrics {
         }
         let hook_names: Vec<String> = hooks.into_iter().map(|h| h.name).collect();
 
-        let agents_md_dir_names = wimo ai_wimo_agent::prompt::agents_md::read_agents_config_with_paths(
+        let agents_md_dir_names = wimoai_wimo_agent::prompt::agents_md::read_agents_config_with_paths(
             &self.cwd,
             self.compat,
         )
@@ -202,7 +202,7 @@ impl SessionHarnessMetrics {
             memory_enabled: self.memory_enabled,
             memory_retrieval_mode: self.memory_retrieval_mode,
             // Same signal `SessionNew` carries; recomputed here because this event is built off-thread, after spawn (cheap: repo discovery)
-            is_git_repo: wimo ai_wimo_telemetry::context::collect_git_context(&self.cwd).is_git_repo,
+            is_git_repo: wimoai_wimo_telemetry::context::collect_git_context(&self.cwd).is_git_repo,
             auto_update: self.auto_update,
         }
     }

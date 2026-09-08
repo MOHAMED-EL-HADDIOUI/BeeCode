@@ -3,7 +3,7 @@
 
 use tokio::sync::oneshot;
 
-use wimo ai_wimo_sampling_types::ConversationRequest;
+use wimoai_wimo_sampling_types::ConversationRequest;
 
 use crate::config::SamplerConfig;
 use crate::handle::CollectedSamplingResult;

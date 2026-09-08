@@ -8,8 +8,8 @@ fn prefetched_agent_id_resolves_and_persists() {
         std::env::remove_var("wimo_AGENT_ID");
         std::env::set_var("wimo_HOME", home.path());
     }
-    wimo ai_wimo_telemetry::id::prefetch_agent_id();
-    let id = wimo ai_wimo_telemetry::id::agent_id();
+    wimoai_wimo_telemetry::id::prefetch_agent_id();
+    let id = wimoai_wimo_telemetry::id::agent_id();
     assert_eq!(
         std::fs::read_to_string(home.path().join("agent_id"))
             .expect("agent_id cache")

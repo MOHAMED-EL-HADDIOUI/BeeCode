@@ -132,9 +132,9 @@ impl TestSandbox {
             .map_or_else(|| OsString::from("git"), OsString::to_owned);
         let mut cmd = Command::new(git);
         self.apply_to_std_command(&mut cmd);
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
-        cmd.stdin(Stdio::null()).envs(wimo ai_tty_utils::pager_env());
-        for &(key, value) in &wimo ai_tty_utils::GIT_AUTH_SUPPRESSION_ENVS {
+        wimoai_tty_utils::detach_std_command(&mut cmd);
+        cmd.stdin(Stdio::null()).envs(wimoai_tty_utils::pager_env());
+        for &(key, value) in &wimoai_tty_utils::GIT_AUTH_SUPPRESSION_ENVS {
             cmd.env(key, value);
         }
         cmd.arg("--no-optional-locks");
@@ -278,7 +278,7 @@ fn run_git(sandbox: &TestSandbox, args: &[&str]) {
 fn apply_mock_url(env: &mut BTreeMap<OsString, OsString>, url: String) {
     for key in [
         "wimo_CLI_CHAT_PROXY_BASE_URL",
-        "wimo_wimo ai_API_BASE_URL",
+        "wimo_wimoai_API_BASE_URL",
         "wimo_MODELS_BASE_URL",
         "wimo_FEEDBACK_BASE_URL",
         "wimo_TRACE_UPLOAD_URL",
@@ -288,7 +288,7 @@ fn apply_mock_url(env: &mut BTreeMap<OsString, OsString>, url: String) {
     ] {
         env.insert(key.into(), url.clone().into());
     }
-    env.insert("wimo ai_API_KEY".into(), TEST_API_KEY.into());
+    env.insert("wimoai_API_KEY".into(), TEST_API_KEY.into());
 }
 
 fn baseline_env(
@@ -701,7 +701,7 @@ mod tests {
             Some(sandbox.temp_dir().into())
         );
         assert_eq!(
-            env_value(&sandbox, "wimo ai_API_KEY").as_deref(),
+            env_value(&sandbox, "wimoai_API_KEY").as_deref(),
             Some(OsStr::new(TEST_API_KEY))
         );
         assert_eq!(

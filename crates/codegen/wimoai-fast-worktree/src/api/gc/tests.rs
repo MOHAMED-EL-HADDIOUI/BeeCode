@@ -395,8 +395,8 @@ fn effective_max_age_precedence() {
 
 #[test]
 fn run_pass_prunes_orphan_grove_pins_after_grace() {
-    wimo ai_test_utils::require_git!();
-    use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+    wimoai_test_utils::require_git!();
+    use wimoai_test_utils::git::{git_commit_all, init_git_repo};
 
     let mut fx = crate::db::wimoHomeFixture::new();
     let grove = fx.isolate_xdg_grove_data();
@@ -407,7 +407,7 @@ fn run_pass_prunes_orphan_grove_pins_after_grace() {
     git_commit_all(&repo, "c");
     let oid = {
         let mut cmd = std::process::Command::new("git");
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         let out = cmd
             .current_dir(&repo)
             .args(["rev-parse", "HEAD"])
@@ -417,7 +417,7 @@ fn run_pass_prunes_orphan_grove_pins_after_grace() {
     };
     let pin = "refs/wimo/worktrees/wt-orphan";
     let mut uref = std::process::Command::new("git");
-    wimo ai_tty_utils::detach_std_command(&mut uref);
+    wimoai_tty_utils::detach_std_command(&mut uref);
     assert!(
         uref.current_dir(&repo)
             .args(["update-ref", pin, &oid])
@@ -468,7 +468,7 @@ fn run_pass_prunes_orphan_grove_pins_after_grace() {
     );
     assert_eq!(report.pin_gc_pruned, 1, "{report:?}");
     let mut show = std::process::Command::new("git");
-    wimo ai_tty_utils::detach_std_command(&mut show);
+    wimoai_tty_utils::detach_std_command(&mut show);
     let shown = show
         .current_dir(&repo)
         .args(["show-ref", "--verify", pin])

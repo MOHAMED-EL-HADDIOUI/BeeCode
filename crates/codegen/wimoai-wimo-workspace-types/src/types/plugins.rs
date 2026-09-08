@@ -2,7 +2,7 @@
 //! They appear in `OpsChunk::Plugins`, `OpsChunk::Plugin`, `WorkspaceEvent::PluginsChanged`, and `WorkspaceEvent::HooksChanged`.
 //!
 //! TODO(workspace): align with the canonical types in
-//! `wimo ai-hooks-plugins-types` and `wimo ai-wimo-plugin-marketplace`.
+//! `wimoai-hooks-plugins-types` and `wimoai-wimo-plugin-marketplace`.
 
 use serde::{Deserialize, Serialize};
 
@@ -37,7 +37,7 @@ pub struct HookInfo {
     /// Hook event the script attaches to (e.g. `"PreToolUse"`).
     ///
     /// TODO(workspace): the event field will become a typed enum once
-    /// aligned with `wimo ai_hooks_plugins_types::HookEvent` -- right
+    /// aligned with `wimoai_hooks_plugins_types::HookEvent` -- right
     /// now it's a free-form string for placeholder convenience, which
     /// allows typos through.
     #[serde(default)]

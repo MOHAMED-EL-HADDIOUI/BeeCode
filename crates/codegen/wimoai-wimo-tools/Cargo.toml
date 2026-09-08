@@ -1,29 +1,29 @@
 [package]
 license = "Apache-2.0"
 edition.workspace = true
-name = "wimo ai-wimo-tools"
+name = "wimoai-wimo-tools"
 version = "0.1.220-alpha.4"
 description = "wimo tools library"
 
 [dependencies]
 anyhow = { workspace = true }
 arc-swap = { workspace = true }
-wimo ai-dirs = { workspace = true }
+wimoai-dirs = { workspace = true }
 derive_more = { workspace = true, features = ["from", "try_into"] }
 dunce = { workspace = true }
 encoding_rs = { workspace = true, optional = true }
 fs2 = { workspace = true }
 educe = { workspace = true, features = ["Debug"] }
 async-openai = { workspace = true }
-wimo ai-tty-utils = { workspace = true }
-wimo ai-wimo-auth = { workspace = true }
-wimo ai-wimo-config = { path = "../wimo ai-wimo-config" }
-wimo ai-wimo-extra-ca = { workspace = true }
-wimo ai-wimo-tools-api = { path = "../wimo ai-wimo-tools-api" }
-wimo ai-wimo-workspace-types = { path = "../wimo ai-wimo-workspace-types" }
-wimo ai-wimo-version = { workspace = true }
-wimo ai-interjection-core = { workspace = true }
-wimo ai-token-estimation = { workspace = true }
+wimoai-tty-utils = { workspace = true }
+wimoai-wimo-auth = { workspace = true }
+wimoai-wimo-config = { path = "../wimoai-wimo-config" }
+wimoai-wimo-extra-ca = { workspace = true }
+wimoai-wimo-tools-api = { path = "../wimoai-wimo-tools-api" }
+wimoai-wimo-workspace-types = { path = "../wimoai-wimo-workspace-types" }
+wimoai-wimo-version = { workspace = true }
+wimoai-interjection-core = { workspace = true }
+wimoai-token-estimation = { workspace = true }
 async-lsp = { workspace = true }
 async-stream = { workspace = true }
 async-trait = { workspace = true }
@@ -53,11 +53,11 @@ schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_path_to_error = { workspace = true }
-wimo ai-tool-runtime = { workspace = true }
-wimo ai-tool-types = { workspace = true }
-wimo ai-tool-protocol = { workspace = true }
-wimo ai-computer-hub-core = { workspace = true }
-wimo ai-computer-hub-sdk = { workspace = true }
+wimoai-tool-runtime = { workspace = true }
+wimoai-tool-types = { workspace = true }
+wimoai-tool-protocol = { workspace = true }
+wimoai-computer-hub-core = { workspace = true }
+wimoai-computer-hub-sdk = { workspace = true }
 
 futures = { workspace = true }
 similar = { workspace = true }
@@ -80,7 +80,7 @@ unicode-normalization = { workspace = true, optional = true }
 url = { workspace = true }
 uuid = { workspace = true, features = ["v7"] }
 wildmatch = { workspace = true }
-wimo ai-wimo-env = { workspace = true }
+wimoai-wimo-env = { workspace = true }
 serde_yaml = { workspace = true }
 shellexpand = "3.1"
 tempfile = { workspace = true }
@@ -88,8 +88,8 @@ which = { workspace = true }
 
 chrono = { workspace = true }
 futures-util = { workspace = true }
-wimo ai-wimo-sandbox = { path = "../wimo ai-wimo-sandbox", default-features = false }
-wimo ai-file-utils = { path = "../wimo ai-file-utils" }
+wimoai-wimo-sandbox = { path = "../wimoai-wimo-sandbox", default-features = false }
+wimoai-file-utils = { path = "../wimoai-file-utils" }
 dhat = { workspace = true, optional = true }
 zstd = { workspace = true }
 
@@ -111,8 +111,8 @@ pretty_assertions = { workspace = true }
 tokio = { workspace = true, features = ["test-util"] }
 tracing-subscriber = { workspace = true, features = ["fmt"] }
 wiremock = { workspace = true }
-wimo ai-wimo-test-support = { workspace = true }
-wimo ai-test-utils = { workspace = true }
+wimoai-wimo-test-support = { workspace = true }
+wimoai-test-utils = { workspace = true }
 
 [build-dependencies]
 reqwest = { workspace = true, features = ["blocking", "rustls-tls"] }

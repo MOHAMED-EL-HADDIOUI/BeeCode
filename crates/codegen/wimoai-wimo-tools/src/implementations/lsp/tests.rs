@@ -686,7 +686,7 @@ async fn e2e_multi_server_routing() {
 }
 
 /// Requires `npx typescript-language-server` on PATH. Run with:
-/// `cargo test -p wimo ai-wimo-shell e2e_real_typescript_language_server -- --ignored`
+/// `cargo test -p wimoai-wimo-shell e2e_real_typescript_language_server -- --ignored`
 #[ignore]
 #[tokio::test(flavor = "current_thread")]
 async fn e2e_real_typescript_language_server() {
@@ -2152,7 +2152,7 @@ async fn drop_reaps_server_child_without_shutdown() {
 ///
 /// ```text
 /// ROSLYN_DLL=/path/to/Microsoft.CodeAnalysis.LanguageServer.dll \
-///   cargo test -p wimo ai-wimo-tools e2e_real_roslyn_survives_editing -- --ignored --nocapture
+///   cargo test -p wimoai-wimo-tools e2e_real_roslyn_survives_editing -- --ignored --nocapture
 /// ```
 #[ignore]
 #[tokio::test(flavor = "multi_thread")]

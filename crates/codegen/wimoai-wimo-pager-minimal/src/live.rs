@@ -10,15 +10,15 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Clear, Widget};
-use wimo ai_wimo_pager::app::PagerTerminal;
-use wimo ai_wimo_pager::app::app_view::{ActiveView, AppView};
-use wimo ai_wimo_pager::minimal_api;
-use wimo ai_wimo_pager::render::Renderable;
-use wimo ai_wimo_pager::scrollback::state::ScrollbackState;
-use wimo ai_wimo_pager::scrollback::wrappers::EntryRenderer;
-use wimo ai_wimo_pager::theme::Theme;
-use wimo ai_wimo_pager::views::prompt_widget::{PromptBg, PromptStyle};
-use wimo ai_wimo_pager::views::turn_status;
+use wimoai_wimo_pager::app::PagerTerminal;
+use wimoai_wimo_pager::app::app_view::{ActiveView, AppView};
+use wimoai_wimo_pager::minimal_api;
+use wimoai_wimo_pager::render::Renderable;
+use wimoai_wimo_pager::scrollback::state::ScrollbackState;
+use wimoai_wimo_pager::scrollback::wrappers::EntryRenderer;
+use wimoai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::views::prompt_widget::{PromptBg, PromptStyle};
+use wimoai_wimo_pager::views::turn_status;
 /// Left inset (columns) for every auxiliary live-region row and the prompt's `chrome_pad_left`.
 /// The auxiliary rows are the status row, the info bar, the exit hint, and the todo panel.
 ///
@@ -26,7 +26,7 @@ use wimo ai_wimo_pager::views::turn_status;
 /// Committed and tail blocks zero their block pads via [`super::commit::committed_appearance`] and reclaim the accent column via `hide_accent`.
 /// Content glyphs (`◆` / `$` / message text) thus start at column 0, matching the welcome card's outer edge.
 /// The prompt and auxiliary rows share that left edge (no chrome pad) so nothing sits ragged against the welcome box.
-pub(super) fn live_left_inset(_appearance: &wimo ai_wimo_pager::appearance::AppearanceConfig) -> u16 {
+pub(super) fn live_left_inset(_appearance: &wimoai_wimo_pager::appearance::AppearanceConfig) -> u16 {
     0
 }
 /// Shrink `area` from the left by `inset` columns (clamped to the width).
@@ -39,9 +39,9 @@ fn inset_left(area: Rect, inset: u16) -> Rect {
     }
 }
 /// Drop cached `/btw` geometry so minimal input cannot scroll an invisible panel after a modal host path skipped painting it.
-fn clear_btw_geometry(agent: &mut wimo ai_wimo_pager::app::agent_view::AgentView) {
+fn clear_btw_geometry(agent: &mut wimoai_wimo_pager::app::agent_view::AgentView) {
     agent.last_btw_selection_model =
-        wimo ai_wimo_pager::scrollback::text_selection::ResolvedSelectionModel::default();
+        wimoai_wimo_pager::scrollback::text_selection::ResolvedSelectionModel::default();
     agent.last_btw_area = Rect::default();
 }
 /// Keep a paintable `/btw` area only when it is wholly inside the frame buffer.
@@ -60,8 +60,8 @@ fn paintable_btw_area(frame_area: Rect, area: Rect) -> Option<Rect> {
 /// `input_mode` wires special composer modes (bash `! `, feedback `~ `, remember `# `) the same way the full TUI does.
 /// Without it, `!` on an empty prompt would flip mode invisibly (key consumed, default `❯` remains).
 pub(super) fn prompt_style(
-    appearance: &wimo ai_wimo_pager::appearance::AppearanceConfig,
-    input_mode: wimo ai_wimo_pager::app::agent_view::PromptInputMode,
+    appearance: &wimoai_wimo_pager::appearance::AppearanceConfig,
+    input_mode: wimoai_wimo_pager::app::agent_view::PromptInputMode,
     theme: &Theme,
     multiline: bool,
 ) -> PromptStyle {
@@ -129,7 +129,7 @@ pub fn draw_live(app: &mut AppView, terminal: &mut PagerTerminal) {
     {
         clear_btw_geometry(agent);
     }
-    wimo ai_wimo_pager::render::draw::draw_frame(terminal, cursor, |frame, _link_spans| {
+    wimoai_wimo_pager::render::draw::draw_frame(terminal, cursor, |frame, _link_spans| {
         let area = frame.area();
         if area.height == 0 || area.width < 4 {
             return (None, None);
@@ -140,7 +140,7 @@ pub fn draw_live(app: &mut AppView, terminal: &mut PagerTerminal) {
             crate::auth::render_auth(frame.buffer_mut(), area, &theme, &auth_hint);
             return (None, None);
         };
-        agent.active_pane = wimo ai_wimo_pager::app::agent_view::AgentPane::Prompt;
+        agent.active_pane = wimoai_wimo_pager::app::agent_view::AgentPane::Prompt;
         let status_activity = minimal_advance_phase_timer(agent);
         let show_todos = crate::todo::todo_panel_visible(agent, force_todos);
         let queued = agent.session.pending_prompts.len() + agent.shared_queue.len();
@@ -155,7 +155,7 @@ pub fn draw_live(app: &mut AppView, terminal: &mut PagerTerminal) {
         if minimal_api::extensions_modal(agent).is_some() {
             let tick = (now_millis() / 100) as u64;
             if let Some(state) = minimal_api::extensions_modal_mut(agent) {
-                wimo ai_wimo_pager::views::extensions_modal::render_extensions_modal(
+                wimoai_wimo_pager::views::extensions_modal::render_extensions_modal(
                     frame.buffer_mut(),
                     area,
                     state,
@@ -261,7 +261,7 @@ pub fn draw_live(app: &mut AppView, terminal: &mut PagerTerminal) {
             .max(1);
         let rest = avail.saturating_sub(prompt_h);
         let raw_btw = if minimal_api::minimal_btw_surface_available(agent) {
-            wimo ai_wimo_pager::views::btw_overlay::btw_panel_height(
+            wimoai_wimo_pager::views::btw_overlay::btw_panel_height(
                 agent.btw_state.as_ref(),
                 area.width,
             )
@@ -330,7 +330,7 @@ pub fn draw_live(app: &mut AppView, terminal: &mut PagerTerminal) {
         );
         if let (Some(btw), Some(btw_area)) = (agent.btw_state.as_ref(), btw_area) {
             let focused = minimal_api::btw_focused(agent);
-            wimo ai_wimo_pager::views::btw_overlay::render_btw_panel(
+            wimoai_wimo_pager::views::btw_overlay::render_btw_panel(
                 frame.buffer_mut(),
                 btw,
                 btw_area,
@@ -425,14 +425,14 @@ pub fn draw_live(app: &mut AppView, terminal: &mut PagerTerminal) {
             result.cursor_pos,
             result
                 .post_flush_escapes
-                .map(wimo ai_wimo_pager::terminal::overlay::PostFlush::from),
+                .map(wimoai_wimo_pager::terminal::overlay::PostFlush::from),
         )
     });
 }
 fn live_tail_renderer<'a>(
-    entry: &'a wimo ai_wimo_pager::scrollback::entry::ScrollbackEntry,
+    entry: &'a wimoai_wimo_pager::scrollback::entry::ScrollbackEntry,
     theme: &'a Theme,
-    appearance: &wimo ai_wimo_pager::appearance::AppearanceConfig,
+    appearance: &wimoai_wimo_pager::appearance::AppearanceConfig,
     cwd: &'a std::path::Path,
     tick: u64,
 ) -> EntryRenderer<'a> {
@@ -450,7 +450,7 @@ fn draw_tail(
     sb: &ScrollbackState,
     turn_running: bool,
     theme: &Theme,
-    appearance: &wimo ai_wimo_pager::appearance::AppearanceConfig,
+    appearance: &wimoai_wimo_pager::appearance::AppearanceConfig,
     cwd: &std::path::Path,
     tick: u64,
 ) {
@@ -521,8 +521,8 @@ fn draw_tail(
 /// Minimal has a separate draw path, so it must drive the same logic or the phase timer would never reset.
 /// Returns the resolved activity for [`render_minimal_status`].
 fn minimal_advance_phase_timer(
-    agent: &mut wimo ai_wimo_pager::app::agent_view::AgentView,
-) -> Option<wimo ai_wimo_pager::acp::tracker::TurnActivity> {
+    agent: &mut wimoai_wimo_pager::app::agent_view::AgentView,
+) -> Option<wimoai_wimo_pager::acp::tracker::TurnActivity> {
     let activity = minimal_api::resolve_turn_activity(agent);
     if activity.as_ref() != minimal_api::last_activity(agent) {
         agent.activity_started_at = Some(std::time::Instant::now());
@@ -541,8 +541,8 @@ fn minimal_advance_phase_timer(
 fn render_minimal_status(
     buf: &mut Buffer,
     area: Rect,
-    agent: &wimo ai_wimo_pager::app::agent_view::AgentView,
-    activity: &Option<wimo ai_wimo_pager::acp::tracker::TurnActivity>,
+    agent: &wimoai_wimo_pager::app::agent_view::AgentView,
+    activity: &Option<wimoai_wimo_pager::acp::tracker::TurnActivity>,
     transcript_progress: Option<(usize, usize)>,
     theme: &Theme,
 ) {
@@ -608,8 +608,8 @@ fn render_minimal_status(
 fn render_config_status_line(
     buf: &mut Buffer,
     area: Rect,
-    agent: &mut wimo ai_wimo_pager::app::agent_view::AgentView,
-    frame: &wimo ai_wimo_pager::views::status_line::StatusLineFrame,
+    agent: &mut wimoai_wimo_pager::app::agent_view::AgentView,
+    frame: &wimoai_wimo_pager::views::status_line::StatusLineFrame,
     theme: &Theme,
 ) {
     if area.height == 0 || area.width == 0 {
@@ -619,13 +619,13 @@ fn render_config_status_line(
         return;
     };
     if let Some(width) = minimal_api::status_line_inner_width(area.width, padding) {
-        agent.last_status_line_size = Some(wimo ai_wimo_pager::views::status_line::RowSize {
+        agent.last_status_line_size = Some(wimoai_wimo_pager::views::status_line::RowSize {
             cols: width,
             lines: area.height,
         });
     }
     if let Some(display) = frame.display() {
-        let _ = wimo ai_wimo_pager::views::status_line::render_status_line(
+        let _ = wimoai_wimo_pager::views::status_line::render_status_line(
             buf, area, display, padding, theme,
         );
     }
@@ -634,8 +634,8 @@ fn render_config_status_line(
 fn render_idle_hint(buf: &mut Buffer, area: Rect, theme: &Theme) {
     let style = theme.dim().bg(Color::Reset);
     buf.set_style(area, style);
-    let auto = wimo ai_wimo_pager::app::minimal_auto_set_for_mouse_leak();
-    let switch_back = wimo ai_wimo_pager::app::minimal_show_switch_back_to_fullscreen();
+    let auto = wimoai_wimo_pager::app::minimal_auto_set_for_mouse_leak();
+    let switch_back = wimoai_wimo_pager::app::minimal_show_switch_back_to_fullscreen();
     let hint = match (auto, switch_back) {
         (true, true) => {
             "minimal · auto-set on JetBrains/Windows due to JetBrains mouse reporting issues \
@@ -663,12 +663,12 @@ fn render_idle_hint(buf: &mut Buffer, area: Rect, theme: &Theme) {
 fn render_prompt_info(
     buf: &mut Buffer,
     area: Rect,
-    agent: &wimo ai_wimo_pager::app::agent_view::AgentView,
+    agent: &wimoai_wimo_pager::app::agent_view::AgentView,
     queued: usize,
     transcript_hint: &str,
     theme: &Theme,
 ) {
-    use wimo ai_wimo_pager::views::context_bar::fmt_tokens;
+    use wimoai_wimo_pager::views::context_bar::fmt_tokens;
     let base = theme.primary().bg(Color::Reset);
     let sep = theme.dim().bg(Color::Reset);
     let mut segs: Vec<(String, Style)> = Vec::new();
@@ -705,7 +705,7 @@ fn render_prompt_info(
         if let (Some(used), Some(total)) = (used, total)
             && total > 0
         {
-            let pct = wimo ai_token_estimation::usage_percentage(used, total);
+            let pct = wimoai_token_estimation::usage_percentage(used, total);
             segs.push((
                 format!("{} / {} ({:.0}%)", fmt_tokens(used), fmt_tokens(total), pct),
                 base,
@@ -734,7 +734,7 @@ fn render_prompt_info(
 /// `None` when nothing is pending, the hint expired, or the pending action has no label (silent).
 /// Mirrors the full-TUI shortcuts-bar `PendingHint`, which minimal does not render.
 fn minimal_pending_hint(
-    pending: &Option<wimo ai_wimo_pager::app::app_view::PendingAction>,
+    pending: &Option<wimoai_wimo_pager::app::app_view::PendingAction>,
 ) -> Option<String> {
     let pending = pending.as_ref()?;
     if pending.expired() {
@@ -767,9 +767,9 @@ fn render_exit_hint(buf: &mut Buffer, area: Rect, theme: &Theme, hint: &str) {
 /// The commit can then reposition the correctly-sized viewport to sit directly after them.
 /// Sizing to the tall streaming tail left the viewport oversized at commit time, and the collapse stranded the prompt at the top of the screen.
 pub(super) fn tail_height(
-    agent: &wimo ai_wimo_pager::app::agent_view::AgentView,
+    agent: &wimoai_wimo_pager::app::agent_view::AgentView,
     width: u16,
-    appearance: &wimo ai_wimo_pager::appearance::AppearanceConfig,
+    appearance: &wimoai_wimo_pager::appearance::AppearanceConfig,
 ) -> u16 {
     let theme = Theme::current();
     let sb = &agent.scrollback;
@@ -794,7 +794,7 @@ fn now_millis() -> u128 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    fn agent() -> wimo ai_wimo_pager::app::agent_view::AgentView {
+    fn agent() -> wimoai_wimo_pager::app::agent_view::AgentView {
         minimal_api::test_agent_view(Some("s1"), std::path::PathBuf::from("/tmp"))
     }
     #[test]
@@ -815,7 +815,7 @@ mod tests {
     #[test]
     fn config_status_line_paints_and_records_the_script_size() {
         use std::sync::Arc;
-        use wimo ai_wimo_pager::views::status_line::{
+        use wimoai_wimo_pager::views::status_line::{
             RowSize, SanitizedText, StatusLineDisplay, StatusLineFrame,
         };
         let theme = Theme::current();
@@ -862,10 +862,10 @@ mod tests {
     }
     #[test]
     fn tail_height_uses_owning_session_cwd_for_tool_paths() {
-        use wimo ai_wimo_pager::app::agent::AgentState;
-        use wimo ai_wimo_pager::scrollback::RenderBlock;
-        use wimo ai_wimo_pager::scrollback::entry::ScrollbackEntry;
-        use wimo ai_wimo_pager::scrollback::types::DisplayMode;
+        use wimoai_wimo_pager::app::agent::AgentState;
+        use wimoai_wimo_pager::scrollback::RenderBlock;
+        use wimoai_wimo_pager::scrollback::entry::ScrollbackEntry;
+        use wimoai_wimo_pager::scrollback::types::DisplayMode;
         let cwd = std::path::PathBuf::from("/alternate/worktree");
         let mut agent = minimal_api::test_agent_view(Some("s1"), cwd.clone());
         agent.session.state = AgentState::TurnRunning;
@@ -876,7 +876,7 @@ mod tests {
         entry.set_display_mode(DisplayMode::Expanded);
         agent.scrollback.push(entry);
         let appearance = super::super::commit::committed_appearance(
-            &wimo ai_wimo_pager::appearance::AppearanceConfig::default(),
+            &wimoai_wimo_pager::appearance::AppearanceConfig::default(),
         );
         let theme = Theme::current();
         let entry = agent.scrollback.get(0).unwrap();
@@ -902,13 +902,13 @@ mod tests {
     /// The tail and the committed footprint are one builder with a different tick; this test catches anyone forking them again.
     #[test]
     fn the_animation_tick_never_changes_a_blocks_height() {
-        use wimo ai_wimo_pager::scrollback::RenderBlock;
-        use wimo ai_wimo_pager::scrollback::entry::ScrollbackEntry;
+        use wimoai_wimo_pager::scrollback::RenderBlock;
+        use wimoai_wimo_pager::scrollback::entry::ScrollbackEntry;
         minimal_api::set_show_thinking_blocks(true);
         let theme = Theme::current();
         let cwd = std::path::PathBuf::from("/tmp");
         let appearance = super::super::commit::committed_appearance(
-            &wimo ai_wimo_pager::appearance::AppearanceConfig::default(),
+            &wimoai_wimo_pager::appearance::AppearanceConfig::default(),
         );
         let long = "reasoning that wraps a good few times even at a hundred and \
                     twenty columns because it simply keeps going and going and going";
@@ -940,8 +940,8 @@ mod tests {
     }
     #[test]
     fn minimal_status_shows_rich_activity_and_idle_hint() {
-        use wimo ai_wimo_pager::acp::tracker::TurnActivity;
-        use wimo ai_wimo_pager::app::agent::AgentState;
+        use wimoai_wimo_pager::acp::tracker::TurnActivity;
+        use wimoai_wimo_pager::app::agent::AgentState;
         let theme = Theme::current();
         let area = Rect::new(0, 0, 60, 1);
         let read = |buf: &Buffer| -> String {
@@ -949,7 +949,7 @@ mod tests {
                 .filter_map(|x| buf.cell((x, 0)).map(|c| c.symbol().to_string()))
                 .collect()
         };
-        wimo ai_wimo_pager::app::set_minimal_show_switch_back_to_fullscreen_for_test(false);
+        wimoai_wimo_pager::app::set_minimal_show_switch_back_to_fullscreen_for_test(false);
         let a = agent();
         let mut buf = Buffer::empty(area);
         render_minimal_status(&mut buf, area, &a, &None, None, &theme);
@@ -959,7 +959,7 @@ mod tests {
             !idle.contains("/fullscreen"),
             "cold start must not show switch-back: {idle:?}"
         );
-        wimo ai_wimo_pager::app::set_minimal_show_switch_back_to_fullscreen_for_test(true);
+        wimoai_wimo_pager::app::set_minimal_show_switch_back_to_fullscreen_for_test(true);
         let mut buf = Buffer::empty(area);
         render_minimal_status(&mut buf, area, &a, &None, None, &theme);
         let switched = read(&buf);
@@ -967,7 +967,7 @@ mod tests {
             switched.contains("/fullscreen to go back"),
             "relaunch into minimal must show switch-back: {switched:?}"
         );
-        wimo ai_wimo_pager::app::set_minimal_show_switch_back_to_fullscreen_for_test(false);
+        wimoai_wimo_pager::app::set_minimal_show_switch_back_to_fullscreen_for_test(false);
         let mut a = agent();
         a.session.state = AgentState::TurnRunning;
         let mut buf = Buffer::empty(area);
@@ -999,7 +999,7 @@ mod tests {
     }
     #[test]
     fn minimal_status_shows_idle_watching_cue() {
-        use wimo ai_wimo_pager::app::agent::AgentState;
+        use wimoai_wimo_pager::app::agent::AgentState;
         let theme = Theme::current();
         let area = Rect::new(0, 0, 60, 1);
         let read = |buf: &Buffer| -> String {
@@ -1011,7 +1011,7 @@ mod tests {
         a.session.state = AgentState::Idle;
         a.session.scheduled_tasks.insert(
             "loop-1".to_string(),
-            wimo ai_wimo_pager::app::agent::ScheduledTaskInfo {
+            wimoai_wimo_pager::app::agent::ScheduledTaskInfo {
                 task_id: "loop-1".to_string(),
                 prompt: "do the thing".to_string(),
                 human_schedule: "every 5m".to_string(),
@@ -1033,8 +1033,8 @@ mod tests {
     }
     #[test]
     fn prompt_style_bash_mode_shows_bang_prefix() {
-        use wimo ai_wimo_pager::app::agent_view::PromptInputMode;
-        use wimo ai_wimo_pager::appearance::AppearanceConfig;
+        use wimoai_wimo_pager::app::agent_view::PromptInputMode;
+        use wimoai_wimo_pager::appearance::AppearanceConfig;
         let appearance = AppearanceConfig::default();
         let theme = Theme::current();
         let normal = prompt_style(&appearance, PromptInputMode::Normal, &theme, false);
@@ -1056,7 +1056,7 @@ mod tests {
     #[test]
     fn prompt_info_renders_model_context_and_queued() {
         let mut a = agent();
-        a.context_state = Some(wimo ai_wimo_shell::session::ContextInfo {
+        a.context_state = Some(wimoai_wimo_shell::session::ContextInfo {
             used: 276_000,
             total: 2_000_000,
             ..Default::default()
@@ -1079,10 +1079,10 @@ mod tests {
     }
     #[test]
     fn prompt_info_bash_mode_shows_run_shell_command() {
-        use wimo ai_wimo_pager::app::agent_view::PromptInputMode;
+        use wimoai_wimo_pager::app::agent_view::PromptInputMode;
         let mut a = agent();
         a.prompt_input_mode = PromptInputMode::Bash;
-        a.context_state = Some(wimo ai_wimo_shell::session::ContextInfo {
+        a.context_state = Some(wimoai_wimo_shell::session::ContextInfo {
             used: 276_000,
             total: 2_000_000,
             ..Default::default()
@@ -1131,7 +1131,7 @@ mod tests {
                 .filter_map(|x| buf.cell((x, 0)).map(|c| c.symbol().to_string()))
                 .collect()
         };
-        let render = |a: &wimo ai_wimo_pager::app::agent_view::AgentView| -> String {
+        let render = |a: &wimoai_wimo_pager::app::agent_view::AgentView| -> String {
             let mut buf = Buffer::empty(area);
             render_prompt_info(&mut buf, area, a, 0, "ctrl+o transcript", &theme);
             read(&buf)
@@ -1155,9 +1155,9 @@ mod tests {
     #[test]
     fn pending_hint_formats_press_again() {
         use crossterm::event::{KeyCode, KeyModifiers};
-        use wimo ai_wimo_pager::app::actions::Action;
-        use wimo ai_wimo_pager::app::app_view::PendingAction;
-        use wimo ai_wimo_pager::input::key::KeyShortcut;
+        use wimoai_wimo_pager::app::actions::Action;
+        use wimoai_wimo_pager::app::app_view::PendingAction;
+        use wimoai_wimo_pager::input::key::KeyShortcut;
         assert!(minimal_pending_hint(&None).is_none());
         let shortcut = KeyShortcut::new(KeyCode::Char('q'), KeyModifiers::CONTROL);
         let pending = Some(PendingAction::new(Action::Quit, shortcut, "quit"));

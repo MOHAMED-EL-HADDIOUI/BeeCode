@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{LazyLock, Mutex, OnceLock};
 use std::time::{Duration, Instant};
-use wimo ai_wimo_telemetry::region;
-use wimo ai_wimo_telemetry::region::Parent;
+use wimoai_wimo_telemetry::region;
+use wimoai_wimo_telemetry::region::Parent;
 
 use crate::host::HostOs;
 use crate::terminal::{TerminalName, terminal_context};
@@ -262,7 +262,7 @@ fn compute_snapshot(cwd: &Path) -> GitSnapshot {
 /// Intended to be built once (e.g. when a directory picker opens) and reused for many path lookups, avoiding a DB open per candidate.
 pub fn worktree_label_index() -> std::collections::HashMap<PathBuf, String> {
     let mut map = std::collections::HashMap::new();
-    let Ok(db) = wimo ai_fast_worktree::db::WorktreeDb::open_default() else {
+    let Ok(db) = wimoai_fast_worktree::db::WorktreeDb::open_default() else {
         return map;
     };
     let Ok(records) = db.list(&Default::default()) else {
@@ -284,7 +284,7 @@ pub fn worktree_label_index() -> std::collections::HashMap<PathBuf, String> {
 /// Returns `(None, None)` silently on any error (missing DB, no record).
 /// Called from `spawn_blocking` so DB I/O is fine.
 fn lookup_worktree_record(cwd: &Path) -> (Option<String>, Option<PathBuf>) {
-    let Ok(db) = wimo ai_fast_worktree::db::WorktreeDb::open_default() else {
+    let Ok(db) = wimoai_fast_worktree::db::WorktreeDb::open_default() else {
         return (None, None);
     };
     // Try exact match first, then walk up ancestors to find the worktree root.
@@ -306,7 +306,7 @@ fn collapse_home(path: &Path) -> String {
     collapse_home_path(path, home_dir().as_deref().map(Path::new))
 }
 
-/// Tilde-collapse with a path-component prefix, so `HOME=/Users/u` does not match `/Users/user/wimo ai`.
+/// Tilde-collapse with a path-component prefix, so `HOME=/Users/u` does not match `/Users/user/wimoai`.
 /// Trailing slashes on HOME do not break the join.
 fn collapse_home_path(path: &Path, home: Option<&Path>) -> String {
     let Some(home) = home else {
@@ -377,7 +377,7 @@ fn decide_nerd_fonts(nerd_fonts: Option<&str>, host: HostOs, brand: TerminalName
 }
 
 pub(crate) fn home_dir() -> Option<String> {
-    wimo ai_dirs::home_dir().map(|home| home.to_string_lossy().into_owned())
+    wimoai_dirs::home_dir().map(|home| home.to_string_lossy().into_owned())
 }
 
 #[cfg(test)]
@@ -388,7 +388,7 @@ mod tests {
     /// Uses a unique path so it doesn't race the shared cache with other tests.
     #[test]
     fn cwd_git_info_lazy_non_repo_is_none() {
-        let p = Path::new("/nonexistent-wimo ai-git-info-lazy-test-zzz");
+        let p = Path::new("/nonexistent-wimoai-git-info-lazy-test-zzz");
         assert!(cwd_git_info_lazy(p).is_none());
         // Second call hits the reserved (None) entry and is still None
         assert!(cwd_git_info_lazy(p).is_none());
@@ -554,12 +554,12 @@ mod tests {
     fn collapse_home_requires_whole_path_component() {
         let home = Path::new("/Users/u");
         assert_eq!(
-            collapse_home_path(Path::new("/Users/user/wimo ai"), Some(home)),
-            "/Users/user/wimo ai"
+            collapse_home_path(Path::new("/Users/user/wimoai"), Some(home)),
+            "/Users/user/wimoai"
         );
         assert_eq!(
-            collapse_home_path(Path::new("/Users/u/wimo ai"), Some(home)),
-            "~/wimo ai"
+            collapse_home_path(Path::new("/Users/u/wimoai"), Some(home)),
+            "~/wimoai"
         );
         assert_eq!(
             collapse_home_path(Path::new("/Users/u/"), Some(Path::new("/Users/u/"))),
@@ -629,17 +629,17 @@ mod tests {
         let home = tempfile::tempdir().unwrap();
         // serial(wimo_HOME) orders peers; EnvVarGuard restores on drop so later `open_default()` callers do not see a deleted temp home
         let _wimo_home = crate::test_util::EnvVarGuard::set("wimo_HOME", home.path());
-        let _ = wimo ai_fast_worktree::db::WorktreeDb::open(home.path());
+        let _ = wimoai_fast_worktree::db::WorktreeDb::open(home.path());
 
         let wt = crate::test_util::TempGitRepo::init("wt-branch");
         let canon_wt = dunce::canonicalize(&wt.path).unwrap_or_else(|_| wt.path.clone());
-        let db = wimo ai_fast_worktree::db::WorktreeDb::open(home.path()).unwrap();
-        db.register(&wimo ai_fast_worktree::db::WorktreeRecord {
+        let db = wimoai_fast_worktree::db::WorktreeDb::open(home.path()).unwrap();
+        db.register(&wimoai_fast_worktree::db::WorktreeRecord {
             id: "db-wt".into(),
             path: canon_wt,
             source_repo: PathBuf::from("/src/main-repo"),
             repo_name: "main-repo".into(),
-            kind: wimo ai_fast_worktree::db::WorktreeKind::Session,
+            kind: wimoai_fast_worktree::db::WorktreeKind::Session,
             creation_mode: "standalone".into(),
             git_ref: None,
             head_commit: None,
@@ -647,7 +647,7 @@ mod tests {
             creator_pid: None,
             created_at: 1,
             last_accessed_at: None,
-            status: wimo ai_fast_worktree::db::WorktreeStatus::Alive,
+            status: wimoai_fast_worktree::db::WorktreeStatus::Alive,
             metadata: Some(serde_json::json!({ "label": "db-label" })),
         })
         .unwrap();
@@ -663,7 +663,7 @@ mod tests {
 
     #[test]
     fn update_from_notification_ors_cached_label_into_is_worktree() {
-        let dir = PathBuf::from("/nonexistent-wimo ai-notif-label-wt");
+        let dir = PathBuf::from("/nonexistent-wimoai-notif-label-wt");
         {
             let mut cache = CWD_GIT_CACHE.lock().expect("cache lock");
             cwd_cache_insert(

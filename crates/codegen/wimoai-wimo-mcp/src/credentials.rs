@@ -16,7 +16,7 @@ use crate::rmcp;
 
 /// Ensure credential paths are owner-only (Unix `0o600`).
 ///
-/// Local helper, not shell-base's: `wimo ai-wimo-mcp` sits below `config-types` in the dep graph.
+/// Local helper, not shell-base's: `wimoai-wimo-mcp` sits below `config-types` in the dep graph.
 /// Shell-base pulls shared, then config-types, then mcp, so this crate linking shell-base would be a cycle.
 /// Windows ACL tightening stays on auth via shell-base; MCP is Unix-first here.
 fn ensure_owner_only_permissions(path: &Path) -> std::io::Result<()> {
@@ -215,7 +215,7 @@ impl McpCredentialStore {
 
     /// Default path: `$wimo_HOME/mcp_credentials.json`.
     fn default_path() -> Option<PathBuf> {
-        Some(wimo ai_wimo_config::user_wimo_home()?.join(CREDENTIALS_FILENAME))
+        Some(wimoai_wimo_config::user_wimo_home()?.join(CREDENTIALS_FILENAME))
     }
 }
 

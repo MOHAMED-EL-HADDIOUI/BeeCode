@@ -216,8 +216,8 @@ fn merge_section_preserves_unmodeled_fields_inside_a_nested_table() {
     ui.insert("status_line".into(), TomlValue::Table(status_line));
     table.insert("ui".into(), TomlValue::Table(ui));
     let cfg = crate::agent::config::UiConfig {
-        status_line: wimo ai_wimo_status_line::test_support::StatusLineConfigFixture::from_kind(
-            wimo ai_wimo_status_line::StatusLineType::Command,
+        status_line: wimoai_wimo_status_line::test_support::StatusLineConfigFixture::from_kind(
+            wimoai_wimo_status_line::StatusLineType::Command,
         )
         .with_command("~/status_line.sh")
         .into_config(),

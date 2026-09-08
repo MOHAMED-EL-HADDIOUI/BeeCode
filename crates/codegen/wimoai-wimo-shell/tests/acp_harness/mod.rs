@@ -7,12 +7,12 @@ use std::time::Duration;
 use agent_client_protocol::{self as acp, Agent as _};
 use serde_json::json;
 use tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
-use wimo ai_acp_lib::{
+use wimoai_acp_lib::{
     AcpAgentGatewayReceiver as GatewayReceiver, AcpAgentGatewaySender as GatewaySender,
     LineBufferedRead,
 };
-use wimo ai_wimo_shell::agent::config::Config as AgentConfig;
-use wimo ai_wimo_shell::agent::mvp_agent::MvpAgent;
+use wimoai_wimo_shell::agent::config::Config as AgentConfig;
+use wimoai_wimo_shell::agent::mvp_agent::MvpAgent;
 
 /// Matches production's `MAX_BUFFER_SIZE` in `agent::app`.
 pub const DUPLEX_BUFFER_BYTES: usize = 8 * 1024 * 1024;
@@ -75,7 +75,7 @@ pub fn spawn_agent_local() -> AgentPipes {
         });
     tokio::task::spawn_local(
         GatewayReceiver::new(gw_rx, agent_conn)
-            .with_on_meta(wimo ai_file_utils::trace_context::span_from_meta_traceparent)
+            .with_on_meta(wimoai_file_utils::trace_context::span_from_meta_traceparent)
             .run(),
     );
     tokio::task::spawn_local(agent_io);
@@ -150,8 +150,8 @@ where
     let method = init
         .auth_methods
         .iter()
-        .find(|m| &*m.id().0 == "wimo ai.api_key")
-        .expect("wimo ai.api_key auth method not advertised");
+        .find(|m| &*m.id().0 == "wimoai.api_key")
+        .expect("wimoai.api_key auth method not advertised");
     tokio::time::timeout(
         RPC_TIMEOUT,
         client_conn.authenticate(
@@ -234,8 +234,8 @@ fn set_test_env(wimo_home: &std::path::Path, server_url: &str) {
     unsafe {
         std::env::set_var("wimo_HOME", wimo_home);
         std::env::set_var("wimo_CLI_CHAT_PROXY_BASE_URL", server_url);
-        std::env::set_var("wimo_wimo ai_API_BASE_URL", server_url);
-        std::env::set_var("wimo ai_API_KEY", "test-key-for-ci");
+        std::env::set_var("wimo_wimoai_API_BASE_URL", server_url);
+        std::env::set_var("wimoai_API_KEY", "test-key-for-ci");
         std::env::set_var("wimo_TELEMETRY_ENABLED", "false");
         std::env::set_var("wimo_FEEDBACK_ENABLED", "false");
         std::env::set_var("wimo_TRACE_UPLOAD", "false");
@@ -250,11 +250,11 @@ fn set_test_env(wimo_home: &std::path::Path, server_url: &str) {
 /// since each test wants a different `acp::Client`.
 pub fn run_agent_test<F, Fut>(body: F)
 where
-    F: FnOnce(std::path::PathBuf, std::rc::Rc<wimo ai_wimo_test_support::MockInferenceServer>) -> Fut,
+    F: FnOnce(std::path::PathBuf, std::rc::Rc<wimoai_wimo_test_support::MockInferenceServer>) -> Fut,
     Fut: std::future::Future<Output = ()>,
 {
     run_agent_test_with_models(
-        vec![wimo ai_wimo_test_support::MockModelEntry::new("test-model")],
+        vec![wimoai_wimo_test_support::MockModelEntry::new("test-model")],
         body,
     )
 }
@@ -262,14 +262,14 @@ where
 /// [`run_agent_test`] with a custom `/v1/models` catalog.
 #[allow(dead_code)]
 pub fn run_agent_test_with_models<F, Fut>(
-    models: Vec<wimo ai_wimo_test_support::MockModelEntry>,
+    models: Vec<wimoai_wimo_test_support::MockModelEntry>,
     body: F,
 ) where
-    F: FnOnce(std::path::PathBuf, std::rc::Rc<wimo ai_wimo_test_support::MockInferenceServer>) -> Fut,
+    F: FnOnce(std::path::PathBuf, std::rc::Rc<wimoai_wimo_test_support::MockInferenceServer>) -> Fut,
     Fut: std::future::Future<Output = ()>,
 {
     let _env_guard = hold_global_env();
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
 
     // Own thread: agent startup blocks on a models prefetch and would starve the mock.
     let mock_rt = tokio::runtime::Builder::new_multi_thread()
@@ -279,7 +279,7 @@ pub fn run_agent_test_with_models<F, Fut>(
         .expect("mock runtime");
     let server = std::rc::Rc::new(
         mock_rt
-            .block_on(wimo ai_wimo_test_support::MockInferenceServer::start_with_models(models))
+            .block_on(wimoai_wimo_test_support::MockInferenceServer::start_with_models(models))
             .expect("mock server"),
     );
     let wimo_home = tempfile::TempDir::new().expect("wimo home");

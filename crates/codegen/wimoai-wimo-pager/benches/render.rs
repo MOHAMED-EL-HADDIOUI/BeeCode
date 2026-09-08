@@ -1,4 +1,4 @@
-//! Criterion benchmarks for the wimo ai-wimo-pager rendering pipeline.
+//! Criterion benchmarks for the wimoai-wimo-pager rendering pipeline.
 //!
 //! Measures the per-frame cost of rendering a rich markdown document into a ratatui `Buffer`.
 //! This isolates the render hot path (entry rendering, scratch buffer copies, layout computation).
@@ -10,15 +10,15 @@ use criterion::{Criterion, criterion_group, criterion_main};
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 
-use wimo ai_wimo_pager::appearance::AppearanceConfig;
-use wimo ai_wimo_pager::render::Renderable;
-use wimo ai_wimo_pager::scrollback::entry::ScrollbackEntry;
-use wimo ai_wimo_pager::scrollback::render::render_scrolled_entries_with_scratch;
-use wimo ai_wimo_pager::scrollback::wrappers::EntryRenderer;
-use wimo ai_wimo_pager::scrollback::{
+use wimoai_wimo_pager::appearance::AppearanceConfig;
+use wimoai_wimo_pager::render::Renderable;
+use wimoai_wimo_pager::scrollback::entry::ScrollbackEntry;
+use wimoai_wimo_pager::scrollback::render::render_scrolled_entries_with_scratch;
+use wimoai_wimo_pager::scrollback::wrappers::EntryRenderer;
+use wimoai_wimo_pager::scrollback::{
     EntryId, EntryLayoutInfo, HorizontalLayout, RenderBlock, ScrollbackState,
 };
-use wimo ai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::theme::Theme;
 
 static BENCH_MD: &str = include_str!("bench.md");
 

@@ -114,28 +114,28 @@ impl crate::types::tool_metadata::ToolMetadata for BashConciseTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for BashConciseTool {
+impl wimoai_tool_runtime::Tool for BashConciseTool {
     type Args = BashToolInput;
     type Output = BashToolOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("run_terminal_cmd").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("run_terminal_cmd").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "run_terminal_cmd",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -143,10 +143,10 @@ impl wimo ai_tool_runtime::Tool for BashConciseTool {
     #[tracing::instrument(name = "tool.run_terminal_cmd_concise", skip_all)]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: BashToolInput,
-    ) -> Result<BashToolOutput, wimo ai_tool_runtime::ToolError> {
-        let result = wimo ai_tool_runtime::Tool::run(&BashTool, ctx, input).await?;
+    ) -> Result<BashToolOutput, wimoai_tool_runtime::ToolError> {
+        let result = wimoai_tool_runtime::Tool::run(&BashTool, ctx, input).await?;
 
         match result {
             // TODO: Add different concise message for auto backgrounded terminal task

@@ -1,8 +1,8 @@
 //! Dedicated binary: production `remove_var` must not race the lib test suite.
 
 use std::process::Stdio;
-use wimo ai_wimo_shell::agent::external_otel_pin;
-use wimo ai_tty_utils::{detach_std_command, pager_env};
+use wimoai_wimo_shell::agent::external_otel_pin;
+use wimoai_tty_utils::{detach_std_command, pager_env};
 
 const DECOY: &str = "OTEL_EXPORTER_OTLP_ENDPOINT";
 const DECOY_VALUE: &str = "http://127.0.0.1:9";

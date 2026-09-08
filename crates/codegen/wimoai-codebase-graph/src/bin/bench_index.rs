@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::time::Instant;
 
-use wimo ai_codebase_graph::{IndexBuilder, LanguageRegistry};
+use wimoai_codebase_graph::{IndexBuilder, LanguageRegistry};
 
 // Use mimalloc for faster allocation in multi-threaded workloads
 #[global_allocator]
@@ -13,7 +13,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let path = if let Some(p) = args.get(1) {
         p.clone()
-    } else if let Ok(p) = std::env::var("BENCH_REPO_ROOT").or_else(|_| std::env::var("wimo ai_ROOT")) {
+    } else if let Ok(p) = std::env::var("BENCH_REPO_ROOT").or_else(|_| std::env::var("wimoai_ROOT")) {
         p
     } else {
         eprintln!("Usage: bench_index <path>");

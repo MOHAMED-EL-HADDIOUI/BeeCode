@@ -43,10 +43,10 @@ pub enum ConfigUpdate {
     /// Updated memory config (boxed to avoid large enum variant).
     Memory(Box<crate::config::MemoryConfig>),
     /// Updated skills discovery config.
-    Skills(wimo ai_wimo_agent::prompt::skills::SkillsConfig),
+    Skills(wimoai_wimo_agent::prompt::skills::SkillsConfig),
     /// Updated `[compat]` vendor-compatibility config.
     /// It is applied on the next agent (re)build, which re-resolves `compat_resolved`.
-    Compat(Box<wimo ai_wimo_tools::types::compat::CompatConfigToml>),
+    Compat(Box<wimoai_wimo_tools::types::compat::CompatConfigToml>),
     /// The `[model.*]` entries in config.toml changed.
     /// The agent should re-resolve its model list (BYOK models added/removed, default or surprise changed).
     ModelsChanged,
@@ -160,7 +160,7 @@ impl ConfigReloader {
                         // Whole-file deletion (NotFound) and corrupt JSON land here
                         // The resulting memory/disk divergence must be visible in unified.jsonl
                         let path = self.wimo_home.join("auth.json");
-                        wimo ai_wimo_telemetry::unified_log::error(
+                        wimoai_wimo_telemetry::unified_log::error(
                             "auth reload: auth.json unreadable, keeping previous credentials",
                             None,
                             Some(serde_json::json!({
@@ -264,7 +264,7 @@ impl ConfigReloader {
                     info!("auth scope removed from auth.json, sent clear to agent");
                     // AuthCleared makes the agent drop in-memory credentials
                     // Record what the reloader saw so "entry removed" is distinguishable from "file deleted" (the Err path)
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "auth reload: scope entry gone, sending AuthCleared",
                         None,
                         Some(serde_json::json!({
@@ -478,14 +478,14 @@ pub(crate) fn hash_auth_key(key: &str) -> u64 {
 /// Keep these in sync rather than adding a fourth parse path.
 pub(crate) fn parse_skills_config(
     config: &toml::Value,
-) -> wimo ai_wimo_agent::prompt::skills::SkillsConfig {
+) -> wimoai_wimo_agent::prompt::skills::SkillsConfig {
     config
         .get("skills")
         .and_then(|v| v.clone().try_into().ok())
         .unwrap_or_default()
 }
 
-fn parse_compat_config(config: &toml::Value) -> wimo ai_wimo_tools::types::compat::CompatConfigToml {
+fn parse_compat_config(config: &toml::Value) -> wimoai_wimo_tools::types::compat::CompatConfigToml {
     config
         .get("compat")
         .and_then(|v| v.clone().try_into().ok())
@@ -817,7 +817,7 @@ mod tests {
         let skills = parse_skills_config(&config);
         assert_eq!(
             skills,
-            wimo ai_wimo_agent::prompt::skills::SkillsConfig::default()
+            wimoai_wimo_agent::prompt::skills::SkillsConfig::default()
         );
     }
 

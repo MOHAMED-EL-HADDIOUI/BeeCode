@@ -189,7 +189,7 @@ mod tests {
     #[test]
     #[cfg(target_os = "macos")]
     fn worktree_id_tmp_matches_private_tmp() {
-        let name = format!("wimo ai-fwt-id-{}", std::process::id());
+        let name = format!("wimoai-fwt-id-{}", std::process::id());
         let via_var = PathBuf::from("/tmp").join(&name);
         let via_private = PathBuf::from("/private/tmp").join(&name);
         assert_eq!(
@@ -199,7 +199,7 @@ mod tests {
     }
     #[test]
     fn relative_dest_id_matches_cwd_join() {
-        let name = format!("wimo ai-fwt-rel-{}", std::process::id());
+        let name = format!("wimoai-fwt-rel-{}", std::process::id());
         let rel = PathBuf::from(&name);
         let abs = std::env::current_dir().unwrap().join(&name);
         assert_eq!(worktree_id_from_path(&rel), worktree_id_from_path(&abs));

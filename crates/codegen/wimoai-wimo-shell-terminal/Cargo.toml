@@ -1,9 +1,9 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-shell-terminal"
+name = "wimoai-wimo-shell-terminal"
 version = "0.1.0"
 edition.workspace = true
-description = "Local, ACP, and PTY terminal runners extracted from wimo ai-wimo-shell so they compile in parallel."
+description = "Local, ACP, and PTY terminal runners extracted from wimoai-wimo-shell so they compile in parallel."
 
 [dependencies]
 agent-client-protocol = { workspace = true }
@@ -27,13 +27,13 @@ tokio = { workspace = true, features = [
 ] }
 tracing = { workspace = true }
 uuid = { workspace = true, features = ["v7"] }
-wimo ai-acp-lib = { workspace = true }
-wimo ai-wimo-config = { workspace = true }
-wimo ai-wimo-paths = { path = "../wimo ai-wimo-paths" }
-wimo ai-wimo-sandbox = { path = "../wimo ai-wimo-sandbox", default-features = false }
-wimo ai-wimo-tools = { workspace = true }
-wimo ai-wimo-workspace = { workspace = true }
-wimo ai-tty-utils = { workspace = true }
+wimoai-acp-lib = { workspace = true }
+wimoai-wimo-config = { workspace = true }
+wimoai-wimo-paths = { path = "../wimoai-wimo-paths" }
+wimoai-wimo-sandbox = { path = "../wimoai-wimo-sandbox", default-features = false }
+wimoai-wimo-tools = { workspace = true }
+wimoai-wimo-workspace = { workspace = true }
+wimoai-tty-utils = { workspace = true }
 
 [target.'cfg(unix)'.dependencies]
 libc = { workspace = true }

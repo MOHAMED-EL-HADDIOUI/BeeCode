@@ -141,7 +141,7 @@ impl Listener {
         let stop = Arc::new(AtomicBool::new(false));
         let stop_thread = stop.clone();
         let handle = thread::Builder::new()
-            .name("wimo ai-power-listener".into())
+            .name("wimoai-power-listener".into())
             .spawn(move || run_thread(callback, tx, stop_thread))
             .ok()?;
 
@@ -277,7 +277,7 @@ extern "C" fn power_callback(
         // in-flight token refresh to finish, which intentionally delays the
         // `IOAllowPowerChange` and holds off the suspend. IOKit allows ~30 s
         // per phase before forcing sleep, so a bounded wait is safe. See the
-        // `wimo ai_system_power` crate-level callback contract.
+        // `wimoai_system_power` crate-level callback contract.
         (ctx.callback)(event);
     }
     if needs_ack {

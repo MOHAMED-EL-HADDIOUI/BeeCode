@@ -3,8 +3,8 @@
 
 use super::*;
 use crate::auth::backend::{ActiveAuthBackend, AuthBackend};
-use wimo ai_wimo_telemetry::region;
-use wimo ai_wimo_telemetry::region::Parent;
+use wimoai_wimo_telemetry::region;
+use wimoai_wimo_telemetry::region::Parent;
 
 const CLASSIFIER_REQUEST_TOKEN_RESERVE: u64 = 16_384;
 
@@ -81,14 +81,14 @@ pub(super) fn transient_backoff_delay(attempts_used: u32) -> std::time::Duration
 
 /// Stream stalls (never retried internally), transport errors, retryable 5xx.
 /// Vetoes mirror `is_retry_vetoed`. Status-less `Api` fails closed; other kinds keep their dedicated recovery or terminal path.
-pub(super) fn transient_retry_eligible(error: &wimo ai_wimo_sampler::SamplingErrorInfo) -> bool {
-    use wimo ai_wimo_sampler::SamplingErrorKind;
+pub(super) fn transient_retry_eligible(error: &wimoai_wimo_sampler::SamplingErrorInfo) -> bool {
+    use wimoai_wimo_sampler::SamplingErrorKind;
     if error.should_retry == Some(false)
-        || wimo ai_wimo_sampling_types::is_context_length_error(&error.message)
+        || wimoai_wimo_sampling_types::is_context_length_error(&error.message)
         // Deterministic rejection however the proxy wrapped it (400 or 500); the sampler's own classifier already stripped images and gave up
         || matches!(
             error.error_code,
-            Some(wimo ai_wimo_sampling_types::ApiErrorCode::InvalidImage)
+            Some(wimoai_wimo_sampling_types::ApiErrorCode::InvalidImage)
         )
     {
         return false;
@@ -100,7 +100,7 @@ pub(super) fn transient_retry_eligible(error: &wimo ai_wimo_sampler::SamplingErr
         SamplingErrorKind::Api => error.status_code.is_some_and(|status| {
             status != 429
                 && reqwest::StatusCode::from_u16(status)
-                    .is_ok_and(wimo ai_wimo_sampling_types::is_retryable_api_status)
+                    .is_ok_and(wimoai_wimo_sampling_types::is_retryable_api_status)
         }),
         SamplingErrorKind::Auth
         | SamplingErrorKind::Serialization
@@ -154,13 +154,13 @@ impl LengthSalvageStreak {
 }
 
 /// Auth-failure detector for tool errors.
-/// Matches strictly on HTTP 401 when the error carries a structured status code, mirroring `SamplingError::is_auth_error` in wimo ai-wimo-sampling-types.
+/// Matches strictly on HTTP 401 when the error carries a structured status code, mirroring `SamplingError::is_auth_error` in wimoai-wimo-sampling-types.
 /// 403 is deliberately excluded because it means "authenticated but forbidden" (content-safety blocks, ZDR-gated requests, remote settings gates).
 /// A token refresh there would be a no-op and would show the client a spurious auth_required teardown.
 ///
 /// String fallbacks remain for tools that report auth failures without going through the structured `HttpFailure` path.
 /// Examples: JSON-only `invalid_token` payloads, BYOK key-validation messages.
-pub(super) fn is_auth_tool_error(err: &wimo ai_tool_runtime::ToolError) -> bool {
+pub(super) fn is_auth_tool_error(err: &wimoai_tool_runtime::ToolError) -> bool {
     // When the error carries a structured HTTP status code in details, trust it as the authoritative signal
     // This replaces the legacy `HttpFailure { status, .. }` variant matching.
     if let Some(details) = &err.details
@@ -199,7 +199,7 @@ impl SessionTokenAuthGate {
             is_session_based: auth_method_id
                 .is_some_and(crate::agent::auth_method::is_session_based_method),
             model_byok,
-            endpoint_is_first_party: crate::util::is_wimo ai_api_url(base_url),
+            endpoint_is_first_party: crate::util::is_wimoai_api_url(base_url),
         }
     }
 
@@ -219,13 +219,13 @@ pub(super) async fn call_with_auth_retry<F, Fut>(
     shared_recovery: Option<&tokio::sync::OnceCell<bool>>,
     tool_name: &str,
     mut call: F,
-) -> Result<wimo ai_wimo_tools::types::output::ToolRunResult, wimo ai_tool_runtime::ToolError>
+) -> Result<wimoai_wimo_tools::types::output::ToolRunResult, wimoai_tool_runtime::ToolError>
 where
     F: FnMut() -> Fut,
     Fut: std::future::Future<
             Output = Result<
-                wimo ai_wimo_tools::types::output::ToolRunResult,
-                wimo ai_tool_runtime::ToolError,
+                wimoai_wimo_tools::types::output::ToolRunResult,
+                wimoai_tool_runtime::ToolError,
             >,
         >,
 {
@@ -251,7 +251,7 @@ where
         call().await
     } else {
         tracing::warn!(tool = tool_name, "auth recovery: tool 401, refresh failed");
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth recovery: tool 401, refresh failed",
             None,
             Some(serde_json::json!({ "tool": tool_name })),
@@ -279,8 +279,8 @@ async fn stream_drain_outcome(rx: tokio::sync::oneshot::Receiver<()>) -> StreamD
 
 fn error_after_stream_drain(
     outcome: StreamDrainOutcome,
-    original: wimo ai_wimo_sampler::SamplingErrorInfo,
-) -> wimo ai_wimo_sampler::SamplingErrorInfo {
+    original: wimoai_wimo_sampler::SamplingErrorInfo,
+) -> wimoai_wimo_sampler::SamplingErrorInfo {
     if outcome == StreamDrainOutcome::Revoked {
         revoked_sampling_info()
     } else {
@@ -288,9 +288,9 @@ fn error_after_stream_drain(
     }
 }
 
-fn revoked_sampling_info() -> wimo ai_wimo_sampler::SamplingErrorInfo {
-    wimo ai_wimo_sampler::SamplingErrorInfo {
-        kind: wimo ai_wimo_sampler::SamplingErrorKind::Api,
+fn revoked_sampling_info() -> wimoai_wimo_sampler::SamplingErrorInfo {
+    wimoai_wimo_sampler::SamplingErrorInfo {
+        kind: wimoai_wimo_sampler::SamplingErrorKind::Api,
         status_code: None,
         message: "sampling result revoked by turn cancellation or rewind".to_string(),
         is_retryable: false,
@@ -301,7 +301,7 @@ fn revoked_sampling_info() -> wimo ai_wimo_sampler::SamplingErrorInfo {
         empty_response_context: None,
         doom_loop_triggers: None,
         doom_loop_aborted_at_chunk: None,
-        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
     }
 }
 
@@ -344,11 +344,11 @@ impl SessionActor {
     fn resolve_hosted(
         &self,
     ) -> (
-        Vec<wimo ai_wimo_sampling_types::HostedTool>,
-        wimo ai_wimo_sampling_types::ToolOverrides,
+        Vec<wimoai_wimo_sampling_types::HostedTool>,
+        wimoai_wimo_sampling_types::ToolOverrides,
     ) {
         let mut tools = self.agent.borrow().hosted_tools().to_vec();
-        let applied = wimo ai_wimo_sampling_types::apply_tool_overrides(
+        let applied = wimoai_wimo_sampling_types::apply_tool_overrides(
             &mut tools,
             self.tool_overrides.borrow().as_ref(),
         );
@@ -356,11 +356,11 @@ impl SessionActor {
     }
 
     /// Ungated. Prefer [`Self::hosted_tools_for_turn`], which folds in the backend-search gate.
-    pub(crate) fn effective_hosted_tools(&self) -> Vec<wimo ai_wimo_sampling_types::HostedTool> {
+    pub(crate) fn effective_hosted_tools(&self) -> Vec<wimoai_wimo_sampling_types::HostedTool> {
         self.resolve_hosted().0
     }
 
-    pub(crate) fn hosted_tools_for_turn(&self) -> Vec<wimo ai_wimo_sampling_types::HostedTool> {
+    pub(crate) fn hosted_tools_for_turn(&self) -> Vec<wimoai_wimo_sampling_types::HostedTool> {
         if self.backend_search_active() {
             self.effective_hosted_tools()
         } else {
@@ -371,7 +371,7 @@ impl SessionActor {
     /// The applied overrides to echo, or `None` when backend search is off.
     pub(crate) fn effective_tool_overrides(
         &self,
-    ) -> Option<wimo ai_wimo_sampling_types::ToolOverrides> {
+    ) -> Option<wimoai_wimo_sampling_types::ToolOverrides> {
         if !self.backend_search_active() {
             return None;
         }
@@ -384,7 +384,7 @@ impl SessionActor {
     }
 
     /// Set the per-turn override and emit it before any turn runs, so a subagent spawned this turn inherits it.
-    pub(crate) fn set_tool_overrides(&self, overrides: wimo ai_wimo_sampling_types::ToolOverrides) {
+    pub(crate) fn set_tool_overrides(&self, overrides: wimoai_wimo_sampling_types::ToolOverrides) {
         *self.tool_overrides.borrow_mut() = Some(overrides);
         self.emit_resolved_tool_overrides();
     }
@@ -392,7 +392,7 @@ impl SessionActor {
     /// Fold a per-turn update at promotion: an object sets, `null` clears to the seed, absent leaves.
     pub(crate) fn apply_tool_overrides_update(
         &self,
-        update: Option<wimo ai_wimo_sampling_types::ToolOverridesUpdate>,
+        update: Option<wimoai_wimo_sampling_types::ToolOverridesUpdate>,
     ) {
         let Some(update) = update else { return };
         {
@@ -508,7 +508,7 @@ impl SessionActor {
                     model = %model_id,
                     "auth provider pre-turn refresh failed"
                 );
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "auth provider pre-turn refresh failed",
                     Some(self.session_info.id.0.as_ref()),
                     Some(serde_json::json!({
@@ -538,7 +538,7 @@ impl SessionActor {
                 provider = %provider.name,
                 "auth recovery: sampler 401, provider re-mint declined or failed"
             );
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth recovery: sampler 401, provider re-mint declined or failed",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({ "provider": provider.name })),
@@ -550,7 +550,7 @@ impl SessionActor {
             provider = %provider.name,
             "auth recovery: sampler 401, auth provider re-mint, retrying"
         );
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth recovery: sampler 401, auth provider re-mint, retrying",
             Some(self.session_info.id.0.as_ref()),
             None,
@@ -590,13 +590,13 @@ impl SessionActor {
         });
         let sid = Some(self.session_info.id.0.as_ref());
         if refresh_active {
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth gate: Unknown BYOK on first-party endpoint — session-token refresh kept active",
                 sid,
                 Some(ctx),
             );
         } else {
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth gate: Unknown BYOK on non-first-party endpoint — refresh withheld (may surface stale-token 401)",
                 sid,
                 Some(ctx),
@@ -610,9 +610,9 @@ impl SessionActor {
         #[allow(clippy::items_after_statements)]
         #[derive(Debug)]
         struct TraceContextInjector;
-        impl wimo ai_wimo_sampler::HeaderInjector for TraceContextInjector {
+        impl wimoai_wimo_sampler::HeaderInjector for TraceContextInjector {
             fn inject(&self, headers: &mut reqwest::header::HeaderMap) {
-                if let Some(tp) = wimo ai_file_utils::trace_context::current_traceparent()
+                if let Some(tp) = wimoai_file_utils::trace_context::current_traceparent()
                     && let Ok(v) = reqwest::header::HeaderValue::from_str(&tp)
                 {
                     headers.insert("traceparent", v);
@@ -624,7 +624,7 @@ impl SessionActor {
             .chat_state_handle
             .get_sampling_config()
             .await
-            .unwrap_or_else(|| wimo ai_wimo_sampling_types::SamplingConfig {
+            .unwrap_or_else(|| wimoai_wimo_sampling_types::SamplingConfig {
                 base_url: String::new(),
                 model: String::new(),
                 max_completion_tokens: None,
@@ -659,7 +659,7 @@ impl SessionActor {
             // A session from another authority must not seed the default headers either.
             self.auth_manager
                 .as_ref()
-                .filter(|_| ActiveAuthBackend::default().is_wimo ai_authority())
+                .filter(|_| ActiveAuthBackend::default().is_wimoai_authority())
                 .and_then(|am| am.current_wire_valid().map(|a| a.key))
         } else {
             creds.api_key
@@ -729,7 +729,7 @@ impl SessionActor {
                 .auth_manager
                 .as_ref()
                 .and_then(|am| am.current_or_expired())
-                .filter(|a| a.is_wimo ai_auth())
+                .filter(|a| a.is_wimoai_auth())
                 .map(|a| a.user_id),
             origin_client: self.origin_client.clone(),
             // Attribute sampler 401s against the bearer sent on the wire.
@@ -800,9 +800,9 @@ impl SessionActor {
             crate::util::config::auto_mode_classifier_defaults(&auto_cfg, effective_supports_re);
         let classify_timeout = crate::util::config::auto_mode_classify_timeout(&auto_cfg);
         let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<(
-            Vec<wimo ai_wimo_workspace::permission::ClassifierMessage>,
+            Vec<wimoai_wimo_workspace::permission::ClassifierMessage>,
             tokio::sync::oneshot::Sender<
-                Result<String, wimo ai_wimo_workspace::permission::ClassifierFailure>,
+                Result<String, wimoai_wimo_workspace::permission::ClassifierFailure>,
             >,
         )>();
         let session = Arc::clone(self);
@@ -820,8 +820,8 @@ impl SessionActor {
                             let config = session.reconstruct_full_config().await;
                             let context_window = config.context_window;
                             let model = config.model.clone();
-                            let client = wimo ai_wimo_sampler::SamplingClient::new(config).map_err(|e| {
-                                wimo ai_wimo_workspace::permission::ClassifierFailure::TransportError(
+                            let client = wimoai_wimo_sampler::SamplingClient::new(config).map_err(|e| {
+                                wimoai_wimo_workspace::permission::ClassifierFailure::TransportError(
                                     e.to_string(),
                                 )
                             })?;
@@ -832,18 +832,18 @@ impl SessionActor {
                     let items = messages
                         .into_iter()
                         .map(|m| match m.role {
-                            wimo ai_wimo_workspace::permission::ClassifierMessageRole::System => {
+                            wimoai_wimo_workspace::permission::ClassifierMessageRole::System => {
                                 ConversationItem::system(m.text)
                             }
-                            wimo ai_wimo_workspace::permission::ClassifierMessageRole::User => {
+                            wimoai_wimo_workspace::permission::ClassifierMessageRole::User => {
                                 ConversationItem::user(m.text)
                             }
                         })
                         .collect::<Vec<_>>();
-                    let input_tokens = wimo ai_chat_state::estimate_conversation_tokens(&items);
+                    let input_tokens = wimoai_chat_state::estimate_conversation_tokens(&items);
                     if !classifier_request_fits_context(input_tokens, context_window) {
                         return Err(
-                            wimo ai_wimo_workspace::permission::ClassifierFailure::TransportError(
+                            wimoai_wimo_workspace::permission::ClassifierFailure::TransportError(
                                 "permission auto classifier request exceeds context window"
                                     .to_owned(),
                             ),
@@ -861,23 +861,23 @@ impl SessionActor {
                         // Structured output: constrain the model to the {thinking, shouldBlock, reason} schema
                         // The response is then guaranteed parseable (parity with forced-classify tooling)
                         json_schema: Some(
-                            wimo ai_wimo_workspace::permission::classifier_output_json_schema(),
+                            wimoai_wimo_workspace::permission::classifier_output_json_schema(),
                         ),
                         // Resolved `[auto_mode]` effort: explicit config/remote, else the built-in `Low` default when the model supports it
                         // None means the provider default
                         reasoning_effort: classifier_reasoning_effort,
                         x_wimo_conv_id: Some(format!("perm-classifier-{}", uuid::Uuid::new_v4())),
-                        x_wimo_req_id: Some(format!("wimo ai-perm-auto-{}", uuid::Uuid::new_v4())),
+                        x_wimo_req_id: Some(format!("wimoai-perm-auto-{}", uuid::Uuid::new_v4())),
                         x_wimo_session_id: Some(session_id),
-                        x_wimo_agent_id: Some(wimo ai_wimo_telemetry::id::agent_id()),
+                        x_wimo_agent_id: Some(wimoai_wimo_telemetry::id::agent_id()),
                         ..ConversationRequest::default()
                     };
                     let fut = sampling_client.conversation_collect(request);
                     let response = tokio::time::timeout(classify_timeout, fut)
                         .await
-                        .map_err(|_| wimo ai_wimo_workspace::permission::ClassifierFailure::Timeout)?
+                        .map_err(|_| wimoai_wimo_workspace::permission::ClassifierFailure::Timeout)?
                         .map_err(|e| {
-                            wimo ai_wimo_workspace::permission::ClassifierFailure::TransportError(
+                            wimoai_wimo_workspace::permission::ClassifierFailure::TransportError(
                                 e.to_string(),
                             )
                         })?;
@@ -892,7 +892,7 @@ impl SessionActor {
             }
         });
         let clf =
-            wimo ai_wimo_workspace::permission::LlmPermissionClassifier::with_channel(tx, prompt_type);
+            wimoai_wimo_workspace::permission::LlmPermissionClassifier::with_channel(tx, prompt_type);
         debug_assert!(
             clf.has_side_query(),
             "channel-wired classifier must report has_side_query"
@@ -905,13 +905,13 @@ impl SessionActor {
     }
 
     /// Resolve a standalone aux-model `SamplerConfig` for `slug` via the shared catalog routing, gathering the session-local auth context once.
-    /// The routing is Tier-1 catalog creds / Tier-2 wimo AI-proxy via session token / `wimo ai_API_KEY` / deployment key.
+    /// The routing is Tier-1 catalog creds / Tier-2 wimo AI-proxy via session token / `wimoai_API_KEY` / deployment key.
     /// Shared by image-describe and the classifier so the gather can't drift.
     /// `None` means the caller falls back to the session model.
     pub(super) async fn resolve_aux_sampler_config(
         &self,
         slug: &str,
-    ) -> Option<wimo ai_wimo_sampler::SamplerConfig> {
+    ) -> Option<wimoai_wimo_sampler::SamplerConfig> {
         let creds = self.chat_state_handle.get_credentials().await;
         let session_key = self
             .auth_manager
@@ -941,7 +941,7 @@ impl SessionActor {
     async fn resolve_auto_classifier_sampler(
         &self,
         slug: &str,
-    ) -> Option<(wimo ai_wimo_sampler::SamplingClient, String, u64)> {
+    ) -> Option<(wimoai_wimo_sampler::SamplingClient, String, u64)> {
         let active_session_config = self.reconstruct_full_config().await;
         let mut cfg = self.resolve_aux_sampler_config(slug).await?;
         crate::agent::config::stamp_session_local_sampler_fields(
@@ -952,7 +952,7 @@ impl SessionActor {
         );
         let model = cfg.model.clone();
         let context_window = cfg.context_window;
-        let client = wimo ai_wimo_sampler::SamplingClient::new(cfg)
+        let client = wimoai_wimo_sampler::SamplingClient::new(cfg)
             .map_err(
                 |e| tracing::warn!(error = %e, "auto classifier aux sampler build failed; using session model"),
             )
@@ -968,14 +968,14 @@ impl SessionActor {
     pub(super) async fn prepare_chat_completion(
         &self,
         force_http1: bool,
-    ) -> Result<wimo ai_wimo_sampler::SamplingClient, acp::Error> {
+    ) -> Result<wimoai_wimo_sampler::SamplingClient, acp::Error> {
         // Check if the JWT token is expired/near-expiration and refresh from config if needed
         self.refresh_token_if_expired().await;
 
         let mut full_config = self.reconstruct_full_config().await;
         full_config.force_http1 = force_http1;
         let sampling_client =
-            wimo ai_wimo_sampler::SamplingClient::new(full_config).map_err(|e| self.to_acp_error(e))?;
+            wimoai_wimo_sampler::SamplingClient::new(full_config).map_err(|e| self.to_acp_error(e))?;
 
         Ok(sampling_client)
     }
@@ -1008,7 +1008,7 @@ impl SessionActor {
         message: String,
         status_code: Option<u16>,
     ) -> (&'static str, String) {
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth: turn failure classified",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -1031,11 +1031,11 @@ impl SessionActor {
     /// Executing more calls is not converging, so report the pre-salvage `MaxTokensTruncation` failure.
     /// The sampler emitted only Completed events for these samples, so the error signal is recorded here.
     pub(crate) async fn fail_turn_length_salvage_exhausted(&self) -> acp::Error {
-        let kind = wimo ai_wimo_sampler::SamplingErrorKind::MaxTokensTruncation;
-        let message = wimo ai_wimo_sampling_types::SamplingError::MaxTokensTruncation.to_string();
+        let kind = wimoai_wimo_sampler::SamplingErrorKind::MaxTokensTruncation;
+        let message = wimoai_wimo_sampling_types::SamplingError::MaxTokensTruncation.to_string();
         self.signals_handle().record_error_typed(kind.as_str());
         self.log_terminal_failure(kind.as_str(), None, &message);
-        self.send_wimo ai_notification(wimo aiSessionUpdate::RetryState(
+        self.send_wimoai_notification(wimoaiSessionUpdate::RetryState(
             crate::extensions::notification::RetryState::Failed {
                 error_type: kind.as_str().to_owned(),
                 message: message.clone(),
@@ -1058,7 +1058,7 @@ impl SessionActor {
             None => ("auth", message),
         };
         self.log_terminal_failure(error_type, STATUS, &message);
-        self.send_wimo ai_notification(wimo aiSessionUpdate::RetryState(
+        self.send_wimoai_notification(wimoaiSessionUpdate::RetryState(
             crate::extensions::notification::RetryState::Failed {
                 error_type: error_type.to_owned(),
                 message: message.clone(),
@@ -1076,7 +1076,7 @@ impl SessionActor {
             .as_ref()
             .and_then(|am| am.current_or_expired());
         let reauthable = is_reauthable_failure(Some(error_type), message);
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "turn.terminal_failure",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -1084,7 +1084,7 @@ impl SessionActor {
                 "status_code": status_code,
                 "reauthable": reauthable,
                 "auth_mode": auth.as_ref().map(|a| format!("{:?}", a.auth_mode)),
-                "key_prefix": auth.as_ref().map(|a| wimo ai_wimo_auth::bearer_suffix(&a.key).to_owned()),
+                "key_prefix": auth.as_ref().map(|a| wimoai_wimo_auth::bearer_suffix(&a.key).to_owned()),
                 "expires_at": auth
                     .as_ref()
                     .and_then(|a| a.expires_at.map(|e| e.to_rfc3339())),
@@ -1109,12 +1109,12 @@ impl SessionActor {
     /// `transient`: turn-loop retry state (the loop owns the counters).
     pub(crate) async fn handle_sampling_failure(
         self: &Arc<Self>,
-        error: wimo ai_wimo_sampler::SamplingErrorInfo,
+        error: wimoai_wimo_sampler::SamplingErrorInfo,
         rate_limit_waits: u32,
         transient: TransientRetryState,
         mid_salvage_continuation: bool,
     ) -> Result<SamplerFailureRecovery, acp::Error> {
-        use wimo ai_wimo_sampler::SamplingErrorKind;
+        use wimoai_wimo_sampler::SamplingErrorKind;
 
         // On an in-flight salvage continuation, a max-tokens failure or a probable context overflow is not terminal
         // For an overflow, compact-and-resubmit would delete the continue reminder and split the report
@@ -1133,7 +1133,7 @@ impl SessionActor {
             && error.message.contains("encrypted_content");
         let quiet_mid_salvage = mid_salvage_continuation
             && (error.kind == SamplingErrorKind::MaxTokensTruncation
-                || wimo ai_wimo_sampling_types::is_context_length_error(&error.message)
+                || wimoai_wimo_sampling_types::is_context_length_error(&error.message)
                 || (!matches!(
                     error.kind,
                     SamplingErrorKind::Auth | SamplingErrorKind::RateLimited
@@ -1198,7 +1198,7 @@ impl SessionActor {
                 .expect("should_compact_on_error guarantees context_window");
             {
                 let total_tokens = self.chat_state_handle.get_estimated_total_tokens().await;
-                let percentage = wimo ai_token_estimation::usage_percentage_u8(total_tokens, cw);
+                let percentage = wimoai_token_estimation::usage_percentage_u8(total_tokens, cw);
 
                 // Update the in-memory sampling config's `context_window` if the model reported a different value (mirror the legacy path's bookkeeping)
                 if let Some(mut cfg) = self.chat_state_handle.get_sampling_config().await
@@ -1238,7 +1238,7 @@ impl SessionActor {
                             with the current model. Please start a new session."
                 .to_string();
             self.log_terminal_failure("encrypted_content_mismatch", error.status_code, &friendly);
-            self.send_wimo ai_notification(wimo aiSessionUpdate::RetryState(
+            self.send_wimoai_notification(wimoaiSessionUpdate::RetryState(
                 crate::extensions::notification::RetryState::Failed {
                     error_type: "encrypted_content_mismatch".to_string(),
                     message: friendly.clone(),
@@ -1250,7 +1250,7 @@ impl SessionActor {
 
         if matches!(error.kind, SamplingErrorKind::RateLimited) {
             self.log_terminal_failure("rate_limited", error.status_code, &detailed_message);
-            self.send_wimo ai_notification(wimo aiSessionUpdate::RetryState(
+            self.send_wimoai_notification(wimoaiSessionUpdate::RetryState(
                 crate::extensions::notification::RetryState::Exhausted {
                     attempts: rate_limit_waits,
                     reason: detailed_message.clone(),
@@ -1299,7 +1299,7 @@ impl SessionActor {
                     endpoint_is_first_party = gate.endpoint_is_first_party,
                     "auth recovery: sampler 401 not refreshable (api-key auth) — surfacing 401",
                 );
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "auth recovery: sampler 401 not eligible (api-key auth)",
                     Some(self.session_info.id.0.as_ref()),
                     Some(serde_json::json!({
@@ -1327,7 +1327,7 @@ impl SessionActor {
             && error.status_code == Some(401)
             && auth_provider.is_none()
         {
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth recovery: sampler 401 not eligible (non-auth error kind)",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -1351,7 +1351,7 @@ impl SessionActor {
                 .await
             {
                 tracing::info!(session_id = %self.session_info.id.0, "auth recovery: sampler 401, recovered, retrying");
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "auth recovery: sampler 401, recovered, retrying",
                     Some(self.session_info.id.0.as_ref()),
                     None,
@@ -1363,7 +1363,7 @@ impl SessionActor {
                 });
             }
             tracing::warn!(session_id = %self.session_info.id.0, "auth recovery: sampler 401, refresh failed");
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth recovery: sampler 401, refresh failed",
                 Some(self.session_info.id.0.as_ref()),
                 None,
@@ -1394,7 +1394,7 @@ impl SessionActor {
                     status_code: error.status_code,
                 });
             }
-            wimo ai_wimo_telemetry::unified_log::error(
+            wimoai_wimo_telemetry::unified_log::error(
                 "shell.turn.transient_retry_exhausted",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -1458,7 +1458,7 @@ impl SessionActor {
             .map(|a| a.auth_mode)
             .unwrap_or(crate::auth::AuthMode::ApiKey);
         let auth_mode_str = format!("{auth_mode:?}");
-        let client_version = wimo ai_wimo_version::VERSION;
+        let client_version = wimoai_wimo_version::VERSION;
 
         // 5c. Legacy WebLogin auth: always show a deprecation message regardless of error type.
         if auth_mode == crate::auth::AuthMode::WebLogin {
@@ -1470,7 +1470,7 @@ impl SessionActor {
                  Version: {client_version}"
             );
             self.log_terminal_failure("legacy_auth", error.status_code, &msg);
-            self.send_wimo ai_notification(wimo aiSessionUpdate::RetryState(
+            self.send_wimoai_notification(wimoaiSessionUpdate::RetryState(
                 crate::extensions::notification::RetryState::Failed {
                     error_type: "legacy_auth".to_string(),
                     message: msg.clone(),
@@ -1538,8 +1538,8 @@ impl SessionActor {
         let error_type = if error
             .error_code
             .as_ref()
-            .is_some_and(wimo ai_wimo_sampling_types::ApiErrorCode::is_size_overflow)
-            || wimo ai_wimo_sampling_types::is_context_length_error(&error.message)
+            .is_some_and(wimoai_wimo_sampling_types::ApiErrorCode::is_size_overflow)
+            || wimoai_wimo_sampling_types::is_context_length_error(&error.message)
         {
             crate::extensions::notification::CONTEXT_LENGTH_ERROR_TYPE
         } else {
@@ -1554,7 +1554,7 @@ impl SessionActor {
             _ => (error_type, detailed_message),
         };
         self.log_terminal_failure(error_type, error.status_code, &detailed_message);
-        self.send_wimo ai_notification(wimo aiSessionUpdate::RetryState(
+        self.send_wimoai_notification(wimoaiSessionUpdate::RetryState(
             crate::extensions::notification::RetryState::Failed {
                 error_type: error_type.to_string(),
                 message: detailed_message.clone(),
@@ -1572,7 +1572,7 @@ impl SessionActor {
 
     async fn wait_for_stream_drain(
         &self,
-        request_id: &wimo ai_wimo_sampler::RequestId,
+        request_id: &wimoai_wimo_sampler::RequestId,
         stream_drained_rx: tokio::sync::oneshot::Receiver<()>,
         timeout_message: &'static str,
     ) -> StreamDrainOutcome {
@@ -1644,9 +1644,9 @@ impl SessionActor {
     async fn submit_turn_request(
         self: &Arc<Self>,
         request: ConversationRequest,
-    ) -> Result<SamplerTurnOutcome, wimo ai_wimo_sampler::SamplingErrorInfo> {
+    ) -> Result<SamplerTurnOutcome, wimoai_wimo_sampler::SamplingErrorInfo> {
         // Install the per-request stream-drain barrier before submitting so the drainer can acknowledge the fully processed terminal event
-        let request_id = wimo ai_wimo_sampler::RequestId::random();
+        let request_id = wimoai_wimo_sampler::RequestId::random();
         let stream_drained_rx = {
             let (tx, rx) = tokio::sync::oneshot::channel();
             self.turn_stream_drained
@@ -1757,7 +1757,7 @@ impl SessionActor {
             Err(rich_err) => {
                 // Detector labels are already merged from the awaited result.
                 // Wait briefly for the UI/error event rail, then fail open so a stuck drainer cannot prevent recovery or turn teardown
-                let original = wimo ai_wimo_sampler::SamplingErrorInfo::from(&rich_err);
+                let original = wimoai_wimo_sampler::SamplingErrorInfo::from(&rich_err);
                 let outcome = if terminal_event_queued {
                     self.wait_for_stream_drain(
                         &request_id,
@@ -1782,7 +1782,7 @@ impl SessionActor {
 
     async fn recover_from_sampling_failure(
         self: &Arc<Self>,
-        info: wimo ai_wimo_sampler::SamplingErrorInfo,
+        info: wimoai_wimo_sampler::SamplingErrorInfo,
         budget: &RateLimitWaitBudget,
         transient: TransientRetryState,
         mid_salvage_continuation: bool,
@@ -1825,7 +1825,7 @@ impl SessionActor {
         );
         // Per-wait unified-log marker so each pause is visible in session logs like auth backoff
         // The terminal give-up alone (the `subagent_rate_limit_exhausted` marker) is not enough
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "shell.turn.subagent_rate_limit_backoff",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -1836,7 +1836,7 @@ impl SessionActor {
         );
         // Whole seconds with a one-second floor: a sub-second jittered wait would otherwise render as "waiting 0s"
         let announced = Duration::from_secs(backoff.as_secs_f64().round().max(1.0) as u64);
-        self.send_wimo ai_notification(wimo aiSessionUpdate::RetryState(
+        self.send_wimoai_notification(wimoaiSessionUpdate::RetryState(
             crate::extensions::notification::RetryState::Retrying {
                 attempt,
                 max_retries: budget.max_attempts(),
@@ -1853,7 +1853,7 @@ impl SessionActor {
     fn log_rate_limit_budget_spent(
         &self,
         decision: RateLimitWaitDecision,
-        error: &wimo ai_wimo_sampler::SamplingErrorInfo,
+        error: &wimoai_wimo_sampler::SamplingErrorInfo,
     ) {
         let RateLimitWaitDecision::BudgetSpent { attempts, limit } = decision else {
             return;
@@ -1864,7 +1864,7 @@ impl SessionActor {
             retry_after_secs = ?error.retry_after_secs,
             "subagent stopped waiting out rate limits; failing the turn"
         );
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "shell.turn.subagent_rate_limit_exhausted",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -1895,7 +1895,7 @@ impl SessionActor {
                 .unwrap_or_default();
             // Same condition as the seed guard above, so without this the re-seed puts the key back.
             if self.auth_gate(&model_id, &base_url).active()
-                && ActiveAuthBackend::default().is_wimo ai_authority()
+                && ActiveAuthBackend::default().is_wimoai_authority()
             {
                 match am.get_valid_token().await {
                     Ok(key) => {
@@ -1924,7 +1924,7 @@ impl SessionActor {
                             model = %model_id,
                             "auth: preflight get_valid_token failed"
                         );
-                        wimo ai_wimo_telemetry::unified_log::warn(
+                        wimoai_wimo_telemetry::unified_log::warn(
                             "auth.preflight.refresh_failed",
                             Some(self.session_info.id.0.as_ref()),
                             Some(serde_json::json!({
@@ -1938,7 +1938,7 @@ impl SessionActor {
                 }
             }
         } else {
-            wimo ai_wimo_telemetry::unified_log::debug(
+            wimoai_wimo_telemetry::unified_log::debug(
                 "token refresh skipped: no auth manager",
                 Some(self.session_info.id.0.as_ref()),
                 None,
@@ -2169,10 +2169,10 @@ async fn acquire_subagent_sampling_permit(
 
 /// The cutoff a subagent inherits: a non-empty per-turn `base` wins per tool, else the `seed`.
 fn resolve_configured_cutoff(
-    seed: Option<wimo ai_wimo_sampling_types::ToolOverrides>,
-    base: Option<&wimo ai_wimo_sampling_types::ToolOverrides>,
-) -> wimo ai_wimo_sampling_types::ToolOverrides {
-    use wimo ai_wimo_sampling_types::{ToolOverrides, WebSearchOptions, XSearchOptions};
+    seed: Option<wimoai_wimo_sampling_types::ToolOverrides>,
+    base: Option<&wimoai_wimo_sampling_types::ToolOverrides>,
+) -> wimoai_wimo_sampling_types::ToolOverrides {
+    use wimoai_wimo_sampling_types::{ToolOverrides, WebSearchOptions, XSearchOptions};
     let ToolOverrides {
         x_search: seed_x,
         web_search: seed_w,
@@ -2215,8 +2215,8 @@ mod stream_drain_tests {
 
     #[test]
     fn failed_drain_revocation_supersedes_original_error() {
-        let original = wimo ai_wimo_sampler::SamplingErrorInfo {
-            kind: wimo ai_wimo_sampler::SamplingErrorKind::RateLimited,
+        let original = wimoai_wimo_sampler::SamplingErrorInfo {
+            kind: wimoai_wimo_sampler::SamplingErrorKind::RateLimited,
             status_code: Some(429),
             message: "original sampling failure".to_string(),
             is_retryable: true,
@@ -2227,7 +2227,7 @@ mod stream_drain_tests {
             empty_response_context: None,
             doom_loop_triggers: None,
             doom_loop_aborted_at_chunk: None,
-            credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+            credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
         };
         let result = error_after_stream_drain(StreamDrainOutcome::Revoked, original);
         assert_eq!(

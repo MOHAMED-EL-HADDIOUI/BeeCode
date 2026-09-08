@@ -28,27 +28,27 @@ use anyhow::Result;
 use std::net::SocketAddr;
 use std::num::NonZeroUsize;
 use tokio_util::sync::CancellationToken;
-use wimo ai_wimo_pager::app::{
+use wimoai_wimo_pager::app::{
     AgentCmd, Command, EARLY_PREFETCH_WAIT, HeadlessArgs, LeaderMgmtArgs, LeaderMgmtCommand,
     LeaderMode, LeaderTargetArgs, PagerArgs, resolve_leader_mode, resolve_use_leader,
     warn_leader_disabled_by_sandbox,
 };
-use wimo ai_wimo_pager::app::{WorkspaceMgmtArgs, WorkspaceMgmtCommand, WorkspaceStartArgs};
-use wimo ai_wimo_pager::client_identity::PAGER_CLIENT_VERSION;
-use wimo ai_wimo_shell::agent::app::{run_headless, run_leader, run_stdio_agent};
-use wimo ai_wimo_shell::agent::config::Config as AgentConfig;
-use wimo ai_wimo_shell::leader::{
+use wimoai_wimo_pager::app::{WorkspaceMgmtArgs, WorkspaceMgmtCommand, WorkspaceStartArgs};
+use wimoai_wimo_pager::client_identity::PAGER_CLIENT_VERSION;
+use wimoai_wimo_shell::agent::app::{run_headless, run_leader, run_stdio_agent};
+use wimoai_wimo_shell::agent::config::Config as AgentConfig;
+use wimoai_wimo_shell::leader::{
     ClientCapabilities, ClientMode, ControlCommand, LeaderCapabilities, LeaderDescriptor,
     LeaderRegistration, LeaderTarget, leader_is_older_than,
 };
-use wimo ai_wimo_shell::leader::{
+use wimoai_wimo_shell::leader::{
     ControlPayload, LeaderClient, LeaderEnvUrls, connect_or_spawn, socket_path_for_ws_url,
 };
-use wimo ai_wimo_telemetry::process_info::{
+use wimoai_wimo_telemetry::process_info::{
     Entrypoint, Interactivity, ProcessIdentity, ReleaseChannel, set_identity, set_release_channel,
 };
 fn process_identity(command: Option<&Command>, is_interactive: bool) -> Option<ProcessIdentity> {
-    use wimo ai_wimo_telemetry::process_info::LeaderMode::Standalone;
+    use wimoai_wimo_telemetry::process_info::LeaderMode::Standalone;
     let (entrypoint, interactivity) = match command {
         Some(Command::Agent(_)) => return None,
         Some(Command::Dashboard) => return None,
@@ -118,7 +118,7 @@ fn command_needs_pre_sandbox_policy_heal(command: Option<&Command>) -> bool {
     }
 }
 use std::env;
-use wimo ai_wimo_update::{UpdateConfig, auto_update, enforce_version_policy_or_exit};
+use wimoai_wimo_update::{UpdateConfig, auto_update, enforce_version_policy_or_exit};
 /// Apply headless args to an existing config, only overriding values that are explicitly set.
 /// Unset args leave the environment defaults in place.
 fn apply_headless_args_to_config(args: &HeadlessArgs, config: &mut AgentConfig) {
@@ -131,14 +131,14 @@ fn apply_headless_args_to_config(args: &HeadlessArgs, config: &mut AgentConfig) 
 }
 /// Apply global endpoint CLI args to an existing config.
 fn apply_agent_endpoint_args(
-    agent_args: &wimo ai_wimo_pager::app::AgentArgs,
+    agent_args: &wimoai_wimo_pager::app::AgentArgs,
     config: &mut AgentConfig,
 ) {
     if let Some(v) = &agent_args.cli_chat_proxy_base_url {
         config.endpoints.cli_chat_proxy_base_url = Some(v.clone());
     }
-    if let Some(v) = &agent_args.wimo ai_api_base_url {
-        config.endpoints.wimo ai_api_base_url = v.clone();
+    if let Some(v) = &agent_args.wimoai_api_base_url {
+        config.endpoints.wimoai_api_base_url = v.clone();
     }
 }
 /// Resolve --agent-profile path: canonicalize and verify the file exists.
@@ -177,7 +177,7 @@ const HEADLESS_ENTRYPOINT: &str = "headless";
 /// Initialize simple tracing for non-TUI agent modes.
 fn init_tracing_simple(app_entrypoint: &'static str) {
     use tracing_subscriber::{EnvFilter, Layer as _, fmt, layer::SubscriberExt as _};
-    use wimo ai_wimo_telemetry::debug_log::RMCP_SSE_NOISE_TARGET;
+    use wimoai_wimo_telemetry::debug_log::RMCP_SSE_NOISE_TARGET;
     let default_filter = if app_entrypoint == HEADLESS_ENTRYPOINT {
         "off"
     } else {
@@ -197,35 +197,35 @@ fn init_tracing_simple(app_entrypoint: &'static str) {
         .with_writer(std::io::stderr);
     let registry = tracing_subscriber::registry()
         .with(fmt_layer.with_filter(env_filter))
-        .with(wimo ai_wimo_telemetry::sampling_log::layer())
-        .with(wimo ai_wimo_telemetry::span_profile::layer(app_entrypoint))
-        .with(wimo ai_wimo_telemetry::instrumentation::layer())
-        .with(wimo ai_wimo_telemetry::hooks_log::layer())
-        .with(wimo ai_wimo_telemetry::otel_layer::build_otel_layer(
-            wimo ai_wimo_telemetry::otel_layer::OtelClientInfo {
+        .with(wimoai_wimo_telemetry::sampling_log::layer())
+        .with(wimoai_wimo_telemetry::span_profile::layer(app_entrypoint))
+        .with(wimoai_wimo_telemetry::instrumentation::layer())
+        .with(wimoai_wimo_telemetry::hooks_log::layer())
+        .with(wimoai_wimo_telemetry::otel_layer::build_otel_layer(
+            wimoai_wimo_telemetry::otel_layer::OtelClientInfo {
                 client_name: "wimo-pager",
-                client_version: wimo ai_wimo_version::VERSION,
+                client_version: wimoai_wimo_version::VERSION,
                 service_version: env!("VERSION_WITH_COMMIT"),
                 app_entrypoint,
             },
-            wimo ai_wimo_shell::auth::credential_provider::build_default_otel_layer_config(),
+            wimoai_wimo_shell::auth::credential_provider::build_default_otel_layer_config(),
         ));
-    wimo ai_wimo_telemetry::debug_log::install_firehose(registry, app_entrypoint);
-    wimo ai_wimo_telemetry::external::init(
-        wimo ai_wimo_shell::agent::config::resolve_external_otel_config(
-            wimo ai_wimo_telemetry::external::config::ExternalClientInfo {
+    wimoai_wimo_telemetry::debug_log::install_firehose(registry, app_entrypoint);
+    wimoai_wimo_telemetry::external::init(
+        wimoai_wimo_shell::agent::config::resolve_external_otel_config(
+            wimoai_wimo_telemetry::external::config::ExternalClientInfo {
                 service_version: env!("VERSION_WITH_COMMIT").to_owned(),
-                client_version: wimo ai_wimo_version::VERSION.to_owned(),
+                client_version: wimoai_wimo_version::VERSION.to_owned(),
                 app_entrypoint: app_entrypoint.to_owned(),
             },
         ),
     );
 }
-/// `wimo setup`: rendering and exit codes only; fetch logic lives in `wimo ai_wimo_shell::managed_config`.
+/// `wimo setup`: rendering and exit codes only; fetch logic lives in `wimoai_wimo_shell::managed_config`.
 /// `json` prints the served configuration instead of installing it.
 #[tracing::instrument(level = "debug", skip_all)]
 async fn run_setup_command(json: bool) {
-    use wimo ai_wimo_shell::managed_config::{self, SetupOutcome};
+    use wimoai_wimo_shell::managed_config::{self, SetupOutcome};
     if !managed_config::has_principal() {
         eprintln!("No deployment key or team sign-in found.");
         eprintln!();
@@ -296,7 +296,7 @@ async fn run_leader_mgmt(args: LeaderMgmtArgs) -> Result<()> {
     match args.command {
         LeaderMgmtCommand::Kill => kill_leaders().await,
         LeaderMgmtCommand::List { json } => {
-            let leaders = wimo ai_wimo_shell::leader::discover_leaders().await;
+            let leaders = wimoai_wimo_shell::leader::discover_leaders().await;
             if json {
                 let payload: Vec<_> = leaders.iter().map(leader_descriptor_json).collect();
                 println!(
@@ -340,7 +340,7 @@ async fn run_leader_mgmt(args: LeaderMgmtArgs) -> Result<()> {
 }
 #[tracing::instrument(level = "debug", skip_all)]
 async fn kill_leaders() -> Result<()> {
-    let leaders = wimo ai_wimo_shell::leader::discover_leaders().await;
+    let leaders = wimoai_wimo_shell::leader::discover_leaders().await;
     if leaders.is_empty() {
         eprintln!("No leader candidates found.");
         return Ok(());
@@ -351,7 +351,7 @@ async fn kill_leaders() -> Result<()> {
         let Some(pid) = leader_pid(d) else {
             continue;
         };
-        if !wimo ai_wimo_shell::util::is_wimo_process(pid) {
+        if !wimoai_wimo_shell::util::is_wimo_process(pid) {
             if let Some(ref lock) = d.lock_path {
                 eprintln!("  PID {pid} is not a wimo process, removing stale lock");
                 let _ = std::fs::remove_file(lock);
@@ -363,7 +363,7 @@ async fn kill_leaders() -> Result<()> {
             continue;
         }
         eprintln!("  Killing leader PID {pid}");
-        if let Err(e) = wimo ai_wimo_shell::util::kill_process_by_pid(pid) {
+        if let Err(e) = wimoai_wimo_shell::util::kill_process_by_pid(pid) {
             eprintln!("  warning: failed to terminate PID {pid}: {e}");
             continue;
         }
@@ -381,21 +381,21 @@ async fn kill_leaders() -> Result<()> {
 fn resolve_target(args: &LeaderTargetArgs) -> LeaderTarget {
     match args.pid {
         Some(pid) => LeaderTarget::Pid(pid),
-        None => LeaderTarget::Environment(wimo ai_wimo_shell::env::WimoEnvironment::Production),
+        None => LeaderTarget::Environment(wimoai_wimo_shell::env::WimoEnvironment::Production),
     }
 }
 #[tracing::instrument(skip_all)]
 async fn connect_to_leader(
     args: &LeaderTargetArgs,
-) -> Result<(LeaderDescriptor, wimo ai_wimo_shell::leader::LeaderClient)> {
+) -> Result<(LeaderDescriptor, wimoai_wimo_shell::leader::LeaderClient)> {
     let target = resolve_target(args);
-    let selection = wimo ai_wimo_shell::leader::resolve_leader_target(target)
+    let selection = wimoai_wimo_shell::leader::resolve_leader_target(target)
         .await
         .map_err(|e| anyhow::anyhow!("{}", e.message))?;
     let socket_path = selection
         .socket_path()
         .ok_or_else(|| anyhow::anyhow!("resolved leader target did not include a socket path"))?;
-    let client = wimo ai_wimo_shell::leader::LeaderClient::connect(
+    let client = wimoai_wimo_shell::leader::LeaderClient::connect(
         socket_path.to_path_buf(),
         "wimo-pager-leader-cli",
         ClientMode::Stdio,
@@ -434,7 +434,7 @@ fn leader_descriptor_json(d: &LeaderDescriptor) -> serde_json::Value {
 fn leader_info_json(
     d: &LeaderDescriptor,
     reg: &LeaderRegistration,
-    info: Option<&wimo ai_wimo_shell::leader::ControlPayload>,
+    info: Option<&wimoai_wimo_shell::leader::ControlPayload>,
 ) -> Result<serde_json::Value> {
     let mut val = leader_descriptor_json(d);
     val["clientId"] = serde_json::json!(reg.client_id);
@@ -470,7 +470,7 @@ fn workspace_command_env_override() -> Option<bool> {
 /// Precedence: the env override, then remote `Some(true)`, then loaded-but-off (`Disabled`), then settings-not-loaded (`Unknown`).
 fn workspace_command_gate(
     env_override: Option<bool>,
-    remote_settings: Option<&wimo ai_wimo_shell::util::config::RemoteSettings>,
+    remote_settings: Option<&wimoai_wimo_shell::util::config::RemoteSettings>,
 ) -> WorkspaceGate {
     if let Some(enabled) = env_override {
         return if enabled {
@@ -494,9 +494,9 @@ fn env_flag_enabled(value: &str) -> bool {
 }
 /// Blocking fetch of remote settings via the startup prefetch path,
 /// capped at the early-prefetch wait so a slow endpoint cannot stall the CLI.
-fn fetch_remote_settings() -> Option<wimo ai_wimo_shell::util::config::RemoteSettings> {
-    wimo ai_wimo_shell::agent::models::startup_prefetch::begin(None);
-    wimo ai_wimo_shell::agent::models::startup_prefetch::wait_settings(EARLY_PREFETCH_WAIT)
+fn fetch_remote_settings() -> Option<wimoai_wimo_shell::util::config::RemoteSettings> {
+    wimoai_wimo_shell::agent::models::startup_prefetch::begin(None);
+    wimoai_wimo_shell::agent::models::startup_prefetch::wait_settings(EARLY_PREFETCH_WAIT)
 }
 #[tracing::instrument(level = "debug", skip_all)]
 async fn run_workspace_mgmt(args: WorkspaceMgmtArgs) -> Result<()> {
@@ -505,7 +505,7 @@ async fn run_workspace_mgmt(args: WorkspaceMgmtArgs) -> Result<()> {
         WorkspaceMgmtCommand::Start(_)
             | WorkspaceMgmtCommand::Restart(_)
             | WorkspaceMgmtCommand::Resume { .. }
-    ) && let Some(profile) = wimo ai_wimo_sandbox::requested_confinement_profile()
+    ) && let Some(profile) = wimoai_wimo_sandbox::requested_confinement_profile()
     {
         anyhow::bail!(
             "`wimo workspace` start/restart/resume is unavailable under sandbox profile '{profile}': \
@@ -598,7 +598,7 @@ async fn workspace_control(
     json: bool,
     command: ControlCommand,
 ) -> Result<()> {
-    let agent_config = wimo ai_wimo_shell::config::load_agent_config_disk_only()
+    let agent_config = wimoai_wimo_shell::config::load_agent_config_disk_only()
         .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
     let client = connect_workspace_control(&agent_config, target).await?;
     ensure_workspace_caps(client.registration())?;
@@ -611,11 +611,11 @@ async fn workspace_control(
 async fn workspace_start(
     args: WorkspaceStartArgs,
     restart: bool,
-    remote_settings: Option<wimo ai_wimo_shell::util::config::RemoteSettings>,
+    remote_settings: Option<wimoai_wimo_shell::util::config::RemoteSettings>,
 ) -> Result<()> {
-    use wimo ai_wimo_shell::auth::ensure_authenticated;
-    wimo ai_wimo_shell::util::config::set_remote_campaigns_from_settings(remote_settings.as_ref());
-    let raw_config = wimo ai_wimo_shell::config::load_effective_config()
+    use wimoai_wimo_shell::auth::ensure_authenticated;
+    wimoai_wimo_shell::util::config::set_remote_campaigns_from_settings(remote_settings.as_ref());
+    let raw_config = wimoai_wimo_shell::config::load_effective_config()
         .map_err(|e| anyhow::anyhow!("Failed to load config: {e}"))?;
     let agent_config = AgentConfig::new_from_toml_cfg(&raw_config)
         .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
@@ -625,7 +625,7 @@ async fn workspace_start(
         &raw_config,
         remote_settings.as_ref(),
         true,
-        wimo ai_wimo_sandbox::requested_confinement_profile(),
+        wimoai_wimo_sandbox::requested_confinement_profile(),
     );
     if !use_leader {
         anyhow::bail!(
@@ -1084,14 +1084,14 @@ async fn replay_acp_state_after_reconnect(
 /// Does NOT write terminal escape codes; agent mode never enables TUI modes.
 /// The TUI has its own signal handler (`app::signal_handler`) that does the full crossterm teardown.
 fn shutdown_and_flush_telemetry(exit_code: i32) -> ! {
-    wimo ai_wimo_telemetry::sentry::flush_on_shutdown();
-    wimo ai_wimo_telemetry::otel_layer::shutdown_otel();
-    wimo ai_wimo_telemetry::debug_log::flush();
+    wimoai_wimo_telemetry::sentry::flush_on_shutdown();
+    wimoai_wimo_telemetry::otel_layer::shutdown_otel();
+    wimoai_wimo_telemetry::debug_log::flush();
     finalize_span_profile();
     std::process::exit(exit_code);
 }
 fn finalize_span_profile() {
-    if let Some(path) = wimo ai_wimo_telemetry::span_profile::finalize() {
+    if let Some(path) = wimoai_wimo_telemetry::span_profile::finalize() {
         eprintln!("wimo: span profile written to {}", path.display());
     }
 }
@@ -1132,7 +1132,7 @@ const PLUGIN_DIR_LEADER_WARNING: &str = "wimo: --plugin-dir is ignored in leader
 /// Run the `agent` subcommand, dispatching to the appropriate mode.
 #[tracing::instrument(level = "debug", skip_all)]
 async fn run_agent_command(
-    agent_args: Box<wimo ai_wimo_pager::app::AgentArgs>,
+    agent_args: Box<wimoai_wimo_pager::app::AgentArgs>,
     permission_mode_flag: Option<String>,
     trust: bool,
     no_auto_update: bool,
@@ -1143,7 +1143,7 @@ async fn run_agent_command(
         #[cfg(unix)]
         {
             use tokio::signal::unix::{SignalKind, signal};
-            use wimo ai_wimo_pager::app::signal_handler::next_signal_code;
+            use wimoai_wimo_pager::app::signal_handler::next_signal_code;
             let mut term = signal(SignalKind::terminate()).ok();
             let mut hup = signal(SignalKind::hangup()).ok();
             let code = next_signal_code(&mut term, &mut hup).await;
@@ -1160,29 +1160,29 @@ async fn run_agent_command(
         agent_args.mode,
         Some(AgentCmd::Leader(_) | AgentCmd::Stdio | AgentCmd::Headless(_) | AgentCmd::Serve(_))
     ) {
-        wimo ai_wimo_shell::agent::app::suppress_otel();
+        wimoai_wimo_shell::agent::app::suppress_otel();
     }
     init_tracing_simple("agent");
-    let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-    wimo ai_wimo_telemetry::instrumentation::install_panic_hook();
+    let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+    wimoai_wimo_telemetry::instrumentation::install_panic_hook();
     if trust {
         match std::env::current_dir() {
-            Ok(cwd) => wimo ai_wimo_workspace::folder_trust::grant_folder_trust(&cwd),
+            Ok(cwd) => wimoai_wimo_workspace::folder_trust::grant_folder_trust(&cwd),
             Err(e) => {
                 tracing::warn!(error = %e, "--trust: failed to resolve cwd; folder not trusted")
             }
         }
     }
-    let had_prefetch = wimo ai_wimo_shell::agent::models::startup_prefetch::begin(None);
-    wimo ai_wimo_shell::agent::mvp_agent::warm_async_http_client();
+    let had_prefetch = wimoai_wimo_shell::agent::models::startup_prefetch::begin(None);
+    wimoai_wimo_shell::agent::mvp_agent::warm_async_http_client();
     let is_stdio = matches!(agent_args.mode, Some(AgentCmd::Stdio));
     let is_leader = matches!(agent_args.mode, Some(AgentCmd::Leader(_)));
     if !is_stdio && !is_leader {
         eprintln!(
             "wimo Build (pager) - v{}",
-            wimo ai_wimo_version::display_version_with_commit(
+            wimoai_wimo_version::display_version_with_commit(
                 env!("VERSION_WITH_COMMIT"),
-                wimo ai_wimo_update::channel_label(),
+                wimoai_wimo_update::channel_label(),
             )
         );
         if should_check_for_updates(no_auto_update) {
@@ -1197,12 +1197,12 @@ async fn run_agent_command(
         }
     }
     let remote_settings = if had_prefetch {
-        wimo ai_wimo_shell::agent::models::startup_prefetch::wait_settings(EARLY_PREFETCH_WAIT)
+        wimoai_wimo_shell::agent::models::startup_prefetch::wait_settings(EARLY_PREFETCH_WAIT)
     } else {
         None
     };
-    wimo ai_wimo_shell::util::config::set_remote_campaigns_from_settings(remote_settings.as_ref());
-    let raw_config = wimo ai_wimo_shell::config::load_effective_config()
+    wimoai_wimo_shell::util::config::set_remote_campaigns_from_settings(remote_settings.as_ref());
+    let raw_config = wimoai_wimo_shell::config::load_effective_config()
         .map_err(|e| anyhow::anyhow!("Failed to load config: {}", e))?;
     let mut agent_config = AgentConfig::new_from_toml_cfg(&raw_config)
         .map_err(|e| anyhow::anyhow!("Failed to create agent config: {}", e))?;
@@ -1210,8 +1210,8 @@ async fn run_agent_command(
     agent_config.reasoning_effort_override = agent_args
         .reasoning_effort
         .as_deref()
-        .and_then(wimo ai_wimo_shell::sampling::types::parse_canonical_effort_token);
-    let launch_yolo = wimo ai_wimo_shell::util::config::effective_yolo_for_launch(
+        .and_then(wimoai_wimo_shell::sampling::types::parse_canonical_effort_token);
+    let launch_yolo = wimoai_wimo_shell::util::config::effective_yolo_for_launch(
         agent_args.yolo,
         permission_mode_flag.as_deref(),
         None,
@@ -1220,11 +1220,11 @@ async fn run_agent_command(
         eprintln!("wimo: {warning}");
     }
     agent_config.default_yolo_mode = launch_yolo.yolo;
-    agent_config.default_auto_mode = wimo ai_wimo_shell::util::config::effective_auto_for_launch(
+    agent_config.default_auto_mode = wimoai_wimo_shell::util::config::effective_auto_for_launch(
         agent_args.yolo,
         permission_mode_flag.as_deref(),
         None,
-        wimo ai_wimo_shell::util::config::PermissionMode::Ask,
+        wimoai_wimo_shell::util::config::PermissionMode::Ask,
     );
     agent_config.agent_profile_path = agent_args
         .agent_profile
@@ -1238,7 +1238,7 @@ async fn run_agent_command(
     }
     apply_agent_endpoint_args(&agent_args, &mut agent_config);
     agent_config.remote_settings = remote_settings.clone();
-    agent_config.resolve_runtime_fields(&wimo ai_wimo_shell::agent::config::RuntimeResolutionContext {
+    agent_config.resolve_runtime_fields(&wimoai_wimo_shell::agent::config::RuntimeResolutionContext {
         raw_config: &raw_config,
         remote_settings: remote_settings.as_ref(),
         is_headless: !is_leader,
@@ -1256,7 +1256,7 @@ async fn run_agent_command(
         &agent_args.mode,
         None | Some(AgentCmd::Stdio) | Some(AgentCmd::Headless(_))
     );
-    let requested_confinement = wimo ai_wimo_sandbox::requested_confinement_profile();
+    let requested_confinement = wimoai_wimo_sandbox::requested_confinement_profile();
     let LeaderMode {
         use_leader,
         policy_disable_reason,
@@ -1279,7 +1279,7 @@ async fn run_agent_command(
     if let Some(profile) = disabled_by_confinement {
         warn_leader_disabled_by_sandbox(profile);
     }
-    use wimo ai_wimo_telemetry::process_info::LeaderMode::{Attached, Standalone};
+    use wimoai_wimo_telemetry::process_info::LeaderMode::{Attached, Standalone};
     set_identity(ProcessIdentity {
         entrypoint: match &agent_args.mode {
             Some(AgentCmd::Stdio) => Entrypoint::Embedded,
@@ -1296,7 +1296,7 @@ async fn run_agent_command(
     });
     let managed_install = is_managed_install(
         std::env::current_exe().ok(),
-        &wimo ai_wimo_shell::util::wimo_home::wimo_home(),
+        &wimoai_wimo_shell::util::wimo_home::wimo_home(),
     );
     if stdio_auto_update_enabled(
         is_stdio,
@@ -1325,7 +1325,7 @@ async fn run_agent_command(
         use std::sync::Arc;
         use tokio::io::AsyncWriteExt;
         use tokio::sync::Mutex as TokioMutex;
-        use wimo ai_wimo_shell::leader::{
+        use wimoai_wimo_shell::leader::{
             ClientCapabilities, ClientMode, LeaderReconnector, ReconnectPolicy, connect_or_spawn,
         };
         let mode = match &agent_args.mode {
@@ -1333,7 +1333,7 @@ async fn run_agent_command(
             Some(AgentCmd::Headless(_)) | None => ClientMode::Headless,
             _ => ClientMode::Stdio,
         };
-        let env_urls = wimo ai_wimo_shell::leader::LeaderEnvUrls::from(&agent_config.wimo_com_config);
+        let env_urls = wimoai_wimo_shell::leader::LeaderEnvUrls::from(&agent_config.wimo_com_config);
         let default_model = agent_config
             .default_model_override
             .clone()
@@ -1363,7 +1363,7 @@ async fn run_agent_command(
         let cancel = CancellationToken::new();
         match mode {
             ClientMode::Stdio => {
-                if let Err(error) = wimo ai_tty_utils::kill_current_process_on_parent_death() {
+                if let Err(error) = wimoai_tty_utils::kill_current_process_on_parent_death() {
                     tracing::warn!(
                         %error,
                         "failed to bind to parent death; stdio bridge will not die \
@@ -1376,7 +1376,7 @@ async fn run_agent_command(
                 let replay_state_stdin = replay_state.clone();
                 let cancel_stdin = cancel.clone();
                 let stdin_task = tokio::spawn(async move {
-                    let mut stdin_lines = wimo ai_acp_lib::spawn_stdin_line_reader();
+                    let mut stdin_lines = wimoai_acp_lib::spawn_stdin_line_reader();
                     loop {
                         tokio::select! {
                             biased;
@@ -1516,12 +1516,12 @@ async fn run_agent_command(
             let mut agent_config = agent_config.clone();
             apply_headless_args_to_config(&a.headless, &mut agent_config);
             let secret = a.get_secret();
-            let server_config = wimo ai_wimo_shell::agent::ServerConfig {
+            let server_config = wimoai_wimo_shell::agent::ServerConfig {
                 bind_addr: a.bind,
                 secret: secret.clone(),
             };
             print_serve_startup_info(a.bind, &secret);
-            wimo ai_wimo_shell::agent::run_agent_server(server_config, agent_config).await
+            wimoai_wimo_shell::agent::run_agent_server(server_config, agent_config).await
         }
         Some(AgentCmd::Leader(a)) => {
             let mut agent_config = agent_config.clone();
@@ -1533,19 +1533,19 @@ async fn run_agent_command(
                 None
             } else {
                 let update_config_for_leader = update_config.clone();
-                Some(wimo ai_wimo_shell::agent::app::LeaderAutoUpdateConfig {
+                Some(wimoai_wimo_shell::agent::app::LeaderAutoUpdateConfig {
                     check_interval: std::time::Duration::from_secs(60 * 60),
                     check_fn: Box::new(move || {
                         let uc = update_config_for_leader.clone();
                         Box::pin(async move {
-                            let current_config = wimo ai_wimo_shell::util::config::load_config().await;
+                            let current_config = wimoai_wimo_shell::util::config::load_config().await;
                             if current_config.cli.auto_update == Some(false) {
                                 return false;
                             }
                             match auto_update::ensure_latest_on_disk(&uc).await {
                                 Ok(outcome) => {
                                     if let Some(v) = &outcome.installed {
-                                        if let Err(e) = wimo ai_wimo_shell::managed_config::sync().await
+                                        if let Err(e) = wimoai_wimo_shell::managed_config::sync().await
                                         {
                                             tracing::warn!(
                                                 "Leader auto-update: managed config refresh failed: {e}"
@@ -1645,7 +1645,7 @@ fn flag_dashboard_at_startup_if_requested(args: &mut PagerArgs) -> Result<()> {
     if !matches!(args.command, Some(Command::Dashboard)) {
         return Ok(());
     }
-    if !wimo ai_wimo_pager::views::dashboard::dashboard_enabled() {
+    if !wimoai_wimo_pager::views::dashboard::dashboard_enabled() {
         anyhow::bail!(
             "the Agent Dashboard is disabled. Enable it by removing \
              `[dashboard] enabled = false` from ~/.wimo/config.toml and \
@@ -1784,7 +1784,7 @@ fn purge_jemalloc_retained_pages() {
 /// Returns `None` if any mallctl fails (trace records the absence).
 /// Uses the `tikv-jemalloc-ctl` raw helpers (shared with the heap-profile hooks below) instead of hand-rolled mallctl.
 #[cfg(all(feature = "jemalloc", unix))]
-fn jemalloc_allocator_stats() -> Option<wimo ai_wimo_pager::memory_trace::AllocatorStats> {
+fn jemalloc_allocator_stats() -> Option<wimoai_wimo_pager::memory_trace::AllocatorStats> {
     /// SAFETY: callers pass fixed NUL-terminated `stats.*` size_t ctl names.
     unsafe fn gauge(name: &[u8]) -> Option<u64> {
         unsafe {
@@ -1795,7 +1795,7 @@ fn jemalloc_allocator_stats() -> Option<wimo ai_wimo_pager::memory_trace::Alloca
     }
     unsafe {
         tikv_jemalloc_ctl::raw::write(b"epoch\0", 1u64).ok()?;
-        Some(wimo ai_wimo_pager::memory_trace::AllocatorStats {
+        Some(wimoai_wimo_pager::memory_trace::AllocatorStats {
             allocated: gauge(b"stats.allocated\0")?,
             active: gauge(b"stats.active\0")?,
             resident: gauge(b"stats.resident\0")?,
@@ -1827,12 +1827,12 @@ fn jemalloc_stats_dump() -> String {
     out
 }
 #[cfg(all(feature = "jemalloc", unix))]
-fn jemalloc_heap_stats() -> Option<wimo ai_wimo_shell::heap_profile::JemallocStats> {
+fn jemalloc_heap_stats() -> Option<wimoai_wimo_shell::heap_profile::JemallocStats> {
     unsafe {
         tikv_jemalloc_ctl::raw::write(b"epoch\0", 1u64).ok()?;
         let allocated = tikv_jemalloc_ctl::raw::read::<usize>(b"stats.allocated\0").ok()? as u64;
         let resident = tikv_jemalloc_ctl::raw::read::<usize>(b"stats.resident\0").ok()? as u64;
-        Some(wimo ai_wimo_shell::heap_profile::JemallocStats {
+        Some(wimoai_wimo_shell::heap_profile::JemallocStats {
             allocated,
             resident,
         })
@@ -1861,7 +1861,7 @@ fn jemalloc_dump_to_path(path: &std::path::Path) -> Result<(), String> {
 }
 #[cfg(all(feature = "jemalloc", unix))]
 fn install_heap_profile_hooks() {
-    wimo ai_wimo_shell::heap_profile::install(wimo ai_wimo_shell::heap_profile::HeapProfileHooks {
+    wimoai_wimo_shell::heap_profile::install(wimoai_wimo_shell::heap_profile::HeapProfileHooks {
         stats: jemalloc_heap_stats,
         set_prof_active: jemalloc_set_prof_active,
         dump_to_path: jemalloc_dump_to_path,
@@ -1871,8 +1871,8 @@ fn install_heap_profile_hooks() {
 fn version_text(channel_label: &str) -> String {
     format!(
         "wimo {}\n",
-        wimo ai_wimo_version::display_version_with_commit(
-            wimo ai_wimo_version::full_version(),
+        wimoai_wimo_version::display_version_with_commit(
+            wimoai_wimo_version::full_version(),
             channel_label,
         )
     )
@@ -1886,7 +1886,7 @@ fn dispatch_version_if_requested(args: &PagerArgs) -> bool {
     }
     if let Err(error) = write_version(
         &mut std::io::stdout().lock(),
-        wimo ai_wimo_update::channel_label(),
+        wimoai_wimo_update::channel_label(),
     ) {
         eprintln!("Error: {error}");
         std::process::exit(1);
@@ -1897,44 +1897,44 @@ fn dispatch_doctor_if_requested(args: &PagerArgs) -> bool {
     let Some(Command::Doctor(doctor_args)) = &args.command else {
         return false;
     };
-    if let Err(error) = wimo ai_wimo_pager::doctor_cmd::run(doctor_args.clone()) {
+    if let Err(error) = wimoai_wimo_pager::doctor_cmd::run(doctor_args.clone()) {
         eprintln!("Error: {error:#}");
         std::process::exit(1);
     }
     true
 }
 fn main() {
-    wimo ai_wimo_version::set_full_version(env!("VERSION_WITH_COMMIT"));
-    wimo ai_wimo_telemetry::startup::mark_process_start();
-    if let Some(code) = wimo ai_wimo_pager::app::mermaid_worker::maybe_run_render_subprocess() {
+    wimoai_wimo_version::set_full_version(env!("VERSION_WITH_COMMIT"));
+    wimoai_wimo_telemetry::startup::mark_process_start();
+    if let Some(code) = wimoai_wimo_pager::app::mermaid_worker::maybe_run_render_subprocess() {
         std::process::exit(code);
     }
-    if let Some(code) = wimo ai_wimo_pager::voice::maybe_run_capture_subprocess() {
+    if let Some(code) = wimoai_wimo_pager::voice::maybe_run_capture_subprocess() {
         std::process::exit(code);
     }
     set_release_channel(ReleaseChannel::from_label(
-        wimo ai_wimo_update::channel_name().unwrap_or_default(),
+        wimoai_wimo_update::channel_name().unwrap_or_default(),
     ));
     let args = PagerArgs::parse_cli();
     if dispatch_version_if_requested(&args) || dispatch_doctor_if_requested(&args) {
         return;
     }
-    wimo ai_wimo_pager_minimal::install();
+    wimoai_wimo_pager_minimal::install();
     #[cfg(all(feature = "jemalloc", unix))]
-    wimo ai_wimo_pager::memory_release::install_release_hook(purge_jemalloc_retained_pages);
+    wimoai_wimo_pager::memory_release::install_release_hook(purge_jemalloc_retained_pages);
     #[cfg(all(feature = "jemalloc", unix))]
     {
-        wimo ai_wimo_pager::memory_trace::install_allocator_stats_provider(jemalloc_allocator_stats);
-        wimo ai_wimo_pager::memory_trace::install_allocator_dump_provider(jemalloc_stats_dump);
+        wimoai_wimo_pager::memory_trace::install_allocator_stats_provider(jemalloc_allocator_stats);
+        wimoai_wimo_pager::memory_trace::install_allocator_dump_provider(jemalloc_stats_dump);
     }
     #[cfg(all(feature = "jemalloc", unix))]
     install_heap_profile_hooks();
     unsafe {
-        wimo ai_wimo_shell::agent::external_otel_pin::strip_conflicting_process_env();
+        wimoai_wimo_shell::agent::external_otel_pin::strip_conflicting_process_env();
     }
-    wimo ai_wimo_pager::memory_trace::start(wimo ai_wimo_pager::memory_trace::default_dir());
+    wimoai_wimo_pager::memory_trace::start(wimoai_wimo_pager::memory_trace::default_dir());
     raise_fd_limit();
-    if let Err(e) = wimo ai_wimo_config::validate_requirements() {
+    if let Err(e) = wimoai_wimo_config::validate_requirements() {
         eprintln!("Couldn't start wimo: {e}");
         eprintln!();
         eprintln!(
@@ -1943,24 +1943,24 @@ fn main() {
         );
         std::process::exit(2);
     }
-    let _sentry_guard = wimo ai_wimo_telemetry::sentry::init(wimo ai_wimo_telemetry::sentry::Config {
+    let _sentry_guard = wimoai_wimo_telemetry::sentry::init(wimoai_wimo_telemetry::sentry::Config {
         client: "wimo-pager",
         client_version: PAGER_CLIENT_VERSION,
         release: env!("VERSION_WITH_COMMIT"),
-        disabled: wimo ai_wimo_shell::agent::config::is_error_reporting_disabled_sync(),
+        disabled: wimoai_wimo_shell::agent::config::is_error_reporting_disabled_sync(),
     });
-    wimo ai_wimo_pager::docs::extract_user_guide_docs(&wimo ai_wimo_shell::util::wimo_home::wimo_home());
-    wimo ai_crash_handler::install_terminal_restore_only();
-    if wimo ai_wimo_shell::util::config::load_crash_handler_enabled_sync() {
-        let crash_dir = wimo ai_wimo_shell::util::wimo_home::wimo_home().join("crash");
-        if let Some(report) = wimo ai_crash_handler::check_previous_crash(&crash_dir) {
+    wimoai_wimo_pager::docs::extract_user_guide_docs(&wimoai_wimo_shell::util::wimo_home::wimo_home());
+    wimoai_crash_handler::install_terminal_restore_only();
+    if wimoai_wimo_shell::util::config::load_crash_handler_enabled_sync() {
+        let crash_dir = wimoai_wimo_shell::util::wimo_home::wimo_home().join("crash");
+        if let Some(report) = wimoai_crash_handler::check_previous_crash(&crash_dir) {
             eprintln!("wimo crashed during your last session.");
             eprintln!("  Signal:  {}", report.signal_name);
             eprintln!("  Version: {}", report.app_version);
             eprintln!("  Report:  {}", report.report_path.display());
             eprintln!();
         }
-        if !wimo ai_crash_handler::install(wimo ai_crash_handler::CrashHandlerConfig {
+        if !wimoai_crash_handler::install(wimoai_crash_handler::CrashHandlerConfig {
             app_version: env!("VERSION_WITH_COMMIT").to_string(),
             crash_dir: crash_dir.clone(),
         }) {
@@ -1970,7 +1970,7 @@ fn main() {
             );
         }
     }
-    let crashed = wimo ai_wimo_active_sessions::collect_crashed().unwrap_or_default();
+    let crashed = wimoai_wimo_active_sessions::collect_crashed().unwrap_or_default();
     if !crashed.is_empty() {
         tracing::info!(
             count = crashed.len(),
@@ -1981,16 +1981,16 @@ fn main() {
     let mut builder = tokio::runtime::Builder::new_multi_thread();
     builder.worker_threads(workers.get()).enable_all();
     let runtime =
-        wimo ai_tty_utils::runtime::build_with_blocking_pool(&mut builder).unwrap_or_else(|e| {
+        wimoai_tty_utils::runtime::build_with_blocking_pool(&mut builder).unwrap_or_else(|e| {
             eprintln!("wimo: failed to start tokio runtime: {e}");
             shutdown_and_flush_telemetry(1);
         });
     let result = run_and_shutdown(runtime, async_main(args), RUNTIME_SHUTDOWN_GRACE);
-    wimo ai_wimo_telemetry::debug_log::flush();
+    wimoai_wimo_telemetry::debug_log::flush();
     if let Err(e) = result {
-        wimo ai_tty_utils::restore_native_stderr();
+        wimoai_tty_utils::restore_native_stderr();
         finalize_span_profile();
-        match e.downcast_ref::<wimo ai_wimo_pager::app::StartupFailure>() {
+        match e.downcast_ref::<wimoai_wimo_pager::app::StartupFailure>() {
             Some(startup) => eprintln!("{}", startup.user_report()),
             None => eprintln!("Error: {e:#}"),
         }
@@ -2001,7 +2001,7 @@ fn main() {
 }
 #[tracing::instrument(level = "debug", skip_all)]
 async fn async_main(args: PagerArgs) -> Result<()> {
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
     let mut args = args.apply_cwd()?;
     if let Some(ref mode) = args.compaction_mode {
         unsafe { std::env::set_var("wimo_COMPACTION_MODE", mode) };
@@ -2011,11 +2011,11 @@ async fn async_main(args: PagerArgs) -> Result<()> {
     }
     if args.chat() {
         unsafe {
-            std::env::set_var(wimo ai_wimo_shell::agent::chat_modes::wimo_CHAT_MODE_ENV, "1");
+            std::env::set_var(wimoai_wimo_shell::agent::chat_modes::wimo_CHAT_MODE_ENV, "1");
         }
     }
     if let Some(ref socket) = args.leader_socket {
-        unsafe { std::env::set_var(wimo ai_wimo_shell::leader::LEADER_SOCKET_ENV, socket) };
+        unsafe { std::env::set_var(wimoai_wimo_shell::leader::LEADER_SOCKET_ENV, socket) };
     }
     if let Some(ref path) = args.debug_file {
         unsafe {
@@ -2033,17 +2033,17 @@ async fn async_main(args: PagerArgs) -> Result<()> {
         set_if_unset("wimo_HOOKS_LOG", "1");
     }
     if let Some(Command::Completions { shell }) = &args.command {
-        wimo ai_wimo_pager::completions_cmd::run(*shell);
+        wimoai_wimo_pager::completions_cmd::run(*shell);
         return Ok(());
     }
     if let Some(Command::Wrap(ref wrap_args)) = args.command {
-        return wimo ai_wimo_pager::wrap_cmd::run(wrap_args);
+        return wimoai_wimo_pager::wrap_cmd::run(wrap_args);
     }
     args.pin_local_resume_target()?;
     let saved_profile = args.saved_resume_profile();
     let sandbox_profile_arg = match args.startup_sandbox_profile(saved_profile.as_deref()) {
-        wimo ai_wimo_pager::app::cli::SandboxStartup::Apply(profile) => profile,
-        wimo ai_wimo_pager::app::cli::SandboxStartup::Conflict { requested, saved } => {
+        wimoai_wimo_pager::app::cli::SandboxStartup::Apply(profile) => profile,
+        wimoai_wimo_pager::app::cli::SandboxStartup::Conflict { requested, saved } => {
             eprintln!(
                 "error: cannot resume this session under sandbox profile '{requested}' — \
                  it was created with '{saved}'. Omit --sandbox to resume with '{saved}', \
@@ -2054,24 +2054,24 @@ async fn async_main(args: PagerArgs) -> Result<()> {
     };
     if args.trust {
         match std::env::current_dir() {
-            Ok(cwd) => wimo ai_wimo_workspace::folder_trust::grant_folder_trust(&cwd),
+            Ok(cwd) => wimoai_wimo_workspace::folder_trust::grant_folder_trust(&cwd),
             Err(e) => {
                 eprintln!("warning: --trust: failed to resolve cwd; folder not trusted: {e}");
             }
         }
     }
     if command_needs_pre_sandbox_policy_heal(args.command.as_ref()) {
-        match wimo ai_wimo_shell::config::load_agent_config_disk_only() {
+        match wimoai_wimo_shell::config::load_agent_config_disk_only() {
             Ok(agent_cfg) => {
-                let auth_manager = std::sync::Arc::new(wimo ai_wimo_shell::auth::AuthManager::new(
-                    &wimo ai_wimo_shell::util::wimo_home::wimo_home(),
+                let auth_manager = std::sync::Arc::new(wimoai_wimo_shell::auth::AuthManager::new(
+                    &wimoai_wimo_shell::util::wimo_home::wimo_home(),
                     agent_cfg.wimo_com_config.clone(),
                 ));
                 auth_manager.configure_refresher(
                     agent_cfg.wimo_com_config.auth_provider_command.clone(),
                     None,
                 );
-                wimo ai_wimo_shell::managed_config::ensure_managed_policy_present(&auth_manager).await;
+                wimoai_wimo_shell::managed_config::ensure_managed_policy_present(&auth_manager).await;
             }
             Err(e) => {
                 tracing::warn!(
@@ -2081,7 +2081,7 @@ async fn async_main(args: PagerArgs) -> Result<()> {
             }
         }
     }
-    wimo ai_wimo_shell::config::apply_sandbox(
+    wimoai_wimo_shell::config::apply_sandbox(
         None,
         sandbox_profile_arg.as_deref(),
         args.cwd.as_deref(),
@@ -2091,10 +2091,10 @@ async fn async_main(args: PagerArgs) -> Result<()> {
         && args.single.is_none()
         && args.prompt_json.is_none()
         && args.prompt_file.is_none();
-    wimo ai_wimo_shell::http::set_client_name(if is_interactive {
-        wimo ai_wimo_workspace::permission::ClientType::wimoPager
+    wimoai_wimo_shell::http::set_client_name(if is_interactive {
+        wimoai_wimo_workspace::permission::ClientType::wimoPager
     } else {
-        wimo ai_wimo_workspace::permission::ClientType::Generic
+        wimoai_wimo_workspace::permission::ClientType::Generic
     });
     if let Some(identity) = process_identity(args.command.as_ref(), is_interactive) {
         set_identity(identity);
@@ -2106,13 +2106,13 @@ async fn async_main(args: PagerArgs) -> Result<()> {
                 if json {
                     let payload = serde_json::json!({
                         "currentVersion": env!("VERSION_WITH_COMMIT"),
-                        "channel": wimo ai_wimo_update::channel_name().unwrap_or("unknown"),
+                        "channel": wimoai_wimo_update::channel_name().unwrap_or("unknown"),
                     });
                     println!("{}", serde_json::to_string(&payload)?);
                 } else {
                     write_version(
                         &mut std::io::stdout().lock(),
-                        wimo ai_wimo_update::channel_label(),
+                        wimoai_wimo_update::channel_label(),
                     )?;
                 }
                 return Ok(());
@@ -2145,85 +2145,85 @@ async fn async_main(args: PagerArgs) -> Result<()> {
             }
             Command::Inspect { json } => {
                 let cwd = std::env::current_dir().unwrap_or_default();
-                wimo ai_wimo_shell::inspect::inspect(&cwd, json).await?;
+                wimoai_wimo_shell::inspect::inspect(&cwd, json).await?;
                 return Ok(());
             }
             Command::Setup { json } => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
                 run_setup_command(json).await;
                 return Ok(());
             }
             Command::Mcp(mcp_args) => {
                 init_tracing_simple("cli");
-                return wimo ai_wimo_pager::mcp_cmd::run(mcp_args).await;
+                return wimoai_wimo_pager::mcp_cmd::run(mcp_args).await;
             }
             Command::Plugin(plugin_args) => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-                return wimo ai_wimo_pager::plugin_cmd::run(plugin_args).await;
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+                return wimoai_wimo_pager::plugin_cmd::run(plugin_args).await;
             }
             Command::Models => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-                let agent_config = wimo ai_wimo_shell::config::load_agent_config_disk_only()
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+                let agent_config = wimoai_wimo_shell::config::load_agent_config_disk_only()
                     .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
-                return wimo ai_wimo_pager::models::list_available_models(&agent_config).await;
+                return wimoai_wimo_pager::models::list_available_models(&agent_config).await;
             }
             Command::Leader(leader_args) => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
                 return run_leader_mgmt(leader_args).await;
             }
             Command::Worktree(worktree_args) => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-                let agent_config = wimo ai_wimo_shell::config::load_agent_config_disk_only()
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+                let agent_config = wimoai_wimo_shell::config::load_agent_config_disk_only()
                     .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
-                return wimo ai_wimo_pager::worktree_cmd::run(worktree_args, &agent_config).await;
+                return wimoai_wimo_pager::worktree_cmd::run(worktree_args, &agent_config).await;
             }
             Command::DiskUsage(disk_usage_args) => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-                return wimo ai_wimo_pager::disk_usage_cmd::run(disk_usage_args);
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+                return wimoai_wimo_pager::disk_usage_cmd::run(disk_usage_args);
             }
             Command::Workspace(workspace_args) => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
                 return run_workspace_mgmt(workspace_args).await;
             }
             Command::Sessions(sessions_args) => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-                let agent_config = wimo ai_wimo_shell::config::load_agent_config_disk_only()
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+                let agent_config = wimoai_wimo_shell::config::load_agent_config_disk_only()
                     .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
-                return wimo ai_wimo_pager::sessions_cmd::run(sessions_args, &agent_config).await;
+                return wimoai_wimo_pager::sessions_cmd::run(sessions_args, &agent_config).await;
             }
             Command::Usage(usage_args) => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-                return wimo ai_wimo_pager::usage_cmd::run(usage_args);
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+                return wimoai_wimo_pager::usage_cmd::run(usage_args);
             }
             Command::Share(ref share_args) => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-                let agent_config = wimo ai_wimo_shell::config::load_agent_config_disk_only()
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+                let agent_config = wimoai_wimo_shell::config::load_agent_config_disk_only()
                     .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
-                return wimo ai_wimo_pager::share_cmd::run(share_args, &agent_config).await;
+                return wimoai_wimo_pager::share_cmd::run(share_args, &agent_config).await;
             }
             Command::Export(export_args) => {
                 init_tracing_simple("cli");
-                return wimo ai_wimo_pager::export_cmd::run(export_args);
+                return wimoai_wimo_pager::export_cmd::run(export_args);
             }
             Command::Trace(trace_args) => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-                let agent_config = wimo ai_wimo_shell::config::load_agent_config_disk_only()
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+                let agent_config = wimoai_wimo_shell::config::load_agent_config_disk_only()
                     .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
-                return wimo ai_wimo_pager::trace_cmd::run(trace_args, &agent_config).await;
+                return wimoai_wimo_pager::trace_cmd::run(trace_args, &agent_config).await;
             }
             Command::Memory(memory_args) => {
-                return wimo ai_wimo_pager::memory_cmd::run(memory_args);
+                return wimoai_wimo_pager::memory_cmd::run(memory_args);
             }
             Command::Update {
                 check,
@@ -2237,7 +2237,7 @@ async fn async_main(args: PagerArgs) -> Result<()> {
                 auto,
             } => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
                 let channel_switch = get_channel_switch(alpha, stable, enterprise);
                 let trigger = resolve_update_trigger(trigger.as_deref(), auto);
                 return run_update_command(
@@ -2258,25 +2258,25 @@ async fn async_main(args: PagerArgs) -> Result<()> {
                 devbox,
             } => {
                 init_tracing_simple("cli");
-                let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
-                let config = wimo ai_wimo_shell::config::load_agent_config_disk_only()
+                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
+                let config = wimoai_wimo_shell::config::load_agent_config_disk_only()
                     .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
-                wimo ai_wimo_shell::auth::run_cli_login(&config, oauth, device_auth, devbox).await?;
+                wimoai_wimo_shell::auth::run_cli_login(&config, oauth, device_auth, devbox).await?;
                 println!();
-                wimo ai_wimo_shell::instrumentation::finalize_and_exit(0);
+                wimoai_wimo_shell::instrumentation::finalize_and_exit(0);
             }
             Command::Logout => {
                 init_tracing_simple("cli");
-                let config = wimo ai_wimo_shell::config::load_agent_config_disk_only()
+                let config = wimoai_wimo_shell::config::load_agent_config_disk_only()
                     .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
-                wimo ai_wimo_shell::auth::run_cli_logout(&config)?;
-                wimo ai_wimo_shell::instrumentation::finalize_and_exit(0);
+                wimoai_wimo_shell::auth::run_cli_logout(&config)?;
+                wimoai_wimo_shell::instrumentation::finalize_and_exit(0);
             }
             Command::Wrap(ref wrap_args) => {
-                return wimo ai_wimo_pager::wrap_cmd::run(wrap_args);
+                return wimoai_wimo_pager::wrap_cmd::run(wrap_args);
             }
             Command::Completions { shell } => {
-                wimo ai_wimo_pager::completions_cmd::run(shell);
+                wimoai_wimo_pager::completions_cmd::run(shell);
                 return Ok(());
             }
             Command::Dashboard => {
@@ -2285,7 +2285,7 @@ async fn async_main(args: PagerArgs) -> Result<()> {
             }
         }
     }
-    let headless_prompt = wimo ai_wimo_pager::headless::HeadlessPrompt::from_args(
+    let headless_prompt = wimoai_wimo_pager::headless::HeadlessPrompt::from_args(
         args.single.as_deref(),
         args.prompt_json.as_deref(),
         args.prompt_file.as_deref(),
@@ -2300,9 +2300,9 @@ async fn async_main(args: PagerArgs) -> Result<()> {
             anyhow::bail!("--memory-flush without a prompt requires --resume/-r or --continue/-c");
         }
         init_tracing_simple(HEADLESS_ENTRYPOINT);
-        let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
+        let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
         enforce_version_policy_or_exit();
-        let launch_yolo = wimo ai_wimo_shell::util::config::effective_yolo_for_launch(
+        let launch_yolo = wimoai_wimo_shell::util::config::effective_yolo_for_launch(
             args.yolo,
             args.permission_mode_flag.as_deref(),
             None,
@@ -2313,19 +2313,19 @@ async fn async_main(args: PagerArgs) -> Result<()> {
         let json_schema = args
             .json_schema
             .as_deref()
-            .map(wimo ai_wimo_pager::headless::parse_json_schema)
+            .map(wimoai_wimo_pager::headless::parse_json_schema)
             .transpose()?;
         if json_schema.is_some()
-            && args.output_format == wimo ai_wimo_pager::headless::OutputFormat::Plain
+            && args.output_format == wimoai_wimo_pager::headless::OutputFormat::Plain
         {
-            args.output_format = wimo ai_wimo_pager::headless::OutputFormat::Json;
+            args.output_format = wimoai_wimo_pager::headless::OutputFormat::Json;
         }
         let memory_enabled_override = args.memory_enabled_override();
         let memory_flush = args.memory_flush;
-        return wimo ai_wimo_pager::headless::run_single_turn(
+        return wimoai_wimo_pager::headless::run_single_turn(
             headless_prompt,
             args.verbatim,
-            wimo ai_wimo_pager::headless::HeadlessOptions {
+            wimoai_wimo_pager::headless::HeadlessOptions {
                 session_id: args.session_id.clone(),
                 resume: args.resume_session.or(args.load_session),
                 resume_title_pinned: args.resume_target_pinned,
@@ -2363,7 +2363,7 @@ async fn async_main(args: PagerArgs) -> Result<()> {
         .await;
     }
     enforce_version_policy_or_exit();
-    let _otel_guard = wimo ai_wimo_telemetry::otel_layer::otel_guard();
+    let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
     type UpdateWaitHandle = tokio::task::JoinHandle<std::io::Result<std::process::ExitStatus>>;
     let bg_update_wait: std::sync::Arc<tokio::sync::Mutex<Option<UpdateWaitHandle>>> =
         std::sync::Arc::new(tokio::sync::Mutex::new(None));
@@ -2383,8 +2383,8 @@ async fn async_main(args: PagerArgs) -> Result<()> {
         } else {
             None
         };
-    let result = wimo ai_wimo_pager::app::run(args, bg_update_rx).await;
-    wimo ai_wimo_sandbox::flush();
+    let result = wimoai_wimo_pager::app::run(args, bg_update_rx).await;
+    wimoai_wimo_sandbox::flush();
     match result {
         Ok(true) => {
             let adopted = bg_update_wait.lock().await.take();
@@ -2454,19 +2454,19 @@ async fn finish_update_on_exit(
 }
 /// Build an [`UpdateConfig`] from the current environment and config files.
 fn build_update_config() -> UpdateConfig {
-    let environment = wimo ai_wimo_shell::env::WimoEnvironment::from_flags(false, false);
+    let environment = wimoai_wimo_shell::env::WimoEnvironment::from_flags(false, false);
     let mut config = UpdateConfig::from_environment(&environment);
     cryptify::flow_stmt!({
         {
             config.deployment_key =
-                wimo ai_wimo_shell::agent::config::EndpointsConfig::default().deployment_key;
+                wimoai_wimo_shell::agent::config::EndpointsConfig::default().deployment_key;
         }
     });
     config.npm_registry = std::env::var(obfstr::obfstr!("wimo_NPM_REGISTRY"))
         .ok()
-        .or_else(wimo ai_wimo_shell::util::config::load_npm_registry_sync);
-    if let Ok(root) = wimo ai_wimo_shell::config::load_effective_config_disk_only()
-        && let Some(ch) = wimo ai_wimo_shell::util::config::channel_from_toml_opt(&root)
+        .or_else(wimoai_wimo_shell::util::config::load_npm_registry_sync);
+    if let Ok(root) = wimoai_wimo_shell::config::load_effective_config_disk_only()
+        && let Some(ch) = wimoai_wimo_shell::util::config::channel_from_toml_opt(&root)
     {
         config.channel = ch;
     }
@@ -2504,7 +2504,7 @@ fn is_managed_install(exe: Option<std::path::PathBuf>, wimo_home: &std::path::Pa
     let Some(exe) = exe else {
         return false;
     };
-    let managed = wimo ai_wimo_config::wimo_application_in(wimo_home);
+    let managed = wimoai_wimo_config::wimo_application_in(wimo_home);
     match (dunce::canonicalize(&exe), dunce::canonicalize(&managed)) {
         (Ok(exe), Ok(managed)) => exe == managed,
         _ => false,
@@ -2570,15 +2570,15 @@ async fn run_update_command(
             v
         );
     }
-    let telemetry_cfg = wimo ai_wimo_shell::config::load_agent_config_disk_only()
+    let telemetry_cfg = wimoai_wimo_shell::config::load_agent_config_disk_only()
         .map_err(|e| tracing::warn!("wimo update: telemetry init skipped (agent config: {e})"))
         .ok();
     if let Some(agent_cfg) = telemetry_cfg {
-        let auth_manager = std::sync::Arc::new(wimo ai_wimo_shell::auth::AuthManager::new(
-            &wimo ai_wimo_shell::util::wimo_home::wimo_home(),
+        let auth_manager = std::sync::Arc::new(wimoai_wimo_shell::auth::AuthManager::new(
+            &wimoai_wimo_shell::util::wimo_home::wimo_home(),
             agent_cfg.wimo_com_config.clone(),
         ));
-        wimo ai_wimo_shell::agent::init::update_telemetry_config(&agent_cfg, &auth_manager);
+        wimoai_wimo_shell::agent::init::update_telemetry_config(&agent_cfg, &auth_manager);
     }
     let result = auto_update::run_update(
         force_reinstall,
@@ -2591,7 +2591,7 @@ async fn run_update_command(
     if let Ok(Some(installed_version)) = &result {
         signal_leaders_to_relaunch(installed_version).await;
     }
-    wimo ai_wimo_telemetry::session_ctx::drain_pending(wimo ai_wimo_telemetry::session_ctx::CLI_DRAIN)
+    wimoai_wimo_telemetry::session_ctx::drain_pending(wimoai_wimo_telemetry::session_ctx::CLI_DRAIN)
         .await;
     result?;
     Ok(())
@@ -2603,8 +2603,8 @@ async fn run_update_command(
 /// The leader re-checks the directional version guard authoritatively; the pager-side `live_info` check just avoids connecting to newer leaders.
 #[tracing::instrument(level = "debug", skip_all)]
 async fn signal_leaders_to_relaunch(installed_version: &str) {
-    for d in wimo ai_wimo_shell::leader::discover_leaders().await {
-        if d.classification != wimo ai_wimo_shell::leader::LeaderDiscoveryState::Reachable {
+    for d in wimoai_wimo_shell::leader::discover_leaders().await {
+        if d.classification != wimoai_wimo_shell::leader::LeaderDiscoveryState::Reachable {
             continue;
         }
         let Some(socket_path) = d.socket_path.clone() else {
@@ -2615,7 +2615,7 @@ async fn signal_leaders_to_relaunch(installed_version: &str) {
         {
             continue;
         }
-        let client = match wimo ai_wimo_shell::leader::LeaderClient::connect(
+        let client = match wimoai_wimo_shell::leader::LeaderClient::connect(
             socket_path,
             "wimo-pager-update",
             ClientMode::Stdio,
@@ -2639,14 +2639,14 @@ async fn signal_leaders_to_relaunch(installed_version: &str) {
             })
             .await
         {
-            Ok(Ok(wimo ai_wimo_shell::leader::ControlPayload::Relaunching {
+            Ok(Ok(wimoai_wimo_shell::leader::ControlPayload::Relaunching {
                 from_version,
                 to_version,
                 ..
             })) => {
                 eprintln!("  ↻ Relaunching shared session (leader {from_version} → {to_version})…");
             }
-            Ok(Ok(wimo ai_wimo_shell::leader::ControlPayload::RelaunchDeclined { reason })) => {
+            Ok(Ok(wimoai_wimo_shell::leader::ControlPayload::RelaunchDeclined { reason })) => {
                 tracing::debug!(%reason, "Leader declined relaunch");
             }
             Ok(Ok(_)) => {}
@@ -2776,7 +2776,7 @@ mod tests {
     }
     #[test]
     fn version_output_writer_preserves_channel_aware_contract() {
-        wimo ai_wimo_version::set_full_version(env!("VERSION_WITH_COMMIT"));
+        wimoai_wimo_version::set_full_version(env!("VERSION_WITH_COMMIT"));
         for (label, expected_suffix) in [
             (" [alpha]", " [alpha]\n"),
             (" [stable]", " [stable]\n"),
@@ -2842,7 +2842,7 @@ mod tests {
         eprintln!(
             "skip jemalloc prof checks: opt.prof false \
              (release-dist static conf, or MALLOC_CONF=prof:true,prof_active:false,lg_prof_sample={})",
-            wimo ai_wimo_shell::heap_profile::LG_PROF_SAMPLE
+            wimoai_wimo_shell::heap_profile::LG_PROF_SAMPLE
         );
         false
     }
@@ -2873,7 +2873,7 @@ mod tests {
         }
     }
     #[cfg(all(feature = "jemalloc", unix))]
-    fn assert_stats_sane(stats: wimo ai_wimo_shell::heap_profile::JemallocStats) {
+    fn assert_stats_sane(stats: wimoai_wimo_shell::heap_profile::JemallocStats) {
         assert!(stats.allocated > 0, "allocated={}", stats.allocated);
         assert!(stats.resident > 0, "resident={}", stats.resident);
         assert!(
@@ -2929,25 +2929,25 @@ mod tests {
     fn install_heap_profile_hooks_wires_shell_apis() {
         install_heap_profile_hooks();
         assert_stats_sane(
-            wimo ai_wimo_shell::heap_profile::stats().expect("shell stats after install"),
+            wimoai_wimo_shell::heap_profile::stats().expect("shell stats after install"),
         );
         if !require_opt_prof() {
-            assert!(!wimo ai_wimo_shell::heap_profile::prof_available());
+            assert!(!wimoai_wimo_shell::heap_profile::prof_available());
             return;
         }
-        assert!(wimo ai_wimo_shell::heap_profile::prof_available());
+        assert!(wimoai_wimo_shell::heap_profile::prof_available());
         assert_prof_active(false);
         {
             let _guard = ProfActiveGuard::set(true);
             assert_prof_active(true);
-            assert!(wimo ai_wimo_shell::heap_profile::set_prof_active(true));
+            assert!(wimoai_wimo_shell::heap_profile::set_prof_active(true));
             assert_prof_active(true);
         }
         assert_prof_active(false);
-        assert!(wimo ai_wimo_shell::heap_profile::set_prof_active(false));
+        assert!(wimoai_wimo_shell::heap_profile::set_prof_active(false));
         assert_prof_active(false);
         let dump = TempHeapDump::new("shell");
-        wimo ai_wimo_shell::heap_profile::dump_to_path(dump.path()).expect("shell dump");
+        wimoai_wimo_shell::heap_profile::dump_to_path(dump.path()).expect("shell dump");
         dump.assert_nonempty_dump();
     }
     #[cfg(unix)]
@@ -3060,7 +3060,7 @@ mod tests {
     }
     #[test]
     fn workspace_command_gate_resolution() {
-        use wimo ai_wimo_shell::util::config::RemoteSettings;
+        use wimoai_wimo_shell::util::config::RemoteSettings;
         let on = RemoteSettings {
             workspace_command_enabled: Some(true),
             ..RemoteSettings::default()

@@ -6,7 +6,7 @@
 use std::ops::Range;
 
 use ratatui::layout::Rect;
-use wimo ai_ratatui_textarea::{ClipboardProvider, InternalClipboard, TextArea, TextAreaState};
+use wimoai_ratatui_textarea::{ClipboardProvider, InternalClipboard, TextArea, TextAreaState};
 
 use super::ListItem;
 use super::layout::{ListLayoutCache, WrapMode};

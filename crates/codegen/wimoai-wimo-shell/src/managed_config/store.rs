@@ -12,10 +12,10 @@ use super::response::{
 
 /// Server-synced policy artifacts; excludes the sync marker.
 pub const MANAGED_ARTIFACT_FILES: [&str; 4] = [
-    wimo ai_wimo_config::MANAGED_CONFIG_FILENAME,
-    wimo ai_wimo_config::REQUIREMENTS_FILENAME,
-    wimo ai_wimo_config::signed_policy::SIGNATURE_SIDECAR_FILE,
-    wimo ai_wimo_config::signed_policy::MANAGED_IDENTITY_SIDECAR_FILE,
+    wimoai_wimo_config::MANAGED_CONFIG_FILENAME,
+    wimoai_wimo_config::REQUIREMENTS_FILENAME,
+    wimoai_wimo_config::signed_policy::SIGNATURE_SIDECAR_FILE,
+    wimoai_wimo_config::signed_policy::MANAGED_IDENTITY_SIDECAR_FILE,
 ];
 
 pub(super) fn remove_managed_config_files(home: &std::path::Path) {
@@ -28,20 +28,20 @@ pub(super) fn remove_managed_config_files(home: &std::path::Path) {
     if artifacts_removed {
         remove_synced_file(
             home,
-            wimo ai_wimo_config::MANAGED_CONFIG_CACHE_FILE,
+            wimoai_wimo_config::MANAGED_CONFIG_CACHE_FILE,
             "removed managed config file",
         );
         let _ = std::fs::remove_file(staged_refresh_path(home));
     }
     let atomic_write_tmp_prefixes = [
-        format!("{}.", wimo ai_wimo_config::MANAGED_CONFIG_CACHE_FILE),
+        format!("{}.", wimoai_wimo_config::MANAGED_CONFIG_CACHE_FILE),
         format!(
             "{}.",
-            wimo ai_wimo_config::signed_policy::SIGNATURE_SIDECAR_FILE
+            wimoai_wimo_config::signed_policy::SIGNATURE_SIDECAR_FILE
         ),
         format!(
             "{}.",
-            wimo ai_wimo_config::signed_policy::MANAGED_IDENTITY_SIDECAR_FILE
+            wimoai_wimo_config::signed_policy::MANAGED_IDENTITY_SIDECAR_FILE
         ),
     ];
     if let Ok(entries) = std::fs::read_dir(home) {
@@ -139,7 +139,7 @@ pub fn clear_orphan() {
     let Some(_lock) = try_lock_managed_config(&home) else {
         return; // another process is syncing; retry next call
     };
-    if wimo ai_wimo_config::fail_closed_policy_armed_at(&home) {
+    if wimoai_wimo_config::fail_closed_policy_armed_at(&home) {
         tracing::info!(
             "keeping fail_closed managed policy on disk; no team principal present to own a clear"
         );
@@ -224,7 +224,7 @@ pub(super) fn gate_snapshot_locked(home: &std::path::Path) -> GateSnapshot {
     // Purge first so an offline team switch isn't misread as a substituted cache.
     purge_prior_tenant_locked(home);
     // Raise the floor after the purge so a purged marker stays absent.
-    wimo ai_wimo_config::bump_rollback_floor(home);
+    wimoai_wimo_config::bump_rollback_floor(home);
     GateSnapshot {
         managed_principal_present: managed_principal_present(),
         // Expiry-ignoring: a backdated auth.json must not resolve Team→None and relax binding.
@@ -253,13 +253,13 @@ fn purge_prior_tenant_locked(home: &std::path::Path) {
 /// Best-effort: a failed tick must not refuse a session.
 pub(super) fn bump_managed_rollback_floor() {
     // Re-checked inside `bump_rollback_floor`; this early-out skips the lock I/O when dark.
-    if !wimo ai_wimo_config::signed_policy::verification_active() {
+    if !wimoai_wimo_config::signed_policy::verification_active() {
         return;
     }
     let home = crate::util::wimo_home::wimo_home();
     match try_lock_managed_config(&home) {
         Some(_lock) => {
-            wimo ai_wimo_config::bump_rollback_floor(&home);
+            wimoai_wimo_config::bump_rollback_floor(&home);
         }
         None => tracing::debug!("managed-config lock contended; skipping the floor tick"),
     }
@@ -272,11 +272,11 @@ pub(super) fn apply_managed_config(
 ) -> std::io::Result<bool> {
     let artifacts = [
         (
-            wimo ai_wimo_config::MANAGED_CONFIG_FILENAME,
+            wimoai_wimo_config::MANAGED_CONFIG_FILENAME,
             body.managed_config.as_deref(),
         ),
         (
-            wimo ai_wimo_config::REQUIREMENTS_FILENAME,
+            wimoai_wimo_config::REQUIREMENTS_FILENAME,
             body.requirements.as_deref(),
         ),
     ];
@@ -289,7 +289,7 @@ pub(super) fn apply_managed_config(
             Some(content) => {
                 clear_squatting_dir(&path);
                 // 0o600: `managed_config` can embed the enforced deployment key.
-                match wimo ai_wimo_config::fs_atomic::write_atomically(&path, content, Some(0o600)) {
+                match wimoai_wimo_config::fs_atomic::write_atomically(&path, content, Some(0o600)) {
                     Ok(()) => changed = true,
                     Err(e) => {
                         first_err.get_or_insert(e);
@@ -326,7 +326,7 @@ pub(super) fn apply_fetched(
     parked_at: Option<u64>,
 ) -> std::io::Result<ApplyOutcome> {
     // Verify before lock/persist: prior trusted policy survives a bad fetch.
-    let verified = if wimo ai_wimo_config::signed_policy::verification_active() {
+    let verified = if wimoai_wimo_config::signed_policy::verification_active() {
         match verify_signed_envelope(body, active_team_id_any_expiry().as_deref()) {
             Ok(verified) => Some(verified),
             Err(e) => {
@@ -351,7 +351,7 @@ pub(super) fn apply_fetched(
     }
     // A parked refresh's authoritative freshness check, under the same flock as the apply.
     if let Some(parked_at) = parked_at
-        && parked_at < wimo ai_wimo_config::managed_config_synced_at(&home).unwrap_or(0)
+        && parked_at < wimoai_wimo_config::managed_config_synced_at(&home).unwrap_or(0)
     {
         return Ok(ApplyOutcome::StaleStage);
     }
@@ -383,20 +383,20 @@ pub(super) fn apply_fetched(
     };
     // Sidecar after policy files so a present sidecar covers the final set.
     if let Some(verified) = verified {
-        clear_squatting_dir(&home.join(wimo ai_wimo_config::signed_policy::SIGNATURE_SIDECAR_FILE));
-        wimo ai_wimo_config::signed_policy::write_sidecar(&home, &verified.sidecar)?;
+        clear_squatting_dir(&home.join(wimoai_wimo_config::signed_policy::SIGNATURE_SIDECAR_FILE));
+        wimoai_wimo_config::signed_policy::write_sidecar(&home, &verified.sidecar)?;
         if let Some(claim_sidecar) =
             verified_claim_sidecar(body, served_principal_of(&verified.payload))
         {
             clear_squatting_dir(
-                &home.join(wimo ai_wimo_config::signed_policy::MANAGED_IDENTITY_SIDECAR_FILE),
+                &home.join(wimoai_wimo_config::signed_policy::MANAGED_IDENTITY_SIDECAR_FILE),
             );
-            wimo ai_wimo_config::signed_policy::write_managed_identity_sidecar(&home, &claim_sidecar)?;
+            wimoai_wimo_config::signed_policy::write_managed_identity_sidecar(&home, &claim_sidecar)?;
         }
     }
     // Marker last, still under the lock: post-release, a concurrent purge could delete
     // the files it describes.
-    clear_squatting_dir(&home.join(wimo ai_wimo_config::MANAGED_CONFIG_CACHE_FILE));
+    clear_squatting_dir(&home.join(wimoai_wimo_config::MANAGED_CONFIG_CACHE_FILE));
     crate::config::mark_managed_config_synced_at(
         &home,
         crate::config::SyncMarker {
@@ -457,7 +457,7 @@ fn stage_refresh(
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
-    wimo ai_wimo_config::fs_atomic::write_atomically(&path, &json, Some(0o600))
+    wimoai_wimo_config::fs_atomic::write_atomically(&path, &json, Some(0o600))
 }
 
 /// Bounded local I/O, re-verified through [`apply_fetched`]; an unverifying build deletes it unread.
@@ -468,7 +468,7 @@ pub(super) fn apply_staged_managed_config() {
         return;
     };
     // Fetch-disabled and unverifiable builds discard a stage unread (fail-safe).
-    if !is_fetch_enabled() || !wimo ai_wimo_config::signed_policy::verification_active() {
+    if !is_fetch_enabled() || !wimoai_wimo_config::signed_policy::verification_active() {
         let _ = std::fs::remove_file(&path);
         return;
     }
@@ -484,7 +484,7 @@ pub(super) fn apply_staged_managed_config() {
     }
     // Early-out only; the authoritative freshness refusal runs under the apply flock.
     if staged.parked_at == 0
-        || staged.parked_at < wimo ai_wimo_config::managed_config_synced_at(&home).unwrap_or(0)
+        || staged.parked_at < wimoai_wimo_config::managed_config_synced_at(&home).unwrap_or(0)
     {
         let _ = std::fs::remove_file(&path);
         return;
@@ -517,11 +517,11 @@ pub(super) fn apply_staged_managed_config() {
 pub(super) fn verified_claim_sidecar(
     body: &ManagedConfigResponse,
     served_principal: Option<&str>,
-) -> Option<wimo ai_wimo_config::signed_policy::SignatureEnvelope> {
-    use wimo ai_wimo_config::signed_policy::now_unix;
+) -> Option<wimoai_wimo_config::signed_policy::SignatureEnvelope> {
+    use wimoai_wimo_config::signed_policy::now_unix;
     let sidecar = body.managed_identity_sidecar()?;
     // Unclamped wall clock, like the policy verify: a fresh claim heals an inflated floor.
-    let claim = match wimo ai_wimo_config::signed_policy::verify_fetched_claim(&sidecar, now_unix()) {
+    let claim = match wimoai_wimo_config::signed_policy::verify_fetched_claim(&sidecar, now_unix()) {
         Ok(claim) => claim,
         Err(e) => {
             tracing::debug!("is-managed claim did not verify; not persisting it: {e}");
@@ -538,8 +538,8 @@ pub(super) fn verified_claim_sidecar(
 /// The prior tenant's sidecars must not survive to read foreign-bound.
 fn evict_prior_sidecars(home: &std::path::Path) {
     for name in [
-        wimo ai_wimo_config::signed_policy::SIGNATURE_SIDECAR_FILE,
-        wimo ai_wimo_config::signed_policy::MANAGED_IDENTITY_SIDECAR_FILE,
+        wimoai_wimo_config::signed_policy::SIGNATURE_SIDECAR_FILE,
+        wimoai_wimo_config::signed_policy::MANAGED_IDENTITY_SIDECAR_FILE,
     ] {
         remove_synced_file(home, name, "evicted prior principal's sidecar");
     }
@@ -637,7 +637,7 @@ pub(super) fn current_serving_identity_any_expiry() -> crate::config::ServingIde
     serving_identity_from(active_team_id_any_expiry())
 }
 
-pub fn classify_auth_mode() -> wimo ai_wimo_telemetry::startup::AuthMode {
+pub fn classify_auth_mode() -> wimoai_wimo_telemetry::startup::AuthMode {
     auth_mode(
         resolve_deployment_key().is_some(),
         &team_principal_signed_in(),

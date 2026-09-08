@@ -6,8 +6,8 @@ use super::support::*;
 use super::*;
 use std::sync::Arc;
 use std::time::Duration;
-use wimo ai_wimo_test_support::sse::chat_completion_script_exact;
-use wimo ai_wimo_test_support::{MockInferenceServer, ScriptedResponse, SseEvent};
+use wimoai_wimo_test_support::sse::chat_completion_script_exact;
+use wimoai_wimo_test_support::{MockInferenceServer, ScriptedResponse, SseEvent};
 /// Distinctive fragment of the continue reminder.
 const REMINDER_MARKER: &str = "exceeded the output token limit";
 /// `SessionActor` turn futures overflow the default test thread stack.
@@ -82,7 +82,7 @@ async fn salvage_test_actor_with_context(
         server,
         total_tokens,
         context_window,
-        wimo ai_wimo_sampling_types::ApiBackend::ChatCompletions,
+        wimoai_wimo_sampling_types::ApiBackend::ChatCompletions,
     )
     .await
 }
@@ -93,9 +93,9 @@ async fn salvage_test_actor_on_backend(
     server: &MockInferenceServer,
     total_tokens: u64,
     context_window: u64,
-    backend: wimo ai_wimo_sampling_types::ApiBackend,
+    backend: wimoai_wimo_sampling_types::ApiBackend,
 ) -> Arc<SessionActor> {
-    let sampling_cfg = wimo ai_wimo_sampler::SamplerConfig {
+    let sampling_cfg = wimoai_wimo_sampler::SamplerConfig {
         api_key: Some("test-key".to_string()),
         base_url: server.url(),
         model: "test".to_string(),
@@ -106,10 +106,10 @@ async fn salvage_test_actor_on_backend(
         ..Default::default()
     };
     let (sampler_event_tx, sampler_event_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_wimo_sampler::SamplingEvent>();
-    let sampler_handle = wimo ai_wimo_sampler::SamplerActor::spawn(
+        tokio::sync::mpsc::unbounded_channel::<wimoai_wimo_sampler::SamplingEvent>();
+    let sampler_handle = wimoai_wimo_sampler::SamplerActor::spawn(
         sampling_cfg,
-        wimo ai_wimo_sampler::RetryPolicy {
+        wimoai_wimo_sampler::RetryPolicy {
             max_retries: 0,
             rate_limit_retry_threshold: 0,
             ..Default::default()
@@ -117,7 +117,7 @@ async fn salvage_test_actor_on_backend(
         sampler_event_tx,
     );
     let (gateway_tx, gateway_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+        tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
     drain_gateway(gateway_rx);
     let (persistence_tx, persistence_rx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
     drain_persistence(persistence_rx);
@@ -187,13 +187,13 @@ async fn run_prompt(actor: &Arc<SessionActor>, prompt_id: &str) -> PromptTurnRes
 /// cell, now injectable).
 #[test]
 fn remote_budget_wires_into_the_resolver() {
-    if wimo ai_wimo_config::env_bool("wimo_LENGTH_SALVAGE") == Some(true) {
+    if wimoai_wimo_config::env_bool("wimo_LENGTH_SALVAGE") == Some(true) {
         panic!("ambient wimo_LENGTH_SALVAGE=1 would mask the remote tier under test");
     }
     block_on_session(|| {
         current_thread_local(async {
             let (gateway_tx, gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             drain_gateway(gateway_rx);
             let (persistence_tx, persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
@@ -236,7 +236,7 @@ fn remote_settings_length_salvage_budget_serde_cells() {
 /// This is the safety property that nothing changes for production default agents until the rollout flag lands.
 #[test]
 fn default_agent_gate_off_hard_fails_on_length() {
-    if wimo ai_wimo_config::env_bool("wimo_LENGTH_SALVAGE") == Some(true) {
+    if wimoai_wimo_config::env_bool("wimo_LENGTH_SALVAGE") == Some(true) {
         panic!("ambient wimo_LENGTH_SALVAGE=1 would flip the gate under test");
     }
     block_on_session(|| {
@@ -263,10 +263,10 @@ fn default_agent_gate_off_hard_fails_on_length() {
 /// Terminal error whose metadata reports a tiny context window.
 /// The overflow heuristic compares the token estimate to that window, so it fires for any nonempty history.
 fn error_with_tiny_window(
-    kind: wimo ai_wimo_sampler::SamplingErrorKind,
+    kind: wimoai_wimo_sampler::SamplingErrorKind,
     status_code: u16,
-) -> wimo ai_wimo_sampler::SamplingErrorInfo {
-    wimo ai_wimo_sampler::SamplingErrorInfo {
+) -> wimoai_wimo_sampler::SamplingErrorInfo {
+    wimoai_wimo_sampler::SamplingErrorInfo {
         kind,
         status_code: Some(status_code),
         message: "terminal failure".to_string(),
@@ -274,7 +274,7 @@ fn error_with_tiny_window(
         error_code: None,
         is_retryable: false,
         retry_after_secs: None,
-        model_metadata: Some(wimo ai_wimo_sampling_types::ResponseModelMetadata {
+        model_metadata: Some(wimoai_wimo_sampling_types::ResponseModelMetadata {
             context_window: Some(1),
             max_completion_tokens: None,
             models_etag: None,
@@ -282,7 +282,7 @@ fn error_with_tiny_window(
         empty_response_context: None,
         doom_loop_triggers: None,
         doom_loop_aborted_at_chunk: None,
-        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
     }
 }
 /// A rate-limited terminal error mid-continuation keeps its terminal arm even when the estimate exceeds the reported window.
@@ -294,12 +294,12 @@ fn rate_limit_mid_continuation_stays_terminal() {
             let server = MockInferenceServer::start().await.expect("mock server");
             let actor = salvage_test_actor(&server).await;
             actor.chat_state_handle.push_user_message(
-                wimo ai_wimo_sampling_types::ConversationItem::user(
+                wimoai_wimo_sampling_types::ConversationItem::user(
                     "enough history that the token estimate clears the tiny window",
                 ),
             );
             let error =
-                error_with_tiny_window(wimo ai_wimo_sampler::SamplingErrorKind::RateLimited, 429);
+                error_with_tiny_window(wimoai_wimo_sampler::SamplingErrorKind::RateLimited, 429);
             let Err(err) = actor
                 .handle_sampling_failure(error, 0, transient_state(0, true), true)
                 .await
@@ -323,7 +323,7 @@ fn suppressed_overflow_mid_continuation_still_completes_truncated() {
             let server = MockInferenceServer::start().await.expect("mock server");
             let actor = salvage_test_actor(&server).await;
             actor.chat_state_handle.push_user_message(
-                wimo ai_wimo_sampling_types::ConversationItem::user(
+                wimoai_wimo_sampling_types::ConversationItem::user(
                     "enough history that the token estimate clears the tiny window",
                 ),
             );
@@ -331,7 +331,7 @@ fn suppressed_overflow_mid_continuation_still_completes_truncated() {
                 crate::session::compaction_config::SUPPRESS_STICKY,
                 std::sync::atomic::Ordering::Relaxed,
             );
-            let error = error_with_tiny_window(wimo ai_wimo_sampler::SamplingErrorKind::Api, 500);
+            let error = error_with_tiny_window(wimoai_wimo_sampler::SamplingErrorKind::Api, 500);
             let Err(err) = actor
                 .handle_sampling_failure(error, 0, transient_state(0, true), true)
                 .await

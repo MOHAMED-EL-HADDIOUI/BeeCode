@@ -31,7 +31,7 @@ pub struct NotificationMeta {
     /// The agent resolves it by exact string match against persisted lines, so the full id is kept.
     /// The numeric suffix alone is ambiguous across the non-monotonic counter runs of a multi-resume history.
     pub event_id: Option<String>,
-    /// Monotonic per-process sequence parsed from `eventId` (`"{sessionId}-{counter}"`, see `wimo ai-wimo-shell util::event_id`).
+    /// Monotonic per-process sequence parsed from `eventId` (`"{sessionId}-{counter}"`, see `wimoai-wimo-shell util::event_id`).
     /// The agent stamps the SAME `eventId` on the live emission and on the persisted line that is later replayed.
     /// A client can therefore dedup an event it receives twice (replay/live overlap, a re-emit after the reconnect gate, or duplicate routing).
     /// Per-session events arrive in increasing order, so the pager keeps a highwater and drops anything at or below it.
@@ -40,7 +40,7 @@ pub struct NotificationMeta {
 }
 
 /// Serializable counterpart of the replay stamp the agent injects on replayed notifications.
-/// The stamp is `_meta.isReplay`, set by wimo ai-wimo-shell's `forward_raw_replay_line` during `session/load`.
+/// The stamp is `_meta.isReplay`, set by wimoai-wimo-shell's `forward_raw_replay_line` during `session/load`.
 ///
 /// [`NotificationMeta::from_json`] is the parse side; this is the build side.
 /// Code that constructs a replay-stamped `_meta` (test fixtures, playgrounds) shares the wire key with the parser.
@@ -72,8 +72,8 @@ pub mod user_prompt_meta {
     /// `[[start, end], …]` byte ranges of recognized slash tokens into the block's `text`.
     /// Only meaningful when that text is displayed verbatim (never stamped alongside `displayText`).
     pub const SKILL_TOKEN_RANGES: &str = "skillTokenRanges";
-    /// See [`wimo ai_prompt_queue::COMBINED_DISPLAY_TEXTS_META`].
-    pub const COMBINED_DISPLAY_TEXTS: &str = wimo ai_prompt_queue::COMBINED_DISPLAY_TEXTS_META;
+    /// See [`wimoai_prompt_queue::COMBINED_DISPLAY_TEXTS_META`].
+    pub const COMBINED_DISPLAY_TEXTS: &str = wimoai_prompt_queue::COMBINED_DISPLAY_TEXTS_META;
 }
 
 /// `UserMessageChunk` / `ContentChunk._meta` keys stamped by the shell and
@@ -82,7 +82,7 @@ pub mod user_message_chunk_meta {
     /// Prompt index for rewind / attribution.
     pub const PROMPT_INDEX: &str = "promptIndex";
     /// When true, the chunk must not become a scrollback user prompt.
-    /// See [`wimo ai_wimo_shell::session::PromptOrigin::hide_user_echo_from_scrollback`].
+    /// See [`wimoai_wimo_shell::session::PromptOrigin::hide_user_echo_from_scrollback`].
     pub const HIDE_FROM_SCROLLBACK: &str = "hideFromScrollback";
 }
 

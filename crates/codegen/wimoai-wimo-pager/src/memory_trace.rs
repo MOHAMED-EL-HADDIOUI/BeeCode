@@ -20,7 +20,7 @@
 //!
 //! ## Hooks (installed by the composition-root binary, mirrors `memory_release`)
 //!
-//! The lib cannot depend on jemalloc; `wimo ai-wimo-pager-bin` installs:
+//! The lib cannot depend on jemalloc; `wimoai-wimo-pager-bin` installs:
 //! - [`install_allocator_stats_provider`]: cheap mallctl gauge reads
 //! - [`install_allocator_dump_provider`]: full `malloc_stats_print` text
 //! - [`install_threshold_hook`]: `(trace_path, crossed_bytes)`.
@@ -39,7 +39,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 mod memory_trace_wait;
 use memory_trace_wait::wait_full_interval;
 
-pub use wimo ai_tty_utils::{ProcessResources, sample_process_memory};
+pub use wimoai_tty_utils::{ProcessResources, sample_process_memory};
 
 /// Allocator gauges sampled from jemalloc (`stats.*` mallctls). All bytes.
 #[derive(Clone, Copy, Debug, serde::Serialize)]
@@ -517,7 +517,7 @@ pub fn record_crash_sample() {
 }
 
 pub fn default_dir() -> PathBuf {
-    wimo ai_wimo_shell::util::wimo_home::wimo_home().join("memtrace")
+    wimoai_wimo_shell::util::wimo_home::wimo_home().join("memtrace")
 }
 
 #[derive(Debug, PartialEq, Eq)]

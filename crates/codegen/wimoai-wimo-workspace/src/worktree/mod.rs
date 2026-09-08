@@ -14,9 +14,9 @@ use git2::{DiffOptions, Oid, Repository};
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex as TokioMutex;
 use tokio_util::sync::CancellationToken;
-use wimo ai_fast_worktree::{BtrfsDelegate, IgnoredFilesMode, WorkingTreeMode, WorktreeBuilder};
-use wimo ai_wimo_telemetry::region;
-use wimo ai_wimo_telemetry::region::Parent;
+use wimoai_fast_worktree::{BtrfsDelegate, IgnoredFilesMode, WorkingTreeMode, WorktreeBuilder};
+use wimoai_wimo_telemetry::region;
+use wimoai_wimo_telemetry::region::Parent;
 
 use crate::session::git::{
     GitFileChange, change_type_from_git2_delta, find_git_root_from_path,
@@ -26,15 +26,15 @@ use crate::session::git::{
 mod identity;
 pub use identity::{WorktreeIdentity, worktree_identity_for_cwd, worktree_identity_in};
 
-// Canonical in wimo ai-wimo-workspace-types; re-exported for existing paths.
-pub use wimo ai_wimo_workspace_types::rpc::worktree::{
+// Canonical in wimoai-wimo-workspace-types; re-exported for existing paths.
+pub use wimoai_wimo_workspace_types::rpc::worktree::{
     ApplyMode, ApplyWorktreeRequest, ApplyWorktreeResponse, CopiedChangesSummary,
     CreateWorktreeFromWorktreeRequestWire, CreateWorktreeFromWorktreeResponse,
     CreateWorktreeRequest, CreateWorktreeResponse, DirtyStateSummary, FileConflict,
     RemoveWorktreeRequest, RemoveWorktreeResponse, WorktreeCopyMode, WorktreeType,
 };
 
-const WORKTREE_LOG: &str = "wimo ai_worktree";
+const WORKTREE_LOG: &str = "wimoai_worktree";
 
 async fn blocking_copy_on_write<F, T>(work: F) -> std::result::Result<T, tokio::task::JoinError>
 where
@@ -239,10 +239,10 @@ mod grove_fuse_tests {
     }
 }
 
-fn enabled_grove_opts() -> wimo ai_fast_worktree::NfsWorktreeOpts {
-    wimo ai_fast_worktree::NfsWorktreeOpts {
+fn enabled_grove_opts() -> wimoai_fast_worktree::NfsWorktreeOpts {
+    wimoai_fast_worktree::NfsWorktreeOpts {
         enabled: true,
-        ..wimo ai_fast_worktree::NfsWorktreeOpts::default()
+        ..wimoai_fast_worktree::NfsWorktreeOpts::default()
     }
 }
 
@@ -260,7 +260,7 @@ fn resolve_grove_fuse_creation_type(
         return requested;
     }
     let linked = grove_enabled
-        && wimo ai_fast_worktree::source_is_linked_local_view(&enabled_grove_opts(), source);
+        && wimoai_fast_worktree::source_is_linked_local_view(&enabled_grove_opts(), source);
     resolve_grove_fuse_creation_type_for(requested, linked, working_tree, source, session_id)
 }
 
@@ -290,11 +290,11 @@ fn resolve_grove_fuse_creation_type_for(
 }
 
 /// Map a [`WorktreeType`] to the fast-worktree crate's `CreationMode`.
-pub(crate) fn to_creation_mode(t: WorktreeType) -> wimo ai_fast_worktree::CreationMode {
+pub(crate) fn to_creation_mode(t: WorktreeType) -> wimoai_fast_worktree::CreationMode {
     match t {
-        WorktreeType::Linked => wimo ai_fast_worktree::CreationMode::Linked,
-        WorktreeType::Standalone => wimo ai_fast_worktree::CreationMode::Standalone,
-        WorktreeType::Git => wimo ai_fast_worktree::CreationMode::GitCheckout,
+        WorktreeType::Linked => wimoai_fast_worktree::CreationMode::Linked,
+        WorktreeType::Standalone => wimoai_fast_worktree::CreationMode::Standalone,
+        WorktreeType::Git => wimoai_fast_worktree::CreationMode::GitCheckout,
     }
 }
 
@@ -696,7 +696,7 @@ pub trait WorktreeNotificationSender {
 pub const MAX_LABEL_LEN: usize = 64;
 pub const MAX_COLLISION_SUFFIX: u32 = 100;
 
-pub use wimo ai_fast_worktree::META_KEY_LABEL;
+pub use wimoai_fast_worktree::META_KEY_LABEL;
 /// Unlike META_KEY_LABEL, nothing below this crate reads this key from the worktree record.
 pub const META_KEY_USER_PROVIDED: &str = "user_provided";
 
@@ -820,7 +820,7 @@ pub fn resolve_label_collision(base_dir: &Path, label: &str) -> String {
 /// wimo home for worktree paths: the same resolver as `worktrees.db`, with a `temp_dir()/.wimo` last resort.
 /// This is not wimo-config's cwd-relative `.wimo`: worktree paths need an absolute, always-writable anchor that does not move with the process cwd.
 fn wimo_home() -> std::path::PathBuf {
-    wimo ai_fast_worktree::resolve_wimo_home().unwrap_or_else(|_| std::env::temp_dir().join(".wimo"))
+    wimoai_fast_worktree::resolve_wimo_home().unwrap_or_else(|_| std::env::temp_dir().join(".wimo"))
 }
 
 /// Returns `~/.wimo/worktrees/<repo_slug>` for the given git root.
@@ -1162,7 +1162,7 @@ pub async fn create_worktree_streaming<N: WorktreeNotificationSender>(
             .working_tree_mode(working_tree_mode)
             .ignored_files_mode(IgnoredFilesMode::Skip)
             .creation_mode(to_creation_mode(creation_mode))
-            .worktree_kind(wimo ai_fast_worktree::WorktreeKind::Session)
+            .worktree_kind(wimoai_fast_worktree::WorktreeKind::Session)
             .session_id(session_id_for_builder)
             .metadata(label_metadata);
 
@@ -1358,7 +1358,7 @@ pub async fn remove_worktree(
     // The btrfs delegate is used only as a fallback when a direct btrfs op fails (rootless hosts lack CAP_SYS_ADMIN for direct subvolume ops)
     let delegate = btrfs_delegate_from_env();
     match tokio::task::spawn_blocking(move || {
-        wimo ai_fast_worktree::remove_worktree_with_delegate(&wt_path, delegate)
+        wimoai_fast_worktree::remove_worktree_with_delegate(&wt_path, delegate)
     })
     .await
     {
@@ -1445,7 +1445,7 @@ pub async fn rehydrate_subagent_worktree(
     let session_id = session_id.map(str::to_owned);
     let _recreate = region!("worktree.cwd_recreate", Parent::Inherit);
     let report = tokio::task::spawn_blocking(move || {
-        wimo ai_fast_worktree::rehydrate_worktree_from_ref(
+        wimoai_fast_worktree::rehydrate_worktree_from_ref(
             &dest,
             &source_repo,
             &snapshot_ref,
@@ -1475,8 +1475,8 @@ pub async fn snapshot_subagent_worktree(
     tokio::task::spawn_blocking(move || -> Result<String> {
         let message = format!("subagent worktree snapshot {ref_name}");
         // Capture into the worktree's git, then make it durable in the source repo (and verify) so it survives the worktree's deletion
-        wimo ai_fast_worktree::snapshot_worktree_to_ref(&worktree_path, &ref_name, &message)?;
-        wimo ai_fast_worktree::transfer_snapshot_to_repo(&worktree_path, &source_repo, &ref_name)?;
+        wimoai_fast_worktree::snapshot_worktree_to_ref(&worktree_path, &ref_name, &message)?;
+        wimoai_fast_worktree::transfer_snapshot_to_repo(&worktree_path, &source_repo, &ref_name)?;
         Ok(ref_name)
     })
     .await
@@ -1491,7 +1491,7 @@ pub async fn remove_subagent_worktree(worktree_path: &Path) -> Result<()> {
     // On rootless hosts the snapshot delete needs the privileged helper; without the delegate the btrfs delete hits EPERM and the snapshot leaks
     let delegate = btrfs_delegate_from_env();
     tokio::task::spawn_blocking(move || {
-        wimo ai_fast_worktree::remove_worktree_with_delegate(&worktree_path, delegate)
+        wimoai_fast_worktree::remove_worktree_with_delegate(&worktree_path, delegate)
     })
     .await
     .map_err(|e| anyhow::anyhow!("remove_subagent_worktree task failed: {e}"))??;
@@ -1694,7 +1694,7 @@ async fn cleanup_cancelled_worktree(worktree_path: &str) {
     let path = std::path::PathBuf::from(worktree_path);
     let delegate = btrfs_delegate_from_env();
     match tokio::task::spawn_blocking(move || {
-        wimo ai_fast_worktree::remove_worktree_with_delegate(&path, delegate)
+        wimoai_fast_worktree::remove_worktree_with_delegate(&path, delegate)
     })
     .await
     {
@@ -1827,7 +1827,7 @@ pub async fn create_worktree_from_worktree_streaming<N: WorktreeNotificationSend
                 .working_tree_mode(working_tree_mode)
                 .ignored_files_mode(IgnoredFilesMode::Skip)
                 .creation_mode(to_creation_mode(creation_mode))
-                .worktree_kind(wimo ai_fast_worktree::WorktreeKind::Fork)
+                .worktree_kind(wimoai_fast_worktree::WorktreeKind::Fork)
                 .session_id(session_id_for_builder)
                 .metadata(label_metadata);
 
@@ -2058,7 +2058,7 @@ pub async fn create_worktree_from_worktree_sync(
             .working_tree_mode(working_tree_mode)
             .ignored_files_mode(IgnoredFilesMode::Skip)
             .creation_mode(to_creation_mode(creation_mode))
-            .worktree_kind(wimo ai_fast_worktree::WorktreeKind::Fork)
+            .worktree_kind(wimoai_fast_worktree::WorktreeKind::Fork)
             .session_id(session_id_for_builder)
             .metadata(label_metadata);
 
@@ -2510,7 +2510,7 @@ pub struct RehydrateSessionResponse {
 // Worktree Management / DB
 // ============================================================================
 
-use wimo ai_fast_worktree::{
+use wimoai_fast_worktree::{
     DbStats, GcOptions, GcReport, ListFilter, WorktreeAutoGcLayer, WorktreeDb, WorktreeKind,
     WorktreeRecord, gc_worktrees as fw_gc_worktrees, rebuild_worktree_db, resolve_wimo_home,
     resolve_worktree_auto_gc_from_layers, run_auto_gc_pass,
@@ -2584,10 +2584,10 @@ fn resolve_mgmt_path(id_or_path: &str) -> Result<std::path::PathBuf> {
 pub fn detach_worktree_mgmt(
     id_or_path: &str,
     allow_copy: bool,
-) -> Result<wimo ai_fast_worktree::DetachReply> {
+) -> Result<wimoai_fast_worktree::DetachReply> {
     let path = resolve_mgmt_path(id_or_path)?;
-    let client = wimo ai_fast_worktree::NfsWorktreeClient::from_opts(
-        &wimo ai_fast_worktree::NfsWorktreeOpts::default(),
+    let client = wimoai_fast_worktree::NfsWorktreeClient::from_opts(
+        &wimoai_fast_worktree::NfsWorktreeOpts::default(),
     );
     client.detach_worktree(&path, allow_copy)
 }
@@ -2595,29 +2595,29 @@ pub fn detach_worktree_mgmt(
 pub fn salvage_worktree_mgmt(
     id_or_path: &str,
     out: &str,
-) -> Result<wimo ai_fast_worktree::SalvageReply> {
+) -> Result<wimoai_fast_worktree::SalvageReply> {
     let path = resolve_mgmt_path(id_or_path)?;
-    let client = wimo ai_fast_worktree::NfsWorktreeClient::from_opts(
-        &wimo ai_fast_worktree::NfsWorktreeOpts::default(),
+    let client = wimoai_fast_worktree::NfsWorktreeClient::from_opts(
+        &wimoai_fast_worktree::NfsWorktreeOpts::default(),
     );
     match client.salvage_worktree(&path, std::path::Path::new(out)) {
         Ok(r) => Ok(r),
         Err(e) if e.to_string().contains("unreachable") => {
-            wimo ai_fast_worktree::local_salvage(&path, std::path::Path::new(out))
+            wimoai_fast_worktree::local_salvage(&path, std::path::Path::new(out))
         }
         Err(e) => Err(e),
     }
 }
 
-pub fn clean_artifacts_mgmt(id_or_path: &str) -> Result<wimo ai_fast_worktree::CleanArtifactsReply> {
+pub fn clean_artifacts_mgmt(id_or_path: &str) -> Result<wimoai_fast_worktree::CleanArtifactsReply> {
     let path = resolve_mgmt_path(id_or_path)?;
-    let client = wimo ai_fast_worktree::NfsWorktreeClient::from_opts(
-        &wimo ai_fast_worktree::NfsWorktreeOpts::default(),
+    let client = wimoai_fast_worktree::NfsWorktreeClient::from_opts(
+        &wimoai_fast_worktree::NfsWorktreeOpts::default(),
     );
     match client.clean_artifacts(&path) {
         Ok(r) => Ok(r),
         Err(e) if e.to_string().contains("unreachable") => {
-            wimo ai_fast_worktree::local_clean_artifacts(&path)
+            wimoai_fast_worktree::local_clean_artifacts(&path)
         }
         Err(e) => Err(e),
     }
@@ -2625,14 +2625,14 @@ pub fn clean_artifacts_mgmt(id_or_path: &str) -> Result<wimo ai_fast_worktree::C
 
 /// Map settings to a resolve layer (shared by shell and workspace).
 pub fn worktree_auto_gc_layer_from_settings(
-    s: &wimo ai_wimo_config_types::WorktreeAutoGcSettings,
+    s: &wimoai_wimo_config_types::WorktreeAutoGcSettings,
 ) -> WorktreeAutoGcLayer {
     use std::collections::BTreeMap;
-    use wimo ai_wimo_config_types::WorktreeKindMaxAge;
+    use wimoai_wimo_config_types::WorktreeKindMaxAge;
 
     // Exhaustive destructure: a new settings field becomes a compile error here
     // Otherwise it would be a silently dropped knob on both the shell and workspace resolve paths
-    let wimo ai_wimo_config_types::WorktreeAutoGcSettings {
+    let wimoai_wimo_config_types::WorktreeAutoGcSettings {
         enabled,
         max_age_secs,
         min_interval_secs,
@@ -2676,16 +2676,16 @@ pub fn worktree_auto_gc_layer_from_settings(
 /// Returns `None` when the table is absent or fails to deserialize.
 fn worktree_auto_gc_settings_from_toml(
     root: &toml::Value,
-) -> Option<wimo ai_wimo_config_types::WorktreeAutoGcSettings> {
+) -> Option<wimoai_wimo_config_types::WorktreeAutoGcSettings> {
     root.get("worktree")
         .and_then(|w| w.get("auto_gc"))
         // toml::Value only deserializes by value (no &Value Deserializer).
-        .and_then(|v| wimo ai_wimo_config_types::WorktreeAutoGcSettings::deserialize(v.clone()).ok())
+        .and_then(|v| wimoai_wimo_config_types::WorktreeAutoGcSettings::deserialize(v.clone()).ok())
 }
 
 /// Remote-blind (env and `$wimo_HOME/config.toml` only): opts in only when local `[worktree.auto_gc] enabled = true`, else returns `None`.
 /// A forced dry-run would stamp the shared throttle and block the shell agent's remote-aware pass over the same DB, so skip instead.
-fn resolve_worktree_auto_gc_local() -> Option<wimo ai_fast_worktree::ResolvedWorktreeAutoGc> {
+fn resolve_worktree_auto_gc_local() -> Option<wimoai_fast_worktree::ResolvedWorktreeAutoGc> {
     let local = if let Ok(home) = resolve_wimo_home() {
         let path = home.join("config.toml");
         if let Ok(text) = std::fs::read_to_string(&path)
@@ -2704,8 +2704,8 @@ fn resolve_worktree_auto_gc_local() -> Option<wimo ai_fast_worktree::ResolvedWor
 /// Pure opt-in decision (no IO): `None` unless local config explicitly enables the pass.
 /// Split out of `resolve_worktree_auto_gc_local` so the fail-safe is testable without touching `$wimo_HOME`.
 fn local_auto_gc_policy(
-    local: Option<&wimo ai_wimo_config_types::WorktreeAutoGcSettings>,
-) -> Option<wimo ai_fast_worktree::ResolvedWorktreeAutoGc> {
+    local: Option<&wimoai_wimo_config_types::WorktreeAutoGcSettings>,
+) -> Option<wimoai_fast_worktree::ResolvedWorktreeAutoGc> {
     // Without an explicit local opt-in, the remote-aware shell pass owns GC
     if !local.and_then(|s| s.enabled).unwrap_or(false) {
         return None;
@@ -2728,7 +2728,7 @@ pub fn worktree_db_stats() -> Result<DbStats> {
     db.stats()
 }
 
-pub fn worktree_db_rebuild() -> Result<wimo ai_fast_worktree::RebuildReport> {
+pub fn worktree_db_rebuild() -> Result<wimoai_fast_worktree::RebuildReport> {
     let home = resolve_wimo_home()?;
     let db = WorktreeDb::open(&home)?;
     rebuild_worktree_db(&db, &home)
@@ -2760,7 +2760,7 @@ pub fn candidate_worktree_cwds_for_same_repo(current_cwd: &std::path::Path) -> R
     let main_root = find_main_repo_root_from_path(current_cwd)?;
     let db_records = match open_db() {
         Ok(db) => {
-            let filter = wimo ai_fast_worktree::ListFilter {
+            let filter = wimoai_fast_worktree::ListFilter {
                 source_repo: Some(main_root.clone()),
                 include_dead: true,
                 ..Default::default()
@@ -2808,7 +2808,7 @@ fn scan_worktree_dirs_on_disk(main_repo_root: &std::path::Path) -> Vec<String> {
 pub fn build_candidate_list(
     current_cwd: &str,
     main_repo_root: &str,
-    db_records: &[wimo ai_fast_worktree::WorktreeRecord],
+    db_records: &[wimoai_fast_worktree::WorktreeRecord],
     fs_paths: &[String],
 ) -> Vec<String> {
     let mut seen = std::collections::HashSet::new();
@@ -2857,7 +2857,7 @@ mod tests {
     /// A dry-run would stamp the shared throttle and block the shell agent's real deleting pass.
     #[test]
     fn local_auto_gc_policy_opts_in_only_when_enabled() {
-        use wimo ai_wimo_config_types::WorktreeAutoGcSettings;
+        use wimoai_wimo_config_types::WorktreeAutoGcSettings;
 
         assert!(local_auto_gc_policy(None).is_none(), "no config ⇒ skip");
         assert!(
@@ -2899,7 +2899,7 @@ mod tests {
 
     /// Create a source repo (one committed file) plus a worktree of it.
     fn repo_with_worktree(temp: &tempfile::TempDir) -> (std::path::PathBuf, std::path::PathBuf) {
-        use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+        use wimoai_test_utils::git::{git_commit_all, init_git_repo};
         let repo = temp.path().join("repo");
         std::fs::create_dir(&repo).unwrap();
         init_git_repo(&repo);
@@ -2914,7 +2914,7 @@ mod tests {
     /// Happy path: the snapshot ref resolves and the worktree dir is removed.
     #[tokio::test]
     async fn snapshot_and_remove_captures_then_deletes() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = tempfile::TempDir::new().unwrap();
         let (repo, wt) = repo_with_worktree(&temp);
 
@@ -2939,7 +2939,7 @@ mod tests {
     /// Full cycle (LINKED worktree): snapshot and remove, then rehydrate restores content byte-for-byte.
     #[tokio::test]
     async fn snapshot_and_remove_then_rehydrate_round_trips() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = tempfile::TempDir::new().unwrap();
         let (repo, wt) = repo_with_worktree(&temp);
 
@@ -2974,8 +2974,8 @@ mod tests {
     /// The test FAILS without `transfer_snapshot_to_repo`.
     #[tokio::test]
     async fn snapshot_standalone_worktree_durable_after_removal_round_trips() {
-        wimo ai_test_utils::require_git!();
-        use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+        wimoai_test_utils::require_git!();
+        use wimoai_test_utils::git::{git_commit_all, init_git_repo};
         let temp = tempfile::TempDir::new().unwrap();
         let repo = temp.path().join("repo");
         std::fs::create_dir(&repo).unwrap();
@@ -3029,7 +3029,7 @@ mod tests {
     /// Invariant: a failed snapshot must NOT remove the worktree directory.
     #[tokio::test]
     async fn snapshot_failure_preserves_worktree() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = tempfile::TempDir::new().unwrap();
 
         // A plain directory (no git HEAD) makes `snapshot_worktree_to_ref` fail, so removal must never run
@@ -3085,7 +3085,7 @@ mod tests {
             creator_pid: None,
             created_at: 100,
             last_accessed_at: None,
-            status: wimo ai_fast_worktree::WorktreeStatus::Alive,
+            status: wimoai_fast_worktree::WorktreeStatus::Alive,
             metadata: Some(build_label_metadata("my-label", true)),
         };
         db.register(&record).unwrap();
@@ -3151,8 +3151,8 @@ mod tests {
     /// `delegate` is `None` here, exercising the direct removal path.
     #[tokio::test]
     async fn cleanup_cancelled_worktree_removes_dir_and_deregisters() {
-        wimo ai_test_utils::require_git!();
-        use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+        wimoai_test_utils::require_git!();
+        use wimoai_test_utils::git::{git_commit_all, init_git_repo};
 
         let temp = tempfile::TempDir::new().unwrap();
         let repo = temp.path().join("repo");
@@ -3195,8 +3195,8 @@ mod tests {
     /// In proxy mode the shell never spawns the async task, so a marker set in prepare would never clear and would wedge every retry in `Creating`.
     #[tokio::test]
     async fn prepare_does_not_strand_in_progress_marker() {
-        wimo ai_test_utils::require_git!();
-        use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+        wimoai_test_utils::require_git!();
+        use wimoai_test_utils::git::{git_commit_all, init_git_repo};
 
         let temp = tempfile::TempDir::new().unwrap();
         let repo = temp.path().join("repo");
@@ -3253,8 +3253,8 @@ mod tests {
     /// The probe observes it mid-creation.
     #[tokio::test]
     async fn create_worktree_async_holds_marker_during_creation_and_clears_after() {
-        wimo ai_test_utils::require_git!();
-        use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+        wimoai_test_utils::require_git!();
+        use wimoai_test_utils::git::{git_commit_all, init_git_repo};
 
         let temp = tempfile::TempDir::new().unwrap();
         let repo = temp.path().join("repo");
@@ -3306,7 +3306,7 @@ mod tests {
     /// `prepare_worktree_from_worktree` must not strand the marker in the proxy case.
     #[tokio::test]
     async fn fork_prepare_does_not_strand_in_progress_marker() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = tempfile::TempDir::new().unwrap();
         let (_repo, wt) = repo_with_worktree(&temp);
 
@@ -3360,8 +3360,8 @@ mod tests {
     /// The loser bails (no second creation, no spurious terminal status) and the marker is cleared once the winner finishes.
     #[tokio::test]
     async fn concurrent_create_worktree_async_dedups_to_single_creator() {
-        wimo ai_test_utils::require_git!();
-        use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+        wimoai_test_utils::require_git!();
+        use wimoai_test_utils::git::{git_commit_all, init_git_repo};
 
         let temp = tempfile::TempDir::new().unwrap();
         let repo = temp.path().join("repo");

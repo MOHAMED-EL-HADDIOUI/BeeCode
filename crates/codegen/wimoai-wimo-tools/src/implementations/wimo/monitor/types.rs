@@ -79,7 +79,7 @@ pub struct MonitorOutput {
     pub persistent: bool,
 }
 
-impl wimo ai_tool_runtime::ToolOutput for MonitorOutput {}
+impl wimoai_tool_runtime::ToolOutput for MonitorOutput {}
 
 #[derive(thiserror::Error, Debug)]
 pub enum MonitorError {
@@ -143,8 +143,8 @@ impl MonitorEventNotification {
 /// of [`MonitorEventNotification`]. Producers `push_capped`; the turn loop
 /// drains its session's events via [`drain_owned`].
 ///
-/// [`EventQueue`]: wimo ai_interjection_core::EventQueue
-pub type MonitorEventBuffer = wimo ai_interjection_core::EventQueue<MonitorEventNotification>;
+/// [`EventQueue`]: wimoai_interjection_core::EventQueue
+pub type MonitorEventBuffer = wimoai_interjection_core::EventQueue<MonitorEventNotification>;
 
 crate::register_resource!("wimo", "MonitorEventBuffer", MonitorEventBuffer);
 

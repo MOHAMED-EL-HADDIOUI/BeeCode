@@ -8,6 +8,6 @@ fn env_override_pins_the_agent_id_without_persisting_it() {
         std::env::set_var("wimo_HOME", home.path());
         std::env::set_var("wimo_AGENT_ID", "pinned-agent-id");
     }
-    assert_eq!(wimo ai_wimo_telemetry::id::agent_id(), "pinned-agent-id");
+    assert_eq!(wimoai_wimo_telemetry::id::agent_id(), "pinned-agent-id");
     assert!(!home.path().join("agent_id").exists());
 }

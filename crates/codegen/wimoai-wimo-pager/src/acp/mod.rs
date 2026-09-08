@@ -19,11 +19,11 @@ pub(crate) fn is_session_update_ext_method(method: &str) -> bool {
     matches!(method, "x.ai/session_notification" | "x.ai/session/update")
 }
 
-use wimo ai_wimo_telemetry::process_info::{
+use wimoai_wimo_telemetry::process_info::{
     Entrypoint, Interactivity, LeaderMode, ProcessIdentity, set_identity,
 };
-use wimo ai_wimo_telemetry::startup;
-pub use wimo ai_wimo_telemetry::startup::{
+use wimoai_wimo_telemetry::startup;
+pub use wimoai_wimo_telemetry::startup::{
     AgentKind, Owner, StartupOutcome, StartupPhase, StartupTimer,
 };
 
@@ -32,10 +32,10 @@ use tokio_util::sync::CancellationToken;
 
 use crate::client_identity::{HEADLESS_CLIENT_TYPE, PAGER_CLIENT_TYPE, PAGER_CLIENT_VERSION};
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::{AcpAgentTx, AcpClientRx, acp_send};
-use wimo ai_wimo_shell::agent::auth_method::AuthMethodKind;
-use wimo ai_wimo_shell::agent::config::Config as AgentConfig;
-use wimo ai_wimo_shell::sampling::types::ReasoningEffort;
+use wimoai_acp_lib::{AcpAgentTx, AcpClientRx, acp_send};
+use wimoai_wimo_shell::agent::auth_method::AuthMethodKind;
+use wimoai_wimo_shell::agent::config::Config as AgentConfig;
+use wimoai_wimo_shell::sampling::types::ReasoningEffort;
 
 pub use model_state::ModelState;
 
@@ -84,7 +84,7 @@ pub struct AcpConnection {
     pub available_commands: Vec<acp::AvailableCommand>,
     // NOTE: Startup announcements from InitializeResponse.meta are not yet supported.
     // Requires the shell to include announcements in initialize metadata
-    // When available, add field: startup_announcements: Option<Vec<wimo ai_wimo_announcements::RemoteAnnouncement>>
+    // When available, add field: startup_announcements: Option<Vec<wimoai_wimo_announcements::RemoteAnnouncement>>
     /// Whether interactive login is required (deferred auth for `wimo.com`).
     pub needs_login: bool,
     /// Login button label from `AuthMethod.name` (e.g., "wimo.com", "Acme Corp").
@@ -111,7 +111,7 @@ pub struct AcpConnection {
     ///
     /// In-process mode shares the agent's instance (single token cache); leader mode builds a dedicated one off the same local `auth.json`.
     /// Either way it resolves a fresh bearer per request via the refresh chain.
-    pub auth_manager: std::sync::Arc<wimo ai_wimo_shell::auth::AuthManager>,
+    pub auth_manager: std::sync::Arc<wimoai_wimo_shell::auth::AuthManager>,
 }
 
 /// CLI flags that affect agent configuration, threaded from PagerArgs.
@@ -147,7 +147,7 @@ pub struct ConnectFlags {
     /// Installer field for config.toml.
     pub installer: Option<String>,
     /// Remote settings from early prefetch (used for memory config resolution).
-    pub remote_settings: Option<wimo ai_wimo_shell::util::config::RemoteSettings>,
+    pub remote_settings: Option<wimoai_wimo_shell::util::config::RemoteSettings>,
     /// Override the entire system prompt.
     pub system_prompt_override: Option<String>,
     /// Extra rules appended to the system prompt (from `--rules`).
@@ -156,7 +156,7 @@ pub struct ConnectFlags {
     pub reasoning_effort_override: Option<ReasoningEffort>,
     /// CLI permission rules from the --allow and --deny flags.
     /// Not supported in leader mode (agent config is set at leader startup).
-    pub permission_rules: Vec<wimo ai_wimo_workspace::permission::types::PermissionRule>,
+    pub permission_rules: Vec<wimoai_wimo_workspace::permission::types::PermissionRule>,
     /// Seed agent sessions with always-approve (YOLO) permission mode.
     pub default_yolo_mode: bool,
     /// Seed agent sessions with auto (classifier) permission mode.
@@ -167,12 +167,12 @@ pub struct ConnectFlags {
 /// Connect to an agent: spawn, initialize, authenticate.
 pub async fn connect(cancel: &CancellationToken, flags: ConnectFlags) -> Result<AcpConnection> {
     startup::enter(StartupPhase::ConfigLoad);
-    let raw_config = wimo ai_wimo_shell::config::load_effective_config()
+    let raw_config = wimoai_wimo_shell::config::load_effective_config()
         .map_err(|e| anyhow::anyhow!("Failed to load config: {}", e))?;
     let mut agent_config = AgentConfig::new_from_toml_cfg(&raw_config)
         .map_err(|e| anyhow::anyhow!("Failed to create agent config: {}", e))?;
 
-    agent_config.resolve_runtime_fields(&wimo ai_wimo_shell::agent::config::RuntimeResolutionContext {
+    agent_config.resolve_runtime_fields(&wimoai_wimo_shell::agent::config::RuntimeResolutionContext {
         raw_config: &raw_config,
         remote_settings: flags.remote_settings.as_ref(),
         is_headless: false,
@@ -273,7 +273,7 @@ pub async fn connect_via_leader(
     flags: ConnectFlags,
     raw_config: &toml::Value,
 ) -> Result<AcpConnection> {
-    use wimo ai_wimo_shell::leader::{
+    use wimoai_wimo_shell::leader::{
         ClientCapabilities, ClientMode, LeaderReconnector, ReconnectPolicy, connect_or_spawn,
     };
 
@@ -285,7 +285,7 @@ pub async fn connect_via_leader(
 
     startup::enter(StartupPhase::ConfigLoad);
     // The leader path never runs the managed-policy sync in this process.
-    startup::set_auth_mode(wimo ai_wimo_shell::managed_config::classify_auth_mode());
+    startup::set_auth_mode(wimoai_wimo_shell::managed_config::classify_auth_mode());
     let mut agent_config = AgentConfig::new_from_toml_cfg(raw_config)
         .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
     // resolve_telemetry_mode reads remote_settings.
@@ -295,7 +295,7 @@ pub async fn connect_via_leader(
         .client_identifier
         .as_deref()
         .unwrap_or(HEADLESS_CLIENT_TYPE);
-    let env_urls = wimo ai_wimo_shell::leader::LeaderEnvUrls::from(&agent_config.wimo_com_config);
+    let env_urls = wimoai_wimo_shell::leader::LeaderEnvUrls::from(&agent_config.wimo_com_config);
     let capabilities = ClientCapabilities {
         // Leader agent is pre-running; capabilities carry the mode seeds into session meta
         yolo_mode: flags.default_yolo_mode,
@@ -366,8 +366,8 @@ pub async fn connect_via_leader(
     // Build a dedicated *non-refreshing* one over the same `auth.json`: skip `configure_refresher` so only the agent rotates the token
     // A second refresher would race rotation and could clear credentials on failure
     // This one just reads the valid token, and on expiry adopts the agent's disk-rotated token under the file lock (`try_adopt_disk_token`)
-    let auth_manager = std::sync::Arc::new(wimo ai_wimo_shell::auth::AuthManager::new(
-        &wimo ai_wimo_shell::util::wimo_home::wimo_home(),
+    let auth_manager = std::sync::Arc::new(wimoai_wimo_shell::auth::AuthManager::new(
+        &wimoai_wimo_shell::util::wimo_home::wimo_home(),
         agent_config.wimo_com_config.clone(),
     ));
 
@@ -377,7 +377,7 @@ pub async fn connect_via_leader(
         leader: LeaderMode::Attached,
         interactivity: Interactivity::Interactive,
     });
-    wimo ai_wimo_shell::agent::init::update_telemetry_config(&agent_config, &auth_manager);
+    wimoai_wimo_shell::agent::init::update_telemetry_config(&agent_config, &auth_manager);
 
     Ok(AcpConnection {
         tx,
@@ -438,7 +438,7 @@ fn unsupported_leader_flags(flags: &ConnectFlags) -> Vec<&'static str> {
 fn apply_config_writes(flags: &ConnectFlags) {
     // Use toml_edit to preserve existing config structure
     let config_path =
-        wimo ai_wimo_shell::util::wimo_home::wimo_home().join(wimo ai_wimo_config::USER_CONFIG_FILENAME);
+        wimoai_wimo_shell::util::wimo_home::wimo_home().join(wimoai_wimo_config::USER_CONFIG_FILENAME);
     let content = std::fs::read_to_string(&config_path).unwrap_or_default();
     let mut doc = content
         .parse::<toml_edit::DocumentMut>()
@@ -496,7 +496,7 @@ fn client_capabilities_meta(flags: &ConnectFlags) -> serde_json::Value {
         "x.ai/bashOutputNoColor": true,
         "x.ai/gitHeadChanged": true,
     });
-    meta[wimo ai_wimo_status_line::STATUS_LINE_CAPABILITY] = flags.status_line.into();
+    meta[wimoai_wimo_status_line::STATUS_LINE_CAPABILITY] = flags.status_line.into();
     meta
 }
 
@@ -536,7 +536,7 @@ async fn initialize(
         .meta(build_initialize_meta(flags).as_object().cloned());
 
     let resp: acp::InitializeResponse = {
-        let _timer = wimo ai_wimo_telemetry::instrumentation::timer("acp_init.initialize_roundtrip");
+        let _timer = wimoai_wimo_telemetry::instrumentation::timer("acp_init.initialize_roundtrip");
         acp_send(req, tx).await?
     };
 
@@ -683,7 +683,7 @@ pub fn find_interactive_login_method(
 /// Attempt eager auth; on failure fall back to the interactive login screen.
 ///
 /// Errors from `authenticate` are caught so the connection still succeeds.
-/// When `wimo ai.api_key` was advertised, non-interactive credentials were available: do not promote to interactive auto-Login.
+/// When `wimoai.api_key` was advertised, non-interactive credentials were available: do not promote to interactive auto-Login.
 /// The shell owns unpinned fallthrough, and a failed api_key must not open a browser.
 /// Otherwise hand the interactive method for the login screen.
 ///
@@ -730,7 +730,7 @@ async fn eager_auth_or_login_fallback(
             // Non-interactive credentials were advertised; shell fallthrough already preferred them, so do not auto-open browser login
             let has_api_key = auth_methods
                 .iter()
-                .any(|m| AuthMethodKind::from_id(m.id()) == AuthMethodKind::wimo aiApiKey);
+                .any(|m| AuthMethodKind::from_id(m.id()) == AuthMethodKind::wimoaiApiKey);
             if has_api_key {
                 return (false, login_label, login_method_id, auth_start_mode, None);
             }
@@ -758,7 +758,7 @@ async fn bounded_eager_auth(
     Option<serde_json::Value>,
 ) {
     match tokio::time::timeout(
-        wimo ai_wimo_shell::http::STARTUP_AUTH_REFRESH_TIMEOUT,
+        wimoai_wimo_shell::http::STARTUP_AUTH_REFRESH_TIMEOUT,
         eager_auth_or_login_fallback(
             tx,
             auth_methods,
@@ -976,15 +976,15 @@ mod tests {
     /// This test exercises the SHELL-PAGER JOIN, not just the pager half.
     /// It calls the shell-side `build_auth_methods()` with the exact inputs `MvpAgent::initialize()` would compute for an enterprise user.
     /// The result then feeds into the pager's `startup_auth_metadata()`.
-    /// If a change re-orders `build_auth_methods()` to put `wimo ai.api_key` anywhere other than first (the shape of a past regression), this test fails.
+    /// If a change re-orders `build_auth_methods()` to put `wimoai.api_key` anywhere other than first (the shape of a past regression), this test fails.
     /// It fails because `startup_auth_metadata()` returns `needs_login = true`.
     ///
     /// Counterpart tests in `agent::auth_method::tests` pin the same invariant from the shell side:
-    /// `enterprise_byok_first_method_is_wimo ai_api_key` and `enterprise_byok_config_does_not_require_login`.
+    /// `enterprise_byok_first_method_is_wimoai_api_key` and `enterprise_byok_config_does_not_require_login`.
     /// This test pins the cross-crate contract that the pager actually consumes the shell's output as expected.
     #[test]
     fn shell_built_auth_methods_for_byok_user_skip_login_screen() {
-        use wimo ai_wimo_shell::agent::auth_method::{AuthMethodsBuildInputs, build_auth_methods};
+        use wimoai_wimo_shell::agent::auth_method::{AuthMethodsBuildInputs, build_auth_methods};
 
         let built = build_auth_methods(AuthMethodsBuildInputs {
             // Enterprise-style: model has `env_key` set and the env var resolves, so the shell-side predicate returns true
@@ -1003,7 +1003,7 @@ mod tests {
             !needs,
             "shell built auth_methods for a BYOK user, but the pager still \
              reports needs_login = true. Either the shell stopped putting \
-             wimo ai.api_key first or the pager stopped treating wimo ai.api_key as \
+             wimoai.api_key first or the pager stopped treating wimoai.api_key as \
              a no-login method.",
         );
         assert!(label.is_none());
@@ -1011,25 +1011,25 @@ mod tests {
         assert_eq!(mode, AuthStartMode::Pending);
     }
 
-    /// Inverse direction: when `wimo ai.api_key` is NOT in the list, the pager MUST show the login screen.
-    /// We assert this with `wimo ai.api_key` present LATER in the list (the shape of a past regression) and confirm the pager still requires login.
+    /// Inverse direction: when `wimoai.api_key` is NOT in the list, the pager MUST show the login screen.
+    /// We assert this with `wimoai.api_key` present LATER in the list (the shape of a past regression) and confirm the pager still requires login.
     /// The pager only inspects `auth_methods.first()`.
     /// This locks the failure mode of the regression.
     /// If a refactor makes the pager scan past `.first()`, this test diverges from `startup_auth_wimo_com_no_provider_needs_login_pending` above.
     /// It then either passes or fails on a meaningful new code path.
     #[test]
-    fn startup_auth_wimo ai_api_key_not_first_still_requires_login() {
-        use wimo ai_wimo_shell::agent::auth_method::{wimo_COM_METHOD_ID, wimo ai_API_KEY_METHOD_ID};
+    fn startup_auth_wimoai_api_key_not_first_still_requires_login() {
+        use wimoai_wimo_shell::agent::auth_method::{wimo_COM_METHOD_ID, wimoai_API_KEY_METHOD_ID};
 
         let methods = vec![
             make_auth_method(wimo_COM_METHOD_ID, "wimo", None),
-            make_auth_method(wimo ai_API_KEY_METHOD_ID, "wimo ai.api_key", None),
+            make_auth_method(wimoai_API_KEY_METHOD_ID, "wimoai.api_key", None),
         ];
         let (needs, _, _, _) = startup_auth_metadata(&methods);
         assert!(
             needs,
             "with wimo.com first, the pager must require login -- pinning \
-             the BAD-ordering failure mode (wimo ai.api_key not first)",
+             the BAD-ordering failure mode (wimoai.api_key not first)",
         );
     }
 
@@ -1150,7 +1150,7 @@ mod tests {
     /// The agent gates the whole payload on this key, so a misspelling on either side switches the feature off with nothing to show for it.
     #[test]
     fn client_capabilities_meta_advertises_the_status_line_the_config_asked_for() {
-        let key = wimo ai_wimo_status_line::STATUS_LINE_CAPABILITY;
+        let key = wimoai_wimo_status_line::STATUS_LINE_CAPABILITY;
         for wants_a_row in [true, false] {
             let meta = client_capabilities_meta(&ConnectFlags {
                 status_line: wants_a_row,

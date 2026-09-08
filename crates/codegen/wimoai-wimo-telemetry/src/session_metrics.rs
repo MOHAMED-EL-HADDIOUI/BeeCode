@@ -177,11 +177,11 @@ impl TraceUploadReason {
         }
     }
 
-    pub fn from_upload_method(method: &Option<wimo ai_file_utils::UploadMethod>) -> Self {
+    pub fn from_upload_method(method: &Option<wimoai_file_utils::UploadMethod>) -> Self {
         match method {
-            Some(wimo ai_file_utils::UploadMethod::Proxy { .. }) => Self::Proxy,
-            Some(wimo ai_file_utils::UploadMethod::S3 { .. }) => Self::DirectS3,
-            Some(wimo ai_file_utils::UploadMethod::Direct { .. }) => Self::DirectGcs,
+            Some(wimoai_file_utils::UploadMethod::Proxy { .. }) => Self::Proxy,
+            Some(wimoai_file_utils::UploadMethod::S3 { .. }) => Self::DirectS3,
+            Some(wimoai_file_utils::UploadMethod::Direct { .. }) => Self::DirectGcs,
             None => Self::NoCredentials,
         }
     }
@@ -189,7 +189,7 @@ impl TraceUploadReason {
 
 #[cfg(test)]
 mod tests {
-    use wimo ai_file_utils::UploadMethod;
+    use wimoai_file_utils::UploadMethod;
 
     use super::TraceUploadReason;
 

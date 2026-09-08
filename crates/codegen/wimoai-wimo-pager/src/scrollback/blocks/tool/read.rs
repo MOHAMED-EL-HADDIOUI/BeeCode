@@ -17,7 +17,7 @@ const FIRST_LINES: usize = 5;
 const LAST_LINES: usize = 3;
 
 use crate::appearance::AppearanceConfig;
-use wimo ai_wimo_tools::implementations::skills::types::skill_name_from_path;
+use wimoai_wimo_tools::implementations::skills::types::skill_name_from_path;
 
 /// What kind of non-text media this read produced.
 #[derive(Debug, Clone)]

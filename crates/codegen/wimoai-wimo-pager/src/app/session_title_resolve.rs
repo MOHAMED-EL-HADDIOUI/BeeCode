@@ -6,7 +6,7 @@
 //! Materialization keeps [`select_by_title`] as the authoritative error source (ambiguity / no-match).
 //! It is also the fallback for callers that bypass pinning.
 
-use wimo ai_wimo_shell::session::persistence::{RecentSessionSelection, Summary};
+use wimoai_wimo_shell::session::persistence::{RecentSessionSelection, Summary};
 
 /// UUID-shaped resume args always take the id path, even when no such id exists and a session is titled with that exact UUID.
 pub(crate) fn is_uuid_shaped(arg: &str) -> bool {
@@ -119,14 +119,14 @@ pub(crate) fn presandbox_resume_target(
     let Some(cwd) = cwd else {
         return Ok(PinnedResumeTarget::Unresolved);
     };
-    if let Some(local_id) = wimo ai_wimo_shell::session::resolve_local_session(arg, cwd) {
+    if let Some(local_id) = wimoai_wimo_shell::session::resolve_local_session(arg, cwd) {
         return Ok(PinnedResumeTarget::Id(local_id));
     }
-    if wimo ai_wimo_shell::session::resolve_local_session_any_cwd(arg).is_some() {
+    if wimoai_wimo_shell::session::resolve_local_session_any_cwd(arg).is_some() {
         return Ok(PinnedResumeTarget::Id(arg.to_string()));
     }
     let summaries =
-        wimo ai_wimo_shell::session::persistence::local_summaries_for_cwd_sync(cwd, selection)
+        wimoai_wimo_shell::session::persistence::local_summaries_for_cwd_sync(cwd, selection)
             .map_err(|e| {
                 anyhow::anyhow!(
                     "failed to list local sessions while resolving --resume {arg:?}: {e}"

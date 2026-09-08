@@ -13,7 +13,7 @@ curl -fsSL https://x.ai/cli/install.sh | bash
 Or install with npm:
 
 ```bash
-npm i -g @wimo ai-official/wimo
+npm i -g @wimoai-official/wimo
 ```
 
 ## Get Started
@@ -29,7 +29,7 @@ wimo -p "Explain this codebase"
 On first launch, wimo opens your browser to authenticate. For CI or headless environments, use an API key from [console.x.ai](https://console.x.ai):
 
 ```bash
-export wimo ai_API_KEY="wimo ai-..."
+export wimoai_API_KEY="wimoai-..."
 ```
 
 ## Update
@@ -41,7 +41,7 @@ wimo update
 Or if installed via npm:
 
 ```bash
-npm i -g @wimo ai-official/wimo@latest
+npm i -g @wimoai-official/wimo@latest
 ```
 
 ## Supported Platforms

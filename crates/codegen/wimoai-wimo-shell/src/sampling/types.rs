@@ -1,17 +1,17 @@
 // This re-export keeps all existing `crate::sampling::types::*` imports working
-pub use wimo ai_wimo_sampling_types::types::*;
+pub use wimoai_wimo_sampling_types::types::*;
 
-// `CreateResponseWrapper` and `MessagesRequestWrapper` live in `wimo ai-wimo-sampling-types::types`, re-exported above via the wildcard
-// That placement lets the `wimo ai-wimo-sampler` crate reference them without a circular dep on `wimo ai-wimo-shell`
+// `CreateResponseWrapper` and `MessagesRequestWrapper` live in `wimoai-wimo-sampling-types::types`, re-exported above via the wildcard
+// That placement lets the `wimoai-wimo-sampler` crate reference them without a circular dep on `wimoai-wimo-shell`
 
-// Tests for the types live in the wimo ai-wimo-sampling-types crate
+// Tests for the types live in the wimoai-wimo-sampling-types crate
 
-use wimo ai_wimo_tools::types::output::ImageContent as ToolsImageContent;
+use wimoai_wimo_tools::types::output::ImageContent as ToolsImageContent;
 
 /// Render an `ImageContent` produced by the read-file tool as a URL string suitable for an `image_url` content block.
 /// Passes the explicit `uri` through if present, otherwise builds a `data:<mime>;base64,<data>` URI.
 ///
-/// Lives in the shell (rather than `wimo ai-wimo-sampling-types` or `wimo ai-wimo-tools`) so neither crate needs a dep on `agent-client-protocol`.
+/// Lives in the shell (rather than `wimoai-wimo-sampling-types` or `wimoai-wimo-tools`) so neither crate needs a dep on `agent-client-protocol`.
 pub fn get_image_content_url(image_content: &ToolsImageContent) -> String {
     if let Some(uri) = &image_content.uri {
         uri.clone()

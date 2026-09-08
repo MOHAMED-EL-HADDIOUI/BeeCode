@@ -1,11 +1,11 @@
 //! Prepares one cache-aligned, image-budgeted compaction request history.
 
-use wimo ai_chat_state::compaction_utils::ModelRequestHistory;
-use wimo ai_chat_state::image_budget::{
+use wimoai_chat_state::compaction_utils::ModelRequestHistory;
+use wimoai_chat_state::image_budget::{
     IMAGE_COMPACT_RECLAIM_TARGET_BYTES, IMAGE_COMPACT_TRIGGER_BYTES, ImageBudgetOutcome,
     apply_image_budget_with_limits,
 };
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_wimo_sampling_types::ConversationItem;
 
 use super::session_compact::build_compaction_prompt;
 
@@ -75,7 +75,7 @@ fn effective_image_budget_limits(compaction_tool_tokens: u64) -> (usize, usize) 
     // The existing tool estimate is bytes/4; invert that same heuristic here.
     // Saturation is conservative: an unrepresentable reserve leaves no image budget.
     let reserved_bytes =
-        usize::try_from(wimo ai_token_estimation::estimate_chars(compaction_tool_tokens))
+        usize::try_from(wimoai_token_estimation::estimate_chars(compaction_tool_tokens))
             .unwrap_or(usize::MAX);
     (
         IMAGE_COMPACT_TRIGGER_BYTES.saturating_sub(reserved_bytes),

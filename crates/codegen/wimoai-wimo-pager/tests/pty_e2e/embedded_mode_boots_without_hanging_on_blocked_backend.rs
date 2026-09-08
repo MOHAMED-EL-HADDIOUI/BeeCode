@@ -30,9 +30,9 @@ async fn embedded_mode_boots_without_hanging_on_blocked_backend() {
     let env = [
         ("HOME", home.path().to_str().unwrap()),
         ("wimo_HOME", wimo_home.to_str().unwrap()),
-        ("wimo ai_API_KEY", "test-key-for-ci"),
+        ("wimoai_API_KEY", "test-key-for-ci"),
         ("wimo_CLI_CHAT_PROXY_BASE_URL", base.as_str()),
-        ("wimo_wimo ai_API_BASE_URL", base.as_str()),
+        ("wimo_wimoai_API_BASE_URL", base.as_str()),
         ("wimo_TELEMETRY_ENABLED", "false"),
         ("wimo_FEEDBACK_ENABLED", "false"),
         ("wimo_TRACE_UPLOAD", "false"),

@@ -3,7 +3,7 @@
 
 use chrono::Utc;
 use tempfile::TempDir;
-use wimo ai_wimo_active_sessions::*;
+use wimoai_wimo_active_sessions::*;
 
 fn session(id: &str, pid: u32) -> ActiveSession {
     ActiveSession {

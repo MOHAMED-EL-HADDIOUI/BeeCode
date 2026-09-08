@@ -22,12 +22,12 @@ use crate::session::two_pass::{
 };
 use agent_client_protocol as acp;
 use std::sync::Arc;
-use wimo ai_chat_state::compaction_utils::{
+use wimoai_chat_state::compaction_utils::{
     CompactedHistoryInput, CompactionAttempt, build_compacted_history, is_degenerate_summary,
     prepare_conversation_for_verbatim_summarization, sanitize_compacted_history,
     validate_compacted_history,
 };
-use wimo ai_wimo_sampling_types::{ApiBackend, ConversationItem};
+use wimoai_wimo_sampling_types::{ApiBackend, ConversationItem};
 /// Prefix on the early-guard failure payloads below; the user-facing normalizer strips it (the renderer prepends its own headline).
 const COMPACTION_FAILED_GUARD_PREFIX: &str = "Compaction failed: ";
 /// Human-readable "next fire" for a scheduled loop in the compaction reminder.
@@ -155,7 +155,7 @@ impl SessionActor {
         };
         let tool_defs = self.prepare_tool_definitions().await;
         let tools = self.turn_base_tool_specs(&tool_defs);
-        let compaction_tool_tokens = wimo ai_chat_state::estimate_tool_specs_tokens(&tools);
+        let compaction_tool_tokens = wimoai_chat_state::estimate_tool_specs_tokens(&tools);
         let wall_clock_budget_secs = self
             .agent
             .borrow()
@@ -197,7 +197,7 @@ impl SessionActor {
         let estimated_total = self.chat_state_handle.get_estimated_total_tokens().await;
         let threshold = self.compaction.threshold_percent.get() as u64;
         let start_pct = threshold.saturating_sub(prefire_lead_percent());
-        wimo ai_token_estimation::exceeds_threshold(estimated_total, cw, start_pct as u8)
+        wimoai_token_estimation::exceeds_threshold(estimated_total, cw, start_pct as u8)
     }
     /// Background pass-1: summarize the ~95% prefix into NOTE₁ and cache it for a later pass-2 apply.
     /// Always releases the in-flight guard.
@@ -273,7 +273,7 @@ impl SessionActor {
             prepare_conversation_for_verbatim_summarization(split.prefix.to_vec(), strips);
         let prefix_est_tokens = prefix_prepared
             .iter()
-            .map(wimo ai_chat_state::estimate_item_tokens)
+            .map(wimoai_chat_state::estimate_item_tokens)
             .sum::<u64>();
         let prompt = build_two_pass_compaction_prompt(None);
         let pass1_history = build_two_pass_pass1_history(&prefix_prepared, &prompt);
@@ -467,7 +467,7 @@ fn preserve_inherited_prefix(
 }
 /// Project the token count a re-pinned (preserved) history would reseed to.
 /// The release decision then compares against the same threshold the auto-compact trigger applies next turn.
-/// This only APPROXIMATES the reseed done by `wimo ai-chat-state` `replace_conversation`, the authority.
+/// This only APPROXIMATES the reseed done by `wimoai-chat-state` `replace_conversation`, the authority.
 /// It divides by the current conversation estimate, not the reseed's frozen `estimate_at_last_response`.
 /// The conversation only grows, so this under-estimates the reseed (a lower bound) and can lean toward preserve.
 /// That never re-loops: the post-replace `exceeds_threshold` check still sets sticky Size suppression if a preserve leaves the fork over budget.
@@ -517,7 +517,7 @@ impl SessionActor {
             .memory
             .last_flush_compaction
             .load(std::sync::atomic::Ordering::Relaxed);
-        if wimo ai_wimo_memory::flush::should_flush(
+        if wimoai_wimo_memory::flush::should_flush(
             total_tokens,
             context_window,
             self.compaction.threshold_percent.get(),
@@ -582,7 +582,7 @@ impl SessionActor {
             .run_compact_inner(
                 user_context,
                 None,
-                wimo ai_wimo_telemetry::events::CompactionTrigger::Manual,
+                wimoai_wimo_telemetry::events::CompactionTrigger::Manual,
                 false,
             )
             .await
@@ -598,12 +598,12 @@ impl SessionActor {
                 crate::session::helpers::session_compact::compact_error_data(kind, &detail),
             ));
         }
-        use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+        use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
         let tokens_after = self.chat_state_handle.get_total_tokens().await;
         let span = tracing::Span::current();
         span.record("post_tokens", tokens_after as i64);
         span.record("success", true);
-        self.send_wimo ai_notification(wimo aiSessionUpdate::AutoCompactCompleted {
+        self.send_wimoai_notification(wimoaiSessionUpdate::AutoCompactCompleted {
             tokens_before: Some(total_tokens),
             tokens_after,
             elapsed_ms: None,
@@ -615,8 +615,8 @@ impl SessionActor {
     }
     async fn emit_compact_cancelled(&self, auto_trigger: bool) -> Result<(), acp::Error> {
         if auto_trigger {
-            use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
-            self.send_wimo ai_notification(wimo aiSessionUpdate::AutoCompactCancelled {
+            use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
+            self.send_wimoai_notification(wimoaiSessionUpdate::AutoCompactCancelled {
                 reason: crate::extensions::notification::AutoCompactCancelReason::UserCancelled,
             })
             .await;
@@ -652,14 +652,14 @@ impl SessionActor {
                 context_window,
                 "auto-compaction suppressed after deterministic compaction failure"
             );
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::AutoCompactSuppressed {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::AutoCompactSuppressed {
                     reason: reason.as_str(),
                     estimated_tokens,
                     context_window,
                 },
             );
-            self.send_wimo ai_notification(
+            self.send_wimoai_notification(
                 crate::extensions::notification::SessionUpdate::AutoCompactFailed {
                     error: Self::suppress_notification_message(reason, detail),
                 },
@@ -720,8 +720,8 @@ impl SessionActor {
         const INTERNAL_PREFIXES: &[&str] = &[
             COMPACT_FAILED_PREFIX,
             COMPACTION_FAILED_GUARD_PREFIX,
-            wimo ai_wimo_compaction::sampler::SAMPLER_BUILD_FAILED_PREFIX,
-            wimo ai_wimo_compaction::sampler::SAMPLER_START_FAILED_PREFIX,
+            wimoai_wimo_compaction::sampler::SAMPLER_BUILD_FAILED_PREFIX,
+            wimoai_wimo_compaction::sampler::SAMPLER_START_FAILED_PREFIX,
         ];
         let mut rest = raw.trim();
         loop {
@@ -746,7 +746,7 @@ impl SessionActor {
     /// Terminal auth compact failure: emit RetryState auth (reauth stash) and auth_required.
     /// Separate from `AutoCompactFailed` (user-facing); this aborts the turn.
     pub(crate) async fn surface_compact_auth_failure(&self, err: acp::Error) -> acp::Error {
-        use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+        use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
         use crate::extensions::notification::UNAUTHORIZED_NEEDLE;
         let detailed = crate::sampling::error::acp_error_message(&err);
         let message = if detailed.to_ascii_lowercase().contains("unauthorized") {
@@ -762,14 +762,14 @@ impl SessionActor {
             error = %message,
             "auto-compact auth failure: aborting turn for re-auth"
         );
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auto-compact auth failure: aborting turn for re-auth",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
                 "message": crate::util::truncate(&message, 300),
             })),
         );
-        self.send_wimo ai_notification(wimo aiSessionUpdate::RetryState(
+        self.send_wimoai_notification(wimoaiSessionUpdate::RetryState(
             crate::extensions::notification::RetryState::Failed {
                 error_type: "auth".to_string(),
                 message: message.clone(),
@@ -779,7 +779,7 @@ impl SessionActor {
         acp::Error::auth_required().data(crate::sampling::error::terminal_error_data(
             message,
             Some(401),
-            wimo ai_wimo_sampler::SamplingErrorKind::Auth,
+            wimoai_wimo_sampler::SamplingErrorKind::Auth,
         ))
     }
     /// Clear [`SUPPRESS_AUTH`] on login/token refresh (credit suppress waits for a 200).
@@ -819,11 +819,11 @@ impl SessionActor {
         match preserve_inherited_prefix(&full_conv, compacted_history, prefix_len) {
             Ok(preserved) => {
                 let projected_preserved = project_preserved_reseed_tokens(
-                    wimo ai_chat_state::estimate_conversation_tokens(&preserved),
+                    wimoai_chat_state::estimate_conversation_tokens(&preserved),
                     tokens_before,
-                    wimo ai_chat_state::estimate_conversation_tokens(&full_conv),
+                    wimoai_chat_state::estimate_conversation_tokens(&full_conv),
                 );
-                if wimo ai_token_estimation::exceeds_threshold(
+                if wimoai_token_estimation::exceeds_threshold(
                     projected_preserved,
                     context_window,
                     self.compaction.threshold_percent.get(),
@@ -895,7 +895,7 @@ impl SessionActor {
         &self,
         user_context: Option<String>,
         auto_continue: Option<crate::extensions::notification::AutoContinueInfo>,
-        trigger: wimo ai_wimo_telemetry::events::CompactionTrigger,
+        trigger: wimoai_wimo_telemetry::events::CompactionTrigger,
         lossy_input: bool,
     ) -> Result<(), acp::Error> {
         let (cancel, _cancel_scope) = self.compaction.cancel.enter();
@@ -903,8 +903,8 @@ impl SessionActor {
         tracing::Span::current().record("compaction_tokens_before", tokens_before as i64);
         self.signals_handle().record_compaction(tokens_before);
         let trigger_str = match trigger {
-            wimo ai_wimo_telemetry::events::CompactionTrigger::Manual => "manual",
-            wimo ai_wimo_telemetry::events::CompactionTrigger::Auto => "auto",
+            wimoai_wimo_telemetry::events::CompactionTrigger::Manual => "manual",
+            wimoai_wimo_telemetry::events::CompactionTrigger::Auto => "auto",
         };
         let sampling_config = self.chat_state_handle.get_sampling_config().await;
         let context_window = sampling_config
@@ -930,22 +930,22 @@ impl SessionActor {
             .map(|c| c.api_backend == ApiBackend::Messages)
             .unwrap_or(false);
         let model_id = sampling_config.map(|c| c.model).unwrap_or_default();
-        let compaction = wimo ai_wimo_telemetry::events::CompactionScope::begin(
-            wimo ai_wimo_telemetry::events::CompactionBeginParams {
+        let compaction = wimoai_wimo_telemetry::events::CompactionScope::begin(
+            wimoai_wimo_telemetry::events::CompactionBeginParams {
                 trigger,
                 tokens_used: tokens_before,
                 context_window,
                 model_id: model_id.clone(),
                 user_context_provided: user_context.is_some(),
                 compaction_mode: match self.compaction.compaction_mode {
-                    wimo ai_chat_state::CompactionMode::Summary => {
-                        wimo ai_wimo_telemetry::events::CompactionModeLabel::Summary
+                    wimoai_chat_state::CompactionMode::Summary => {
+                        wimoai_wimo_telemetry::events::CompactionModeLabel::Summary
                     }
-                    wimo ai_chat_state::CompactionMode::Transcript => {
-                        wimo ai_wimo_telemetry::events::CompactionModeLabel::Transcript
+                    wimoai_chat_state::CompactionMode::Transcript => {
+                        wimoai_wimo_telemetry::events::CompactionModeLabel::Transcript
                     }
-                    wimo ai_chat_state::CompactionMode::Segments(_) => {
-                        wimo ai_wimo_telemetry::events::CompactionModeLabel::Segments
+                    wimoai_chat_state::CompactionMode::Segments(_) => {
+                        wimoai_wimo_telemetry::events::CompactionModeLabel::Segments
                     }
                 },
                 two_pass_enabled: self.two_pass_active(),
@@ -954,8 +954,8 @@ impl SessionActor {
         );
         let compact_source = trigger_str;
         self.dispatch_hook(
-            wimo ai_wimo_hooks::event::HookEventName::PreCompact,
-            wimo ai_wimo_hooks::event::HookPayload::PreCompact {
+            wimoai_wimo_hooks::event::HookEventName::PreCompact,
+            wimoai_wimo_hooks::event::HookPayload::PreCompact {
                 source: compact_source.into(),
             },
             None,
@@ -971,7 +971,7 @@ impl SessionActor {
         );
         let assembly_start = std::time::Instant::now();
         let segment_messages = if self.compaction.compaction_mode.writes_segments() {
-            wimo ai_chat_state::compaction_utils::prepare_conversation_for_segment(
+            wimoai_chat_state::compaction_utils::prepare_conversation_for_segment(
                 full_conversation.clone(),
             )
         } else {
@@ -980,12 +980,12 @@ impl SessionActor {
         const SUMMARY_BUDGET_RESERVE_TOKENS: u64 = 32_768;
         let verbatim_input_enabled = self.compaction.verbatim_input && !lossy_input;
         let mut simplified_messages = if verbatim_input_enabled {
-            wimo ai_chat_state::compaction_utils::prepare_conversation_for_verbatim_summarization(
+            wimoai_chat_state::compaction_utils::prepare_conversation_for_verbatim_summarization(
                 full_conversation,
                 summary_strips_reasoning,
             )
         } else {
-            wimo ai_chat_state::compaction_utils::prepare_conversation_for_summarization(
+            wimoai_chat_state::compaction_utils::prepare_conversation_for_summarization(
                 full_conversation,
             )
         };
@@ -1039,22 +1039,22 @@ impl SessionActor {
         let sampling_config = self.reconstruct_full_config().await;
         let sampling_client = self.prepare_chat_completion(false).await?;
         let backend_search_active = self.backend_search_active();
-        let effective_tool_defs: Vec<wimo ai_wimo_sampling_types::ToolDefinition> = self
+        let effective_tool_defs: Vec<wimoai_wimo_sampling_types::ToolDefinition> = self
             .prepare_tool_definitions()
             .await
             .into_iter()
             .filter(|td| !backend_search_active || td.function.name != "web_search")
             .collect();
         let compaction_tool_tokens =
-            wimo ai_chat_state::estimate_tool_definitions_tokens(&effective_tool_defs);
-        let compaction_tools: Vec<wimo ai_wimo_sampling_types::ToolSpec> = effective_tool_defs
+            wimoai_chat_state::estimate_tool_definitions_tokens(&effective_tool_defs);
+        let compaction_tools: Vec<wimoai_wimo_sampling_types::ToolSpec> = effective_tool_defs
             .into_iter()
-            .map(wimo ai_wimo_sampling_types::ToolSpec::from)
+            .map(wimoai_wimo_sampling_types::ToolSpec::from)
             .collect();
-        let compaction_hosted_tools: Vec<wimo ai_wimo_sampling_types::HostedTool> =
+        let compaction_hosted_tools: Vec<wimoai_wimo_sampling_types::HostedTool> =
             self.hosted_tools_for_turn();
         if lossy_input {
-            simplified_messages = wimo ai_chat_state::compaction_utils::fit_conversation_to_budget(
+            simplified_messages = wimoai_chat_state::compaction_utils::fit_conversation_to_budget(
                 simplified_messages,
                 lossy_input_budget(context_window, compaction_tool_tokens),
             );
@@ -1091,8 +1091,8 @@ impl SessionActor {
         let use_short_prompt = false;
         let started_at = chrono::Utc::now().to_rfc3339();
         let estimated_input_tokens =
-            wimo ai_chat_state::estimate_conversation_tokens(&simplified_messages);
-        let auto_trigger = matches!(trigger, wimo ai_wimo_telemetry::events::CompactionTrigger::Auto);
+            wimoai_chat_state::estimate_conversation_tokens(&simplified_messages);
+        let auto_trigger = matches!(trigger, wimoai_wimo_telemetry::events::CompactionTrigger::Auto);
         let wall_clock_budget_secs = self
             .agent
             .borrow()
@@ -1121,7 +1121,7 @@ impl SessionActor {
                 estimated_input_tokens,
                 retry_delay_secs,
             );
-        let fr_config = wimo ai_wimo_compaction::FullReplaceConfig {
+        let fr_config = wimoai_wimo_compaction::FullReplaceConfig {
             max_attempts: max_retries,
             retry_delay_secs,
             sampling_timeout_secs: 0,
@@ -1135,7 +1135,7 @@ impl SessionActor {
         let mut compact_summary: Option<String> =
             two_pass_output.as_ref().map(|o| o.content.clone());
         while compact_summary.is_none() {
-            match wimo ai_wimo_compaction::sample_full_replace_summary(
+            match wimoai_wimo_compaction::sample_full_replace_summary(
                 &sampler,
                 &request_turns,
                 user_context.as_deref(),
@@ -1148,14 +1148,14 @@ impl SessionActor {
                     compact_summary = Some(summary.summary);
                     break;
                 }
-                Err(wimo ai_wimo_compaction::FullReplaceError::NothingToCompact) => {
+                Err(wimoai_wimo_compaction::FullReplaceError::NothingToCompact) => {
                     last_error = Some(
                         acp::Error::internal_error()
                             .data(format!("{COMPACT_FAILED_PREFIX}nothing to compact")),
                     );
                     break;
                 }
-                Err(wimo ai_wimo_compaction::FullReplaceError::EmptyResponse) => {
+                Err(wimoai_wimo_compaction::FullReplaceError::EmptyResponse) => {
                     last_failure_outcome = if observer.degenerate_seen() {
                         CompactionOutcome::Degenerate
                     } else {
@@ -1168,7 +1168,7 @@ impl SessionActor {
                     ));
                     break;
                 }
-                Err(wimo ai_wimo_compaction::FullReplaceError::Sampler {
+                Err(wimoai_wimo_compaction::FullReplaceError::Sampler {
                     message,
                     deterministic,
                     context_overflow,
@@ -1188,8 +1188,8 @@ impl SessionActor {
                         };
                         if let Some(stage) = next_stage {
                             input_overflow_rejections += 1;
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::CompactionRetryDegraded {
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::CompactionRetryDegraded {
                                     trigger,
                                     reason: "input_overflow",
                                     from_stage: Some(input_stage.as_str()),
@@ -1212,18 +1212,18 @@ impl SessionActor {
                                     let budget = context_window
                                         .saturating_sub(SUMMARY_BUDGET_RESERVE_TOKENS)
                                         .saturating_sub(compaction_tool_tokens);
-                                    let verbatim = wimo ai_chat_state::compaction_utils::prepare_conversation_for_verbatim_summarization(
+                                    let verbatim = wimoai_chat_state::compaction_utils::prepare_conversation_for_verbatim_summarization(
                                         conv,
                                         summary_strips_reasoning,
                                     );
-                                    wimo ai_chat_state::compaction_utils::fit_conversation_to_budget(
+                                    wimoai_chat_state::compaction_utils::fit_conversation_to_budget(
                                         verbatim,
                                         budget,
                                     )
                                 }
                                 InputStage::Lossy => {
-                                    wimo ai_chat_state::compaction_utils::fit_conversation_to_budget(
-                                        wimo ai_chat_state::compaction_utils::prepare_conversation_for_summarization(
+                                    wimoai_chat_state::compaction_utils::fit_conversation_to_budget(
+                                        wimoai_chat_state::compaction_utils::prepare_conversation_for_summarization(
                                             conv,
                                         ),
                                         lossy_input_budget(context_window, compaction_tool_tokens),
@@ -1371,10 +1371,10 @@ impl SessionActor {
                         .into_iter()
                         .map(|t| {
                             let tool_name = match t.kind {
-                                wimo ai_wimo_tools::computer::types::TaskKind::Monitor => {
+                                wimoai_wimo_tools::computer::types::TaskKind::Monitor => {
                                     monitor_tool_name.clone()
                                 }
-                                wimo ai_wimo_tools::computer::types::TaskKind::Bash => {
+                                wimoai_wimo_tools::computer::types::TaskKind::Bash => {
                                     execute_tool_name.clone()
                                 }
                             };
@@ -1387,7 +1387,7 @@ impl SessionActor {
                         self.tool_context.subagent_event_tx
                     {
                         let (tx, rx) = tokio::sync::oneshot::channel();
-                        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+                        use wimoai_wimo_tools::implementations::wimo::task::types::{
                             SubagentEvent, SubagentListActiveRequest,
                         };
                         let _ =
@@ -1410,7 +1410,7 @@ impl SessionActor {
                     };
                     let connected_mcp_servers = {
                         use crate::session::helpers::compaction_context::CompactionServerSummary;
-                        use wimo ai_wimo_tools::implementations::search_tool::{
+                        use wimoai_wimo_tools::implementations::search_tool::{
                             sanitize_description, truncate_description,
                         };
                         self.connected_server_summaries()
@@ -1433,7 +1433,7 @@ impl SessionActor {
                             TodoSummary, TodoSummaryStatus,
                         };
                         use crate::tools::todo::{TodoState, TodoStatus};
-                        use wimo ai_wimo_tools::types::resources::State;
+                        use wimoai_wimo_tools::types::resources::State;
                         let bridge = self.agent.borrow().tool_bridge().clone();
                         bridge
                             .read_resource::<State<TodoState>>()
@@ -1470,7 +1470,7 @@ impl SessionActor {
                             );
                             ScheduledLoopSummary {
                                 task_id: t.id,
-                                interval: wimo ai_wimo_tools::implementations::wimo::scheduler::interval::interval_to_human(
+                                interval: wimoai_wimo_tools::implementations::wimo::scheduler::interval::interval_to_human(
                                     t.interval_secs,
                                 ),
                                 next_fire_at,
@@ -1505,7 +1505,7 @@ impl SessionActor {
                     let workflow_tool_name = if workflows.is_empty() {
                         None
                     } else {
-                        use wimo ai_wimo_tools::types::tool::ToolKind;
+                        use wimoai_wimo_tools::types::tool::ToolKind;
                         self.agent
                             .borrow()
                             .tool_bridge()
@@ -1598,13 +1598,13 @@ impl SessionActor {
                 })
         };
         let memory_opt_out = false;
-        let memory_ref: Option<&dyn wimo ai_wimo_tools::types::memory_backend::MemoryBackend> =
+        let memory_ref: Option<&dyn wimoai_wimo_tools::types::memory_backend::MemoryBackend> =
             if memory_opt_out {
                 None
             } else {
                 memory_backend_impl
                     .as_ref()
-                    .map(|b| b as &dyn wimo ai_wimo_tools::types::memory_backend::MemoryBackend)
+                    .map(|b| b as &dyn wimoai_wimo_tools::types::memory_backend::MemoryBackend)
             };
         let suppress_state_reminder = false;
         let workflow_listing = self.workflow_listing_for_prompt();
@@ -1688,7 +1688,7 @@ impl SessionActor {
                     .compaction_recovery_count
                     .fetch_add(n, std::sync::atomic::Ordering::Relaxed);
                 tracing::debug!(
-                    target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                    target: wimoai_wimo_telemetry::memory_log::TARGET,
                     count = n,
                     "MEMORY_COMPACTION_RECOVERY: {} search(es) performed",
                     n,
@@ -1759,7 +1759,7 @@ impl SessionActor {
             .and_then(|item| match item {
                 ConversationItem::User(parts) => {
                     parts.content.into_iter().next().and_then(|p| match p {
-                        wimo ai_wimo_sampling_types::ContentPart::Text { text } => {
+                        wimoai_wimo_sampling_types::ContentPart::Text { text } => {
                             Some(text.as_ref().to_owned())
                         }
                         _ => None,
@@ -1806,7 +1806,7 @@ impl SessionActor {
             .replace_conversation_for_compaction(compacted_history);
         if self.startup_hints.inherited_prefix_len.is_some() {
             let post_replace_tokens = self.chat_state_handle.get_total_tokens().await;
-            if wimo ai_token_estimation::exceeds_threshold(
+            if wimoai_token_estimation::exceeds_threshold(
                 post_replace_tokens,
                 context_window,
                 self.compaction.threshold_percent.get(),
@@ -1836,7 +1836,7 @@ impl SessionActor {
             .context_injected
             .store(false, std::sync::atomic::Ordering::Relaxed);
         if self.memory.is_enabled() {
-            tracing::info!(target: wimo ai_wimo_telemetry::memory_log::TARGET, "MEMORY_COMPACT: post-compaction reset, next turn re-checks injection (search only if no block persisted)");
+            tracing::info!(target: wimoai_wimo_telemetry::memory_log::TARGET, "MEMORY_COMPACT: post-compaction reset, next turn re-checks injection (search only if no block persisted)");
         }
         let _ = self
             .notifications
@@ -1858,8 +1858,8 @@ impl SessionActor {
         self.plan_mode.lock().reset_after_compaction();
         self.persist_plan_mode_state();
         self.dispatch_hook(
-            wimo ai_wimo_hooks::event::HookEventName::PostCompact,
-            wimo ai_wimo_hooks::event::HookPayload::PostCompact {
+            wimoai_wimo_hooks::event::HookEventName::PostCompact,
+            wimoai_wimo_hooks::event::HookPayload::PostCompact {
                 source: compact_source.into(),
             },
             None,
@@ -1911,14 +1911,14 @@ impl SessionActor {
             }
         }
         compaction.complete(
-            wimo ai_wimo_telemetry::events::CompactionCompleteStats {
+            wimoai_wimo_telemetry::events::CompactionCompleteStats {
                 tokens_after,
                 two_pass_used,
                 segments_queued,
                 degenerate_retries: telemetry.degenerate_rejections,
                 input_overflow_retries: input_overflow_rejections,
             },
-            wimo ai_wimo_telemetry::events::CompactionTiming {
+            wimoai_wimo_telemetry::events::CompactionTiming {
                 model_wait_ms: compact_output.model_wait_ms(),
                 pre_compaction_ms: Some(pre_compaction_ms),
                 post_compaction_ms: Some(post_compaction_ms),
@@ -1932,12 +1932,12 @@ impl SessionActor {
         context_window: std::num::NonZeroU64,
     ) -> Option<AutoCompactTriggerInfo> {
         let cw = context_window.get();
-        if wimo ai_token_estimation::exceeds_threshold(
+        if wimoai_token_estimation::exceeds_threshold(
             total_tokens,
             cw,
             self.compaction.threshold_percent.get(),
         ) {
-            let percentage = wimo ai_token_estimation::usage_percentage_u8(total_tokens, cw);
+            let percentage = wimoai_token_estimation::usage_percentage_u8(total_tokens, cw);
             Some(AutoCompactTriggerInfo {
                 tokens_used: total_tokens,
                 context_window: cw,
@@ -1953,7 +1953,7 @@ impl SessionActor {
     /// Called from `handle_sampling_failure` with the `SamplingErrorInfo` the sampler hands back.
     pub(crate) async fn should_compact_on_error(
         &self,
-        err: &wimo ai_wimo_sampler::SamplingErrorInfo,
+        err: &wimoai_wimo_sampler::SamplingErrorInfo,
     ) -> bool {
         if self.compaction.is_suppressed() {
             return false;
@@ -1965,7 +1965,7 @@ impl SessionActor {
     /// The latter must see overflows even while compaction is suppressed.
     pub(crate) async fn estimate_exceeds_error_context_window(
         &self,
-        err: &wimo ai_wimo_sampler::SamplingErrorInfo,
+        err: &wimoai_wimo_sampler::SamplingErrorInfo,
     ) -> bool {
         let Some(ref metadata) = err.model_metadata else {
             return false;
@@ -2014,7 +2014,7 @@ impl SessionActor {
             )
             .is_ok()
         {
-            let percentage = wimo ai_token_estimation::usage_percentage_u8(estimated_total, cw);
+            let percentage = wimoai_token_estimation::usage_percentage_u8(estimated_total, cw);
             tracing::info!(
                 "Forced auto-compact trigger (debug): model={model}, \
                  {percentage}% full ({estimated_total}/{cw} tokens)",
@@ -2049,7 +2049,7 @@ impl SessionActor {
             return None;
         }
         let overflow = estimated_total.saturating_sub(cw);
-        let percentage = wimo ai_token_estimation::usage_percentage_u8(estimated_total, cw);
+        let percentage = wimoai_token_estimation::usage_percentage_u8(estimated_total, cw);
         tracing::warn!(
             estimated_total,
             context_window = cw,
@@ -2139,18 +2139,18 @@ impl SessionActor {
         trigger_info: AutoCompactTriggerInfo,
         lossy_input: bool,
     ) -> Result<(), acp::Error> {
-        use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+        use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
         let (_cancel, _cancel_scope) = self.compaction.cancel.enter();
         self.record_compaction_variant();
         let tokens_before = self.chat_state_handle.get_total_tokens().await;
         tracing::Span::current().record("pre_tokens", tokens_before as i64);
-        wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::AutoCompactFired {
+        wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::AutoCompactFired {
             tokens_before: trigger_info.tokens_used,
             percentage: trigger_info.percentage,
         });
         self.signals_handle()
             .record_compaction(trigger_info.tokens_used);
-        self.send_wimo ai_notification(wimo aiSessionUpdate::AutoCompactStarted {
+        self.send_wimoai_notification(wimoaiSessionUpdate::AutoCompactStarted {
             tokens_used: trigger_info.tokens_used,
             context_window: trigger_info.context_window,
             percentage: trigger_info.percentage,
@@ -2168,7 +2168,7 @@ impl SessionActor {
             .run_compact_inner(
                 None,
                 None,
-                wimo ai_wimo_telemetry::events::CompactionTrigger::Auto,
+                wimoai_wimo_telemetry::events::CompactionTrigger::Auto,
                 lossy_input,
             )
             .await;
@@ -2179,7 +2179,7 @@ impl SessionActor {
                 let span = tracing::Span::current();
                 span.record("post_tokens", tokens_after as i64);
                 span.record("success", true);
-                self.send_wimo ai_notification(wimo aiSessionUpdate::AutoCompactCompleted {
+                self.send_wimoai_notification(wimoaiSessionUpdate::AutoCompactCompleted {
                     tokens_before: Some(trigger_info.tokens_used),
                     tokens_after,
                     elapsed_ms: Some(elapsed_ms),
@@ -2202,7 +2202,7 @@ impl SessionActor {
                         s.contains(crate::session::helpers::session_compact::COMPACT_CANCELLED_MSG)
                     });
                 if !cancelled && !self.compaction.is_suppressed() {
-                    self.send_wimo ai_notification(wimo aiSessionUpdate::AutoCompactFailed {
+                    self.send_wimoai_notification(wimoaiSessionUpdate::AutoCompactFailed {
                         error: Self::failure_with_retry_guidance(
                             &crate::sampling::error::acp_error_message(&e),
                         ),
@@ -2227,11 +2227,11 @@ impl SessionActor {
     fn persist_compaction_request_artifact(
         &self,
         chat_history: Vec<ConversationItem>,
-        tools: Vec<wimo ai_wimo_sampling_types::ToolSpec>,
+        tools: Vec<wimoai_wimo_sampling_types::ToolSpec>,
         user_context: Option<&str>,
         use_short_prompt: bool,
         model: &str,
-        trigger: wimo ai_wimo_telemetry::events::CompactionTrigger,
+        trigger: wimoai_wimo_telemetry::events::CompactionTrigger,
         summary: Option<&str>,
         error: Option<&acp::Error>,
         attempts: u32,
@@ -2241,8 +2241,8 @@ impl SessionActor {
         use crate::extensions::notification::CompactionRequestFile;
         let request_id = uuid::Uuid::new_v4().to_string();
         let trigger_str = match trigger {
-            wimo ai_wimo_telemetry::events::CompactionTrigger::Manual => "manual",
-            wimo ai_wimo_telemetry::events::CompactionTrigger::Auto => "auto",
+            wimoai_wimo_telemetry::events::CompactionTrigger::Manual => "manual",
+            wimoai_wimo_telemetry::events::CompactionTrigger::Auto => "auto",
         };
         let prompt_variant = if use_short_prompt {
             "short"
@@ -2295,7 +2295,7 @@ impl SessionActor {
         original_user_info: Option<String>,
     ) {
         use crate::extensions::notification::{
-            CompactionCheckpointFile, CompactionCheckpointInfo, SessionUpdate as wimo aiSessionUpdate,
+            CompactionCheckpointFile, CompactionCheckpointInfo, SessionUpdate as wimoaiSessionUpdate,
         };
         let checkpoint_id = uuid::Uuid::new_v4().to_string();
         let checkpoint_file = format!("compaction_checkpoints/{checkpoint_id}.json");
@@ -2325,7 +2325,7 @@ impl SessionActor {
             schema_version: 1,
             created_at,
         };
-        self.persist_wimo ai_update_only(wimo aiSessionUpdate::CompactionCheckpoint(Box::new(info)));
+        self.persist_wimoai_update_only(wimoaiSessionUpdate::CompactionCheckpoint(Box::new(info)));
         tracing::info!(
             prompt_index_at_compaction,
             "Persisted compaction checkpoint"

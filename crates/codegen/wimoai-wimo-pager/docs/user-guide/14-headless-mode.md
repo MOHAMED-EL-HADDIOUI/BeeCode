@@ -542,15 +542,15 @@ Key environment variables that affect headless mode:
 
 | Variable                        | Description                                                   |
 | ------------------------------- | ------------------------------------------------------------- |
-| `wimo ai_API_KEY`        | API key for authentication (required when no browser login)   |
+| `wimoai_API_KEY`        | API key for authentication (required when no browser login)   |
 | `wimo_HOME`                    | Override config directory (default: `~/.wimo`)                |
 | `wimo_LOG_FILE`                | Path to a log file (used verbatim as the path; works in headless and TUI, honors `RUST_LOG`) |
 | `RUST_LOG`                     | Log level filter (e.g. `debug`). Headless logs to stderr.     |
 
-For CI environments without browser access, set `wimo ai_API_KEY` with an API key from [console.x.ai](https://console.x.ai):
+For CI environments without browser access, set `wimoai_API_KEY` with an API key from [console.x.ai](https://console.x.ai):
 
 ```bash
-export wimo ai_API_KEY="wimo ai-..."
+export wimoai_API_KEY="wimoai-..."
 wimo -p "Run the test suite" --yolo
 ```
 
@@ -571,7 +571,7 @@ wimo -p "Run the test suite" --yolo
 
 For headless use, authenticate with one of:
 
-- **`wimo ai_API_KEY`**: simplest for CI. See [Environment Variables](#environment-variables-for-headless) above.
+- **`wimoai_API_KEY`**: simplest for CI. See [Environment Variables](#environment-variables-for-headless) above.
 - **`wimo login --device-auth`** (or `--device-code`): no browser needed on the target machine.
   See [Authentication > Device Code Flow](02-authentication.md#device-code-flow).
 - **`wimo login`**: browser-based OAuth2 on machines with a GUI.
@@ -624,12 +624,12 @@ wimo stores data in `~/.wimo` (override with `wimo_HOME`; see [Environment Varia
 
 For containers or CI, mount `~/.wimo` read-only:
 
-- Pre-populate `auth.json` or use `wimo ai_API_KEY`
+- Pre-populate `auth.json` or use `wimoai_API_KEY`
 - Session persistence fails silently (ephemeral)
 - Update checks log a warning and skip
 
 ```bash
-export wimo ai_API_KEY="wimo ai-..."
+export wimoai_API_KEY="wimoai-..."
 export wimo_DISABLE_AUTOUPDATER=1
 wimo -p "..." --no-auto-update
 ```

@@ -9,13 +9,13 @@ fn configured_garbage_file_yields_zero_roots_and_builds() {
     // Safety: sole test in this binary; set before any OnceLock resolve.
     unsafe {
         std::env::set_var(
-            wimo ai_wimo_extra_ca::ENV_wimo_EXTRA_CA_BUNDLE,
+            wimoai_wimo_extra_ca::ENV_wimo_EXTRA_CA_BUNDLE,
             path.as_os_str(),
         );
     }
 
-    assert!(wimo ai_wimo_extra_ca::extra_root_ders().is_empty());
+    assert!(wimoai_wimo_extra_ca::extra_root_ders().is_empty());
 
-    wimo ai_wimo_extra_ca::build_reqwest_client(|builder| builder)
+    wimoai_wimo_extra_ca::build_reqwest_client(|builder| builder)
         .expect("client builds after zero-cert configured file");
 }

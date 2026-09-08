@@ -4,7 +4,7 @@ use super::support::*;
 use super::*;
 use std::sync::Arc;
 use std::time::Duration;
-use wimo ai_wimo_test_support::{MockInferenceServer, MockModelEntry, ScriptedResponse};
+use wimoai_wimo_test_support::{MockInferenceServer, MockModelEntry, ScriptedResponse};
 
 #[derive(Clone, Copy)]
 pub(super) enum SessionKind {
@@ -24,7 +24,7 @@ pub(super) type CapturedRetries =
     Arc<std::sync::Mutex<Vec<crate::extensions::notification::RetryState>>>;
 
 pub(super) fn drain_gateway(
-    mut rx: tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    mut rx: tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) -> CapturedRetries {
     use crate::extensions::notification::{SessionNotification, SessionUpdate};
     let captured: CapturedRetries = Arc::new(std::sync::Mutex::new(Vec::new()));
@@ -32,10 +32,10 @@ pub(super) fn drain_gateway(
     tokio::task::spawn_local(async move {
         while let Some(msg) = rx.recv().await {
             match msg {
-                wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                     let _ = args.response_tx.send(Ok(()));
                 }
-                wimo ai_acp_lib::AcpClientMessage::ExtNotification(args)
+                wimoai_acp_lib::AcpClientMessage::ExtNotification(args)
                     if args.request.method.as_ref() == "x.ai/session_notification" =>
                 {
                     if let Ok(SessionNotification {
@@ -63,18 +63,18 @@ pub(super) fn drain_persistence(mut rx: tokio::sync::mpsc::UnboundedReceiver<Per
     });
 }
 
-pub(super) fn sampler_surfaces_429() -> wimo ai_wimo_sampler::RetryPolicy {
-    wimo ai_wimo_sampler::RetryPolicy {
+pub(super) fn sampler_surfaces_429() -> wimoai_wimo_sampler::RetryPolicy {
+    wimoai_wimo_sampler::RetryPolicy {
         max_retries: 5,
-        rate_limit_retry_threshold: wimo ai_wimo_sampler::RATE_LIMIT_RETRY_DISABLED,
+        rate_limit_retry_threshold: wimoai_wimo_sampler::RATE_LIMIT_RETRY_DISABLED,
         ..Default::default()
     }
 }
 
-fn sampler_retries_429() -> wimo ai_wimo_sampler::RetryPolicy {
-    wimo ai_wimo_sampler::RetryPolicy {
+fn sampler_retries_429() -> wimoai_wimo_sampler::RetryPolicy {
+    wimoai_wimo_sampler::RetryPolicy {
         max_retries: 5,
-        rate_limit_retry_threshold: wimo ai_wimo_sampler::RATE_LIMIT_RETRY_THRESHOLD,
+        rate_limit_retry_threshold: wimoai_wimo_sampler::RATE_LIMIT_RETRY_THRESHOLD,
         ..Default::default()
     }
 }
@@ -82,23 +82,23 @@ fn sampler_retries_429() -> wimo ai_wimo_sampler::RetryPolicy {
 pub(super) async fn actor_under_test(
     server: &MockInferenceServer,
     session: SessionKind,
-    retry_policy: wimo ai_wimo_sampler::RetryPolicy,
+    retry_policy: wimoai_wimo_sampler::RetryPolicy,
     transient_retry_enabled: bool,
 ) -> (Arc<SessionActor>, CapturedRetries) {
     let sampler_max_retries = retry_policy.max_retries;
-    let sampling_cfg = wimo ai_wimo_sampler::SamplerConfig {
+    let sampling_cfg = wimoai_wimo_sampler::SamplerConfig {
         base_url: server.url(),
         model: "test".to_string(),
-        api_backend: wimo ai_wimo_sampler::ApiBackend::Responses,
+        api_backend: wimoai_wimo_sampler::ApiBackend::Responses,
         context_window: 256_000,
         max_retries: Some(sampler_max_retries),
         idle_timeout_secs: Some(30),
         ..Default::default()
     };
     let (sampler_event_tx, sampler_event_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_wimo_sampler::SamplingEvent>();
+        tokio::sync::mpsc::unbounded_channel::<wimoai_wimo_sampler::SamplingEvent>();
     let sampler_handle =
-        wimo ai_wimo_sampler::SamplerActor::spawn(sampling_cfg, retry_policy, sampler_event_tx);
+        wimoai_wimo_sampler::SamplerActor::spawn(sampling_cfg, retry_policy, sampler_event_tx);
 
     let (gateway_tx, gateway_rx) = tokio::sync::mpsc::unbounded_channel();
     let captured_retries = drain_gateway(gateway_rx);
@@ -118,7 +118,7 @@ pub(super) async fn actor_under_test(
         .await
         .expect("test actor has sampling config");
     cfg.base_url = server.url();
-    cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+    cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
     cfg.model = "test".to_string();
     actor.chat_state_handle.update_sampling_config(cfg);
 

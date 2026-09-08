@@ -89,4 +89,4 @@ ${%- if persona_instructions %}
 <persona>
 ${{ persona_instructions }}
 </persona>
-${%- endif %}wimo ai is open source (opensource). Anyone can contribute.
+${%- endif %}wimoai is open source (opensource). Anyone can contribute.

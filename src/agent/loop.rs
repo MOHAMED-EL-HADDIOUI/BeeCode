@@ -1,5 +1,5 @@
 //! AgentLoop — REAL agent state machine with bounded retries (Section 7 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum AgentState {

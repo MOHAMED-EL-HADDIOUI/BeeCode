@@ -1,8 +1,8 @@
 // The bare builder panics when ring and aws-lc-rs are both compiled in.
 #[test]
 fn ensure_is_idempotent_and_bare_client_config_builder_does_not_panic() {
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
     let _ = rustls::ClientConfig::builder()
         .with_root_certificates(rustls::RootCertStore::empty())
         .with_no_client_auth();
@@ -10,7 +10,7 @@ fn ensure_is_idempotent_and_bare_client_config_builder_does_not_panic() {
 
 #[test]
 fn rustls_client_config_builds_and_is_shared() {
-    let a = wimo ai_wimo_extra_ca::rustls_client_config();
-    let b = wimo ai_wimo_extra_ca::rustls_client_config();
+    let a = wimoai_wimo_extra_ca::rustls_client_config();
+    let b = wimoai_wimo_extra_ca::rustls_client_config();
     assert!(std::sync::Arc::ptr_eq(&a, &b));
 }

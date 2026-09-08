@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
-use wimo ai_sqlite_journal::{BUSY_RETRY_BUDGET, JournalMode};
+use wimoai_sqlite_journal::{BUSY_RETRY_BUDGET, JournalMode};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -229,7 +229,7 @@ impl WorktreeDb {
 
     /// Open the default DB at `~/.wimo/worktrees.db`.
     ///
-    /// Discovers wimo home via `wimo ai_dirs::resolve_wimo_home` (`$wimo_HOME`,
+    /// Discovers wimo home via `wimoai_dirs::resolve_wimo_home` (`$wimo_HOME`,
     /// else the canonicalized `<home>/.wimo`).
     /// Path is resolved fresh each call (env read plus a canonicalize) to
     /// support test overrides. Each call opens its own connection — callers in
@@ -459,7 +459,7 @@ pub fn now_epoch_secs() -> i64 {
 
 /// Resolve the wimo home: `$wimo_HOME`, else `<home>/.wimo`.
 pub fn resolve_wimo_home() -> Result<PathBuf> {
-    wimo ai_dirs::resolve_wimo_home()
+    wimoai_dirs::resolve_wimo_home()
         .context("neither $wimo_HOME nor a home directory could be resolved")
 }
 

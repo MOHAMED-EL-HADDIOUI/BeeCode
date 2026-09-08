@@ -131,11 +131,11 @@ impl ConfigFileWatcher {
         // We snapshot `$HOME` here so the closure can tell `<home>/.claude.json` apart from a project-level `<cwd>/.claude.json` purely by path
         //
         // Canonicalize `$HOME` ONCE up front. `notify` backends may deliver canonicalized event paths.
-        // macOS FSEvents resolves symlinks, returning `/private/var/...` where `wimo ai_dirs::home_dir()` returned `/var/...`
+        // macOS FSEvents resolves symlinks, returning `/private/var/...` where `wimoai_dirs::home_dir()` returned `/var/...`
         // A raw byte compare against an un-canonicalized `$HOME` would therefore mis-route `~/.claude.json` to the per-cwd path
         // The per-event side is canonicalized in `parent_is_dir`
         let user_home_buf: Option<PathBuf> =
-            wimo ai_dirs::home_dir().map(|h| dunce::canonicalize(&h).unwrap_or(h));
+            wimoai_dirs::home_dir().map(|h| dunce::canonicalize(&h).unwrap_or(h));
 
         let mut debouncer = new_filtered_debouncer(debounce, move |res: DebounceEventResult| {
             let Ok(events) = res else { return };
@@ -275,7 +275,7 @@ impl ConfigFileWatcher {
 }
 
 /// Answers "is `parent` the directory `dir`?" while tolerating symlink and canonicalization differences.
-/// A `notify`-delivered event path may be canonicalized while a `wimo ai_dirs::home_dir()`-style reference is not.
+/// A `notify`-delivered event path may be canonicalized while a `wimoai_dirs::home_dir()`-style reference is not.
 /// `dir` is expected to be already canonicalized (see `ConfigFileWatcher::start`).
 fn parent_is_dir(parent: Option<&Path>, dir: &Path) -> bool {
     let Some(parent) = parent else {
@@ -602,7 +602,7 @@ pub struct SkillsFileWatcher {
 }
 
 impl SkillsFileWatcher {
-    /// Start watching discovery dirs from [`collect_skill_config_dirs`](wimo ai_wimo_agent::prompt::skills::collect_skill_config_dirs).
+    /// Start watching discovery dirs from [`collect_skill_config_dirs`](wimoai_wimo_agent::prompt::skills::collect_skill_config_dirs).
     ///
     /// After a [`DiscoveryChange`], call [`Self::refresh_new_discovery_dirs`] so newly created seed dirs get watches attached.
     pub fn start(
@@ -610,17 +610,17 @@ impl SkillsFileWatcher {
         monorepo_user_dir: Option<&Path>,
         config_paths: &[String],
     ) -> Option<(Self, mpsc::UnboundedReceiver<DiscoveryChange>)> {
-        let wimo_home = wimo ai_wimo_tools::util::wimo_home::wimo_home();
+        let wimo_home = wimoai_wimo_tools::util::wimo_home::wimo_home();
         // Watch the full superset of vendor dirs (all-on compat)
         // This watcher is shared by the whole leader; per-session compat isn't resolved here, and the discovery gating happens downstream
         // Watching a currently-disabled vendor dir is harmless: a change just re-runs the gated discovery
         // It also avoids ever missing a watch if a toggle flips
-        let dirs_to_watch = wimo ai_wimo_agent::prompt::skills::collect_skill_config_dirs(
+        let dirs_to_watch = wimoai_wimo_agent::prompt::skills::collect_skill_config_dirs(
             cwd,
             monorepo_user_dir,
             &wimo_home,
             config_paths,
-            wimo ai_wimo_tools::types::compat::CompatConfig::default(),
+            wimoai_wimo_tools::types::compat::CompatConfig::default(),
         );
         let project_root = cwd.map(crate::session::workflow::registry::project_root);
         Self::start_with_dirs(&dirs_to_watch, &wimo_home, project_root.as_deref())

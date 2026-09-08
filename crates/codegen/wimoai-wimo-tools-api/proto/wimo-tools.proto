@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package wimo ai.wimo.tools.v1;
+package wimoai.wimo.tools.v1;
 
 // ============================================================================
 // MAIN SERVICE
@@ -257,7 +257,7 @@ message ToolConfigEntry {
   ///
   /// The whole selection path keys on this format: the default
   /// client-facing name is the segment after the FIRST colon (see
-  /// `default_client_name` in the wimo ai-wimo-tools-api crate).
+  /// `default_client_name` in the wimoai-wimo-tools-api crate).
   string id = 1;
 
   /// Tool-specific parameters as JSON string.
@@ -351,7 +351,7 @@ message FinalizeToolServerConfigResponse {
 
 message ToolNotificationMsg {
   string session_id = 1;
-  /// serde(tag = "type") JSON for wimo ai_wimo_tools::notification::ToolNotification.
+  /// serde(tag = "type") JSON for wimoai_wimo_tools::notification::ToolNotification.
   string notification_json = 2;
   /// Monotonically increasing sequence number for observability.
   uint64 sequence = 3;

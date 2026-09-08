@@ -1,21 +1,21 @@
-//! Rendering helpers for [`CompactionStateContext`] that depend on shell-specific types (`wimo ai_wimo_tools::MemoryBackend`, memory context).
+//! Rendering helpers for [`CompactionStateContext`] that depend on shell-specific types (`wimoai_wimo_tools::MemoryBackend`, memory context).
 //!
-//! The core [`CompactionStateContext`] struct and its builder live in `wimo ai_chat_state::compaction_utils`.
-//! This module adds system-reminder rendering that requires dependencies not available in `wimo ai-chat-state`.
+//! The core [`CompactionStateContext`] struct and its builder live in `wimoai_chat_state::compaction_utils`.
+//! This module adds system-reminder rendering that requires dependencies not available in `wimoai-chat-state`.
 //!
-//! The **common** active-agent section (Running Background Tasks: commands, loops, workflows, subagents) plus TODO is formatted by [`wimo ai_wimo_compaction::reminder`].
+//! The **common** active-agent section (Running Background Tasks: commands, loops, workflows, subagents) plus TODO is formatted by [`wimoai_wimo_compaction::reminder`].
 //! That keeps wimo-chat and wimo in lockstep.
 //! Harness-only sections (edited files, AGENTS.md, skills, catalog workflows, MCP, memory) stay here.
 
 use std::path::PathBuf;
 
-pub use wimo ai_chat_state::compaction_utils::{
+pub use wimoai_chat_state::compaction_utils::{
     BackgroundTaskSummary, CompactionInputs, CompactionServerSummary, CompactionStateContext,
     RunningSubagentSummary, ScheduledLoopSummary, TodoSummary, TodoSummaryStatus,
     WorkflowRunSummary, extract_last_user_query, extract_messages_since_last_user,
     extract_user_query,
 };
-use wimo ai_wimo_compaction::reminder::{
+use wimoai_wimo_compaction::reminder::{
     self, ActiveAgentReminderState, BackgroundTask, RunningSubagent, ScheduledLoop, TodoItem,
     TodoStatus, WorkflowRun,
 };
@@ -48,7 +48,7 @@ pub struct SubagentToolNames {
 pub fn to_system_reminder_sync(
     ctx: &CompactionStateContext,
     discovered_agents_md: &[PathBuf],
-    skills: &[wimo ai_wimo_tools::implementations::skills::types::SkillInfo],
+    skills: &[wimoai_wimo_tools::implementations::skills::types::SkillInfo],
     subagent_tool_names: Option<&SubagentToolNames>,
     mcp_tool_names: Option<&McpToolNames>,
     workflow_listing: Option<&str>,
@@ -70,8 +70,8 @@ pub fn to_system_reminder_sync(
 pub async fn to_system_reminder(
     ctx: &CompactionStateContext,
     discovered_agents_md: &[PathBuf],
-    skills: &[wimo ai_wimo_tools::implementations::skills::types::SkillInfo],
-    memory_backend: Option<&dyn wimo ai_wimo_tools::types::memory_backend::MemoryBackend>,
+    skills: &[wimoai_wimo_tools::implementations::skills::types::SkillInfo],
+    memory_backend: Option<&dyn wimoai_wimo_tools::types::memory_backend::MemoryBackend>,
     subagent_tool_names: Option<&SubagentToolNames>,
     mcp_tool_names: Option<&McpToolNames>,
     workflow_listing: Option<&str>,
@@ -82,7 +82,7 @@ pub async fn to_system_reminder(
         let query = ctx.last_user_query.as_deref().unwrap_or("project context");
         if let Ok(results) = memory.search(query, 3, 0.0).await {
             tracing::debug!(
-                target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                target: wimoai_wimo_telemetry::memory_log::TARGET,
                 results = results.len(),
                 "recovered memory context after compaction"
             );
@@ -105,8 +105,8 @@ pub async fn to_system_reminder(
 fn to_system_reminder_inner(
     ctx: &CompactionStateContext,
     discovered_agents_md: &[PathBuf],
-    skills: &[wimo ai_wimo_tools::implementations::skills::types::SkillInfo],
-    memory_results: &[wimo ai_wimo_tools::types::memory_backend::MemorySearchResult],
+    skills: &[wimoai_wimo_tools::implementations::skills::types::SkillInfo],
+    memory_results: &[wimoai_wimo_tools::types::memory_backend::MemorySearchResult],
     subagent_tool_names: Option<&SubagentToolNames>,
     mcp_tool_names: Option<&McpToolNames>,
     workflow_listing: Option<&str>,
@@ -147,7 +147,7 @@ fn to_system_reminder_inner(
     // Reuse the standard listing renderer so the post-compaction listing matches the startup `<system-reminder>`
     // The shared renderer has no hard-coded tool name and includes `Use when:` triggers and `Absolute path:`
     if let Some(listing) =
-        wimo ai_wimo_tools::types::skill_discovery_tracker::format_compaction_skill_listing(skills)
+        wimoai_wimo_tools::types::skill_discovery_tracker::format_compaction_skill_listing(skills)
     {
         sections.push(format!("## Available Skills\n{listing}"));
     }
@@ -238,7 +238,7 @@ fn to_system_reminder_inner(
 
     // Connected MCP servers (shell-only)
     if !ctx.connected_mcp_servers.is_empty() {
-        use wimo ai_wimo_tools::implementations::search_tool::format_compaction_server_line;
+        use wimoai_wimo_tools::implementations::search_tool::format_compaction_server_line;
         let servers: String = ctx
             .connected_mcp_servers
             .iter()
@@ -502,7 +502,7 @@ mod tests {
             workflows: vec![],
             workflow_tool_name: None,
         };
-        let skills = [wimo ai_wimo_tools::implementations::skills::types::SkillInfo {
+        let skills = [wimoai_wimo_tools::implementations::skills::types::SkillInfo {
             name: "commit".into(),
             description: "Create a git commit.".into(),
             path: "/skills/commit/SKILL.md".into(),

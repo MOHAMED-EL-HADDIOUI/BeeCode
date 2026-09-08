@@ -1,5 +1,5 @@
 //! Integrated runtime — REAL end-to-end execution (Section 3/4/5/6/7 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 use crate::agent::loop::{AgentLoop, AgentState};
 use crate::context::engine::ContextEngine;

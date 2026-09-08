@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-auth"
+name = "wimoai-wimo-auth"
 version = "0.1.0"
 edition.workspace = true
 description = "Auth dependency-inversion seam: HttpAuth + AuthCredentialProvider traits"

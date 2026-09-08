@@ -12,7 +12,7 @@ use crate::types::tool::{ToolKind, ToolNamespace};
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct LspToolOutput(pub String);
 
-impl wimo ai_tool_runtime::ToolOutput for LspToolOutput {}
+impl wimoai_tool_runtime::ToolOutput for LspToolOutput {}
 
 impl From<LspToolOutput> for ToolOutput {
     fn from(o: LspToolOutput) -> Self {
@@ -49,28 +49,28 @@ Requires file_path + line + character for position-based operations."#
     }
 }
 
-impl wimo ai_tool_runtime::Tool for LspTool {
+impl wimoai_tool_runtime::Tool for LspTool {
     type Args = LspToolInput;
     type Output = LspToolOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("lsp").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("lsp").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "lsp",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -82,9 +82,9 @@ impl wimo ai_tool_runtime::Tool for LspTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: LspToolInput,
-    ) -> Result<LspToolOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<LspToolOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -94,7 +94,7 @@ impl wimo ai_tool_runtime::Tool for LspTool {
             handle = res
                 .get::<Arc<dyn LspBackend>>()
                 .ok_or_else(|| {
-                    wimo ai_tool_runtime::ToolError::custom(
+                    wimoai_tool_runtime::ToolError::custom(
                         "process_manager",
                         "LSP tool is unavailable. Configure ~/.wimo/lsp.json or <cwd>/.wimo/lsp.json and ensure the language server can start.",
                     )
@@ -104,7 +104,7 @@ impl wimo ai_tool_runtime::Tool for LspTool {
 
         let result = handle.dispatch(&input).await;
         if result.is_error {
-            Err(wimo ai_tool_runtime::ToolError::custom(
+            Err(wimoai_tool_runtime::ToolError::custom(
                 "process_manager",
                 result.text,
             ))

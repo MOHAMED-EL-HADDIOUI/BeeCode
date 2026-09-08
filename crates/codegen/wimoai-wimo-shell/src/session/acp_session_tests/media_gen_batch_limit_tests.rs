@@ -8,9 +8,9 @@
 use super::support::*;
 use super::*;
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenTool;
-use wimo ai_wimo_tools::media_gen_limits::DEFAULT_MAX_PARALLEL_IMAGE_GEN;
-use wimo ai_wimo_tools::registry::types::ToolConfig;
+use wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenTool;
+use wimoai_wimo_tools::media_gen_limits::DEFAULT_MAX_PARALLEL_IMAGE_GEN;
+use wimoai_wimo_tools::registry::types::ToolConfig;
 
 fn image_gen_call(id: &str) -> ToolCallResponse {
     ToolCallResponse {
@@ -44,7 +44,7 @@ fn drain_tool_call_statuses(
         };
         let Some(acp_n) = (match notification {
             SessionNotification::Acp(n) => Some(*n),
-            SessionNotification::wimo ai(_) => None,
+            SessionNotification::wimoai(_) => None,
         }) else {
             continue;
         };
@@ -68,7 +68,7 @@ async fn tool_result_text(actor: &SessionActor, call_id: &str) -> String {
     conv.iter()
         .rev()
         .find_map(|item| match item {
-            wimo ai_wimo_sampling_types::ConversationItem::ToolResult(tr)
+            wimoai_wimo_sampling_types::ConversationItem::ToolResult(tr)
                 if tr.tool_call_id == call_id =>
             {
                 Some(tr.content.to_string())
@@ -84,7 +84,7 @@ async fn first_k_tail_rejects_get_pending_then_failed() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let (mut actor, mut event_rx) =
@@ -162,7 +162,7 @@ async fn over_cap_report_classifies_modest_vs_egregious() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -173,8 +173,8 @@ async fn over_cap_report_classifies_modest_vs_egregious() {
             .await;
 
             let over = DEFAULT_MAX_PARALLEL_IMAGE_GEN + 1;
-            let calls: Vec<wimo ai_wimo_sampling_types::ToolCall> = (0..over)
-                .map(|i| wimo ai_wimo_sampling_types::ToolCall {
+            let calls: Vec<wimoai_wimo_sampling_types::ToolCall> = (0..over)
+                .map(|i| wimoai_wimo_sampling_types::ToolCall {
                     id: format!("img_{i}").into(),
                     name: "image_gen".into(),
                     arguments: "{}".into(),
@@ -190,9 +190,9 @@ async fn over_cap_report_classifies_modest_vs_egregious() {
                 "max+1 is modest first-K, not a 2x resample"
             );
 
-            let spam: Vec<wimo ai_wimo_sampling_types::ToolCall> = (0..DEFAULT_MAX_PARALLEL_IMAGE_GEN
+            let spam: Vec<wimoai_wimo_sampling_types::ToolCall> = (0..DEFAULT_MAX_PARALLEL_IMAGE_GEN
                 * 2)
-                .map(|i| wimo ai_wimo_sampling_types::ToolCall {
+                .map(|i| wimoai_wimo_sampling_types::ToolCall {
                     id: format!("spam_{i}").into(),
                     name: "image_gen".into(),
                     arguments: "{}".into(),
@@ -202,8 +202,8 @@ async fn over_cap_report_classifies_modest_vs_egregious() {
             assert_eq!(spam_report.len(), 1);
             assert!(spam_report[0].is_egregious());
 
-            let under: Vec<wimo ai_wimo_sampling_types::ToolCall> = (0..DEFAULT_MAX_PARALLEL_IMAGE_GEN)
-                .map(|i| wimo ai_wimo_sampling_types::ToolCall {
+            let under: Vec<wimoai_wimo_sampling_types::ToolCall> = (0..DEFAULT_MAX_PARALLEL_IMAGE_GEN)
+                .map(|i| wimoai_wimo_sampling_types::ToolCall {
                     id: format!("ok_{i}").into(),
                     name: "image_gen".into(),
                     arguments: "{}".into(),

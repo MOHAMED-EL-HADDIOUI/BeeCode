@@ -8,18 +8,18 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Style};
 use ratatui::text::Span;
 
-use wimo ai_wimo_pager::app::PagerTerminal;
-use wimo ai_wimo_pager::app::app_view::{ActiveView, AppView};
-use wimo ai_wimo_pager::appearance::AppearanceConfig;
-use wimo ai_wimo_pager::minimal_api;
-use wimo ai_wimo_pager::render::Renderable;
-use wimo ai_wimo_pager::scrollback::block::RenderBlock;
-use wimo ai_wimo_pager::scrollback::blocks::ToolCallBlock;
-use wimo ai_wimo_pager::scrollback::entry::{EntryId, ScrollbackEntry};
-use wimo ai_wimo_pager::scrollback::state::ScrollbackState;
-use wimo ai_wimo_pager::scrollback::types::DisplayMode;
-use wimo ai_wimo_pager::scrollback::wrappers::EntryRenderer;
-use wimo ai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::app::PagerTerminal;
+use wimoai_wimo_pager::app::app_view::{ActiveView, AppView};
+use wimoai_wimo_pager::appearance::AppearanceConfig;
+use wimoai_wimo_pager::minimal_api;
+use wimoai_wimo_pager::render::Renderable;
+use wimoai_wimo_pager::scrollback::block::RenderBlock;
+use wimoai_wimo_pager::scrollback::blocks::ToolCallBlock;
+use wimoai_wimo_pager::scrollback::entry::{EntryId, ScrollbackEntry};
+use wimoai_wimo_pager::scrollback::state::ScrollbackState;
+use wimoai_wimo_pager::scrollback::types::DisplayMode;
+use wimoai_wimo_pager::scrollback::wrappers::EntryRenderer;
+use wimoai_wimo_pager::theme::Theme;
 
 /// Blank rows emitted after each committed block and held after each live-tail entry (`super::live`) in minimal mode.
 ///

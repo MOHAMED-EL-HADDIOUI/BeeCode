@@ -566,9 +566,9 @@ fn parse_row_state_token_all_synonyms() {
 fn rename_at_cap_drops_extra_char() {
     assert_eq!(
         MAX_RENAME_SCALARS,
-        wimo ai_wimo_shell::session::persistence::MAX_TITLE_SCALARS
+        wimoai_wimo_shell::session::persistence::MAX_TITLE_SCALARS
     );
-    assert_eq!(wimo ai_wimo_shell::session::persistence::MAX_TITLE_SCALARS, 100);
+    assert_eq!(wimoai_wimo_shell::session::persistence::MAX_TITLE_SCALARS, 100);
     let mut draft = RenameDraft::new(
         DashboardRowId::TopLevel(AgentId(0)),
         "a".repeat(MAX_RENAME_SCALARS),
@@ -956,7 +956,7 @@ fn peek_enter_with_text_emits_reply() {
 
 fn peek_test_image() -> crate::prompt_images::PastedImage {
     crate::prompt_images::PastedImage {
-        element_id: wimo ai_ratatui_textarea::ElementId::from_raw(0),
+        element_id: wimoai_ratatui_textarea::ElementId::from_raw(0),
         display_number: 0,
         mime_type: "image/png".into(),
         dimensions: Some((10, 10)),
@@ -3259,7 +3259,7 @@ fn bracketed_paste_with_peek_open_goes_to_reply() {
 fn pasted_image_chip_omits_full_path() {
     let mut state = DashboardState::new();
     let pasted = crate::prompt_images::PastedImage {
-        element_id: wimo ai_ratatui_textarea::ElementId::from_raw(0),
+        element_id: wimoai_ratatui_textarea::ElementId::from_raw(0),
         display_number: 0,
         mime_type: "image/png".into(),
         dimensions: Some((10, 10)),
@@ -3837,7 +3837,7 @@ fn completion_reports_full_miss_for_unreadable_file_url() {
     let completion = state.complete_clipboard_attachment_paste(
         completion_ctx(None, false),
         crate::app::actions::ProbedAttachment::NoRaster,
-        Some("file:///definitely/missing/wimo ai-primary-paste.png".to_owned()),
+        Some("file:///definitely/missing/wimoai-primary-paste.png".to_owned()),
     );
 
     assert_eq!(

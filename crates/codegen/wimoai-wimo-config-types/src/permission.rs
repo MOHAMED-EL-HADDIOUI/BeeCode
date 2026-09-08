@@ -1,4 +1,4 @@
-//! Permission-policy config value types, extracted from wimo ai-wimo-shell so crates the shell depends on can use them.
+//! Permission-policy config value types, extracted from wimoai-wimo-shell so crates the shell depends on can use them.
 
 use serde::{Deserialize, Serialize};
 

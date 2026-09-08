@@ -1,5 +1,5 @@
 //! Git checkpoints — REAL recoverable checkpoints (Section 16 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub struct Checkpoint {
     pub id: u32,

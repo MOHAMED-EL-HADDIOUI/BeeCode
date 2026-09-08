@@ -7,7 +7,7 @@ use std::io;
 use std::path::Path;
 
 use crate::extensions::notification::{
-    CompactionCheckpointFile, CompactionCheckpointInfo, SessionUpdate as wimo aiSessionUpdate,
+    CompactionCheckpointFile, CompactionCheckpointInfo, SessionUpdate as wimoaiSessionUpdate,
 };
 use crate::sampling::ConversationItem;
 use crate::session::storage::{SessionUpdate, UpdatesIterator};
@@ -65,7 +65,7 @@ pub fn find_latest_compaction_checkpoint(
         if let Ok(notification) = serde_json::from_str::<
             crate::extensions::notification::SessionNotification,
         >(raw_params.get())
-            && let wimo aiSessionUpdate::CompactionCheckpoint(info) = notification.update
+            && let wimoaiSessionUpdate::CompactionCheckpoint(info) = notification.update
         {
             latest = Some(*info);
         }
@@ -230,12 +230,12 @@ impl ReplayState {
         session_dir: &Path,
     ) -> io::Result<ReplayAction> {
         match update {
-            SessionUpdate::wimo ai(notification) => {
+            SessionUpdate::wimoai(notification) => {
                 match &notification.update {
-                    wimo aiSessionUpdate::CompactionCheckpoint(info) => {
+                    wimoaiSessionUpdate::CompactionCheckpoint(info) => {
                         return self.handle_checkpoint(info, session_dir);
                     }
-                    wimo aiSessionUpdate::RewindMarker {
+                    wimoaiSessionUpdate::RewindMarker {
                         target_prompt_index,
                         ..
                     } => {
@@ -612,7 +612,7 @@ mod tests {
     use super::*;
     use crate::extensions::notification::{
         AutoContinueInfo, CompactionCheckpointFile, CompactionCheckpointInfo,
-        SessionNotification as wimo aiNotification, SessionUpdate as wimo aiSessionUpdate,
+        SessionNotification as wimoaiNotification, SessionUpdate as wimoaiSessionUpdate,
     };
     use agent_client_protocol as acp;
     use tempfile::TempDir;
@@ -724,9 +724,9 @@ mod tests {
     }
 
     fn make_rewind_marker(target: usize) -> SessionUpdate {
-        SessionUpdate::wimo ai(Box::new(wimo aiNotification {
+        SessionUpdate::wimoai(Box::new(wimoaiNotification {
             session_id: acp::SessionId::new("test"),
-            update: wimo aiSessionUpdate::RewindMarker {
+            update: wimoaiSessionUpdate::RewindMarker {
                 target_prompt_index: target,
                 created_at: "2024-01-01T00:00:00Z".to_string(),
             },
@@ -739,9 +739,9 @@ mod tests {
         prompt_index_at_compaction: usize,
         auto_continue: Option<AutoContinueInfo>,
     ) -> SessionUpdate {
-        SessionUpdate::wimo ai(Box::new(wimo aiNotification {
+        SessionUpdate::wimoai(Box::new(wimoaiNotification {
             session_id: acp::SessionId::new("test"),
-            update: wimo aiSessionUpdate::CompactionCheckpoint(Box::new(CompactionCheckpointInfo {
+            update: wimoaiSessionUpdate::CompactionCheckpoint(Box::new(CompactionCheckpointInfo {
                 checkpoint_id: checkpoint_id.to_string(),
                 prompt_index_at_compaction,
                 checkpoint_file: format!("compaction_checkpoints/{checkpoint_id}.json"),

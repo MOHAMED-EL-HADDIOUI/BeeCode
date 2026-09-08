@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-update"
+name = "wimoai-wimo-update"
 version = "0.1.220-alpha.4"
 edition.workspace = true
 
@@ -10,7 +10,7 @@ anyhow = { workspace = true }
 futures = { workspace = true }
 indicatif = { workspace = true }
 reqwest = { workspace = true }
-wimo ai-wimo-extra-ca = { workspace = true }
+wimoai-wimo-extra-ca = { workspace = true }
 semver = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
@@ -19,11 +19,11 @@ time = { workspace = true, features = ["serde"] }
 tokio = { workspace = true, features = ["fs", "process", "io-util", "macros", "time"] }
 tracing = { workspace = true }
 url = { workspace = true }
-wimo ai-dirs = { workspace = true }
-wimo ai-wimo-shell = { workspace = true }
-wimo ai-wimo-telemetry = { workspace = true }
-wimo ai-wimo-tools = { workspace = true }
-wimo ai-wimo-version = { workspace = true }
+wimoai-dirs = { workspace = true }
+wimoai-wimo-shell = { workspace = true }
+wimoai-wimo-telemetry = { workspace = true }
+wimoai-wimo-tools = { workspace = true }
+wimoai-wimo-version = { workspace = true }
 flate2 = { workspace = true }
 zstd = { workspace = true }
 

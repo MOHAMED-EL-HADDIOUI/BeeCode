@@ -1,6 +1,6 @@
 //! Code Navigation Extension Methods
 //!
-//! Provides go-to-definition, go-to-references, and symbol lookup using the wimo ai-codebase-graph index.
+//! Provides go-to-definition, go-to-references, and symbol lookup using the wimoai-codebase-graph index.
 //!
 //! ## Extension Methods
 //!
@@ -169,10 +169,10 @@ pub(crate) struct StatusResponse {
 #[tracing::instrument(name = "ext.code_nav", skip_all, fields(method = %args.method))]
 pub async fn handle(
     agent: &MvpAgent,
-    ops: &wimo ai_wimo_workspace::WorkspaceOps,
+    ops: &wimoai_wimo_workspace::WorkspaceOps,
     args: &acp::ExtRequest,
 ) -> ExtResult {
-    use wimo ai_wimo_workspace::workspace_ops::*;
+    use wimoai_wimo_workspace::workspace_ops::*;
 
     match args.method.as_ref() {
         "x.ai/code/goto-definition" => {
@@ -346,7 +346,7 @@ pub async fn handle(
 }
 
 /// Convert workspace CodeNavResponse to the shell's CodeNavResponse format and wrap in the `ExtMethodResult` envelope that clients expect.
-fn to_code_nav_ext_response(resp: wimo ai_wimo_workspace::workspace_ops::CodeNavResponse) -> ExtResult {
+fn to_code_nav_ext_response(resp: wimoai_wimo_workspace::workspace_ops::CodeNavResponse) -> ExtResult {
     let symbol = resp
         .locations
         .first()

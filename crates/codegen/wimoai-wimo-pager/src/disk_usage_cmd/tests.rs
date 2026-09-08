@@ -25,7 +25,7 @@ fn untracked_row(bytes: u64) -> WorktreeUsage {
         kind: WorktreeKind::Session,
         registration: Registration::Untracked,
         last_modified_at: None,
-        path: "/wt-home/worktrees/wimo ai/wt-1".into(),
+        path: "/wt-home/worktrees/wimoai/wt-1".into(),
     }
 }
 
@@ -67,8 +67,8 @@ fn collect_report_joins_registry_and_flags_untracked() {
     let tmp = tempfile::TempDir::new().unwrap();
     let base = dunce::canonicalize(tmp.path()).unwrap();
     let home = base.join("wimo-home");
-    let tracked = home.join("worktrees/wimo ai/wt-tracked");
-    let untracked = home.join("worktrees/wimo ai/wt-untracked");
+    let tracked = home.join("worktrees/wimoai/wt-tracked");
+    let untracked = home.join("worktrees/wimoai/wt-untracked");
     let external = base.join("external-repo");
     std::fs::create_dir_all(&tracked).unwrap();
     std::fs::create_dir_all(&untracked).unwrap();
@@ -140,7 +140,7 @@ fn record_registered_via_symlinked_home_joins_as_one_row() {
     let tmp = tempfile::TempDir::new().unwrap();
     let base = dunce::canonicalize(tmp.path()).unwrap();
     let real_home = base.join("real-home");
-    let wt = real_home.join("worktrees/wimo ai/wt-a");
+    let wt = real_home.join("worktrees/wimoai/wt-a");
     std::fs::create_dir_all(&wt).unwrap();
     std::fs::write(wt.join("f.bin"), vec![b'x'; 4096]).unwrap();
     let link_home = base.join("link-home");
@@ -149,7 +149,7 @@ fn record_registered_via_symlinked_home_joins_as_one_row() {
     let db = WorktreeDb::open(&real_home).unwrap();
     db.register(&make_record(
         "wt-a",
-        &link_home.join("worktrees/wimo ai/wt-a"),
+        &link_home.join("worktrees/wimoai/wt-a"),
         "via-link",
     ))
     .unwrap();
@@ -169,10 +169,10 @@ fn record_registered_via_symlinked_home_joins_as_one_row() {
 fn duplicate_discovered_dirs_size_once() {
     let tmp = tempfile::TempDir::new().unwrap();
     let home = dunce::canonicalize(tmp.path()).unwrap().join("wimo-home");
-    let wt = home.join("worktrees/wimo ai/wt-a");
+    let wt = home.join("worktrees/wimoai/wt-a");
     std::fs::create_dir_all(&wt).unwrap();
     std::fs::write(wt.join("f.bin"), vec![b'x'; 4096]).unwrap();
-    std::os::unix::fs::symlink(&wt, home.join("worktrees/wimo ai/wt-alias")).unwrap();
+    std::os::unix::fs::symlink(&wt, home.join("worktrees/wimoai/wt-alias")).unwrap();
 
     let report = collect_report(&home).unwrap();
     assert_eq!(
@@ -190,11 +190,11 @@ fn escape_symlink_is_counted_not_sized() {
     let tmp = tempfile::TempDir::new().unwrap();
     let base = dunce::canonicalize(tmp.path()).unwrap();
     let home = base.join("wimo-home");
-    std::fs::create_dir_all(home.join("worktrees/wimo ai")).unwrap();
+    std::fs::create_dir_all(home.join("worktrees/wimoai")).unwrap();
     let external = base.join("external");
     std::fs::create_dir_all(&external).unwrap();
     std::fs::write(external.join("huge.bin"), vec![b'x'; 65536]).unwrap();
-    std::os::unix::fs::symlink(&external, home.join("worktrees/wimo ai/escape")).unwrap();
+    std::os::unix::fs::symlink(&external, home.join("worktrees/wimoai/escape")).unwrap();
 
     let report = collect_report(&home).unwrap();
     assert!(
@@ -244,7 +244,7 @@ fn record_at_missing_path_is_omitted() {
     let db = WorktreeDb::open(&home).unwrap();
     db.register(&make_record(
         "wt-gone",
-        &home.join("worktrees/wimo ai/wt-gone"),
+        &home.join("worktrees/wimoai/wt-gone"),
         "gone",
     ))
     .unwrap();
@@ -260,7 +260,7 @@ fn record_at_missing_path_is_omitted() {
 fn registry_absent_reports_untracked_rows() {
     let tmp = tempfile::TempDir::new().unwrap();
     let home = dunce::canonicalize(tmp.path()).unwrap().join("wimo-home");
-    let wt = home.join("worktrees/wimo ai/wt-a");
+    let wt = home.join("worktrees/wimoai/wt-a");
     std::fs::create_dir_all(&wt).unwrap();
     std::fs::write(wt.join("f.bin"), vec![b'x'; 4096]).unwrap();
 
@@ -284,7 +284,7 @@ fn registry_absent_reports_untracked_rows() {
 fn corrupt_registry_degrades_to_untracked_rows() {
     let tmp = tempfile::TempDir::new().unwrap();
     let home = dunce::canonicalize(tmp.path()).unwrap().join("wimo-home");
-    let wt = home.join("worktrees/wimo ai/wt-a");
+    let wt = home.join("worktrees/wimoai/wt-a");
     std::fs::create_dir_all(&wt).unwrap();
     std::fs::write(wt.join("f.bin"), vec![b'x'; 4096]).unwrap();
     std::fs::write(
@@ -309,7 +309,7 @@ fn corrupt_registry_degrades_to_untracked_rows() {
 #[test]
 fn a_row_off_the_anchor_reports_no_size() {
     let tmp = tempfile::TempDir::new().unwrap();
-    let wt = tmp.path().join("worktrees/wimo ai/wt-a");
+    let wt = tmp.path().join("worktrees/wimoai/wt-a");
     std::fs::create_dir_all(&wt).unwrap();
     std::fs::write(wt.join("payload.bin"), vec![b'x'; 65536]).unwrap();
     let elsewhere = Volume::of(&wt).other_device_for_test();
@@ -335,7 +335,7 @@ fn every_open_outcome_maps_to_its_state() {
     let db = WorktreeDb::open(&home).unwrap();
     db.register(&make_record(
         "wt-a",
-        &home.join("worktrees/wimo ai/wt-a"),
+        &home.join("worktrees/wimoai/wt-a"),
         "lbl",
     ))
     .unwrap();
@@ -377,7 +377,7 @@ fn every_open_outcome_maps_to_its_state() {
 fn unopenable_registry_is_not_reported_as_corrupt() {
     let tmp = tempfile::TempDir::new().unwrap();
     let home = dunce::canonicalize(tmp.path()).unwrap().join("wimo-home");
-    let wt = home.join("worktrees/wimo ai/wt-a");
+    let wt = home.join("worktrees/wimoai/wt-a");
     std::fs::create_dir_all(&wt).unwrap();
     std::fs::write(wt.join("f.bin"), vec![b'x'; 4096]).unwrap();
     std::fs::create_dir_all(WorktreeDb::resolve_db_path(&home)).unwrap();
@@ -457,7 +457,7 @@ fn the_registry_open_lands_after_sizing() {
         let db = WorktreeDb::open(&home).unwrap();
         db.register(&make_record(
             "wt-a",
-            &home.join("worktrees/wimo ai/wt-a"),
+            &home.join("worktrees/wimoai/wt-a"),
             "lbl",
         ))
         .unwrap();
@@ -560,13 +560,13 @@ fn json_shape_is_frozen() {
         worktrees: vec![
             WorktreeUsage {
                 last_modified_at: Some(1_700_005_000),
-                path: "/home/user/.wimo/worktrees/wimo ai/wt-1".into(),
+                path: "/home/user/.wimo/worktrees/wimoai/wt-1".into(),
                 ..tracked_row(
                     90,
                     TrackedRow {
                         last_accessed_at: Some(1_700_009_999),
                         label: Some("my-feature".into()),
-                        repo_name: "wimo ai".into(),
+                        repo_name: "wimoai".into(),
                         git_ref: Some("brian/fix".into()),
                         ..record("wt-1", 1_700_000_000)
                     },
@@ -609,9 +609,9 @@ fn json_shape_is_frozen() {
                     "last_accessed_at": 1_700_009_999,
                     "last_modified_at": 1_700_005_000,
                     "label": "my-feature",
-                    "repo_name": "wimo ai",
+                    "repo_name": "wimoai",
                     "git_ref": "brian/fix",
-                    "path": "/home/user/.wimo/worktrees/wimo ai/wt-1",
+                    "path": "/home/user/.wimo/worktrees/wimoai/wt-1",
                 },
                 {
                     "bytes": 10,
@@ -686,7 +686,7 @@ fn print_report_truncates_long_labels_and_keeps_columns_aligned() {
         registry: RegistryState::Read,
         worktrees: vec![
             WorktreeUsage {
-                path: "/wt-home/worktrees/wimo ai/wt-long".into(),
+                path: "/wt-home/worktrees/wimoai/wt-long".into(),
                 ..tracked_row(
                     150,
                     TrackedRow {
@@ -696,7 +696,7 @@ fn print_report_truncates_long_labels_and_keeps_columns_aligned() {
                 )
             },
             WorktreeUsage {
-                path: "/wt-home/worktrees/wimo ai/wt-dead".into(),
+                path: "/wt-home/worktrees/wimoai/wt-dead".into(),
                 ..tracked_row(
                     100,
                     TrackedRow {
@@ -707,7 +707,7 @@ fn print_report_truncates_long_labels_and_keeps_columns_aligned() {
                 )
             },
             WorktreeUsage {
-                path: "/wt-home/worktrees/wimo ai/wt-short".into(),
+                path: "/wt-home/worktrees/wimoai/wt-short".into(),
                 ..untracked_row(50)
             },
         ],
@@ -720,7 +720,7 @@ fn print_report_truncates_long_labels_and_keeps_columns_aligned() {
     assert!(text.contains("session (dead)"));
     assert!(text.contains("untracked (session)"));
     assert!(text.contains("组件更新"));
-    crate::test_util::assert_path_column_aligned(&text, "worktrees/wimo ai/wt-");
+    crate::test_util::assert_path_column_aligned(&text, "worktrees/wimoai/wt-");
 }
 
 #[test]
@@ -958,7 +958,7 @@ fn symlinked_worktrees_dir_is_surfaced_not_silently_dropped() {
     let home = base.join("wimo-home");
     std::fs::create_dir_all(&home).unwrap();
     let elsewhere = base.join("worktrees-on-another-disk");
-    let wt = elsewhere.join("wimo ai/wt-a");
+    let wt = elsewhere.join("wimoai/wt-a");
     std::fs::create_dir_all(&wt).unwrap();
     std::fs::write(wt.join(".git"), "gitdir: /repo/.git/worktrees/wt-a\n").unwrap();
     std::fs::write(wt.join("big.bin"), vec![b'x'; 1 << 20]).unwrap();

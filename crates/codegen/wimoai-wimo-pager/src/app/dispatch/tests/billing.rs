@@ -1,7 +1,7 @@
 //! Tests for credit-limit upsells, paywall gating, and auto-topup.
 
 use super::*;
-use wimo ai_wimo_shell::sampling::error::is_free_usage_exhausted_error;
+use wimoai_wimo_shell::sampling::error::is_free_usage_exhausted_error;
 
 // ── Credit-limit upsell / max-tier tests ───────────────────────────
 
@@ -713,7 +713,7 @@ fn is_nonsilent_billing(effects: &[Effect]) -> bool {
 fn complete_session_usage(
     app: &mut AppView,
     session_id: &str,
-    usage: wimo ai_wimo_shell::extensions::notification::PromptUsage,
+    usage: wimoai_wimo_shell::extensions::notification::PromptUsage,
 ) -> Vec<Effect> {
     dispatch(
         Action::TaskComplete(TaskResult::SessionUsageComplete {
@@ -774,7 +774,7 @@ fn team_auth_disables_agent_billing_surface() {
         .get_mut(&AgentId(0))
         .unwrap()
         .billing_surface_visible = true;
-    app.apply_auth_meta(&wimo ai_wimo_shell::auth::AuthMeta {
+    app.apply_auth_meta(&wimoai_wimo_shell::auth::AuthMeta {
         team_id: Some("team-uuid".into()),
         team_name: Some("Acme Corp".into()),
         ..Default::default()
@@ -809,8 +809,8 @@ fn session_usage_complete_pushes_block_and_chains_billing() {
     let mut app = test_app_with_agent();
     app.screen_mode = crate::app::ScreenMode::Minimal;
     let before = agent_scrollback_len(&app);
-    let usage = wimo ai_wimo_shell::extensions::notification::PromptUsage {
-        totals: wimo ai_wimo_shell::extensions::notification::PromptUsageModel {
+    let usage = wimoai_wimo_shell::extensions::notification::PromptUsage {
+        totals: wimoai_wimo_shell::extensions::notification::PromptUsageModel {
             input_tokens: 1_000,
             output_tokens: 100,
             total_tokens: 1_100,
@@ -868,8 +868,8 @@ fn session_usage_complete_drops_stale_session() {
     let effects = complete_session_usage(
         &mut app,
         "old-session",
-        wimo ai_wimo_shell::extensions::notification::PromptUsage {
-            totals: wimo ai_wimo_shell::extensions::notification::PromptUsageModel {
+        wimoai_wimo_shell::extensions::notification::PromptUsage {
+            totals: wimoai_wimo_shell::extensions::notification::PromptUsageModel {
                 model_calls: 99,
                 cost_usd_ticks: Some(1_000_000_000_000),
                 ..Default::default()
@@ -1227,7 +1227,7 @@ fn free_usage_upsell_shows_three_options_with_exact_labels() {
         qv.local_kind,
         Some(
             crate::views::question_view::LocalQuestionKind::FreeUsageUpsell {
-                source: wimo ai_wimo_telemetry::events::SuperwimoUpsell::FreeUsagePaywall,
+                source: wimoai_wimo_telemetry::events::SuperwimoUpsell::FreeUsagePaywall,
             }
         )
     ));
@@ -1263,7 +1263,7 @@ fn free_usage_upsell_shows_three_options_with_exact_labels() {
 #[test]
 fn free_usage_failure_opens_paywall_modal() {
     use crate::app::acp_handler::apply_session_event_for_test;
-    use wimo ai_wimo_shell::extensions::notification::{RetryState, SessionUpdate};
+    use wimoai_wimo_shell::extensions::notification::{RetryState, SessionUpdate};
 
     let mut app = test_app_with_agent();
     let id = AgentId(0);
@@ -1332,7 +1332,7 @@ fn free_usage_translate_local_submit_maps_options() {
     open_free_usage_upsell(agent, None);
     let mut qv = agent.question_view.take().unwrap();
     let kind = || LocalQuestionKind::FreeUsageUpsell {
-        source: wimo ai_wimo_telemetry::events::SuperwimoUpsell::FreeUsagePaywall,
+        source: wimoai_wimo_telemetry::events::SuperwimoUpsell::FreeUsagePaywall,
     };
 
     for idx in [0, 1, 2] {
@@ -1374,7 +1374,7 @@ fn restricted_command_submit_opens_three_option_upsell() {
         qv.local_kind,
         Some(
             crate::views::question_view::LocalQuestionKind::FreeUsageUpsell {
-                source: wimo ai_wimo_telemetry::events::SuperwimoUpsell::RestrictedCommand,
+                source: wimoai_wimo_telemetry::events::SuperwimoUpsell::RestrictedCommand,
             }
         )
     ));
@@ -1627,9 +1627,9 @@ fn credit_limit_upsell_submit_shows_url_when_browser_unavailable() {
     qv.selections[0] = QuestionSelection::Single(Some(1));
     let kind = LocalQuestionKind::CreditLimitUpsell {
         choices: vec![
-            wimo ai_wimo_telemetry::events::CreditLimitChoice::UpgradeTier,
-            wimo ai_wimo_telemetry::events::CreditLimitChoice::PurchaseCredits,
-            wimo ai_wimo_telemetry::events::CreditLimitChoice::RetryLastPrompt,
+            wimoai_wimo_telemetry::events::CreditLimitChoice::UpgradeTier,
+            wimoai_wimo_telemetry::events::CreditLimitChoice::PurchaseCredits,
+            wimoai_wimo_telemetry::events::CreditLimitChoice::RetryLastPrompt,
         ],
     };
     let InputOutcome::Action(Action::OpenUrl(url)) =

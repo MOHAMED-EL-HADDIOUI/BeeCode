@@ -18,21 +18,21 @@
 //!
 //! `set_viewport_height` early-returns when the height is unchanged, so steady state is a no-op.
 //!
-//! [`Terminal::set_viewport_height`]: wimo ai_ratatui_inline::Terminal::set_viewport_height
+//! [`Terminal::set_viewport_height`]: wimoai_ratatui_inline::Terminal::set_viewport_height
 
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::style::Style;
 
-use wimo ai_wimo_pager::app::PagerTerminal;
-use wimo ai_wimo_pager::app::agent_view::AgentView;
-use wimo ai_wimo_pager::app::app_view::{ActiveView, AppView};
-use wimo ai_wimo_pager::appearance::LayoutConfig;
-use wimo ai_wimo_pager::minimal_api;
-use wimo ai_wimo_pager::render::SafeBuf as _;
-use wimo ai_wimo_pager::theme::Theme;
-use wimo ai_wimo_pager::views::prompt_widget::{PromptBg, PromptInfo, PromptStyle, PromptWidget};
-use wimo ai_wimo_pager::views::question_view::{feedback_input, inline_text_width};
+use wimoai_wimo_pager::app::PagerTerminal;
+use wimoai_wimo_pager::app::agent_view::AgentView;
+use wimoai_wimo_pager::app::app_view::{ActiveView, AppView};
+use wimoai_wimo_pager::appearance::LayoutConfig;
+use wimoai_wimo_pager::minimal_api;
+use wimoai_wimo_pager::render::SafeBuf as _;
+use wimoai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::views::prompt_widget::{PromptBg, PromptInfo, PromptStyle, PromptWidget};
+use wimoai_wimo_pager::views::question_view::{feedback_input, inline_text_width};
 
 /// Which prompt-anchored dropdown is currently shown.
 /// Mirrors the coexistence order in `AgentView::draw`: `@` file search wins over `/` slash, which wins over shell completion.
@@ -49,9 +49,9 @@ enum Kind {
 /// `items_width` is the width the rows render at (minimal is flush-left, so the prompt/viewport width).
 /// Slash rows wrap, so their count is line-based.
 fn active(prompt: &PromptWidget, items_width: u16) -> Option<(Kind, u16)> {
-    use wimo ai_wimo_pager::views::completion_dropdown::MAX_VISIBLE_ROWS;
-    use wimo ai_wimo_pager::views::file_search::dropdown::MAX_DROPDOWN_ROWS as FILE_MAX;
-    use wimo ai_wimo_pager::views::slash_dropdown::desired_item_rows;
+    use wimoai_wimo_pager::views::completion_dropdown::MAX_VISIBLE_ROWS;
+    use wimoai_wimo_pager::views::file_search::dropdown::MAX_DROPDOWN_ROWS as FILE_MAX;
+    use wimoai_wimo_pager::views::slash_dropdown::desired_item_rows;
 
     // Precedence matches `AgentView::draw`: file search is checked first and, when visible, suppresses the others even when it has 0 results
     if prompt.file_search_visible() {
@@ -215,7 +215,7 @@ fn compute_target(app: &mut AppView, term_h: u16, width: u16) -> u16 {
         .get(&id)
         .map(|a| (a.prompt_input_mode, a.multiline_mode))
         .unwrap_or_default();
-    let theme = wimo ai_wimo_pager::theme::Theme::current();
+    let theme = wimoai_wimo_pager::theme::Theme::current();
     let style = super::live::prompt_style(&app.appearance, input_mode, &theme, multiline);
 
     let Some(agent) = app.agents.get_mut(&id) else {
@@ -272,7 +272,7 @@ fn compute_target(app: &mut AppView, term_h: u16, width: u16) -> u16 {
     // Height is measured at full viewport width so wrap matches `live::draw_live`
     // Only reserve rows the shared minimal paint policy accepts, otherwise a narrow or short terminal leaves a blank strip
     let raw_btw = if minimal_api::minimal_btw_surface_available(agent) {
-        wimo ai_wimo_pager::views::btw_overlay::btw_panel_height(agent.btw_state.as_ref(), width)
+        wimoai_wimo_pager::views::btw_overlay::btw_panel_height(agent.btw_state.as_ref(), width)
     } else {
         0
     };
@@ -351,7 +351,7 @@ pub fn render(
 
     match kind {
         Kind::FileSearch => {
-            wimo ai_wimo_pager::views::file_search::dropdown::render_dropdown(
+            wimoai_wimo_pager::views::file_search::dropdown::render_dropdown(
                 buf,
                 items_rect,
                 &prompt.file_search,
@@ -361,12 +361,12 @@ pub fn render(
         Kind::Slash => {
             let snap = prompt.slash_snapshot();
             let hovered = prompt.slash_hovered();
-            wimo ai_wimo_pager::views::slash_dropdown::render_dropdown(
+            wimoai_wimo_pager::views::slash_dropdown::render_dropdown(
                 buf, items_rect, &snap, hovered, theme,
             );
         }
         Kind::Completion => {
-            wimo ai_wimo_pager::views::completion_dropdown::render_dropdown(
+            wimoai_wimo_pager::views::completion_dropdown::render_dropdown(
                 buf,
                 items_rect,
                 &minimal_api::prompt_suggestions(prompt).dropdown,
@@ -430,14 +430,14 @@ pub fn modal_height(modal: Modal, agent: &mut AgentView, screen_h: u16, content_
             .permission_queue
             .front()
             .map(|p| {
-                wimo ai_wimo_pager::views::permission_view::permission_view_height(
+                wimoai_wimo_pager::views::permission_view::permission_view_height(
                     p, screen_h, content_w,
                 )
             })
             .unwrap_or(0),
         Modal::Question => {
             let input_mode = minimal_api::question_view(agent).is_some_and(|qv| {
-                qv.focus == wimo ai_wimo_pager::views::question_view::QuestionFocus::InputMode
+                qv.focus == wimoai_wimo_pager::views::question_view::QuestionFocus::InputMode
             });
             let editor_extra = if input_mode {
                 question_editor_h(
@@ -452,7 +452,7 @@ pub fn modal_height(modal: Modal, agent: &mut AgentView, screen_h: u16, content_
             };
             minimal_api::question_view_mut(agent)
                 .map(|qv| {
-                    wimo ai_wimo_pager::views::question_view::question_view_height(
+                    wimoai_wimo_pager::views::question_view::question_view_height(
                         qv, screen_h, content_w,
                     )
                     .saturating_add(editor_extra)
@@ -460,11 +460,11 @@ pub fn modal_height(modal: Modal, agent: &mut AgentView, screen_h: u16, content_
                 .unwrap_or(0)
         }
         Modal::Rewind => minimal_api::rewind_state(agent)
-            .map(|rw| wimo ai_wimo_pager::views::rewind::rewind_overlay_height(&rw.phase, screen_h))
+            .map(|rw| wimoai_wimo_pager::views::rewind::rewind_overlay_height(&rw.phase, screen_h))
             .unwrap_or(0),
         Modal::Cancel => {
             if minimal_api::cancel_turn_view(agent).is_some() {
-                wimo ai_wimo_pager::views::modal::cancel_turn_panel_height(screen_h)
+                wimoai_wimo_pager::views::modal::cancel_turn_panel_height(screen_h)
             } else {
                 0
             }
@@ -489,7 +489,7 @@ pub fn render_modal(
         Modal::Question => render_question(buf, area, agent, theme, screen_h),
         Modal::Rewind => {
             if let Some(rw) = minimal_api::rewind_state(agent) {
-                wimo ai_wimo_pager::views::rewind::render_rewind_overlay(buf, area, &rw.phase, true);
+                wimoai_wimo_pager::views::rewind::render_rewind_overlay(buf, area, &rw.phase, true);
             }
             None
         }
@@ -499,7 +499,7 @@ pub fn render_modal(
             // Render the hit-test rects into a local Vec and store them back after
             let mut buttons: Vec<Rect> = Vec::new();
             let drawn = if let Some(ctv) = minimal_api::cancel_turn_view(agent) {
-                wimo ai_wimo_pager::views::modal::render_cancel_turn_panel(
+                wimoai_wimo_pager::views::modal::render_cancel_turn_panel(
                     buf,
                     area,
                     ctv,
@@ -561,7 +561,7 @@ fn render_permission(
     let perm = agent.permission_queue.front()?;
     // Clone so the immutable borrow of `agent.prompt` ends before the mutable `agent.prompt.draw` below
     let followup = agent.prompt.text().to_string();
-    let result = wimo ai_wimo_pager::views::permission_view::render_permission_view(
+    let result = wimoai_wimo_pager::views::permission_view::render_permission_view(
         buf,
         area,
         perm,
@@ -597,7 +597,7 @@ fn render_question(
     theme: &Theme,
     screen_h: u16,
 ) -> Option<(u16, u16)> {
-    use wimo ai_wimo_pager::views::question_view::{QUESTION_VIEW_HPAD, QuestionFocus};
+    use wimoai_wimo_pager::views::question_view::{QUESTION_VIEW_HPAD, QuestionFocus};
 
     let input_mode = minimal_api::question_view(agent)
         .map(|qv| qv.focus == QuestionFocus::InputMode)
@@ -622,7 +622,7 @@ fn render_question(
     // Computed in an inner scope so the immutable borrows end before the `&mut clamp_scroll`
     if let Some(qv) = minimal_api::question_view_mut(agent) {
         let vis = qv.questions.get(qv.active_tab).map(|question| {
-            wimo ai_wimo_pager::views::question_view::visible_options_height(
+            wimoai_wimo_pager::views::question_view::visible_options_height(
                 question,
                 q_area.height,
                 content_w,
@@ -638,7 +638,7 @@ fn render_question(
     }
 
     if let Some(qv) = minimal_api::question_view(agent) {
-        wimo ai_wimo_pager::views::question_view::render_question_view(
+        wimoai_wimo_pager::views::question_view::render_question_view(
             buf,
             q_area,
             qv,
@@ -662,12 +662,12 @@ fn render_question(
             .and_then(|qv| qv.per_question_freeform_selected.get(qv.active_tab))
             .copied()
             .unwrap_or(false);
-        let embed = wimo ai_wimo_pager::views::modal_window::embedded_row_style(theme, true);
+        let embed = wimoai_wimo_pager::views::modal_window::embedded_row_style(theme, true);
         let fg = |normal| embed.map_or(normal, |e| e.fg(normal));
         let marker = if is_multi {
             (if freeform_sel { "[x]" } else { "[ ]" }).to_string()
         } else if freeform_sel {
-            format!("({})", wimo ai_wimo_pager::glyphs::filled_dot())
+            format!("({})", wimoai_wimo_pager::glyphs::filled_dot())
         } else {
             "(\u{25cb})".to_string()
         };
@@ -694,7 +694,7 @@ fn render_question(
         buf.set_span_safe(
             area.x + 9,
             row_y,
-            &ratatui::text::Span::styled(wimo ai_wimo_pager::glyphs::prompt_arrow(), accent),
+            &ratatui::text::Span::styled(wimoai_wimo_pager::glyphs::prompt_arrow(), accent),
             2,
         );
 
@@ -702,7 +702,7 @@ fn render_question(
         let editor = Rect {
             x: area.x + 11,
             y: row_y,
-            width: wimo ai_wimo_pager::views::question_view::inline_text_width(area.width),
+            width: wimoai_wimo_pager::views::question_view::inline_text_width(area.width),
             height: input_h,
         };
         return agent
@@ -750,7 +750,7 @@ fn render_feedback_editor(
     );
     for y in input_area.y..input_area.y.saturating_add(box_h) {
         if let Some(cell) = buf.cell_mut((area.x, y)) {
-            cell.set_symbol(wimo ai_wimo_pager::glyphs::accent_bar());
+            cell.set_symbol(wimoai_wimo_pager::glyphs::accent_bar());
             cell.set_style(Style::default().fg(theme.accent_user).bg(theme.bg_light));
         }
     }
@@ -843,7 +843,7 @@ fn inline_input_style(theme: &Theme) -> PromptStyle {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_pager::views::suggestion_controller::CompletionItemParsed;
+    use wimoai_wimo_pager::views::suggestion_controller::CompletionItemParsed;
 
     fn completion_item() -> CompletionItemParsed {
         // The functional update sets only the semantic fields
@@ -857,8 +857,8 @@ mod tests {
 
     /// Build an agent with an active single-select question in InputMode and the given freeform text loaded into the prompt.
     fn question_input_agent(text: &str) -> AgentView {
-        use wimo ai_wimo_pager::views::prompt_widget::StashedPrompt;
-        use wimo ai_wimo_pager::views::question_view::{Question, QuestionOption, QuestionViewState};
+        use wimoai_wimo_pager::views::prompt_widget::StashedPrompt;
+        use wimoai_wimo_pager::views::question_view::{Question, QuestionOption, QuestionViewState};
 
         let mut agent = minimal_api::test_agent_view(Some("s1"), std::path::PathBuf::from("/tmp"));
         let mut qv = QuestionViewState::new(
@@ -1070,7 +1070,7 @@ mod tests {
 
     #[test]
     fn completion_dropdown_caps_item_rows() {
-        use wimo ai_wimo_pager::views::completion_dropdown::MAX_VISIBLE_ROWS;
+        use wimoai_wimo_pager::views::completion_dropdown::MAX_VISIBLE_ROWS;
         let mut pw = PromptWidget::new();
         minimal_api::prompt_suggestions_mut(&mut pw).dropdown.open = true;
         minimal_api::prompt_suggestions_mut(&mut pw).dropdown.items =

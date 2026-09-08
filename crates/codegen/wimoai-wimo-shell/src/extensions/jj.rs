@@ -1,10 +1,10 @@
-//! Jujutsu extension handlers; delegates to [`wimo ai_wimo_workspace::session::jj`].
+//! Jujutsu extension handlers; delegates to [`wimoai_wimo_workspace::session::jj`].
 
 use agent_client_protocol as acp;
 
 use super::{Empty, ExtResult, to_ext_response, to_ext_response_partial};
-use wimo ai_wimo_workspace::session::git::{CommitData, StageData};
-use wimo ai_wimo_workspace::session::jj;
+use wimoai_wimo_workspace::session::git::{CommitData, StageData};
+use wimoai_wimo_workspace::session::jj;
 
 /// Handle a `x.ai/git/*` method for a jj-colocated repo.
 ///

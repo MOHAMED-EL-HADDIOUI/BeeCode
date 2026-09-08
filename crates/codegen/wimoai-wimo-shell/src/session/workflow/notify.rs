@@ -1,5 +1,5 @@
 use crate::extensions::notification::{
-    SessionNotification as wimo aiSessionNotification, SessionUpdate as wimo aiSessionUpdate,
+    SessionNotification as wimoaiSessionNotification, SessionUpdate as wimoaiSessionUpdate,
     WorkflowAgentInfo, WorkflowPhaseInfo,
 };
 use crate::session::persistence::PersistenceMsg;
@@ -10,7 +10,7 @@ use super::tracker::WorkflowRunState;
 #[derive(Clone)]
 pub(crate) struct WorkflowNotifySender {
     session_id: agent_client_protocol::SessionId,
-    gateway: wimo ai_acp_lib::AcpAgentGatewaySender,
+    gateway: wimoai_acp_lib::AcpAgentGatewaySender,
     persistence_tx: tokio::sync::mpsc::UnboundedSender<PersistenceMsg>,
     store: WorkflowRunStore,
 }
@@ -18,7 +18,7 @@ pub(crate) struct WorkflowNotifySender {
 impl WorkflowNotifySender {
     pub(crate) fn new(
         session_id: agent_client_protocol::SessionId,
-        gateway: wimo ai_acp_lib::AcpAgentGatewaySender,
+        gateway: wimoai_acp_lib::AcpAgentGatewaySender,
         persistence_tx: tokio::sync::mpsc::UnboundedSender<PersistenceMsg>,
         store: WorkflowRunStore,
     ) -> Self {
@@ -68,10 +68,10 @@ impl WorkflowNotifySender {
         );
     }
 
-    fn dispatch(&self, update: wimo aiSessionUpdate, persist: bool) {
+    fn dispatch(&self, update: wimoaiSessionUpdate, persist: bool) {
         let mut meta = None;
         crate::util::event_id::ensure_event_id_meta(&self.session_id.0, &mut meta);
-        let notification = wimo aiSessionNotification {
+        let notification = wimoaiSessionNotification {
             session_id: self.session_id.clone(),
             update,
             meta: meta.map(serde_json::Value::Object),
@@ -81,7 +81,7 @@ impl WorkflowNotifySender {
             .ok();
         if persist {
             let _ = self.persistence_tx.send(PersistenceMsg::Update(
-                crate::session::storage::SessionUpdate::wimo ai(Box::new(notification)),
+                crate::session::storage::SessionUpdate::wimoai(Box::new(notification)),
             ));
         }
         if let Some(raw) = raw {
@@ -98,7 +98,7 @@ pub(crate) fn build_workflow_updated(
     state: &WorkflowRunState,
     elapsed_ms: u64,
     _active_agents: u32,
-) -> wimo aiSessionUpdate {
+) -> wimoaiSessionUpdate {
     let last = state.history.last();
 
     let run_complete = state.status == super::tracker::WorkflowRunStatus::Complete;
@@ -151,7 +151,7 @@ pub(crate) fn build_workflow_updated(
         .agent_budget
         .map(|total| total.saturating_sub(state.agents_used.saturating_add(agents_reserved)));
 
-    wimo aiSessionUpdate::WorkflowUpdated {
+    wimoaiSessionUpdate::WorkflowUpdated {
         run_id: state.run_id.clone(),
         revision: state.revision,
         name: state.name.clone(),
@@ -190,15 +190,15 @@ mod tests {
             "demo".into(),
             "obj".into(),
             vec![
-                wimo ai_workflow::PhaseMeta {
+                wimoai_workflow::PhaseMeta {
                     title: "Plan".into(),
                     detail: None,
                 },
-                wimo ai_workflow::PhaseMeta {
+                wimoai_workflow::PhaseMeta {
                     title: "Execute".into(),
                     detail: None,
                 },
-                wimo ai_workflow::PhaseMeta {
+                wimoai_workflow::PhaseMeta {
                     title: "Verify".into(),
                     detail: None,
                 },
@@ -209,7 +209,7 @@ mod tests {
         t.set_phase("wf_1", "Execute");
         let state = t.get("wf_1").unwrap();
         match build_workflow_updated(&state, 0, 0) {
-            wimo aiSessionUpdate::WorkflowUpdated { phases, .. } => {
+            wimoaiSessionUpdate::WorkflowUpdated { phases, .. } => {
                 let states: Vec<(String, String)> =
                     phases.into_iter().map(|p| (p.title, p.state)).collect();
                 assert_eq!(
@@ -233,11 +233,11 @@ mod tests {
             "demo".into(),
             "obj".into(),
             vec![
-                wimo ai_workflow::PhaseMeta {
+                wimoai_workflow::PhaseMeta {
                     title: "Plan".into(),
                     detail: None,
                 },
-                wimo ai_workflow::PhaseMeta {
+                wimoai_workflow::PhaseMeta {
                     title: "Verify".into(),
                     detail: None,
                 },
@@ -248,13 +248,13 @@ mod tests {
         t.set_phase("wf_2", "Verify");
         t.apply_outcome(
             "wf_2",
-            &wimo ai_workflow::WorkflowOutcome::Completed {
+            &wimoai_workflow::WorkflowOutcome::Completed {
                 result: serde_json::json!("done"),
             },
         );
         let state = t.get("wf_2").unwrap();
         match build_workflow_updated(&state, 0, 0) {
-            wimo aiSessionUpdate::WorkflowUpdated { phases, status, .. } => {
+            wimoaiSessionUpdate::WorkflowUpdated { phases, status, .. } => {
                 assert_eq!(status, "complete");
                 let states: Vec<(String, String)> =
                     phases.into_iter().map(|p| (p.title, p.state)).collect();

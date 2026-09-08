@@ -160,7 +160,7 @@ fn auth_scope_uses_oauth2_when_present() {
         cfg.auth_scope(),
         format!(
             "{}::{}",
-            crate::auth::config::wimo ai_OAUTH2_ISSUER,
+            crate::auth::config::wimoai_OAUTH2_ISSUER,
             obfstr::obfstr!("b1a00492-073a-47ea-816f-4c329264a828"),
         )
     );
@@ -2808,10 +2808,10 @@ fn apply_user_info_enrichment_preserves_token_fields() {
 #[tokio::test]
 #[serial_test::serial]
 async fn current_api_key_async_drives_refresh_chain() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    use wimo ai_wimo_tools::types::ApiKeyProvider;
-    let _wimo ai = EnvGuard::unset("wimo ai_API_KEY");
-    let _legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+    use wimoai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_tools::types::ApiKeyProvider;
+    let _wimoai = EnvGuard::unset("wimoai_API_KEY");
+    let _legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
     let dir = tempfile::tempdir().unwrap();
     let mgr = Arc::new(AuthManager::new(dir.path(), wimoComConfig::default()));
     mgr.hot_swap(wimoAuth {
@@ -3214,7 +3214,7 @@ fn oidc_session_for_team(principal_id: &str) -> wimoAuth {
         auth_mode: AuthMode::Oidc,
         refresh_token: Some("rt".into()),
         expires_at: Some(Utc::now() + Duration::hours(1)),
-        oidc_issuer: Some(crate::auth::config::wimo ai_OAUTH2_ISSUER.to_string()),
+        oidc_issuer: Some(crate::auth::config::wimoai_OAUTH2_ISSUER.to_string()),
         oidc_client_id: Some("client".into()),
         ..wimoAuth::test_default()
     }
@@ -3479,7 +3479,7 @@ async fn pin_matches_principal_id_without_principal_type() {
 #[tokio::test]
 async fn cached_api_key_session_rejected_when_api_key_auth_disabled() {
     let api_key_session = || wimoAuth {
-        key: "wimo ai-cached-key".into(),
+        key: "wimoai-cached-key".into(),
         auth_mode: AuthMode::ApiKey,
         expires_at: Some(Utc::now() + Duration::hours(1)),
         ..wimoAuth::test_default()
@@ -3500,7 +3500,7 @@ async fn cached_api_key_session_rejected_when_api_key_auth_disabled() {
     mgr2.hot_swap(api_key_session());
     assert_eq!(
         mgr2.current().map(|a| a.key),
-        Some("wimo ai-cached-key".to_string()),
+        Some("wimoai-cached-key".to_string()),
         "api-key session must work normally when the switch is off"
     );
 }
@@ -3539,25 +3539,25 @@ async fn shared_api_key_provider_resolves_live_bearer() {
         "provider must follow the manager's refresh chain rather than snapshot at startup"
     );
 }
-/// With no OAuth session, voice/tools fall back to env or the auth.json `wimo ai::api_key`.
+/// With no OAuth session, voice/tools fall back to env or the auth.json `wimoai::api_key`.
 #[tokio::test]
 #[serial_test::serial]
 async fn shared_api_key_provider_static_fallthrough() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let dir = tempfile::tempdir().unwrap();
     let mgr = Arc::new(AuthManager::new(dir.path(), wimoComConfig::default()));
     let provider = shared_api_key_provider(mgr.clone());
     {
-        let _legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
-        let _key = EnvGuard::set("wimo ai_API_KEY", "env-only-key");
+        let _legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
+        let _key = EnvGuard::set("wimoai_API_KEY", "env-only-key");
         assert_eq!(
             provider.current_api_key_async().await.as_deref(),
             Some("env-only-key")
         );
     }
     {
-        let _wimo ai = EnvGuard::unset("wimo ai_API_KEY");
-        let _legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+        let _wimoai = EnvGuard::unset("wimoai_API_KEY");
+        let _legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
         crate::auth::store_api_key(dir.path(), "disk-api-key").unwrap();
         assert_eq!(
             provider.current_api_key_async().await.as_deref(),
@@ -3565,7 +3565,7 @@ async fn shared_api_key_provider_static_fallthrough() {
         );
     }
     {
-        let _key = EnvGuard::set("wimo ai_API_KEY", "env-should-lose");
+        let _key = EnvGuard::set("wimoai_API_KEY", "env-should-lose");
         mgr.hot_swap(wimoAuth {
             key: "session-bearer".into(),
             expires_at: Some(Utc::now() + Duration::hours(1)),
@@ -3581,8 +3581,8 @@ async fn shared_api_key_provider_static_fallthrough() {
 #[tokio::test]
 #[serial_test::serial]
 async fn shared_api_key_provider_kill_switch_blocks_static() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    let _key = EnvGuard::set("wimo ai_API_KEY", "blocked");
+    use wimoai_wimo_test_support::EnvGuard;
+    let _key = EnvGuard::set("wimoai_API_KEY", "blocked");
     let dir = tempfile::tempdir().unwrap();
     let mgr = Arc::new(AuthManager::new(
         dir.path(),
@@ -3599,8 +3599,8 @@ async fn shared_api_key_provider_kill_switch_blocks_static() {
 #[tokio::test]
 #[serial_test::serial]
 async fn shared_api_key_provider_oidc_preferred_blocks_static() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    let _key = EnvGuard::set("wimo ai_API_KEY", "should-not-use");
+    use wimoai_wimo_test_support::EnvGuard;
+    let _key = EnvGuard::set("wimoai_API_KEY", "should-not-use");
     let dir = tempfile::tempdir().unwrap();
     let mgr = Arc::new(AuthManager::new(
         dir.path(),
@@ -3618,9 +3618,9 @@ async fn shared_api_key_provider_oidc_preferred_blocks_static() {
 #[tokio::test]
 #[serial_test::serial]
 async fn shared_api_key_provider_api_key_preferred_skips_session() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    let _legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
-    let _key = EnvGuard::set("wimo ai_API_KEY", "static-preferred");
+    use wimoai_wimo_test_support::EnvGuard;
+    let _legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
+    let _key = EnvGuard::set("wimoai_API_KEY", "static-preferred");
     let dir = tempfile::tempdir().unwrap();
     let mgr = Arc::new(AuthManager::new(
         dir.path(),
@@ -3647,9 +3647,9 @@ async fn shared_api_key_provider_api_key_preferred_skips_session() {
 #[tokio::test]
 #[serial_test::serial]
 async fn shared_api_key_provider_sync_falls_through_when_session_expired() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    let _legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
-    let _key = EnvGuard::set("wimo ai_API_KEY", "static-after-expiry");
+    use wimoai_wimo_test_support::EnvGuard;
+    let _legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
+    let _key = EnvGuard::set("wimoai_API_KEY", "static-after-expiry");
     let dir = tempfile::tempdir().unwrap();
     let mgr = Arc::new(AuthManager::new(dir.path(), wimoComConfig::default()));
     mgr.hot_swap(wimoAuth {
@@ -3674,10 +3674,10 @@ async fn shared_api_key_provider_sync_falls_through_when_session_expired() {
 #[tokio::test]
 #[serial_test::serial]
 async fn shared_api_key_provider_sync_buffered_session_beats_static() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    use wimo ai_wimo_tools::types::ApiKeyProvider;
-    let _legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
-    let _key = EnvGuard::set("wimo ai_API_KEY", "leftover-static");
+    use wimoai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_tools::types::ApiKeyProvider;
+    let _legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
+    let _key = EnvGuard::set("wimoai_API_KEY", "leftover-static");
     let dir = tempfile::tempdir().unwrap();
     let mgr = Arc::new(AuthManager::new(dir.path(), wimoComConfig::default()));
     mgr.hot_swap(wimoAuth {
@@ -3694,9 +3694,9 @@ async fn shared_api_key_provider_sync_buffered_session_beats_static() {
 #[tokio::test]
 #[serial_test::serial]
 async fn shared_api_key_provider_disk_memo_follows_rewrites() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    let _wimo ai = EnvGuard::unset("wimo ai_API_KEY");
-    let _legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+    use wimoai_wimo_test_support::EnvGuard;
+    let _wimoai = EnvGuard::unset("wimoai_API_KEY");
+    let _legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
     let dir = tempfile::tempdir().unwrap();
     let mgr = Arc::new(AuthManager::new(dir.path(), wimoComConfig::default()));
     let provider = shared_api_key_provider(mgr);
@@ -3712,11 +3712,11 @@ async fn shared_api_key_provider_disk_memo_follows_rewrites() {
 #[serial_test::serial]
 async fn process_key_from_model_env_key() {
     use crate::agent::config::{Config, resolve_model_list};
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     const ENV: &str = "TEST_MODEL_ENV_KEY";
     const TOKEN: &str = "model-env-token";
-    let _wimo ai = EnvGuard::unset("wimo ai_API_KEY");
-    let _legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+    let _wimoai = EnvGuard::unset("wimoai_API_KEY");
+    let _legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
     let _tok = EnvGuard::set(ENV, TOKEN);
     let dm = crate::models::default_model();
     let cfg = Config::new_from_toml_cfg(
@@ -3749,9 +3749,9 @@ async fn process_key_from_model_env_key() {
 #[tokio::test]
 #[serial_test::serial]
 async fn process_key_precedence() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    let _wimo ai = EnvGuard::unset("wimo ai_API_KEY");
-    let _legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+    use wimoai_wimo_test_support::EnvGuard;
+    let _wimoai = EnvGuard::unset("wimoai_API_KEY");
+    let _legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
     let dir = tempfile::tempdir().unwrap();
     let mgr = Arc::new(AuthManager::new(dir.path(), wimoComConfig::default()));
     let provider = shared_api_key_provider(mgr.clone());
@@ -3767,7 +3767,7 @@ async fn process_key_precedence() {
         Some("process")
     );
     {
-        let _key = EnvGuard::set("wimo ai_API_KEY", "env");
+        let _key = EnvGuard::set("wimoai_API_KEY", "env");
         assert_eq!(
             provider.current_api_key_async().await.as_deref(),
             Some("env")
@@ -4060,7 +4060,7 @@ fn dark_wake_defer_budget_survives_powered_on_during_dark_wake() {
 #[test]
 #[serial_test::serial(force_dark_wake_env)]
 fn is_dark_wake_false_when_power_listener_not_started() {
-    let _unset = wimo ai_wimo_test_support::EnvGuard::unset("wimo_AUTH_FORCE_DARK_WAKE");
+    let _unset = wimoai_wimo_test_support::EnvGuard::unset("wimo_AUTH_FORCE_DARK_WAKE");
     let dir = tempfile::tempdir().unwrap();
     let mgr = AuthManager::new(dir.path(), wimoComConfig::default());
     assert!(
@@ -4074,7 +4074,7 @@ fn is_dark_wake_false_when_power_listener_not_started() {
 #[test]
 #[serial_test::serial(force_dark_wake_env)]
 fn is_dark_wake_env_override_forces_both_states() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let dir = tempfile::tempdir().unwrap();
     let mgr = AuthManager::new(dir.path(), wimoComConfig::default());
     {
@@ -4274,7 +4274,7 @@ fn sleep_ack_hold_times_out_when_refresh_never_drains() {
 fn manual_auth_reason_maps_terminal_and_skips_non_forcing() {
     use crate::auth::error::RefreshTokenFailedReason as Reason;
     use crate::auth::recovery::manual_auth_reason;
-    use wimo ai_wimo_telemetry::events::ManualAuthReason as R;
+    use wimoai_wimo_telemetry::events::ManualAuthReason as R;
     let permanent = |reason: Reason| manual_auth_reason(&AuthError::permanent(reason));
     assert_eq!(
         permanent(Reason::RefreshTokenRejected),
@@ -4339,7 +4339,7 @@ fn relay_should_cancel_gives_up_only_on_terminal_failures() {
 #[tokio::test]
 async fn manual_auth_capture_attributes_and_recorder_debounces() {
     use crate::auth::recovery::{ManualAuthTracker, RejectedAuth};
-    use wimo ai_wimo_telemetry::events::{AuthTokenKind, ManualAuthSurface};
+    use wimoai_wimo_telemetry::events::{AuthTokenKind, ManualAuthSurface};
     let auth = wimoAuth {
         key: "dead-token".into(),
         user_id: "user-1".into(),
@@ -4410,7 +4410,7 @@ async fn manual_auth_emits_only_for_user_facing_source() {
         .await
         .unwrap_err();
     assert!(matches!(err, AuthError::ServerRejectedNoRecovery));
-    use wimo ai_wimo_telemetry::events::{
+    use wimoai_wimo_telemetry::events::{
         AuthTokenKind, ManualAuth, ManualAuthReason, ManualAuthSurface,
     };
     assert_eq!(

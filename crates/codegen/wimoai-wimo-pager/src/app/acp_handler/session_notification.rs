@@ -1,5 +1,5 @@
 use super::*;
-use wimo ai_wimo_shell::sampling::error::format_rate_limited_user_message;
+use wimoai_wimo_shell::sampling::error::format_rate_limited_user_message;
 /// Stash a live stop-family batch under `stash_pid` for the turn marker to fold.
 /// `merge_same_name` merges a same-name repeat instead of pushing it standalone.
 pub(super) fn stash_live_stop_batch(
@@ -48,10 +48,10 @@ pub(super) fn refresh_context_used(view: &mut AgentView, used: u64) {
 /// Context-bar refresh carried by a compaction lifecycle update, if any.
 /// `AutoCompactStarted` carries the count the trigger fired on, and the banner percentage derives from it.
 /// Without this refresh the bar shows the stale pre-turn number right next to the "N% full" banner.
-pub(super) fn compaction_context_refresh(update: &wimo aiSessionUpdate) -> Option<u64> {
+pub(super) fn compaction_context_refresh(update: &wimoaiSessionUpdate) -> Option<u64> {
     match update {
-        wimo aiSessionUpdate::AutoCompactStarted { tokens_used, .. } => Some(*tokens_used),
-        wimo aiSessionUpdate::AutoCompactCompleted { tokens_after, .. } => Some(*tokens_after),
+        wimoaiSessionUpdate::AutoCompactStarted { tokens_used, .. } => Some(*tokens_used),
+        wimoaiSessionUpdate::AutoCompactCompleted { tokens_after, .. } => Some(*tokens_after),
         _ => None,
     }
 }
@@ -200,16 +200,16 @@ pub(super) fn handle_session_notification_with_origin(
         return false;
     };
     match &session_notif.update {
-        wimo aiSessionUpdate::TaskBackgrounded { .. } => {
+        wimoaiSessionUpdate::TaskBackgrounded { .. } => {
             return handle_task_backgrounded(notif, app);
         }
-        wimo aiSessionUpdate::TaskCompleted { .. } => {
+        wimoaiSessionUpdate::TaskCompleted { .. } => {
             return handle_task_completed(notif, app);
         }
-        wimo aiSessionUpdate::ScheduledTaskCreated { .. } => {
+        wimoaiSessionUpdate::ScheduledTaskCreated { .. } => {
             return handle_scheduled_task_created(notif, app);
         }
-        wimo aiSessionUpdate::ScheduledTaskDeleted { .. } => {
+        wimoaiSessionUpdate::ScheduledTaskDeleted { .. } => {
             return handle_scheduled_task_deleted(notif, app);
         }
         _ => {}
@@ -253,7 +253,7 @@ pub(super) fn handle_session_notification_with_origin(
     }
     let is_workflow_update = matches!(
         &session_notif.update,
-        wimo aiSessionUpdate::WorkflowUpdated { .. }
+        wimoaiSessionUpdate::WorkflowUpdated { .. }
     );
     let is_subagent_lifecycle =
         if let Some(lifecycle) = classify_subagent_lifecycle(&session_notif.update, origin) {
@@ -281,14 +281,14 @@ pub(super) fn handle_session_notification_with_origin(
         && !meta.is_replay
         && meta.event_seq.is_some_and(|seq| {
             agent
-                .last_applied_wimo ai_event_seq
+                .last_applied_wimoai_event_seq
                 .is_some_and(|last| seq <= last)
         })
     {
         tracing::debug!(
             session_id = session_notif.session_id.0.as_ref(),
             event_seq = meta.event_seq,
-            last_applied = agent.last_applied_wimo ai_event_seq,
+            last_applied = agent.last_applied_wimoai_event_seq,
             "x.ai/session update DROPPED by dedup highwater (event_seq <= last_applied)"
         );
         return false;
@@ -299,15 +299,15 @@ pub(super) fn handle_session_notification_with_origin(
     let mut deferred_subagent_finish: Option<SessionNotification> = None;
     let root_session_id: &str = session_notif.session_id.0.as_ref();
     let changed = match session_notif.update {
-        ref update @ (wimo aiSessionUpdate::AutoCompactStarted { .. }
-        | wimo aiSessionUpdate::AutoCompactCompleted { .. }
-        | wimo aiSessionUpdate::AutoCompactFailed { .. }
-        | wimo aiSessionUpdate::AutoCompactCancelled { .. }
-        | wimo aiSessionUpdate::RetryState(_)
-        | wimo aiSessionUpdate::ImageDropped { .. }
-        | wimo aiSessionUpdate::MemoryFlushCompleted { .. }
-        | wimo aiSessionUpdate::MemoryDreamCompleted { .. }
-        | wimo aiSessionUpdate::MemorySessionSaved { .. }) => {
+        ref update @ (wimoaiSessionUpdate::AutoCompactStarted { .. }
+        | wimoaiSessionUpdate::AutoCompactCompleted { .. }
+        | wimoaiSessionUpdate::AutoCompactFailed { .. }
+        | wimoaiSessionUpdate::AutoCompactCancelled { .. }
+        | wimoaiSessionUpdate::RetryState(_)
+        | wimoaiSessionUpdate::ImageDropped { .. }
+        | wimoaiSessionUpdate::MemoryFlushCompleted { .. }
+        | wimoaiSessionUpdate::MemoryDreamCompleted { .. }
+        | wimoaiSessionUpdate::MemorySessionSaved { .. }) => {
             let changed = apply_session_event(
                 update,
                 &mut agent.session,
@@ -317,16 +317,16 @@ pub(super) fn handle_session_notification_with_origin(
             if let Some(used) = compaction_context_refresh(update) {
                 refresh_context_used(agent, used);
             }
-            if let wimo aiSessionUpdate::AutoCompactCompleted { .. } = update {
+            if let wimoaiSessionUpdate::AutoCompactCompleted { .. } = update {
                 agent.todo.update_todos(Vec::new());
             }
             changed
         }
-        wimo aiSessionUpdate::ImageCompressed {
+        wimoaiSessionUpdate::ImageCompressed {
             ref images,
             ref message,
         } => apply_image_compressed(agent, images, message),
-        wimo aiSessionUpdate::ToolCallDeltaChunk {
+        wimoaiSessionUpdate::ToolCallDeltaChunk {
             ref name,
             tool_index,
             ..
@@ -345,7 +345,7 @@ pub(super) fn handle_session_notification_with_origin(
                 changed
             }
         }
-        wimo aiSessionUpdate::TurnCompleted {
+        wimoaiSessionUpdate::TurnCompleted {
             prompt_id,
             stop_reason,
             agent_result,
@@ -468,7 +468,7 @@ pub(super) fn handle_session_notification_with_origin(
                 false
             }
         }
-        wimo aiSessionUpdate::SubagentSpawned {
+        wimoaiSessionUpdate::SubagentSpawned {
             subagent_id,
             child_session_id,
             subagent_type,
@@ -504,7 +504,7 @@ pub(super) fn handle_session_notification_with_origin(
                 .filter(|info| info.finished)
                 .map(|info| SessionNotification {
                     session_id: session_notif.session_id.clone(),
-                    update: wimo aiSessionUpdate::SubagentFinished {
+                    update: wimoaiSessionUpdate::SubagentFinished {
                         subagent_id: info.subagent_id.to_string(),
                         child_session_id: child_session_id.clone(),
                         status: info.status.as_deref().unwrap_or("cancelled").to_owned(),
@@ -699,7 +699,7 @@ pub(super) fn handle_session_notification_with_origin(
             deferred_subagent_finish = retained_terminal_finish.or(taken_deferred);
             true
         }
-        wimo aiSessionUpdate::SubagentProgress {
+        wimoaiSessionUpdate::SubagentProgress {
             child_session_id,
             duration_ms,
             turn_count,
@@ -737,7 +737,7 @@ pub(super) fn handle_session_notification_with_origin(
             sync_subagent_activity(agent, &child_session_id, activity_label);
             true
         }
-        wimo aiSessionUpdate::SubagentFinished {
+        wimoaiSessionUpdate::SubagentFinished {
             child_session_id,
             status,
             error,
@@ -885,7 +885,7 @@ pub(super) fn handle_session_notification_with_origin(
             }
             true
         }
-        wimo aiSessionUpdate::HookAnnotation { message } => {
+        wimoaiSessionUpdate::HookAnnotation { message } => {
             if app.appearance.disable_plugins {
                 return false;
             }
@@ -897,7 +897,7 @@ pub(super) fn handle_session_notification_with_origin(
                 }));
             true
         }
-        wimo aiSessionUpdate::HookExecution {
+        wimoaiSessionUpdate::HookExecution {
             event_name,
             tool_name: _tool_name,
             prompt_id: batch_prompt_id,
@@ -908,15 +908,15 @@ pub(super) fn handle_session_notification_with_origin(
                 .into_iter()
                 .map(|r| {
                     let status = match r.status {
-                        wimo ai_wimo_shell::extensions::notification::HookRunStatusDto::Success {
+                        wimoai_wimo_shell::extensions::notification::HookRunStatusDto::Success {
                             elapsed_ms,
                         } => HookRunStatus::Success {
                             elapsed: std::time::Duration::from_millis(elapsed_ms),
                         },
-                        wimo ai_wimo_shell::extensions::notification::HookRunStatusDto::Skipped => {
+                        wimoai_wimo_shell::extensions::notification::HookRunStatusDto::Skipped => {
                             HookRunStatus::Skipped
                         }
-                        wimo ai_wimo_shell::extensions::notification::HookRunStatusDto::Failed {
+                        wimoai_wimo_shell::extensions::notification::HookRunStatusDto::Failed {
                             error,
                             elapsed_ms,
                             blocked: true,
@@ -924,7 +924,7 @@ pub(super) fn handle_session_notification_with_origin(
                             detail: error,
                             elapsed: std::time::Duration::from_millis(elapsed_ms),
                         },
-                        wimo ai_wimo_shell::extensions::notification::HookRunStatusDto::Failed {
+                        wimoai_wimo_shell::extensions::notification::HookRunStatusDto::Failed {
                             error,
                             elapsed_ms,
                             blocked: false,
@@ -942,7 +942,7 @@ pub(super) fn handle_session_notification_with_origin(
                 .collect();
             let is_tool_hook = event_name == "pre_tool_use" || event_name == "post_tool_use";
             let is_stop_hook =
-                wimo ai_hooks_plugins_types::HookEvent::from_wire(&event_name).is_turn_end();
+                wimoai_hooks_plugins_types::HookEvent::from_wire(&event_name).is_turn_end();
             if is_tool_hook {
                 let phase = if event_name == "pre_tool_use" {
                     HookPhase::Pre
@@ -997,7 +997,7 @@ pub(super) fn handle_session_notification_with_origin(
             }
             true
         }
-        wimo aiSessionUpdate::HooksChanged {
+        wimoaiSessionUpdate::HooksChanged {
             hooks,
             project_trusted,
             load_errors,
@@ -1006,7 +1006,7 @@ pub(super) fn handle_session_notification_with_origin(
                 use crate::views::extensions_modal::TabDataState;
                 modal.seed_hook_groups_once(&hooks);
                 modal.hooks_data =
-                    TabDataState::Loaded(wimo ai_hooks_plugins_types::HooksListResponse {
+                    TabDataState::Loaded(wimoai_hooks_plugins_types::HooksListResponse {
                         hooks,
                         project_trusted,
                         load_errors,
@@ -1016,12 +1016,12 @@ pub(super) fn handle_session_notification_with_origin(
                 false
             }
         }
-        wimo aiSessionUpdate::PluginsChanged { plugins } => {
+        wimoaiSessionUpdate::PluginsChanged { plugins } => {
             if let Some(ref mut modal) = agent.extensions_modal {
                 use crate::views::extensions_modal::TabDataState;
                 modal.seed_plugin_groups_once(&plugins);
                 modal.plugins_data =
-                    TabDataState::Loaded(wimo ai_hooks_plugins_types::PluginsListResponse { plugins });
+                    TabDataState::Loaded(wimoai_hooks_plugins_types::PluginsListResponse { plugins });
                 if !matches!(modal.skills_data, TabDataState::Loading) {
                     modal.skills_data = TabDataState::Loading;
                     plugins_changed_needs_skills_refetch = true;
@@ -1031,15 +1031,15 @@ pub(super) fn handle_session_notification_with_origin(
                 false
             }
         }
-        wimo aiSessionUpdate::SessionSummaryGenerated { session_summary } => {
+        wimoaiSessionUpdate::SessionSummaryGenerated { session_summary } => {
             let title_is_manual = session_notif.meta.as_ref().and_then(|v| {
-                v.get(wimo ai_wimo_shell::extensions::notification::TITLE_IS_MANUAL_META_KEY)
+                v.get(wimoai_wimo_shell::extensions::notification::TITLE_IS_MANUAL_META_KEY)
                     .and_then(|v| v.as_bool())
             });
             match title_is_manual {
                 Some(true) => {
                     if let Some(clean) =
-                        wimo ai_wimo_shell::session::persistence::sanitize_and_cap_title(
+                        wimoai_wimo_shell::session::persistence::sanitize_and_cap_title(
                             &session_summary,
                         )
                     {
@@ -1057,7 +1057,7 @@ pub(super) fn handle_session_notification_with_origin(
                     };
                     let decoded = decode_html_entities(&session_summary);
                     if let Some(clean) =
-                        wimo ai_wimo_shell::session::persistence::sanitize_and_cap_title(&decoded)
+                        wimoai_wimo_shell::session::persistence::sanitize_and_cap_title(&decoded)
                     {
                         agent.generated_session_title = Some(clean);
                     } else if other == Some(false)
@@ -1069,14 +1069,14 @@ pub(super) fn handle_session_notification_with_origin(
             }
             true
         }
-        wimo aiSessionUpdate::LastTurnSummary {
+        wimoaiSessionUpdate::LastTurnSummary {
             summary,
             prompt_id: _,
         } => {
             agent.set_last_turn_summary(Some(summary));
             true
         }
-        wimo aiSessionUpdate::SessionRecap { summary, auto } => {
+        wimoaiSessionUpdate::SessionRecap { summary, auto } => {
             use crate::scrollback::block::RenderBlock;
             use crate::scrollback::blocks::SessionEvent;
             if should_drop_late_auto_recap(auto, meta.is_replay, agent) {
@@ -1095,7 +1095,7 @@ pub(super) fn handle_session_notification_with_origin(
                 true
             }
         }
-        wimo aiSessionUpdate::SessionRecapUnavailable => {
+        wimoaiSessionUpdate::SessionRecapUnavailable => {
             if meta.is_replay {
                 false
             } else if let Some(pending_id) = agent.pending_recap_entry.take() {
@@ -1108,7 +1108,7 @@ pub(super) fn handle_session_notification_with_origin(
                 false
             }
         }
-        wimo aiSessionUpdate::ModelAutoSwitched {
+        wimoaiSessionUpdate::ModelAutoSwitched {
             previous_model_id,
             new_model_id,
             reason,
@@ -1151,7 +1151,7 @@ pub(super) fn handle_session_notification_with_origin(
             ));
             true
         }
-        wimo aiSessionUpdate::ModelChanged {
+        wimoaiSessionUpdate::ModelChanged {
             model_id,
             reasoning_effort,
         } => {
@@ -1163,10 +1163,10 @@ pub(super) fn handle_session_notification_with_origin(
                 );
                 return false;
             }
-            use wimo ai_wimo_shell::sampling::types::ReasoningEffort;
+            use wimoai_wimo_shell::sampling::types::ReasoningEffort;
             let new_model_id = acp::ModelId::new(model_id.clone());
             if !agent.session.models.available.contains_key(&new_model_id) {
-                if wimo ai_wimo_shell::agent::chat_modes::process_chat_mode_enabled() {
+                if wimoai_wimo_shell::agent::chat_modes::process_chat_mode_enabled() {
                     agent.session.models.available.insert(
                         new_model_id.clone(),
                         acp::ModelInfo::new(new_model_id.clone(), model_id.clone()),
@@ -1203,7 +1203,7 @@ pub(super) fn handle_session_notification_with_origin(
             }
             actually_changed
         }
-        wimo aiSessionUpdate::MemoryFiles { files } => {
+        wimoaiSessionUpdate::MemoryFiles { files } => {
             let entries = crate::views::memory_modal::build_entries(files);
             let modal_state = crate::views::memory_modal::MemoryModalState::new(entries);
             agent.active_modal = Some(crate::views::modal::ActiveModal::MemoryBrowser {
@@ -1211,8 +1211,8 @@ pub(super) fn handle_session_notification_with_origin(
             });
             true
         }
-        update @ wimo aiSessionUpdate::WorkflowUpdated { .. } => ingest_workflow_update(agent, update),
-        wimo aiSessionUpdate::GoalUpdated {
+        update @ wimoaiSessionUpdate::WorkflowUpdated { .. } => ingest_workflow_update(agent, update),
+        wimoaiSessionUpdate::GoalUpdated {
             goal_id,
             objective,
             status,
@@ -1318,10 +1318,10 @@ pub(super) fn handle_session_notification_with_origin(
                 true
             }
         }
-        wimo aiSessionUpdate::InteractionResolved { tool_call_id } => {
+        wimoaiSessionUpdate::InteractionResolved { tool_call_id } => {
             agent.dismiss_resolved_interaction(&tool_call_id)
         }
-        wimo aiSessionUpdate::SessionStatus(status) => {
+        wimoaiSessionUpdate::SessionStatus(status) => {
             agent.status_context = Some(*status);
             status_snapshot_applied = true;
             false
@@ -1362,9 +1362,9 @@ pub(super) fn handle_session_notification_with_origin(
             && !meta.is_replay
             && !is_workflow_update
         {
-            agent.last_applied_wimo ai_event_seq = Some(
+            agent.last_applied_wimoai_event_seq = Some(
                 agent
-                    .last_applied_wimo ai_event_seq
+                    .last_applied_wimoai_event_seq
                     .map_or(seq, |last| last.max(seq)),
             );
         }
@@ -1403,36 +1403,36 @@ pub(super) fn handle_session_notification_with_origin(
 /// Events like compaction, retry, and memory flush are emitted by the child's `acp_session` with the *child's* `session_id`.
 /// This routes them to the correct child view and updates `SubagentInfo` where appropriate.
 pub(super) fn handle_child_session_notification(
-    update: wimo aiSessionUpdate,
+    update: wimoaiSessionUpdate,
     child_sid: &str,
     agent: &mut AgentView,
     is_api_key_auth: bool,
 ) -> bool {
     match update {
-        wimo aiSessionUpdate::AutoCompactStarted { .. }
-        | wimo aiSessionUpdate::AutoCompactCompleted { .. }
-        | wimo aiSessionUpdate::AutoCompactFailed { .. }
-        | wimo aiSessionUpdate::AutoCompactCancelled { .. }
-        | wimo aiSessionUpdate::RetryState(_)
-        | wimo aiSessionUpdate::MemoryFlushCompleted { .. }
-        | wimo aiSessionUpdate::MemoryDreamCompleted { .. }
-        | wimo aiSessionUpdate::MemorySessionSaved { .. } => {
+        wimoaiSessionUpdate::AutoCompactStarted { .. }
+        | wimoaiSessionUpdate::AutoCompactCompleted { .. }
+        | wimoaiSessionUpdate::AutoCompactFailed { .. }
+        | wimoaiSessionUpdate::AutoCompactCancelled { .. }
+        | wimoaiSessionUpdate::RetryState(_)
+        | wimoaiSessionUpdate::MemoryFlushCompleted { .. }
+        | wimoaiSessionUpdate::MemoryDreamCompleted { .. }
+        | wimoaiSessionUpdate::MemorySessionSaved { .. } => {
             let mut changed = false;
             if let Some(child_view) = agent.child_view_for_live_update_mut(child_sid) {
                 changed = apply_child_view_session_event(child_view, &update, is_api_key_auth);
             }
-            if let wimo aiSessionUpdate::AutoCompactCompleted { tokens_after, .. } = update
+            if let wimoaiSessionUpdate::AutoCompactCompleted { tokens_after, .. } = update
                 && let Some(info) = agent.subagent_sessions.get_mut(child_sid)
             {
                 info.tokens_used = Some(tokens_after);
                 if let Some(cw) = info.context_window_tokens.filter(|&cw| cw > 0) {
                     info.context_usage_pct =
-                        Some(wimo ai_token_estimation::usage_percentage_u8(tokens_after, cw));
+                        Some(wimoai_token_estimation::usage_percentage_u8(tokens_after, cw));
                 }
             }
             changed
         }
-        wimo aiSessionUpdate::ToolCallDeltaChunk {
+        wimoaiSessionUpdate::ToolCallDeltaChunk {
             ref name,
             tool_index,
             ..
@@ -1469,7 +1469,7 @@ pub(super) fn handle_child_session_notification(
 /// A rebuilt transcript therefore keeps the same compaction/retry markers the live one had.
 pub(crate) fn apply_child_view_session_event(
     child_view: &mut AgentView,
-    update: &wimo aiSessionUpdate,
+    update: &wimoaiSessionUpdate,
     is_api_key_auth: bool,
 ) -> bool {
     let changed = apply_session_event(
@@ -1490,20 +1490,20 @@ pub(crate) fn apply_child_view_session_event(
 /// The Retrying arm clears the `in_flight_prompt` rewind stash, which a fixture setting fields directly would miss.
 #[cfg(test)]
 pub(crate) fn apply_session_event_for_test(
-    update: &wimo aiSessionUpdate,
+    update: &wimoaiSessionUpdate,
     session: &mut AgentSession,
     scrollback: &mut crate::scrollback::state::ScrollbackState,
 ) -> bool {
     apply_session_event(update, session, scrollback, false)
 }
 pub(super) fn apply_session_event(
-    update: &wimo aiSessionUpdate,
+    update: &wimoaiSessionUpdate,
     session: &mut AgentSession,
     scrollback: &mut crate::scrollback::state::ScrollbackState,
     is_api_key_auth: bool,
 ) -> bool {
     match update {
-        wimo aiSessionUpdate::AutoCompactStarted { percentage, .. } => {
+        wimoaiSessionUpdate::AutoCompactStarted { percentage, .. } => {
             tracing::info!("Auto-compact started: {percentage}% context used");
             if session.compact_held_prompt.is_none() {
                 session.compact_held_prompt = session.in_flight_prompt.clone();
@@ -1517,7 +1517,7 @@ pub(super) fn apply_session_event(
             ));
             true
         }
-        wimo aiSessionUpdate::AutoCompactCompleted {
+        wimoaiSessionUpdate::AutoCompactCompleted {
             tokens_before,
             tokens_after,
             elapsed_ms,
@@ -1539,7 +1539,7 @@ pub(super) fn apply_session_event(
             }
             true
         }
-        wimo aiSessionUpdate::AutoCompactFailed { error } => {
+        wimoaiSessionUpdate::AutoCompactFailed { error } => {
             tracing::error!(error = %error, "Auto-compaction failed");
             session.set_compaction_activity(None);
             scrollback.push_block(RenderBlock::session_event(SessionEvent::CompactionFailed {
@@ -1547,7 +1547,7 @@ pub(super) fn apply_session_event(
             }));
             true
         }
-        wimo aiSessionUpdate::AutoCompactCancelled { .. } => {
+        wimoaiSessionUpdate::AutoCompactCancelled { .. } => {
             tracing::info!("Auto-compact cancelled");
             session.set_compaction_activity(None);
             session.compact_held_prompt = None;
@@ -1556,12 +1556,12 @@ pub(super) fn apply_session_event(
             ));
             true
         }
-        wimo aiSessionUpdate::RetryState(retry) => {
+        wimoaiSessionUpdate::RetryState(retry) => {
             tracing::debug!("Retry state: {retry:?}");
             apply_retry_state(retry, session, scrollback, is_api_key_auth);
             true
         }
-        wimo aiSessionUpdate::ImageDropped { notes } => {
+        wimoaiSessionUpdate::ImageDropped { notes } => {
             let message = notes.join("\n");
             tracing::info!("Image dropped: {message}");
             scrollback.push_block(RenderBlock::system(message));
@@ -1595,7 +1595,7 @@ pub(super) fn scrollback_has_recent_compaction_failed(
 /// Only the re-encode *fallback* (the oversized original was kept) shows, as a persistent scrollback warning that is rebuilt on session replay.
 pub(super) fn apply_image_compressed(
     agent: &mut AgentView,
-    images: &[wimo ai_wimo_shell::extensions::notification::ImageCompressedEntry],
+    images: &[wimoai_wimo_shell::extensions::notification::ImageCompressedEntry],
     message: &str,
 ) -> bool {
     if images.is_empty() {
@@ -1609,14 +1609,14 @@ pub(super) fn apply_image_compressed(
     false
 }
 pub(super) fn apply_retry_state(
-    retry: &wimo ai_wimo_shell::extensions::notification::RetryState,
+    retry: &wimoai_wimo_shell::extensions::notification::RetryState,
     session: &mut AgentSession,
     scrollback: &mut crate::scrollback::state::ScrollbackState,
     is_api_key_auth: bool,
 ) {
     let mut is_credit_limit = false;
     let mut is_reauth = false;
-    use wimo ai_wimo_shell::extensions::notification::RetryState;
+    use wimoai_wimo_shell::extensions::notification::RetryState;
     match retry {
         RetryState::Retrying {
             attempt,
@@ -1639,8 +1639,8 @@ pub(super) fn apply_retry_state(
             session.set_retry_activity(None);
             session.rate_limited = *rate_limited;
             if *rate_limited {
-                wimo ai_wimo_telemetry::session_ctx::log_event(
-                    wimo ai_wimo_telemetry::events::RateLimitHit {
+                wimoai_wimo_telemetry::session_ctx::log_event(
+                    wimoai_wimo_telemetry::events::RateLimitHit {
                         model_id: session
                             .models
                             .current
@@ -1653,7 +1653,7 @@ pub(super) fn apply_retry_state(
             }
             is_credit_limit = super::super::dispatch::is_credit_limit_error(None, reason);
             let is_free_usage = *rate_limited
-                && wimo ai_wimo_shell::sampling::error::is_free_usage_exhausted_error(reason);
+                && wimoai_wimo_shell::sampling::error::is_free_usage_exhausted_error(reason);
             if is_credit_limit {
                 session.credit_limit_blocked = true;
             } else if is_free_usage {
@@ -1716,7 +1716,7 @@ pub(super) fn apply_retry_state(
         }
     }
     if is_credit_limit {
-        wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::CreditLimitHit {
+        wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::CreditLimitHit {
             model_id: session
                 .models
                 .current
@@ -1740,7 +1740,7 @@ pub(super) fn apply_retry_state(
 ///
 /// Returns `true` when a `CurrentModeUpdate` was processed so the caller can refresh open settings modals after the per-agent borrow releases.
 pub(super) fn detect_plan_mode_change(update: &acp::SessionUpdate, agent: &mut AgentView) -> bool {
-    use wimo ai_wimo_tools::types::SessionMode;
+    use wimoai_wimo_tools::types::SessionMode;
     let acp::SessionUpdate::CurrentModeUpdate(cmu) = update else {
         return false;
     };

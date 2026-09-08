@@ -26,7 +26,7 @@ async fn seed_skills(actor: &SessionActor, names: &[&str]) {
     let skills = names
         .iter()
         .map(
-            |name| wimo ai_wimo_tools::implementations::skills::types::SkillInfo {
+            |name| wimoai_wimo_tools::implementations::skills::types::SkillInfo {
                 name: name.to_string(),
                 description: format!("Does {name} things."),
                 path: format!("/skills/{name}/SKILL.md"),
@@ -45,7 +45,7 @@ async fn usage_categories_include_skills_and_mcp_with_counts() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             seed_skills(&actor, &["alpha", "beta"]).await;
@@ -71,19 +71,19 @@ async fn usage_categories_include_agents_md_with_count() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             let def = actor.agent.borrow().definition().clone();
             let bridge = actor.tool_bridge_handle();
-            let ctx = wimo ai_wimo_agent::PromptContext {
+            let ctx = wimoai_wimo_agent::PromptContext {
                 agents_md_files: vec![
-                    wimo ai_wimo_agent::prompt::agents_md::AgentConfigFile {
+                    wimoai_wimo_agent::prompt::agents_md::AgentConfigFile {
                         file_name: "AGENTS.md".into(),
                         file_path: "/repo/AGENTS.md".into(),
                         content: "# Root\nUse rustfmt.".into(),
                     },
-                    wimo ai_wimo_agent::prompt::agents_md::AgentConfigFile {
+                    wimoai_wimo_agent::prompt::agents_md::AgentConfigFile {
                         file_name: "AGENTS.md".into(),
                         file_path: "/repo/crates/AGENTS.md".into(),
                         content: "# Crate\nPrefer unit tests.".into(),
@@ -91,13 +91,13 @@ async fn usage_categories_include_agents_md_with_count() {
                 ],
                 ..Default::default()
             };
-            *actor.agent.borrow_mut() = wimo ai_wimo_agent::Agent::new(
+            *actor.agent.borrow_mut() = wimoai_wimo_agent::Agent::new(
                 def,
                 ctx,
                 String::new(),
                 bridge,
-                wimo ai_wimo_agent::ReminderPolicy::default(),
-                wimo ai_wimo_agent::CompactionPolicy::default(),
+                wimoai_wimo_agent::ReminderPolicy::default(),
+                wimoai_wimo_agent::CompactionPolicy::default(),
                 vec![],
                 false,
             );
@@ -117,7 +117,7 @@ async fn usage_categories_include_workflows_when_enabled() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             actor.background_workflows_enabled = true;
@@ -145,7 +145,7 @@ async fn baseline_reminder_lists_workflows_under_skills() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             actor.background_workflows_enabled = true;
@@ -161,7 +161,7 @@ async fn baseline_reminder_lists_workflows_under_skills() {
                         item,
                         ConversationItem::User(u)
                             if u.synthetic_reason
-                                == Some(wimo ai_wimo_sampling_types::SyntheticReason::SystemReminder)
+                                == Some(wimoai_wimo_sampling_types::SyntheticReason::SystemReminder)
                     )
                     .then(|| item.text_content())
                 })
@@ -185,7 +185,7 @@ async fn baseline_reminder_lists_workflows_when_there_are_no_skills() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             actor.background_workflows_enabled = true;
@@ -200,7 +200,7 @@ async fn baseline_reminder_lists_workflows_when_there_are_no_skills() {
                         item,
                         ConversationItem::User(u)
                             if u.synthetic_reason
-                                == Some(wimo ai_wimo_sampling_types::SyntheticReason::SystemReminder)
+                                == Some(wimoai_wimo_sampling_types::SyntheticReason::SystemReminder)
                     )
                     .then(|| item.text_content())
                 })
@@ -215,7 +215,7 @@ async fn subagent_session_does_not_list_workflows() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             actor.background_workflows_enabled = true;
@@ -232,7 +232,7 @@ async fn subagent_session_does_not_list_workflows() {
                         item,
                         ConversationItem::User(u)
                             if u.synthetic_reason
-                                == Some(wimo ai_wimo_sampling_types::SyntheticReason::SystemReminder)
+                                == Some(wimoai_wimo_sampling_types::SyntheticReason::SystemReminder)
                     )
                     .then(|| item.text_content())
                 })
@@ -255,7 +255,7 @@ async fn mcp_snapshot_matches_full_mode_injected_reminder() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             actor.mcp_reminder_mode = McpReminderMode::Full;

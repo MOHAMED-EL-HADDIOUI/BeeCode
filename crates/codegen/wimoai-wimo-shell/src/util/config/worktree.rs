@@ -1,9 +1,9 @@
 use super::RemoteSettings;
 use serde::{Deserialize, Serialize};
 use toml::Value as TomlValue;
-use wimo ai_fast_worktree::CreationMode;
+use wimoai_fast_worktree::CreationMode;
 
-/// Mirrors the internal `CreationMode` enum from wimo ai-fast-worktree but uses config-friendly naming (lowercase strings in TOML).
+/// Mirrors the internal `CreationMode` enum from wimoai-fast-worktree but uses config-friendly naming (lowercase strings in TOML).
 #[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum WorktreeType {
@@ -208,15 +208,15 @@ pub(crate) fn resolve_restore_code(
 
 /// Resolve `[worktree.auto_gc]` from parsed settings: env > local > remote > defaults (clamped).
 /// Platform age policy is applied later in `maybe_auto_gc`.
-/// (`wimo ai-fast-worktree`'s `resolve_worktree_auto_gc_from_layers` owns and tests precedence and clamping; this only maps settings to layers.)
+/// (`wimoai-fast-worktree`'s `resolve_worktree_auto_gc_from_layers` owns and tests precedence and clamping; this only maps settings to layers.)
 pub(crate) fn resolve_worktree_auto_gc_from_settings(
     local: Option<&super::WorktreeAutoGcSettings>,
     remote: Option<&super::WorktreeAutoGcSettings>,
-) -> wimo ai_fast_worktree::ResolvedWorktreeAutoGc {
-    use wimo ai_wimo_workspace::worktree::worktree_auto_gc_layer_from_settings;
+) -> wimoai_fast_worktree::ResolvedWorktreeAutoGc {
+    use wimoai_wimo_workspace::worktree::worktree_auto_gc_layer_from_settings;
     let local_layer = local.map(worktree_auto_gc_layer_from_settings);
     let remote_layer = remote.map(worktree_auto_gc_layer_from_settings);
-    wimo ai_fast_worktree::resolve_worktree_auto_gc_from_layers(
+    wimoai_fast_worktree::resolve_worktree_auto_gc_from_layers(
         local_layer.as_ref(),
         remote_layer.as_ref(),
     )

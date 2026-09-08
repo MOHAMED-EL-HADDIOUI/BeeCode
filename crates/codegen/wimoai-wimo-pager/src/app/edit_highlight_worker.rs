@@ -26,7 +26,7 @@ use crate::scrollback::blocks::tool::{
     compute_file_scoped_styles, file_text_within_hl_caps,
 };
 use crate::scrollback::entry::EntryId;
-use wimo ai_wimo_pager_diff::DiffHunk;
+use wimoai_wimo_pager_diff::DiffHunk;
 
 /// Tracing target. Filter with `RUST_LOG=edit_hl=debug`.
 pub const EDIT_HL_TRACING_TARGET: &str = "edit_hl";
@@ -369,7 +369,7 @@ mod tests {
     use super::*;
     use similar::ChangeTag;
     use std::sync::mpsc;
-    use wimo ai_wimo_pager_diff::DiffLine;
+    use wimoai_wimo_pager_diff::DiffLine;
 
     fn sample_hunks() -> Vec<DiffHunk> {
         vec![vec![DiffLine {

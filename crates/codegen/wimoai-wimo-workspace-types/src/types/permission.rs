@@ -4,7 +4,7 @@
 //! These feed the bidirectional tool-stream flow that consumes these types.
 //!
 //! TODO(workspace): align with the canonical permission types in
-//! `wimo ai-wimo-shell` once the wire surface is firm.
+//! `wimoai-wimo-shell` once the wire surface is firm.
 
 use serde::{Deserialize, Serialize};
 

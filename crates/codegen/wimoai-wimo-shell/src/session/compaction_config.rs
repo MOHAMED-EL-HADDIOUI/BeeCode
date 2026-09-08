@@ -171,7 +171,7 @@ pub(crate) struct CompactionConfig {
     /// `Cell` because `SessionActor` is `!Send`.
     pub previous_model: Cell<Option<PreviousModelInfo>>,
     /// The resolved mode; `Segments` carries its detail level inline.
-    pub compaction_mode: wimo ai_chat_state::CompactionMode,
+    pub compaction_mode: wimoai_chat_state::CompactionMode,
     /// When `true`, feed the summarizer the verbatim conversation instead of the lossy rewrite (the retry loop may still fall back).
     pub verbatim_input: bool,
     pub tool_choice: crate::util::config::CompactionToolChoice,

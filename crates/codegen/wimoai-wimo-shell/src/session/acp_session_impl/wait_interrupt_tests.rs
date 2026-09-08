@@ -1,7 +1,7 @@
 use super::*;
 use crate::tools::tool_context::BlockingWaitState;
-use wimo ai_wimo_tools::types::output::ToolOutput;
-use wimo ai_tool_types::TaskOutputOutput;
+use wimoai_wimo_tools::types::output::ToolOutput;
+use wimoai_tool_types::TaskOutputOutput;
 
 fn ids(xs: &[&str]) -> Vec<String> {
     xs.iter().map(|s| (*s).to_string()).collect()

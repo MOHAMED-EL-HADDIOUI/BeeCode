@@ -1,4 +1,4 @@
-//! # wimo ai-wimo-hooks
+//! # wimoai-wimo-hooks
 //!
 //! Runtime hook system for wimo: file-based discovery, command execution, and policy enforcement.
 //!
@@ -20,8 +20,8 @@
 //!
 //! ```rust,no_run
 //! use std::path::Path;
-//! use wimo ai_wimo_hooks::discovery::load_hooks;
-//! use wimo ai_wimo_hooks::event::HookEventName;
+//! use wimoai_wimo_hooks::discovery::load_hooks;
+//! use wimoai_wimo_hooks::event::HookEventName;
 //!
 //! let (registry, errors) = load_hooks(
 //!     Some(Path::new("/home/user/.wimo/hooks")),

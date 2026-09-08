@@ -1,6 +1,6 @@
 //! Round-trip test against the live backend: pushes one session, then pulls it back.
 //!
-//! Run with: `cargo test -p wimo ai-wimo-shell -- pull_smoke --ignored --nocapture`
+//! Run with: `cargo test -p wimoai-wimo-shell -- pull_smoke --ignored --nocapture`
 
 #[cfg(test)]
 mod tests {

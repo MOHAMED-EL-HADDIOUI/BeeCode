@@ -384,8 +384,8 @@ pub enum ToolType {
     Function,
 }
 
-// The canonical definitions live in wimo ai-wimo-tools; the re-export keeps existing `crate::sampling::types::ToolDefinition` imports working
-pub use wimo ai_wimo_tools::types::definition::{FunctionTool, ToolDefinition};
+// The canonical definitions live in wimoai-wimo-tools; the re-export keeps existing `crate::sampling::types::ToolDefinition` imports working
+pub use wimoai_wimo_tools::types::definition::{FunctionTool, ToolDefinition};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]

@@ -108,9 +108,9 @@ impl ConversationsClient {
         }
     }
 
-    async fn require_wimo ai_auth(&self) -> Result<wimoAuth, ConvError> {
+    async fn require_wimoai_auth(&self) -> Result<wimoAuth, ConvError> {
         let auth = self.auth.auth().await.map_err(|_| ConvError::NoOauth)?;
-        if !auth.is_wimo ai_auth() {
+        if !auth.is_wimoai_auth() {
             return Err(ConvError::NoOauth);
         }
         Ok(auth)
@@ -124,11 +124,11 @@ impl ConversationsClient {
         let mut builder = builder
             .header("Authorization", format!("Bearer {}", auth.key))
             .header(
-                "X-wimo ai-Token-Auth",
+                "X-wimoai-Token-Auth",
                 self.auth.wimo_com_config().token_header.clone(),
             )
             .header("x-userid", &auth.user_id)
-            .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+            .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
             .header(
                 "x-wimo-client-identifier",
                 crate::http::process_client_identifier(),
@@ -141,14 +141,14 @@ impl ConversationsClient {
         if let Some(email) = &auth.email {
             builder = builder.header("x-email", email);
         }
-        wimo ai_file_utils::trace_context::inject_trace_context_into_request(builder)
+        wimoai_file_utils::trace_context::inject_trace_context_into_request(builder)
     }
 
     pub async fn list_conversations(
         &self,
         q: &ConvQuery,
     ) -> Result<ListConversationsPage, ConvError> {
-        let auth = self.require_wimo ai_auth().await?;
+        let auth = self.require_wimoai_auth().await?;
 
         let url = format!("{}/rest/app-chat/conversations", self.base_url);
         let mut query: Vec<(&str, String)> = vec![("pageSize", q.page_size.to_string())];
@@ -200,7 +200,7 @@ impl ConversationsClient {
         conversation_id: &str,
         body: &UpdateConversationBody,
     ) -> Result<(), ConvError> {
-        let auth = self.require_wimo ai_auth().await?;
+        let auth = self.require_wimoai_auth().await?;
         let url = format!(
             "{}/rest/app-chat/conversations/{}",
             self.base_url,
@@ -225,7 +225,7 @@ impl ConversationsClient {
         &self,
         conversation_id: &str,
     ) -> Result<(), ConvError> {
-        let auth = self.require_wimo ai_auth().await?;
+        let auth = self.require_wimoai_auth().await?;
         let url = format!(
             "{}/rest/app-chat/conversations/soft/{}",
             self.base_url,

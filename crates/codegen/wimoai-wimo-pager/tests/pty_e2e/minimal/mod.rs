@@ -2,7 +2,7 @@
 //!
 //! Grouped under one `mod minimal;` so the parent `pty_e2e` module isn't interleaved with a dozen `minimal_*` entries.
 //! A full-pager contributor can skip this whole subtree.
-//! These exercise the sibling `wimo ai-wimo-pager-minimal` crate end-to-end through the built binary (which installs the minimal hook).
+//! These exercise the sibling `wimoai-wimo-pager-minimal` crate end-to-end through the built binary (which installs the minimal hook).
 //! They therefore live with the rest of the pty suite rather than in a separate crate.
 //! Shared harness helpers are reached via `crate::common`, the root of the `pty_e2e` test crate.
 

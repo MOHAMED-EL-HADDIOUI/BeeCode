@@ -1,5 +1,5 @@
 use super::*;
-use wimo ai_wimo_shell::util::config::{ConsentAnswer, ConsentGate};
+use wimoai_wimo_shell::util::config::{ConsentAnswer, ConsentGate};
 
 const ACCOUNT: &str = "user@example.com";
 const NOTICE_ID: &str = "tos-2026-08";

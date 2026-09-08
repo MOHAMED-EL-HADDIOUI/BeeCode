@@ -1,9 +1,9 @@
-//! Unified PTY harness for wimo ai-wimo-pager.
+//! Unified PTY harness for wimoai-wimo-pager.
 //!
 //! The same layered API serves three consumers:
 //!
 //! 1. **Regression scenarios** (e.g. `scenarios::plan_approval_resume`) assert screen contents and multi-process resume behavior.
-//!    They run via `tests/` in this crate and via `pty-scenario` YAML under `wimo ai-wimo-pager/tests/scenarios/`.
+//!    They run via `tests/` in this crate and via `pty-scenario` YAML under `wimoai-wimo-pager/tests/scenarios/`.
 //! 2. **Benchmarks** (`benches/pty_bench.rs`) run timing scenarios, collect per-frame timings, emit JSON, and compare against baselines.
 //! 3. **Ad-hoc scenario runs** spin up the harness to reproduce issues locally.
 //!
@@ -120,13 +120,13 @@ impl PtyHarness {
         Ok(Self::from_pty(pty, rows, cols))
     }
 
-    /// Spawn from a canonical [`wimo ai_wimo_test_support::TestSandbox`] baseline plus Set-only convenience overrides.
+    /// Spawn from a canonical [`wimoai_wimo_test_support::TestSandbox`] baseline plus Set-only convenience overrides.
     pub fn new_in_sandbox(
         binary: &Path,
         rows: u16,
         cols: u16,
         args: &[&str],
-        sandbox: &wimo ai_wimo_test_support::TestSandbox,
+        sandbox: &wimoai_wimo_test_support::TestSandbox,
         env: &[(&str, &str)],
         cwd: Option<&Path>,
     ) -> Result<Self> {
@@ -143,7 +143,7 @@ impl PtyHarness {
         rows: u16,
         cols: u16,
         args: &[&str],
-        sandbox: &wimo ai_wimo_test_support::TestSandbox,
+        sandbox: &wimoai_wimo_test_support::TestSandbox,
         operations: &[EnvOp<'_>],
         cwd: Option<&Path>,
     ) -> Result<Self> {
@@ -185,7 +185,7 @@ impl PtyHarness {
     ///
     /// ```no_run
     /// # use std::time::Duration;
-    /// # use wimo ai_wimo_pager_pty_harness::{PtyHarness, ContentController, pager_binary};
+    /// # use wimoai_wimo_pager_pty_harness::{PtyHarness, ContentController, pager_binary};
     /// # async fn example() -> anyhow::Result<()> {
     /// let content = ContentController::start().await?;
     /// content.set_response("# Hello\n\nAgent said hi.");

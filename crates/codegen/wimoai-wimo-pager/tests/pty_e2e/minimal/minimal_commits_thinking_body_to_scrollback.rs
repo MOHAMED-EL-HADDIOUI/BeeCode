@@ -1,7 +1,7 @@
 // Per-test-case module for the `pty_e2e` integration test crate.
 #[allow(unused_imports)]
 use crate::common::*;
-use wimo ai_wimo_pager_pty_harness::{InferenceEndpoint, InferenceRequestMatcher};
+use wimoai_wimo_pager_pty_harness::{InferenceEndpoint, InferenceRequestMatcher};
 
 /// Reasoning text streamed by the mock. Must never appear in the answer text so screen assertions can tell the two apart.
 const REASONING_SENTINEL: &str = "REASONINGSENTINEL";

@@ -1,19 +1,19 @@
-//! `AgentRebuildSpec` is the canonical recipe for constructing an [`wimo ai_wimo_agent::Agent`] for a given session.
+//! `AgentRebuildSpec` is the canonical recipe for constructing an [`wimoai_wimo_agent::Agent`] for a given session.
 //!
-//! INVARIANT: This is the **only** place in the shell crate that calls [`wimo ai_wimo_agent::AgentBuilder::new`].
+//! INVARIANT: This is the **only** place in the shell crate that calls [`wimoai_wimo_agent::AgentBuilder::new`].
 //! Initial session spawn ([`crate::session::acp_session::spawn_session_actor`]) goes through [`AgentRebuildSpec::build_agent`].
 //! So does the zero-turn harness rebuild ([`crate::session::acp_session::SessionActor::handle_rebuild_agent_for_definition`]).
 //!
 //! ## Why this exists
 //!
-//! [`wimo ai_wimo_agent::Agent`] owns an [`wimo ai_wimo_tools::bridge::ToolBridge`] that carries session-scoped channels.
+//! [`wimoai_wimo_agent::Agent`] owns an [`wimoai_wimo_tools::bridge::ToolBridge`] that carries session-scoped channels.
 //! Those are the notification handle, terminal/fs backends, subagent senders, scheduler set, plugin registry, and attribution callback.
 //! The Agent is therefore session-bound: it cannot be shared across sessions and cannot be re-rendered from outside its session context.
 //! A rebuild happens, for example, when the user picks a model with a different `agent_type` before sending any user message.
 //! To rebuild, we must retain every input that the original `AgentBuilder` chain consumed.
 //! `AgentRebuildSpec` is exactly that retained bag of inputs.
 //!
-//! ## WHEN ADDING A NEW [`wimo ai_wimo_agent::AgentBuilder`]`::with_*` KNOB
+//! ## WHEN ADDING A NEW [`wimoai_wimo_agent::AgentBuilder`]`::with_*` KNOB
 //!
 //! 1. Add the corresponding field to [`AgentRebuildSpec`].
 //! 2. Pass it through in [`AgentRebuildSpec::build_agent`].
@@ -32,25 +32,25 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::mpsc::UnboundedSender;
-use wimo ai_wimo_agent::config::AgentDefinition;
-use wimo ai_wimo_agent::error::AgentBuildError;
-use wimo ai_wimo_agent::prompt::context::PromptAudience;
-use wimo ai_wimo_agent::prompt::skills::SkillsConfig;
-use wimo ai_wimo_agent::{Agent, AgentBuilder, CompactionPolicy, ReminderPolicy};
-use wimo ai_wimo_tools::computer::types::{AsyncFileSystem, TerminalBackend};
-use wimo ai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig;
-use wimo ai_wimo_tools::implementations::wimo::ask_user_question::types::UserQuestionRequest;
-use wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
-use wimo ai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer;
-use wimo ai_wimo_tools::implementations::wimo::task::types::{SubagentEvent, TaskModelValidator};
-use wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
-use wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig;
-use wimo ai_wimo_tools::implementations::lsp::LspBackend;
-use wimo ai_wimo_tools::implementations::web_search::WebSearchConfig;
-use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-use wimo ai_wimo_tools::types::SharedApiKeyProvider;
-use wimo ai_wimo_tools::types::compat::CompatConfig;
-use wimo ai_wimo_tools::types::memory_backend::MemoryBackend;
+use wimoai_wimo_agent::config::AgentDefinition;
+use wimoai_wimo_agent::error::AgentBuildError;
+use wimoai_wimo_agent::prompt::context::PromptAudience;
+use wimoai_wimo_agent::prompt::skills::SkillsConfig;
+use wimoai_wimo_agent::{Agent, AgentBuilder, CompactionPolicy, ReminderPolicy};
+use wimoai_wimo_tools::computer::types::{AsyncFileSystem, TerminalBackend};
+use wimoai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig;
+use wimoai_wimo_tools::implementations::wimo::ask_user_question::types::UserQuestionRequest;
+use wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
+use wimoai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer;
+use wimoai_wimo_tools::implementations::wimo::task::types::{SubagentEvent, TaskModelValidator};
+use wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
+use wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig;
+use wimoai_wimo_tools::implementations::lsp::LspBackend;
+use wimoai_wimo_tools::implementations::web_search::WebSearchConfig;
+use wimoai_wimo_tools::notification::ToolNotificationHandle;
+use wimoai_wimo_tools::types::SharedApiKeyProvider;
+use wimoai_wimo_tools::types::compat::CompatConfig;
+use wimoai_wimo_tools::types::memory_backend::MemoryBackend;
 /// Shell-resolved per-tool `ToolConfig.params` JSON maps.
 /// The struct keeps the spawn functions to a single argument instead of adjacent identically-typed positional arguments a caller could transpose.
 #[derive(Debug, Clone, Default)]
@@ -81,13 +81,13 @@ pub(crate) struct AgentRebuildSpec {
     pub web_search_config: WebSearchConfig,
     /// `[toolset.web_search]` domain policy, resolved once at spawn.
     /// It is applied to both search paths (the hosted `tool_overrides` merge and the client-side `WebSearchConfig`) so they never diverge.
-    pub web_search_domains: Option<wimo ai_wimo_sampling_types::WebSearchOptions>,
+    pub web_search_domains: Option<wimoai_wimo_sampling_types::WebSearchOptions>,
     pub backend_search: bool,
     pub web_fetch_config: WebFetchConfig,
     pub image_gen_config: ImageGenConfig,
     pub video_gen_config: VideoGenConfig,
     pub app_builder_deployer_config: AppBuilderDeployerConfig,
-    pub media_gen_batch_limits: wimo ai_wimo_tools::media_gen_limits::MediaGenBatchLimits,
+    pub media_gen_batch_limits: wimoai_wimo_tools::media_gen_limits::MediaGenBatchLimits,
     pub write_file_enabled: bool,
     pub active_agent_messages_enabled: bool,
     pub subagents_enabled: bool,
@@ -104,13 +104,13 @@ pub(crate) struct AgentRebuildSpec {
     pub context_window_tokens: u64,
     pub prompt_working_directory: Option<String>,
     pub lsp: Option<Arc<dyn LspBackend>>,
-    pub plugin_registry: Option<Arc<wimo ai_wimo_agent::plugins::PluginRegistry>>,
+    pub plugin_registry: Option<Arc<wimoai_wimo_agent::plugins::PluginRegistry>>,
     pub api_key_provider: Option<SharedApiKeyProvider>,
-    pub attribution_callback: Option<wimo ai_wimo_tools::SharedAttributionCallback>,
+    pub attribution_callback: Option<wimoai_wimo_tools::SharedAttributionCallback>,
     pub tool_params_json: ResolvedToolParamsJson,
     pub subagent_event_tx: Option<UnboundedSender<SubagentEvent>>,
     pub subagent_coordinator_sender: Option<
-        wimo ai_wimo_tools::implementations::wimo::task::backend::SubagentCoordinatorSender,
+        wimoai_wimo_tools::implementations::wimo::task::backend::SubagentCoordinatorSender,
     >,
     pub monitor_event_buffer: Option<MonitorEventBuffer>,
     pub user_question_tx: UnboundedSender<UserQuestionRequest>,
@@ -126,12 +126,12 @@ pub(crate) struct AgentRebuildSpec {
     pub scheduler_background_loops: bool,
     pub mcp_state: Arc<tokio::sync::Mutex<crate::session::mcp_servers::McpState>>,
     pub managed_gateway_tool_client:
-        Option<wimo ai_wimo_tools::types::resources::ManagedGatewayToolClient>,
+        Option<wimoai_wimo_tools::types::resources::ManagedGatewayToolClient>,
     pub is_non_interactive: bool,
     pub system_prompt_label: String,
     pub owner_session_id: Option<String>,
     pub parent_scheduler_handle:
-        Option<wimo ai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle>,
+        Option<wimoai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle>,
 }
 impl AgentRebuildSpec {
     /// This is the canonical construction path; see module docs for the invariant.
@@ -152,7 +152,7 @@ impl AgentRebuildSpec {
         self: &Arc<Self>,
         definition: AgentDefinition,
         persisted_skill_names: Option<std::collections::HashSet<String>>,
-        preloaded_skills: Option<Vec<wimo ai_wimo_tools::implementations::skills::types::SkillInfo>>,
+        preloaded_skills: Option<Vec<wimoai_wimo_tools::implementations::skills::types::SkillInfo>>,
     ) -> Result<(Agent, std::time::Duration), AgentBuildError> {
         self.build_agent_inner(definition, persisted_skill_names, preloaded_skills)
             .await
@@ -162,7 +162,7 @@ impl AgentRebuildSpec {
         self: &Arc<Self>,
         definition: AgentDefinition,
         persisted_skill_names: Option<std::collections::HashSet<String>>,
-        preloaded_skills: Option<Vec<wimo ai_wimo_tools::implementations::skills::types::SkillInfo>>,
+        preloaded_skills: Option<Vec<wimoai_wimo_tools::implementations::skills::types::SkillInfo>>,
     ) -> Result<(Agent, std::time::Duration), AgentBuildError> {
         let build_phase_start = std::time::Instant::now();
         let Self {
@@ -334,10 +334,10 @@ impl AgentRebuildSpec {
                         }),
                     );
                 if let Some(event_tx) = subagent_event_tx.clone() {
-                    use wimo ai_wimo_tools::implementations::wimo::task::backend::{
+                    use wimoai_wimo_tools::implementations::wimo::task::backend::{
                         ChannelBackend, SubagentBackendResource,
                     };
-                    use wimo ai_wimo_tools::implementations::wimo::task::types::{
+                    use wimoai_wimo_tools::implementations::wimo::task::types::{
                         MaxSubagentDepth, SessionIdResource, SubagentDepthCounter,
                         SubagentEventSender,
                     };
@@ -376,19 +376,19 @@ impl AgentRebuildSpec {
                 }
                 resources
                     .insert(
-                        wimo ai_wimo_tools::types::resources::RespectGitignore(
+                        wimoai_wimo_tools::types::resources::RespectGitignore(
                             *respect_gitignore,
                         ),
                     );
                 resources
                     .insert(
-                        wimo ai_wimo_tools::types::resources::SchedulerBackgroundLoops(
+                        wimoai_wimo_tools::types::resources::SchedulerBackgroundLoops(
                             *scheduler_background_loops,
                         ),
                     );
                 resources
                     .insert(
-                        wimo ai_wimo_tools::types::resources::PathNotFoundHints(
+                        wimoai_wimo_tools::types::resources::PathNotFoundHints(
                             *path_not_found_hints,
                         ),
                     );
@@ -396,7 +396,7 @@ impl AgentRebuildSpec {
                     resources.insert(client);
                 }
                 {
-                    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::UserQuestionSender;
+                    use wimoai_wimo_tools::implementations::wimo::ask_user_question::UserQuestionSender;
                     resources.insert(UserQuestionSender(user_question_tx.clone()));
                 }
             })
@@ -411,11 +411,11 @@ pub(crate) fn test_rebuild_spec_default() -> Arc<AgentRebuildSpec> {
     Arc::new(AgentRebuildSpec {
         working_directory: std::env::temp_dir(),
         terminal_backend: Arc::new(
-            wimo ai_wimo_tools::computer::local::LocalTerminalBackend::new_local(
-                wimo ai_wimo_tools::computer::local::SearchShadowConfig::default(),
+            wimoai_wimo_tools::computer::local::LocalTerminalBackend::new_local(
+                wimoai_wimo_tools::computer::local::SearchShadowConfig::default(),
             ),
         ),
-        fs_backend: Arc::new(wimo ai_wimo_tools::computer::local::LocalFs),
+        fs_backend: Arc::new(wimoai_wimo_tools::computer::local::LocalFs),
         tools_notification_handle: ToolNotificationHandle::noop(),
         bridge_state_path: std::env::temp_dir().join("test_tool_state.json"),
         session_env: Arc::new(HashMap::new()),
@@ -433,7 +433,7 @@ pub(crate) fn test_rebuild_spec_default() -> Arc<AgentRebuildSpec> {
         image_gen_config: ImageGenConfig::default(),
         video_gen_config: VideoGenConfig::default(),
         app_builder_deployer_config: AppBuilderDeployerConfig::default(),
-        media_gen_batch_limits: wimo ai_wimo_tools::media_gen_limits::MediaGenBatchLimits::default(),
+        media_gen_batch_limits: wimoai_wimo_tools::media_gen_limits::MediaGenBatchLimits::default(),
         write_file_enabled: true,
         active_agent_messages_enabled: false,
         subagents_enabled: false,
@@ -458,7 +458,7 @@ pub(crate) fn test_rebuild_spec_default() -> Arc<AgentRebuildSpec> {
         monitor_event_buffer: None,
         user_question_tx: uq_tx,
         subagent_depth: 0,
-        subagents_max_depth: wimo ai_wimo_tools::implementations::wimo::task::MAX_SUBAGENT_DEPTH,
+        subagents_max_depth: wimoai_wimo_tools::implementations::wimo::task::MAX_SUBAGENT_DEPTH,
         session_id_str: "test-session".to_string(),
         blocking_wait_depth: Arc::new(crate::tools::tool_context::BlockingWaitState::new()),
         respect_gitignore: false,
@@ -469,7 +469,7 @@ pub(crate) fn test_rebuild_spec_default() -> Arc<AgentRebuildSpec> {
         )),
         managed_gateway_tool_client: None,
         is_non_interactive: false,
-        system_prompt_label: wimo ai_wimo_agent::DEFAULT_SYSTEM_PROMPT_LABEL.to_string(),
+        system_prompt_label: wimoai_wimo_agent::DEFAULT_SYSTEM_PROMPT_LABEL.to_string(),
         owner_session_id: Some("test-session".to_string()),
         parent_scheduler_handle: None,
     })
@@ -484,7 +484,7 @@ mod tests {
     fn task_description(agent: &Agent) -> String {
         let toolset = agent.tool_bridge().toolset();
         let task_name = toolset
-            .tool_name_for_kind(wimo ai_wimo_tools::types::tool::ToolKind::Task)
+            .tool_name_for_kind(wimoai_wimo_tools::types::tool::ToolKind::Task)
             .expect("Wimo Task tool should be present");
         toolset
             .tool_definitions()
@@ -497,7 +497,7 @@ mod tests {
     /// Agent frontmatter is model-writable (`.wimo/agents/*.md`), so a configured blocklist must survive a frontmatter allowlist.
     #[tokio::test(flavor = "current_thread")]
     async fn config_web_search_domains_beat_agent_frontmatter() {
-        use wimo ai_wimo_sampling_types::{HostedTool, ToolOverrides, WebSearchOptions};
+        use wimoai_wimo_sampling_types::{HostedTool, ToolOverrides, WebSearchOptions};
         let frontmatter = WebSearchOptions {
             allowed_domains: Some(vec!["attacker.example".into()]),
             excluded_domains: None,

@@ -7,12 +7,12 @@ impl SessionActor {
     /// Same as `--trust`: also allows repo-local MCP/LSP for this folder.
     pub(super) fn do_hooks_trust_project(cwd: &str) -> Result<std::path::PathBuf, String> {
         let root =
-            wimo ai_wimo_workspace::session::git::find_git_root_from_path(std::path::Path::new(cwd))
+            wimoai_wimo_workspace::session::git::find_git_root_from_path(std::path::Path::new(cwd))
                 .map_err(|_| {
                     "Not in a git repository. Project hooks require a git worktree root."
                         .to_string()
                 })?;
-        wimo ai_wimo_workspace::folder_trust::grant_folder_trust(&root);
+        wimoai_wimo_workspace::folder_trust::grant_folder_trust(&root);
         Ok(root)
     }
 
@@ -22,7 +22,7 @@ impl SessionActor {
         cwd: &str,
     ) -> Result<(std::path::PathBuf, bool), String> {
         let root =
-            wimo ai_wimo_workspace::session::git::find_git_root_from_path(std::path::Path::new(cwd))
+            wimoai_wimo_workspace::session::git::find_git_root_from_path(std::path::Path::new(cwd))
                 .map_err(|_| "Not in a git repository.".to_string())?;
         // revoke_folder_trust persists set_untrusted and downgrades the decision cache so the untrust applies at the next reload, not just restart
         let was_trusted = crate::agent::folder_trust::revoke_folder_trust(&root);
@@ -42,18 +42,18 @@ impl SessionActor {
         let toolset = bridge.toolset();
         let mut resources = toolset.resources.lock().await;
         let existing = resources
-            .get::<wimo ai_wimo_tools::types::resources::TruncationCfg>()
+            .get::<wimoai_wimo_tools::types::resources::TruncationCfg>()
             .map(|c| c.0.clone());
         match (resolved, existing) {
             (resolved, Some(mut cfg)) => {
                 if cfg.mcp_max_output_bytes != resolved {
                     cfg.mcp_max_output_bytes = resolved;
-                    resources.insert(wimo ai_wimo_tools::types::resources::TruncationCfg(cfg));
+                    resources.insert(wimoai_wimo_tools::types::resources::TruncationCfg(cfg));
                 }
             }
             (Some(v), None) => {
-                resources.insert(wimo ai_wimo_tools::types::resources::TruncationCfg(
-                    wimo ai_wimo_tools::types::context::TruncationConfig {
+                resources.insert(wimoai_wimo_tools::types::resources::TruncationCfg(
+                    wimoai_wimo_tools::types::context::TruncationConfig {
                         mcp_max_output_bytes: Some(v),
                         ..Default::default()
                     },
@@ -92,9 +92,9 @@ impl SessionActor {
     /// Handle a hooks management action from the pager modal.
     pub(super) async fn handle_hooks_action(
         self: &Arc<Self>,
-        action: wimo ai_hooks_plugins_types::HooksAction,
-    ) -> wimo ai_hooks_plugins_types::ActionOutcome {
-        use wimo ai_hooks_plugins_types::{ActionOutcome, HooksAction, OutcomeStatus};
+        action: wimoai_hooks_plugins_types::HooksAction,
+    ) -> wimoai_hooks_plugins_types::ActionOutcome {
+        use wimoai_hooks_plugins_types::{ActionOutcome, HooksAction, OutcomeStatus};
 
         match action {
             HooksAction::Reload => {
@@ -224,7 +224,7 @@ impl SessionActor {
                         requires_restart: false,
                     };
                 }
-                match wimo ai_wimo_hooks::trust::disable_hook(&hook_name) {
+                match wimoai_wimo_hooks::trust::disable_hook(&hook_name) {
                     Ok(()) => ActionOutcome {
                         status: OutcomeStatus::Success,
                         message: "Hook disabled.".to_owned(),
@@ -240,7 +240,7 @@ impl SessionActor {
                 }
             }
             HooksAction::Enable { hook_name } => {
-                match wimo ai_wimo_hooks::trust::enable_hook(&hook_name) {
+                match wimoai_wimo_hooks::trust::enable_hook(&hook_name) {
                     Ok(true) => ActionOutcome {
                         status: OutcomeStatus::Success,
                         message: "Hook enabled.".to_owned(),
@@ -274,10 +274,10 @@ impl SessionActor {
                         continue;
                     }
                     let ok = if disable {
-                        wimo ai_wimo_hooks::trust::disable_hook(name).is_ok()
+                        wimoai_wimo_hooks::trust::disable_hook(name).is_ok()
                     } else {
                         // Only an actual removal counts (Ok(false) means it wasn't disabled)
-                        wimo ai_wimo_hooks::trust::enable_hook(name) == Ok(true)
+                        wimoai_wimo_hooks::trust::enable_hook(name) == Ok(true)
                     };
                     if ok {
                         toggled += 1;
@@ -303,9 +303,9 @@ impl SessionActor {
     /// Handle a plugins management action from the pager modal.
     pub(super) async fn handle_plugins_action(
         self: &Arc<Self>,
-        action: wimo ai_hooks_plugins_types::PluginsAction,
-    ) -> wimo ai_hooks_plugins_types::ActionOutcome {
-        use wimo ai_hooks_plugins_types::{ActionOutcome, OutcomeStatus, PluginsAction};
+        action: wimoai_hooks_plugins_types::PluginsAction,
+    ) -> wimoai_hooks_plugins_types::ActionOutcome {
+        use wimoai_hooks_plugins_types::{ActionOutcome, OutcomeStatus, PluginsAction};
 
         match action {
             PluginsAction::Reload => match &self.plugin_registry_handle {
@@ -337,15 +337,15 @@ impl SessionActor {
                 }
                 let cwd = std::path::Path::new(&self.session_info.cwd);
                 let install_source =
-                    wimo ai_wimo_agent::plugins::git_install::parse_install_source(&source, cwd);
-                let registry = wimo ai_wimo_agent::plugins::InstallRegistry::load();
-                match wimo ai_wimo_agent::plugins::git_install::install_from_source(
+                    wimoai_wimo_agent::plugins::git_install::parse_install_source(&source, cwd);
+                let registry = wimoai_wimo_agent::plugins::InstallRegistry::load();
+                match wimoai_wimo_agent::plugins::git_install::install_from_source(
                     &install_source,
                     &registry,
                     crate::plugin::marketplace_require_sha(),
                 ) {
                     Ok(result) => {
-                        let repo = wimo ai_wimo_agent::plugins::git_install::build_installed_repo(
+                        let repo = wimoai_wimo_agent::plugins::git_install::build_installed_repo(
                             &result,
                             &install_source,
                         );
@@ -393,7 +393,7 @@ impl SessionActor {
                 }
                 // Extract plugin name from ID (last segment of "scope/hex8/name").
                 let plugin_name = plugin_id.rsplit('/').next().unwrap_or(&plugin_id);
-                let mut registry = wimo ai_wimo_agent::plugins::InstallRegistry::load();
+                let mut registry = wimoai_wimo_agent::plugins::InstallRegistry::load();
                 match registry.find_plugin(plugin_name) {
                     None => ActionOutcome {
                         status: OutcomeStatus::NotFound,
@@ -422,7 +422,7 @@ impl SessionActor {
 
                         // Proceed with removal.
                         if let Err(e) =
-                            wimo ai_wimo_agent::plugins::git_install::remove_repo_path(&repo_path)
+                            wimoai_wimo_agent::plugins::git_install::remove_repo_path(&repo_path)
                         {
                             tracing::warn!("Failed to remove repo path: {e}");
                         }
@@ -443,7 +443,7 @@ impl SessionActor {
                 }
             }
             PluginsAction::Update { plugin_id } => {
-                let registry = wimo ai_wimo_agent::plugins::InstallRegistry::load();
+                let registry = wimoai_wimo_agent::plugins::InstallRegistry::load();
                 let all_repos = registry.list();
                 if all_repos.is_empty() {
                     return ActionOutcome {
@@ -456,7 +456,7 @@ impl SessionActor {
 
                 let repos_to_update: Vec<(
                     String,
-                    wimo ai_wimo_agent::plugins::install_registry::InstalledRepo,
+                    wimoai_wimo_agent::plugins::install_registry::InstalledRepo,
                 )> = if let Some(ref id) = plugin_id {
                     let name = id.rsplit('/').next().unwrap_or(id);
                     match registry.find_plugin(name) {
@@ -480,13 +480,13 @@ impl SessionActor {
                 let mut messages = Vec::new();
                 let mut any_updated = false;
                 for (key, repo) in &repos_to_update {
-                    match wimo ai_wimo_agent::plugins::git_install::update_repo(
+                    match wimoai_wimo_agent::plugins::git_install::update_repo(
                         key,
                         repo,
                         crate::plugin::marketplace_require_sha(),
                     ) {
                         Ok(status) => {
-                            use wimo ai_wimo_agent::plugins::git_install::UpdateStatus;
+                            use wimoai_wimo_agent::plugins::git_install::UpdateStatus;
                             match status {
                                 UpdateStatus::Updated(result) => {
                                     if result.changed {
@@ -655,7 +655,7 @@ impl SessionActor {
     /// Reload hooks mid-session: re-discovers global and project hooks, re-evaluates project trust, and re-appends plugin-contributed hooks.
     /// `pub(super)` so the `SessionCommand::ReloadHooks` arm in `run_session` (parent module) can call it after an interactive folder-trust grant.
     pub(super) async fn reload_hooks_impl(self: &std::sync::Arc<Self>) -> String {
-        let git_root = wimo ai_wimo_workspace::session::git::find_git_root_from_path(
+        let git_root = wimoai_wimo_workspace::session::git::find_git_root_from_path(
             std::path::Path::new(&self.session_info.cwd),
         )
         .ok();
@@ -679,7 +679,7 @@ impl SessionActor {
             for plugin in pr.active_plugins() {
                 if let Some(ref hooks_path) = plugin.hooks_path {
                     let (specs, warnings) =
-                        wimo ai_wimo_agent::plugins::hooks_adapter::parse_plugin_hooks(
+                        wimoai_wimo_agent::plugins::hooks_adapter::parse_plugin_hooks(
                             hooks_path,
                             &plugin.name,
                             &plugin.root_str(),
@@ -692,7 +692,7 @@ impl SessionActor {
                 }
                 if let Some(ref inline_value) = plugin.inline_hooks {
                     let (specs, warnings) =
-                        wimo ai_wimo_agent::plugins::hooks_adapter::parse_plugin_hooks_from_value(
+                        wimoai_wimo_agent::plugins::hooks_adapter::parse_plugin_hooks_from_value(
                             inline_value,
                             &plugin.name,
                             &plugin.root_str(),
@@ -724,7 +724,7 @@ impl SessionActor {
             );
             let load_errors = self.hook_load_errors.borrow().clone();
             let project_trusted = is_trusted;
-            self.send_wimo ai_notification(wimo aiSessionUpdate::HooksChanged {
+            self.send_wimoai_notification(wimoaiSessionUpdate::HooksChanged {
                 hooks,
                 project_trusted,
                 load_errors,
@@ -740,13 +740,13 @@ impl SessionActor {
     /// Incidental toggles pass `false` for the cheap skip-unchanged path.
     pub(super) async fn reload_plugins_impl(
         self: &Arc<Self>,
-        handle: &wimo ai_wimo_agent::plugins::SharedPluginRegistryHandle,
+        handle: &wimoai_wimo_agent::plugins::SharedPluginRegistryHandle,
         force: bool,
     ) -> String {
         let session_cwd = std::path::Path::new(&self.session_info.cwd);
 
         let sid = self.session_info.id.0.as_ref();
-        wimo ai_wimo_telemetry::unified_log::info("reload_plugins_impl: start", Some(sid), None);
+        wimoai_wimo_telemetry::unified_log::info("reload_plugins_impl: start", Some(sid), None);
 
         // Folder-trust gates repo-local project plugins (hooks/MCP)
         // Resolve and record the verdict for this cwd before the plugins-config read below, whose project-paths merge reads the gate
@@ -766,7 +766,7 @@ impl SessionActor {
         let count = handle.reload(Some(session_cwd), &discovery_config, project_trusted, force);
         let discover_ms = t2.elapsed().as_millis();
 
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "reload_plugins_impl: discovery done",
             Some(sid),
             Some(serde_json::json!({
@@ -817,8 +817,8 @@ impl SessionActor {
     /// Re-merge this session's `_meta.pluginDirs` into a registry rebuilt by a process-wide fan-out (which knows nothing about per-session dirs).
     pub(crate) fn preserve_session_plugin_dirs(
         &self,
-        incoming: Option<std::sync::Arc<wimo ai_wimo_agent::plugins::PluginRegistry>>,
-    ) -> Option<std::sync::Arc<wimo ai_wimo_agent::plugins::PluginRegistry>> {
+        incoming: Option<std::sync::Arc<wimoai_wimo_agent::plugins::PluginRegistry>>,
+    ) -> Option<std::sync::Arc<wimoai_wimo_agent::plugins::PluginRegistry>> {
         let dirs = self.session_plugin_dirs();
         if dirs.is_empty() {
             return incoming;
@@ -840,7 +840,7 @@ impl SessionActor {
     /// Returns `(hooks_reloaded, mcp_changed, skill_count)`.
     pub(super) async fn apply_plugin_registry_snapshot(
         self: &Arc<Self>,
-        new_registry_snapshot: Option<std::sync::Arc<wimo ai_wimo_agent::plugins::PluginRegistry>>,
+        new_registry_snapshot: Option<std::sync::Arc<wimoai_wimo_agent::plugins::PluginRegistry>>,
     ) -> (usize, bool, usize) {
         let sid = self.session_info.id.0.as_ref();
         let session_cwd = std::path::Path::new(&self.session_info.cwd);
@@ -856,7 +856,7 @@ impl SessionActor {
                 // File-based hooks
                 if let Some(ref hooks_path) = plugin.hooks_path {
                     let (specs, warnings) =
-                        wimo ai_wimo_agent::plugins::hooks_adapter::parse_plugin_hooks(
+                        wimoai_wimo_agent::plugins::hooks_adapter::parse_plugin_hooks(
                             hooks_path,
                             &plugin.name,
                             &plugin.root_str(),
@@ -870,7 +870,7 @@ impl SessionActor {
                 // Inline hooks
                 if let Some(ref inline_value) = plugin.inline_hooks {
                     let (specs, warnings) =
-                        wimo ai_wimo_agent::plugins::hooks_adapter::parse_plugin_hooks_from_value(
+                        wimoai_wimo_agent::plugins::hooks_adapter::parse_plugin_hooks_from_value(
                             inline_value,
                             &plugin.name,
                             &plugin.root_str(),
@@ -893,7 +893,7 @@ impl SessionActor {
                     // No registry yet: bootstrap config-layer and file hooks the way reload_hooks_impl does
                     // Starting from empty sources instead would let a plugin-first snapshot drop config hooks
                     let git_root =
-                        wimo ai_wimo_workspace::session::git::find_git_root_from_path(session_cwd).ok();
+                        wimoai_wimo_workspace::session::git::find_git_root_from_path(session_cwd).ok();
                     let is_trusted =
                         crate::agent::folder_trust::resolve_and_record(session_cwd, None, false);
                     let (mut new_reg, _errs) = crate::util::hooks::discover_hooks(
@@ -907,7 +907,7 @@ impl SessionActor {
             }
         }
 
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "reload_plugins_impl: hooks done",
             Some(sid),
             Some(serde_json::json!({
@@ -939,7 +939,7 @@ impl SessionActor {
             if (!diff.added.is_empty() || !diff.removed.is_empty())
                 && let Some(tx) = &dispatch_event_tx
             {
-                let _ = tx.send(wimo ai_wimo_mcp::servers::McpClientEvent::ConfigDiff {
+                let _ = tx.send(wimoai_wimo_mcp::servers::McpClientEvent::ConfigDiff {
                     added: diff.added.clone(),
                     removed: diff.removed.clone(),
                 });
@@ -967,7 +967,7 @@ impl SessionActor {
             false
         };
 
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "reload_plugins_impl: MCP done",
             Some(sid),
             Some(serde_json::json!({
@@ -979,7 +979,7 @@ impl SessionActor {
         // Refresh skills: re-scan from disk using the (already-updated) plugin registry.
         let t_skills = std::time::Instant::now();
         let skill_count = self.reload_skills_from_disk().await;
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "reload_plugins_impl: skills done",
             Some(sid),
             Some(serde_json::json!({
@@ -990,7 +990,7 @@ impl SessionActor {
 
         // Notify pager about registry changes so the modal auto-refreshes.
         // Extract all RefCell borrows into locals before the .await so no Ref guard is alive across the suspension point
-        // Otherwise send_wimo ai_notification's Notification hooks, which also borrow these RefCells, panic with BorrowMutError
+        // Otherwise send_wimoai_notification's Notification hooks, which also borrow these RefCells, panic with BorrowMutError
         let t_notify = std::time::Instant::now();
         {
             let hooks = crate::extensions::hooks::current_hook_infos(
@@ -1001,7 +1001,7 @@ impl SessionActor {
             let project_trusted = crate::agent::folder_trust::project_scope_allowed(
                 std::path::Path::new(&self.session_info.cwd),
             );
-            self.send_wimo ai_notification(wimo aiSessionUpdate::HooksChanged {
+            self.send_wimoai_notification(wimoaiSessionUpdate::HooksChanged {
                 hooks,
                 project_trusted,
                 load_errors,
@@ -1020,11 +1020,11 @@ impl SessionActor {
                     None => Vec::new(),
                 }
             };
-            self.send_wimo ai_notification(wimo aiSessionUpdate::PluginsChanged { plugins })
+            self.send_wimoai_notification(wimoaiSessionUpdate::PluginsChanged { plugins })
                 .await;
         }
 
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "apply_plugin_registry_snapshot: complete",
             Some(sid),
             Some(serde_json::json!({

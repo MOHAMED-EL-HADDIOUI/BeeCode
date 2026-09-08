@@ -1,8 +1,8 @@
 //! Marketplace browsing and install endpoints for the pager modal.
-//! Scanning and install logic live in the `wimo ai-wimo-plugin-marketplace` crate.
+//! Scanning and install logic live in the `wimoai-wimo-plugin-marketplace` crate.
 
 use agent_client_protocol as acp;
-use wimo ai_hooks_plugins_types::{
+use wimoai_hooks_plugins_types::{
     MarketplaceAction, MarketplaceActionRequest, MarketplaceListResponse, MarketplacePluginEntry,
     MarketplaceScanResult,
 };
@@ -11,7 +11,7 @@ use crate::agent::MvpAgent;
 
 type ExtResult = Result<acp::ExtResponse, acp::Error>;
 
-fn load_filtered_marketplace_sources() -> Vec<wimo ai_wimo_plugin_marketplace::MarketplaceSource> {
+fn load_filtered_marketplace_sources() -> Vec<wimoai_wimo_plugin_marketplace::MarketplaceSource> {
     crate::plugin::load_filtered_marketplace_sources()
 }
 
@@ -30,15 +30,15 @@ async fn handle_list() -> ExtResult {
         .iter()
         .map(|s| {
             let url = match &s.kind {
-                wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, .. } => url.as_str(),
-                wimo ai_wimo_plugin_marketplace::SourceKind::Local { path } => {
+                wimoai_wimo_plugin_marketplace::SourceKind::Git { url, .. } => url.as_str(),
+                wimoai_wimo_plugin_marketplace::SourceKind::Local { path } => {
                     path.to_str().unwrap_or("?")
                 }
             };
             format!("{}={}", s.name, url)
         })
         .collect();
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "marketplace handle_list: sources loaded",
         None,
         Some(serde_json::json!({
@@ -75,7 +75,7 @@ async fn handle_list() -> ExtResult {
             .iter()
             .filter(|p| p.components.is_some())
             .count();
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "marketplace handle_list: source scanned",
             None,
             Some(serde_json::json!({
@@ -92,7 +92,7 @@ async fn handle_list() -> ExtResult {
         results.push(scan);
     }
 
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "marketplace handle_list: complete",
         None,
         Some(serde_json::json!({
@@ -118,8 +118,8 @@ async fn handle_action(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
                 .await
             {
                 Ok(outcome) => outcome,
-                Err(e) => wimo ai_hooks_plugins_types::ActionOutcome {
-                    status: wimo ai_hooks_plugins_types::OutcomeStatus::InternalError,
+                Err(e) => wimoai_hooks_plugins_types::ActionOutcome {
+                    status: wimoai_hooks_plugins_types::OutcomeStatus::InternalError,
                     message: format!("Refresh task failed: {e}"),
                     requires_reload: false,
                     requires_restart: false,
@@ -148,26 +148,26 @@ async fn handle_action(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
 }
 
 fn refresh_sources(
-    sources: &[wimo ai_wimo_plugin_marketplace::MarketplaceSource],
+    sources: &[wimoai_wimo_plugin_marketplace::MarketplaceSource],
     source_url_or_path: Option<&str>,
-) -> wimo ai_hooks_plugins_types::ActionOutcome {
+) -> wimoai_hooks_plugins_types::ActionOutcome {
     let mut refreshed = 0;
     let mut errors = Vec::new();
     for source in sources {
         if let Some(filter) = source_url_or_path {
             let identity = match &source.kind {
-                wimo ai_wimo_plugin_marketplace::SourceKind::Local { path } => {
+                wimoai_wimo_plugin_marketplace::SourceKind::Local { path } => {
                     path.display().to_string()
                 }
-                wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, .. } => url.clone(),
+                wimoai_wimo_plugin_marketplace::SourceKind::Git { url, .. } => url.clone(),
             };
             if identity != filter {
                 continue;
             }
         }
-        if let wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, branch } = &source.kind {
-            let cache_root = wimo ai_wimo_plugin_marketplace::git::default_cache_root();
-            if let Err(e) = wimo ai_wimo_plugin_marketplace::git::force_sync_source_cache(
+        if let wimoai_wimo_plugin_marketplace::SourceKind::Git { url, branch } = &source.kind {
+            let cache_root = wimoai_wimo_plugin_marketplace::git::default_cache_root();
+            if let Err(e) = wimoai_wimo_plugin_marketplace::git::force_sync_source_cache(
                 url,
                 branch.as_deref(),
                 &cache_root,
@@ -187,8 +187,8 @@ fn refresh_sources(
             errors.join("; ")
         )
     };
-    wimo ai_hooks_plugins_types::ActionOutcome {
-        status: wimo ai_hooks_plugins_types::OutcomeStatus::Success,
+    wimoai_hooks_plugins_types::ActionOutcome {
+        status: wimoai_hooks_plugins_types::OutcomeStatus::Success,
         message: msg,
         requires_reload: false,
         requires_restart: false,
@@ -200,16 +200,16 @@ async fn handle_update(
     sid: &acp::SessionId,
     source_url_or_path: &str,
     plugin_relative_path: &str,
-) -> wimo ai_hooks_plugins_types::ActionOutcome {
-    use wimo ai_wimo_plugin_marketplace::installer;
-    use wimo ai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
+) -> wimoai_hooks_plugins_types::ActionOutcome {
+    use wimoai_wimo_plugin_marketplace::installer;
+    use wimoai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
 
     let sources = load_filtered_marketplace_sources();
 
-    let source_identity = |s: &wimo ai_wimo_plugin_marketplace::MarketplaceSource| -> String {
+    let source_identity = |s: &wimoai_wimo_plugin_marketplace::MarketplaceSource| -> String {
         match &s.kind {
-            wimo ai_wimo_plugin_marketplace::SourceKind::Local { path } => path.display().to_string(),
-            wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, .. } => url.clone(),
+            wimoai_wimo_plugin_marketplace::SourceKind::Local { path } => path.display().to_string(),
+            wimoai_wimo_plugin_marketplace::SourceKind::Git { url, .. } => url.clone(),
         }
     };
 
@@ -229,7 +229,7 @@ async fn handle_update(
     };
 
     let plugin_path =
-        match wimo ai_wimo_plugin_marketplace::MarketplaceRelativePath::parse(plugin_relative_path) {
+        match wimoai_wimo_plugin_marketplace::MarketplaceRelativePath::parse(plugin_relative_path) {
             Ok(path) => path,
             Err(e) => {
                 return ActionOutcome {
@@ -244,17 +244,17 @@ async fn handle_update(
 
     let marketplace_lease;
     let marketplace_root = match &source.kind {
-        wimo ai_wimo_plugin_marketplace::SourceKind::Local { path } => {
+        wimoai_wimo_plugin_marketplace::SourceKind::Local { path } => {
             marketplace_lease = None;
             path.clone()
         }
-        wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, branch } => {
-            let cache_root = wimo ai_wimo_plugin_marketplace::git::default_cache_root();
-            match wimo ai_wimo_plugin_marketplace::git::sync_source_cache_with_mode(
+        wimoai_wimo_plugin_marketplace::SourceKind::Git { url, branch } => {
+            let cache_root = wimoai_wimo_plugin_marketplace::git::default_cache_root();
+            match wimoai_wimo_plugin_marketplace::git::sync_source_cache_with_mode(
                 url,
                 branch.as_deref(),
                 &cache_root,
-                wimo ai_wimo_plugin_marketplace::git::SyncMode::Force,
+                wimoai_wimo_plugin_marketplace::git::SyncMode::Force,
             ) {
                 Ok(lease) => {
                     let path = lease.path.clone();
@@ -273,7 +273,7 @@ async fn handle_update(
         }
     };
 
-    let scan = wimo ai_wimo_plugin_marketplace::scan_marketplace(&marketplace_root);
+    let scan = wimoai_wimo_plugin_marketplace::scan_marketplace(&marketplace_root);
     let entry = match scan
         .entries
         .into_iter()
@@ -290,12 +290,12 @@ async fn handle_update(
         }
     };
 
-    let provenance = wimo ai_wimo_agent::plugins::install_registry::MarketplaceProvenance {
+    let provenance = wimoai_wimo_agent::plugins::install_registry::MarketplaceProvenance {
         source_url_or_path: source_url_or_path.to_string(),
         source_display_name: source.name.clone(),
         plugin_subdir: plugin_relative_path.to_string(),
     };
-    let mut registry = wimo ai_wimo_agent::plugins::install_registry::InstallRegistry::load();
+    let mut registry = wimoai_wimo_agent::plugins::install_registry::InstallRegistry::load();
     let require_sha = crate::plugin::marketplace_require_sha();
     let update_result = installer::update_from_marketplace_entry_transactional(
         &marketplace_root,
@@ -313,7 +313,7 @@ async fn handle_update(
                 tracing::warn!("{w}");
             }
             let reload_outcome = agent
-                .execute_plugins_action(sid, wimo ai_hooks_plugins_types::PluginsAction::Reload)
+                .execute_plugins_action(sid, wimoai_hooks_plugins_types::PluginsAction::Reload)
                 .await;
             let mut msg = format!(
                 "Updated {} ({} -> {})",
@@ -331,7 +331,7 @@ async fn handle_update(
                 requires_restart: false,
             }
         }
-        Err(wimo ai_wimo_agent::plugins::install_registry::InstallError::PluginNotFound { .. }) => {
+        Err(wimoai_wimo_agent::plugins::install_registry::InstallError::PluginNotFound { .. }) => {
             ActionOutcome {
                 status: OutcomeStatus::NotFound,
                 message: format!(
@@ -354,16 +354,16 @@ async fn handle_install(
     sid: &acp::SessionId,
     source_url_or_path: &str,
     plugin_relative_path: &str,
-) -> wimo ai_hooks_plugins_types::ActionOutcome {
-    use wimo ai_wimo_plugin_marketplace::installer;
-    use wimo ai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
+) -> wimoai_hooks_plugins_types::ActionOutcome {
+    use wimoai_wimo_plugin_marketplace::installer;
+    use wimoai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
 
     let sources = load_filtered_marketplace_sources();
 
-    let source_identity = |s: &wimo ai_wimo_plugin_marketplace::MarketplaceSource| -> String {
+    let source_identity = |s: &wimoai_wimo_plugin_marketplace::MarketplaceSource| -> String {
         match &s.kind {
-            wimo ai_wimo_plugin_marketplace::SourceKind::Local { path } => path.display().to_string(),
-            wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, .. } => url.clone(),
+            wimoai_wimo_plugin_marketplace::SourceKind::Local { path } => path.display().to_string(),
+            wimoai_wimo_plugin_marketplace::SourceKind::Git { url, .. } => url.clone(),
         }
     };
 
@@ -401,12 +401,12 @@ async fn handle_install(
 
     if let Some((remote_url, remote_ref, remote_sha, remote_subdir)) = remote_entry {
         // URL-sourced plugin: clone from remote git URL.
-        let provenance = wimo ai_wimo_agent::plugins::install_registry::MarketplaceProvenance {
+        let provenance = wimoai_wimo_agent::plugins::install_registry::MarketplaceProvenance {
             source_url_or_path: source_url_or_path.to_string(),
             source_display_name: source.name.clone(),
             plugin_subdir: plugin_relative_path.to_string(),
         };
-        let mut registry = wimo ai_wimo_agent::plugins::install_registry::InstallRegistry::load();
+        let mut registry = wimoai_wimo_agent::plugins::install_registry::InstallRegistry::load();
         let require_sha = crate::plugin::marketplace_require_sha();
         match installer::install_from_remote_url(
             &remote_url,
@@ -425,7 +425,7 @@ async fn handle_install(
                     tracing::warn!("{w}");
                 }
                 let _ = agent
-                    .execute_plugins_action(sid, wimo ai_hooks_plugins_types::PluginsAction::Reload)
+                    .execute_plugins_action(sid, wimoai_hooks_plugins_types::PluginsAction::Reload)
                     .await;
                 ActionOutcome {
                     status: OutcomeStatus::Success,
@@ -458,17 +458,17 @@ async fn handle_install(
         // Local-sourced plugin: resolve from marketplace directory.
         let marketplace_lease;
         let marketplace_root = match &source.kind {
-            wimo ai_wimo_plugin_marketplace::SourceKind::Local { path } => {
+            wimoai_wimo_plugin_marketplace::SourceKind::Local { path } => {
                 marketplace_lease = None;
                 path.clone()
             }
-            wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, branch } => {
-                let cache_root = wimo ai_wimo_plugin_marketplace::git::default_cache_root();
-                match wimo ai_wimo_plugin_marketplace::git::sync_source_cache_with_mode(
+            wimoai_wimo_plugin_marketplace::SourceKind::Git { url, branch } => {
+                let cache_root = wimoai_wimo_plugin_marketplace::git::default_cache_root();
+                match wimoai_wimo_plugin_marketplace::git::sync_source_cache_with_mode(
                     url,
                     branch.as_deref(),
                     &cache_root,
-                    wimo ai_wimo_plugin_marketplace::git::SyncMode::UseTtl,
+                    wimoai_wimo_plugin_marketplace::git::SyncMode::UseTtl,
                 ) {
                     Ok(lease) => {
                         let cached_path = lease.path.clone();
@@ -488,7 +488,7 @@ async fn handle_install(
         };
 
         let plugin_path =
-            match wimo ai_wimo_plugin_marketplace::MarketplaceRelativePath::parse(plugin_relative_path)
+            match wimoai_wimo_plugin_marketplace::MarketplaceRelativePath::parse(plugin_relative_path)
             {
                 Ok(path) => path,
                 Err(e) => {
@@ -521,13 +521,13 @@ async fn handle_install(
         };
         let plugin_relative_path = plugin_path.as_str();
 
-        let provenance = wimo ai_wimo_agent::plugins::install_registry::MarketplaceProvenance {
+        let provenance = wimoai_wimo_agent::plugins::install_registry::MarketplaceProvenance {
             source_url_or_path: source_url_or_path.to_string(),
             source_display_name: source.name.clone(),
             plugin_subdir: plugin_relative_path.to_string(),
         };
 
-        let mut registry = wimo ai_wimo_agent::plugins::install_registry::InstallRegistry::load();
+        let mut registry = wimoai_wimo_agent::plugins::install_registry::InstallRegistry::load();
         let install_result = installer::install_from_marketplace(
             &marketplace_root,
             plugin_relative_path,
@@ -543,7 +543,7 @@ async fn handle_install(
                     tracing::warn!("{w}");
                 }
                 let _ = agent
-                    .execute_plugins_action(sid, wimo ai_hooks_plugins_types::PluginsAction::Reload)
+                    .execute_plugins_action(sid, wimoai_hooks_plugins_types::PluginsAction::Reload)
                     .await;
                 ActionOutcome {
                     status: OutcomeStatus::Success,
@@ -580,11 +580,11 @@ async fn handle_uninstall(
     sid: &acp::SessionId,
     source_url_or_path: &str,
     plugin_relative_path: &str,
-) -> wimo ai_hooks_plugins_types::ActionOutcome {
-    use wimo ai_wimo_plugin_marketplace::installer;
-    use wimo ai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
+) -> wimoai_hooks_plugins_types::ActionOutcome {
+    use wimoai_wimo_plugin_marketplace::installer;
+    use wimoai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
 
-    let mut registry = wimo ai_wimo_agent::plugins::install_registry::InstallRegistry::load();
+    let mut registry = wimoai_wimo_agent::plugins::install_registry::InstallRegistry::load();
 
     // Find the installed entry by marketplace provenance.
     let found = installer::find_installed_marketplace_plugin(
@@ -631,7 +631,7 @@ async fn handle_uninstall(
 
     // Trigger plugin reload so the removed plugin disappears from the session.
     let _ = agent
-        .execute_plugins_action(sid, wimo ai_hooks_plugins_types::PluginsAction::Reload)
+        .execute_plugins_action(sid, wimoai_hooks_plugins_types::PluginsAction::Reload)
         .await;
 
     ActionOutcome {
@@ -643,11 +643,11 @@ async fn handle_uninstall(
 }
 
 fn scan_source(
-    source: &wimo ai_wimo_plugin_marketplace::MarketplaceSource,
+    source: &wimoai_wimo_plugin_marketplace::MarketplaceSource,
 ) -> (MarketplaceScanResult, bool) {
     let lease;
     let (source_kind, source_url_or_path, root) = match &source.kind {
-        wimo ai_wimo_plugin_marketplace::SourceKind::Local { path } => {
+        wimoai_wimo_plugin_marketplace::SourceKind::Local { path } => {
             lease = None;
             (
                 "local".to_string(),
@@ -655,19 +655,19 @@ fn scan_source(
                 Some(path.clone()),
             )
         }
-        wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, branch } => {
-            let cache_root = wimo ai_wimo_plugin_marketplace::git::default_cache_root();
+        wimoai_wimo_plugin_marketplace::SourceKind::Git { url, branch } => {
+            let cache_root = wimoai_wimo_plugin_marketplace::git::default_cache_root();
             let t_git = std::time::Instant::now();
-            match wimo ai_wimo_plugin_marketplace::git::sync_source_cache_with_mode(
+            match wimoai_wimo_plugin_marketplace::git::sync_source_cache_with_mode(
                 url,
                 branch.as_deref(),
                 &cache_root,
-                wimo ai_wimo_plugin_marketplace::git::SyncMode::UseTtl,
+                wimoai_wimo_plugin_marketplace::git::SyncMode::UseTtl,
             ) {
                 Ok(cache_lease) => {
                     let cached_path = cache_lease.path.clone();
                     lease = Some(cache_lease);
-                    wimo ai_wimo_telemetry::unified_log::info(
+                    wimoai_wimo_telemetry::unified_log::info(
                         "scan_source: git sync done",
                         None,
                         Some(serde_json::json!({
@@ -709,18 +709,18 @@ fn scan_source(
         }
     };
 
-    let scan = wimo ai_wimo_plugin_marketplace::scan_marketplace(&root);
+    let scan = wimoai_wimo_plugin_marketplace::scan_marketplace(&root);
     let catalog_loaded = scan.catalog_loaded;
     let discovered = scan.entries;
     drop(lease);
 
     // Cross-reference with install registry.
-    let registry = wimo ai_wimo_agent::plugins::install_registry::InstallRegistry::load();
+    let registry = wimoai_wimo_agent::plugins::install_registry::InstallRegistry::load();
     let plugins = discovered
         .into_iter()
         .map(|p| {
             let (install_status, installed_version) =
-                match wimo ai_wimo_plugin_marketplace::installer::find_installed_marketplace_plugin(
+                match wimoai_wimo_plugin_marketplace::installer::find_installed_marketplace_plugin(
                     &registry,
                     &source_url_or_path,
                     &p.relative_path,
@@ -755,7 +755,7 @@ fn scan_source(
 }
 
 fn to_plugin_entry(
-    p: wimo ai_wimo_plugin_marketplace::MarketplaceEntry,
+    p: wimoai_wimo_plugin_marketplace::MarketplaceEntry,
     install_status: String,
     installed_version: Option<String>,
 ) -> MarketplacePluginEntry {
@@ -785,9 +785,9 @@ fn to_plugin_entry(
 }
 
 /// Add a new git or local-path marketplace source to `~/.wimo/config.toml`.
-async fn handle_add_source(url: &str) -> wimo ai_hooks_plugins_types::ActionOutcome {
+async fn handle_add_source(url: &str) -> wimoai_hooks_plugins_types::ActionOutcome {
     use crate::plugin::{self, MarketplaceAddInput};
-    use wimo ai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
+    use wimoai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
 
     let url = url.trim();
     if url.is_empty() {
@@ -824,7 +824,7 @@ async fn handle_add_source(url: &str) -> wimo ai_hooks_plugins_types::ActionOutc
 
     // Local paths never match the git-URL allowlist, so a restricted strictKnownMarketplaces policy blocks them (intentionally fail-closed)
     let allowlist =
-        &wimo ai_wimo_workspace::permission::resolution::managed_settings().marketplace_allowlist;
+        &wimoai_wimo_workspace::permission::resolution::managed_settings().marketplace_allowlist;
     if allowlist.is_restricted() && !allowlist.is_url_allowed(&identity) {
         return ActionOutcome {
             status: OutcomeStatus::ValidationError,
@@ -837,17 +837,17 @@ async fn handle_add_source(url: &str) -> wimo ai_hooks_plugins_types::ActionOutc
     let config = crate::config::load_effective_config()
         .ok()
         .unwrap_or(toml::Value::Table(toml::map::Map::new()));
-    let existing = wimo ai_wimo_plugin_marketplace::load_sources(&config);
+    let existing = wimoai_wimo_plugin_marketplace::load_sources(&config);
     let already_configured = match &input {
         MarketplaceAddInput::GitUrl(git_url) => {
             let normalized = git_url.trim_end_matches(".git");
             existing.iter().any(|s| {
-                matches!(&s.kind, wimo ai_wimo_plugin_marketplace::SourceKind::Git { url: u, .. }
+                matches!(&s.kind, wimoai_wimo_plugin_marketplace::SourceKind::Git { url: u, .. }
                     if u.trim_end_matches(".git") == normalized)
             })
         }
         MarketplaceAddInput::LocalPath(path) => existing.iter().any(|s| {
-            matches!(&s.kind, wimo ai_wimo_plugin_marketplace::SourceKind::Local { path: p }
+            matches!(&s.kind, wimoai_wimo_plugin_marketplace::SourceKind::Local { path: p }
                 if p == path)
         }),
     };
@@ -865,7 +865,7 @@ async fn handle_add_source(url: &str) -> wimo ai_hooks_plugins_types::ActionOutc
     if let MarketplaceAddInput::GitUrl(git_url) = &input {
         let probe_url = git_url.clone();
         let probe = tokio::task::spawn_blocking(move || {
-            wimo ai_wimo_plugin_marketplace::git::probe_git_remote(&probe_url)
+            wimoai_wimo_plugin_marketplace::git::probe_git_remote(&probe_url)
         })
         .await;
         match probe {
@@ -893,9 +893,9 @@ async fn handle_add_source(url: &str) -> wimo ai_hooks_plugins_types::ActionOutc
     }
 
     let is_official = matches!(&input, MarketplaceAddInput::GitUrl(u)
-        if wimo ai_wimo_plugin_marketplace::is_official_source_url(u));
+        if wimoai_wimo_plugin_marketplace::is_official_source_url(u));
     let name = if is_official {
-        wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.to_string()
+        wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.to_string()
     } else {
         match &input {
             MarketplaceAddInput::GitUrl(u) => plugin::name_from_url(u),
@@ -904,8 +904,8 @@ async fn handle_add_source(url: &str) -> wimo ai_hooks_plugins_types::ActionOutc
     };
 
     // Run the write under SAVE_LOCK and the flock, off the reactor
-    let config_path = wimo ai_wimo_config::wimo_home().join("config.toml");
-    let wimo_home = wimo ai_wimo_config::wimo_home();
+    let config_path = wimoai_wimo_config::wimo_home().join("config.toml");
+    let wimo_home = wimoai_wimo_config::wimo_home();
     let _save_guard = crate::util::config::lock_config_writes().await;
     let write = {
         let name = name.clone();
@@ -1026,14 +1026,14 @@ fn add_marketplace_source(
 
 /// Remove a marketplace source from `~/.wimo/config.toml` and uninstall all
 /// plugins that were installed from it.
-async fn handle_remove_source(source_url_or_path: &str) -> wimo ai_hooks_plugins_types::ActionOutcome {
+async fn handle_remove_source(source_url_or_path: &str) -> wimoai_hooks_plugins_types::ActionOutcome {
     let src = source_url_or_path.to_string();
     // Lock, then run the blocking FS work off the reactor
     let _save_guard = crate::util::config::lock_config_writes().await;
     match tokio::task::spawn_blocking(move || remove_source_locked(&src)).await {
         Ok(outcome) => outcome,
-        Err(e) => wimo ai_hooks_plugins_types::ActionOutcome {
-            status: wimo ai_hooks_plugins_types::OutcomeStatus::InternalError,
+        Err(e) => wimoai_hooks_plugins_types::ActionOutcome {
+            status: wimoai_hooks_plugins_types::OutcomeStatus::InternalError,
             message: format!("Config write task failed: {e}"),
             requires_reload: false,
             requires_restart: false,
@@ -1043,18 +1043,18 @@ async fn handle_remove_source(source_url_or_path: &str) -> wimo ai_hooks_plugins
 
 /// Sync body of [`handle_remove_source`], run on a blocking thread.
 /// Holds the flock for the whole read-modify-write so a concurrent auto-register can't re-add the source mid-removal.
-fn remove_source_locked(source_url_or_path: &str) -> wimo ai_hooks_plugins_types::ActionOutcome {
+fn remove_source_locked(source_url_or_path: &str) -> wimoai_hooks_plugins_types::ActionOutcome {
     use crate::plugin;
-    use wimo ai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
+    use wimoai_hooks_plugins_types::{ActionOutcome, OutcomeStatus};
 
-    let wimo_home = wimo ai_wimo_config::wimo_home();
+    let wimo_home = wimoai_wimo_config::wimo_home();
     let _flock = acquire_init_lock(&wimo_home).ok();
 
     let uninstalled = plugin::uninstall_marketplace_source_plugins(source_url_or_path);
 
     // Remove the source and (if official) set the flag in ONE atomic write so a crash can't drop the flag and re-add the source next startup
     let config_path = wimo_home.join("config.toml");
-    let is_official = wimo ai_wimo_plugin_marketplace::is_official_source_url(source_url_or_path);
+    let is_official = wimoai_wimo_plugin_marketplace::is_official_source_url(source_url_or_path);
     let mut removed_from_config = false;
     let content = match crate::util::config::read_to_string_or_empty(&config_path) {
         Ok(c) => c,
@@ -1229,7 +1229,7 @@ fn default_skills_repo_keys<'a>(
     repos: impl IntoIterator<
         Item = (
             &'a str,
-            &'a wimo ai_wimo_agent::plugins::install_registry::InstalledRepo,
+            &'a wimoai_wimo_agent::plugins::install_registry::InstalledRepo,
         ),
     >,
 ) -> Vec<&'a str> {
@@ -1257,8 +1257,8 @@ fn read_default_skills_installs_purged(config_path: &std::path::Path) -> bool {
 /// Best-effort: errors are logged and never block startup.
 pub(crate) fn purge_default_skills_installs(wimo_home: &std::path::Path) {
     purge_default_skills_installs_impl(wimo_home, || {
-        wimo ai_wimo_agent::plugins::install_registry::InstallRegistry::try_load_from(
-            wimo ai_wimo_agent::plugins::install_registry::InstallRegistry::resolve_install_dir(),
+        wimoai_wimo_agent::plugins::install_registry::InstallRegistry::try_load_from(
+            wimoai_wimo_agent::plugins::install_registry::InstallRegistry::resolve_install_dir(),
         )
     });
 }
@@ -1266,8 +1266,8 @@ pub(crate) fn purge_default_skills_installs(wimo_home: &std::path::Path) {
 fn purge_default_skills_installs_impl(
     wimo_home: &std::path::Path,
     load_registry: impl FnOnce() -> Result<
-        wimo ai_wimo_agent::plugins::install_registry::InstallRegistry,
-        wimo ai_wimo_agent::plugins::install_registry::InstallError,
+        wimoai_wimo_agent::plugins::install_registry::InstallRegistry,
+        wimoai_wimo_agent::plugins::install_registry::InstallError,
     >,
 ) {
     let config_path = wimo_home.join("config.toml");
@@ -1396,14 +1396,14 @@ pub(crate) fn ensure_official_marketplace_source(wimo_home: &std::path::Path) {
     // "Already present" means the official URL is in the config.toml sources or in a JSON store (settings.json, known_marketplaces.json) under wimo_home
     // The scan is scoped to wimo_home only (not ~/.claude) to keep tests hermetic
     // A user with the URL solely in ~/.claude gets one duplicate entry that the UI dedupes by URL
-    let toml_sources = wimo ai_wimo_plugin_marketplace::load_sources(&parsed);
-    let json_sources = wimo ai_wimo_plugin_marketplace::load_extra_sources_from_settings_in(
+    let toml_sources = wimoai_wimo_plugin_marketplace::load_sources(&parsed);
+    let json_sources = wimoai_wimo_plugin_marketplace::load_extra_sources_from_settings_in(
         &toml_sources,
         std::slice::from_ref(&wimo_home.to_path_buf()),
     );
     let already_present = toml_sources.iter().chain(json_sources.iter()).any(|s| {
-        matches!(&s.kind, wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, .. }
-            if wimo ai_wimo_plugin_marketplace::is_official_source_url(url))
+        matches!(&s.kind, wimoai_wimo_plugin_marketplace::SourceKind::Git { url, .. }
+            if wimoai_wimo_plugin_marketplace::is_official_source_url(url))
     });
 
     let write_result = if already_present {
@@ -1412,9 +1412,9 @@ pub(crate) fn ensure_official_marketplace_source(wimo_home: &std::path::Path) {
     } else {
         add_marketplace_source(
             &config_path,
-            wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME,
+            wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME,
             &crate::plugin::MarketplaceAddInput::GitUrl(
-                wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.to_string(),
+                wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.to_string(),
             ),
             true,
         )
@@ -1423,7 +1423,7 @@ pub(crate) fn ensure_official_marketplace_source(wimo_home: &std::path::Path) {
     match write_result {
         Ok(()) if !already_present => {
             tracing::info!(
-                url = wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
+                url = wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
                 "auto-registered official wimo AI marketplace source"
             );
         }
@@ -1440,11 +1440,11 @@ mod official_source_tests {
 
     fn read_sources(
         config_path: &std::path::Path,
-    ) -> Vec<wimo ai_wimo_plugin_marketplace::MarketplaceSource> {
+    ) -> Vec<wimoai_wimo_plugin_marketplace::MarketplaceSource> {
         let raw = std::fs::read_to_string(config_path).unwrap_or_default();
         let parsed: toml::Value =
             toml::from_str(&raw).unwrap_or_else(|_| toml::Value::Table(Default::default()));
-        wimo ai_wimo_plugin_marketplace::load_sources(&parsed)
+        wimoai_wimo_plugin_marketplace::load_sources(&parsed)
     }
 
     fn read_flag(config_path: &std::path::Path) -> bool {
@@ -1486,7 +1486,7 @@ mod official_source_tests {
         assert_eq!(sources[0].name, "my-plugins");
         assert!(matches!(
             &sources[0].kind,
-            wimo ai_wimo_plugin_marketplace::SourceKind::Local { path } if path == &dir
+            wimoai_wimo_plugin_marketplace::SourceKind::Local { path } if path == &dir
         ));
         // The path must not be mangled into a git URL.
         let raw = std::fs::read_to_string(&config_path).unwrap();
@@ -1524,8 +1524,8 @@ mod official_source_tests {
         let sources = read_sources(&config_path);
         assert!(
             !sources.iter().any(|s| matches!(&s.kind,
-                wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, .. }
-                    if wimo ai_wimo_plugin_marketplace::is_official_source_url(url))),
+                wimoai_wimo_plugin_marketplace::SourceKind::Git { url, .. }
+                    if wimoai_wimo_plugin_marketplace::is_official_source_url(url))),
             "official source must not be re-added after removal"
         );
     }
@@ -1544,12 +1544,12 @@ mod official_source_tests {
         assert_eq!(sources.len(), 1);
         assert_eq!(
             sources[0].name,
-            wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME
+            wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME
         );
         assert!(matches!(
             &sources[0].kind,
-            wimo ai_wimo_plugin_marketplace::SourceKind::Git { url, .. }
-                if url == wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL
+            wimoai_wimo_plugin_marketplace::SourceKind::Git { url, .. }
+                if url == wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL
         ));
         assert!(read_flag(&config_path));
     }
@@ -1607,8 +1607,8 @@ mod official_source_tests {
             &config_path,
             format!(
                 "[[marketplace.sources]]\nname = \"{}\"\ngit = \"{}\"\n",
-                wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME,
-                wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
+                wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME,
+                wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
             ),
         )
         .unwrap();
@@ -1629,8 +1629,8 @@ mod official_source_tests {
         std::fs::write(
             plugins_dir.join("known_marketplaces.json"),
             format!(
-                r#"{{"wimo ai-official":{{"source":{{"source":"git","url":"{}"}}}}}}"#,
-                wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
+                r#"{{"wimoai-official":{{"source":{{"source":"git","url":"{}"}}}}}}"#,
+                wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
             ),
         )
         .unwrap();
@@ -1655,8 +1655,8 @@ mod official_source_tests {
         std::fs::write(
             home.join("settings.json"),
             format!(
-                r#"{{"extraKnownMarketplaces":{{"wimo ai-official":{{"source":{{"source":"git","url":"{}"}}}}}}}}"#,
-                wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
+                r#"{{"extraKnownMarketplaces":{{"wimoai-official":{{"source":{{"source":"git","url":"{}"}}}}}}}}"#,
+                wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
             ),
         )
         .unwrap();
@@ -1682,8 +1682,8 @@ mod official_source_tests {
             &config_path,
             format!(
                 "[[marketplace.sources]]\nname = \"{}\"\ngit = \"{}\"\nbranch = \"some-branch\"\n",
-                wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME,
-                wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
+                wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME,
+                wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL,
             ),
         )
         .unwrap();
@@ -1729,7 +1729,7 @@ mod official_source_tests {
 #[cfg(test)]
 mod default_skills_purge_tests {
     use super::*;
-    use wimo ai_wimo_agent::plugins::install_registry::{
+    use wimoai_wimo_agent::plugins::install_registry::{
         InstallKind, InstallRegistry, InstalledRepo, MarketplaceProvenance, RepoPlugin,
     };
 
@@ -1910,12 +1910,12 @@ mod conversion_tests {
 
     #[test]
     fn to_plugin_entry_carries_homepage_and_keywords() {
-        let entry = wimo ai_wimo_plugin_marketplace::MarketplaceEntry {
+        let entry = wimoai_wimo_plugin_marketplace::MarketplaceEntry {
             name: "demo".into(),
             version: Some("1.0.0".into()),
             description: Some("demo".into()),
             category: Some("dev".into()),
-            author: Some("wimo ai".into()),
+            author: Some("wimoai".into()),
             tags: vec!["cli".into()],
             keywords: vec!["search".into(), "rank".into()],
             domains: vec!["example.com".into()],
@@ -1929,8 +1929,8 @@ mod conversion_tests {
             remote_ref: None,
             remote_sha: None,
             remote_subdir: Some("plugins/acme".into()),
-            components: Some(wimo ai_hooks_plugins_types::PluginComponents {
-                skills: vec![wimo ai_hooks_plugins_types::ComponentItem::new(
+            components: Some(wimoai_hooks_plugins_types::PluginComponents {
+                skills: vec![wimoai_hooks_plugins_types::ComponentItem::new(
                     "code-review",
                     Some("Review staged changes".to_string()),
                 )],

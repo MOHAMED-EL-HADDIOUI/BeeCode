@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use tokio::sync::{mpsc, oneshot};
-use wimo ai_wimo_tools::implementations::wimo::task::coordinator::ActiveMessageAdmission;
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_tools::implementations::wimo::task::coordinator::ActiveMessageAdmission;
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     ActiveAgentMessageDelivery, ActiveAgentMessageOperation,
 };
-use wimo ai_message_delivery_core::{
+use wimoai_message_delivery_core::{
     AgentSource, DeliveryEnvelope, DeliveryIdentity, HumanSource, Operation, OperationSet,
     authorize_operation,
 };
@@ -39,7 +39,7 @@ pub(crate) struct HumanPromptContent {
     pub(crate) verbatim: bool,
     pub(crate) traceparent: Option<String>,
     pub(crate) json_schema: Option<serde_json::Value>,
-    pub(crate) tool_overrides_update: Option<wimo ai_wimo_sampling_types::ToolOverridesUpdate>,
+    pub(crate) tool_overrides_update: Option<wimoai_wimo_sampling_types::ToolOverridesUpdate>,
     pub(crate) respond_to: oneshot::Sender<crate::session::commands::PromptTurnResult>,
     pub(crate) parsed_prompt_tx:
         Option<oneshot::Sender<crate::session::commands::ParsedPromptInfo>>,
@@ -152,7 +152,7 @@ impl MessageDeliveryHandle {
             AgentDeliveryIdentity,
         >,
         receipt_sink: mpsc::Sender<crate::agent::subagent::PromptTurnReceipt>,
-        parent_telemetry_ctx: wimo ai_wimo_telemetry::TelemetryCtx,
+        parent_telemetry_ctx: wimoai_wimo_telemetry::TelemetryCtx,
     ) -> ActiveMessageAdmission {
         let (operation, content, identity, grant) = envelope.into_parts();
         let delivery = grant.delivery;

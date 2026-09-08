@@ -34,7 +34,7 @@ account = "other@example.com"
 #[serial_test::serial(wimo_HOME)]
 async fn set_consent_answer_is_monotonic_per_account() {
     let home = tempfile::tempdir().expect("home");
-    let _guard = wimo ai_wimo_test_support::env::EnvGuard::set("wimo_HOME", home.path());
+    let _guard = wimoai_wimo_test_support::env::EnvGuard::set("wimo_HOME", home.path());
 
     let answers = || {
         let root = crate::config::load_from_disk().expect("read config");

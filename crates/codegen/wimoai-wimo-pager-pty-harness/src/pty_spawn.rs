@@ -12,7 +12,7 @@ use std::path::Path;
 use anyhow::{Context, Result};
 use portable_pty::CommandBuilder;
 #[cfg(any(unix, test))]
-use wimo ai_wimo_test_support::TestSandbox;
+use wimoai_wimo_test_support::TestSandbox;
 
 use crate::pty::EnvOp;
 
@@ -31,7 +31,7 @@ const APPEARANCE_ENV_VARS: &[&str] = &[
 /// Host terminal identity markers stripped from the child environment.
 ///
 /// The pager's terminal detection
-/// (`wimo ai-wimo-pager-render/src/terminal/mod.rs`:
+/// (`wimoai-wimo-pager-render/src/terminal/mod.rs`:
 /// `detect_terminal_brand_from_env` / `detect_byobu_from_env` /
 /// `detect_multiplexer_from_env` / `detect_tmux_meta_from_env`, plus
 /// `embedded_editor.rs`'s `embedded_editor_from_env`) reads all of these,
@@ -251,7 +251,7 @@ pub(crate) fn spawn_pty_session_child(
     // non-setuid with no file capabilities (the kernel clears PDEATHSIG
     // across a privileged exec).
     #[cfg(target_os = "linux")]
-    wimo ai_tty_utils::kill_on_parent_death_std_with(&mut cmd, libc::SIGKILL);
+    wimoai_tty_utils::kill_on_parent_death_std_with(&mut cmd, libc::SIGKILL);
 
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
@@ -503,11 +503,11 @@ mod tests {
         cmd.env_clear();
         sandbox.apply_to_command_builder(&mut cmd);
 
-        apply_child_env(&mut cmd, &[EnvOp::remove("wimo ai_API_KEY")]);
+        apply_child_env(&mut cmd, &[EnvOp::remove("wimoai_API_KEY")]);
 
-        assert_eq!(cmd.get_env("wimo ai_API_KEY"), None);
+        assert_eq!(cmd.get_env("wimoai_API_KEY"), None);
         assert_eq!(
-            cmd.get_env("wimo_wimo ai_API_BASE_URL")
+            cmd.get_env("wimo_wimoai_API_BASE_URL")
                 .and_then(|v| v.to_str()),
             Some("http://127.0.0.1:43123/v1")
         );

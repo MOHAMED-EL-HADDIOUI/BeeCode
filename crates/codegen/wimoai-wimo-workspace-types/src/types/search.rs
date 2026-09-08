@@ -1,7 +1,7 @@
 //! Minimal serializable search-related shapes (ripgrep and fuzzy file search).
 //!
 //! TODO(workspace): align with the canonical ripgrep / fuzzy types in
-//! `wimo ai_wimo_shell::file_system` when the search subsystem moves
+//! `wimoai_wimo_shell::file_system` when the search subsystem moves
 //! into the workspace crate.
 
 use serde::{Deserialize, Serialize};

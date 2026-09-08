@@ -8,7 +8,7 @@
 use std::io;
 
 use tokio::sync::{mpsc, oneshot};
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_wimo_sampling_types::ConversationItem;
 
 use crate::commands::{StrictAppendAck, StrictAppendError};
 

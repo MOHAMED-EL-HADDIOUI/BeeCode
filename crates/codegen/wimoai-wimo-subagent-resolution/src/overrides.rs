@@ -1,13 +1,13 @@
 //! Runtime override resolution: merges explicit, role, and persona defaults.
 //!
-//! Extracted from `wimo ai-wimo-shell/src/agent/subagent/` `resolve_effective_overrides()`.
+//! Extracted from `wimoai-wimo-shell/src/agent/subagent/` `resolve_effective_overrides()`.
 
 use std::collections::HashMap;
 use std::path::Path;
 
 use serde::de::DeserializeOwned;
-use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentRuntimeOverrides;
-use wimo ai_tool_types::{SubagentCapabilityMode, SubagentIsolationMode};
+use wimoai_wimo_tools::implementations::wimo::task::types::SubagentRuntimeOverrides;
+use wimoai_tool_types::{SubagentCapabilityMode, SubagentIsolationMode};
 
 use crate::config::{SubagentPersona, SubagentRole};
 use crate::types::EffectiveRuntimeConfig;
@@ -213,7 +213,7 @@ fn resolve_persona_instructions(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_tools::implementations::wimo::task::types::ModelOverrideProvenance;
+    use wimoai_wimo_tools::implementations::wimo::task::types::ModelOverrideProvenance;
 
     /// Helper to build an overrides struct with only the fields we care about.
     fn make_overrides(

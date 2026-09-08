@@ -2,7 +2,7 @@
 //! threads, open files, and heap/RSS reach steady state. A stub `ChildRunner` drives
 //! the real coordinator/transport.
 //!
-//!   SUBAGENT_SOAK_CYCLES=20000 cargo test -p wimo ai-wimo-tools \
+//!   SUBAGENT_SOAK_CYCLES=20000 cargo test -p wimoai-wimo-tools \
 //!     [--features dhat-heap] --test test_subagent_soak -- --ignored --nocapture
 
 #![cfg(unix)]
@@ -19,15 +19,15 @@ use serde::{Serialize, Serializer};
 use strum::{EnumCount, IntoEnumIterator};
 use tokio_util::sync::CancellationToken;
 
-use wimo ai_wimo_test_support::env::env_parse;
-use wimo ai_wimo_test_support::resources::{ResourceGrowth, ResourceSnapshot};
-use wimo ai_wimo_tools::implementations::wimo::task::admission::SubagentLimits;
-use wimo ai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
-use wimo ai_wimo_tools::implementations::wimo::task::coordinator::{
+use wimoai_wimo_test_support::env::env_parse;
+use wimoai_wimo_test_support::resources::{ResourceGrowth, ResourceSnapshot};
+use wimoai_wimo_tools::implementations::wimo::task::admission::SubagentLimits;
+use wimoai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
+use wimoai_wimo_tools::implementations::wimo::task::coordinator::{
     ChildCompletion, ChildControl, ChildRunOutput, ChildRunRequest, ChildRunner, CoordinatorConfig,
     LocalBoxFuture, MAX_COMPLETED_ENTRIES, StartedChild, SubagentCoordinator, SubagentProgress,
 };
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     SubagentDescribeOutcome, SubagentOwner, SubagentRegistryCounts, SubagentRequest,
     SubagentResult, SubagentValidateTypeOutcome,
 };

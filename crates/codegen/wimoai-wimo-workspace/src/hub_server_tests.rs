@@ -4,14 +4,14 @@ use crate::handle::tests::{
     background_capable_cfg, make_confining_handle, make_handle, start_background_sleep,
 };
 use std::sync::Arc;
-use wimo ai_wimo_tools::implementations::wimo::scheduler::types::{
+use wimoai_wimo_tools::implementations::wimo::scheduler::types::{
     ScheduledTask, SchedulerState,
 };
-use wimo ai_wimo_tools::types::resources::State;
-use wimo ai_tool_protocol::turn_hook;
+use wimoai_wimo_tools::types::resources::State;
+use wimoai_tool_protocol::turn_hook;
 async fn next_item(
     stream: &mut ToolStream<TypedToolOutput>,
-) -> Option<wimo ai_tool_runtime::ToolStreamItem<TypedToolOutput>> {
+) -> Option<wimoai_tool_runtime::ToolStreamItem<TypedToolOutput>> {
     use std::task::Context;
     std::future::poll_fn(|cx: &mut Context<'_>| stream.as_mut().poll_next(cx)).await
 }
@@ -83,7 +83,7 @@ async fn handle_hook_request_unbound_session_is_noop() {
 }
 #[tokio::test]
 async fn dispatch_workspace_info_reports_server_version() {
-    use wimo ai_wimo_workspace_types::rpc::workspace::{WorkspaceInfo, WorkspaceInfoReq};
+    use wimoai_wimo_workspace_types::rpc::workspace::{WorkspaceInfo, WorkspaceInfoReq};
     let handler = WorkspaceRpcHandler::new(make_handle());
     let value = handler
         .dispatch(
@@ -94,7 +94,7 @@ async fn dispatch_workspace_info_reports_server_version() {
         .await
         .expect("workspace.info dispatch");
     let info: WorkspaceInfo = serde_json::from_value(value).expect("typed WorkspaceInfo");
-    assert_eq!(Some(wimo ai_wimo_version::VERSION.to_owned()), info.version);
+    assert_eq!(Some(wimoai_wimo_version::VERSION.to_owned()), info.version);
 }
 #[tokio::test]
 async fn dispatch_unknown_method_returns_unknown_method_error() {
@@ -158,7 +158,7 @@ async fn handle_evict_unbind_does_not_unmount() {
 }
 #[tokio::test]
 async fn handle_evict_triggers_two_phase_drain() {
-    use wimo ai_tool_protocol::ToolServerLifecycleStatus;
+    use wimoai_tool_protocol::ToolServerLifecycleStatus;
     let handle = make_handle();
     let tracker = handle.activity_tracker().clone();
     let handler = WorkspaceRpcHandler::new(handle);
@@ -205,8 +205,8 @@ async fn list_background_tasks_rpc_stays_truthful_across_rebinds() {
     use crate::handle::RebindOutcome;
     use crate::handle::tests::{background_capable_cfg, start_background_sleep};
     use crate::session::tool_config::test_support::tc;
-    use wimo ai_wimo_tools::registry::types::ToolServerConfig;
-    use wimo ai_wimo_workspace_types::rpc::workspace::ListBackgroundTasksResponse;
+    use wimoai_wimo_tools::registry::types::ToolServerConfig;
+    use wimoai_wimo_workspace_types::rpc::workspace::ListBackgroundTasksResponse;
     let handle = make_handle();
     let cfg = background_capable_cfg();
     let session = handle
@@ -225,7 +225,7 @@ async fn list_background_tasks_rpc_stays_truthful_across_rebinds() {
     let handler = WorkspaceRpcHandler::new(handle.clone());
     async fn list_tasks(
         handler: &WorkspaceRpcHandler,
-    ) -> Vec<wimo ai_wimo_workspace_types::rpc::workspace::BackgroundTaskSummaryWire> {
+    ) -> Vec<wimoai_wimo_workspace_types::rpc::workspace::BackgroundTaskSummaryWire> {
         let value = handler
             .dispatch(
                 "workspace.list_background_tasks",
@@ -256,7 +256,7 @@ async fn list_background_tasks_rpc_stays_truthful_across_rebinds() {
     let read_only = ToolServerConfig {
         tools: vec![tc(
             "Wimo:read_file",
-            Some(wimo ai_wimo_tools::types::tool::ToolKind::Read),
+            Some(wimoai_wimo_tools::types::tool::ToolKind::Read),
         )],
         behavior_preset: None,
     };
@@ -386,7 +386,7 @@ async fn tasks_snapshot_rpc_lists_outstanding_background_tasks() {
 /// `hub_session_deletes_a_live_scheduled_task` covers the session that does ask.
 #[tokio::test]
 async fn delete_scheduled_task_rpc_reports_honestly() {
-    use wimo ai_wimo_workspace_types::rpc::workspace::DeleteScheduledTaskResponse;
+    use wimoai_wimo_workspace_types::rpc::workspace::DeleteScheduledTaskResponse;
     let handle = make_handle();
     let cfg = background_capable_cfg();
     let session = handle
@@ -449,7 +449,7 @@ async fn seed_scheduled_task(toolset: &FinalizedToolset, id: &str) {
 }
 #[tokio::test]
 async fn kill_task_rpc_terminates_outstanding_background_task() {
-    use wimo ai_wimo_workspace_types::rpc::workspace::{KillTaskOutcome, KillTaskResponse};
+    use wimoai_wimo_workspace_types::rpc::workspace::{KillTaskOutcome, KillTaskResponse};
     let handle = make_handle();
     let cfg = background_capable_cfg();
     let session = handle
@@ -704,7 +704,7 @@ async fn bind_rejected_after_evict_drain() {
 }
 #[tokio::test]
 async fn repeat_evict_does_not_redrain() {
-    use wimo ai_tool_protocol::ToolServerLifecycleStatus;
+    use wimoai_tool_protocol::ToolServerLifecycleStatus;
     let handle = make_handle();
     let tracker = handle.activity_tracker().clone();
     let handler = WorkspaceRpcHandler::new(handle);
@@ -1205,7 +1205,7 @@ async fn handle_call_wraps_in_envelope_with_value() {
     let handler = WorkspaceRpcHandler::new(handle);
     let mut ctx = ToolCallContext::default();
     ctx.extensions
-        .insert(wimo ai_tool_runtime::SessionContext("main".to_owned()));
+        .insert(wimoai_tool_runtime::SessionContext("main".to_owned()));
     let args = serde_json::json!({
         "method": "workspace.get_session_summary",
         "params": {}
@@ -1213,7 +1213,7 @@ async fn handle_call_wraps_in_envelope_with_value() {
     let mut stream = handler.handle_call(ctx, args).await;
     let item = next_item(&mut stream).await.expect("should have terminal");
     match item {
-        wimo ai_tool_runtime::ToolStreamItem::Terminal(Ok(typed)) => {
+        wimoai_tool_runtime::ToolStreamItem::Terminal(Ok(typed)) => {
             let ok_val = typed
                 .value
                 .get("ok")
@@ -1238,7 +1238,7 @@ async fn handle_call_error_envelope() {
     let mut stream = handler.handle_call(ctx, args).await;
     let item = next_item(&mut stream).await.expect("should have terminal");
     match item {
-        wimo ai_tool_runtime::ToolStreamItem::Terminal(Ok(typed)) => {
+        wimoai_tool_runtime::ToolStreamItem::Terminal(Ok(typed)) => {
             assert!(
                 typed.value.get("err").is_some(),
                 "envelope should have 'err' key: {}",
@@ -1262,7 +1262,7 @@ async fn handle_call_records_rpc_metrics_and_collapses_unknown_method() {
         .get_sample_count();
     let mut ctx = ToolCallContext::default();
     ctx.extensions
-        .insert(wimo ai_tool_runtime::SessionContext("main".to_owned()));
+        .insert(wimoai_tool_runtime::SessionContext("main".to_owned()));
     let mut stream = handler
         .handle_call(
             ctx,
@@ -1438,7 +1438,7 @@ async fn handle_hook_unrecognized_custom_kind_does_not_panic() {
 }
 #[tokio::test]
 async fn handle_hook_cancel_marks_call_completed() {
-    use wimo ai_tool_protocol::ToolCallId;
+    use wimoai_tool_protocol::ToolCallId;
     let handle = make_handle();
     let handler = WorkspaceRpcHandler::new(handle.clone());
     let tracker = handle.activity_tracker();
@@ -2126,15 +2126,15 @@ async fn dispatch_knows_every_typed_method() {
     };
     use crate::workspace_ops::*;
     use crate::worktree::{ApplyWorktreeRequest, CreateWorktreeRequest, RemoveWorktreeRequest};
-    use wimo ai_wimo_workspace_types::rpc::git::{GitBranchInfoReq, GitMetadataReq};
-    use wimo ai_wimo_workspace_types::rpc::search::FuzzyStatusReq;
-    use wimo ai_wimo_workspace_types::rpc::skills::DiscoverPluginsReq;
-    use wimo ai_wimo_workspace_types::rpc::workspace::{
+    use wimoai_wimo_workspace_types::rpc::git::{GitBranchInfoReq, GitMetadataReq};
+    use wimoai_wimo_workspace_types::rpc::search::FuzzyStatusReq;
+    use wimoai_wimo_workspace_types::rpc::skills::DiscoverPluginsReq;
+    use wimoai_wimo_workspace_types::rpc::workspace::{
         ConfigureMcpReq, DropSessionReq, InstallPluginReq, LoadEnvrcReq, LoadPermissionsReq,
         LoadProjectConfigReq, RefreshPluginsReq, ResolveFileReferencesReq, ToolDefinitionsReq,
         UpdateToolConfigReq,
     };
-    use wimo ai_wimo_workspace_types::rpc::worktree::WorktreeCreateSyncReq;
+    use wimoai_wimo_workspace_types::rpc::worktree::WorktreeCreateSyncReq;
     let handler = WorkspaceRpcHandler::new(make_handle());
     let methods = [
         <WorkspaceInfoReq as WorkspaceRpc>::METHOD,
@@ -2208,7 +2208,7 @@ async fn dispatch_knows_every_typed_method() {
         <EndPromptReq as WorkspaceRpc>::METHOD,
         <GetRewindPointsReq as WorkspaceRpc>::METHOD,
         <RewindToReq as WorkspaceRpc>::METHOD,
-        <wimo ai_wimo_workspace_types::rpc::presence::PresenceNoteReq as WorkspaceRpc>::METHOD,
+        <wimoai_wimo_workspace_types::rpc::presence::PresenceNoteReq as WorkspaceRpc>::METHOD,
         <HookRegistryReq as WorkspaceRpc>::METHOD,
         <LoadProjectConfigReq as WorkspaceRpc>::METHOD,
         <LoadPermissionsReq as WorkspaceRpc>::METHOD,
@@ -2241,8 +2241,8 @@ async fn dispatch_knows_every_typed_method() {
 #[tokio::test]
 async fn dispatch_stamps_client_rpc_activity_for_mutations_only() {
     use crate::file_system::{FsListReq, FsWriteFileReq};
-    use wimo ai_wimo_workspace_types::rpc::workspace::DropSessionReq;
-    use wimo ai_tool_protocol::IdleWithholdReason;
+    use wimoai_wimo_workspace_types::rpc::workspace::DropSessionReq;
+    use wimoai_tool_protocol::IdleWithholdReason;
     let handler = WorkspaceRpcHandler::new(make_handle());
     let tracker = handler.workspace.activity_tracker().clone();
     assert_eq!(tracker.snapshot().withhold_reason, None);
@@ -2285,8 +2285,8 @@ async fn dispatch_stamps_client_rpc_activity_for_mutations_only() {
 }
 #[tokio::test]
 async fn presence_note_stamps_only_visible_notes_for_live_sessions() {
-    use wimo ai_wimo_workspace_types::rpc::presence::PresenceNoteReq;
-    use wimo ai_tool_protocol::IdleWithholdReason;
+    use wimoai_wimo_workspace_types::rpc::presence::PresenceNoteReq;
+    use wimoai_tool_protocol::IdleWithholdReason;
     let handle = crate::handle::tests::make_handle_with_status_config(crate::StatusConfig {
         presence_keepalive_enabled: true,
         ..crate::StatusConfig::default()
@@ -2338,7 +2338,7 @@ async fn presence_note_stamps_only_visible_notes_for_live_sessions() {
 }
 #[tokio::test]
 async fn presence_note_is_inert_while_dark() {
-    use wimo ai_wimo_workspace_types::rpc::presence::PresenceNoteReq;
+    use wimoai_wimo_workspace_types::rpc::presence::PresenceNoteReq;
     let handle = make_handle();
     handle.create_session("sess-1").expect("create session");
     let tracker = handle.activity_tracker().clone();

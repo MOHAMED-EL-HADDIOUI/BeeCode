@@ -10,8 +10,8 @@ use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Paragraph, Widget};
 use std::path::PathBuf;
-use wimo ai_wimo_shell::claude_import::{ImportPlan, ImportableItem, PathKind, find_project_root};
-use wimo ai_wimo_workspace::permission::types::RuleAction;
+use wimoai_wimo_shell::claude_import::{ImportPlan, ImportableItem, PathKind, find_project_root};
+use wimoai_wimo_workspace::permission::types::RuleAction;
 
 use crate::theme::Theme;
 use crate::views::modal_window::{
@@ -723,7 +723,7 @@ fn build_rows(
         let scope_key = format!("scope:{:?}", Scope::Project);
         let project_config = find_project_root(cwd)
             .join(".wimo")
-            .join(wimo ai_wimo_config::USER_CONFIG_FILENAME);
+            .join(wimoai_wimo_config::USER_CONFIG_FILENAME);
         let label = format!("Project  {}", project_config.display());
         let scope_header_pos = rows.len();
         rows.push(Row::ScopeHeader {
@@ -1050,8 +1050,8 @@ fn is_selectable(row: &Row) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_shell::claude_import::PathKind;
-    use wimo ai_wimo_workspace::permission::types::{PatternMode, PermissionRule, ToolFilter};
+    use wimoai_wimo_shell::claude_import::PathKind;
+    use wimoai_wimo_workspace::permission::types::{PatternMode, PermissionRule, ToolFilter};
 
     fn sample_plan() -> ImportPlan {
         ImportPlan {
@@ -1117,9 +1117,9 @@ mod tests {
     /// De-selecting an MCP server must skip THAT MCP server in `filtered_plan`, not another item sharing the deselected slot's index.
     #[test]
     fn filtered_plan_respects_per_item_selection_after_grouping() {
-        use wimo ai_wimo_shell::claude_import::ImportableItem;
-        use wimo ai_wimo_shell::util::config::{McpServerConfig, McpServerTransportConfig};
-        use wimo ai_wimo_workspace::permission::types::{PatternMode, PermissionRule, ToolFilter};
+        use wimoai_wimo_shell::claude_import::ImportableItem;
+        use wimoai_wimo_shell::util::config::{McpServerConfig, McpServerTransportConfig};
+        use wimoai_wimo_workspace::permission::types::{PatternMode, PermissionRule, ToolFilter};
 
         // Mix Permissions, MCP servers, and EnvVars in a non-sorted order so the display order (sorted by ItemKind) differs from the source order
         let mcp = |name: &str| ImportableItem::McpServer {

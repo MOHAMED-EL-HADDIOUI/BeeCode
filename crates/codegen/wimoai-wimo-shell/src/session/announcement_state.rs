@@ -3,7 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use wimo ai_wimo_tools::implementations::search_tool::ServerFingerprint;
+use wimoai_wimo_tools::implementations::search_tool::ServerFingerprint;
 
 /// Persisted announcement tracking state.
 ///

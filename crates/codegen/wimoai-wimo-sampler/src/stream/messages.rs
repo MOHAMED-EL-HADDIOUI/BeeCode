@@ -9,8 +9,8 @@ use std::time::{Duration, Instant};
 use futures_util::StreamExt;
 use futures_util::stream::{BoxStream, Stream};
 
-use wimo ai_wimo_sampling_types::messages::{self, MessageStreamEvent};
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::messages::{self, MessageStreamEvent};
+use wimoai_wimo_sampling_types::{
     AssistantItem, ConversationItem, ConversationResponse, ResponseModelMetadata, SamplingError,
     StopReason, TokenUsage, ToolCall, rs,
 };

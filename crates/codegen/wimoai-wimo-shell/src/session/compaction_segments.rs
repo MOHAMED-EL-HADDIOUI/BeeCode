@@ -2,14 +2,14 @@
 //! Split into two methods so the write isn't hidden behind a text-producing name.
 //!
 //! Layering (do NOT collapse): the mode decision and hint text sit in [`CompactionMode`].
-//! The markdown render sits in `wimo ai-compaction-transcript`, disk I/O in `StorageAdapter`.
+//! The markdown render sits in `wimoai-compaction-transcript`, disk I/O in `StorageAdapter`.
 use super::SessionActor;
 use crate::extensions::notification::CompactionSegmentFile;
 use crate::session::persistence::PersistenceMsg;
-use wimo ai_chat_state::CompactionMode;
-use wimo ai_chat_state::compaction_utils::format_compact_summary;
-use wimo ai_compaction_transcript::COMPACTION_DIR;
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_chat_state::CompactionMode;
+use wimoai_chat_state::compaction_utils::format_compact_summary;
+use wimoai_compaction_transcript::COMPACTION_DIR;
+use wimoai_wimo_sampling_types::ConversationItem;
 impl SessionActor {
     /// Persist the per-segment store (`Segments` only; no-op for `Summary` and `Transcript`).
     /// Queues a write on the persistence channel; storage assigns the index and renders the markdown.

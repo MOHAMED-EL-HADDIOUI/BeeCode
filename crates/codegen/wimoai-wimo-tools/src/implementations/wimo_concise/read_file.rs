@@ -38,28 +38,28 @@ impl crate::types::tool_metadata::ToolMetadata for ReadFileConciseTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for ReadFileConciseTool {
+impl wimoai_tool_runtime::Tool for ReadFileConciseTool {
     type Args = ReadFileInput;
     type Output = ReadFileOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("read_file").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("read_file").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "read_file",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -71,16 +71,16 @@ impl wimo ai_tool_runtime::Tool for ReadFileConciseTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: ReadFileInput,
-    ) -> Result<ReadFileOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ReadFileOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
         // WimoConcise is not version-managed — always pass None.
         let cwd_override = ctx
             .extensions
-            .get::<wimo ai_tool_runtime::Cwd>()
+            .get::<wimoai_tool_runtime::Cwd>()
             .map(|c| c.0.clone());
         // `None`: the concise tool does not stream, so it needs no
         // text-path streamability signal (see `run_read_file`).
@@ -169,7 +169,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
         match result {

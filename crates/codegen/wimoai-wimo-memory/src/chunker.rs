@@ -3,7 +3,7 @@
 //! Chunks respect markdown structure (headers, paragraphs, code blocks) and include ancestor headers so each chunk stands alone.
 //! Character counts stand in for token counts, at about 4 characters per token.
 
-use wimo ai_wimo_config_types::MemoryIndexConfig;
+use wimoai_wimo_config_types::MemoryIndexConfig;
 
 /// A chunk of text extracted from a memory file.
 #[derive(Debug, Clone, PartialEq, Eq)]

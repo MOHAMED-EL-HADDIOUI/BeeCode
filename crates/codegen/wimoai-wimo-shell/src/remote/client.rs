@@ -21,9 +21,9 @@ fn add_cli_chat_proxy_headers_blocking(
 ) -> reqwest::blocking::RequestBuilder {
     let mut builder = builder
         .header("Authorization", format!("Bearer {}", &auth.key))
-        .header("X-wimo ai-Token-Auth", wimoComConfig::default().token_header)
+        .header("X-wimoai-Token-Auth", wimoComConfig::default().token_header)
         .header("x-userid", &auth.user_id)
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION);
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION);
     if let Some(email) = &auth.email {
         builder = builder.header("x-email", email);
     }
@@ -52,7 +52,7 @@ async fn add_bundle_fetch_headers(
     url: &str,
 ) -> reqwest::RequestBuilder {
     let resolved_auth = match auth_manager {
-        Some(am) if ActiveAuthBackend::default().is_wimo ai_authority() => am.auth().await.ok(),
+        Some(am) if ActiveAuthBackend::default().is_wimoai_authority() => am.auth().await.ok(),
         _ => None,
     };
     let mut credentials = crate::util::wimo_auth_credentials::wimoAuthCredentials::new(
@@ -62,7 +62,7 @@ async fn add_bundle_fetch_headers(
     credentials.alpha_test_key = alpha_test_key.map(str::to_owned);
     let mut builder = credentials
         .apply(builder, url)
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION);
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION);
     if deployment_key.is_none()
         && let Some(auth) = &resolved_auth
     {
@@ -80,7 +80,7 @@ async fn add_bundle_fetch_headers(
             crate::http::CLIENT_MODE_HEADER,
             crate::http::process_client_mode(),
         );
-    wimo ai_file_utils::trace_context::inject_trace_context_into_request(builder)
+    wimoai_file_utils::trace_context::inject_trace_context_into_request(builder)
 }
 /// Fetch the bundled subagent cache payload from cli-chat-proxy `GET /v1/subagents/bundle`.
 ///
@@ -149,7 +149,7 @@ async fn fetch_bundle_inner(
     let archive_url = format!("{}/bundle/archive", cli_chat_proxy_base_url);
     let raw_client = crate::http::shared_client();
     let client: reqwest_middleware::ClientWithMiddleware = if let Some(am) = auth_manager {
-        let provider: std::sync::Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider> =
+        let provider: std::sync::Arc<dyn wimoai_wimo_auth::AuthCredentialProvider> =
             std::sync::Arc::new(
                 crate::auth::credential_provider::ShellAuthCredentialProvider::new(
                     am.clone(),
@@ -164,7 +164,7 @@ async fn fetch_bundle_inner(
     let mut request = client
         .get(&archive_url)
         .timeout(std::time::Duration::from_secs(30))
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
         .header(
             crate::http::CLIENT_MODE_HEADER,
             crate::http::process_client_mode(),
@@ -286,7 +286,7 @@ impl Default for BackendClient {
 }
 impl BackendClient {
     fn build_default_client() -> reqwest::Client {
-        wimo ai_wimo_extra_ca::build_reqwest_client(|builder| {
+        wimoai_wimo_extra_ca::build_reqwest_client(|builder| {
                 builder.connect_timeout(Duration::from_secs(10)).timeout(DEFAULT_TIMEOUT)
             })
             .unwrap_or_else(|e| {
@@ -318,7 +318,7 @@ impl BackendClient {
         mut self,
         manager: std::sync::Arc<crate::auth::AuthManager>,
     ) -> Self {
-        let credentials: std::sync::Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider> =
+        let credentials: std::sync::Arc<dyn wimoai_wimo_auth::AuthCredentialProvider> =
             std::sync::Arc::new(
                 crate::auth::credential_provider::ShellAuthCredentialProvider::new(
                     manager.clone(),
@@ -374,8 +374,8 @@ impl BackendClient {
         let share_response = self.create_share_link(&session.session_id).await?;
         Ok(share_url(&share_response.permission_id))
     }
-    /// Must include X-wimo ai-Token-Auth so nginx auth subrequest routes to OAuth.
-    /// See: crates/codegen/wimo ai-wimo-shell/src/agent/app.rs:run_headless
+    /// Must include X-wimoai-Token-Auth so nginx auth subrequest routes to OAuth.
+    /// See: crates/codegen/wimoai-wimo-shell/src/agent/app.rs:run_headless
     async fn auth_header_map(&self) -> Result<reqwest::header::HeaderMap, BackendError> {
         use reqwest::header::{HeaderMap, HeaderValue};
         let auth = self.resolve_auth().await?;
@@ -385,8 +385,8 @@ impl BackendClient {
                 .map_err(|e| BackendError::Auth(format!("invalid {name} header: {e}")))
         };
         headers.insert(
-            "X-wimo ai-Token-Auth",
-            required(&wimoComConfig::default().token_header, "X-wimo ai-Token-Auth")?,
+            "X-wimoai-Token-Auth",
+            required(&wimoComConfig::default().token_header, "X-wimoai-Token-Auth")?,
         );
         headers.insert("x-userid", required(&auth.user_id, "x-userid")?);
         if let Some(email) = &auth.email
@@ -403,7 +403,7 @@ impl BackendClient {
         );
         headers.insert(
             "x-wimo-client-version",
-            HeaderValue::from_static(wimo ai_wimo_version::VERSION),
+            HeaderValue::from_static(wimoai_wimo_version::VERSION),
         );
         Ok(headers)
     }
@@ -412,7 +412,7 @@ impl BackendClient {
         builder: reqwest::RequestBuilder,
     ) -> Result<reqwest::Response, BackendError> {
         let headers = self.auth_header_map().await?;
-        let builder = wimo ai_file_utils::trace_context::inject_trace_context_into_request(
+        let builder = wimoai_file_utils::trace_context::inject_trace_context_into_request(
             builder.timeout(DEFAULT_TIMEOUT).headers(headers),
         );
         let request = builder.build()?;
@@ -635,7 +635,7 @@ struct LoginConfigResponse {
 /// Best-effort: any error or unset flag returns `None` so the caller keeps the loopback default.
 /// Caps at 1.5s with no retries since it's on the login path.
 pub async fn fetch_login_device_flow(cli_chat_proxy_base_url: &str) -> Option<bool> {
-    let agent_id = tokio::task::spawn_blocking(wimo ai_wimo_telemetry::id::agent_id)
+    let agent_id = tokio::task::spawn_blocking(wimoai_wimo_telemetry::id::agent_id)
         .await
         .ok()?;
     let client = crate::http::shared_client();
@@ -644,7 +644,7 @@ pub async fn fetch_login_device_flow(cli_chat_proxy_base_url: &str) -> Option<bo
         .get(&url)
         .timeout(std::time::Duration::from_millis(1500))
         .header("x-wimo-agent-id", agent_id)
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
         .header(
             "x-wimo-client-identifier",
             crate::http::process_client_identifier(),
@@ -793,7 +793,7 @@ pub(crate) fn parse_remote_model_value(
             .or_else(|| obj.get("reasoning_efforts"))
             .or_else(|| meta.and_then(|m| m.get("reasoningEfforts")))
             .and_then(|v| v.as_array())
-            .map(|arr| wimo ai_wimo_sampling_types::parse_reasoning_effort_options(arr))
+            .map(|arr| wimoai_wimo_sampling_types::parse_reasoning_effort_options(arr))
             .unwrap_or_default(),
         variants: obj
             .get("variants")
@@ -828,7 +828,7 @@ pub(crate) fn parse_remote_model_value(
                     .or_else(|| obj.get("send_compactions_remaining"))
                     .or_else(|| meta.and_then(|m| m.get("sendCompactionsRemaining")))
                     .and_then(|v| v.as_bool())
-                    .map(wimo ai_wimo_sampling_types::CompactionsRemaining::Dynamic)
+                    .map(wimoai_wimo_sampling_types::CompactionsRemaining::Dynamic)
             }),
         compaction_at_tokens: obj
             .get("compactionAtTokens")
@@ -898,16 +898,16 @@ fn get_env_keys(
 }
 fn parse_compaction_at_tokens(
     v: &serde_json::Value,
-) -> Option<wimo ai_wimo_sampling_types::CompactionAtTokens> {
-    use wimo ai_wimo_sampling_types::CompactionAtTokens;
+) -> Option<wimoai_wimo_sampling_types::CompactionAtTokens> {
+    use wimoai_wimo_sampling_types::CompactionAtTokens;
     v.as_bool()
         .map(CompactionAtTokens::Enabled)
         .or_else(|| v.as_u64().map(CompactionAtTokens::Fixed))
 }
 fn parse_compactions_remaining(
     v: &serde_json::Value,
-) -> Option<wimo ai_wimo_sampling_types::CompactionsRemaining> {
-    use wimo ai_wimo_sampling_types::CompactionsRemaining;
+) -> Option<wimoai_wimo_sampling_types::CompactionsRemaining> {
+    use wimoai_wimo_sampling_types::CompactionsRemaining;
     v.as_bool().map(CompactionsRemaining::Dynamic).or_else(|| {
         v.as_u64()
             .and_then(|n| u8::try_from(n).ok())

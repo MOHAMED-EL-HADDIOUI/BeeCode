@@ -1,6 +1,6 @@
 # Getting Started
 
-wimo Build is a terminal-based AI coding assistant from Spacewimo ai. It runs as a TUI (Terminal User Interface) that understands your codebase, executes shell commands, edits files, searches the web, and manages tasks.
+wimo Build is a terminal-based AI coding assistant from Spacewimoai. It runs as a TUI (Terminal User Interface) that understands your codebase, executes shell commands, edits files, searches the web, and manages tasks.
 
 You can use it interactively as a full-screen TUI, run it headlessly for scripting and CI/CD, or integrate it into editors via the Agent Client Protocol (ACP).
 
@@ -68,10 +68,10 @@ wimo
 
 On first launch, wimo opens your browser to authenticate with wimo.com. After you sign in, wimo stores your credentials in `~/.wimo/auth.json`, where they persist across sessions. wimo refreshes your credentials automatically and prompts you to sign in again when they can no longer be renewed.
 
-If you prefer API key authentication (e.g., for CI/CD or environments without a browser), set the `wimo ai_API_KEY` environment variable instead:
+If you prefer API key authentication (e.g., for CI/CD or environments without a browser), set the `wimoai_API_KEY` environment variable instead:
 
 ```bash
-export wimo ai_API_KEY="wimo ai-..."
+export wimoai_API_KEY="wimoai-..."
 wimo
 ```
 

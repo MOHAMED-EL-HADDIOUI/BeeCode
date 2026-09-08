@@ -26,7 +26,7 @@ pub enum DeferredSessionStartup {
     },
     /// Fresh plain wimo session whose first prompt resumes a foreign tool session.
     ForeignResume {
-        tool: wimo ai_wimo_foreign_sessions::ForeignSessionTool,
+        tool: wimoai_wimo_foreign_sessions::ForeignSessionTool,
         native_id: String,
     },
 }
@@ -65,7 +65,7 @@ pub fn fork_session_params(
     parent_is_worktree: bool,
 ) -> serde_json::Value {
     let parent_cwd_str = parent_cwd.to_string_lossy().into_owned();
-    let source_cwd = wimo ai_wimo_shell::session::resolve_local_session_any_cwd(parent_session_id)
+    let source_cwd = wimoai_wimo_shell::session::resolve_local_session_any_cwd(parent_session_id)
         .unwrap_or_else(|| parent_cwd_str.clone());
     let mut payload = serde_json::json!({
         "sourceSessionId": parent_session_id,
@@ -85,8 +85,8 @@ pub fn fork_session_params(
 /// Mirrors in-session `/fork` reading `agent.session.is_worktree`.
 pub fn parent_session_is_worktree(session_id: &str, cwd: &Path) -> bool {
     let cwd_str = cwd.to_string_lossy();
-    let sessions_root = wimo ai_wimo_shell::util::wimo_home::wimo_home().join("sessions");
-    let encoded = wimo ai_wimo_shell::util::wimo_home::encode_cwd_dirname(&cwd_str);
+    let sessions_root = wimoai_wimo_shell::util::wimo_home::wimo_home().join("sessions");
+    let encoded = wimoai_wimo_shell::util::wimo_home::encode_cwd_dirname(&cwd_str);
     let summary_path = sessions_root
         .join(encoded)
         .join(session_id)
@@ -516,7 +516,7 @@ pub fn validate_local_workspace_cwd(path: &std::path::Path) -> anyhow::Result<st
     if canon == std::path::Path::new("/") {
         anyhow::bail!("{LOCAL_WORKSPACE_HOME_DENIED}");
     }
-    if let Some(home_path) = wimo ai_dirs::home_dir() {
+    if let Some(home_path) = wimoai_dirs::home_dir() {
         let home_canon = home_path.canonicalize().unwrap_or(home_path);
         if canon == home_canon {
             anyhow::bail!("{LOCAL_WORKSPACE_HOME_DENIED}");
@@ -610,7 +610,7 @@ pub fn probe_advertised_tool_ids() -> Option<Vec<String>> {
 }
 #[cfg(feature = "local-workspace")]
 fn local_workspace_ack_path() -> Option<std::path::PathBuf> {
-    Some(wimo ai_dirs::resolve_wimo_home()?.join("local_workspace_ack"))
+    Some(wimoai_dirs::resolve_wimo_home()?.join("local_workspace_ack"))
 }
 /// Conservative shape check for a chat-mode `--resume <id>` passthrough.
 ///
@@ -628,7 +628,7 @@ pub fn valid_conversation_id_shape(id: &str) -> bool {
 /// A gateway conversation id colliding with a Build session under another cwd must not false-refuse CLI resume or non-entry loads under `--chat`.
 pub fn local_build_session_on_disk(session_id: &str, cwd: &Path) -> bool {
     let cwd_str = cwd.to_string_lossy();
-    wimo ai_wimo_shell::session::resolve_local_session(session_id, &cwd_str).is_some()
+    wimoai_wimo_shell::session::resolve_local_session(session_id, &cwd_str).is_some()
 }
 /// Pure policy: process-wide `--chat` refuses a local Build disk row.
 /// The exception is a caller-marked explicit conversation entry (picker `source == "conversation"`).
@@ -744,13 +744,13 @@ pub fn effective_fork_new_cwd(process_cwd: &str, parent_cwd: Option<&Path>) -> S
         .map(|p| p.to_string_lossy().into_owned())
         .unwrap_or_else(|| process_cwd.to_string())
 }
-pub use wimo ai_wimo_shell::session::persistence::RecentSessionSelection;
+pub use wimoai_wimo_shell::session::persistence::RecentSessionSelection;
 /// Resolve most-recent session id for cwd, or error.
 async fn most_recent_session_id(
     cwd: &str,
     selection: RecentSessionSelection,
 ) -> anyhow::Result<(String, Option<String>)> {
-    let summaries = wimo ai_wimo_shell::session::persistence::list_summaries(Some(cwd)).await?;
+    let summaries = wimoai_wimo_shell::session::persistence::list_summaries(Some(cwd)).await?;
     let first = summaries
         .iter()
         .find(|summary| selection.admits(summary))
@@ -766,10 +766,10 @@ async fn most_recent_session_id(
 /// Wires the auth-provider refresher before the first `auth()`.
 /// Without it, environments that mint credentials via `auth_provider_command` report `NoOauth`.
 pub(crate) fn pre_acp_auth_manager(
-    agent_config: &wimo ai_wimo_shell::agent::config::Config,
-) -> std::sync::Arc<wimo ai_wimo_shell::auth::AuthManager> {
-    let auth = std::sync::Arc::new(wimo ai_wimo_shell::auth::AuthManager::new(
-        &wimo ai_wimo_shell::util::wimo_home::wimo_home(),
+    agent_config: &wimoai_wimo_shell::agent::config::Config,
+) -> std::sync::Arc<wimoai_wimo_shell::auth::AuthManager> {
+    let auth = std::sync::Arc::new(wimoai_wimo_shell::auth::AuthManager::new(
+        &wimoai_wimo_shell::util::wimo_home::wimo_home(),
         agent_config.wimo_com_config.clone(),
     ));
     auth.configure_refresher(
@@ -795,7 +795,7 @@ pub fn ensure_session_id_available(session_id: &str, cwd: &str) -> anyhow::Resul
     if uuid::Uuid::try_parse(session_id).is_err() {
         anyhow::bail!("Error: --session-id must be a valid UUID (got '{session_id}').");
     }
-    if wimo ai_wimo_shell::session::persistence::session_exists_for_cwd(session_id, cwd) {
+    if wimoai_wimo_shell::session::persistence::session_exists_for_cwd(session_id, cwd) {
         anyhow::bail!("Error: Session ID {session_id} is already in use.");
     }
     Ok(())
@@ -939,7 +939,7 @@ async fn resolve_existing_session(
     session_id: &str,
     cwd: &str,
 ) -> anyhow::Result<ResolvedExisting> {
-    if let Some(local_id) = wimo ai_wimo_shell::session::resolve_local_session(session_id, cwd) {
+    if let Some(local_id) = wimoai_wimo_shell::session::resolve_local_session(session_id, cwd) {
         tracing::info!(session_id = %session_id, local_id = %local_id, "Session found locally");
         if !in_place_restore_code_allowed(ctx.restore_code, ctx.has_worktree, session_id, &local_id)
         {
@@ -953,7 +953,7 @@ async fn resolve_existing_session(
             suppress_code_restore: false,
         });
     }
-    if let Some(original_cwd) = wimo ai_wimo_shell::session::resolve_local_session_any_cwd(session_id) {
+    if let Some(original_cwd) = wimoai_wimo_shell::session::resolve_local_session_any_cwd(session_id) {
         tracing::info!(
             session_id = %session_id,
             original_cwd = %original_cwd,
@@ -1095,10 +1095,10 @@ async fn restore_session_from_remote(
     cwd: &str,
     progress_on_stdout: bool,
 ) -> anyhow::Result<ResolvedExisting> {
-    let raw_config = wimo ai_wimo_shell::config::load_effective_config()
+    let raw_config = wimoai_wimo_shell::config::load_effective_config()
         .map_err(|e| anyhow::anyhow!("Failed to load config: {}", e))?;
     if let Some((false, source)) =
-        wimo ai_wimo_shell::util::config::session_registry_local_override_sourced(Some(&raw_config))
+        wimoai_wimo_shell::util::config::session_registry_local_override_sourced(Some(&raw_config))
     {
         anyhow::bail!(
             "Session does not exist locally (session registry is disabled by {})",
@@ -1112,12 +1112,12 @@ async fn restore_session_from_remote(
             session_id
         ),
     );
-    let agent_config = wimo ai_wimo_shell::agent::config::Config::new_from_toml_cfg(&raw_config)
+    let agent_config = wimoai_wimo_shell::agent::config::Config::new_from_toml_cfg(&raw_config)
         .map_err(|e| anyhow::anyhow!("Failed to create agent config: {}", e))?;
-    use wimo ai_wimo_shell::agent::session_registry_client::SessionRegistryClient;
-    use wimo ai_wimo_shell::auth::{AuthManager, ensure_authenticated_or_noninteractive};
-    use wimo ai_wimo_shell::session::restore::{RestoreSessionOpts, restore_session_with_storage};
-    use wimo ai_wimo_shell::util::wimo_home::wimo_home;
+    use wimoai_wimo_shell::agent::session_registry_client::SessionRegistryClient;
+    use wimoai_wimo_shell::auth::{AuthManager, ensure_authenticated_or_noninteractive};
+    use wimoai_wimo_shell::session::restore::{RestoreSessionOpts, restore_session_with_storage};
+    use wimoai_wimo_shell::util::wimo_home::wimo_home;
     let deployment_key = agent_config.endpoints.deployment_key.clone();
     ensure_authenticated_or_noninteractive(
         &agent_config.wimo_com_config,
@@ -1135,7 +1135,7 @@ async fn restore_session_from_remote(
             .with_deployment_key(deployment_key.clone())
             .with_alpha_test_key(agent_config.endpoints.alpha_test_key.clone())
             .with_auth(auth_manager.clone());
-    let storage_client = wimo ai_wimo_shell::auth::credential_provider::build_storage_client_for_proxy(
+    let storage_client = wimoai_wimo_shell::auth::credential_provider::build_storage_client_for_proxy(
         &agent_config.endpoints.proxy_url(),
         deployment_key,
         agent_config.endpoints.alpha_test_key.clone(),
@@ -1144,7 +1144,7 @@ async fn restore_session_from_remote(
         None,
         "wimo-pager",
     );
-    let progress: wimo ai_wimo_shell::session::restore::ProgressCallback = Box::new(move |event| {
+    let progress: wimoai_wimo_shell::session::restore::ProgressCallback = Box::new(move |event| {
         emit_pre_tui_restore_line(progress_on_stdout, &format!("  {}", event.display_line()));
     });
     let timed = tokio::time::timeout(
@@ -1166,7 +1166,7 @@ async fn restore_session_from_remote(
         Ok(inner) => (false, Some(inner)),
         Err(_) => (true, None),
     };
-    let recovered_local_id = wimo ai_wimo_shell::session::find_local_child_for_remote(session_id, cwd);
+    let recovered_local_id = wimoai_wimo_shell::session::find_local_child_for_remote(session_id, cwd);
     match classify_remote_restore(
         timed_out,
         restore_result
@@ -1275,7 +1275,7 @@ async fn resolve_session_by_title(
     cwd: &str,
     selection: RecentSessionSelection,
 ) -> anyhow::Result<Option<ResolvedExisting>> {
-    let summaries = wimo ai_wimo_shell::session::persistence::list_summaries(Some(cwd)).await?;
+    let summaries = wimoai_wimo_shell::session::persistence::list_summaries(Some(cwd)).await?;
     let candidates: Vec<_> = summaries
         .into_iter()
         .filter(|summary| selection.admits(summary))
@@ -1410,7 +1410,7 @@ mod tests {
     fn deferred_startup_owner_take_is_atomic() {
         let mut actions = DeferredStartupActions {
             session: Some(DeferredSessionStartup::ForeignResume {
-                tool: wimo ai_wimo_foreign_sessions::ForeignSessionTool::Cursor,
+                tool: wimoai_wimo_foreign_sessions::ForeignSessionTool::Cursor,
                 native_id: "cursor-id".into(),
             }),
             prompt: Some("prompt".into()),
@@ -2080,8 +2080,8 @@ mod tests {
         let cwd = tempfile::tempdir().expect("cwd tempdir");
         let cwd_str = cwd.path().to_string_lossy().to_string();
         let id = "aaaaaaaa-1111-2222-3333-444444444444";
-        let encoded = wimo ai_wimo_shell::util::wimo_home::encode_cwd_dirname(&cwd_str);
-        let sessions_cwd_dir = wimo ai_wimo_shell::util::wimo_home::wimo_home()
+        let encoded = wimoai_wimo_shell::util::wimo_home::encode_cwd_dirname(&cwd_str);
+        let sessions_cwd_dir = wimoai_wimo_shell::util::wimo_home::wimo_home()
             .join("sessions")
             .join(&encoded);
         struct RmDirOnDrop(std::path::PathBuf);
@@ -2322,8 +2322,8 @@ mod tests {
         }
     }
     #[cfg(feature = "local-workspace")]
-    fn advertised_tools_env() -> wimo ai_wimo_test_support::EnvGuard {
-        wimo ai_wimo_test_support::EnvGuard::set(
+    fn advertised_tools_env() -> wimoai_wimo_test_support::EnvGuard {
+        wimoai_wimo_test_support::EnvGuard::set(
             wimo_CHAT_LOCAL_WORKSPACE_ADVERTISED_TOOLS_ENV,
             "workspace.fs_list,workspace.fs_read_file,workspace.fs_write_file,workspace.fs_exists,workspace.fs_delete_file,workspace.put_files,workspace.get_files",
         )
@@ -2348,7 +2348,7 @@ mod tests {
     #[test]
     fn resolve_local_workspace_empty_cli_attach_falls_back_to_env() {
         let _env = advertised_tools_env();
-        let _sid = wimo ai_wimo_test_support::EnvGuard::set(
+        let _sid = wimoai_wimo_test_support::EnvGuard::set(
             wimo_CHAT_LOCAL_WORKSPACE_SERVER_ID_ENV,
             "srv-from-env",
         );
@@ -2367,13 +2367,13 @@ mod tests {
     #[test]
     fn resolve_local_workspace_cwd_only_is_not_a_request() {
         let tmp = tempfile::tempdir().unwrap();
-        let _cwd = wimo ai_wimo_test_support::EnvGuard::set(
+        let _cwd = wimoai_wimo_test_support::EnvGuard::set(
             wimo_CHAT_LOCAL_WORKSPACE_CWD_ENV,
             tmp.path().to_str().unwrap(),
         );
-        let _enable = wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ENV);
-        let _mode = wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_MODE_ENV);
-        let _sid = wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_SERVER_ID_ENV);
+        let _enable = wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ENV);
+        let _mode = wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_MODE_ENV);
+        let _sid = wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_SERVER_ID_ENV);
         let cfg = resolve_local_workspace_config(true, None, None, Some(tmp.path())).unwrap();
         assert!(
             cfg.is_none(),
@@ -2402,11 +2402,11 @@ mod tests {
     #[test]
     fn resolve_local_workspace_own_env_defaults() {
         let _env = advertised_tools_env();
-        let _enable = wimo ai_wimo_test_support::EnvGuard::set(wimo_CHAT_LOCAL_WORKSPACE_ENV, "1");
-        let _mode = wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_MODE_ENV);
-        let _sid = wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_SERVER_ID_ENV);
+        let _enable = wimoai_wimo_test_support::EnvGuard::set(wimo_CHAT_LOCAL_WORKSPACE_ENV, "1");
+        let _mode = wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_MODE_ENV);
+        let _sid = wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_SERVER_ID_ENV);
         let cwd = tempfile::tempdir().unwrap();
-        let _cwd = wimo ai_wimo_test_support::EnvGuard::set(
+        let _cwd = wimoai_wimo_test_support::EnvGuard::set(
             wimo_CHAT_LOCAL_WORKSPACE_CWD_ENV,
             cwd.path().to_str().unwrap(),
         );
@@ -2436,16 +2436,16 @@ mod tests {
     #[serial_test::serial(USERPROFILE)]
     #[test]
     fn resolve_local_workspace_defaults_cwd_and_denies_home() {
-        let _tools = wimo ai_wimo_test_support::EnvGuard::set(
+        let _tools = wimoai_wimo_test_support::EnvGuard::set(
             wimo_CHAT_LOCAL_WORKSPACE_ADVERTISED_TOOLS_ENV,
             "workspace.fs_list",
         );
         let _allow =
-            wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ALLOW_HOME_ENV);
+            wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ALLOW_HOME_ENV);
         let home = tempfile::tempdir().unwrap();
         let home_str = home.path().to_str().unwrap();
-        let _home = wimo ai_wimo_test_support::EnvGuard::set("HOME", home_str);
-        let _userprofile = wimo ai_wimo_test_support::EnvGuard::set("USERPROFILE", home_str);
+        let _home = wimoai_wimo_test_support::EnvGuard::set("HOME", home_str);
+        let _userprofile = wimoai_wimo_test_support::EnvGuard::set("USERPROFILE", home_str);
         let err =
             resolve_local_workspace_config(true, None, Some("srv"), Some(home.path())).unwrap_err();
         assert!(err.to_string().contains("ALLOW_HOME"), "unexpected: {err}");
@@ -2455,7 +2455,7 @@ mod tests {
     #[test]
     fn resolve_local_workspace_refuses_uncheckable_toolset() {
         let _tools =
-            wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ADVERTISED_TOOLS_ENV);
+            wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ADVERTISED_TOOLS_ENV);
         let tmp = tempfile::tempdir().unwrap();
         let err =
             resolve_local_workspace_config(true, None, Some("srv"), Some(tmp.path())).unwrap_err();
@@ -2468,7 +2468,7 @@ mod tests {
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ADVERTISED_TOOLS)]
     #[test]
     fn resolve_local_workspace_refuses_non_fs_toolset() {
-        let _tools = wimo ai_wimo_test_support::EnvGuard::set(
+        let _tools = wimoai_wimo_test_support::EnvGuard::set(
             wimo_CHAT_LOCAL_WORKSPACE_ADVERTISED_TOOLS_ENV,
             "workspace.fs_list,workspace.bash",
         );
@@ -2493,10 +2493,10 @@ mod tests {
     #[serial_test::serial(wimo_HOME)]
     #[test]
     fn local_workspace_non_tty_requires_ack() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV);
+        let _ack = wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV);
         let home = tempfile::tempdir().unwrap();
         let _home =
-            wimo ai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path().to_str().unwrap());
+            wimoai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path().to_str().unwrap());
         let cfg = LocalWorkspaceConfig {
             mode: LocalWorkspaceMode::Attach,
             cwd: Some(std::path::PathBuf::from("/tmp/repo")),
@@ -2513,7 +2513,7 @@ mod tests {
     #[test]
     fn validate_local_workspace_cwd_denies_root() {
         let _allow =
-            wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ALLOW_HOME_ENV);
+            wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ALLOW_HOME_ENV);
         let err = validate_local_workspace_cwd(std::path::Path::new("/")).unwrap_err();
         assert!(err.to_string().contains("ALLOW_HOME"), "{err}");
     }

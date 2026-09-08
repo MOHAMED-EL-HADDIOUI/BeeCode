@@ -7,12 +7,12 @@ use futures::stream::{self, Stream, StreamExt};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use wimo ai_tool_protocol::{StreamingSpec, ToolCapabilities, ToolId};
-use wimo ai_tool_runtime::{
+use wimoai_tool_protocol::{StreamingSpec, ToolCapabilities, ToolId};
+use wimoai_tool_runtime::{
     ContentBlock, Tool, ToolCallContext, ToolError, ToolErrorKind, ToolOutput, ToolProgress,
     ToolStream, ToolStreamItem, with_progress,
 };
-use wimo ai_tool_types::ToolDescription;
+use wimoai_tool_types::ToolDescription;
 
 #[derive(Debug, Deserialize, Serialize, JsonSchema)]
 struct EmptyArgs {}
@@ -33,7 +33,7 @@ impl Tool for StreamingOk {
         ToolId::new("streaming_ok").unwrap()
     }
 
-    fn description(&self, _ctx: &::wimo ai_tool_runtime::ListToolsContext) -> ToolDescription {
+    fn description(&self, _ctx: &::wimoai_tool_runtime::ListToolsContext) -> ToolDescription {
         ToolDescription::new("streaming_ok", "ok")
     }
 
@@ -76,7 +76,7 @@ impl Tool for StreamingErr {
         ToolId::new("streaming_err").unwrap()
     }
 
-    fn description(&self, _ctx: &::wimo ai_tool_runtime::ListToolsContext) -> ToolDescription {
+    fn description(&self, _ctx: &::wimoai_tool_runtime::ListToolsContext) -> ToolDescription {
         ToolDescription::new("streaming_err", "err")
     }
 

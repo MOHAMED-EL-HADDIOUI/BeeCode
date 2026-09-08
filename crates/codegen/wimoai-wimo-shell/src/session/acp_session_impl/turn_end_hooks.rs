@@ -3,7 +3,7 @@
 //! The gate owns the third report, `Stop`.
 
 use super::*;
-use wimo ai_wimo_hooks::event::{self, StopCancelledReason, StopFailureKind};
+use wimoai_wimo_hooks::event::{self, StopCancelledReason, StopFailureKind};
 
 /// This path's slice of the session's ten-second exit budget, spent twice per teardown: once by `flush` and once by `drain`.
 const TURN_END_DRAIN_BUDGET: std::time::Duration = std::time::Duration::from_millis(250);

@@ -5,13 +5,13 @@
 //!
 //! Run a single scenario locally:
 //! ```bash
-//! cargo bench -p wimo ai-wimo-pager-pty-harness \
+//! cargo bench -p wimoai-wimo-pager-pty-harness \
 //!   --bench pty_bench -- --scenario scroll-stress
 //! ```
 //!
 //! Run every scenario and write a new baseline:
 //! ```bash
-//! cargo bench -p wimo ai-wimo-pager-pty-harness \
+//! cargo bench -p wimoai-wimo-pager-pty-harness \
 //!   --bench pty_bench -- --all \
 //!   --write-baseline benches/pty_baselines/local.json
 //! ```
@@ -19,7 +19,7 @@
 //! Run every scenario in CI and fail on >15% p99 regression:
 //! ```bash
 //! PAGER_BINARY=./artifacts/wimo-${VERSION}-linux-x86_64 \
-//!   cargo bench -p wimo ai-wimo-pager-pty-harness \
+//!   cargo bench -p wimoai-wimo-pager-pty-harness \
 //!   --bench pty_bench -- --all \
 //!   --baseline benches/pty_baselines/linux-x86_64.json
 //! ```
@@ -29,7 +29,7 @@ use std::process::ExitCode;
 
 use anyhow::{Context, Result, bail};
 use clap::Parser as ClapParser;
-use wimo ai_wimo_pager_pty_harness::{
+use wimoai_wimo_pager_pty_harness::{
     BenchResults, ContentController, PtyHarness, Scenario, compare_baseline, pager_binary,
     results::{DEFAULT_REGRESSION_THRESHOLD, load_baseline, write_baseline},
 };
@@ -37,7 +37,7 @@ use wimo ai_wimo_pager_pty_harness::{
 #[derive(ClapParser, Debug)]
 #[command(
     name = "pty-bench",
-    about = "PTY benchmark harness for wimo ai-wimo-pager",
+    about = "PTY benchmark harness for wimoai-wimo-pager",
     long_about = None,
 )]
 struct Cli {

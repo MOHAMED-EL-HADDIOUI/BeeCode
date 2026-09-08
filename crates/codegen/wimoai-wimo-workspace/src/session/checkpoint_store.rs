@@ -496,7 +496,7 @@ impl CheckpointStore {
 mod tests {
     use super::*;
     use crate::session::file_state::{FileSnapshot, RewindPoint};
-    use wimo ai_wimo_paths::RelPathBuf;
+    use wimoai_wimo_paths::RelPathBuf;
 
     /// A minimal FS-only checkpoint (no hunk delta) for store-mechanics tests.
     /// Distinct content per prompt so a disk round-trip is meaningfully checked.

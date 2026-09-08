@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-workspace-daemon"
+name = "wimoai-wimo-workspace-daemon"
 version = "0.1.0"
 edition.workspace = true
 description = "Process lifecycle for the workspace-server daemon: self-daemonization, single-instance pidfile locking, and preview-proxy child supervision"
@@ -15,9 +15,9 @@ serde_json = { workspace = true }
 tokio = { workspace = true, features = ["macros", "process", "rt", "sync", "time"] }
 tracing = { workspace = true }
 # Metric donation sink for the preview-proxy metrics scraper.
-wimo ai-computer-hub-sdk = { workspace = true, features = ["metrics"] }
+wimoai-computer-hub-sdk = { workspace = true, features = ["metrics"] }
 # reset_oom_score_adj in the preview-proxy pre_exec hook.
-wimo ai-tty-utils = { workspace = true }
+wimoai-tty-utils = { workspace = true }
 
 # fork/setsid/dup2/chdir on the self-daemonize path, and PDEATHSIG on the
 # supervised preview-proxy child.

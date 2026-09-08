@@ -32,7 +32,7 @@ use crate::views::list_pane::{
     ListItem, ListPane, ListPaneConfig, ListPaneState, ListPaneStyle, WrapMode,
 };
 
-use wimo ai_ratatui_textarea::ElementId;
+use wimoai_ratatui_textarea::ElementId;
 
 /// Stable ids for mermaid affordance rows (above source lines and comments).
 const MERMAID_AFFORDANCE_ID_BASE: u64 = 2_000_000;
@@ -1354,7 +1354,7 @@ fn highlight_to_ratatui_line(
         if piece.is_empty() {
             continue;
         }
-        // Shared path: polarity-safe under the terminal-native lock, else normal theme quantize (see wimo ai_wimo_pager_render::syntax)
+        // Shared path: polarity-safe under the terminal-native lock, else normal theme quantize (see wimoai_wimo_pager_render::syntax)
         let fg = crate::syntax::syntect_rgb_to_fg(
             style.foreground.r,
             style.foreground.g,

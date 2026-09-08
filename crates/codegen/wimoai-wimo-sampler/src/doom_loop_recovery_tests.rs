@@ -1,5 +1,5 @@
 use super::*;
-use wimo ai_wimo_sampling_types::{ContentPart, SyntheticReason};
+use wimoai_wimo_sampling_types::{ContentPart, SyntheticReason};
 
 fn armed() -> FailedResponseCapture {
     FailedResponseCapture::armed()

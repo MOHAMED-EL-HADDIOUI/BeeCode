@@ -66,7 +66,7 @@ pub(super) struct SleepGate {
 impl SleepGate {
     pub(super) fn raise(&self) {
         *self.raised_at.write() = Some(DualClock::now());
-        wimo ai_wimo_telemetry::unified_log::warn("auth.sleep.gate_set", None, None);
+        wimoai_wimo_telemetry::unified_log::warn("auth.sleep.gate_set", None, None);
     }
 
     pub(super) fn lower(&self, reason: &str) {
@@ -77,7 +77,7 @@ impl SleepGate {
                 (mono.as_millis() as u64, wall.as_millis() as u64)
             })
             .unwrap_or((0, 0));
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth.sleep.gate_cleared",
             None,
             Some(serde_json::json!({
@@ -118,7 +118,7 @@ impl SleepGate {
                 None => return false,
             }
         }
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth.sleep.gate_cleared",
             None,
             Some(serde_json::json!({
@@ -201,7 +201,7 @@ impl AuthManager {
         if in_flight == 0 {
             return;
         }
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth.sleep.refresh_in_flight_at_suspend",
             None,
             Some(serde_json::json!({ "in_flight": in_flight })),
@@ -223,7 +223,7 @@ impl AuthManager {
             }
         }
         let remaining = self.refresh_in_flight.load(Ordering::SeqCst);
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth.sleep.refresh_drain",
             None,
             Some(serde_json::json!({
@@ -241,7 +241,7 @@ impl AuthManager {
     }
 
     /// Whether the system is currently in a **dark wake**.
-    /// See [`wimo ai_system_power::PowerState`] for what a dark wake is and why an IdP refresh must avoid one.
+    /// See [`wimoai_system_power::PowerState`] for what a dark wake is and why an IdP refresh must avoid one.
     /// `refresh_chain` gates on [`Self::should_defer_for_dark_wake`], which wraps this with a deferral bound.
     ///
     /// Scoped to processes that actively listen for power events (local, interactive ones).
@@ -266,8 +266,8 @@ impl AuthManager {
             return false;
         }
         matches!(
-            wimo ai_system_power::current_power_state(),
-            wimo ai_system_power::PowerState::DarkWake
+            wimoai_system_power::current_power_state(),
+            wimoai_system_power::PowerState::DarkWake
         )
     }
 
@@ -307,7 +307,7 @@ impl AuthManager {
         // A still-continuous dark wake then defers afresh, up to DARK_WAKE_DEFER_MAX, before the next forced refresh
         *run = None;
         drop(run);
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth.dark_wake.defer_budget_exhausted",
             None,
             Some(serde_json::json!({
@@ -356,9 +356,9 @@ impl AuthManager {
         }
         // Weak ref so the manager and the listener never form an Arc cycle
         let weak = Arc::downgrade(self);
-        let listener = wimo ai_system_power::SystemPowerListener::start(move |event| {
+        let listener = wimoai_system_power::SystemPowerListener::start(move |event| {
             if let Some(this) = weak.upgrade() {
-                let imminent = matches!(event, wimo ai_system_power::PowerEvent::WillSleep);
+                let imminent = matches!(event, wimoai_system_power::PowerEvent::WillSleep);
                 this.set_system_sleep_imminent(imminent);
             }
         });
@@ -369,7 +369,7 @@ impl AuthManager {
             // Unavailable (unsupported OS, no logind, or a registration failure): release the guard so a later call can retry
             self.power_listener_started.store(false, Ordering::Release);
         }
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth.sleep.power_listener_init",
             None,
             Some(serde_json::json!({ "available": available })),

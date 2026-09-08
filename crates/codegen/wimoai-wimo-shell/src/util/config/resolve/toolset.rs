@@ -1,6 +1,6 @@
 use crate::util::config::RemoteSettings;
 use toml::Value as TomlValue;
-use wimo ai_wimo_tools::implementations::wimo::ask_user_question;
+use wimoai_wimo_tools::implementations::wimo::ask_user_question;
 
 /// Resolve whether the bash-harness shadows that swap `find` for `bfs` and `grep` for `ugrep` are enabled.
 /// Precedence (highest first): `requirements.toml` (org policy, wins outright) > a truthy `DISABLE_EMBEDDED_SEARCH_TOOLS` master (forces off)
@@ -9,18 +9,18 @@ use wimo ai_wimo_tools::implementations::wimo::ask_user_question;
 /// Pass the **merged** requirements ([`crate::config::load_merged_requirements`])
 /// so an org policy in any requirements layer — not only
 /// `~/.wimo/requirements.toml` — is honored. Returns `(find_bfs, grep_ugrep)`,
-/// which the caller bakes into a [`wimo ai_wimo_tools::computer::local::SearchShadowConfig`] on the local terminal backend.
+/// which the caller bakes into a [`wimoai_wimo_tools::computer::local::SearchShadowConfig`] on the local terminal backend.
 pub(crate) fn resolve_search_tools_enabled(
     requirements: Option<&TomlValue>,
     user: Option<&TomlValue>,
     managed: Option<&TomlValue>,
 ) -> (bool, bool) {
-    let disable = wimo ai_wimo_config::env_bool("DISABLE_EMBEDDED_SEARCH_TOOLS");
+    let disable = wimoai_wimo_config::env_bool("DISABLE_EMBEDDED_SEARCH_TOOLS");
     fn from_toml(v: Option<&TomlValue>, key: &str) -> Option<bool> {
         v?.get("toolset")?.get("bash")?.get(key)?.as_bool()
     }
     let resolve = |primary: &str, alias: &str, key: &str| -> bool {
-        let env = wimo ai_wimo_config::env_bool(primary).or_else(|| wimo ai_wimo_config::env_bool(alias));
+        let env = wimoai_wimo_config::env_bool(primary).or_else(|| wimoai_wimo_config::env_bool(alias));
         resolve_search_tool_enabled(
             disable,
             from_toml(requirements, key),
@@ -40,9 +40,9 @@ pub(crate) fn resolve_search_tools_enabled(
 /// This is the authoritative parse; the `Config` field of the same name only feeds the unrecognized-key scan.
 pub(crate) fn resolve_shell_env_policy(
     effective_cfg: Option<&TomlValue>,
-) -> Option<wimo ai_wimo_tools::util::ShellEnvironmentPolicy> {
+) -> Option<wimoai_wimo_tools::util::ShellEnvironmentPolicy> {
     let value = effective_cfg?.get("shell_environment_policy")?.clone();
-    match value.try_into::<wimo ai_wimo_tools::util::ShellEnvironmentPolicy>() {
+    match value.try_into::<wimoai_wimo_tools::util::ShellEnvironmentPolicy>() {
         Ok(policy) => Some(policy),
         Err(error) => {
             tracing::warn!(
@@ -492,7 +492,7 @@ fn resolve_ask_user_question_timeout_secs_from_tiers(
         .or(managed)
         .or(remote)
         .unwrap_or(
-            wimo ai_wimo_tools::implementations::wimo::ask_user_question::RESPONSE_TIMEOUT
+            wimoai_wimo_tools::implementations::wimo::ask_user_question::RESPONSE_TIMEOUT
                 .as_secs(),
         )
 }
@@ -508,7 +508,7 @@ fn resolve_ask_user_question_timeout_secs(
 ) -> u64 {
     resolve_ask_user_question_timeout_secs_from_tiers(
         ask_user_question_timeout_secs_from_toml(requirements),
-        wimo ai_wimo_tools::implementations::wimo::ask_user_question::response_timeout_env_secs(),
+        wimoai_wimo_tools::implementations::wimo::ask_user_question::response_timeout_env_secs(),
         ask_user_question_timeout_secs_from_toml(user),
         ask_user_question_timeout_secs_from_toml(managed)
             .or_else(|| ask_user_question_timeout_secs_from_toml(system_managed)),
@@ -523,7 +523,7 @@ fn resolve_ask_user_question_timeout_secs(
 /// Both fields resolve to concrete values, so the tool's legacy env fallback only runs for consumers that skip this resolver.
 pub(crate) fn resolve_ask_user_question_params_from_disk(
     remote: Option<&RemoteSettings>,
-) -> wimo ai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionParams {
+) -> wimoai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionParams {
     let requirements = crate::config::load_merged_requirements();
     let layers = match crate::config::ConfigLayers::load() {
         Ok(l) => Some(l),
@@ -535,7 +535,7 @@ pub(crate) fn resolve_ask_user_question_params_from_disk(
     let user = layers.as_ref().map(|l| &l.user);
     let managed = layers.as_ref().map(|l| &l.managed);
     let system_managed = layers.as_ref().map(|l| &l.system_managed);
-    wimo ai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionParams {
+    wimoai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionParams {
         timeout_enabled: Some(
             resolve_ask_user_question_timeout_enabled(
                 requirements.as_ref(),
@@ -594,7 +594,7 @@ fn read_domain_array(section: &TomlValue, key: &str) -> Option<Vec<String>> {
 /// Config degrades rather than failing the session (the repo convention for `[toolset.*]`).
 /// Authored inputs (frontmatter / per-turn) instead hard-error via `WebSearchOptions`'s deserialize validation.
 fn cap_web_search_domains(list: Option<Vec<String>>, field: &str) -> Option<Vec<String>> {
-    const MAX: usize = wimo ai_wimo_sampling_types::MAX_WEB_SEARCH_DOMAINS;
+    const MAX: usize = wimoai_wimo_sampling_types::MAX_WEB_SEARCH_DOMAINS;
     list.map(|mut domains| {
         if domains.len() > MAX {
             tracing::warn!(
@@ -616,7 +616,7 @@ fn cap_web_search_domains(list: Option<Vec<String>>, field: &str) -> Option<Vec<
 /// This only shapes the already-merged `[toolset.web_search]` section.
 /// Returns `None` when neither filter is set.
 pub(crate) fn resolve_web_search_domains_from_disk()
--> Option<wimo ai_wimo_sampling_types::WebSearchOptions> {
+-> Option<wimoai_wimo_sampling_types::WebSearchOptions> {
     let effective = match crate::config::load_effective_config() {
         Ok(v) => v,
         Err(e) => {
@@ -630,7 +630,7 @@ pub(crate) fn resolve_web_search_domains_from_disk()
 
 fn web_search_options_from_section(
     section: &TomlValue,
-) -> Option<wimo ai_wimo_sampling_types::WebSearchOptions> {
+) -> Option<wimoai_wimo_sampling_types::WebSearchOptions> {
     let allowed = cap_web_search_domains(
         read_domain_array(section, "allowed_domains"),
         "allowed_domains",
@@ -639,7 +639,7 @@ fn web_search_options_from_section(
         read_domain_array(section, "excluded_domains"),
         "excluded_domains",
     );
-    let opts = wimo ai_wimo_sampling_types::WebSearchOptions {
+    let opts = wimoai_wimo_sampling_types::WebSearchOptions {
         allowed_domains: allowed,
         excluded_domains: excluded,
     };
@@ -656,7 +656,7 @@ fn web_search_options_from_section(
                 "[toolset.web_search] sets both allowed_domains and excluded_domains; \
                  dropping excluded_domains (allowlist wins)"
             );
-            Some(wimo ai_wimo_sampling_types::WebSearchOptions {
+            Some(wimoai_wimo_sampling_types::WebSearchOptions {
                 allowed_domains: opts.allowed_domains,
                 excluded_domains: None,
             })
@@ -668,7 +668,7 @@ fn web_search_options_from_section(
 mod web_search_domains_tests {
     use super::*;
 
-    // Cross-layer precedence and allow/exclude atomicity live in ConfigLayers (see `wimo ai_wimo_config::loader` normalization tests)
+    // Cross-layer precedence and allow/exclude atomicity live in ConfigLayers (see `wimoai_wimo_config::loader` normalization tests)
     // These cover only the section-shaping this module still owns: extraction, the max-5 cap, and the defensive both-set degrade
     fn section(body: &str) -> TomlValue {
         let full: TomlValue = toml::from_str(&format!("[toolset.web_search]\n{body}\n")).unwrap();
@@ -736,7 +736,7 @@ mod web_search_domains_tests {
 mod ask_user_question_timeout_tests {
     use super::*;
     use crate::agent::config::ConfigSource;
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::RESPONSE_TIMEOUT_ENV;
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::RESPONSE_TIMEOUT_ENV;
 
     // Both env vars are process-global (a dev exports the secs var for TUI repro); serialize and force them unset so these tests can't go flaky
     static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
@@ -811,7 +811,7 @@ mod ask_user_question_timeout_tests {
 
     #[test]
     fn timeout_secs_tier_precedence() {
-        let d = wimo ai_wimo_tools::implementations::wimo::ask_user_question::RESPONSE_TIMEOUT
+        let d = wimoai_wimo_tools::implementations::wimo::ask_user_question::RESPONSE_TIMEOUT
             .as_secs();
         let r = resolve_ask_user_question_timeout_secs_from_tiers;
         assert_eq!(r(None, None, None, None, None), d);
@@ -825,7 +825,7 @@ mod ask_user_question_timeout_tests {
     #[test]
     fn timeout_secs_rejects_non_positive_layers() {
         let _g = guard();
-        let d = wimo ai_wimo_tools::implementations::wimo::ask_user_question::RESPONSE_TIMEOUT
+        let d = wimoai_wimo_tools::implementations::wimo::ask_user_question::RESPONSE_TIMEOUT
             .as_secs();
         // user 0 and managed negative are dropped; remote fills the gap.
         let zero = toml_ask("timeout_secs = 0");
@@ -961,7 +961,7 @@ mod tests {
 #[cfg(test)]
 mod shell_env_policy_tests {
     use super::*;
-    use wimo ai_wimo_tools::util::{EnvironmentVariablePattern, ShellEnvironmentPolicyInherit};
+    use wimoai_wimo_tools::util::{EnvironmentVariablePattern, ShellEnvironmentPolicyInherit};
 
     #[test]
     fn resolve_shell_env_policy_absent_parsed_typo_and_typed_error() {

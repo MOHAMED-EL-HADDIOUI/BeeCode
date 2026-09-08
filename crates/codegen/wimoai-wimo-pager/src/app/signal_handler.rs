@@ -129,7 +129,7 @@ fn spawn_async_signal_task() {
 
 /// Wait for the next SIGINT/SIGTERM/SIGHUP and map it to its exit code.
 ///
-/// Shared with the agent binary (`wimo ai-wimo-pager-bin`) so the 130/143/129 map cannot drift between TUI and agent signal handlers.
+/// Shared with the agent binary (`wimoai-wimo-pager-bin`) so the 130/143/129 map cannot drift between TUI and agent signal handlers.
 #[cfg(unix)]
 pub async fn next_signal_code(
     sigterm: &mut Option<tokio::signal::unix::Signal>,
@@ -229,7 +229,7 @@ fn shutdown_with_terminal_restore(exit_code: i32) -> ! {
     TERMINAL_OWNED.store(false, Ordering::Release);
     // Best-effort unregister (non-blocking flock to avoid hanging).
     if let Some(ref sid) = *CURRENT_SESSION_ID.lock() {
-        let _ = wimo ai_wimo_active_sessions::try_unregister(sid);
+        let _ = wimoai_wimo_active_sessions::try_unregister(sid);
     }
     flush_telemetry_and_exit(exit_code);
 }
@@ -239,15 +239,15 @@ fn flush_telemetry_and_exit(exit_code: i32) -> ! {
     // Reap detached (setsid) background children before the hard exit
     // This tail runs on the force/second-signal and agent-mode paths that skip the graceful quit
     // The graceful path reaps them in `app::run`'s teardown
-    wimo ai_tty_utils::global_process_scope().kill_all();
+    wimoai_tty_utils::global_process_scope().kill_all();
     // Restore fd 2 so Sentry/OTEL flushes reach the terminal.
-    wimo ai_tty_utils::restore_native_stderr();
+    wimoai_tty_utils::restore_native_stderr();
     crate::app::status_line::metrics::global().report_health();
-    wimo ai_wimo_telemetry::sentry::flush_on_shutdown();
-    wimo ai_wimo_telemetry::otel_layer::shutdown_otel();
+    wimoai_wimo_telemetry::sentry::flush_on_shutdown();
+    wimoai_wimo_telemetry::otel_layer::shutdown_otel();
     // Flush the --debug firehose on TUI signal exit (this path bypasses main's flush).
-    wimo ai_wimo_telemetry::debug_log::flush();
-    if let Some(path) = wimo ai_wimo_telemetry::span_profile::finalize() {
+    wimoai_wimo_telemetry::debug_log::flush();
+    if let Some(path) = wimoai_wimo_telemetry::span_profile::finalize() {
         eprintln!("wimo: span profile written to {}", path.display());
     }
     std::process::exit(exit_code);

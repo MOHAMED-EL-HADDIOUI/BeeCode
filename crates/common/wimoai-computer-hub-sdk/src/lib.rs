@@ -12,7 +12,7 @@
 //! implementations, and call [`ToolServer::run`] to drive the inbound
 //! loop. The harness entry point is [`ToolHarness`]: build it via
 //! [`ToolHarnessBuilder`], optionally seed it with in-process
-//! [`wimo ai_tool_runtime::Tool`] implementations, and call
+//! [`wimoai_tool_runtime::Tool`] implementations, and call
 //! [`ToolHarness::call`] to dispatch a tool call. Authorisation
 //! credentials (`AuthCredential`) plus the target URL determine
 //! which pool entry the consumer attaches to; multiple
@@ -67,10 +67,10 @@ pub use server::{
     ToolServer, ToolServerBuilder, ToolServerHandler, WeakToolServer,
 };
 pub use trace_donate::{HubDonatingReporter, TraceDonationPump};
-pub use wimo ai_computer_hub_core::{
+pub use wimoai_computer_hub_core::{
     wimo_BOT_TOOL_DESCRIPTIONS, wimo_BOT_TOOL_IDS, wimo_bot_tool_arguments_schema,
     wimo_bot_tool_description, is_wimo_bot_tool,
 };
 // Re-exported so consumers that depend only on the SDK can recognize the
 // server's `workspace_unavailable` error without also pulling in the core crate.
-pub use wimo ai_computer_hub_core::is_workspace_unavailable;
+pub use wimoai_computer_hub_core::is_workspace_unavailable;

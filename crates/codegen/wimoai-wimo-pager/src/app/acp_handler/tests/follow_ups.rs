@@ -285,7 +285,7 @@
                 .cloned(),
         );
         handle(
-            AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+            AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
                 request,
                 response_tx: tx,
             }),

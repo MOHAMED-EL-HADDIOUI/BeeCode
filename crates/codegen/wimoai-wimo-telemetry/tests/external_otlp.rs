@@ -4,7 +4,7 @@
 mod otlp_collector;
 
 use otlp_collector as col;
-use wimo ai_wimo_telemetry::external::IdentityAttrs;
+use wimoai_wimo_telemetry::external::IdentityAttrs;
 
 const CANARY_MODEL: &str = "sk-CANARYabcdefghij1234567890";
 const CANARY_PROMPT: &str = "CANARY_PROMPT_TEXT do not export";
@@ -16,14 +16,14 @@ const OAUTH_EMAIL: &str = "otel.parity@example.com";
 fn deny_decision(
     command: &str,
     tool_use_id: &str,
-) -> wimo ai_wimo_telemetry::events::PermissionDecisionRecord {
-    wimo ai_wimo_telemetry::events::PermissionDecisionRecord {
-        payload: wimo ai_wimo_telemetry::events::PermissionDecisionPayload {
+) -> wimoai_wimo_telemetry::events::PermissionDecisionRecord {
+    wimoai_wimo_telemetry::events::PermissionDecisionRecord {
+        payload: wimoai_wimo_telemetry::events::PermissionDecisionPayload {
             tool_name: "run_terminal_cmd".into(),
-            access_kind: wimo ai_wimo_telemetry::events::AccessKind::Bash,
-            decision: wimo ai_wimo_telemetry::events::PermissionOutcome::Deny,
+            access_kind: wimoai_wimo_telemetry::events::AccessKind::Bash,
+            decision: wimoai_wimo_telemetry::events::PermissionOutcome::Deny,
             wait_ms: 10,
-            permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+            permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
             source: Some("user_reject".into()),
             subagent_session_id: None,
             subagent_type: None,
@@ -39,7 +39,7 @@ fn deny_decision(
             auto_denials_consecutive: None,
             auto_denials_total: None,
         },
-        tool_input: wimo ai_wimo_telemetry::events::ExternalToolInput {
+        tool_input: wimoai_wimo_telemetry::events::ExternalToolInput {
             parameters: Some(serde_json::json!({ "command": command })),
             tool_use_id: Some(tool_use_id.into()),
         },
@@ -52,7 +52,7 @@ fn external_stream_end_to_end() {
     let endpoint = col::start_collector(collected.clone());
 
     // Resolve through the real config path (double opt-in, gates off).
-    let mut cfg = wimo ai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
+    let mut cfg = wimoai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
         |name| match name {
             "wimo_EXTERNAL_OTEL" => Some("1".into()),
             "OTEL_LOGS_EXPORTER" | "OTEL_METRICS_EXPORTER" => Some("otlp".into()),
@@ -65,17 +65,17 @@ fn external_stream_end_to_end() {
         None,
     )
     .expect("double opt-in must resolve");
-    cfg.client = wimo ai_wimo_telemetry::external::config::ExternalClientInfo {
+    cfg.client = wimoai_wimo_telemetry::external::config::ExternalClientInfo {
         service_version: "0.0.0-test".into(),
         client_version: "0.0.0-test".into(),
         app_entrypoint: "cli".into(),
     };
 
-    wimo ai_wimo_telemetry::external::init(Some(cfg));
-    assert!(wimo ai_wimo_telemetry::external::is_active());
+    wimoai_wimo_telemetry::external::init(Some(cfg));
+    assert!(wimoai_wimo_telemetry::external::is_active());
 
     // OAuth identity is not a content gate — email must still export with gates off.
-    wimo ai_wimo_telemetry::external::set_identity(IdentityAttrs {
+    wimoai_wimo_telemetry::external::set_identity(IdentityAttrs {
         user_id: Some("user-gates-off".into()),
         email: Some(OAUTH_EMAIL.into()),
         organization_id: None,
@@ -85,20 +85,20 @@ fn external_stream_end_to_end() {
 
     // Emit through the same funnel production uses, with the product events client never initialized and no auth at all
     // The external sink must fire anyway: it does not depend on product telemetry being enabled
-    assert!(!wimo ai_wimo_telemetry::is_enabled());
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::SessionNew {
+    assert!(!wimoai_wimo_telemetry::is_enabled());
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::SessionNew {
         session_id: "sess-int-1".into(),
         client_identifier: None,
         client_version: None,
         is_git_repo: true,
-        permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+        permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::SessionHarness {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::SessionHarness {
         session_id: "sess-int-1".into(),
         client_identifier: Some("wimo-pager".into()),
         model_id: "wimo-4".into(),
         agent_name: "wimo-plan".into(),
-        permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+        permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
         mcp_server_names: vec![CANARY_MCP.into()],
         plugin_names: vec![],
         skill_names: vec![],
@@ -106,11 +106,11 @@ fn external_stream_end_to_end() {
         hook_names: vec![],
         agents_md_dir_names: vec![],
         memory_enabled: false,
-        memory_retrieval_mode: wimo ai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
+        memory_retrieval_mode: wimoai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
         is_git_repo: true,
         auto_update: None,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::PromptSubmitted {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::PromptSubmitted {
         prompt_length: CANARY_PROMPT.len(),
         model_id: "wimo-4".into(),
         client_identifier: None,
@@ -119,7 +119,7 @@ fn external_stream_end_to_end() {
         command_name: None,
     });
     // The model id is a canary: the scrub that runs when the metric increments must keep it out of the metrics body
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::ModelResponseReceived {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::ModelResponseReceived {
         model_id: CANARY_MODEL.into(),
         duration_ms: 5,
         stop_reason: Some("stop".into()),
@@ -130,9 +130,9 @@ fn external_stream_end_to_end() {
         cache_creation_tokens: None,
         cost_usd_ticks: None,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::ToolCallCompleted {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::ToolCallCompleted {
         tool_name: "run_terminal_cmd".into(),
-        outcome: wimo ai_wimo_session_events::types::ToolOutcome::Success,
+        outcome: wimoai_wimo_session_events::types::ToolOutcome::Success,
         hook_rewrote: false,
         duration_ms: 3,
         tool_result_size_bytes: None,
@@ -142,13 +142,13 @@ fn external_stream_end_to_end() {
         tool_output: None,
         error_message: None,
     });
-    wimo ai_wimo_telemetry::log_event(deny_decision(CANARY_CMD, "call-deny-off"));
-    wimo ai_wimo_telemetry::external::emit(&wimo ai_wimo_telemetry::events::AssistantResponse {
+    wimoai_wimo_telemetry::log_event(deny_decision(CANARY_CMD, "call-deny-off"));
+    wimoai_wimo_telemetry::external::emit(&wimoai_wimo_telemetry::events::AssistantResponse {
         response_length: CANARY_RESPONSE.len(),
         response_text: Some(CANARY_RESPONSE.into()),
     });
 
-    wimo ai_wimo_telemetry::external::flush();
+    wimoai_wimo_telemetry::external::flush();
 
     assert!(
         col::wait_until(std::time::Duration::from_secs(10), || {
@@ -175,7 +175,7 @@ fn external_stream_end_to_end() {
             for sl in &rl.scope_logs {
                 assert_eq!(
                     sl.scope.as_ref().map(|s| s.name.as_str()),
-                    Some("ai.wimo ai.wimo_code")
+                    Some("ai.wimoai.wimo_code")
                 );
                 for record in &sl.log_records {
                     event_names.push(record.event_name.clone());
@@ -301,16 +301,16 @@ fn external_stream_end_to_end() {
 
     // ── Shutdown: ≤ 2 s + post-shutdown silence ─────────────────────────
     let start = std::time::Instant::now();
-    wimo ai_wimo_telemetry::external::shutdown();
+    wimoai_wimo_telemetry::external::shutdown();
     assert!(
         start.elapsed() <= std::time::Duration::from_millis(2500),
         "shutdown watchdog must bound exit at ~2s (took {:?})",
         start.elapsed()
     );
-    assert!(!wimo ai_wimo_telemetry::external::is_active());
+    assert!(!wimoai_wimo_telemetry::external::is_active());
 
     let logs_before = collected.logs_len();
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::PromptSubmitted {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::PromptSubmitted {
         prompt_length: 1,
         model_id: "wimo-4".into(),
         client_identifier: None,
@@ -326,5 +326,5 @@ fn external_stream_end_to_end() {
     );
 
     // Idempotent shutdown: second call is a no-op, not an error/panic.
-    wimo ai_wimo_telemetry::external::shutdown();
+    wimoai_wimo_telemetry::external::shutdown();
 }

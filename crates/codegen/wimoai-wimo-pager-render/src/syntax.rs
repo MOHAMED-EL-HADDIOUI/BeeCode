@@ -14,7 +14,7 @@
 
 use std::sync::OnceLock;
 
-pub use wimo ai_wimo_markdown::Syntect;
+pub use wimoai_wimo_markdown::Syntect;
 
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;

@@ -1,5 +1,5 @@
 use super::turn_texts_for_feedback;
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_wimo_sampling_types::ConversationItem;
 
 #[test]
 fn empty_conversation_returns_none() {

@@ -1,6 +1,6 @@
 //! Shell child runtime adapter and presentation.
 //!
-//! Lifecycle state and command scheduling live in the shared `wimo ai-wimo-tools` coordinator actor.
+//! Lifecycle state and command scheduling live in the shared `wimoai-wimo-tools` coordinator actor.
 //! This module keeps shell-specific child-session construction, ACP presentation, persistence, and trace work.
 //! The parent-side lifecycle and presentation entry points live in `spawn.rs`.
 //!
@@ -31,16 +31,16 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokio::sync::{mpsc, oneshot};
 use tokio_util::sync::CancellationToken;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-use wimo ai_wimo_agent::config::{McpInheritance, ModelOverride, PermissionMode};
-use wimo ai_wimo_sampling_types::conversation::ConversationItem;
-use wimo ai_wimo_session_events::types::CancellationCategory;
-use wimo ai_wimo_subagent_resolution::ResumeSourceData;
-use wimo ai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer;
-use wimo ai_wimo_tools::implementations::wimo::task::types::*;
-use wimo ai_wimo_tools::types::tool::ToolKind;
-use wimo ai_wimo_workspace::file_system::AsyncFileSystem;
-use wimo ai_hunk_tracker::HunkTrackerHandle;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_wimo_agent::config::{McpInheritance, ModelOverride, PermissionMode};
+use wimoai_wimo_sampling_types::conversation::ConversationItem;
+use wimoai_wimo_session_events::types::CancellationCategory;
+use wimoai_wimo_subagent_resolution::ResumeSourceData;
+use wimoai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer;
+use wimoai_wimo_tools::implementations::wimo::task::types::*;
+use wimoai_wimo_tools::types::tool::ToolKind;
+use wimoai_wimo_workspace::file_system::AsyncFileSystem;
+use wimoai_hunk_tracker::HunkTrackerHandle;
 mod attempt_runner;
 mod spawn;
 pub(crate) use spawn::{
@@ -110,18 +110,18 @@ impl AutoCompactThresholdTiers {
 /// Built by `MvpAgent::build_subagent_spawn_context()`.
 pub(crate) struct SubagentSpawnContext {
     /// Parent's LSP runtime, inherited via ToolContext, same as fs/terminal.
-    pub lsp: Option<std::sync::Arc<dyn wimo ai_wimo_tools::implementations::lsp::LspBackend>>,
+    pub lsp: Option<std::sync::Arc<dyn wimoai_wimo_tools::implementations::lsp::LspBackend>>,
     /// Root session's process scope, inherited so the subagent's own child processes are reaped when the parent session closes.
     /// It is the root's, not an intermediate parent's.
-    /// The Spawn arm of `handle_command` in wimo ai-wimo-tools task/coordinator.rs re-parents nested Spawn requests to the root parent.
+    /// The Spawn arm of `handle_command` in wimoai-wimo-tools task/coordinator.rs re-parents nested Spawn requests to the root parent.
     /// Every subagent therefore resolves back to the root session.
-    pub process_scope: Option<wimo ai_tty_utils::ProcessScope>,
+    pub process_scope: Option<wimoai_tty_utils::ProcessScope>,
     /// Parent's client-registered hooks, inherited so the subagent's tool calls hit the same PreToolUse gate.
     /// Its events fire the same observe hooks over the parent's connection.
     /// Empty when the parent has none.
     /// Filled by the coordinator after the context is built (an async snapshot from the parent session actor).
     pub client_hooks: crate::extensions::hooks::ClientHooks,
-    pub sampling_config: wimo ai_wimo_sampler::SamplerConfig,
+    pub sampling_config: wimoai_wimo_sampler::SamplerConfig,
     pub managed_mcp_proxy_base_url: String,
     /// The staging auth header value propagated from the parent.
     /// Used when building subagent `SamplerConfig`s for auth-flow tracking and for `inject_url_derived_headers` in the construction helpers.
@@ -134,13 +134,13 @@ pub(crate) struct SubagentSpawnContext {
     /// Shell-owned source used only to freeze active-message parent attribution synchronously.
     pub active_message_parent_prompt_index: Arc<std::sync::atomic::AtomicUsize>,
     /// The parent's cutoff at spawn, applied to the child's first turn. `None` if unset.
-    pub inherited_tool_overrides: Option<wimo ai_wimo_sampling_types::ToolOverrides>,
+    pub inherited_tool_overrides: Option<wimoai_wimo_sampling_types::ToolOverrides>,
     pub yolo_mode: bool,
     pub subagent_event_tx: mpsc::UnboundedSender<SubagentEvent>,
     pub parent_depth: u32,
     pub subagents_max_depth: u32,
     pub workflow_max_concurrent_agents: usize,
-    pub media_gen_batch_limits: wimo ai_wimo_tools::media_gen_limits::MediaGenBatchLimits,
+    pub media_gen_batch_limits: wimoai_wimo_tools::media_gen_limits::MediaGenBatchLimits,
     /// Inference idle timeout (secs), resolved from the parent's model config at spawn-context creation time.
     pub inference_idle_timeout_secs: u64,
     pub parent_compaction: crate::session::CompactionPins,
@@ -159,26 +159,26 @@ pub(crate) struct SubagentSpawnContext {
     pub terminal: Arc<dyn AsyncTerminalRunner>,
     /// Parent's terminal backend, shared so background tasks, monitors, and scheduled tasks survive subagent exit.
     /// When `Some`, the subagent session reuses this backend instead of creating a new `LocalTerminalBackend`.
-    pub parent_terminal_backend: Option<Arc<dyn wimo ai_wimo_tools::computer::types::TerminalBackend>>,
+    pub parent_terminal_backend: Option<Arc<dyn wimoai_wimo_tools::computer::types::TerminalBackend>>,
     /// Parent's notification handle for reparenting on subagent exit.
     /// When a subagent exits, its surviving tasks (monitors, bg commands) need their notification handles swapped to this.
     /// Events then route to the parent's notification bridge.
     pub parent_notification_handle:
-        Option<wimo ai_wimo_tools::notification::types::ToolNotificationHandle>,
+        Option<wimoai_wimo_tools::notification::types::ToolNotificationHandle>,
     /// Parent's scheduler handle.
     /// When `Some`, the subagent reuses the parent's scheduler actor so scheduled tasks survive subagent exit.
     pub parent_scheduler_handle:
-        Option<wimo ai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle>,
+        Option<wimoai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle>,
     /// Parent's session environment variables (.envrc and color settings), shared so the child inherits the same env without re-loading.
     pub session_env: Arc<HashMap<String, String>>,
     /// Parent's memory config, shared so the child can access the same cross-session memory store.
     pub memory_config: Option<crate::config::MemoryConfig>,
-    pub web_search_sampling_config: Option<wimo ai_wimo_sampler::SamplerConfig>,
-    pub web_fetch_config: wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig,
-    pub image_gen_config: wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig,
-    pub video_gen_config: wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig,
+    pub web_search_sampling_config: Option<wimoai_wimo_sampler::SamplerConfig>,
+    pub web_fetch_config: wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig,
+    pub image_gen_config: wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig,
+    pub video_gen_config: wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig,
     pub app_builder_deployer_config:
-        wimo ai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig,
+        wimoai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig,
     pub write_file_enabled: bool,
     /// Whether goal mode (`/goal`) is enabled.
     pub goal_enabled: bool,
@@ -197,13 +197,13 @@ pub(crate) struct SubagentSpawnContext {
     pub parent_session_info: Option<SessionInfo>,
     /// Subagent roles config for role-based config layering.
     pub subagent_roles:
-        std::collections::HashMap<String, wimo ai_wimo_subagent_resolution::config::SubagentRole>,
+        std::collections::HashMap<String, wimoai_wimo_subagent_resolution::config::SubagentRole>,
     /// Subagent personas config for persona/SOUL layering.
     pub subagent_personas:
-        std::collections::HashMap<String, wimo ai_wimo_subagent_resolution::config::SubagentPersona>,
+        std::collections::HashMap<String, wimoai_wimo_subagent_resolution::config::SubagentPersona>,
     /// Parent session's ChatStateHandle, used to read the actual live sampling config and credentials from the parent session actor (async).
     /// Cheap Clone (mpsc sender). `None` when the parent SessionHandle is not found.
-    pub parent_chat_state: Option<wimo ai_chat_state::ChatStateHandle>,
+    pub parent_chat_state: Option<wimoai_chat_state::ChatStateHandle>,
     /// Parent session's resolved turn limit, for subagent inheritance.
     pub parent_max_turns: Option<usize>,
     /// All available models for resolving model IDs from overrides.
@@ -234,12 +234,12 @@ pub(crate) struct SubagentSpawnContext {
     /// Inherited from the parent session.
     pub path_not_found_hints: bool,
     /// Plugin registry for plugin-aware agent lookup.
-    pub plugin_registry: Option<std::sync::Arc<wimo ai_wimo_agent::plugins::PluginRegistry>>,
+    pub plugin_registry: Option<std::sync::Arc<wimoai_wimo_agent::plugins::PluginRegistry>>,
     /// Shared models manager for etag-triggered refresh.
     pub models_manager: crate::agent::models::ModelsManager,
     /// Pre-resolved file tool overrides (hashline vs standard) from the parent.
     /// `None` means use the standard (default) file tools.
-    pub file_tool_overrides: Option<Vec<wimo ai_wimo_tools::registry::types::ToolConfig>>,
+    pub file_tool_overrides: Option<Vec<wimoai_wimo_tools::registry::types::ToolConfig>>,
     /// Parent session's agent config snapshot.
     pub agent_config: Option<crate::agent::config::Config>,
     /// GCS bucket URL for trace uploads.
@@ -247,12 +247,12 @@ pub(crate) struct SubagentSpawnContext {
     pub gcs_bucket_url: Option<String>,
     /// GCS upload method (direct or proxy).
     pub gcs_upload_method: Option<crate::session::repo_changes::UploadMethod>,
-    pub hook_registry: Option<std::sync::Arc<wimo ai_wimo_hooks::discovery::HookRegistry>>,
-    pub permission_handle: Option<wimo ai_wimo_workspace::permission::PermissionHandle>,
+    pub hook_registry: Option<std::sync::Arc<wimoai_wimo_hooks::discovery::HookRegistry>>,
+    pub permission_handle: Option<wimoai_wimo_workspace::permission::PermissionHandle>,
     pub worktree_type: crate::util::config::WorktreeType,
-    pub api_key_provider: Option<wimo ai_wimo_tools::types::SharedApiKeyProvider>,
+    pub api_key_provider: Option<wimoai_wimo_tools::types::SharedApiKeyProvider>,
     pub image_description_model: String,
-    pub workspace_ops: wimo ai_wimo_workspace::WorkspaceOps,
+    pub workspace_ops: wimoai_wimo_workspace::WorkspaceOps,
     pub auth_manager: std::sync::Arc<crate::auth::AuthManager>,
     /// The parent SessionActor's live `Auth401AttributionCallback`, captured at spawn time.
     /// Subagents inherit this so the child's `OaiCompatClient` 401 sites emit attribution under the parent's session id.
@@ -260,7 +260,7 @@ pub(crate) struct SubagentSpawnContext {
     ///
     /// Reading from `ctx.sampling_config.attribution_callback` would not work.
     /// The baseline `MvpAgent.sampling_config` goes through `agent/config.rs::sampling_config_for_model`, which always sets that field to `None`.
-    pub attribution_callback: Option<wimo ai_wimo_sampler::SharedAttributionCallback>,
+    pub attribution_callback: Option<wimoai_wimo_sampler::SharedAttributionCallback>,
     /// Parent session's agent name (e.g. "wimo").
     pub parent_agent_name: Option<String>,
     /// `agent_type` of the parent's current model: the harness-flavor fallback when `parent_agent_name` is not a recognized harness.
@@ -279,16 +279,16 @@ pub(crate) struct SubagentSpawnContext {
     /// Snapshot of the parent session's MCP client pool at spawn time.
     pub parent_mcp_pool: Option<crate::session::mcp_servers::SharedMcpPool>,
     /// Exact parent tool schema for verbatim non-workflow forks.
-    pub parent_tool_definitions: Option<Vec<wimo ai_wimo_sampling_types::ToolSpec>>,
+    pub parent_tool_definitions: Option<Vec<wimoai_wimo_sampling_types::ToolSpec>>,
     /// Pre-discovered skills from the parent session, captured at spawn time.
-    pub parent_skills: Option<Vec<wimo ai_wimo_tools::implementations::skills::types::SkillInfo>>,
+    pub parent_skills: Option<Vec<wimoai_wimo_tools::implementations::skills::types::SkillInfo>>,
     /// Parent's skills config for the child's SkillManager.
-    pub parent_skills_config: wimo ai_wimo_agent::prompt::skills::SkillsConfig,
+    pub parent_skills_config: wimoai_wimo_agent::prompt::skills::SkillsConfig,
     /// Parent's resolved vendor-compat config, inherited by the child so its skills / rules / AGENTS.md discovery honors the same vendor toggles.
-    pub parent_compat: wimo ai_wimo_tools::types::compat::CompatConfig,
+    pub parent_compat: wimoai_wimo_tools::types::compat::CompatConfig,
     /// Shared completion reservations held by auto-wake prompts.
     pub task_completion_reservations:
-        Option<wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations>,
+        Option<wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations>,
     /// Channel for requesting trace uploads for synthetic auto-wake turns.
     pub synthetic_trace_tx:
         Option<tokio::sync::mpsc::UnboundedSender<crate::upload::turn::SyntheticTurnTraceRequest>>,
@@ -311,17 +311,17 @@ const _: () = {
     const fn assert_send<T: Send>() {}
     assert_send::<SubagentSpawnContext>()
 };
-pub(crate) fn strip_ask_user_question_tool(tools: &mut Vec<wimo ai_wimo_sampling_types::ToolSpec>) {
+pub(crate) fn strip_ask_user_question_tool(tools: &mut Vec<wimoai_wimo_sampling_types::ToolSpec>) {
     tools.retain(|tool| tool.name != "ask_user_question");
 }
-pub(crate) fn strip_workflow_tool(tools: &mut Vec<wimo ai_wimo_sampling_types::ToolSpec>) {
+pub(crate) fn strip_workflow_tool(tools: &mut Vec<wimoai_wimo_sampling_types::ToolSpec>) {
     tools.retain(|tool| {
-        !wimo ai_wimo_tools::implementations::wimo::is_workflow_tool_id(&tool.name)
+        !wimoai_wimo_tools::implementations::wimo::is_workflow_tool_id(&tool.name)
     });
 }
 impl SubagentSpawnContext {
     /// Would installing a live bearer resolver strip this subagent's only credential?
-    /// A wired resolver is the sampler's sole auth source, so with no session key at spawn it must not displace a fallback key (env `wimo ai_API_KEY`).
+    /// A wired resolver is the sampler's sole auth source, so with no session key at spawn it must not displace a fallback key (env `wimoai_API_KEY`).
     /// Keyed on the resolved config key, not the session cache alone.
     /// The cache is empty in exactly the post-wake / mid-refresh states the resolver targets, and gating on it would freeze the subagent for life.
     /// Shared by all three resolver-wiring paths so they cannot drift.
@@ -363,7 +363,7 @@ impl SubagentSpawnContext {
         )
     }
     /// Bind a spawned subagent by the parent session's `--tools`/`--disallowed-tools`/`--permission-mode` restrictions.
-    fn apply_session_cli_overrides(&self, def: &mut wimo ai_wimo_agent::config::AgentDefinition) {
+    fn apply_session_cli_overrides(&self, def: &mut wimoai_wimo_agent::config::AgentDefinition) {
         if let Some(ref cfg) = self.agent_config {
             cfg.cli_agent_overrides.apply_to_subagent_definition(def);
         }
@@ -396,14 +396,14 @@ impl SubagentSpawnContext {
         )
     }
     pub(crate) fn snapshot_parent_compaction_pins(
-        resolved_mode: wimo ai_chat_state::CompactionMode,
+        resolved_mode: wimoai_chat_state::CompactionMode,
         resolved_two_pass: bool,
         parent_agent_name: Option<&str>,
         parent_model_agent_type: Option<&str>,
         parent_cwd: &Path,
     ) -> crate::session::CompactionPins {
         let current = parent_agent_name
-            .and_then(|name| wimo ai_wimo_agent::discovery::by_name_in_cwd(name, parent_cwd))
+            .and_then(|name| wimoai_wimo_agent::discovery::by_name_in_cwd(name, parent_cwd))
             .map(|d| d.user_message_template)
             .unwrap_or_default();
         let template = crate::agent::mvp_agent::inherited_harness_template(
@@ -420,7 +420,7 @@ impl SubagentSpawnContext {
     }
     pub(crate) fn compaction_pins_for_child(
         &self,
-        child_template: &wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate,
+        child_template: &wimoai_wimo_agent::prompt::user_message::UserMessageTemplate,
     ) -> crate::session::CompactionPins {
         crate::session::cursor_compaction_pins(
             self.parent_compaction.mode,
@@ -429,7 +429,7 @@ impl SubagentSpawnContext {
         )
     }
     /// Env > parent config features > this context's remote settings > default.
-    pub(crate) fn resolve_compaction_mode(&self) -> wimo ai_chat_state::CompactionMode {
+    pub(crate) fn resolve_compaction_mode(&self) -> wimoai_chat_state::CompactionMode {
         crate::agent::config::resolve_compaction_mode_from(
             crate::agent::config::env_string("wimo_COMPACTION_MODE").as_deref(),
             self.agent_config
@@ -458,7 +458,7 @@ impl SubagentSpawnContext {
 pub(crate) struct ShellCompletionData {
     auto_wake_enabled: bool,
     task_completion_reservations:
-        Option<wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations>,
+        Option<wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations>,
     parent_cmd_tx: Option<mpsc::UnboundedSender<SessionCommand>>,
     task_output_tool_name: String,
     scheduler_delete_tool_name: Option<String>,
@@ -515,9 +515,9 @@ impl SubagentPresentation {
 #[tracing::instrument(level = "debug", skip_all)]
 async fn resolve_subagent_sampling_config(
     agent_name: &str,
-    agent_model: &wimo ai_wimo_agent::config::ModelOverride,
+    agent_model: &wimoai_wimo_agent::config::ModelOverride,
     ctx: &SubagentSpawnContext,
-) -> (wimo ai_wimo_sampler::SamplerConfig, acp::ModelId) {
+) -> (wimoai_wimo_sampler::SamplerConfig, acp::ModelId) {
     let (parent_config, parent_mid) = read_parent_sampling_config(ctx).await;
     let try_pin = |model_id: &str, source: &'static str, unknown_msg: &'static str| {
         match resolve_model_override_to_config(model_id, ctx) {
@@ -577,9 +577,9 @@ async fn resolve_subagent_sampling_config(
 async fn resolve_effective_model_config(
     runtime_override_model: Option<&str>,
     subagent_type: &str,
-    definition_model: &wimo ai_wimo_agent::config::ModelOverride,
+    definition_model: &wimoai_wimo_agent::config::ModelOverride,
     ctx: &SubagentSpawnContext,
-) -> (wimo ai_wimo_sampler::SamplerConfig, acp::ModelId) {
+) -> (wimoai_wimo_sampler::SamplerConfig, acp::ModelId) {
     if let Some(model_id) = runtime_override_model {
         if let Some(resolved) = resolve_model_override_to_config(model_id, ctx) {
             return resolved;
@@ -603,14 +603,14 @@ fn key_prefix(key: &Option<String>) -> String {
 fn log_subagent_model_resolution(
     agent_name: &str,
     priority: &str,
-    resolved: &wimo ai_wimo_sampler::SamplerConfig,
+    resolved: &wimoai_wimo_sampler::SamplerConfig,
     resolved_id: &acp::ModelId,
-    parent: &wimo ai_wimo_sampler::SamplerConfig,
+    parent: &wimoai_wimo_sampler::SamplerConfig,
 ) {
     let child_key = key_prefix(&resolved.api_key);
     let parent_key = key_prefix(&parent.api_key);
     let keys_match = resolved.api_key == parent.api_key;
-    wimo ai_wimo_telemetry::unified_log::debug(
+    wimoai_wimo_telemetry::unified_log::debug(
         "subagent model resolved",
         None,
         Some(serde_json::json!({
@@ -633,12 +633,12 @@ fn session_bearer_resolver(
     ctx: &SubagentSpawnContext,
     byok: crate::agent::auth_method::ModelByok,
     base_url: &str,
-) -> Option<wimo ai_wimo_sampler::SharedBearerResolver> {
+) -> Option<wimoai_wimo_sampler::SharedBearerResolver> {
     use crate::agent::auth_method;
     auth_method::session_token_auth_gate(
         auth_method::is_session_based_method(&ctx.auth_method_id),
         byok,
-        crate::util::is_wimo ai_api_url(base_url),
+        crate::util::is_wimoai_api_url(base_url),
     )
     .then(|| {
         crate::auth::credential_provider::WireValidBearerResolver::shared(ctx.auth_manager.clone())
@@ -649,7 +649,7 @@ fn inherited_bearer_resolver(
     ctx: &SubagentSpawnContext,
     model: &str,
     base_url: &str,
-) -> Option<wimo ai_wimo_sampler::SharedBearerResolver> {
+) -> Option<wimoai_wimo_sampler::SharedBearerResolver> {
     let byok = crate::agent::config::resolve_model_auth_facts_and_provider(model)
         .0
         .byok;
@@ -669,7 +669,7 @@ fn parent_catalog_model_id(ctx: &SubagentSpawnContext, routing_model: &str) -> a
 #[tracing::instrument(level = "debug", skip_all)]
 async fn read_parent_sampling_config(
     ctx: &SubagentSpawnContext,
-) -> (wimo ai_wimo_sampler::SamplerConfig, acp::ModelId) {
+) -> (wimoai_wimo_sampler::SamplerConfig, acp::ModelId) {
     if let Some(ref chat_state) = ctx.parent_chat_state {
         if let Some(cfg) = chat_state.get_sampling_config().await {
             let creds = chat_state.get_credentials().await;
@@ -693,7 +693,7 @@ async fn read_parent_sampling_config(
                 &cfg.api_backend,
                 &cfg.base_url,
             );
-            let inherited = wimo ai_wimo_sampler::SamplerConfig {
+            let inherited = wimoai_wimo_sampler::SamplerConfig {
                 api_key: creds.api_key,
                 base_url: cfg.base_url,
                 model: cfg.model.clone(),
@@ -735,7 +735,7 @@ async fn read_parent_sampling_config(
             };
             let model_id = ctx.model_id.clone();
             let global_model_id = ctx.models_manager.current_model_id();
-            wimo ai_wimo_telemetry::unified_log::debug(
+            wimoai_wimo_telemetry::unified_log::debug(
                 "subagent read parent config (live)",
                 None,
                 Some(serde_json::json!({
@@ -754,7 +754,7 @@ async fn read_parent_sampling_config(
              falling back to spawn context baseline"
         );
     }
-    wimo ai_wimo_telemetry::unified_log::warn(
+    wimoai_wimo_telemetry::unified_log::warn(
         "subagent read parent config (fallback)",
         None,
         Some(serde_json::json!({
@@ -793,20 +793,20 @@ async fn read_parent_sampling_config(
 fn subagent_auth_type(
     model: Option<&crate::agent::config::ModelEntry>,
     auth_method_id: &acp::AuthMethodId,
-) -> wimo ai_chat_state::AuthType {
+) -> wimoai_chat_state::AuthType {
     if model.is_some_and(|m| m.has_own_credentials()) {
-        wimo ai_chat_state::AuthType::ApiKey
+        wimoai_chat_state::AuthType::ApiKey
     } else if crate::agent::auth_method::is_session_based_method(auth_method_id) {
-        wimo ai_chat_state::AuthType::SessionToken
+        wimoai_chat_state::AuthType::SessionToken
     } else {
-        wimo ai_chat_state::AuthType::ApiKey
+        wimoai_chat_state::AuthType::ApiKey
     }
 }
 /// Resolve a model override string (config key or model ID) to a `(SamplerConfig, ModelId)` pair.
 fn resolve_model_override_to_config(
     model_id: &str,
     ctx: &SubagentSpawnContext,
-) -> Option<(wimo ai_wimo_sampler::SamplerConfig, acp::ModelId)> {
+) -> Option<(wimoai_wimo_sampler::SamplerConfig, acp::ModelId)> {
     let entry = crate::agent::config::find_model_by_id(&ctx.available_models, model_id).cloned()?;
     if !entry.info.user_selectable {
         let user_picker_only = ctx
@@ -836,7 +836,7 @@ fn resolve_model_override_to_config(
         ctx.sampling_config.user_id.clone(),
     );
     config.bearer_resolver = if !ctx.would_strip_fallback_key(config.api_key.as_deref())
-        && resolved_auth_type == wimo ai_chat_state::AuthType::SessionToken
+        && resolved_auth_type == wimoai_chat_state::AuthType::SessionToken
     {
         session_bearer_resolver(
             ctx,
@@ -850,7 +850,7 @@ fn resolve_model_override_to_config(
     } else {
         None
     };
-    wimo ai_wimo_telemetry::unified_log::debug(
+    wimoai_wimo_telemetry::unified_log::debug(
         "subagent resolve_model_override_to_config",
         None,
         Some(serde_json::json!({
@@ -871,7 +871,7 @@ struct InitialContext {
     source: InitialContextSource,
     copy_error: Option<String>,
     prefix_len: Option<usize>,
-    conversation: Vec<wimo ai_wimo_sampling_types::conversation::ConversationItem>,
+    conversation: Vec<wimoai_wimo_sampling_types::conversation::ConversationItem>,
     force_compact: bool,
     /// True only for a verbatim mirror-fork (parent items copied byte-for-byte).
     /// Gates sending the parent tool snapshot so the child's full request prefix matches the parent.
@@ -880,7 +880,7 @@ struct InitialContext {
 }
 /// Resume bootstrap: preserve only the System head (see `resume_inherited_prefix_len`).
 fn resume_initial_context(
-    conversation: Vec<wimo ai_wimo_sampling_types::conversation::ConversationItem>,
+    conversation: Vec<wimoai_wimo_sampling_types::conversation::ConversationItem>,
     force_compact: bool,
 ) -> InitialContext {
     InitialContext {
@@ -894,7 +894,7 @@ fn resume_initial_context(
 }
 /// Apply `fork_filter_chat` then normalize; empty or System-only input (no `<background_context>` produced) fails open to `New`.
 fn forked_initial_context(
-    mut items: Vec<wimo ai_wimo_sampling_types::conversation::ConversationItem>,
+    mut items: Vec<wimoai_wimo_sampling_types::conversation::ConversationItem>,
 ) -> InitialContext {
     crate::sampling::fork_filter_chat(&mut items);
     if items.is_empty() {
@@ -908,7 +908,7 @@ fn forked_initial_context(
         };
     }
     let (conversation, prefix_len) =
-        wimo ai_wimo_subagent_resolution::context::normalize_forked_context(items);
+        wimoai_wimo_subagent_resolution::context::normalize_forked_context(items);
     if prefix_len < 2 {
         return InitialContext {
             source: InitialContextSource::New,
@@ -932,7 +932,7 @@ fn forked_initial_context(
 /// A dangling assistant (unanswered tool calls), a trailing ToolResult (mid-turn), or a trailing user/reasoning means the prefix would be incoherent.
 /// The caller then falls back to the summarized path instead of partial-trimming.
 fn conversation_tail_is_complete(
-    items: &[wimo ai_wimo_sampling_types::conversation::ConversationItem],
+    items: &[wimoai_wimo_sampling_types::conversation::ConversationItem],
 ) -> bool {
     matches!(
         items.last(),
@@ -955,7 +955,7 @@ fn conversation_tail_is_complete(
 ///
 /// Input that is empty or only `System` item(s), before OR after filtering, inherited nothing, so it fails open to `New` rather than a hollow fork.
 fn verbatim_or_normalize_fork(
-    items: Vec<wimo ai_wimo_sampling_types::conversation::ConversationItem>,
+    items: Vec<wimoai_wimo_sampling_types::conversation::ConversationItem>,
     child_context_window: u64,
 ) -> InitialContext {
     if !items
@@ -971,7 +971,7 @@ fn verbatim_or_normalize_fork(
             verbatim_fork: false,
         };
     }
-    let estimated_tokens = wimo ai_chat_state::estimate_conversation_tokens(&items);
+    let estimated_tokens = wimoai_chat_state::estimate_conversation_tokens(&items);
     const SAFE_FORK_PERCENT: u64 = 80;
     let threshold = child_context_window * SAFE_FORK_PERCENT / 100;
     if estimated_tokens <= threshold && conversation_tail_is_complete(&items) {
@@ -1001,7 +1001,7 @@ fn verbatim_or_normalize_fork(
         };
     }
     let (conversation, prefix_len) =
-        wimo ai_wimo_subagent_resolution::context::normalize_forked_context(filtered);
+        wimoai_wimo_subagent_resolution::context::normalize_forked_context(filtered);
     InitialContext {
         source: InitialContextSource::Forked,
         copy_error: None,
@@ -1125,7 +1125,7 @@ async fn bootstrap_initial_context(
                         ));
                     }
                 };
-                let estimated_tokens = wimo ai_chat_state::estimate_conversation_tokens(&conversation);
+                let estimated_tokens = wimoai_chat_state::estimate_conversation_tokens(&conversation);
                 let context_window = window.context_window;
                 if !window.fits(estimated_tokens) {
                     let limit = window.token_limit();
@@ -1376,7 +1376,7 @@ fn durable_resume_source_for(
 /// Returns `None` when there is no parent pool or `inheritance` is [`McpInheritance::None`] (avoids an empty import call downstream).
 fn resolve_inherited_mcp_pool(
     parent_pool: Option<crate::session::mcp_servers::SharedMcpPool>,
-    inheritance: &wimo ai_wimo_agent::config::McpInheritance,
+    inheritance: &wimoai_wimo_agent::config::McpInheritance,
 ) -> Option<crate::session::mcp_servers::SharedMcpPool> {
     parent_pool.and_then(|pool| filter_pool_by_inheritance(pool, inheritance))
 }
@@ -1386,7 +1386,7 @@ fn resolve_inherited_mcp_pool(
 /// For `Named`/`Except`, retains or removes the matching server names in-place.
 fn filter_pool_by_inheritance(
     mut pool: crate::session::mcp_servers::SharedMcpPool,
-    inheritance: &wimo ai_wimo_agent::config::McpInheritance,
+    inheritance: &wimoai_wimo_agent::config::McpInheritance,
 ) -> Option<crate::session::mcp_servers::SharedMcpPool> {
     match inheritance {
         McpInheritance::All => Some(pool),
@@ -1420,20 +1420,20 @@ fn filter_pool_by_inheritance(
 fn resolve_agent_definition(
     subagent_type: &str,
     ctx: &SubagentSpawnContext,
-) -> Option<wimo ai_wimo_agent::config::AgentDefinition> {
+) -> Option<wimoai_wimo_agent::config::AgentDefinition> {
     let cli_agents = ctx
         .agent_config
         .as_ref()
         .map(|config| config.cli_agents.as_slice())
         .unwrap_or_default();
-    let resolution_context = wimo ai_wimo_subagent_resolution::DefinitionResolutionContext {
+    let resolution_context = wimoai_wimo_subagent_resolution::DefinitionResolutionContext {
         cwd: &ctx.parent_cwd,
         plugins: ctx.plugin_registry.as_deref(),
         cli_agents,
         toggles: &ctx.subagent_toggle,
         allowed_types: ctx.allowed_subagent_types.as_deref(),
     };
-    let mut def = wimo ai_wimo_subagent_resolution::discover_agent_definition(
+    let mut def = wimoai_wimo_subagent_resolution::discover_agent_definition(
         subagent_type,
         &resolution_context,
     )?;
@@ -1446,8 +1446,8 @@ fn available_agent_names(ctx: &SubagentSpawnContext) -> Vec<String> {
         .as_ref()
         .map(|config| config.cli_agents.as_slice())
         .unwrap_or_default();
-    wimo ai_wimo_subagent_resolution::available_agent_names(
-        &wimo ai_wimo_subagent_resolution::DefinitionResolutionContext {
+    wimoai_wimo_subagent_resolution::available_agent_names(
+        &wimoai_wimo_subagent_resolution::DefinitionResolutionContext {
             cwd: &ctx.parent_cwd,
             plugins: ctx.plugin_registry.as_deref(),
             cli_agents,
@@ -1461,7 +1461,7 @@ fn available_agent_names(ctx: &SubagentSpawnContext) -> Vec<String> {
 #[derive(Default)]
 pub(crate) struct SubagentValidationContext {
     pub parent_cwd: PathBuf,
-    pub plugin_registry: Option<Arc<wimo ai_wimo_agent::plugins::PluginRegistry>>,
+    pub plugin_registry: Option<Arc<wimoai_wimo_agent::plugins::PluginRegistry>>,
     pub subagent_toggle: HashMap<String, bool>,
     pub allowed_subagent_types: Option<Vec<String>>,
     pub cli_agent_names: Vec<String>,
@@ -1472,27 +1472,27 @@ pub(crate) fn validate_subagent_type(
     subagent_type: &str,
     ctx: &SubagentValidationContext,
 ) -> SubagentValidateTypeOutcome {
-    let context = wimo ai_wimo_subagent_resolution::DefinitionValidationContext {
+    let context = wimoai_wimo_subagent_resolution::DefinitionValidationContext {
         cwd: &ctx.parent_cwd,
         plugins: ctx.plugin_registry.as_deref(),
         cli_agent_names: &ctx.cli_agent_names,
         toggles: &ctx.subagent_toggle,
         allowed_types: ctx.allowed_subagent_types.as_deref(),
     };
-    match wimo ai_wimo_subagent_resolution::validate_agent_name(subagent_type, &context) {
+    match wimoai_wimo_subagent_resolution::validate_agent_name(subagent_type, &context) {
         Ok(()) => SubagentValidateTypeOutcome::Ok,
-        Err(wimo ai_wimo_subagent_resolution::ResolutionError::Unknown { available, .. }) => {
+        Err(wimoai_wimo_subagent_resolution::ResolutionError::Unknown { available, .. }) => {
             SubagentValidateTypeOutcome::Unknown { available }
         }
-        Err(wimo ai_wimo_subagent_resolution::ResolutionError::Disabled { .. }) => {
+        Err(wimoai_wimo_subagent_resolution::ResolutionError::Disabled { .. }) => {
             SubagentValidateTypeOutcome::Disabled
         }
-        Err(wimo ai_wimo_subagent_resolution::ResolutionError::NotAllowed { allowed, .. }) => {
+        Err(wimoai_wimo_subagent_resolution::ResolutionError::NotAllowed { allowed, .. }) => {
             SubagentValidateTypeOutcome::NotAllowed { allowed }
         }
         Err(
-            wimo ai_wimo_subagent_resolution::ResolutionError::PersonaResolution(_)
-            | wimo ai_wimo_subagent_resolution::ResolutionError::ResumeValidation(_),
+            wimoai_wimo_subagent_resolution::ResolutionError::PersonaResolution(_)
+            | wimoai_wimo_subagent_resolution::ResolutionError::ResumeValidation(_),
         ) => SubagentValidateTypeOutcome::ValidationUnavailable,
     }
 }
@@ -1510,30 +1510,30 @@ fn gate_subagent_type(
         .as_ref()
         .map(|config| config.cli_agents.as_slice())
         .unwrap_or_default();
-    let resolution_context = wimo ai_wimo_subagent_resolution::DefinitionResolutionContext {
+    let resolution_context = wimoai_wimo_subagent_resolution::DefinitionResolutionContext {
         cwd: &ctx.parent_cwd,
         plugins: ctx.plugin_registry.as_deref(),
         cli_agents,
         toggles: &ctx.subagent_toggle,
         allowed_types: ctx.allowed_subagent_types.as_deref(),
     };
-    match wimo ai_wimo_subagent_resolution::gate_agent_definition(subagent_type, &resolution_context) {
+    match wimoai_wimo_subagent_resolution::gate_agent_definition(subagent_type, &resolution_context) {
         Ok(()) => SubagentValidateTypeOutcome::Ok,
-        Err(wimo ai_wimo_subagent_resolution::ResolutionError::Disabled { .. }) => {
+        Err(wimoai_wimo_subagent_resolution::ResolutionError::Disabled { .. }) => {
             SubagentValidateTypeOutcome::Disabled
         }
-        Err(wimo ai_wimo_subagent_resolution::ResolutionError::NotAllowed { allowed, .. }) => {
+        Err(wimoai_wimo_subagent_resolution::ResolutionError::NotAllowed { allowed, .. }) => {
             SubagentValidateTypeOutcome::NotAllowed { allowed }
         }
         Err(
-            wimo ai_wimo_subagent_resolution::ResolutionError::Unknown { .. }
-            | wimo ai_wimo_subagent_resolution::ResolutionError::PersonaResolution(_)
-            | wimo ai_wimo_subagent_resolution::ResolutionError::ResumeValidation(_),
+            wimoai_wimo_subagent_resolution::ResolutionError::Unknown { .. }
+            | wimoai_wimo_subagent_resolution::ResolutionError::PersonaResolution(_)
+            | wimoai_wimo_subagent_resolution::ResolutionError::ResumeValidation(_),
         ) => SubagentValidateTypeOutcome::ValidationUnavailable,
     }
 }
 pub(crate) fn subagent_harness_flavor_is_representable(agent_type: &str) -> bool {
-    wimo ai_wimo_subagent_resolution::subagent_harness_flavor_is_representable(agent_type)
+    wimoai_wimo_subagent_resolution::subagent_harness_flavor_is_representable(agent_type)
 }
 /// Apply the harness-dependent toolset/prompt re-selection to a resolved agent definition.
 ///
@@ -1550,15 +1550,15 @@ fn resolve_subagent_toolset(
     subagent_type: &str,
     harness_agent_type: Option<&str>,
     ctx: &SubagentSpawnContext,
-    definition: &mut wimo ai_wimo_agent::config::AgentDefinition,
+    definition: &mut wimoai_wimo_agent::config::AgentDefinition,
 ) {
-    let resolution_context = wimo ai_wimo_subagent_resolution::HarnessToolsetContext {
+    let resolution_context = wimoai_wimo_subagent_resolution::HarnessToolsetContext {
         harness_override: harness_agent_type,
         parent_agent_name: ctx.parent_agent_name.as_deref(),
         parent_model_agent_type: ctx.parent_model_agent_type.as_deref(),
         file_tool_overrides: ctx.file_tool_overrides.as_deref(),
     };
-    wimo ai_wimo_subagent_resolution::apply_harness_toolset(
+    wimoai_wimo_subagent_resolution::apply_harness_toolset(
         subagent_type,
         &resolution_context,
         definition,
@@ -1575,7 +1575,7 @@ fn resolve_subagent_toolset(
 /// `default_id` is the unqualified tool id (the `"<namespace>:"` prefix on `tc.id` is stripped).
 /// The read/search/execute flags are what the per-role capability gates key on.
 fn summarize_tool_config(
-    config: &wimo ai_wimo_tools::registry::types::ToolServerConfig,
+    config: &wimoai_wimo_tools::registry::types::ToolServerConfig,
 ) -> SubagentTypeSummary {
     let mut tool_names: HashMap<ToolKind, String> = HashMap::new();
     for tc in &config.tools {
@@ -1681,10 +1681,10 @@ fn parent_source_cwd(ctx: &SubagentSpawnContext) -> std::path::PathBuf {
 /// Under the pin, `bypassPermissions` downgrades to `Default` so a repo/profile/`--agents` def can't restore auto-approve.
 /// Caller logs it.
 fn resolve_subagent_permission_mode(
-    requested: wimo ai_wimo_agent::config::PermissionMode,
+    requested: wimoai_wimo_agent::config::PermissionMode,
     is_plugin: bool,
     policy_block: Option<&'static str>,
-) -> wimo ai_wimo_agent::config::PermissionMode {
+) -> wimoai_wimo_agent::config::PermissionMode {
     if is_plugin {
         return PermissionMode::Default;
     }
@@ -1697,7 +1697,7 @@ fn resolve_subagent_permission_mode(
 /// Both arms MUST resolve this identically.
 fn resolve_subagent_source_repo(ctx: &SubagentSpawnContext) -> std::path::PathBuf {
     let source_cwd = parent_source_cwd(ctx);
-    wimo ai_wimo_workspace::session::git::find_main_repo_root_from_path(&source_cwd)
+    wimoai_wimo_workspace::session::git::find_main_repo_root_from_path(&source_cwd)
         .unwrap_or(source_cwd)
 }
 enum SubagentWaitOutcome {
@@ -1726,7 +1726,7 @@ async fn signals_snapshot_counts(child_handle: &SessionHandle) -> Option<(u32, u
     .map(|snapshot| (snapshot.tool_call_count, snapshot.turn_count))
 }
 fn cancellation_error_message(
-    category: Option<wimo ai_wimo_session_events::types::CancellationCategory>,
+    category: Option<wimoai_wimo_session_events::types::CancellationCategory>,
     context: Option<&crate::session::commands::CancellationContext>,
 ) -> String {
     let detail = context.and_then(|ctx| {
@@ -1764,13 +1764,13 @@ fn cancellation_error_message(
 }
 fn telemetry_owner_kind(
     request: &SubagentRequest,
-) -> wimo ai_wimo_telemetry::events::SubagentOwnerKind {
+) -> wimoai_wimo_telemetry::events::SubagentOwnerKind {
     if request.owner.is_workflow() {
-        wimo ai_wimo_telemetry::events::SubagentOwnerKind::Workflow
+        wimoai_wimo_telemetry::events::SubagentOwnerKind::Workflow
     } else if request.from_scheduler_loop() {
-        wimo ai_wimo_telemetry::events::SubagentOwnerKind::SchedulerLoop
+        wimoai_wimo_telemetry::events::SubagentOwnerKind::SchedulerLoop
     } else {
-        wimo ai_wimo_telemetry::events::SubagentOwnerKind::Task
+        wimoai_wimo_telemetry::events::SubagentOwnerKind::Task
     }
 }
 fn failure_result(request: &SubagentRequest, error: &str) -> SubagentResult {
@@ -1861,7 +1861,7 @@ impl UnpromotedChildDisposition {
 async fn cancel_pending_shell_child(
     child_cmd_tx: &mpsc::UnboundedSender<SessionCommand>,
     child_thread: crate::session::SessionThread,
-    workspace_ops: &wimo ai_wimo_workspace::WorkspaceOps,
+    workspace_ops: &wimoai_wimo_workspace::WorkspaceOps,
     subagent_id: &str,
     child_session_id: &acp::SessionId,
     subagent_meta_dir: &Path,
@@ -2001,7 +2001,7 @@ fn spawn_progress_publisher(
                 .and_then(|v| serde_json::value::to_raw_value(&v))
                 .ok();
             if let Some(ref cmd_tx) = parent_cmd_tx {
-                let _ = cmd_tx.send(SessionCommand::wimo aiSessionNotification { notification });
+                let _ = cmd_tx.send(SessionCommand::wimoaiSessionNotification { notification });
             }
             if let Some(params) = params {
                 let ext_notification =
@@ -2471,7 +2471,7 @@ fn completed_finish_from_inspection(inspection: &SubagentInspection) -> Option<S
 #[tracing::instrument(skip_all)]
 pub(crate) async fn reconcile_orphaned_subagents_with_backend(
     unfinished: &[(String, String)],
-    backend: &wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend,
+    backend: &wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend,
     session_dir: &Path,
     parent_session_id: &str,
     gateway: &GatewaySender,
@@ -2596,7 +2596,7 @@ pub(crate) async fn reconcile_orphaned_subagents_with_backend(
 /// Persist-first plus the per-parent lock make a second tick, sequential or overlapping, a no-op.
 #[tracing::instrument(level = "debug", skip_all)]
 pub(crate) async fn reconcile_live_orphaned_subagents(
-    backend: &wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend,
+    backend: &wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend,
     session_dir: &Path,
     parent_session_id: &str,
     gateway: &GatewaySender,

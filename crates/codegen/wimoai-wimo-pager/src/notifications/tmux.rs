@@ -1,4 +1,4 @@
-pub use wimo ai_wimo_pager_render::terminal::{
+pub use wimoai_wimo_pager_render::terminal::{
     passthrough_available, tmux_passthrough_str as tmux_passthrough,
 };
 

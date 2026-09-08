@@ -1,6 +1,6 @@
 pub const ENV_SYSTEM_PROMPT_LABEL: &str = "wimo_SYSTEM_PROMPT_LABEL";
 
-pub const DEFAULT_SYSTEM_PROMPT_LABEL: &str = wimo ai_wimo_agent::DEFAULT_SYSTEM_PROMPT_LABEL;
+pub const DEFAULT_SYSTEM_PROMPT_LABEL: &str = wimoai_wimo_agent::DEFAULT_SYSTEM_PROMPT_LABEL;
 
 /// Precedence: env > config per-model > `[agent]` > GB per-model > GB global > `"wimo"`.
 /// Empty/whitespace falls through.

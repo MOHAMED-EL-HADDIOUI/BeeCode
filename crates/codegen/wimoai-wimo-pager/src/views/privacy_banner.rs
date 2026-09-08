@@ -11,7 +11,7 @@ use ratatui::widgets::{Paragraph, Widget};
 /// Shares its row with the buttons.
 const PRIVACY_BANNER_TITLE: &str = "Help improve wimo";
 
-const PRIVACY_BANNER_DESC: &str = "Off by default. Opt-in to allow Spacewimo ai to retain coding \
+const PRIVACY_BANNER_DESC: &str = "Off by default. Opt-in to allow Spacewimoai to retain coding \
      data, e.g., prompts, traces, & metrics, for training and debugging purposes. Change \
      anytime via settings.";
 

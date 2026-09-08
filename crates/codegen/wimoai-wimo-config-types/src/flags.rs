@@ -1,6 +1,6 @@
-//! Config-value resolution leaf types and per-model laziness config, extracted from wimo ai-wimo-shell so crates the shell depends on can use them.
+//! Config-value resolution leaf types and per-model laziness config, extracted from wimoai-wimo-shell so crates the shell depends on can use them.
 
-use wimo ai_wimo_config::env_bool;
+use wimoai_wimo_config::env_bool;
 
 /// Where a resolved config value came from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, strum::Display)]

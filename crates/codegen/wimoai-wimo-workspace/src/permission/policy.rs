@@ -7,8 +7,8 @@ use crate::permission::bash_command_splitting::{
 use crate::permission::types::{
     AccessKind, Decision, PatternMode, PermissionConfig, PermissionRule, RuleAction, ToolFilter,
 };
-use wimo ai_wimo_paths::normalize_lexically;
-use wimo ai_wimo_tools::implementations::wimo::web_fetch::domain::normalize_domain;
+use wimoai_wimo_paths::normalize_lexically;
+use wimoai_wimo_tools::implementations::wimo::web_fetch::domain::normalize_domain;
 
 /// A security-gate escalation with `Ask` provenance.
 /// The bash-command and shell-file gates only escalate (rule `Allow` is dropped), so these three arms cover every gate outcome.
@@ -1284,9 +1284,9 @@ mod tests {
     #[test]
     fn write_scoped_access_respects_edit_deny_and_not_read_allow() {
         use crate::permission::rules::parse_permission_rule;
-        use wimo ai_wimo_tools::implementations::opencode::edit::EditInput;
-        use wimo ai_wimo_tools::types::ToolInput;
-        use wimo ai_tool_types::TaskToolInput;
+        use wimoai_wimo_tools::implementations::opencode::edit::EditInput;
+        use wimoai_wimo_tools::types::ToolInput;
+        use wimoai_tool_types::TaskToolInput;
 
         let edit = AccessKind::from(&ToolInput::from(EditInput {
             file_path: "/tmp/denied.txt".into(),

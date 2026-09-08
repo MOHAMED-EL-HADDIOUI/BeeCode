@@ -111,7 +111,7 @@ fn sampling_stream_error_with_structured_size_code_is_overflow() {
             is_overflow(&classify_sampling_error(SamplingError::StreamError {
                 error_type: "BAD_REQUEST".into(),
                 message: "request rejected".into(),
-                code: Some(wimo ai_wimo_sampling_types::ApiErrorCode::parse(code)),
+                code: Some(wimoai_wimo_sampling_types::ApiErrorCode::parse(code)),
             })),
             "should be overflow for code: {code}"
         );
@@ -121,7 +121,7 @@ fn sampling_stream_error_with_structured_size_code_is_overflow() {
         SamplingError::StreamError {
             error_type: "server_error".into(),
             message: "internal error".into(),
-            code: Some(wimo ai_wimo_sampling_types::ApiErrorCode::parse(
+            code: Some(wimoai_wimo_sampling_types::ApiErrorCode::parse(
                 "overloaded_error"
             )),
         }

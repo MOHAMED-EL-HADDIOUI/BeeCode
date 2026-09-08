@@ -3,7 +3,7 @@ use std::time::SystemTime;
 
 use agent_client_protocol as acp;
 use pretty_assertions::assert_eq;
-use wimo ai_wimo_tools::computer::types::TaskKind;
+use wimoai_wimo_tools::computer::types::TaskKind;
 
 use super::*;
 

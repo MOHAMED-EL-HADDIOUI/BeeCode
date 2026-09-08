@@ -2,8 +2,8 @@ use super::*;
 
 pub(super) fn turn_result_to_hook_outcome(
     result: &Result<TurnOutcome, acp::Error>,
-) -> wimo ai_tool_protocol::turn_hook::TurnHookOutcome {
-    use wimo ai_tool_protocol::turn_hook::TurnHookOutcome;
+) -> wimoai_tool_protocol::turn_hook::TurnHookOutcome {
+    use wimoai_tool_protocol::turn_hook::TurnHookOutcome;
     match result {
         Ok(TurnOutcome::Completed { .. }) | Ok(TurnOutcome::StationarityEnded { .. }) => {
             TurnHookOutcome::Completed
@@ -30,9 +30,9 @@ pub(super) fn cancellation_category_to_wire_string(
 /// `Cancelled` means the tool never ran (permission, doom-loop, hook, followup).
 pub(super) fn map_tool_outcome(
     outcome: crate::session::events::ToolOutcome,
-) -> wimo ai_tool_protocol::session_event::ToolCallOutcome {
+) -> wimoai_tool_protocol::session_event::ToolCallOutcome {
     use crate::session::events::ToolOutcome;
-    use wimo ai_tool_protocol::session_event::ToolCallOutcome;
+    use wimoai_tool_protocol::session_event::ToolCallOutcome;
     match outcome {
         ToolOutcome::Success => ToolCallOutcome::Success,
         ToolOutcome::Error | ToolOutcome::InvalidTool => ToolCallOutcome::Error,
@@ -51,28 +51,28 @@ pub(super) fn map_tool_outcome(
 /// `DiffReview` always waits on the user, so it is safe to fire `permission_prompt` here.
 #[allow(clippy::type_complexity)]
 pub(super) fn notification_hook_for_update(
-    update: &wimo aiSessionUpdate,
+    update: &wimoaiSessionUpdate,
 ) -> Option<(String, Option<String>, Option<String>, Option<String>)> {
     match update {
-        wimo aiSessionUpdate::DiffReview { .. } => Some((
+        wimoaiSessionUpdate::DiffReview { .. } => Some((
             "permission_prompt".into(),
             Some("Diff review requested".into()),
             None,
             Some("info".into()),
         )),
-        wimo aiSessionUpdate::AutoRecoveryExhausted { error, .. } => Some((
+        wimoaiSessionUpdate::AutoRecoveryExhausted { error, .. } => Some((
             "agent_error".into(),
             Some(error.clone()),
             None,
             Some("error".into()),
         )),
-        wimo aiSessionUpdate::RetryState(RetryState::Exhausted { reason, .. }) => Some((
+        wimoaiSessionUpdate::RetryState(RetryState::Exhausted { reason, .. }) => Some((
             "agent_error".into(),
             Some(reason.clone()),
             None,
             Some("error".into()),
         )),
-        wimo aiSessionUpdate::RetryState(RetryState::Failed { message, .. }) => Some((
+        wimoaiSessionUpdate::RetryState(RetryState::Failed { message, .. }) => Some((
             "agent_error".into(),
             Some(message.clone()),
             None,
@@ -84,12 +84,12 @@ pub(super) fn notification_hook_for_update(
 
 pub(super) struct DeferredPostToolUseScrollback {
     tool_name: String,
-    results: Vec<wimo ai_wimo_hooks::result::HookRunResult>,
+    results: Vec<wimoai_wimo_hooks::result::HookRunResult>,
 }
 
 impl SessionActor {
-    pub(super) fn hook_run_ctx(&self) -> wimo ai_wimo_hooks::runner::RunContext<'_> {
-        wimo ai_wimo_hooks::runner::RunContext {
+    pub(super) fn hook_run_ctx(&self) -> wimoai_wimo_hooks::runner::RunContext<'_> {
+        wimoai_wimo_hooks::runner::RunContext {
             session_id: &self.session_info.id.0,
             workspace_root: &self.hook_resolved_workspace_root,
             process_scope: self.tool_context.process_scope.clone(),
@@ -98,7 +98,7 @@ impl SessionActor {
 
     /// The annotation renders inline with the preceding tool call block rather than as a separate agent message.
     pub(super) async fn send_hook_annotation(&self, message: &str) {
-        self.send_wimo ai_notification(wimo aiSessionUpdate::HookAnnotation {
+        self.send_wimoai_notification(wimoaiSessionUpdate::HookAnnotation {
             message: message.to_string(),
         })
         .await;
@@ -110,17 +110,17 @@ impl SessionActor {
         event_name: &str,
         tool_name: Option<&str>,
         prompt_id: Option<&str>,
-        results: &[wimo ai_wimo_hooks::result::HookRunResult],
+        results: &[wimoai_wimo_hooks::result::HookRunResult],
     ) {
         if results.is_empty()
             || results
                 .iter()
-                .all(|r| matches!(r, wimo ai_wimo_hooks::result::HookRunResult::Skipped { .. }))
+                .all(|r| matches!(r, wimoai_wimo_hooks::result::HookRunResult::Skipped { .. }))
         {
             return;
         }
         use crate::extensions::notification::{HookRunEntryDto, HookRunStatusDto};
-        use wimo ai_wimo_hooks::result::HookRunResult;
+        use wimoai_wimo_hooks::result::HookRunResult;
 
         let runs: Vec<HookRunEntryDto> = results
             .iter()
@@ -172,7 +172,7 @@ impl SessionActor {
             })
             .collect();
 
-        self.send_wimo ai_notification(wimo aiSessionUpdate::HookExecution {
+        self.send_wimoai_notification(wimoaiSessionUpdate::HookExecution {
             event_name: event_name.to_string(),
             tool_name: tool_name.map(|s| s.to_string()),
             prompt_id: prompt_id.map(|s| s.to_string()),
@@ -226,8 +226,8 @@ impl SessionActor {
     /// Dispatch a non-blocking hook event: build the envelope, fire observe-only client hooks, then run the on-disk registry.
     pub(super) async fn dispatch_hook(
         &self,
-        event: wimo ai_wimo_hooks::event::HookEventName,
-        payload: wimo ai_wimo_hooks::event::HookPayload,
+        event: wimoai_wimo_hooks::event::HookEventName,
+        payload: wimoai_wimo_hooks::event::HookPayload,
         prompt_id: Option<&str>,
         tool_name: Option<&str>,
     ) {
@@ -242,7 +242,7 @@ impl SessionActor {
         let ctx = self.hook_run_ctx();
         // Prompt-gate events go through dispatch_prompt_submit_hook; dispatch_non_blocking debug-asserts observe-only
         let results =
-            wimo ai_wimo_hooks::dispatcher::dispatch_non_blocking(&registry, event, &envelope, &ctx)
+            wimoai_wimo_hooks::dispatcher::dispatch_non_blocking(&registry, event, &envelope, &ctx)
                 .await;
         self.send_hook_execution(&event.to_string(), tool_name, prompt_id, &results)
             .await;
@@ -256,7 +256,7 @@ impl SessionActor {
         output: &ToolsToolOutput,
         duration_ms: Option<u64>,
     ) -> (PostToolUseDelivery, Option<DeferredPostToolUseScrollback>) {
-        use wimo ai_wimo_hooks::event::{HookEventName, HookPayload, truncate_payload};
+        use wimoai_wimo_hooks::event::{HookEventName, HookPayload, truncate_payload};
 
         if !self.may_have_hooks_for(HookEventName::PostToolUse) {
             return (PostToolUseDelivery::default(), None);
@@ -288,9 +288,9 @@ impl SessionActor {
         let registry = self.hook_registry.borrow().clone();
         let mut dispatch_result = if let Some(registry) = registry {
             let ctx = self.hook_run_ctx();
-            wimo ai_wimo_hooks::dispatcher::dispatch_post_tool_use(&registry, &envelope, &ctx).await
+            wimoai_wimo_hooks::dispatcher::dispatch_post_tool_use(&registry, &envelope, &ctx).await
         } else {
-            wimo ai_wimo_hooks::dispatcher::PostToolUseResult::default()
+            wimoai_wimo_hooks::dispatcher::PostToolUseResult::default()
         };
         // Client PostToolUse runs the awaited gate though it is not yet in
         // ADVERTISED_BLOCKING_EVENTS; SDK clients dispatch by callback id and answer.
@@ -317,7 +317,7 @@ impl SessionActor {
         &self,
         deferred: DeferredPostToolUseScrollback,
     ) {
-        let event = wimo ai_wimo_hooks::event::HookEventName::PostToolUse.to_string();
+        let event = wimoai_wimo_hooks::event::HookEventName::PostToolUse.to_string();
         self.send_hook_execution(&event, Some(&deferred.tool_name), None, &deferred.results)
             .await;
     }
@@ -330,16 +330,16 @@ impl SessionActor {
         prepared: &PreparedToolCall,
         error_text: String,
         duration_ms: u64,
-    ) -> Vec<wimo ai_wimo_hooks::dispatcher::AdditionalContext> {
-        if !self.may_have_hooks_for(wimo ai_wimo_hooks::event::HookEventName::PostToolUseFailure) {
+    ) -> Vec<wimoai_wimo_hooks::dispatcher::AdditionalContext> {
+        if !self.may_have_hooks_for(wimoai_wimo_hooks::event::HookEventName::PostToolUseFailure) {
             return Vec::new();
         }
         let raw_input: serde_json::Value =
             serde_json::from_str(&prepared.raw_arguments).unwrap_or(serde_json::Value::Null);
-        let (tool_input, tool_input_truncated) = wimo ai_wimo_hooks::event::truncate_payload(raw_input);
+        let (tool_input, tool_input_truncated) = wimoai_wimo_hooks::event::truncate_payload(raw_input);
         let hook_tool_name = prepared.hook_tool_name();
         self.dispatch_post_tool_use_failure_hook(
-            wimo ai_wimo_hooks::event::HookPayload::PostToolUseFailure {
+            wimoai_wimo_hooks::event::HookPayload::PostToolUseFailure {
                 tool_name: hook_tool_name.to_owned(),
                 tool_use_id: prepared.call_id.clone(),
                 tool_input,
@@ -362,17 +362,17 @@ impl SessionActor {
     /// failed tool result. Context-only — no block or output replacement.
     async fn dispatch_post_tool_use_failure_hook(
         &self,
-        payload: wimo ai_wimo_hooks::event::HookPayload,
+        payload: wimoai_wimo_hooks::event::HookPayload,
         tool_name: &str,
-    ) -> Vec<wimo ai_wimo_hooks::dispatcher::AdditionalContext> {
-        let event = wimo ai_wimo_hooks::event::HookEventName::PostToolUseFailure;
+    ) -> Vec<wimoai_wimo_hooks::dispatcher::AdditionalContext> {
+        let event = wimoai_wimo_hooks::event::HookEventName::PostToolUseFailure;
         let envelope = self.fire_hook(event, None, payload);
         let Some(registry) = self.hook_registry.borrow().clone() else {
             return Vec::new();
         };
         let ctx = self.hook_run_ctx();
         let result =
-            wimo ai_wimo_hooks::dispatcher::dispatch_post_tool_use_failure(&registry, &envelope, &ctx)
+            wimoai_wimo_hooks::dispatcher::dispatch_post_tool_use_failure(&registry, &envelope, &ctx)
                 .await;
         self.send_hook_execution(&event.to_string(), Some(tool_name), None, &result.results)
             .await;
@@ -385,7 +385,7 @@ impl SessionActor {
     /// The event fires for every origin, but synthetic wakes and subagent sessions run the gate observe-only.
     pub(super) fn should_enforce_prompt_block(
         &self,
-        policy: &wimo ai_agent_lifecycle::InputPolicy,
+        policy: &wimoai_agent_lifecycle::InputPolicy,
     ) -> bool {
         policy.authority.is_human_intent() && !self.startup_hints.is_subagent
     }
@@ -394,21 +394,21 @@ impl SessionActor {
     /// Returns the gate verdict; the caller decides whether to enforce it (`Block` rejects the prompt).
     pub(super) async fn dispatch_prompt_submit_hook(
         &self,
-        payload: wimo ai_wimo_hooks::event::HookPayload,
+        payload: wimoai_wimo_hooks::event::HookPayload,
         prompt_id: Option<&str>,
-    ) -> wimo ai_wimo_hooks::result::PromptDecision {
-        let event = wimo ai_wimo_hooks::event::HookEventName::UserPromptSubmit;
+    ) -> wimoai_wimo_hooks::result::PromptDecision {
+        let event = wimoai_wimo_hooks::event::HookEventName::UserPromptSubmit;
         if !self.may_have_hooks_for(event) {
-            return wimo ai_wimo_hooks::result::PromptDecision::Allow;
+            return wimoai_wimo_hooks::result::PromptDecision::Allow;
         }
         // Fires observe-only client hooks before (and independent of) the on-disk registry guard below.
         let envelope = self.fire_hook(event, prompt_id.map(|s| s.to_string()), payload);
         let Some(registry) = self.hook_registry.borrow().clone() else {
-            return wimo ai_wimo_hooks::result::PromptDecision::Allow;
+            return wimoai_wimo_hooks::result::PromptDecision::Allow;
         };
         let ctx = self.hook_run_ctx();
         let gate =
-            wimo ai_wimo_hooks::dispatcher::dispatch_prompt_gate(&registry, &envelope, &ctx).await;
+            wimoai_wimo_hooks::dispatcher::dispatch_prompt_gate(&registry, &envelope, &ctx).await;
         self.send_hook_execution(&event.to_string(), None, prompt_id, &gate.results)
             .await;
         self.emit_hook_executed_telemetry(&event.to_string(), None, &gate.results)
@@ -420,35 +420,35 @@ impl SessionActor {
         &self,
         event_name: &str,
         tool_name: Option<&str>,
-        results: &[wimo ai_wimo_hooks::result::HookRunResult],
+        results: &[wimoai_wimo_hooks::result::HookRunResult],
     ) {
         let tool = tool_name.map(|s| s.to_string());
         for r in results {
             let (hook_name, elapsed, outcome) = match r {
-                wimo ai_wimo_hooks::result::HookRunResult::Success {
+                wimoai_wimo_hooks::result::HookRunResult::Success {
                     hook_name, elapsed, ..
                 } => (
                     hook_name,
                     elapsed,
-                    wimo ai_wimo_telemetry::events::HookOutcome::Success,
+                    wimoai_wimo_telemetry::events::HookOutcome::Success,
                 ),
-                wimo ai_wimo_hooks::result::HookRunResult::Blocked {
+                wimoai_wimo_hooks::result::HookRunResult::Blocked {
                     hook_name, elapsed, ..
                 } => (
                     hook_name,
                     elapsed,
-                    wimo ai_wimo_telemetry::events::HookOutcome::Blocked,
+                    wimoai_wimo_telemetry::events::HookOutcome::Blocked,
                 ),
-                wimo ai_wimo_hooks::result::HookRunResult::Failed {
+                wimoai_wimo_hooks::result::HookRunResult::Failed {
                     hook_name, elapsed, ..
                 } => (
                     hook_name,
                     elapsed,
-                    wimo ai_wimo_telemetry::events::HookOutcome::Error,
+                    wimoai_wimo_telemetry::events::HookOutcome::Error,
                 ),
-                wimo ai_wimo_hooks::result::HookRunResult::Skipped { .. } => continue,
+                wimoai_wimo_hooks::result::HookRunResult::Skipped { .. } => continue,
             };
-            wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::HookExecuted {
+            wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::HookExecuted {
                 hook_name: hook_name.clone(),
                 event: event_name.to_string(),
                 tool_name: tool.clone(),
@@ -468,7 +468,7 @@ mod notification_hook_filter_tests {
 
     #[test]
     fn hook_updates_do_not_fire_notification_hook() {
-        let execution = wimo aiSessionUpdate::HookExecution {
+        let execution = wimoaiSessionUpdate::HookExecution {
             event_name: "pre_tool_use".into(),
             tool_name: Some("read_file".into()),
             prompt_id: None,
@@ -480,7 +480,7 @@ mod notification_hook_filter_tests {
         };
         assert!(notification_hook_for_update(&execution).is_none());
 
-        let annotation = wimo aiSessionUpdate::HookAnnotation {
+        let annotation = wimoaiSessionUpdate::HookAnnotation {
             message: "running hooks".into(),
         };
         assert!(notification_hook_for_update(&annotation).is_none());
@@ -488,7 +488,7 @@ mod notification_hook_filter_tests {
 
     #[test]
     fn retry_in_progress_does_not_fire_notification_hook() {
-        let update = wimo aiSessionUpdate::RetryState(RetryState::Retrying {
+        let update = wimoaiSessionUpdate::RetryState(RetryState::Retrying {
             attempt: 1,
             max_retries: 3,
             reason: "timeout".into(),
@@ -499,7 +499,7 @@ mod notification_hook_filter_tests {
 
     #[test]
     fn feedback_request_does_not_fire_notification_hook() {
-        let update = wimo aiSessionUpdate::FeedbackRequest(FeedbackRequestNotification {
+        let update = wimoaiSessionUpdate::FeedbackRequest(FeedbackRequestNotification {
             request_id: "req-1".into(),
             tier: "tier1".into(),
             prompt: "How was this session?".into(),
@@ -516,7 +516,7 @@ mod notification_hook_filter_tests {
 
     #[test]
     fn diff_review_fires_permission_prompt() {
-        let update = wimo aiSessionUpdate::DiffReview { content: vec![] };
+        let update = wimoaiSessionUpdate::DiffReview { content: vec![] };
         let (ty, message, _, level) = notification_hook_for_update(&update).expect("should fire");
         assert_eq!(ty, "permission_prompt");
         assert_eq!(message.as_deref(), Some("Diff review requested"));
@@ -525,8 +525,8 @@ mod notification_hook_filter_tests {
 
     #[test]
     fn task_completed_does_not_fire_via_filter() {
-        let update = wimo aiSessionUpdate::TaskCompleted {
-            task_snapshot: wimo ai_wimo_tools::types::TaskSnapshot {
+        let update = wimoaiSessionUpdate::TaskCompleted {
+            task_snapshot: wimoai_wimo_tools::types::TaskSnapshot {
                 task_id: "task-1".into(),
                 command: "echo hi".into(),
                 display_command: None,

@@ -1,6 +1,6 @@
 //! Shared announcement types, persistence, and formatting for wimo CLI apps.
 //!
-//! This crate provides the common logic used by `wimo ai-wimo-shell` and `wimo ai-wimo-pager` for handling announcements (banner notifications).
+//! This crate provides the common logic used by `wimoai-wimo-shell` and `wimoai-wimo-pager` for handling announcements (banner notifications).
 
 use std::collections::BTreeSet;
 use std::path::PathBuf;
@@ -140,7 +140,7 @@ pub async fn write_hidden_announcement_ids(ids: &BTreeSet<String>) {
 }
 
 fn announcements_state_path() -> PathBuf {
-    wimo ai_wimo_tools::util::wimo_home::wimo_home().join("announcements.json")
+    wimoai_wimo_tools::util::wimo_home::wimo_home().join("announcements.json")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

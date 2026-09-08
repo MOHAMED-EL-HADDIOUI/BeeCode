@@ -7,7 +7,7 @@
 
 use crate::sampling::ConversationItem;
 use crate::session::helpers::chat::floor_char_boundary;
-use wimo ai_chat_state::{compaction_utils, estimate_conversation_tokens, estimate_item_tokens};
+use wimoai_chat_state::{compaction_utils, estimate_conversation_tokens, estimate_item_tokens};
 
 /// Generous headroom: the recap instruction targets about 25-40 words (roughly 240 chars at the top end).
 /// This only guards against runaway model output and never cuts a normal recap.
@@ -67,7 +67,7 @@ pub(crate) fn build_instruction_items(
     strip_reasoning: bool,
 ) -> Vec<ConversationItem> {
     let mut items = if strip_reasoning {
-        wimo ai_chat_state::compaction_utils::strip_reasoning_blocks(conversation)
+        wimoai_chat_state::compaction_utils::strip_reasoning_blocks(conversation)
     } else {
         conversation
     };
@@ -391,7 +391,7 @@ mod tests {
     #[test]
     fn main_turn_count_counts_real_users_only() {
         use std::sync::Arc;
-        use wimo ai_wimo_sampling_types::{ContentPart, SyntheticReason, ToolCall, UserItem};
+        use wimoai_wimo_sampling_types::{ContentPart, SyntheticReason, ToolCall, UserItem};
 
         let conv = vec![
             ConversationItem::system("sys".to_string()),
@@ -587,9 +587,9 @@ mod tests {
         })
     }
 
-    fn mk_tool_call(id: &str, args: &str) -> wimo ai_wimo_sampling_types::ToolCall {
+    fn mk_tool_call(id: &str, args: &str) -> wimoai_wimo_sampling_types::ToolCall {
         use std::sync::Arc;
-        wimo ai_wimo_sampling_types::ToolCall {
+        wimoai_wimo_sampling_types::ToolCall {
             id: Arc::from(id),
             name: "read_file".into(),
             arguments: Arc::from(args),
@@ -699,7 +699,7 @@ mod tests {
                 i,
                 ConversationItem::User(u) if u.content.iter().any(|p| matches!(
                     p,
-                    wimo ai_wimo_sampling_types::ContentPart::Text { text }
+                    wimoai_wimo_sampling_types::ContentPart::Text { text }
                         if text.contains("what changed in the parser?")
                 ))
             )),

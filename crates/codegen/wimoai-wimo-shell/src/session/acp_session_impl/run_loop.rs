@@ -1,9 +1,9 @@
 //! The session actor's main loop (`run_session`): command dispatch, the idle timer arms, and the free helpers only the loop consumes.
 #![allow(clippy::items_after_test_module)]
 use super::*;
-use wimo ai_wimo_telemetry::instrument_task;
-use wimo ai_wimo_telemetry::region::Parent;
-use wimo ai_wimo_telemetry::session_end::{self, Phase, SharedSessionEndTimer};
+use wimoai_wimo_telemetry::instrument_task;
+use wimoai_wimo_telemetry::region::Parent;
+use wimoai_wimo_telemetry::session_end::{self, Phase, SharedSessionEndTimer};
 /// The `YoloToggled` event to emit after `set_yolo_mode(requested)`: `Some(actual)` only on a real change.
 /// Callers MUST pass the post-call state read back via `is_yolo_mode()`, never the request.
 /// Under the always-approve pin the manager clamps a requested ON to OFF, so reporting the request would announce a turn-on that never happened.
@@ -51,9 +51,9 @@ pub(super) async fn fire_session_end_hooks(
 ) {
     let span = session_end::span(Phase::Hooks);
     let envelope = session.fire_hook(
-        wimo ai_wimo_hooks::event::HookEventName::SessionEnd,
+        wimoai_wimo_hooks::event::HookEventName::SessionEnd,
         None,
-        wimo ai_wimo_hooks::event::HookPayload::SessionEnd {
+        wimoai_wimo_hooks::event::HookPayload::SessionEnd {
             reason: reason.to_string(),
             subagent_type: session.subagent_type_label(),
             turn_count: None,
@@ -63,9 +63,9 @@ pub(super) async fn fire_session_end_hooks(
     if let Some(registry) = session.hook_registry.borrow().clone() {
         let _dispatch = session_end::timed_child(timer, Phase::HooksDispatch, span.span());
         let ctx = session.hook_run_ctx();
-        let results = wimo ai_wimo_hooks::dispatcher::dispatch_non_blocking(
+        let results = wimoai_wimo_hooks::dispatcher::dispatch_non_blocking(
             &registry,
-            wimo ai_wimo_hooks::event::HookEventName::SessionEnd,
+            wimoai_wimo_hooks::event::HookEventName::SessionEnd,
             &envelope,
             &ctx,
         )
@@ -124,7 +124,7 @@ impl SessionActor {
         if !admitted {
             Self::push_task_wake_fallback(&mut state, fallback);
             drop(state);
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "shell.task_wake.actor_admission",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -142,7 +142,7 @@ impl SessionActor {
             return None;
         }
         drop(state);
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "shell.task_wake.actor_admission",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -197,7 +197,7 @@ async fn shutdown_workflows(session: &SessionActor, timer: &SharedSessionEndTime
 async fn log_session_ended(session: &SessionActor) {
     let model_id = session.current_model_id().await;
     if let Some(signals) = session.signals_handle().snapshot().await {
-        wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::SessionEnded {
+        wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::SessionEnded {
             duration_secs: session.session_start.elapsed().as_secs(),
             turn_count: signals.turn_count as u64,
             tool_call_count: signals.tool_call_count as u64,
@@ -211,12 +211,12 @@ async fn emit_session_end_timings(timer: &SharedSessionEndTimer, is_subagent: bo
     if is_subagent {
         return;
     }
-    let mut event = wimo ai_wimo_telemetry::events::SessionEndTimings::default();
+    let mut event = wimoai_wimo_telemetry::events::SessionEndTimings::default();
     timer.write_event_phases(&mut event);
     event.total_ms = Some(timer.elapsed_ms());
     let _ = tokio::time::timeout(
         SESSION_END_EMIT_BUDGET,
-        wimo ai_wimo_telemetry::session_ctx::log_event_now(event),
+        wimoai_wimo_telemetry::session_ctx::log_event_now(event),
     )
     .await;
 }
@@ -258,7 +258,7 @@ impl StartupTasks {
 pub(super) async fn run_session(
     session: Arc<SessionActor>,
     mut cmd_rx: mpsc::UnboundedReceiver<SessionCommand>,
-    mut chat_state_event_rx: mpsc::UnboundedReceiver<wimo ai_chat_state::ChatStateEvent>,
+    mut chat_state_event_rx: mpsc::UnboundedReceiver<wimoai_chat_state::ChatStateEvent>,
     mut event_rx: mpsc::UnboundedReceiver<SessionEvent>,
     fs_notify_config: Option<ClientFsConfig>,
     codebase_indexes: std::sync::Arc<parking_lot::Mutex<CodebaseIndexManager>>,
@@ -337,7 +337,7 @@ pub(super) async fn run_session(
         )
     };
     let _elicitation_coordinator = if !session.startup_hints.is_subagent {
-        let elicit_inbox = wimo ai_wimo_mcp::elicitation::ElicitationInbox::new();
+        let elicit_inbox = wimoai_wimo_mcp::elicitation::ElicitationInbox::new();
         {
             let mut mcp_state = session.mcp_state.lock().await;
             mcp_state.set_elicitation_tx(Some(elicit_inbox.clone()));
@@ -356,7 +356,7 @@ pub(super) async fn run_session(
     };
     if !session.startup_hints.is_subagent {
         let (event_tx, event_rx) =
-            tokio::sync::mpsc::unbounded_channel::<wimo ai_wimo_mcp::servers::McpClientEvent>();
+            tokio::sync::mpsc::unbounded_channel::<wimoai_wimo_mcp::servers::McpClientEvent>();
         {
             let mut mcp_state = session.mcp_state.lock().await;
             mcp_state.set_client_event_tx(Some(event_tx));
@@ -430,7 +430,7 @@ pub(super) async fn run_session(
                     let last_len = session.last_idle_flush_conversation_len
                         .load(std::sync::atomic::Ordering::Relaxed);
                     if current_len > last_len {
-                        tracing::info!(target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                        tracing::info!(target: wimoai_wimo_telemetry::memory_log::TARGET,
                             "MEMORY_IDLE_FLUSH: timer fired (conversation {last_len} → {current_len})");
                         session.last_idle_flush_conversation_len
                             .store(current_len, std::sync::atomic::Ordering::Relaxed);
@@ -438,13 +438,13 @@ pub(super) async fn run_session(
                             let session = session.clone();
                             async move {
                                 if !session.run_memory_flush("interval", None).await {
-                                    tracing::info!(target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                                    tracing::info!(target: wimoai_wimo_telemetry::memory_log::TARGET,
                                         "MEMORY_IDLE_FLUSH: skipped — another flush already in progress");
                                 }
                             }
                         });
                     } else {
-                        tracing::debug!(target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                        tracing::debug!(target: wimoai_wimo_telemetry::memory_log::TARGET,
                             "MEMORY_IDLE_FLUSH: skipped, no new messages since last flush (len={current_len})");
                     }
                     // Reset for next idle period
@@ -456,7 +456,7 @@ pub(super) async fn run_session(
                 _ = &mut dream_check_sleep, if session.dream_check_timeout.is_some()
                     && session.memory.is_enabled()
                     && !session.startup_hints.is_subagent => {
-                    tracing::debug!(target: wimo ai_wimo_telemetry::memory_log::TARGET,
+                    tracing::debug!(target: wimoai_wimo_telemetry::memory_log::TARGET,
                         "MEMORY_DREAM_CHECK: timer fired");
                     // Only start a new dream when the previous one has finished; a shorter check
                     // interval must not abort an in-flight consolidation.
@@ -479,7 +479,7 @@ pub(super) async fn run_session(
                 // Events from the ChatStateActor that the session loop must react to
                 event = chat_state_event_rx.recv() => {
                     match event {
-                        Some(wimo ai_chat_state::ChatStateEvent::ConversationReset { new_len }) => {
+                        Some(wimoai_chat_state::ChatStateEvent::ConversationReset { new_len }) => {
                             // Reset idle-flush counter so next idle period flushes the new state.
                             session.last_idle_flush_conversation_len
                                 .store(new_len, std::sync::atomic::Ordering::Relaxed);
@@ -487,7 +487,7 @@ pub(super) async fn run_session(
                             session.memory.context_injected
                                 .store(false, std::sync::atomic::Ordering::Relaxed);
                         }
-                        Some(wimo ai_chat_state::ChatStateEvent::ImageBudget {
+                        Some(wimoai_chat_state::ChatStateEvent::ImageBudget {
                             body_bytes,
                             trigger_bytes,
                             reclaim_target_bytes,
@@ -497,7 +497,7 @@ pub(super) async fn run_session(
                             body_bytes_after,
                         }) => {
                             // Log to the unified log so image eviction can be verified locally
-                            wimo ai_wimo_telemetry::unified_log::info(
+                            wimoai_wimo_telemetry::unified_log::info(
                                 "shell.image_budget",
                                 Some(session.session_info.id.0.as_ref()),
                                 Some(serde_json::json!({
@@ -512,8 +512,8 @@ pub(super) async fn run_session(
                                 })),
                             );
                         }
-                        Some(wimo ai_chat_state::ChatStateEvent::PromptIndexChanged { .. }) |
-                        Some(wimo ai_chat_state::ChatStateEvent::TokensUpdated { .. }) => {
+                        Some(wimoai_chat_state::ChatStateEvent::PromptIndexChanged { .. }) |
+                        Some(wimoai_chat_state::ChatStateEvent::TokensUpdated { .. }) => {
                             // Prompt index and token updates are informational; consumers query the actor directly when they need them
                         }
                         None => {
@@ -553,7 +553,7 @@ pub(super) async fn run_session(
                     let Some(cmd) = maybe_cmd else {
                         session
                             .settle_all_parent_messages(
-                                wimo ai_message_delivery_core::TerminalCause::ActorDrop,
+                                wimoai_message_delivery_core::TerminalCause::ActorDrop,
                             )
                             .await;
                         // ── session_end (channel-closed path) ────────
@@ -645,13 +645,13 @@ pub(super) async fn run_session(
                                 let mut state = session.state.lock().await;
                                 state.notifications_suppressed = false;
                                 if state.take_hook_block_hold() {
-                                    wimo ai_wimo_telemetry::unified_log::info(
+                                    wimoai_wimo_telemetry::unified_log::info(
                                         "shell.prompt.hook_block_hold_released",
                                         Some(session.session_info.id.0.as_ref()),
                                         Some(serde_json::json!({ "reason": "user_intake" })),
                                     );
                                 }
-                                wimo ai_wimo_telemetry::unified_log::info(
+                                wimoai_wimo_telemetry::unified_log::info(
                                     "shell.task_wake.gate_cleared",
                                     Some(session.session_info.id.0.as_ref()),
                                     Some(serde_json::json!({ "reason": "user_intake" })),
@@ -777,7 +777,7 @@ pub(super) async fn run_session(
 
                                 let existing = session.chat_state_handle.get_credentials().await;
                                 if let Some(r) = crate::agent::config::try_resolve_model_credentials(model_name.as_str(), existing.api_key.as_deref()) {
-                                    session.chat_state_handle.update_credentials(wimo ai_chat_state::Credentials {
+                                    session.chat_state_handle.update_credentials(wimoai_chat_state::Credentials {
                                         api_key: r.api_key,
                                         auth_type: r.auth_type,
                                         alpha_test_key: existing.alpha_test_key,
@@ -843,7 +843,7 @@ pub(super) async fn run_session(
                                     std::path::Path::new(&session.session_info.cwd),
                                 );
 
-                            let _ = respond_to.send(wimo ai_hooks_plugins_types::HooksListResponse {
+                            let _ = respond_to.send(wimoai_hooks_plugins_types::HooksListResponse {
                                 hooks,
                                 project_trusted,
                                 load_errors: session.hook_load_errors.borrow().clone(),
@@ -855,8 +855,8 @@ pub(super) async fn run_session(
                         }
                         SessionCommand::NotifyPluginUpdates { updates } => {
                             session
-                                .send_wimo ai_notification(
-                                    wimo aiSessionUpdate::PluginUpdatesInstalled { updates },
+                                .send_wimoai_notification(
+                                    wimoaiSessionUpdate::PluginUpdatesInstalled { updates },
                                 )
                                 .await;
                         }
@@ -942,7 +942,7 @@ pub(super) async fn run_session(
                                     // Cap to prevent unbounded growth during long tool calls.
                                     const MAX_BUFFER_EVENTS: usize = 50;
                                     buffer.push_capped(
-                                        wimo ai_wimo_tools::implementations::wimo::monitor::types::MonitorEventNotification {
+                                        wimoai_wimo_tools::implementations::wimo::monitor::types::MonitorEventNotification {
                                             task_id: task_id.clone(),
                                             event_text,
                                             // Tag with this session's id so the shared (leader-mode) buffer drains show it only here
@@ -1114,7 +1114,7 @@ pub(super) async fn run_session(
                                 let cwd = s.tool_context.cwd.as_path().to_string_lossy();
                                 let skills_config = crate::util::config::load_config().await.skills;
                                 let pr = s.plugin_registry.borrow().clone();
-                                let new_skills = wimo ai_wimo_agent::prompt::skills::list_skills_with_plugins(
+                                let new_skills = wimoai_wimo_agent::prompt::skills::list_skills_with_plugins(
                                     Some(&cwd),
                                     &skills_config,
                                     pr.as_deref(),
@@ -1208,8 +1208,8 @@ pub(super) async fn run_session(
                             session.cancel_pending_image_strips_for_rewind();
                             let _ = respond_to.send(());
                         }
-                        SessionCommand::wimo aiSessionNotification { notification } => {
-                            session.handle_wimo ai_session_notification(notification).await;
+                        SessionCommand::wimoaiSessionNotification { notification } => {
+                            session.handle_wimoai_session_notification(notification).await;
                         }
                         SessionCommand::RecordSubagentUsage {
                             by_model,
@@ -1384,7 +1384,7 @@ pub(super) async fn run_session(
                                 && let Some(tx) = &dispatch_event_tx
                             {
                                 let _ = tx.send(
-                                    wimo ai_wimo_mcp::servers::McpClientEvent::ConfigDiff {
+                                    wimoai_wimo_mcp::servers::McpClientEvent::ConfigDiff {
                                         added: diff.added.clone(),
                                         removed: diff.removed.clone(),
                                     },
@@ -1416,7 +1416,7 @@ pub(super) async fn run_session(
                             });
                         }
                         SessionCommand::ToggleMcpServer { server_name, enabled, server_config, respond_to } => {
-                            session.events.emit(wimo ai_wimo_session_events::Event::McpServerToggled {
+                            session.events.emit(wimoai_wimo_session_events::Event::McpServerToggled {
                                 server_name: server_name.clone(),
                                 enabled,
                             });
@@ -1466,7 +1466,7 @@ pub(super) async fn run_session(
                                 && let Some(tx) = &dispatch_event_tx
                             {
                                 let _ = tx.send(
-                                    wimo ai_wimo_mcp::servers::McpClientEvent::ConfigDiff {
+                                    wimoai_wimo_mcp::servers::McpClientEvent::ConfigDiff {
                                         added: diff.added.clone(),
                                         removed: diff.removed.clone(),
                                     },
@@ -1850,9 +1850,9 @@ pub(super) async fn run_session(
                         }
                         SessionCommand::DispatchSessionStartHook { source } => {
                             let envelope = session.fire_hook(
-                                wimo ai_wimo_hooks::event::HookEventName::SessionStart,
+                                wimoai_wimo_hooks::event::HookEventName::SessionStart,
                                 None,
-                                wimo ai_wimo_hooks::event::HookPayload::SessionStart {
+                                wimoai_wimo_hooks::event::HookPayload::SessionStart {
                                     source,
                                     model_id: None,
                                     agent_type: None,
@@ -1860,9 +1860,9 @@ pub(super) async fn run_session(
                             );
                             if let Some(registry) = session.hook_registry.borrow().clone() {
                                 let ctx = session.hook_run_ctx();
-                                let results = wimo ai_wimo_hooks::dispatcher::dispatch_non_blocking(
+                                let results = wimoai_wimo_hooks::dispatcher::dispatch_non_blocking(
                                     &registry,
-                                    wimo ai_wimo_hooks::event::HookEventName::SessionStart,
+                                    wimoai_wimo_hooks::event::HookEventName::SessionStart,
                                     &envelope,
                                     &ctx,
                                 )
@@ -2159,7 +2159,7 @@ pub(super) async fn run_session(
                             }
                             session
                                 .settle_all_parent_messages(
-                                    wimo ai_message_delivery_core::TerminalCause::HardTeardown,
+                                    wimoai_message_delivery_core::TerminalCause::HardTeardown,
                                 )
                                 .await;
                             // Drop any queued synthetic auto-wake prompts and pending notifications before running hooks
@@ -2204,7 +2204,7 @@ pub(super) async fn run_session(
                     else {
                         session
                             .settle_all_parent_messages(
-                                wimo ai_message_delivery_core::TerminalCause::ActorDrop,
+                                wimoai_message_delivery_core::TerminalCause::ActorDrop,
                             )
                             .await;
                         // Completion channel closed: full feedback teardown so the final signal sync and upload drain still run
@@ -2313,10 +2313,10 @@ pub(super) async fn run_session(
 /// Extract the user query text and assistant response text for the `turn_number`-th turn (0-based) of a conversation snapshot.
 /// Used by the `GetFeedbackContext` handler when a client supplies a `turn_number` (per-turn thumbs button on a specific assistant message).
 pub(super) fn turn_texts_for_feedback(
-    conversation: &[wimo ai_wimo_sampling_types::ConversationItem],
+    conversation: &[wimoai_wimo_sampling_types::ConversationItem],
     turn_number: usize,
 ) -> (Option<String>, Option<String>) {
-    use wimo ai_wimo_sampling_types::ConversationItem;
+    use wimoai_wimo_sampling_types::ConversationItem;
     let Some(start) = conversation
         .iter()
         .enumerate()
@@ -2327,7 +2327,7 @@ pub(super) fn turn_texts_for_feedback(
         return (None, None);
     };
     let raw = conversation[start].text_content();
-    let extracted = wimo ai_chat_state::compaction_utils::extract_user_query(&raw);
+    let extracted = wimoai_chat_state::compaction_utils::extract_user_query(&raw);
     let user_text = (!extracted.is_empty()).then_some(extracted);
     let assistant_text = conversation
         .iter()

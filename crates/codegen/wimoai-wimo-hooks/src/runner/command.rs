@@ -15,7 +15,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use tokio::io::AsyncWriteExt;
-use wimo ai_wimo_tools::util::ProcessGroup;
+use wimoai_wimo_tools::util::ProcessGroup;
 
 use crate::config::{HookSpec, RUNNER_ALWAYS_SET_ENV};
 use crate::event::{
@@ -125,7 +125,7 @@ pub async fn run_command_hook(
         #[cfg(not(unix))]
         {
             let command_str = rewrite_hook_command_for_windows_shell(&command_str, &spec.extra_env);
-            let inv = wimo ai_wimo_config::shell::shell_command_argv(command_str.as_ref());
+            let inv = wimoai_wimo_config::shell::shell_command_argv(command_str.as_ref());
             let mut c = tokio::process::Command::new(&inv.program);
             c.args(&inv.args).envs(inv.env);
             c
@@ -147,12 +147,12 @@ pub async fn run_command_hook(
         tokio::process::Command::new(command_path)
     };
 
-    wimo ai_wimo_tools::util::detach_command(&mut cmd);
-    wimo ai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
+    wimoai_wimo_tools::util::detach_command(&mut cmd);
+    wimoai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
 
     #[cfg(not(unix))]
     let env_root = {
-        use wimo ai_wimo_config::shell::{WindowsShell, detect_windows_shell};
+        use wimoai_wimo_config::shell::{WindowsShell, detect_windows_shell};
         if is_shell_command && matches!(detect_windows_shell(), WindowsShell::GitBash(_)) {
             Cow::Owned(ctx.workspace_root.replace('\\', "/"))
         } else {
@@ -457,7 +457,7 @@ fn rewrite_hook_command_for_windows_shell<'a>(
     command: &'a str,
     extra_env: &std::collections::HashMap<String, String>,
 ) -> Cow<'a, str> {
-    use wimo ai_wimo_config::shell::{WindowsShell, detect_windows_shell};
+    use wimoai_wimo_config::shell::{WindowsShell, detect_windows_shell};
     match detect_windows_shell() {
         WindowsShell::Pwsh | WindowsShell::PowerShell => {
             rewrite_posix_env_refs_for_powershell(command, extra_env)
@@ -1948,7 +1948,7 @@ mod tests {
         }
     }
 
-    fn make_scoped_ctx(scope: wimo ai_wimo_tools::util::ProcessScope) -> RunContext<'static> {
+    fn make_scoped_ctx(scope: wimoai_wimo_tools::util::ProcessScope) -> RunContext<'static> {
         RunContext {
             process_scope: Some(scope),
             ..make_ctx()
@@ -2322,7 +2322,7 @@ mod tests {
         ));
         spec.timeout_ms = 60_000;
         let envelope = make_envelope();
-        let scope = wimo ai_wimo_tools::util::ProcessScope::new();
+        let scope = wimoai_wimo_tools::util::ProcessScope::new();
         let hook_scope = scope.clone();
         let hook = tokio::spawn(async move {
             run_command_hook(
@@ -2352,7 +2352,7 @@ mod tests {
     #[cfg(unix)]
     #[tokio::test]
     async fn command_hook_fails_fast_when_scope_already_closed() {
-        let scope = wimo ai_wimo_tools::util::ProcessScope::new();
+        let scope = wimoai_wimo_tools::util::ProcessScope::new();
         scope.kill_all();
         let mut spec = make_shell_spec("sleep 600");
         spec.timeout_ms = 60_000;

@@ -18,7 +18,7 @@ use std::collections::HashMap;
 use super::embedding::EmbeddingProvider;
 use super::index::MemoryIndex;
 use super::observation::MemoryRetrievalMode;
-use wimo ai_wimo_config_types::MemorySearchConfig;
+use wimoai_wimo_config_types::MemorySearchConfig;
 
 pub(super) enum QueryEmbedding {
     FtsOnly,
@@ -381,7 +381,7 @@ mod tests {
     use crate::index::{MemoryIndex, init_sqlite_vec};
     use crate::storage::MemoryStorage;
     use tempfile::TempDir;
-    use wimo ai_wimo_config_types::{MemoryIndexConfig, MemorySearchConfig};
+    use wimoai_wimo_config_types::{MemoryIndexConfig, MemorySearchConfig};
 
     struct FailingEmbeddingProvider;
 

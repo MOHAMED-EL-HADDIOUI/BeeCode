@@ -1,6 +1,6 @@
 //! `wimo_SCROLL_LOG` JSONL parsing, per-stream grouping, and finalize synchronization.
 //!
-//! Wire schema source of truth: the pager's `ScrollLogRecord` in `wimo ai-wimo-pager/src/input/scroll_log.rs`.
+//! Wire schema source of truth: the pager's `ScrollLogRecord` in `wimoai-wimo-pager/src/input/scroll_log.rs`.
 //! [`ScrollLogLine`] mirrors it field-for-field with every always-emitted field **required**.
 //! The module docs in [`super`] explain why the schema is duplicated.
 
@@ -261,7 +261,7 @@ mod tests {
 
     // Fixture lines shaped like the producer's serde output: compact JSON, snake_case evt/trigger, config echo flattened onto stream_start
     // Optionals are skipped when None
-    // The lines are copied from `scroll_log_records_flood_flushes_and_capped_finalize_drop` in `wimo ai-wimo-pager/src/input/mouse/tests.rs`
+    // The lines are copied from `scroll_log_records_flood_flushes_and_capped_finalize_drop` in `wimoai-wimo-pager/src/input/mouse/tests.rs`
     // That test pins the wire format
     const START: &str = r#"{"ts_ms":0.0,"evt":"stream_start","trigger":"event","kind":"unknown","events_total":0,"events_since_flush":0,"accel":1.0,"desired":0.0,"applied_total":0,"flushed":0,"backlog_after":0,"carry":0.0,"cap":6,"mode":"trackpad","ept":3,"wheel_lpt":3,"trackpad_lpt":3,"invert":false,"speed":1.0,"viewport_height":40}"#;
     const FLUSH_FIRST: &str = r#"{"ts_ms":16.0,"evt":"flush","trigger":"event","kind":"trackpad","events_total":9,"events_since_flush":9,"avg_interval_ms":2.0,"accel":1.0,"desired":9.4,"applied_total":6,"flushed":6,"backlog_after":3,"carry":0.4,"cap":6}"#;

@@ -13,7 +13,7 @@ use crate::settings::{
 };
 use crate::views::modal_window::ModalWindowState;
 
-use wimo ai_wimo_shell::agent::config::UiConfig;
+use wimoai_wimo_shell::agent::config::UiConfig;
 
 // ---------------------------------------------------------------------------
 // Public constants

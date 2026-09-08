@@ -2,7 +2,7 @@
 //!
 //! This crate depends only on `pulldown-cmark`, so it can be used without pulling in the terminal-rendering stack (syntect, ratatui, two-face).
 //! [`parser_options`] is the single source of truth for the parser feature set.
-//! `wimo ai-wimo-markdown` uses the same options, so analysis matches what wimo Build renders.
+//! `wimoai-wimo-markdown` uses the same options, so analysis matches what wimo Build renders.
 //!
 //! After parsing, wimo applies [`offset_events`]: only `~~…~~` counts as strikethrough.
 //! Single-tilde pairs (`~text~`), which pulldown treats as strike, are demoted to literal `~` text so LLM output like `~**10%**` is not struck.

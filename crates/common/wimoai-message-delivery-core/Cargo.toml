@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-message-delivery-core"
+name = "wimoai-message-delivery-core"
 version = "0.1.0"
 edition.workspace = true
 

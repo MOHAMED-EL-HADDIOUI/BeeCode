@@ -1,7 +1,7 @@
 //! Per-turn retry policy for 401s that follow a *successful* auth recovery (fresh token minted, request to be re-sent).
 
 use tokio_retry::strategy::ExponentialBackoff;
-use wimo ai_wimo_sampling_types::SentCredential;
+use wimoai_wimo_sampling_types::SentCredential;
 
 use super::RecoveredStore;
 use crate::auth::AuthManager;

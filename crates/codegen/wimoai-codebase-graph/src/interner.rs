@@ -15,7 +15,7 @@
 //! # Example
 //!
 //! ```
-//! use wimo ai_codebase_graph::interner::StringInterner;
+//! use wimoai_codebase_graph::interner::StringInterner;
 //!
 //! let mut interner = StringInterner::new();
 //!

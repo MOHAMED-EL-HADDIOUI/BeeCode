@@ -5,7 +5,7 @@
 //! field rename/retype in `wimo-tools.proto` cannot silently break those
 //! wire contracts (the producer and consumer live in separate services).
 
-use wimo ai_wimo_tools_api::ToolConfigEntry;
+use wimoai_wimo_tools_api::ToolConfigEntry;
 
 fn full_entry() -> ToolConfigEntry {
     ToolConfigEntry {
@@ -21,8 +21,8 @@ fn full_entry() -> ToolConfigEntry {
     }
 }
 
-fn finalize_request_minimal() -> wimo ai_wimo_tools_api::FinalizeToolServerConfigRequest {
-    wimo ai_wimo_tools_api::FinalizeToolServerConfigRequest {
+fn finalize_request_minimal() -> wimoai_wimo_tools_api::FinalizeToolServerConfigRequest {
+    wimoai_wimo_tools_api::FinalizeToolServerConfigRequest {
         tools: vec![],
         truncation: None,
         system_reminders_enabled: false,
@@ -138,7 +138,7 @@ fn finalize_request_callback_fields_are_optional_and_snake_case() {
 
 #[test]
 fn finalize_request_callback_fields_default_when_absent() {
-    let back: wimo ai_wimo_tools_api::FinalizeToolServerConfigRequest =
+    let back: wimoai_wimo_tools_api::FinalizeToolServerConfigRequest =
         serde_json::from_value(serde_json::json!({
             "tools": [],
             "system_reminders_enabled": false,

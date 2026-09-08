@@ -3,14 +3,14 @@ use std::process::ExitCode;
 
 use anyhow::{Context, Result, bail};
 use clap::Parser as ClapParser;
-use wimo ai_wimo_pager_pty_harness::{
+use wimoai_wimo_pager_pty_harness::{
     ScriptedRunConfig, ScriptedRunStatus, ScriptedScenario, ScriptedScenarioRunner, pager_binary,
 };
 
 #[derive(ClapParser, Debug)]
 #[command(
     name = "pty-scenario",
-    about = "Run declarative TUI regression scenarios against wimo ai-wimo-pager",
+    about = "Run declarative TUI regression scenarios against wimoai-wimo-pager",
     long_about = None,
 )]
 struct Cli {
@@ -19,7 +19,7 @@ struct Cli {
     scenario: PathBuf,
 
     /// Pager binary.
-    /// Defaults to PAGER_BINARY, CARGO_BIN_EXE_wimo ai-wimo-pager, or a locally-built debug binary.
+    /// Defaults to PAGER_BINARY, CARGO_BIN_EXE_wimoai-wimo-pager, or a locally-built debug binary.
     #[arg(long, value_name = "PATH")]
     binary: Option<PathBuf>,
 

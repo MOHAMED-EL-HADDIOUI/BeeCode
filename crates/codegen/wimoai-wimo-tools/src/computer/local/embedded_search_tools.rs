@@ -1,7 +1,7 @@
 //! Shadow `find`→`bfs` and `grep`→`ugrep` when those binaries resolve.
 //!
 //! Per-tool enable state (default on) is resolved by the host via the shared
-//! config helper `wimo ai-wimo-shell::util::config::resolve_search_tools_enabled`
+//! config helper `wimoai-wimo-shell::util::config::resolve_search_tools_enabled`
 //! (requirements > env `wimo_TOOLS_FIND_BFS` / `wimo_TOOLS_GREP_UGREP` (+
 //! `wimo_FIND_BFS` / `wimo_GREP_UGREP` aliases, `DISABLE_EMBEDDED_SEARCH_TOOLS`
 //! master) > `[toolset.bash]` config.toml > managed > default), baked into the

@@ -27,7 +27,7 @@ fn external_stream_grpc_mtls_end_to_end() {
     );
     assert!(endpoint.starts_with("https://"), "{endpoint}");
 
-    let mut cfg = wimo ai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
+    let mut cfg = wimoai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
         |name| match name {
             "wimo_EXTERNAL_OTEL" => Some("1".into()),
             "OTEL_LOGS_EXPORTER" | "OTEL_METRICS_EXPORTER" => Some("otlp".into()),
@@ -48,31 +48,31 @@ fn external_stream_grpc_mtls_end_to_end() {
         Some(cert_path.as_str())
     );
     assert_eq!(cfg.logs_client_key.as_deref(), Some(key_path.as_str()));
-    cfg.client = wimo ai_wimo_telemetry::external::config::ExternalClientInfo {
+    cfg.client = wimoai_wimo_telemetry::external::config::ExternalClientInfo {
         service_version: "0.0.0-test".into(),
         client_version: "0.0.0-test".into(),
         app_entrypoint: "cli".into(),
     };
 
-    wimo ai_wimo_telemetry::external::init(Some(cfg));
+    wimoai_wimo_telemetry::external::init(Some(cfg));
     assert!(
-        wimo ai_wimo_telemetry::external::is_active(),
+        wimoai_wimo_telemetry::external::is_active(),
         "mTLS gRPC exporters must build and activate the stream"
     );
 
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::SessionNew {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::SessionNew {
         session_id: "sess-grpc-mtls-1".into(),
         client_identifier: None,
         client_version: None,
         is_git_repo: true,
-        permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+        permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::SessionHarness {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::SessionHarness {
         session_id: "sess-grpc-mtls-1".into(),
         client_identifier: Some("wimo-pager".into()),
         model_id: "wimo-4".into(),
         agent_name: "wimo-plan".into(),
-        permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+        permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
         mcp_server_names: vec![],
         plugin_names: vec![],
         skill_names: vec![],
@@ -80,12 +80,12 @@ fn external_stream_grpc_mtls_end_to_end() {
         hook_names: vec![],
         agents_md_dir_names: vec![],
         memory_enabled: false,
-        memory_retrieval_mode: wimo ai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
+        memory_retrieval_mode: wimoai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
         is_git_repo: true,
         auto_update: None,
     });
 
-    wimo ai_wimo_telemetry::external::flush();
+    wimoai_wimo_telemetry::external::flush();
     assert!(
         col::wait_until(std::time::Duration::from_secs(10), || {
             collected.logs_len() > 0
@@ -105,5 +105,5 @@ fn external_stream_grpc_mtls_end_to_end() {
         "metric exports must arrive over mTLS"
     );
 
-    wimo ai_wimo_telemetry::external::shutdown();
+    wimoai_wimo_telemetry::external::shutdown();
 }

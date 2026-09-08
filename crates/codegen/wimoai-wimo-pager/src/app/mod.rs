@@ -18,13 +18,13 @@ pub(crate) mod cancel_latency;
 pub mod cli;
 pub mod consent;
 pub use crate::link_opener;
-use wimo ai_wimo_telemetry::region;
-use wimo ai_wimo_telemetry::region::Parent;
+use wimoai_wimo_telemetry::region;
+use wimoai_wimo_telemetry::region::Parent;
 /// Off-thread full-file syntax highlight upgrade for edit diffs.
 pub mod edit_highlight_worker;
 /// Off-thread Mermaid diagram render worker (out of process) + per-session cache.
 pub mod mermaid_worker;
-pub use wimo ai_prompt_queue as prompt_queue;
+pub use wimoai_prompt_queue as prompt_queue;
 mod acp_handler;
 mod connect_timeout;
 mod csi_filter;
@@ -85,7 +85,7 @@ use std::panic;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tokio_util::sync::CancellationToken;
 pub(crate) use turn_completion::CANCELLATION_CATEGORY_KEY;
-use wimo ai_wimo_shell::util::config;
+use wimoai_wimo_shell::util::config;
 /// Tracks the extra Kitty keyboard layer pushed while the `/gboom` game is open (see [`push_gboom_keyboard_flags`]).
 /// Kept separate from the base layer (`terminal::kitty_keyboard`) so teardown pops both, in LIFO order.
 static GBOOM_KEYBOARD_PUSHED: AtomicBool = AtomicBool::new(false);
@@ -100,14 +100,14 @@ pub(crate) fn push_gboom_keyboard_flags() {
     let flags = event::KeyboardEnhancementFlags::DISAMBIGUATE_ESCAPE_CODES
         | event::KeyboardEnhancementFlags::REPORT_EVENT_TYPES
         | event::KeyboardEnhancementFlags::REPORT_ALL_KEYS_AS_ESCAPE_CODES;
-    wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+    wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
         let _ = execute!(stderr, event::PushKeyboardEnhancementFlags(flags));
     });
 }
 /// Pop the extra keyboard layer pushed by [`push_gboom_keyboard_flags`].
 pub(crate) fn pop_gboom_keyboard_flags() {
     if GBOOM_KEYBOARD_PUSHED.swap(false, Ordering::AcqRel) {
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             let _ = execute!(stderr, event::PopKeyboardEnhancementFlags);
         });
     }
@@ -185,23 +185,23 @@ pub(crate) static VOICE_MODE_ENABLED: AtomicBool = AtomicBool::new(false);
 fn dock_flag_in(layer: &toml::Value) -> Option<bool> {
     layer
         .get("features")?
-        .get(wimo ai_wimo_shell::agent::config::Feature::Dock.key())?
+        .get(wimoai_wimo_shell::agent::config::Feature::Dock.key())?
         .as_bool()
 }
 /// `[features] dock` from merged `requirements.toml`.
 pub(crate) fn dock_requirement_pin() -> Option<bool> {
-    dock_flag_in(&wimo ai_wimo_config::load_merged_requirements()?)
+    dock_flag_in(&wimoai_wimo_config::load_merged_requirements()?)
 }
 /// `[features] dock` from effective config (user + managed).
 pub(crate) fn dock_config_value() -> Option<bool> {
-    dock_flag_in(&wimo ai_wimo_shell::config::load_effective_config().ok()?)
+    dock_flag_in(&wimoai_wimo_shell::config::load_effective_config().ok()?)
 }
 /// Registry precedence: pin, `wimo_DOCK` / `wimo_DOCK_V2`, config, remote `dock_enabled`, default off.
 pub(crate) fn resolve_dock_enabled(remote: Option<bool>) -> bool {
-    use wimo ai_wimo_shell::agent::config::{Feature, FeatureSources};
+    use wimoai_wimo_shell::agent::config::{Feature, FeatureSources};
     let mut sources = FeatureSources::from_process_env(Feature::Dock);
     if sources.env.is_none() {
-        sources.env = wimo ai_wimo_config::env_bool("wimo_DOCK_V2");
+        sources.env = wimoai_wimo_config::env_bool("wimo_DOCK_V2");
     }
     sources.pin = dock_requirement_pin();
     sources.config = dock_config_value();
@@ -229,16 +229,16 @@ pub fn set_voice_keybind_enabled_for_test(on: bool) {
 fn voice_mode_in(layer: &toml::Value) -> Option<bool> {
     layer
         .get("features")?
-        .get(wimo ai_wimo_shell::agent::config::Feature::VoiceMode.key())?
+        .get(wimoai_wimo_shell::agent::config::Feature::VoiceMode.key())?
         .as_bool()
 }
 /// `[features] voice_mode` from merged `requirements.toml`.
 pub(crate) fn voice_mode_requirement_pin() -> Option<bool> {
-    voice_mode_in(&wimo ai_wimo_config::load_merged_requirements()?)
+    voice_mode_in(&wimoai_wimo_config::load_merged_requirements()?)
 }
 /// `[features] voice_mode` from effective config (user + managed).
 pub(crate) fn voice_mode_config_value() -> Option<bool> {
-    voice_mode_in(&wimo ai_wimo_shell::config::load_effective_config().ok()?)
+    voice_mode_in(&wimoai_wimo_shell::config::load_effective_config().ok()?)
 }
 /// The registry owns the precedence and the default.
 /// One rule has no row there: with `is_api_key`, a remote-only off is forced back on.
@@ -249,7 +249,7 @@ pub(crate) fn resolve_voice_mode_enabled(
     remote: Option<bool>,
     is_api_key: bool,
 ) -> bool {
-    use wimo ai_wimo_shell::agent::config::{ConfigSource, Feature, FeatureSources};
+    use wimoai_wimo_shell::agent::config::{ConfigSource, Feature, FeatureSources};
     let resolved = Feature::VoiceMode.resolve(FeatureSources {
         pin: requirement,
         config,
@@ -301,7 +301,7 @@ pub(crate) const MOUSE_OFF_HINT_SCROLLBACK: &str =
     "Ctrl+r to enable mouse reporting and restore TUI features";
 pub(crate) const MOUSE_OFF_HINT_PROMPT: &str =
     "/toggle-mouse-reporting to enable mouse reporting and restore TUI features";
-/// Uses [`wimo ai_ratatui_inline::Terminal`] instead of stock `ratatui::Terminal`: our `flush()` returns a `bool` saying whether any cells changed.
+/// Uses [`wimoai_ratatui_inline::Terminal`] instead of stock `ratatui::Terminal`: our `flush()` returns a `bool` saying whether any cells changed.
 /// This lets [`crate::render::draw::draw_frame`] skip cursor escape sequences on frames with empty diffs (e.g., off-screen animation ticks).
 /// Skipping them preserves the cursor blink timer; see [`crate::render::draw`] for details.
 ///
@@ -317,7 +317,7 @@ pub(crate) enum ScreenMode {
     /// Scrollback-native (experimental, `--minimal`): finalized blocks are printed into the terminal's native scrollback via `insert_before`.
     /// A small pinned live region holds the prompt, status, and running turn.
     ///
-    /// All minimal-mode rendering lives in the sibling `wimo ai-wimo-pager-minimal` crate.
+    /// All minimal-mode rendering lives in the sibling `wimoai-wimo-pager-minimal` crate.
     /// This crate keeps only three hooks for it: `crate::minimal_hook`, `crate::minimal_api`, and `AppView::minimal_state`.
     /// `crate::minimal_hook` dispatches into minimal's `draw`/transcript; `crate::minimal_api` is what minimal reads.
     /// If you don't work on minimal, treat this variant as opaque; the fullscreen/inline paths are unaffected.
@@ -347,7 +347,7 @@ impl ScreenMode {
         matches!(self, Self::Minimal)
     }
     /// Stable wire label for the `_meta.screenMode` prompt-telemetry field (headless sends `"headless"`).
-    /// Values are pinned by the telemetry allowlist (`wimo ai-wimo-telemetry`'s `KNOWN_SCREEN_MODES`).
+    /// Values are pinned by the telemetry allowlist (`wimoai-wimo-telemetry`'s `KNOWN_SCREEN_MODES`).
     /// Renaming one silently collapses it to `"other"` on the external stream.
     pub(crate) fn meta_label(self) -> &'static str {
         match self {
@@ -428,7 +428,7 @@ pub fn resolve_leader_mode<'p>(
     leader_flag: bool,
     no_leader_flag: bool,
     raw_config: &toml::Value,
-    _remote_settings: Option<&wimo ai_wimo_shell::util::config::RemoteSettings>,
+    _remote_settings: Option<&wimoai_wimo_shell::util::config::RemoteSettings>,
     eligible: bool,
     requested_confinement: Option<&'p str>,
 ) -> LeaderMode<'p> {
@@ -480,7 +480,7 @@ pub fn resolve_use_leader(
     leader_flag: bool,
     no_leader_flag: bool,
     raw_config: &toml::Value,
-    remote_settings: Option<&wimo ai_wimo_shell::util::config::RemoteSettings>,
+    remote_settings: Option<&wimoai_wimo_shell::util::config::RemoteSettings>,
     eligible: bool,
     requested_confinement: Option<&str>,
 ) -> (bool, Option<&'static str>) {
@@ -503,7 +503,7 @@ const SANDBOX_NOTICE_LINGER: std::time::Duration = std::time::Duration::from_mil
 /// A fullscreen TUI still paints over it, leaving the line to be read on exit.
 /// `leader_disabled_by_sandbox` on the leader-mode decision log is the durable record.
 pub fn warn_leader_disabled_by_sandbox(profile: &str) {
-    wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+    wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
         print_leader_disabled_by_sandbox(profile, stderr)
     });
 }
@@ -557,11 +557,11 @@ async fn bounded_connect(
     let context = || startup_failure::Context {
         target,
         attempt,
-        version: wimo ai_wimo_version::display_version_with_commit(
-            wimo ai_wimo_version::full_version(),
-            wimo ai_wimo_update::channel_label(),
+        version: wimoai_wimo_version::display_version_with_commit(
+            wimoai_wimo_version::full_version(),
+            wimoai_wimo_update::channel_label(),
         ),
-        log_path: wimo ai_wimo_telemetry::unified_log::path(),
+        log_path: wimoai_wimo_telemetry::unified_log::path(),
     };
     tokio::select! {
         biased;
@@ -612,48 +612,48 @@ async fn bounded_connect(
 pub async fn run(
     mut args: PagerArgs,
     bg_update_rx: Option<
-        tokio::sync::oneshot::Receiver<Option<wimo ai_wimo_update::auto_update::UpdateAvailable>>,
+        tokio::sync::oneshot::Receiver<Option<wimoai_wimo_update::auto_update::UpdateAvailable>>,
     >,
 ) -> anyhow::Result<bool> {
     let screen_mode_override = screen_mode_relaunch::take_screen_mode_env_override();
     let cancel = CancellationToken::new();
     let startup_start = std::time::Instant::now();
-    let raw_config = wimo ai_wimo_shell::config::load_effective_config()
+    let raw_config = wimoai_wimo_shell::config::load_effective_config()
         .map_err(|e| anyhow::anyhow!("Failed to load config: {e}"))?;
-    let wimo_com_config = match wimo ai_wimo_shell::agent::config::Config::new_from_toml_cfg(
+    let wimo_com_config = match wimoai_wimo_shell::agent::config::Config::new_from_toml_cfg(
         &raw_config,
     ) {
         Ok(c) => c.wimo_com_config,
         Err(e) => {
             tracing::warn!(error = %e, "failed to parse config for auth refresh, using defaults");
-            wimo ai_wimo_shell::auth::wimoComConfig::default()
+            wimoai_wimo_shell::auth::wimoComConfig::default()
         }
     };
     if matches!(
-        wimo ai_wimo_shell::auth::maybe_run_pre_tui_external_login(
+        wimoai_wimo_shell::auth::maybe_run_pre_tui_external_login(
             &wimo_com_config,
             args.force_login,
             io::stdin().is_terminal(),
         )
         .await?,
-        wimo ai_wimo_shell::auth::PreTuiLoginOutcome::SignedIn(_)
+        wimoai_wimo_shell::auth::PreTuiLoginOutcome::SignedIn(_)
     ) {
         args.force_login = false;
     }
-    wimo ai_tty_utils::redirect_native_stderr();
+    wimoai_tty_utils::redirect_native_stderr();
     let refreshed_auth = tokio::time::timeout(
-        wimo ai_wimo_shell::http::STARTUP_AUTH_REFRESH_TIMEOUT,
-        wimo ai_wimo_shell::auth::try_ensure_fresh_auth(&wimo_com_config),
+        wimoai_wimo_shell::http::STARTUP_AUTH_REFRESH_TIMEOUT,
+        wimoai_wimo_shell::auth::try_ensure_fresh_auth(&wimo_com_config),
     )
     .await
     .unwrap_or(None);
     let had_prefetch = match refreshed_auth {
-        Some(auth) => wimo ai_wimo_shell::agent::models::startup_prefetch::begin_with_auth(Some(auth)),
+        Some(auth) => wimoai_wimo_shell::agent::models::startup_prefetch::begin_with_auth(Some(auth)),
         None => {
-            wimo ai_wimo_shell::agent::models::startup_prefetch::begin(Some(wimo_com_config.clone()))
+            wimoai_wimo_shell::agent::models::startup_prefetch::begin(Some(wimo_com_config.clone()))
         }
     };
-    wimo ai_wimo_shell::agent::mvp_agent::warm_async_http_client();
+    wimoai_wimo_shell::agent::mvp_agent::warm_async_http_client();
     tokio::task::spawn_blocking(|| {});
     if let Ok(cwd) = std::env::current_dir() {
         crate::git_info::populate_from_cwd_async(cwd);
@@ -662,25 +662,25 @@ pub async fn run(
     let remote_settings = if had_prefetch {
         let _wait_span = region!("startup.prefetch_join_wait", Parent::Inherit);
         let settings =
-            wimo ai_wimo_shell::agent::models::startup_prefetch::wait_settings(EARLY_PREFETCH_WAIT);
-        wimo ai_wimo_telemetry::startup::record_prefetch_wait(prefetch_wait_started.elapsed());
+            wimoai_wimo_shell::agent::models::startup_prefetch::wait_settings(EARLY_PREFETCH_WAIT);
+        wimoai_wimo_telemetry::startup::record_prefetch_wait(prefetch_wait_started.elapsed());
         settings
     } else {
         None
     };
-    wimo ai_wimo_shell::util::config::cache_remote_auto_mode(
+    wimoai_wimo_shell::util::config::cache_remote_auto_mode(
         remote_settings.as_ref().and_then(|s| s.auto_mode.clone()),
     );
-    wimo ai_wimo_shell::util::config::cache_remote_prompt_suggestions(
+    wimoai_wimo_shell::util::config::cache_remote_prompt_suggestions(
         remote_settings
             .as_ref()
             .and_then(|s| s.prompt_suggestions.clone()),
     );
-    wimo ai_wimo_shell::util::config::set_remote_campaigns_from_settings(remote_settings.as_ref());
-    let raw_config = wimo ai_wimo_shell::config::load_effective_config()
+    wimoai_wimo_shell::util::config::set_remote_campaigns_from_settings(remote_settings.as_ref());
+    let raw_config = wimoai_wimo_shell::config::load_effective_config()
         .map_err(|e| anyhow::anyhow!("Failed to load config: {e}"))?;
     let prefetch_elapsed = startup_start.elapsed();
-    let requested_confinement = wimo ai_wimo_sandbox::requested_confinement_profile();
+    let requested_confinement = wimoai_wimo_sandbox::requested_confinement_profile();
     let LeaderMode {
         use_leader,
         policy_disable_reason,
@@ -710,14 +710,14 @@ pub async fn run(
     }
     if args.trust {
         match std::env::current_dir() {
-            Ok(cwd) => wimo ai_wimo_workspace::folder_trust::grant_folder_trust(&cwd),
+            Ok(cwd) => wimoai_wimo_workspace::folder_trust::grant_folder_trust(&cwd),
             Err(e) => {
                 tracing::warn!(error = %e, "--trust: failed to resolve cwd; folder not trusted")
             }
         }
     }
     if let Some(reason) = policy_disable_reason {
-        tokio::spawn(wimo ai_wimo_shell::leader::kill_stale_reachable_leaders(reason));
+        tokio::spawn(wimoai_wimo_shell::leader::kill_stale_reachable_leaders(reason));
     }
     if let Some(err) =
         session_startup::chat_mode_flag_conflict(args.chat(), args.fork_session, args.restore_code)
@@ -776,7 +776,7 @@ pub async fn run(
         && !args.chat()
         && let Some(id) = title_lookup_id
     {
-        let summaries = wimo ai_wimo_shell::session::persistence::list_summaries(None).await?;
+        let summaries = wimoai_wimo_shell::session::persistence::list_summaries(None).await?;
         if let Some(s) = summaries.iter().find(|s| s.info.id.0.as_ref() == id)
             && let Some(title) = s.display_title_opt()
         {
@@ -804,16 +804,16 @@ pub async fn run(
     let remote_permission_mode = remote_settings
         .as_ref()
         .and_then(|s| s.permission_mode.as_deref());
-    let launch_yolo = wimo ai_wimo_shell::util::config::effective_yolo_for_launch(
+    let launch_yolo = wimoai_wimo_shell::util::config::effective_yolo_for_launch(
         args.yolo,
         args.permission_mode_flag.as_deref(),
         remote_permission_mode,
     );
-    let launch_auto = wimo ai_wimo_shell::util::config::effective_auto_for_launch(
+    let launch_auto = wimoai_wimo_shell::util::config::effective_auto_for_launch(
         args.yolo,
         args.permission_mode_flag.as_deref(),
         remote_permission_mode,
-        wimo ai_wimo_shell::util::config::default_interactive_permission_mode(),
+        wimoai_wimo_shell::util::config::default_interactive_permission_mode(),
     );
     let mut connect_flags = crate::acp::ConnectFlags {
         subagents: !args.no_subagents,
@@ -835,7 +835,7 @@ pub async fn run(
         reasoning_effort_override: args
             .reasoning_effort
             .as_deref()
-            .and_then(wimo ai_wimo_shell::sampling::types::parse_canonical_effort_token),
+            .and_then(wimoai_wimo_shell::sampling::types::parse_canonical_effort_token),
         permission_rules: crate::headless::parse_permission_rules_lenient(
             &args.allow_rules,
             &args.deny_rules,
@@ -941,11 +941,11 @@ pub async fn run(
     } else {
         crate::acp::AgentKind::Embedded
     };
-    wimo ai_wimo_telemetry::external::init(
-        wimo ai_wimo_shell::agent::config::resolve_external_otel_config(
-            wimo ai_wimo_telemetry::external::config::ExternalClientInfo {
-                service_version: wimo ai_wimo_version::full_version().to_owned(),
-                client_version: wimo ai_wimo_version::VERSION.to_owned(),
+    wimoai_wimo_telemetry::external::init(
+        wimoai_wimo_shell::agent::config::resolve_external_otel_config(
+            wimoai_wimo_telemetry::external::config::ExternalClientInfo {
+                service_version: wimoai_wimo_version::full_version().to_owned(),
+                client_version: wimoai_wimo_version::VERSION.to_owned(),
                 app_entrypoint: "tui".to_owned(),
             },
         ),
@@ -954,8 +954,8 @@ pub async fn run(
         unsafe { std::env::set_var("wimo_LOG_SAMPLING", "1") };
     }
     let tracing_handle = crate::tracing::init_tracing();
-    let pending_startup = wimo ai_wimo_telemetry::startup::PendingStartup::new();
-    let timer = wimo ai_wimo_telemetry::startup::begin(crate::acp::Owner::Client);
+    let pending_startup = wimoai_wimo_telemetry::startup::PendingStartup::new();
+    let timer = wimoai_wimo_telemetry::startup::begin(crate::acp::Owner::Client);
     let primary_started = std::time::Instant::now();
     let connect_result = bounded_connect(
         &cancel,
@@ -977,7 +977,7 @@ pub async fn run(
             tracing::warn!(error = %f.error, "leader connect failed; falling back to embedded agent");
             timer.emit_telemetry(primary_target, f.outcome, f.timeout_secs, false);
             let flags = fallback_flags.expect("set on the use_leader path");
-            let timer = wimo ai_wimo_telemetry::startup::begin(crate::acp::Owner::Client);
+            let timer = wimoai_wimo_telemetry::startup::begin(crate::acp::Owner::Client);
             let target = crate::acp::AgentKind::Embedded;
             let fallback = bounded_connect(
                 &cancel,
@@ -1073,8 +1073,8 @@ pub async fn run(
     crate::unified_log::flush_blocking().await;
     let restore_result = restore_terminal(terminal, writer_thread, current_screen_mode());
     drop(agent_guard);
-    wimo ai_wimo_telemetry::session_ctx::drain_at_process_exit().await;
-    wimo ai_tty_utils::global_process_scope().kill_all();
+    wimoai_wimo_telemetry::session_ctx::drain_at_process_exit().await;
+    wimoai_tty_utils::global_process_scope().kill_all();
     crate::app::status_line::metrics::global().report_health();
     if let Err(cleanup_error) = restore_result {
         match &result {
@@ -1170,8 +1170,8 @@ fn print_relaunch_failure_hint(
 ///
 /// Best-effort: failures are silently ignored since this runs on teardown and panic paths where stderr may already be broken.
 fn disable_mouse_paste_raw() {
-    wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
-        let _ = stderr.write_all(wimo ai_crash_handler::terminal::MOUSE_PASTE_RESET);
+    wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
+        let _ = stderr.write_all(wimoai_crash_handler::terminal::MOUSE_PASTE_RESET);
         let _ = stderr.flush();
     });
 }
@@ -1393,7 +1393,7 @@ fn init_terminal(
     writer_sync: crate::render::draw::WriterSync,
     cursor_blink: Option<bool>,
 ) -> io::Result<TerminalInit> {
-    wimo ai_crash_handler::enable_terminal_escape_restore();
+    wimoai_crash_handler::enable_terminal_escape_restore();
     terminal::enable_raw_mode()?;
     #[cfg(windows)]
     configure_windows_console();
@@ -1405,7 +1405,7 @@ fn init_terminal(
         ));
         set_terminal_title("");
         if want_minimal && clear_main_screen {
-            wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+            wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                 execute!(
                     stderr,
                     Clear(ClearType::All),
@@ -1415,7 +1415,7 @@ fn init_terminal(
             })?;
         }
         if mode.is_fullscreen() {
-            wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+            wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                 execute!(stderr, EnterAlternateScreen)
             })?;
         }
@@ -1423,11 +1423,11 @@ fn init_terminal(
         if want_minimal {
             win_native_selection::enable_native_selection();
         }
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             if !want_minimal {
                 execute!(stderr, event::EnableMouseCapture)?;
             } else if crate::terminal::terminal_context().mouse_reporting_leaks_as_raw_text() {
-                let _ = stderr.write_all(wimo ai_crash_handler::terminal::MOUSE_TRACKING_RESET);
+                let _ = stderr.write_all(wimoai_crash_handler::terminal::MOUSE_TRACKING_RESET);
             }
             execute!(
                 stderr,
@@ -1482,7 +1482,7 @@ fn init_terminal(
                 "kitty keyboard protocol skipped"
             );
         } else {
-            wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+            wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                 let _ = execute!(stderr, event::PushKeyboardEnhancementFlags(flags));
             });
             tracing::info!(
@@ -1505,7 +1505,7 @@ fn init_terminal(
                     .map_err(io::Error::other)?,
             );
             Ok((
-                wimo ai_ratatui_inline::Terminal::new(backend)?,
+                wimoai_ratatui_inline::Terminal::new(backend)?,
                 ScreenMode::Fullscreen,
             ))
         } else {
@@ -1519,7 +1519,7 @@ fn init_terminal(
                 crate::render::draw::TermWriter::new(frame_tx.clone(), writer_sync.clone())
                     .map_err(io::Error::other)?,
             );
-            if let Ok(term) = wimo ai_ratatui_inline::Terminal::with_options(
+            if let Ok(term) = wimoai_ratatui_inline::Terminal::with_options(
                 probe_backend,
                 ratatui::TerminalOptions {
                     viewport: ratatui::Viewport::Inline(viewport_rows),
@@ -1538,7 +1538,7 @@ fn init_terminal(
                 tracing::warn!(
                     "minimal: inline viewport probe failed; downgrading to full-height inline"
                 );
-                wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+                wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                     execute!(stderr, event::EnableMouseCapture)
                 })?;
                 MOUSE_CAPTURE_ENABLED.store(true, Ordering::Release);
@@ -1546,7 +1546,7 @@ fn init_terminal(
                     crate::render::draw::TermWriter::new(frame_tx.clone(), writer_sync.clone())
                         .map_err(io::Error::other)?,
                 );
-                if let Ok(term) = wimo ai_ratatui_inline::Terminal::with_options(
+                if let Ok(term) = wimoai_ratatui_inline::Terminal::with_options(
                     retry_backend,
                     ratatui::TerminalOptions {
                         viewport: ratatui::Viewport::Inline(rows),
@@ -1557,7 +1557,7 @@ fn init_terminal(
             } else {
                 tracing::error!("inline viewport probe failed, using Viewport::Fixed");
             }
-            wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+            wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                 execute!(
                     stderr,
                     crossterm::terminal::ScrollUp(rows),
@@ -1568,7 +1568,7 @@ fn init_terminal(
                 crate::render::draw::TermWriter::new(frame_tx, writer_sync)
                     .map_err(io::Error::other)?,
             );
-            let term = wimo ai_ratatui_inline::Terminal::with_options(
+            let term = wimoai_ratatui_inline::Terminal::with_options(
                 backend,
                 ratatui::TerminalOptions {
                     viewport: ratatui::Viewport::Fixed(ratatui::layout::Rect::new(
@@ -1583,7 +1583,7 @@ fn init_terminal(
         emit_terminal_teardown_sequences(mode, None);
         let _ = terminal::disable_raw_mode();
         signal_handler::mark_restored();
-        wimo ai_crash_handler::disable_terminal_escape_restore();
+        wimoai_crash_handler::disable_terminal_escape_restore();
     })?;
     Ok(TerminalInit {
         terminal,
@@ -1608,33 +1608,33 @@ fn drain_writer_thread_before_teardown(
 /// Does NOT call `disable_raw_mode`.
 /// Callers should drain queued writer-thread frames first when possible; the panic hook can't (it would deadlock).
 fn emit_terminal_teardown_sequences(mode: ScreenMode, inline_cursor_row: Option<u16>) {
-    wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+    wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
         let _ = stderr.write_all(crate::notifications::progress::OSC_CLEAR.as_bytes());
         let _ = stderr.flush();
     });
-    wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+    wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
         let _ = execute!(stderr, crossterm::terminal::EndSynchronizedUpdate);
     });
     crate::theme::reset_cursor_color();
     disable_mouse_paste_raw();
     if MOUSE_CAPTURE_ENABLED.swap(false, Ordering::AcqRel) {
         #[cfg(windows)]
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             let _ = execute!(stderr, event::DisableMouseCapture);
         });
     }
-    wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+    wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
         let _ = execute!(stderr, event::DisableFocusChange);
     });
     pop_gboom_keyboard_flags();
     if crate::terminal::take_kitty_flags_pushed() {
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             let _ = execute!(stderr, event::PopKeyboardEnhancementFlags);
         });
     }
     let restore_style = CURSOR_STYLE_FORCED.load(Ordering::Acquire);
     if mode.is_fullscreen() {
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             if restore_style {
                 let _ = execute!(stderr, SetCursorStyle::DefaultUserShape);
             }
@@ -1644,7 +1644,7 @@ fn emit_terminal_teardown_sequences(mode: ScreenMode, inline_cursor_row: Option<
         let rows = crossterm::terminal::size().map(|(_, r)| r).unwrap_or(24);
         let last = rows.saturating_sub(1);
         let target = inline_cursor_row.unwrap_or(last).min(last);
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             if restore_style {
                 let _ = execute!(stderr, SetCursorStyle::DefaultUserShape);
             }
@@ -1679,8 +1679,8 @@ fn restore_terminal_with(
     let _ = event_loop::drain_pending_events(std::time::Duration::from_millis(10), |_| false);
     let _ = terminal::disable_raw_mode();
     signal_handler::mark_restored();
-    wimo ai_crash_handler::disable_terminal_escape_restore();
-    wimo ai_tty_utils::restore_native_stderr();
+    wimoai_crash_handler::disable_terminal_escape_restore();
+    wimoai_tty_utils::restore_native_stderr();
     drain_result
 }
 fn restore_terminal(
@@ -1698,7 +1698,7 @@ fn restore_terminal(
 }
 pub(crate) fn set_terminal_title(title: &str) {
     let full = terminal_title_string(title);
-    wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+    wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
         let _ = execute!(stderr, SetTitle(full));
     });
 }
@@ -1722,9 +1722,9 @@ fn set_panic_hook() {
         emit_terminal_teardown_sequences(current_screen_mode(), None);
         let _ = terminal::disable_raw_mode();
         signal_handler::mark_restored();
-        wimo ai_crash_handler::disable_terminal_escape_restore();
-        wimo ai_tty_utils::restore_native_stderr();
-        wimo ai_tty_utils::global_process_scope().kill_all();
+        wimoai_crash_handler::disable_terminal_escape_restore();
+        wimoai_tty_utils::restore_native_stderr();
+        wimoai_tty_utils::global_process_scope().kill_all();
         crate::memory_trace::record_crash_sample();
         hook(info);
     }));
@@ -1740,7 +1740,7 @@ mod tests {
         let backend = CrosstermBackend::new(
             crate::render::draw::TermWriter::new(tx, sync).expect("single test writer"),
         );
-        let terminal = wimo ai_ratatui_inline::Terminal::with_options(
+        let terminal = wimoai_ratatui_inline::Terminal::with_options(
             backend,
             TerminalOptions {
                 viewport: Viewport::Fixed(ratatui::layout::Rect::new(0, 0, 80, 24)),
@@ -2038,7 +2038,7 @@ mod tests {
     #[cfg(feature = "release-dist")]
     #[test]
     fn remote_settings_leader_mode_true_enables_leader() {
-        let rs = wimo ai_wimo_shell::util::config::RemoteSettings {
+        let rs = wimoai_wimo_shell::util::config::RemoteSettings {
             leader_mode: Some(true),
             ..Default::default()
         };
@@ -2050,7 +2050,7 @@ mod tests {
     #[cfg(feature = "release-dist")]
     #[test]
     fn remote_settings_leader_mode_false_disables_leader() {
-        let rs = wimo ai_wimo_shell::util::config::RemoteSettings {
+        let rs = wimoai_wimo_shell::util::config::RemoteSettings {
             leader_mode: Some(false),
             ..Default::default()
         };
@@ -2062,7 +2062,7 @@ mod tests {
     #[cfg(feature = "release-dist")]
     #[test]
     fn remote_settings_unknown_leader_mode_is_not_policy_disable() {
-        let rs = wimo ai_wimo_shell::util::config::RemoteSettings {
+        let rs = wimoai_wimo_shell::util::config::RemoteSettings {
             leader_mode: None,
             ..Default::default()
         };
@@ -2074,7 +2074,7 @@ mod tests {
     #[cfg(feature = "release-dist")]
     #[test]
     fn config_toml_overrides_remote_settings() {
-        let rs = wimo ai_wimo_shell::util::config::RemoteSettings {
+        let rs = wimoai_wimo_shell::util::config::RemoteSettings {
             leader_mode: Some(true),
             ..Default::default()
         };

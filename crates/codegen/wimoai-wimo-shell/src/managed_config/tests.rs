@@ -362,7 +362,7 @@ fn purge_keeps_marker_when_an_artifact_removal_fails() {
     for name in MANAGED_ARTIFACT_FILES {
         std::fs::write(home.join(name), "x").unwrap();
     }
-    std::fs::write(home.join(wimo ai_wimo_config::MANAGED_CONFIG_CACHE_FILE), "{}").unwrap();
+    std::fs::write(home.join(wimoai_wimo_config::MANAGED_CONFIG_CACHE_FILE), "{}").unwrap();
 
     // Unremovable squat: `remove_dir_all` can't unlink inside the read-only subdir.
     let squat = home.join("requirements.toml");
@@ -380,7 +380,7 @@ fn purge_keeps_marker_when_an_artifact_removal_fails() {
 
     remove_managed_config_files(home);
     assert!(
-        home.join(wimo ai_wimo_config::MANAGED_CONFIG_CACHE_FILE)
+        home.join(wimoai_wimo_config::MANAGED_CONFIG_CACHE_FILE)
             .exists(),
         "a failed artifact removal must keep the marker (detector stays armed)"
     );
@@ -392,7 +392,7 @@ fn purge_keeps_marker_when_an_artifact_removal_fails() {
     }
     assert!(
         !home
-            .join(wimo ai_wimo_config::MANAGED_CONFIG_CACHE_FILE)
+            .join(wimoai_wimo_config::MANAGED_CONFIG_CACHE_FILE)
             .exists(),
         "with every artifact removed, the marker goes last"
     );
@@ -400,9 +400,9 @@ fn purge_keeps_marker_when_an_artifact_removal_fails() {
 
 #[test]
 fn served_principal_prefers_deployment_id() {
-    use wimo ai_wimo_config::signed_policy::SignedPayload;
+    use wimoai_wimo_config::signed_policy::SignedPayload;
     let payload = |dep: Option<&str>, team: Option<&str>| SignedPayload {
-        typ: wimo ai_wimo_config::signed_policy::MANAGED_POLICY_TYP.into(),
+        typ: wimoai_wimo_config::signed_policy::MANAGED_POLICY_TYP.into(),
         version: 1,
         deployment_id: dep.map(Into::into),
         team_id: team.map(Into::into),
@@ -426,8 +426,8 @@ fn served_principal_prefers_deployment_id() {
 
 #[test]
 fn claim_persists_only_when_bound_to_served_principal() {
-    let claim = |principal: &str| wimo ai_wimo_config::signed_policy::ManagedIdentityClaim {
-        typ: wimo ai_wimo_config::signed_policy::MANAGED_IDENTITY_TYP.into(),
+    let claim = |principal: &str| wimoai_wimo_config::signed_policy::ManagedIdentityClaim {
+        typ: wimoai_wimo_config::signed_policy::MANAGED_IDENTITY_TYP.into(),
         principal: principal.into(),
         fail_closed: true,
         expires_at: 4_000_000_000,
@@ -445,7 +445,7 @@ fn absent_claim_is_skipped() {
 
 #[test]
 fn auth_mode_classification() {
-    use wimo ai_wimo_telemetry::startup::AuthMode;
+    use wimoai_wimo_telemetry::startup::AuthMode;
     let err = || std::io::Error::other("unreadable");
     assert_eq!(auth_mode(true, &Ok(true)), AuthMode::Deployment);
     assert_eq!(auth_mode(true, &Err(err())), AuthMode::Deployment);

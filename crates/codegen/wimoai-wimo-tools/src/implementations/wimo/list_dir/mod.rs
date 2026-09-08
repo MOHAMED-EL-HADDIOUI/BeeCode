@@ -466,18 +466,18 @@ enum ListDirWalk {
 fn map_list_dir_join_error(
     err: tokio::task::JoinError,
     display_path: &Path,
-) -> wimo ai_tool_runtime::ToolError {
-    let tool_id = wimo ai_tool_protocol::ToolId::new("list_dir").expect("valid tool id");
+) -> wimoai_tool_runtime::ToolError {
+    let tool_id = wimoai_tool_protocol::ToolId::new("list_dir").expect("valid tool id");
     let path = display_path.display();
     if err.is_cancelled() {
         tracing::debug!(error = %err, "list_dir walk task cancelled");
-        wimo ai_tool_runtime::ToolError::cancelled(
+        wimoai_tool_runtime::ToolError::cancelled(
             tool_id,
             format!("Directory listing was cancelled for {path}."),
         )
     } else {
         tracing::warn!(error = %err, "list_dir walk task panicked");
-        wimo ai_tool_runtime::ToolError::execution(
+        wimoai_tool_runtime::ToolError::execution(
             tool_id,
             format!(
                 "Directory listing failed unexpectedly for {path}; retry or narrow the target directory."
@@ -490,7 +490,7 @@ fn map_list_dir_join_error(
 async fn spawn_list_dir_walk<T, F>(
     display_path: &Path,
     walk: F,
-) -> Result<T, wimo ai_tool_runtime::ToolError>
+) -> Result<T, wimoai_tool_runtime::ToolError>
 where
     T: Send + 'static,
     F: FnOnce() -> T + Send + 'static,
@@ -499,25 +499,25 @@ where
         .await
         .map_err(|err| map_list_dir_join_error(err, display_path))
 }
-impl wimo ai_tool_runtime::Tool for ListDirTool {
+impl wimoai_tool_runtime::Tool for ListDirTool {
     type Args = ListDirInput;
     type Output = ListDirOutput;
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("list_dir").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("list_dir").expect("valid tool id")
     }
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "list_dir",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -528,9 +528,9 @@ impl wimo ai_tool_runtime::Tool for ListDirTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: ListDirInput,
-    ) -> Result<ListDirOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ListDirOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::{behavior_version, resolve_cwd, shared_resources};
         let resources = shared_resources(&ctx)?;
         let cwd = resolve_cwd(&ctx, &resources).await?;
@@ -1188,7 +1188,7 @@ mod tests {
         let mut resources = Resources::new();
         resources.insert(Cwd(tmp.path().to_path_buf()));
         let tool = ListDirTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             ListDirInput {
@@ -1213,10 +1213,10 @@ mod tests {
         resources.insert(Cwd(tmp.path().to_path_buf()));
         let tool = ListDirTool;
         let mut ctx = test_ctx(resources.into_shared());
-        ctx.extensions.insert(wimo ai_tool_runtime::BehaviorVersion(
+        ctx.extensions.insert(wimoai_tool_runtime::BehaviorVersion(
             "legacy-0.4.10".to_string(),
         ));
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             ctx,
             ListDirInput {
@@ -1244,10 +1244,10 @@ mod tests {
         resources.insert(Cwd(tmp.path().to_path_buf()));
         let tool = ListDirTool;
         let mut ctx = test_ctx(resources.into_shared());
-        ctx.extensions.insert(wimo ai_tool_runtime::BehaviorVersion(
+        ctx.extensions.insert(wimoai_tool_runtime::BehaviorVersion(
             "legacy-0.4.10".to_string(),
         ));
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             ctx,
             ListDirInput {
@@ -1273,7 +1273,7 @@ mod tests {
         let mut resources = Resources::new();
         resources.insert(Cwd(tmp.path().to_path_buf()));
         let tool = ListDirTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             ListDirInput {
@@ -1296,7 +1296,7 @@ mod tests {
         let mut resources = Resources::new();
         resources.insert(Cwd(tmp.path().to_path_buf()));
         let tool = ListDirTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             ListDirInput {
@@ -1328,7 +1328,7 @@ mod tests {
             max_output_chars: Some(200),
         }));
         let tool = ListDirTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             ListDirInput {
@@ -1354,7 +1354,7 @@ mod tests {
         let mut resources = Resources::new();
         resources.insert(Cwd(tmp.path().to_path_buf()));
         let tool = ListDirTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             ListDirInput {
@@ -1379,7 +1379,7 @@ mod tests {
         let mut resources = Resources::new();
         resources.insert(Cwd(PathBuf::from("/does/not/matter")));
         let tool = ListDirTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             ListDirInput {
@@ -1441,7 +1441,7 @@ mod tests {
             max_output_chars: Some(BUDGET),
         }));
         resources.insert(renderer);
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &ListDirTool,
             test_ctx(resources.into_shared()),
             ListDirInput {
@@ -1493,10 +1493,10 @@ mod tests {
         let mut resources = Resources::new();
         resources.insert(Cwd(tmp.path().to_path_buf()));
         let mut ctx = test_ctx(resources.into_shared());
-        ctx.extensions.insert(wimo ai_tool_runtime::BehaviorVersion(
+        ctx.extensions.insert(wimoai_tool_runtime::BehaviorVersion(
             "legacy-0.4.10".to_string(),
         ));
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &ListDirTool,
             ctx,
             ListDirInput {
@@ -1539,10 +1539,10 @@ mod tests {
             max_output_chars: Some(BUDGET),
         }));
         let mut ctx = test_ctx(resources.into_shared());
-        ctx.extensions.insert(wimo ai_tool_runtime::BehaviorVersion(
+        ctx.extensions.insert(wimoai_tool_runtime::BehaviorVersion(
             "legacy-0.4.10".to_string(),
         ));
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &ListDirTool,
             ctx,
             ListDirInput {
@@ -1569,10 +1569,10 @@ mod tests {
         let mut resources = Resources::new();
         resources.insert(Cwd(tmp.path().to_path_buf()));
         let mut ctx = test_ctx(resources.into_shared());
-        ctx.extensions.insert(wimo ai_tool_runtime::BehaviorVersion(
+        ctx.extensions.insert(wimoai_tool_runtime::BehaviorVersion(
             "legacy-0.4.10".to_string(),
         ));
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &ListDirTool,
             ctx,
             ListDirInput {
@@ -1595,7 +1595,7 @@ mod tests {
         })
         .await
         .expect_err("walk panic must surface as Err, not abort the runtime");
-        assert_eq!(err.kind, wimo ai_tool_runtime::ToolErrorKind::Execution);
+        assert_eq!(err.kind, wimoai_tool_runtime::ToolErrorKind::Execution);
         assert_eq!(
             err.detail,
             "Directory listing failed unexpectedly for /tmp/listed; retry or narrow the target directory."
@@ -1617,7 +1617,7 @@ mod tests {
         let join_err = handle.await.expect_err("aborted task");
         assert!(join_err.is_cancelled());
         let err = map_list_dir_join_error(join_err, Path::new("/tmp/listed"));
-        assert_eq!(err.kind, wimo ai_tool_runtime::ToolErrorKind::Cancelled);
+        assert_eq!(err.kind, wimoai_tool_runtime::ToolErrorKind::Cancelled);
         assert_eq!(
             err.detail,
             "Directory listing was cancelled for /tmp/listed."
@@ -1627,7 +1627,7 @@ mod tests {
     fn tool_name_and_description() {
         use crate::types::tool_metadata::ToolMetadata;
         let tool = ListDirTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "list_dir");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "list_dir");
         assert!(
             ToolMetadata::description_template(&tool)
                 .contains("${{ params.list.target_directory }}"),

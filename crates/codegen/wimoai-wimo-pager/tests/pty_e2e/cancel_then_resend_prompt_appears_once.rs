@@ -2,7 +2,7 @@
 #[allow(unused_imports)]
 use super::common::*;
 
-/// Mirrors `wimo ai_interjection_core::format::{INTERRUPT_NOTE, UNFINISHED_TASKS_REMINDER}`.
+/// Mirrors `wimoai_interjection_core::format::{INTERRUPT_NOTE, UNFINISHED_TASKS_REMINDER}`.
 const INTERRUPT_NOTE: &str = "The user interrupted the previous turn:";
 const UNFINISHED_TASKS_REMINDER: &str =
     "Make sure to complete any unfinished tasks from previous turns.";

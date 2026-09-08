@@ -765,7 +765,7 @@ mod tests {
     /// Add new names there when adding a pager builtin.
     #[test]
     fn pager_builtin_triggers_are_reserved_in_shell() {
-        let reserved: std::collections::HashSet<&str> = wimo ai_wimo_shell::session::PAGER_COMMAND_KEYS
+        let reserved: std::collections::HashSet<&str> = wimoai_wimo_shell::session::PAGER_COMMAND_KEYS
             .iter()
             .copied()
             .collect();
@@ -780,14 +780,14 @@ mod tests {
         assert!(
             missing.is_empty(),
             "pager builtin trigger keys missing from the shell's \
-             PAGER_COMMAND_KEYS (wimo ai-wimo-shell/src/session/slash_commands.rs); \
+             PAGER_COMMAND_KEYS (wimoai-wimo-shell/src/session/slash_commands.rs); \
              a skill with one of these names would shadow or be shadowed by \
              the pager builtin: {missing:?}"
         );
     }
     #[test]
     fn pager_blocked_acp_names_are_reserved_in_shell() {
-        let reserved: std::collections::HashSet<&str> = wimo ai_wimo_shell::session::PAGER_COMMAND_KEYS
+        let reserved: std::collections::HashSet<&str> = wimoai_wimo_shell::session::PAGER_COMMAND_KEYS
             .iter()
             .copied()
             .collect();

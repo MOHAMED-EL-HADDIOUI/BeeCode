@@ -114,7 +114,7 @@
         assert!(handle(spawn, &mut app));
         let finish = make_ext_session_notification(
             "sess-1",
-            wimo aiSessionUpdate::SubagentFinished {
+            wimoaiSessionUpdate::SubagentFinished {
                 subagent_id: "child-1".into(),
                 child_session_id: "child-1".into(),
                 status: "failed".into(),
@@ -419,7 +419,7 @@
                 "_meta": { "eventId": format!("sess-parent-{event_seq}") },
             });
             let raw = serde_json::value::to_raw_value(&payload).unwrap();
-            AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+            AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
                 request: acp::ExtNotification::new("x.ai/session_notification", raw.into()),
                 response_tx: tx,
             })
@@ -468,7 +468,7 @@
         ));
         assert_eq!(
             (
-                app.agents[&AgentId(0)].last_applied_wimo ai_event_seq,
+                app.agents[&AgentId(0)].last_applied_wimoai_event_seq,
                 app.agents[&AgentId(0)].scrollback.len(),
             ),
             (Some(100), 7)
@@ -477,7 +477,7 @@
         let _ = handle(finished("child-1", 50), &mut app);
         assert!(app.agents[&AgentId(0)].subagent_sessions["child-1"].finished);
         assert_eq!(
-            app.agents[&AgentId(0)].last_applied_wimo ai_event_seq,
+            app.agents[&AgentId(0)].last_applied_wimoai_event_seq,
             Some(100),
             "a late lower-ID lifecycle event must not regress the scalar wimo AI highwater"
         );
@@ -527,7 +527,7 @@
     #[test]
     fn finish_before_spawn_is_applied_after_later_cursor_progress() {
         let mut app = make_app_with_agent("sess-parent");
-        let notification = |update: wimo aiSessionUpdate, event_id: &str| {
+        let notification = |update: wimoaiSessionUpdate, event_id: &str| {
             let payload = SessionNotification {
                 session_id: acp::SessionId::new("sess-parent"),
                 update,
@@ -874,7 +874,7 @@
             let changed = handle(
                 make_ext_session_notification(
                     child_sid,
-                    wimo aiSessionUpdate::ToolCallDeltaChunk {
+                    wimoaiSessionUpdate::ToolCallDeltaChunk {
                         tool_call_id: Some("call_1".into()),
                         tool_index: 0,
                         name: Some("write".into()),
@@ -951,7 +951,7 @@
                 LateEvent::ToolCallDelta => handle(
                     make_ext_session_notification(
                         child_sid,
-                        wimo aiSessionUpdate::ToolCallDeltaChunk {
+                        wimoaiSessionUpdate::ToolCallDeltaChunk {
                             tool_call_id: Some("call_1".into()),
                             tool_index: 0,
                             name: Some("write".into()),
@@ -1143,7 +1143,7 @@
 
             let mut app = make_app_with_agent("sess-parent");
             let mut spawned = test_subagent_spawned("sess-parent", child_sid);
-            let wimo aiSessionUpdate::SubagentSpawned { resumed_from, .. } = &mut spawned else {
+            let wimoaiSessionUpdate::SubagentSpawned { resumed_from, .. } = &mut spawned else {
                 unreachable!();
             };
             *resumed_from = Some("orig-child".into());
@@ -1261,7 +1261,7 @@
             // A resumed child spawns live; its inherited transcript has not flushed to disk yet
             let mut app = make_app_with_agent("sess-parent");
             let mut spawned = test_subagent_spawned("sess-parent", child_sid);
-            let wimo aiSessionUpdate::SubagentSpawned { resumed_from, .. } = &mut spawned else {
+            let wimoaiSessionUpdate::SubagentSpawned { resumed_from, .. } = &mut spawned else {
                 unreachable!();
             };
             *resumed_from = Some("orig-child".into());
@@ -1795,7 +1795,7 @@
 
         #[test]
         fn rebuild_after_evict_preserves_child_compaction_markers() {
-            let child_sid = "child-wimo ai-marker";
+            let child_sid = "child-wimoai-marker";
             let updates = format!(
                 "{}\n{}\n{}\n",
                 child_tool_line(child_sid),
@@ -1952,7 +1952,7 @@
 
             let mut app = make_app_with_agent("sess-parent");
             let mut spawned = test_subagent_spawned("sess-parent", child_sid);
-            let wimo aiSessionUpdate::SubagentSpawned { resumed_from, .. } = &mut spawned else {
+            let wimoaiSessionUpdate::SubagentSpawned { resumed_from, .. } = &mut spawned else {
                 unreachable!();
             };
             *resumed_from = Some("orig-child".into());
@@ -2129,7 +2129,7 @@
         let raw =
             serde_json::value::to_raw_value(&serde_json::json!({"unexpected": true})).unwrap();
         let request = acp::ExtNotification::new("x.ai/session/update", raw.into());
-        let msg = AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+        let msg = AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
             request,
             response_tx: tx,
         });
@@ -2162,7 +2162,7 @@
         let affected = handle(
             make_ext_session_notification(
                 "sess-A",
-                wimo aiSessionUpdate::AutoCompactCompleted {
+                wimoaiSessionUpdate::AutoCompactCompleted {
                     tokens_before: Some(90_000),
                     tokens_after: 25_000,
                     elapsed_ms: Some(300),

@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-models"
+name = "wimoai-wimo-models"
 version = "0.1.0"
 edition.workspace = true
 description = "Default model IDs for the wimo CLI, loaded from the embedded default_models.json."

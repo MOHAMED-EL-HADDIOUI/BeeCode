@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Resolves the wimo binary and runs it, in order of preference:
 //   1. $wimo_HOME/bin/wimo, the versioned symlink postinstall.js installs
-//   2. bootstrap it from the per-platform @wimo ai-official/wimo-<platform>
+//   2. bootstrap it from the per-platform @wimoai-official/wimo-<platform>
 //      package, decompressing the compressed binary into $wimo_HOME/bin
 //   3. decompress in place under node_modules (no resolvable version, or
 //      an unwritable home)
@@ -13,7 +13,7 @@ const fs = require('fs');
 const os = require('os');
 const zlib = require('zlib');
 
-const pkgName = '@wimo ai-official/wimo';
+const pkgName = '@wimoai-official/wimo';
 const IS_WINDOWS = process.platform === 'win32';
 const EXE = IS_WINDOWS ? '.exe' : '';
 const BIN_NAME = `wimo${EXE}`;
@@ -34,7 +34,7 @@ function readLocalVersion() {
 // Returns null when npm skipped the matching optional dependency
 // (unsupported platform, or --no-optional).
 function resolvePlatformPackageDir() {
-    const platformPkg = `@wimo ai-official/wimo-${process.platform}-${process.arch}`;
+    const platformPkg = `@wimoai-official/wimo-${process.platform}-${process.arch}`;
     try {
         return path.dirname(require.resolve(`${platformPkg}/package.json`));
     } catch {
@@ -108,7 +108,7 @@ function resolveBinary() {
     const platformDir = resolvePlatformPackageDir();
     if (!platformDir) {
         console.error(`${pkgName}: no platform binary installed for ${process.platform}-${process.arch}.`);
-        console.error(`  Expected sibling package @wimo ai-official/wimo-${process.platform}-${process.arch}.`);
+        console.error(`  Expected sibling package @wimoai-official/wimo-${process.platform}-${process.arch}.`);
         console.error(`  This usually means npm skipped optionalDependencies (e.g. --no-optional)`);
         console.error(`  or the platform is not supported.`);
         process.exit(1);

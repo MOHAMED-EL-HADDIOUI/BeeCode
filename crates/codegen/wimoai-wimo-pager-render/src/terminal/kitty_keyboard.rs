@@ -16,10 +16,10 @@
 //! What losing `REPORT_EVENT_TYPES` costs an affected session:
 //!
 //! - Voice hold-to-talk degrades to a tap toggle (`voice_chord_action`; the `voice_capture_mode` setting hides its `hold` choice).
-//! - `is_link_modifier_for_key`'s non-macOS Ctrl-release case (`wimo ai-wimo-pager` `src/app/agent_view/mod.rs`) never fires.
+//! - `is_link_modifier_for_key`'s non-macOS Ctrl-release case (`wimoai-wimo-pager` `src/app/agent_view/mod.rs`) never fires.
 //!   So link-hover clears on the next non-Ctrl key instead of when Ctrl lifts.
 //! - `KeyEventKind::Repeat` disappears: held keys arrive as repeated `Press`, as on every non-KKP terminal.
-//!   But `is_pasteable_key_event` (`wimo ai-wimo-pager` `src/app/event_loop.rs`) excludes `Repeat` on purpose.
+//!   But `is_pasteable_key_event` (`wimoai-wimo-pager` `src/app/event_loop.rs`) excludes `Repeat` on purpose.
 //!   So auto-repeat counts toward paste coalescing again.
 
 use std::sync::atomic::{AtomicU8, Ordering};

@@ -595,7 +595,7 @@ fn turn_error_increments_error_count() {
 
 #[test]
 fn tool_result_hook_rewrote_is_content_free() {
-    use wimo ai_wimo_session_events::types::ToolOutcome;
+    use wimoai_wimo_session_events::types::ToolOutcome;
     for (hook_rewrote, want) in [(true, "true"), (false, "false")] {
         let stream = build(gates_off());
         emit_event_into(
@@ -625,7 +625,7 @@ fn tool_result_gates_off_collapses_and_reduces() {
         &stream,
         &events::ToolCallCompleted {
             tool_name: "docs__post_message".into(),
-            outcome: wimo ai_wimo_session_events::types::ToolOutcome::Success,
+            outcome: wimoai_wimo_session_events::types::ToolOutcome::Success,
             hook_rewrote: false,
             duration_ms: 42,
             tool_result_size_bytes: None,
@@ -664,7 +664,7 @@ fn tool_result_gates_off_collapses_and_reduces() {
 fn tool_result_details_gate_exposes_verbatim_scrubbed() {
     let stream = build(gates_all_on());
     // Use the *real* home dir: `redact_user_paths` collapses the current user's home (env-derived), not arbitrary foreign paths
-    let home = wimo ai_dirs::home_dir()
+    let home = wimoai_dirs::home_dir()
         .map(|h| h.to_string_lossy().into_owned())
         .unwrap_or_else(|| "/home/testuser".into());
     let path = format!("{home}/proj/main.rs");
@@ -672,7 +672,7 @@ fn tool_result_details_gate_exposes_verbatim_scrubbed() {
         &stream,
         &events::ToolCallCompleted {
             tool_name: "docs__post_message".into(),
-            outcome: wimo ai_wimo_session_events::types::ToolOutcome::Success,
+            outcome: wimoai_wimo_session_events::types::ToolOutcome::Success,
             hook_rewrote: false,
             duration_ms: 42,
             tool_result_size_bytes: None,
@@ -998,7 +998,7 @@ fn unmapped_events_produce_nothing() {
 
 /// Events emitted exclusively via `EmitterOrigin::Workspace` (`log_session_event_with_origin`) must not carry an external mapping.
 /// The fan-out hook deliberately lives only in the Shell-origin wrappers.
-/// The workspace-only events today are the wimo ai-wimo-workspace sampler events.
+/// The workspace-only events today are the wimoai-wimo-workspace sampler events.
 /// Those live outside this crate with no `telemetry_event!` binding here; this pin guards the in-crate set.
 #[test]
 fn workspace_only_events_have_no_external_mapping() {
@@ -1033,7 +1033,7 @@ fn mapping_supplied_session_id_wins_and_sequence_increments() {
 
 #[test]
 fn from_snapshot_copies_user_id_without_email() {
-    let attrs = super::IdentityAttrs::from_snapshot(&wimo ai_wimo_auth::CredentialSnapshot {
+    let attrs = super::IdentityAttrs::from_snapshot(&wimoai_wimo_auth::CredentialSnapshot {
         user_id: Some("api-key-principal".into()),
         api_key_id: Some("hashed-key".into()),
         ..Default::default()
@@ -1047,7 +1047,7 @@ fn identity_api_key_user_id_exports_without_email() {
     let stream = build(gates_off());
     super::set_identity_on(
         &stream.ext,
-        super::IdentityAttrs::from_snapshot(&wimo ai_wimo_auth::CredentialSnapshot {
+        super::IdentityAttrs::from_snapshot(&wimoai_wimo_auth::CredentialSnapshot {
             user_id: Some("api-key-principal".into()),
             ..Default::default()
         }),
@@ -1191,7 +1191,7 @@ fn lock_content_gates_drops_prompt_and_response_not_email() {
         &stream,
         &events::ToolCallCompleted {
             tool_name: "run_terminal_cmd".into(),
-            outcome: wimo ai_wimo_session_events::types::ToolOutcome::Error,
+            outcome: wimoai_wimo_session_events::types::ToolOutcome::Error,
             hook_rewrote: false,
             duration_ms: 1,
             tool_result_size_bytes: None,
@@ -1280,7 +1280,7 @@ fn deny_tool_decision_exports_gated_params_and_full_command() {
 fn details_without_content_exports_preview_not_bodies() {
     let ev = events::ToolCallCompleted {
         tool_name: "run_terminal_cmd".into(),
-        outcome: wimo ai_wimo_session_events::types::ToolOutcome::Error,
+        outcome: wimoai_wimo_session_events::types::ToolOutcome::Error,
         hook_rewrote: false,
         duration_ms: 1,
         tool_result_size_bytes: None,
@@ -1310,7 +1310,7 @@ fn details_without_content_exports_preview_not_bodies() {
 fn content_without_details_exports_bodies_not_preview() {
     let ev = events::ToolCallCompleted {
         tool_name: "docs__post_message".into(),
-        outcome: wimo ai_wimo_session_events::types::ToolOutcome::Error,
+        outcome: wimoai_wimo_session_events::types::ToolOutcome::Error,
         hook_rewrote: false,
         duration_ms: 1,
         tool_result_size_bytes: None,
@@ -1426,7 +1426,7 @@ fn full_command_skips_512_collapse() {
     let long = "x".repeat(600);
     let ev = events::ToolCallCompleted {
         tool_name: "run_terminal_cmd".into(),
-        outcome: wimo ai_wimo_session_events::types::ToolOutcome::Success,
+        outcome: wimoai_wimo_session_events::types::ToolOutcome::Success,
         hook_rewrote: false,
         duration_ms: 1,
         tool_result_size_bytes: None,

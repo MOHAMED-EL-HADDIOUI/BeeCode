@@ -7,8 +7,8 @@ use agent_client_protocol as acp;
 use super::{ExtResult, parse_params, to_raw_response};
 use crate::agent::MvpAgent;
 use crate::session::{RolloutSurveyRequest, RolloutSurveyResponse};
-use wimo ai_wimo_telemetry::events::RolloutSurvey;
-use wimo ai_wimo_telemetry::session_ctx::log_event;
+use wimoai_wimo_telemetry::events::RolloutSurvey;
+use wimoai_wimo_telemetry::session_ctx::log_event;
 
 #[tracing::instrument(skip_all, fields(method = %args.method))]
 pub async fn handle(_agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {

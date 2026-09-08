@@ -175,7 +175,7 @@ pub fn truncate_with_preview(
 ///
 /// Use this when the reader needs to distinguish a natural string ending
 /// from a truncation (e.g., model-visible listings). For purely visual
-/// width-based truncation in the TUI, see `wimo ai_wimo_pager`'s own helpers.
+/// width-based truncation in the TUI, see `wimoai_wimo_pager`'s own helpers.
 pub fn truncate_str_with_marker(s: &str, max_bytes: usize) -> Cow<'_, str> {
     if s.len() <= max_bytes {
         return Cow::Borrowed(s);
@@ -226,17 +226,17 @@ pub fn ceil_char_boundary(s: &str, index: usize) -> usize {
 }
 
 /// Estimate the number of tokens in a string using the bytes/4 heuristic.
-/// Thin wrapper around [`wimo ai_token_estimation::estimate_tokens`] preserving
+/// Thin wrapper around [`wimoai_token_estimation::estimate_tokens`] preserving
 /// the historical `usize` return type used by tool-side callers
 /// (`read_file`, `attach_file`, `inspect`, `compaction` file gates).
 pub fn estimate_tokens(s: &str) -> usize {
-    wimo ai_token_estimation::estimate_tokens(s) as usize
+    wimoai_token_estimation::estimate_tokens(s) as usize
 }
 
 /// Estimate the number of chars per token using the bytes/4 heuristic.
-/// Thin wrapper around [`wimo ai_token_estimation::estimate_chars`].
+/// Thin wrapper around [`wimoai_token_estimation::estimate_chars`].
 pub fn estimate_chars(s: u64) -> u64 {
-    wimo ai_token_estimation::estimate_chars(s)
+    wimoai_token_estimation::estimate_chars(s)
 }
 
 /// Human-readable size in powers of 1024: integral bytes (`512 B`), one

@@ -8,7 +8,7 @@
 
 use super::mcp::format_mcp_connecting_reminder;
 use super::support::*;
-use wimo ai_wimo_mcp::servers::McpInitStrategy;
+use wimoai_wimo_mcp::servers::McpInitStrategy;
 
 #[test]
 fn default_reminder_lists_connecting_servers() {

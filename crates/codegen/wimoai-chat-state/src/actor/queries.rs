@@ -56,7 +56,7 @@ impl ChatStateActor {
         let mut truncate_at = self.state.conversation.len();
 
         for (i, item) in self.state.conversation.iter().enumerate() {
-            if matches!(item, wimo ai_wimo_sampling_types::ConversationItem::User(_)) {
+            if matches!(item, wimoai_wimo_sampling_types::ConversationItem::User(_)) {
                 if user_count == target_prompt_index {
                     truncate_at = i;
                     break;
@@ -91,9 +91,9 @@ impl ChatStateActor {
         let context_window = self.state.sampling_config.context_window;
         let cw = context_window.get();
 
-        if wimo ai_token_estimation::exceeds_threshold(self.state.total_tokens, cw, threshold_percent) {
+        if wimoai_token_estimation::exceeds_threshold(self.state.total_tokens, cw, threshold_percent) {
             let utilization_percent =
-                wimo ai_token_estimation::usage_percentage_truncated_u8(self.state.total_tokens, cw);
+                wimoai_token_estimation::usage_percentage_truncated_u8(self.state.total_tokens, cw);
             Some(AutoCompactTrigger {
                 total_tokens: self.state.total_tokens,
                 context_window,
@@ -110,7 +110,7 @@ impl ChatStateActor {
             .iter()
             .rev()
             .find_map(|item| {
-                if let wimo ai_wimo_sampling_types::ConversationItem::Assistant(a) = item {
+                if let wimoai_wimo_sampling_types::ConversationItem::Assistant(a) = item {
                     Some(crate::commands::ModelMetadata {
                         resolved_model_id: a.model_id.clone(),
                         model_fingerprint: a.model_fingerprint.clone(),
@@ -132,7 +132,7 @@ impl ChatStateActor {
     /// Whether the conversation has any assistant tool call without a matching
     /// `ToolResult` (the dangling-tool-call repair would fire on the next build).
     pub(super) fn has_dangling_tool_calls(&self) -> bool {
-        wimo ai_wimo_sampling_types::has_dangling_tool_calls(&self.state.conversation)
+        wimoai_wimo_sampling_types::has_dangling_tool_calls(&self.state.conversation)
     }
 
     /// Return the text content of the last assistant message with non-empty text.
@@ -142,7 +142,7 @@ impl ChatStateActor {
     /// no such item exists.
     pub(super) fn get_last_assistant_text(&self) -> Option<String> {
         self.state.conversation.iter().rev().find_map(|item| {
-            if let wimo ai_wimo_sampling_types::ConversationItem::Assistant(a) = item
+            if let wimoai_wimo_sampling_types::ConversationItem::Assistant(a) = item
                 && !a.content.trim().is_empty()
             {
                 return Some(a.content.as_ref().to_owned());
@@ -165,13 +165,13 @@ impl ChatStateActor {
         // continuation may finish the cut sentence and then call a tool.
         for item in items.by_ref() {
             match item {
-                wimo ai_wimo_sampling_types::ConversationItem::Assistant(a)
+                wimoai_wimo_sampling_types::ConversationItem::Assistant(a)
                     if !a.content.trim().is_empty() =>
                 {
                     segments.push(a.content.as_ref());
                     break;
                 }
-                wimo ai_wimo_sampling_types::ConversationItem::User(u)
+                wimoai_wimo_sampling_types::ConversationItem::User(u)
                     if u.prompt_index.is_some()
                         || u.synthetic_reason
                             .as_ref()
@@ -188,7 +188,7 @@ impl ChatStateActor {
         // join or a multi-continue report loses every middle segment.
         for item in items {
             match item {
-                wimo ai_wimo_sampling_types::ConversationItem::Assistant(a) => {
+                wimoai_wimo_sampling_types::ConversationItem::Assistant(a) => {
                     // An earlier tool-call step is a real boundary.
                     if !a.tool_calls.is_empty() {
                         break;
@@ -199,12 +199,12 @@ impl ChatStateActor {
                 }
                 // Committed between salvage segments on reasoning models;
                 // not report content, not a boundary.
-                wimo ai_wimo_sampling_types::ConversationItem::Reasoning(_) => {}
+                wimoai_wimo_sampling_types::ConversationItem::Reasoning(_) => {}
                 // Join only across the salvage reminder; any other reminder
                 // separates distinct answers.
-                wimo ai_wimo_sampling_types::ConversationItem::User(u)
+                wimoai_wimo_sampling_types::ConversationItem::User(u)
                     if u.synthetic_reason
-                        == Some(wimo ai_wimo_sampling_types::SyntheticReason::LengthContinue) => {}
+                        == Some(wimoai_wimo_sampling_types::SyntheticReason::LengthContinue) => {}
                 // Boundary — deliberately including `BackendToolCall`: a
                 // hosted-tool step between segments is a real step boundary.
                 _ => break,
@@ -223,17 +223,17 @@ impl ChatStateActor {
     /// [`SyntheticReason::starts_prompt_turn`]); mid-turn synthetic injections
     /// are walked past. Whitespace-only assistant items are skipped.
     ///
-    /// [`SyntheticReason::starts_prompt_turn`]: wimo ai_wimo_sampling_types::SyntheticReason::starts_prompt_turn
+    /// [`SyntheticReason::starts_prompt_turn`]: wimoai_wimo_sampling_types::SyntheticReason::starts_prompt_turn
     fn assistant_texts_in_turn(&self) -> Vec<String> {
         let mut texts = Vec::new();
         for item in self.state.conversation.iter().rev() {
             match item {
-                wimo ai_wimo_sampling_types::ConversationItem::Assistant(a)
+                wimoai_wimo_sampling_types::ConversationItem::Assistant(a)
                     if !a.content.trim().is_empty() =>
                 {
                     texts.push(a.content.as_ref().to_owned());
                 }
-                wimo ai_wimo_sampling_types::ConversationItem::User(u)
+                wimoai_wimo_sampling_types::ConversationItem::User(u)
                     if u.prompt_index.is_some()
                         || u.synthetic_reason
                             .as_ref()
@@ -282,11 +282,11 @@ impl ChatStateActor {
     /// should use `get_conversation()` directly.
     pub(super) fn get_first_user_text(&self) -> Option<String> {
         self.state.conversation.iter().find_map(|item| {
-            if let wimo ai_wimo_sampling_types::ConversationItem::User(u) = item {
+            if let wimoai_wimo_sampling_types::ConversationItem::User(u) = item {
                 // Only return text if the first part is Text — behaviour-preserving
                 // w.r.t. the original `content.first().and_then(|p| if Text { … })`.
                 u.content.first().and_then(|part| {
-                    if let wimo ai_wimo_sampling_types::ContentPart::Text { text } = part {
+                    if let wimoai_wimo_sampling_types::ContentPart::Text { text } = part {
                         Some(text.as_ref().to_owned())
                     } else {
                         None
@@ -302,7 +302,7 @@ impl ChatStateActor {
     pub(super) fn get_conversation_item_at(
         &self,
         index: usize,
-    ) -> Option<wimo ai_wimo_sampling_types::ConversationItem> {
+    ) -> Option<wimoai_wimo_sampling_types::ConversationItem> {
         self.state.conversation.get(index).cloned()
     }
 
@@ -322,27 +322,27 @@ impl ChatStateActor {
         };
         for item in &self.state.conversation {
             match item {
-                wimo ai_wimo_sampling_types::ConversationItem::User(_) => counts.user += 1,
-                wimo ai_wimo_sampling_types::ConversationItem::Assistant(_) => {
+                wimoai_wimo_sampling_types::ConversationItem::User(_) => counts.user += 1,
+                wimoai_wimo_sampling_types::ConversationItem::Assistant(_) => {
                     counts.assistant += 1;
                 }
-                wimo ai_wimo_sampling_types::ConversationItem::ToolResult(_) => {
+                wimoai_wimo_sampling_types::ConversationItem::ToolResult(_) => {
                     counts.tool_result += 1;
                 }
-                wimo ai_wimo_sampling_types::ConversationItem::System(_) => {}
-                wimo ai_wimo_sampling_types::ConversationItem::BackendToolCall(_) => {}
-                wimo ai_wimo_sampling_types::ConversationItem::Reasoning(_) => {}
+                wimoai_wimo_sampling_types::ConversationItem::System(_) => {}
+                wimoai_wimo_sampling_types::ConversationItem::BackendToolCall(_) => {}
+                wimoai_wimo_sampling_types::ConversationItem::Reasoning(_) => {}
             }
         }
         counts
     }
 
     /// Return the first `System` message in the conversation, or `None`.
-    pub(super) fn get_system_message(&self) -> Option<wimo ai_wimo_sampling_types::ConversationItem> {
+    pub(super) fn get_system_message(&self) -> Option<wimoai_wimo_sampling_types::ConversationItem> {
         self.state
             .conversation
             .iter()
-            .find(|item| matches!(item, wimo ai_wimo_sampling_types::ConversationItem::System(_)))
+            .find(|item| matches!(item, wimoai_wimo_sampling_types::ConversationItem::System(_)))
             .cloned()
     }
 }

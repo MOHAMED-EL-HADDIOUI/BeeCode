@@ -13,8 +13,8 @@ mod common;
 use serial_test::serial;
 
 use common::FakeBinGuard;
-use wimo ai_wimo_update::auto_update::install_npm_for_test;
-use wimo ai_wimo_update::version::{
+use wimoai_wimo_update::auto_update::install_npm_for_test;
+use wimoai_wimo_update::version::{
     fetch_gh_release_version, fetch_npm_tag_for_test, fetch_npm_version_for_test,
 };
 
@@ -56,7 +56,7 @@ async fn fetch_npm_tag_passes_pkg_and_tag_to_npm() {
     let args = &log[0];
     assert!(args.contains("view"), "args: {args}");
     // For "latest" tag, no `@latest` suffix is appended in pkg_spec.
-    assert!(args.contains("@wimo ai-official/wimo"), "args: {args}");
+    assert!(args.contains("@wimoai-official/wimo"), "args: {args}");
     assert!(!args.contains("@latest"), "args: {args}");
     assert!(args.contains("--json"), "args: {args}");
 }
@@ -72,7 +72,7 @@ async fn fetch_npm_tag_alpha_appends_at_alpha_suffix() {
 
     let log = g.args_log();
     assert!(
-        log[0].contains("@wimo ai-official/wimo@alpha"),
+        log[0].contains("@wimoai-official/wimo@alpha"),
         "args: {}",
         log[0]
     );
@@ -208,7 +208,7 @@ async fn install_npm_calls_npm_with_version_arg() {
     assert_eq!(log.len(), 1, "exactly one npm invocation");
     let args = &log[0];
     assert!(args.contains("i -g"), "args: {args}");
-    assert!(args.contains("@wimo ai-official/wimo@0.1.181"), "args: {args}");
+    assert!(args.contains("@wimoai-official/wimo@0.1.181"), "args: {args}");
 }
 
 #[tokio::test]
@@ -219,7 +219,7 @@ async fn install_npm_falls_back_to_dist_tag_on_no_target() {
     install_npm_for_test(None, "stable", None).unwrap();
     let log = g.args_log();
     assert!(
-        log[0].contains("@wimo ai-official/wimo@latest"),
+        log[0].contains("@wimoai-official/wimo@latest"),
         "stable channel uses @latest dist-tag: {}",
         log[0]
     );
@@ -233,7 +233,7 @@ async fn install_npm_falls_back_to_alpha_dist_tag_on_alpha_channel() {
     install_npm_for_test(None, "alpha", None).unwrap();
     let log = g.args_log();
     assert!(
-        log[0].contains("@wimo ai-official/wimo@alpha"),
+        log[0].contains("@wimoai-official/wimo@alpha"),
         "alpha channel uses @alpha dist-tag: {}",
         log[0]
     );
@@ -402,7 +402,7 @@ async fn fetch_gh_release_passes_repo_flag() {
     let log = g.args_log();
     assert!(log[0].contains("--repo"), "args: {}", log[0]);
     assert!(
-        log[0].contains("wimo ai-org-shared/wimo"),
+        log[0].contains("wimoai-org-shared/wimo"),
         "args: {}",
         log[0]
     );

@@ -5,7 +5,7 @@
     unreachable_code,
     dead_code
 )]
-//! wimo ai-wimo-pager: wimo Build TUI.
+//! wimoai-wimo-pager: wimo Build TUI.
 //!
 //! A clean-room implementation built on the v3 pager rendering engine.
 pub mod acp;
@@ -54,9 +54,9 @@ pub mod wrap_clipboard_image;
 pub mod wrap_cmd;
 pub(crate) mod wrap_filter;
 pub(crate) mod wrap_restore;
-pub use wimo ai_wimo_gboom as gboom;
-pub use wimo ai_wimo_pager_render::key;
-pub use wimo ai_wimo_pager_render::{
+pub use wimoai_wimo_gboom as gboom;
+pub use wimoai_wimo_pager_render::key;
+pub use wimoai_wimo_pager_render::{
     appearance, clipboard, glyphs, host, input, link_opener, modal_window_state, prompt_images,
     render, search, syntax, terminal, theme, util,
 };

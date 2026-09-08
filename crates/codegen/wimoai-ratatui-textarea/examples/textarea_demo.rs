@@ -1,6 +1,6 @@
 //! Demo for TextArea with @-file-search completion and atomic text elements.
 //!
-//! Run with: cargo run -p wimo ai-ratatui-textarea --example textarea_demo
+//! Run with: cargo run -p wimoai-ratatui-textarea --example textarea_demo
 //!
 //! Features demonstrated:
 //! - Type `@` to trigger fuzzy file search (real files from current directory)
@@ -31,8 +31,8 @@ use ratatui::style::{Color, Style, Stylize};
 use ratatui::text::{Line, Span, Text};
 use ratatui::widgets::{Block, Borders, Paragraph, StatefulWidgetRef, Widget};
 
-use wimo ai_ratatui_textarea::wrapping::{RtOptions, word_wrap_line};
-use wimo ai_ratatui_textarea::{
+use wimoai_ratatui_textarea::wrapping::{RtOptions, word_wrap_line};
+use wimoai_ratatui_textarea::{
     ClipboardProvider, ElementId, ElementKind, MouseAction, TextArea, TextAreaState, TextElement,
     TextElementEventKind,
 };

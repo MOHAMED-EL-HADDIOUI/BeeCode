@@ -84,7 +84,7 @@ impl SessionActor {
                 &setup,
                 items,
                 format!("turn-summary-{}", uuid::Uuid::new_v4()),
-                format!("wimo ai-turn-summary-{}", uuid::Uuid::new_v4()),
+                format!("wimoai-turn-summary-{}", uuid::Uuid::new_v4()),
             )
             .await;
 
@@ -121,7 +121,7 @@ impl SessionActor {
                 summary.clone(),
                 prompt_id.to_string(),
             ))));
-        self.send_wimo ai_notification_transient(
+        self.send_wimoai_notification_transient(
             crate::extensions::notification::SessionUpdate::LastTurnSummary {
                 summary,
                 prompt_id: Some(prompt_id.to_string()),

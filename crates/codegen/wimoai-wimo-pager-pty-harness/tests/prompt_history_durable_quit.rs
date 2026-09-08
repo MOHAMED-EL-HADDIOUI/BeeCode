@@ -11,7 +11,7 @@
 //! The deterministic regression catch here is the SIGINT path exiting 0 (pre-fix it was `process::exit(130)`).
 //!
 //! ```bash
-//! cargo test -p wimo ai-wimo-pager-pty-harness --test prompt_history_durable_quit \
+//! cargo test -p wimoai-wimo-pager-pty-harness --test prompt_history_durable_quit \
 //!   -- --ignored --nocapture
 //! ```
 
@@ -19,7 +19,7 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
-use wimo ai_wimo_pager_pty_harness::{ContentController, PtyExitPoll, PtyHarness, keys, pager_binary};
+use wimoai_wimo_pager_pty_harness::{ContentController, PtyExitPoll, PtyHarness, keys, pager_binary};
 
 const ROWS: u16 = 50;
 const COLS: u16 = 120;

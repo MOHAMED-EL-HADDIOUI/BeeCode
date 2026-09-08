@@ -11,7 +11,7 @@ use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::time::Duration;
-use wimo ai_wimo_tools::implementations::skills::discovery::extract_first_paragraph;
+use wimoai_wimo_tools::implementations::skills::discovery::extract_first_paragraph;
 /// Default freshness window for the proactive bundle sync. Bypassed by `force`.
 pub(crate) const BUNDLE_SYNC_TTL: Duration = Duration::from_secs(60 * 60);
 /// Error message returned when no auth source is available for a bundle sync.
@@ -529,7 +529,7 @@ mod tests {
                                 .and_then(|v| v.to_str().ok())
                                 .map(str::to_owned),
                             token_auth: headers
-                                .get("x-wimo ai-token-auth")
+                                .get("x-wimoai-token-auth")
                                 .and_then(|v| v.to_str().ok())
                                 .map(str::to_owned),
                             user_id: headers

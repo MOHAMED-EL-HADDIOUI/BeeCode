@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use wimo ai_test_utils::git::run_git;
+use wimoai_test_utils::git::run_git;
 
 #[cfg(feature = "metadata")]
 use crate::git::{Safety, safe_to_delete_worktree};
@@ -64,7 +64,7 @@ pub(crate) fn seed_source(source: &Path, ignore_lines: &str) {
         source.parent().unwrap(),
         &["init", "--bare", remote.to_str().unwrap()],
     );
-    wimo ai_test_utils::git::git_init_seed(source);
+    wimoai_test_utils::git::git_init_seed(source);
     run_git(
         source,
         &["remote", "add", "origin", remote.to_str().unwrap()],

@@ -1,8 +1,8 @@
 //! Supporting structs/enums referenced from requests, chunks, and events.
 //!
 //! Every type in this module is a **placeholder**: the canonical
-//! implementations live in other crates today (`wimo ai-hunk-tracker`,
-//! `wimo ai-wimo-shell`, `wimo ai-wimo-tools`, ...). We define minimal
+//! implementations live in other crates today (`wimoai-hunk-tracker`,
+//! `wimoai-wimo-shell`, `wimoai-wimo-tools`, ...). We define minimal
 //! serializable shapes here so the wire-types crate's API surface
 //! compiles end-to-end. Each type carries a
 //! `// TODO(workspace): align with <canonical type>` comment naming the

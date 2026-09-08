@@ -1,6 +1,6 @@
 //! Compacted-history assembly (wimo's rebuild structure, generic).
 //!
-//! Moved from `wimo ai-chat-state::compaction_utils::build_compacted_history` and
+//! Moved from `wimoai-chat-state::compaction_utils::build_compacted_history` and
 //! made generic over a write-side item factory so any harness can assemble
 //! the canonical post-compaction history:
 //!

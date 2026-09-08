@@ -1,9 +1,9 @@
 use tokio::sync::mpsc;
-use wimo ai_wimo_tools::implementations::wimo::task::coordinator::{
+use wimoai_wimo_tools::implementations::wimo::task::coordinator::{
     ActiveMessageAdmission, ChildControl, LocalBoxFuture, SendBoxFuture, SubagentProgress,
 };
-use wimo ai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageDelivery;
-use wimo ai_message_delivery_core::DeliveryEnvelope;
+use wimoai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageDelivery;
+use wimoai_message_delivery_core::DeliveryEnvelope;
 
 use super::prompt_turn_receipt::{PromptTurnReceipt, cancel_shell_child_turn};
 use crate::session::{SessionCommand, SessionThread};
@@ -57,7 +57,7 @@ impl ChildControl for ShellChildRuntime {
             {
                 #[cfg(test)]
                 if self.force_queue_envelope {
-                    wimo ai_message_delivery_core::Operation::Queue
+                    wimoai_message_delivery_core::Operation::Queue
                 } else {
                     crate::session::message_delivery::delivery_operation(delivery.operation())
                 }
@@ -74,7 +74,7 @@ impl ChildControl for ShellChildRuntime {
         let parent_prompt_index = self
             .active_message_parent_prompt_index
             .load(std::sync::atomic::Ordering::Acquire);
-        let parent_telemetry_ctx = wimo ai_wimo_telemetry::TelemetryCtx::new(
+        let parent_telemetry_ctx = wimoai_wimo_telemetry::TelemetryCtx::new(
             self.active_message_parent_session_id.clone(),
             std::sync::Arc::new(tokio::sync::Mutex::new(parent_prompt_index)),
         );

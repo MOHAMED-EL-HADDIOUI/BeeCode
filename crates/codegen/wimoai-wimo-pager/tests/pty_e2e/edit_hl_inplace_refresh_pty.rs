@@ -11,7 +11,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::time::Instant;
 
-use wimo ai_wimo_pager_pty_harness::StyledLine;
+use wimoai_wimo_pager_pty_harness::StyledLine;
 
 const DONE_SENTINEL: &str = "EDIT_HL_DONE";
 const ARTIFACT_DIR: &str = "/tmp/edit_hl_video";

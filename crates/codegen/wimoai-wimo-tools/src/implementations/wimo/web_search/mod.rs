@@ -46,28 +46,28 @@ impl crate::types::tool_metadata::ToolMetadata for WebSearchTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for WebSearchTool {
+impl wimoai_tool_runtime::Tool for WebSearchTool {
     type Args = WebSearchInput;
     type Output = WebSearchOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("web_search").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("web_search").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "web_search",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -75,9 +75,9 @@ impl wimo ai_tool_runtime::Tool for WebSearchTool {
     #[tracing::instrument(name = "tool.web_search", skip_all)]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: WebSearchInput,
-    ) -> Result<WebSearchOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<WebSearchOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -91,8 +91,8 @@ impl wimo ai_tool_runtime::Tool for WebSearchTool {
             .search(&input.query, input.allowed_domains.clone())
             .await
             .map_err(|e| {
-                wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("web_search").expect("valid"),
+                wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("web_search").expect("valid"),
                     e.to_string(),
                 )
             })?;
@@ -116,14 +116,14 @@ mod tests {
     #[test]
     fn tool_name_and_description() {
         let tool = WebSearchTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "web_search");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "web_search");
     }
 
     #[tokio::test]
     async fn errors_when_client_not_in_resources() {
         let resources = Resources::new();
         let tool = WebSearchTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx_with_call_id(resources.into_shared(), "test-call"),
             WebSearchInput {

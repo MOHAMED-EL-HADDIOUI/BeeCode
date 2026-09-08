@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use wimo ai_wimo_sampling_types::SentCredential;
+use wimoai_wimo_sampling_types::SentCredential;
 
 use super::{AuthRetryDecision, AuthRetrySchedule};
 use crate::util::dual_clock::DualClock;

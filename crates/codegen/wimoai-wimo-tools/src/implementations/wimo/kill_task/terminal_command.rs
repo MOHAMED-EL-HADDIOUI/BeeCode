@@ -4,7 +4,7 @@ use super::KillTaskTool;
 use crate::implementations::wimo::task_output::background_bash_requires_exprs;
 use crate::types::requirements::{Expr, ToolRequirement};
 use crate::types::tool::{ToolKind, ToolNamespace};
-use wimo ai_tool_types::{KillTaskOutput, KillTaskToolInput};
+use wimoai_tool_types::{KillTaskOutput, KillTaskToolInput};
 
 fn kill_terminal_command_requires_expr() -> Expr<ToolRequirement> {
     Expr::Or(background_bash_requires_exprs())
@@ -36,28 +36,28 @@ Usage notes:
     }
 }
 
-impl wimo ai_tool_runtime::Tool for KillTerminalCommandTool {
+impl wimoai_tool_runtime::Tool for KillTerminalCommandTool {
     type Args = KillTaskToolInput;
     type Output = KillTaskOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("kill_terminal_command").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("kill_terminal_command").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "kill_terminal_command",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -69,10 +69,10 @@ impl wimo ai_tool_runtime::Tool for KillTerminalCommandTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: KillTaskToolInput,
-    ) -> Result<KillTaskOutput, wimo ai_tool_runtime::ToolError> {
-        wimo ai_tool_runtime::Tool::run(&KillTaskTool, ctx, input).await
+    ) -> Result<KillTaskOutput, wimoai_tool_runtime::ToolError> {
+        wimoai_tool_runtime::Tool::run(&KillTaskTool, ctx, input).await
     }
 }
 
@@ -136,7 +136,7 @@ mod tests {
     fn tool_name_and_description_are_subagent_free() {
         let tool = KillTerminalCommandTool;
         assert_eq!(
-            wimo ai_tool_runtime::Tool::id(&tool).as_str(),
+            wimoai_tool_runtime::Tool::id(&tool).as_str(),
             "kill_terminal_command"
         );
         let tmpl = ToolMetadata::description_template(&tool);
@@ -183,7 +183,7 @@ mod tests {
     #[tokio::test]
     async fn delegates_kill_killed() {
         let resources = resources_with_terminal(KillOutcome::Killed);
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &KillTerminalCommandTool,
             test_ctx_with_call_id(resources.into_shared(), "tool_call"),
             KillTaskToolInput {
@@ -205,7 +205,7 @@ mod tests {
     #[tokio::test]
     async fn delegates_kill_already_exited() {
         let resources = resources_with_terminal(KillOutcome::AlreadyExited);
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &KillTerminalCommandTool,
             test_ctx_with_call_id(resources.into_shared(), "tool_call"),
             KillTaskToolInput {
@@ -224,7 +224,7 @@ mod tests {
     #[tokio::test]
     async fn delegates_kill_not_found() {
         let resources = resources_with_terminal(KillOutcome::NotFound);
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &KillTerminalCommandTool,
             test_ctx_with_call_id(resources.into_shared(), "tool_call"),
             KillTaskToolInput {

@@ -2,12 +2,12 @@
 //! Also wimo AI-notification handling and the gateway-bridge dispatch shims.
 use super::*;
 /// Hook / image-intake diagnostics leave the no-output rewind window open; every other variant closes it.
-pub(super) fn closes_cancel_rewind_window(update: &wimo aiSessionUpdate) -> bool {
+pub(super) fn closes_cancel_rewind_window(update: &wimoaiSessionUpdate) -> bool {
     !matches!(
         update,
-        wimo aiSessionUpdate::HookExecution { .. }
-            | wimo aiSessionUpdate::ImageCompressed { .. }
-            | wimo aiSessionUpdate::ImageDropped { .. }
+        wimoaiSessionUpdate::HookExecution { .. }
+            | wimoaiSessionUpdate::ImageCompressed { .. }
+            | wimoaiSessionUpdate::ImageDropped { .. }
     )
 }
 fn scrub_inbound_session_summary(
@@ -76,7 +76,7 @@ mod inbound_summary_persist_scrub_tests {
     use super::*;
     use crate::extensions::notification::TITLE_IS_MANUAL_META_KEY;
     use crate::session::persistence::MAX_TITLE_SCALARS;
-    /// Drive inbound `_x.ai/session/update` through `handle_wimo ai_session_notification`.
+    /// Drive inbound `_x.ai/session/update` through `handle_wimoai_session_notification`.
     /// Removing the `scrub_inbound_session_summary` call site makes this test fail.
     #[tokio::test]
     async fn persist_path_scrubs_title_and_drops_manual_meta() {
@@ -84,15 +84,15 @@ mod inbound_summary_persist_scrub_tests {
         local
             .run_until(async {
                 let (gateway_tx, _gateway_rx) =
-                    tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                    tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
                 let (persistence_tx, mut prx) =
                     tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
                 let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
                 let dirty = format!("\u{1b}]0;X\u{07}{}", "é".repeat(MAX_TITLE_SCALARS + 8));
                 actor
-                    .handle_wimo ai_session_notification(wimo aiSessionNotification {
+                    .handle_wimoai_session_notification(wimoaiSessionNotification {
                         session_id: acp::SessionId::new("test-actor"),
-                        update: wimo aiSessionUpdate::SessionSummaryGenerated {
+                        update: wimoaiSessionUpdate::SessionSummaryGenerated {
                             session_summary: dirty,
                         },
                         meta: Some(serde_json::json!({
@@ -108,10 +108,10 @@ mod inbound_summary_persist_scrub_tests {
                 );
                 loop {
                     match prx.try_recv().expect("inbound summary must be persisted") {
-                        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(
+                        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(
                             notif,
                         )) => {
-                            let wimo aiSessionUpdate::SessionSummaryGenerated { session_summary } =
+                            let wimoaiSessionUpdate::SessionSummaryGenerated { session_summary } =
                                 &notif.update
                             else {
                                 continue;
@@ -145,7 +145,7 @@ impl SessionActor {
     /// Apply subagent usage. `Ok` once the chat-state handle acks; `Err` if the apply failed.
     pub(super) async fn record_subagent_usage(
         &self,
-        by_model: &[(String, wimo ai_chat_state::UsageTotals)],
+        by_model: &[(String, wimoai_chat_state::UsageTotals)],
         parent_prompt_id: Option<&str>,
         incomplete: bool,
     ) -> Result<SubagentUsageApply, ()> {
@@ -178,7 +178,7 @@ impl SessionActor {
     /// A failed apply drops the ack so the child's true-miss fallback runs.
     pub(super) async fn handle_record_subagent_usage_command(
         &self,
-        by_model: &[(String, wimo ai_chat_state::UsageTotals)],
+        by_model: &[(String, wimoai_chat_state::UsageTotals)],
         parent_prompt_id: Option<&str>,
         incomplete: bool,
         respond_to: tokio::sync::oneshot::Sender<()>,
@@ -325,13 +325,13 @@ impl SessionActor {
     /// Producer for the **high-frequency streaming path** with an wimo AI extension payload.
     /// Routes through `event_tx`, the `ReplayBuffer`, and `emit_buffered`, so chunks are merged, debounced, and emitted.
     ///
-    /// For one-shot wimo AI events (RetryState, ImageCompressed, HookExecution, AutoCompactCompleted, etc.), use `send_wimo ai_notification` instead.
+    /// For one-shot wimo AI events (RetryState, ImageCompressed, HookExecution, AutoCompactCompleted, etc.), use `send_wimoai_notification` instead.
     ///
-    /// The frequency-based split (`send_buffered_wimo ai_update` vs `send_wimo ai_notification`) mirrors the ACP-side split.
+    /// The frequency-based split (`send_buffered_wimoai_update` vs `send_wimoai_notification`) mirrors the ACP-side split.
     /// There, `send_update` is the high-frequency buffered path and `emit_notification_direct` the low-frequency direct one.
-    pub(super) async fn send_buffered_wimo ai_update(&self, update: wimo aiSessionUpdate) {
+    pub(super) async fn send_buffered_wimoai_update(&self, update: wimoaiSessionUpdate) {
         self.close_rewind_window().await;
-        let notification = wimo aiSessionNotification {
+        let notification = wimoaiSessionNotification {
             session_id: self.session_info.id.clone(),
             update,
             meta: None,
@@ -367,8 +367,8 @@ impl SessionActor {
             SessionNotification::Acp(n) => {
                 self.emit_notification_direct(*n).await;
             }
-            SessionNotification::wimo ai(n) => {
-                self.log_outbound_wimo ai_buffered(&n);
+            SessionNotification::wimoai(n) => {
+                self.log_outbound_wimoai_buffered(&n);
                 if self
                     .notifications
                     .gateway_enabled
@@ -389,16 +389,16 @@ impl SessionActor {
     /// Tracing log for buffered wimo AI notifications emerging from emit_buffered.
     /// Mirrors `log_outbound_notification` for ACP.
     /// Visible with `RUST_LOG=acp_event=info`.
-    fn log_outbound_wimo ai_buffered(&self, notification: &wimo aiSessionNotification) {
+    fn log_outbound_wimoai_buffered(&self, notification: &wimoaiSessionNotification) {
         if !matches!(
             notification.update,
-            wimo aiSessionUpdate::ToolCallDeltaChunk { .. }
+            wimoaiSessionUpdate::ToolCallDeltaChunk { .. }
         ) {
             return;
         }
         tracing::info!(
             target: "acp_event",
-            event = "wimo ai_buffered_notification_sent",
+            event = "wimoai_buffered_notification_sent",
             session_id = %self.session_info.id,
             "Sending buffered wimo AI session notification"
         );
@@ -477,14 +477,14 @@ impl SessionActor {
                 .forward_fire_and_forget(notification);
         }
     }
-    /// [`Self::send_wimo ai_notification`] minus persistence, for updates whose durable copy lives elsewhere (e.g. `LastTurnSummary` in `summary.json`).
+    /// [`Self::send_wimoai_notification`] minus persistence, for updates whose durable copy lives elsewhere (e.g. `LastTurnSummary` in `summary.json`).
     /// Skips the rewind-window close and notification hooks.
     ///
     /// Must **not** stamp an `eventId`: a reconnect cursor that points at an id absent from `updates.jsonl` never resolves and forces a full replay.
     /// See `ensure_event_id_meta`.
     /// Timestamp-only meta keeps the client clock without advancing the cursor.
-    pub(super) fn send_wimo ai_notification_transient(&self, update: wimo aiSessionUpdate) {
-        let notification = wimo aiSessionNotification {
+    pub(super) fn send_wimoai_notification_transient(&self, update: wimoaiSessionUpdate) {
+        let notification = wimoaiSessionNotification {
             session_id: self.session_info.id.clone(),
             update,
             meta: Some(serde_json::json!({
@@ -636,13 +636,13 @@ impl SessionActor {
     /// Handle wimo AI session notifications: store them in persistence.
     /// These are client-side events (like diff reviews) that should be part of session history.
     /// Exception: `SubagentProgress` ticks are transient and return before the store.
-    pub(super) async fn handle_wimo ai_session_notification(
+    pub(super) async fn handle_wimoai_session_notification(
         &self,
-        mut notification: wimo aiSessionNotification,
+        mut notification: wimoaiSessionNotification,
     ) {
         if !matches!(
             notification.update,
-            wimo aiSessionUpdate::SubagentProgress { .. }
+            wimoaiSessionUpdate::SubagentProgress { .. }
         ) {
             tracing::debug!("storing wimo AI session notification");
         }
@@ -656,7 +656,7 @@ impl SessionActor {
         }
         scrub_inbound_session_summary(&mut notification);
         match &notification.update {
-            wimo aiSessionUpdate::SubagentSpawned {
+            wimoaiSessionUpdate::SubagentSpawned {
                 subagent_id,
                 subagent_type,
                 description,
@@ -718,9 +718,9 @@ impl SessionActor {
                     );
                 }
                 let envelope = self.fire_hook(
-                    wimo ai_wimo_hooks::event::HookEventName::SubagentStart,
+                    wimoai_wimo_hooks::event::HookEventName::SubagentStart,
                     None,
-                    wimo ai_wimo_hooks::event::HookPayload::SubagentStart {
+                    wimoai_wimo_hooks::event::HookPayload::SubagentStart {
                         subagent_id: subagent_id.clone(),
                         subagent_type: subagent_type.clone(),
                         description: Some(description.clone()),
@@ -729,16 +729,16 @@ impl SessionActor {
                 let hook_registry_snapshot = self.hook_registry.borrow().clone();
                 if let Some(registry) = hook_registry_snapshot {
                     let ctx = self.hook_run_ctx();
-                    let _ = wimo ai_wimo_hooks::dispatcher::dispatch_non_blocking(
+                    let _ = wimoai_wimo_hooks::dispatcher::dispatch_non_blocking(
                         &registry,
-                        wimo ai_wimo_hooks::event::HookEventName::SubagentStart,
+                        wimoai_wimo_hooks::event::HookEventName::SubagentStart,
                         &envelope,
                         &ctx,
                     )
                     .await;
                 }
             }
-            wimo aiSessionUpdate::SubagentFinished {
+            wimoaiSessionUpdate::SubagentFinished {
                 subagent_id,
                 tokens_used,
                 ..
@@ -772,7 +772,7 @@ impl SessionActor {
                     );
                 }
             }
-            wimo aiSessionUpdate::SubagentProgress {
+            wimoaiSessionUpdate::SubagentProgress {
                 subagent_id,
                 turn_count,
                 tool_call_count,
@@ -845,13 +845,13 @@ impl SessionActor {
             .notifications
             .persistence_tx
             .send(PersistenceMsg::Update(
-                crate::session::storage::SessionUpdate::wimo ai(Box::new(notification)),
+                crate::session::storage::SessionUpdate::wimoai(Box::new(notification)),
             ));
     }
     /// Persist an wimo AI extension notification to `updates.jsonl` **without** sending it to the gateway/UI.
     /// Used for internal bookkeeping updates like `CompactionCheckpoint` and `RewindMarker` that are only relevant during replay.
-    pub(super) fn persist_wimo ai_update_only(&self, update: wimo aiSessionUpdate) {
-        let notification = wimo aiSessionNotification {
+    pub(super) fn persist_wimoai_update_only(&self, update: wimoaiSessionUpdate) {
+        let notification = wimoaiSessionNotification {
             session_id: self.session_info.id.clone(),
             update,
             meta: Some(self.build_notification_meta()),
@@ -860,7 +860,7 @@ impl SessionActor {
             .notifications
             .persistence_tx
             .send(PersistenceMsg::Update(
-                crate::session::storage::SessionUpdate::wimo ai(Box::new(notification)),
+                crate::session::storage::SessionUpdate::wimoai(Box::new(notification)),
             ))
             .is_err()
         {
@@ -876,9 +876,9 @@ impl SessionActor {
         level: Option<String>,
     ) {
         let envelope = self.fire_hook(
-            wimo ai_wimo_hooks::event::HookEventName::Notification,
+            wimoai_wimo_hooks::event::HookEventName::Notification,
             None,
-            wimo ai_wimo_hooks::event::HookPayload::Notification {
+            wimoai_wimo_hooks::event::HookPayload::Notification {
                 notification_type: notification_type.to_string(),
                 message,
                 title,
@@ -890,9 +890,9 @@ impl SessionActor {
             return;
         };
         let ctx = self.hook_run_ctx();
-        let _ = wimo ai_wimo_hooks::dispatcher::dispatch_non_blocking(
+        let _ = wimoai_wimo_hooks::dispatcher::dispatch_non_blocking(
             &registry,
-            wimo ai_wimo_hooks::event::HookEventName::Notification,
+            wimoai_wimo_hooks::event::HookEventName::Notification,
             &envelope,
             &ctx,
         )
@@ -929,8 +929,8 @@ impl SessionActor {
         });
     }
     #[tracing::instrument(skip_all)]
-    pub(super) async fn send_wimo ai_notification(&self, update: wimo aiSessionUpdate) {
-        self.send_wimo ai_notification_with_extra_meta(
+    pub(super) async fn send_wimoai_notification(&self, update: wimoaiSessionUpdate) {
+        self.send_wimoai_notification_with_extra_meta(
             update,
             None,
             crate::session::storage::jsonl::AppendDurability::Buffered,
@@ -940,8 +940,8 @@ impl SessionActor {
     /// Build the per-response boundary update, projecting the response's usage into the Messages API `message.usage` shape (uncached `input_tokens`).
     pub(super) fn response_completed_update(
         &self,
-        response: &wimo ai_wimo_sampling_types::ConversationResponse,
-    ) -> wimo aiSessionUpdate {
+        response: &wimoai_wimo_sampling_types::ConversationResponse,
+    ) -> wimoaiSessionUpdate {
         let usage =
             response
                 .usage
@@ -960,7 +960,7 @@ impl SessionActor {
         let signature = response
             .reasoning_items()
             .find_map(|r| r.encrypted_content.clone());
-        wimo aiSessionUpdate::ResponseCompleted {
+        wimoaiSessionUpdate::ResponseCompleted {
             message_id: response.message_id.clone(),
             stop_reason: response.raw_stop_reason.clone(),
             usage,
@@ -968,7 +968,7 @@ impl SessionActor {
             stop_sequence: response.stop_sequence.clone(),
         }
     }
-    /// [`Self::send_wimo ai_notification`] with caller-supplied `_meta` keys merged into the standard eventId/timestamp meta.
+    /// [`Self::send_wimoai_notification`] with caller-supplied `_meta` keys merged into the standard eventId/timestamp meta.
     /// Caller keys win on collision.
     ///
     /// `durability` picks the persistence rail: `Buffered` rides the merge buffer (page cache until the next barrier).
@@ -976,9 +976,9 @@ impl SessionActor {
     /// The durable append is fire-and-forget on purpose: nothing gates on it (the turn's RPC has already resolved by the terminal-emit sites).
     /// The persistence actor logs failures whose ack has no reader.
     #[tracing::instrument(skip_all)]
-    pub(super) async fn send_wimo ai_notification_with_extra_meta(
+    pub(super) async fn send_wimoai_notification_with_extra_meta(
         &self,
-        update: wimo aiSessionUpdate,
+        update: wimoaiSessionUpdate,
         extra_meta: Option<serde_json::Map<String, serde_json::Value>>,
         durability: crate::session::storage::jsonl::AppendDurability,
     ) {
@@ -992,13 +992,13 @@ impl SessionActor {
             }
             meta
         };
-        let notification = wimo aiSessionNotification {
+        let notification = wimoaiSessionNotification {
             session_id: self.session_info.id.clone(),
             update,
             meta: Some(meta),
         };
         let persisted_update =
-            crate::session::storage::SessionUpdate::wimo ai(Box::new(notification.clone()));
+            crate::session::storage::SessionUpdate::wimoai(Box::new(notification.clone()));
         match durability {
             crate::session::storage::jsonl::AppendDurability::Buffered => {
                 let _ = self
@@ -1035,15 +1035,15 @@ impl SessionActor {
     }
 }
 #[cfg(test)]
-mod wimo ai_event_id_stamping_tests {
+mod wimoai_event_id_stamping_tests {
     use super::support::create_test_actor;
     use super::*;
-    fn persisted_wimo ai_event_id(
+    fn persisted_wimoai_event_id(
         prx: &mut tokio::sync::mpsc::UnboundedReceiver<PersistenceMsg>,
     ) -> String {
         loop {
             match prx.try_recv().expect("an wimo AI line must be persisted") {
-                PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(notif)) => {
+                PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(notif)) => {
                     return notif
                         .meta
                         .as_ref()
@@ -1057,41 +1057,41 @@ mod wimo ai_event_id_stamping_tests {
         }
     }
     /// The actor is the chokepoint where every persisted line gets an `eventId`.
-    /// Both persist paths must stamp: `send_wimo ai_notification` (own emission) and `handle_wimo ai_session_notification` (inbound/forwarded, meta-less).
+    /// Both persist paths must stamp: `send_wimoai_notification` (own emission) and `handle_wimoai_session_notification` (inbound/forwarded, meta-less).
     /// An id-less line degrades every later cursor reconnect of the session to a full replay.
     #[tokio::test]
-    async fn actor_persisted_wimo ai_lines_carry_event_id() {
+    async fn actor_persisted_wimoai_lines_carry_event_id() {
         let local = tokio::task::LocalSet::new();
         local
             .run_until(async {
                 let (gateway_tx, _gateway_rx) =
-                    tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                    tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
                 let (persistence_tx, mut prx) =
                     tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
                 let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
                 actor
-                    .send_wimo ai_notification(wimo aiSessionUpdate::HookAnnotation {
+                    .send_wimoai_notification(wimoaiSessionUpdate::HookAnnotation {
                         message: "own emission".into(),
                     })
                     .await;
-                let own_id = persisted_wimo ai_event_id(&mut prx);
+                let own_id = persisted_wimoai_event_id(&mut prx);
                 assert!(own_id.starts_with("test-actor-"));
                 actor
-                    .handle_wimo ai_session_notification(wimo aiSessionNotification {
+                    .handle_wimoai_session_notification(wimoaiSessionNotification {
                         session_id: acp::SessionId::new("test-actor"),
-                        update: wimo aiSessionUpdate::HookAnnotation {
+                        update: wimoaiSessionUpdate::HookAnnotation {
                             message: "inbound".into(),
                         },
                         meta: None,
                     })
                     .await;
-                let inbound_id = persisted_wimo ai_event_id(&mut prx);
+                let inbound_id = persisted_wimoai_event_id(&mut prx);
                 assert!(inbound_id.starts_with("test-actor-"));
                 assert_ne!(own_id, inbound_id);
-                actor.persist_wimo ai_update_only(wimo aiSessionUpdate::HookAnnotation {
+                actor.persist_wimoai_update_only(wimoaiSessionUpdate::HookAnnotation {
                     message: "persist-only".into(),
                 });
-                let persist_only_id = persisted_wimo ai_event_id(&mut prx);
+                let persist_only_id = persisted_wimoai_event_id(&mut prx);
                 assert!(persist_only_id.starts_with("test-actor-"));
                 assert_ne!(inbound_id, persist_only_id);
             })
@@ -1105,7 +1105,7 @@ mod wimo ai_event_id_stamping_tests {
         local
             .run_until(async {
                 let (gateway_tx, _gateway_rx) =
-                    tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                    tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
                 let (persistence_tx, mut prx) =
                     tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
                 let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -1148,7 +1148,7 @@ mod wimo ai_event_id_stamping_tests {
         local
             .run_until(async {
                 let (gateway_tx, _gateway_rx) =
-                    tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                    tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
                 let (persistence_tx, mut prx) =
                     tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
                 let (actor, mut event_rx) = super::support::create_test_actor_ex(

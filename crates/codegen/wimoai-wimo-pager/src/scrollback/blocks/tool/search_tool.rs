@@ -1,6 +1,6 @@
 use ratatui::style::Modifier;
 use ratatui::text::{Line, Span, Text};
-use wimo ai_wimo_workspace::permission::mcp_titleize_segment;
+use wimoai_wimo_workspace::permission::mcp_titleize_segment;
 
 use super::TOOL_HEADER_RANGE;
 use crate::appearance::AppearanceConfig;

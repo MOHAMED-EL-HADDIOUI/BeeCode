@@ -15,9 +15,9 @@
 
 use std::time::{Duration, Instant};
 
-use wimo ai_wimo_pager::app::mermaid_worker::render_via_subprocess;
-use wimo ai_wimo_pager::scrollback::blocks::mermaid_content::MermaidRenderQuality;
-use wimo ai_wimo_pager_pty_harness::pager_binary;
+use wimoai_wimo_pager::app::mermaid_worker::render_via_subprocess;
+use wimoai_wimo_pager::scrollback::blocks::mermaid_content::MermaidRenderQuality;
+use wimoai_wimo_pager_pty_harness::pager_binary;
 
 /// A cyclic login-flow whose back-edge (`Attempts -->|No| Enter`) routes back into the cycle, the tricky case for flowchart edge routing.
 const LOGIN_FLOW: &str = "flowchart TD\n\
@@ -115,7 +115,7 @@ fn invalid_diagram_is_contained() {
 fn tight_timeout_kills_child_and_returns_err() {
     // A 1 ms budget cannot cover spawning and rendering, so the parent must kill and reap the child and return Err
     // It must return promptly, not block on the child finishing
-    // That the kill terminates the child's process group is asserted by the `wimo ai_wimo_mermaid::subprocess` `reap_terminates_the_process` unit test
+    // That the kill terminates the child's process group is asserted by the `wimoai_wimo_mermaid::subprocess` `reap_terminates_the_process` unit test
     // Here the loose ceiling guards against the parent blocking on a child that outlived its budget
     // It tolerates slow-CI spawn of the real binary
     let bin = pager_binary().expect("resolve pager binary");

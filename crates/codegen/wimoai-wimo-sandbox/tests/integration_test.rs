@@ -6,7 +6,7 @@
 #[test]
 #[cfg(all(feature = "enforce", unix))]
 fn test_profile_capability_set_construction() {
-    use wimo ai_wimo_sandbox::ProfileName;
+    use wimoai_wimo_sandbox::ProfileName;
 
     // CWD is guaranteed to exist
     let workspace = std::env::current_dir().expect("cwd");
@@ -29,7 +29,7 @@ fn test_profile_capability_set_construction() {
 
 #[test]
 fn test_sandbox_manager_lifecycle() {
-    use wimo ai_wimo_sandbox::{ProfileName, SandboxManager};
+    use wimoai_wimo_sandbox::{ProfileName, SandboxManager};
 
     let workspace = std::env::current_dir().expect("cwd");
 
@@ -45,7 +45,7 @@ fn test_sandbox_manager_lifecycle() {
 
 #[test]
 fn test_sandbox_logger() {
-    use wimo ai_wimo_sandbox::{SandboxEvent, SandboxLogger};
+    use wimoai_wimo_sandbox::{SandboxEvent, SandboxLogger};
 
     let logger = SandboxLogger::new();
 
@@ -75,5 +75,5 @@ fn test_sandbox_logger() {
 fn test_should_restrict_child_network_default() {
     // The "set" path needs an applied sandbox, which is irreversible, so only the default (false) is verifiable here
     // The global is set once at process startup and never unset; a test that applies a sandbox would interfere with this one
-    assert!(!wimo ai_wimo_sandbox::should_restrict_child_network());
+    assert!(!wimoai_wimo_sandbox::should_restrict_child_network());
 }

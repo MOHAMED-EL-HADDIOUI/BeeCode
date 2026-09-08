@@ -12,7 +12,7 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::StatefulWidget;
-use wimo ai_wimo_workspace::permission::mcp_titleize_segment;
+use wimoai_wimo_workspace::permission::mcp_titleize_segment;
 
 use crate::clipboard::SystemClipboard;
 use crate::render::scrollbar::SCROLLBAR_TOTAL_COLS;
@@ -880,7 +880,7 @@ impl BlockViewerPane {
 
         // Build a flat list of DiffLine references from all hunks, interleaving None for separator lines (which render_diff_lines inserts)
         // The rendered output has: [hunk0 lines...] [separator] [hunk1 lines...] ...
-        let mut meta_source: Vec<Option<&wimo ai_wimo_pager_diff::DiffLine>> = Vec::new();
+        let mut meta_source: Vec<Option<&wimoai_wimo_pager_diff::DiffLine>> = Vec::new();
         for (i, hunk) in edit.hunks.iter().enumerate() {
             if i > 0 && !config.hunk_separator.is_empty() {
                 meta_source.push(None); // separator line

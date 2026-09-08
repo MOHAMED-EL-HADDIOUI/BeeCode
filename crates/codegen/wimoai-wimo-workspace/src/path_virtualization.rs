@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use serde_json::Value;
-use wimo ai_tool_runtime::{
+use wimoai_tool_runtime::{
     ContentBlock, ToolChatCompletionResponse, ToolError, ToolProgress, TypedToolOutput,
 };
 

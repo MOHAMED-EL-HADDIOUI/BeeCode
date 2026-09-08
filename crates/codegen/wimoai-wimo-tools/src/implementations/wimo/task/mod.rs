@@ -32,7 +32,7 @@ use crate::types::requirements::{Expr, ToolRequirement};
 use crate::types::resources::{SessionFolder, SharedResources};
 use crate::types::tool::{ToolKind, ToolNamespace};
 use regex::Regex;
-use wimo ai_tool_types::{SubagentCompletedOutput, SubagentIsolationMode, TaskToolInput};
+use wimoai_tool_types::{SubagentCompletedOutput, SubagentIsolationMode, TaskToolInput};
 
 pub const TASK_TOOL_NAME: &str = "task";
 
@@ -139,14 +139,14 @@ async fn detect_continue_parent_work(
     prompt: &str,
 ) -> bool {
     let asks = recent_user_asks(resources).await;
-    wimo ai_tool_types::should_continue_parent_work(&asks, description, prompt)
+    wimoai_tool_types::should_continue_parent_work(&asks, description, prompt)
 }
 
 /// Resolve the model-facing get-output tool and param names for the
 /// background notices. Kind-wide resolution is correct here: these name the
 /// retrieval tool's schema (which the host may rename), not task's own.
 async fn resolve_background_notice_names(resources: &SharedResources) -> (String, String, String) {
-    let canonical = wimo ai_tool_types::BackgroundNoticeNaming::CANONICAL;
+    let canonical = wimoai_tool_types::BackgroundNoticeNaming::CANONICAL;
     let res = resources.lock().await;
     let Some(renderer) = res.get::<crate::types::template_renderer::TemplateRenderer>() else {
         return (
@@ -189,11 +189,11 @@ pub fn is_task_tool_id(name: &str) -> bool {
 }
 
 fn flatten_spawn_join(
-    joined: Result<Result<SubagentResult, wimo ai_tool_runtime::ToolError>, tokio::task::JoinError>,
-) -> Result<SubagentResult, wimo ai_tool_runtime::ToolError> {
+    joined: Result<Result<SubagentResult, wimoai_tool_runtime::ToolError>, tokio::task::JoinError>,
+) -> Result<SubagentResult, wimoai_tool_runtime::ToolError> {
     match joined {
         Ok(result) => result,
-        Err(_) => Err(wimo ai_tool_runtime::ToolError::custom(
+        Err(_) => Err(wimoai_tool_runtime::ToolError::custom(
             "channel_closed",
             "background spawn task failed before registration",
         )),
@@ -203,8 +203,8 @@ fn flatten_spawn_join(
 fn background_spawn_reject_error(
     id: &str,
     subagent_type: &str,
-    result: Result<SubagentResult, wimo ai_tool_runtime::ToolError>,
-) -> wimo ai_tool_runtime::ToolError {
+    result: Result<SubagentResult, wimoai_tool_runtime::ToolError>,
+) -> wimoai_tool_runtime::ToolError {
     match result {
         Err(e) => {
             tracing::error!(
@@ -221,7 +221,7 @@ fn background_spawn_reject_error(
                 error = ?r.error,
                 "background spawn rejected by coordinator",
             );
-            wimo ai_tool_runtime::ToolError::custom(
+            wimoai_tool_runtime::ToolError::custom(
                 "spawn_rejected",
                 r.error.unwrap_or_else(|| {
                     "background spawn was rejected by the coordinator".to_owned()
@@ -234,7 +234,7 @@ fn background_spawn_reject_error(
 fn log_background_spawn_after_start(
     id: &str,
     subagent_type: &str,
-    joined: Result<Result<SubagentResult, wimo ai_tool_runtime::ToolError>, tokio::task::JoinError>,
+    joined: Result<Result<SubagentResult, wimoai_tool_runtime::ToolError>, tokio::task::JoinError>,
 ) {
     match flatten_spawn_join(joined) {
         // Child-result failures are logged once by the coordinator. This
@@ -266,7 +266,7 @@ impl crate::types::tool_metadata::ToolMetadata for TaskTool {
     fn description_template(&self) -> &str {
         // wimo Build normally supplies the description via
         // `ToolConfig::with_description(...)` using `build_task_description()`
-        // in wimo ai-wimo-agent/src/builder.rs (live subagent roster). But a
+        // in wimoai-wimo-agent/src/builder.rs (live subagent roster). But a
         // registration without an override must still ship a real
         // description, never a placeholder: default to the built-in roster
         // with templated tool/param names, resolved by the registry renderer
@@ -295,18 +295,18 @@ impl crate::types::tool_metadata::ToolMetadata for TaskTool {
         }
 
         static DESC: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
-            let subagents: Vec<wimo ai_tool_types::SubagentDescriptor> =
-                wimo ai_tool_types::BUILTIN_SUBAGENTS
+            let subagents: Vec<wimoai_tool_types::SubagentDescriptor> =
+                wimoai_tool_types::BUILTIN_SUBAGENTS
                     .iter()
-                    .map(|b| wimo ai_tool_types::SubagentDescriptor {
+                    .map(|b| wimoai_tool_types::SubagentDescriptor {
                         name: b.name.to_owned(),
                         description: b.description.to_owned(),
                         tools: Some(guard_kind_tokens(b.tools_template)),
                     })
                     .collect();
-            wimo ai_tool_types::build_task_description(
+            wimoai_tool_types::build_task_description(
                 &subagents,
-                &wimo ai_tool_types::TaskToolNaming {
+                &wimoai_tool_types::TaskToolNaming {
                     task_tool: "${{ tools.by_kind.task }}",
                     subagent_type_param: "${{ params.task.subagent_type }}",
                     run_in_background_param: "${{ params.task.run_in_background }}",
@@ -334,28 +334,28 @@ impl crate::types::tool_metadata::ToolMetadata for TaskTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for TaskTool {
+impl wimoai_tool_runtime::Tool for TaskTool {
     type Args = TaskToolInput;
     type Output = ToolOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new(TASK_TOOL_NAME).expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new(TASK_TOOL_NAME).expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "task",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -369,13 +369,13 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: TaskToolInput,
-    ) -> Result<ToolOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ToolOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
         let tool_cancellation = ctx
-            .get::<wimo ai_tool_runtime::Cancellation>()
+            .get::<wimoai_tool_runtime::Cancellation>()
             .map(|cancellation| cancellation.0.clone());
 
         // 1. Depth check
@@ -396,7 +396,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
             let backend = res
                 .get::<SubagentBackendResource>()
                 .ok_or_else(|| {
-                    wimo ai_tool_runtime::ToolError::custom(
+                    wimoai_tool_runtime::ToolError::custom(
                         "missing_resource",
                         "SubagentBackendResource (subagent support not initialized)",
                     )
@@ -428,7 +428,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
         };
 
         if depth >= max_depth {
-            return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(format!(
+            return Err(wimoai_tool_runtime::ToolError::invalid_arguments(format!(
                 "Subagent depth limit exceeded (current depth: {depth}, max: {max_depth}). \
                  Cannot spawn further nested subagents."
             )));
@@ -441,7 +441,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
         });
 
         // Model overrides are soft-ignored on resume (source model is always pinned).
-        let model = wimo ai_tool_types::sanitize_optional_arg(input.model);
+        let model = wimoai_tool_types::sanitize_optional_arg(input.model);
         let model = if resume_from.is_some() {
             if let Some(ref ignored) = model {
                 tracing::debug!(
@@ -467,7 +467,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
                 .as_deref()
                 .is_some_and(|p| std::path::Path::new(p).is_dir())
             {
-                return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(
+                return Err(wimoai_tool_runtime::ToolError::invalid_arguments(
                     "cwd and isolation=\"worktree\" are mutually exclusive. \
                      Use cwd to point the subagent at an existing directory, \
                      or isolation=\"worktree\" to create a new isolated worktree, \
@@ -495,7 +495,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
                 } else {
                     format!("cwd \"{cwd_path}\" does not exist")
                 };
-                return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(detail));
+                return Err(wimoai_tool_runtime::ToolError::invalid_arguments(detail));
             }
         }
 
@@ -517,19 +517,19 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
                 } else {
                     format!(". Available types: {}", available.join(", "))
                 };
-                return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(format!(
+                return Err(wimoai_tool_runtime::ToolError::invalid_arguments(format!(
                     "Unknown subagent type: {}{suffix}",
                     input.subagent_type
                 )));
             }
             SubagentValidateTypeOutcome::Disabled => {
-                return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(format!(
+                return Err(wimoai_tool_runtime::ToolError::invalid_arguments(format!(
                     "Subagent '{}' is disabled via [subagents.toggle] in config.toml",
                     input.subagent_type
                 )));
             }
             SubagentValidateTypeOutcome::NotAllowed { allowed } => {
-                return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(format!(
+                return Err(wimoai_tool_runtime::ToolError::invalid_arguments(format!(
                     "agent can only spawn: {}; '{}' not allowed",
                     allowed.join(", "),
                     input.subagent_type
@@ -538,7 +538,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
             // `custom` (not `invalid_arguments`) so the model doesn't
             // retry with a different name on transport faults.
             SubagentValidateTypeOutcome::CoordinatorGone => {
-                return Err(wimo ai_tool_runtime::ToolError::custom(
+                return Err(wimoai_tool_runtime::ToolError::custom(
                     "validation_unavailable",
                     format!(
                         "Cannot validate subagent type '{}': the subagent coordinator \
@@ -548,7 +548,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
                 ));
             }
             SubagentValidateTypeOutcome::ValidationUnavailable => {
-                return Err(wimo ai_tool_runtime::ToolError::custom(
+                return Err(wimoai_tool_runtime::ToolError::custom(
                     "validation_unavailable",
                     format!(
                         "Cannot validate subagent type '{}': the subagent coordinator did \
@@ -561,13 +561,13 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
 
         if let Some(ref requested) = model {
             let validator = model_validator.ok_or_else(|| {
-                wimo ai_tool_runtime::ToolError::custom(
+                wimoai_tool_runtime::ToolError::custom(
                     "validation_unavailable",
                     "Cannot validate Task.model: model catalog validator is unavailable.",
                 )
             })?;
             if let Some(error) = validator.error_for(requested) {
-                return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(error));
+                return Err(wimoai_tool_runtime::ToolError::invalid_arguments(error));
             }
         }
 
@@ -676,7 +676,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
 
             let (task_output_tool, task_ids_param, timeout_ms_param) =
                 resolve_background_notice_names(&resources).await;
-            let naming = wimo ai_tool_types::BackgroundNoticeNaming {
+            let naming = wimoai_tool_types::BackgroundNoticeNaming {
                 task_output_tool: &task_output_tool,
                 task_ids_param: &task_ids_param,
                 timeout_ms_param: &timeout_ms_param,
@@ -685,7 +685,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
             let continue_parent =
                 detect_continue_parent_work(&resources, &input.description, &input.prompt).await;
             return Ok(ToolOutput::Text(
-                wimo ai_tool_types::format_subagent_started_background(
+                wimoai_tool_types::format_subagent_started_background(
                     &id,
                     &input.subagent_type,
                     &input.description,
@@ -709,7 +709,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
         if result.backgrounded {
             let (task_output_tool, task_ids_param, timeout_ms_param) =
                 resolve_background_notice_names(&resources).await;
-            let naming = wimo ai_tool_types::BackgroundNoticeNaming {
+            let naming = wimoai_tool_types::BackgroundNoticeNaming {
                 task_output_tool: &task_output_tool,
                 task_ids_param: &task_ids_param,
                 timeout_ms_param: &timeout_ms_param,
@@ -724,7 +724,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
             let continue_parent =
                 detect_continue_parent_work(&resources, &input.description, &input.prompt).await;
 
-            let text = wimo ai_tool_types::format_subagent_auto_backgrounded(
+            let text = wimoai_tool_types::format_subagent_auto_backgrounded(
                 &id,
                 &input.subagent_type,
                 &input.description,
@@ -755,7 +755,7 @@ impl wimo ai_tool_runtime::Tool for TaskTool {
                 persona_hint,
             }))
         } else {
-            Err(wimo ai_tool_runtime::ToolError::invalid_arguments(
+            Err(wimoai_tool_runtime::ToolError::invalid_arguments(
                 result
                     .error
                     .unwrap_or_else(|| "Unknown subagent error".to_string()),
@@ -774,7 +774,7 @@ mod tests {
     use crate::types::tool_metadata::test_ctx;
     use std::sync::Arc;
     use tokio::sync::mpsc;
-    use wimo ai_tool_types::SubagentCapabilityMode;
+    use wimoai_tool_types::SubagentCapabilityMode;
 
     /// Backend whose `ValidateType` events are auto-acked with `Ok`.
     fn make_backend() -> (
@@ -843,7 +843,7 @@ mod tests {
         resources.insert(CurrentPromptIdResource("prompt-123".to_string()));
 
         let tool = TaskTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskToolInput {
@@ -882,7 +882,7 @@ mod tests {
             }
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             TaskToolInput {
@@ -916,7 +916,7 @@ mod tests {
         resources.insert(SessionIdResource("child-session".to_string()));
         resources.insert(CurrentPromptIdResource("prompt-456".to_string()));
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             TaskToolInput {
@@ -947,7 +947,7 @@ mod tests {
         let resources = Resources::new();
 
         let tool = TaskTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskToolInput {
@@ -1005,7 +1005,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(shared),
             TaskToolInput {
@@ -1061,7 +1061,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(shared),
             TaskToolInput {
@@ -1104,7 +1104,7 @@ mod tests {
             drop(request.result_tx);
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(shared),
             TaskToolInput {
@@ -1161,7 +1161,7 @@ mod tests {
             }
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("general-purpose", false), // blocking mode
@@ -1192,7 +1192,7 @@ mod tests {
                 );
                 assert!(
                     text.text
-                        .contains(wimo ai_tool_types::BACKGROUND_SUBAGENT_CONTINUE_PARENT_WORK),
+                        .contains(wimoai_tool_types::BACKGROUND_SUBAGENT_CONTINUE_PARENT_WORK),
                     "auto-bg result must keep in-flight parent work: {}",
                     text.text
                 );
@@ -1280,7 +1280,7 @@ mod tests {
             });
         let resources = resources_for_task(backend);
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("invented-agent", true),
@@ -1302,7 +1302,7 @@ mod tests {
         let (backend, mut rx) = make_backend_with_validation(SubagentValidateTypeOutcome::Disabled);
         let resources = resources_for_task(backend);
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("explore", true),
@@ -1322,7 +1322,7 @@ mod tests {
             });
         let resources = resources_for_task(backend);
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("general-purpose", true),
@@ -1340,7 +1340,7 @@ mod tests {
         });
         let resources = resources_for_task(backend);
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("invented", false),
@@ -1357,7 +1357,7 @@ mod tests {
         let (backend, mut rx) = make_backend_with_validation(SubagentValidateTypeOutcome::Disabled);
         let resources = resources_for_task(backend);
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("explore", false),
@@ -1387,7 +1387,7 @@ mod tests {
         input.model = Some("invented-model".to_string());
 
         let result =
-            wimo ai_tool_runtime::Tool::run(&TaskTool, test_ctx(resources.into_shared()), input).await;
+            wimoai_tool_runtime::Tool::run(&TaskTool, test_ctx(resources.into_shared()), input).await;
 
         let msg = result
             .expect_err("invalid model must reject before spawn")
@@ -1412,7 +1412,7 @@ mod tests {
             }
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("general-purpose", true),
@@ -1425,7 +1425,7 @@ mod tests {
                 assert!(text.text.contains("Subagent started in background"));
                 assert!(
                     text.text
-                        .contains(wimo ai_tool_types::BACKGROUND_SUBAGENT_CONTINUE_PARENT_WORK),
+                        .contains(wimoai_tool_types::BACKGROUND_SUBAGENT_CONTINUE_PARENT_WORK),
                     "background spawn must keep in-flight parent work: {}",
                     text.text
                 );
@@ -1448,7 +1448,7 @@ mod tests {
             }
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("general-purpose", true),
@@ -1462,7 +1462,7 @@ mod tests {
                 assert!(
                     !text
                         .text
-                        .contains(wimo ai_tool_types::BACKGROUND_SUBAGENT_CONTINUE_PARENT_WORK),
+                        .contains(wimoai_tool_types::BACKGROUND_SUBAGENT_CONTINUE_PARENT_WORK),
                     "review-only ask must not get continue-parent CTA: {}",
                     text.text
                 );
@@ -1502,7 +1502,7 @@ mod tests {
             }
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("general-purpose", true),
@@ -1514,7 +1514,7 @@ mod tests {
             ToolOutput::Text(text) => {
                 assert!(
                     text.text
-                        .contains(wimo ai_tool_types::BACKGROUND_SUBAGENT_CONTINUE_PARENT_WORK),
+                        .contains(wimoai_tool_types::BACKGROUND_SUBAGENT_CONTINUE_PARENT_WORK),
                     "synthetic rows must not hide leftover exec: {}",
                     text.text
                 );
@@ -1548,7 +1548,7 @@ mod tests {
             let _ = done_tx.send(());
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("general-purpose", true),
@@ -1591,7 +1591,7 @@ mod tests {
         drop(rx);
         let resources = resources_for_task(backend);
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("general-purpose", true),
@@ -1613,7 +1613,7 @@ mod tests {
             make_backend_with_validation(SubagentValidateTypeOutcome::ValidationUnavailable);
         let resources = resources_for_task(backend);
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("explore", true),
@@ -1621,7 +1621,7 @@ mod tests {
         .await;
         let err = result.expect_err("must error");
         assert!(
-            matches!(err.kind, wimo ai_tool_runtime::ToolErrorKind::Custom),
+            matches!(err.kind, wimoai_tool_runtime::ToolErrorKind::Custom),
             "transport faults must not be invalid_arguments (the model would \
              retry with a mutated name): {err:?}"
         );
@@ -1681,7 +1681,7 @@ mod tests {
                 }
             });
 
-            let result = wimo ai_tool_runtime::Tool::run(
+            let result = wimoai_tool_runtime::Tool::run(
                 &TaskTool,
                 test_ctx(resources.into_shared()),
                 task_input("explore", run_in_background),
@@ -1711,7 +1711,7 @@ mod tests {
         let backend = SubagentBackendResource(Arc::new(ChannelBackend::new(tx)));
         let resources = resources_for_task(backend);
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("explore", true),
@@ -1744,7 +1744,7 @@ mod tests {
             }
         });
 
-        let _ = wimo ai_tool_runtime::Tool::run(
+        let _ = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             task_input("explore", true),
@@ -1760,7 +1760,7 @@ mod tests {
     #[test]
     fn task_tool_id_predicate_accepts_all_wire_spellings() {
         assert!(is_task_tool_id(
-            wimo ai_tool_runtime::Tool::id(&TaskTool).as_str()
+            wimoai_tool_runtime::Tool::id(&TaskTool).as_str()
         ));
         for name in ["task", "Task", "spawn_subagent"] {
             assert!(is_task_tool_id(name), "must accept {name:?}");
@@ -2158,7 +2158,7 @@ mod tests {
                 .unwrap();
         });
 
-        let _ = wimo ai_tool_runtime::Tool::run(
+        let _ = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2240,7 +2240,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2306,7 +2306,7 @@ mod tests {
                     .unwrap();
             });
 
-            let result = wimo ai_tool_runtime::Tool::run(
+            let result = wimoai_tool_runtime::Tool::run(
                 &TaskTool,
                 test_ctx(shared),
                 TaskToolInput {
@@ -2380,7 +2380,7 @@ mod tests {
         resources.insert(SessionIdResource("parent".to_string()));
         resources.insert(CurrentPromptIdResource("prompt-1".to_string()));
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             TaskToolInput {
@@ -2434,7 +2434,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2484,7 +2484,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2534,7 +2534,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2587,7 +2587,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2621,7 +2621,7 @@ mod tests {
         resources.insert(SessionIdResource("parent".to_string()));
         resources.insert(CurrentPromptIdResource("prompt-1".to_string()));
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(resources.into_shared()),
             TaskToolInput {
@@ -2676,7 +2676,7 @@ mod tests {
                     .unwrap();
             });
 
-            let result = wimo ai_tool_runtime::Tool::run(
+            let result = wimoai_tool_runtime::Tool::run(
                 &TaskTool,
                 test_ctx(shared.clone()),
                 TaskToolInput {
@@ -2729,7 +2729,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2786,7 +2786,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2838,7 +2838,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2886,7 +2886,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             TaskToolInput {
@@ -2950,7 +2950,7 @@ mod tests {
 
         let mut input = task_input("general-purpose", false);
         input.model = Some("test-model".into());
-        let result = wimo ai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
+        let result = wimoai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
             .await
             .unwrap();
         handle.await.unwrap();
@@ -2986,7 +2986,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskTool,
             test_ctx(shared),
             task_input("general-purpose", false),
@@ -3038,7 +3038,7 @@ mod tests {
 
             let mut input = task_input("general-purpose", false);
             input.model = Some(sentinel.into());
-            let result = wimo ai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
+            let result = wimoai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
                 .await
                 .unwrap_or_else(|e| panic!("sentinel {sentinel:?} should not fail: {e}"));
             handle.await.unwrap();
@@ -3079,7 +3079,7 @@ mod tests {
 
         let mut input = task_input("general-purpose", false);
         input.model = Some("  test-model  ".into());
-        let _ = wimo ai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
+        let _ = wimoai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
             .await
             .unwrap();
         handle.await.unwrap();
@@ -3121,7 +3121,7 @@ mod tests {
         let mut input = task_input("general-purpose", false);
         input.resume_from = Some("prev-id".into());
         input.model = Some("test-model".into());
-        let result = wimo ai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
+        let result = wimoai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
             .await
             .unwrap();
         handle.await.unwrap();
@@ -3156,7 +3156,7 @@ mod tests {
 
         let mut input = task_input("general-purpose", false);
         input.resume_from = Some("prev-id".into());
-        let result = wimo ai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
+        let result = wimoai_tool_runtime::Tool::run(&TaskTool, test_ctx(shared), input)
             .await
             .unwrap();
         handle.await.unwrap();

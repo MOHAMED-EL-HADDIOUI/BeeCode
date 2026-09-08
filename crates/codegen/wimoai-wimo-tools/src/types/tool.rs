@@ -1,6 +1,6 @@
 //! Tool types and post-execution reminders.
 //!
-//! The tool runtime contract (`Tool` trait) lives in `wimo ai_tool_runtime`.
+//! The tool runtime contract (`Tool` trait) lives in `wimoai_tool_runtime`.
 //! Tool metadata (kind, namespace, fingerprinting, etc.) lives in
 //! `crate::types::tool_metadata::ToolMetadata`.
 //!

@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-diag-server"
+name = "wimoai-wimo-diag-server"
 version = "0.1.0"
 edition.workspace = true
 description = "In-guest diagnostics HTTP server (/ready, /statusz, /logs) for the standalone workspace-server"
@@ -16,7 +16,7 @@ serde = { workspace = true }
 tokio = { workspace = true, features = ["net", "rt"] }
 tracing = { workspace = true }
 # Build version reported on `/statusz`.
-wimo ai-wimo-version = { workspace = true }
+wimoai-wimo-version = { workspace = true }
 
 [dev-dependencies]
 # HTTP client for the endpoint contract tests.

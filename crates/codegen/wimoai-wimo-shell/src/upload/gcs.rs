@@ -1,4 +1,4 @@
-//! Shell-side adapter that threads the live `AuthManager` through to the `StorageClient` constructed inside `wimo ai_file_utils::gcs::*` helpers.
+//! Shell-side adapter that threads the live `AuthManager` through to the `StorageClient` constructed inside `wimoai_file_utils::gcs::*` helpers.
 //!
 //! Background: the data-collector helpers (`upload_bytes`, `upload_file`, `upload_stream`, `upload_bytes_signed`) build a `StorageClient` per call.
 //! Without a `StorageConfig` impl that provides `proxy_credentials` / `proxy_attribution`, that client falls back to a static `user_token` snapshot.
@@ -14,16 +14,16 @@
 //!   2. A `StorageClientAttributionBridge` that emits the `auth_401_attribution` event on 401 with the right consumer tag.
 //!
 //! Use [`WithAuth::with_auth`] at every shell-side upload call site that has an `AuthManager` in scope.
-//! Call it immediately before passing the config to an `wimo ai_file_utils::gcs::*` helper.
+//! Call it immediately before passing the config to an `wimoai_file_utils::gcs::*` helper.
 use crate::auth::AuthManager;
 use crate::auth::credential_provider::{
     ShellAuthCredentialProvider, StorageClientAttributionBridge,
 };
 use std::sync::Arc;
-use wimo ai_file_utils::gcs::StorageConfig;
-use wimo ai_file_utils::storage_client::Auth401AttributionCallback;
-use wimo ai_file_utils::{TraceExportConfig, UploadMethod};
-use wimo ai_wimo_auth::AuthCredentialProvider;
+use wimoai_file_utils::gcs::StorageConfig;
+use wimoai_file_utils::storage_client::Auth401AttributionCallback;
+use wimoai_file_utils::{TraceExportConfig, UploadMethod};
+use wimoai_wimo_auth::AuthCredentialProvider;
 /// See the module docs for why this exists.
 ///
 /// `auth_manager == None` is supported (for tests, direct-mode upload, and a few sites without an `AuthManager` in scope).
@@ -81,7 +81,7 @@ impl StorageConfig for TraceExportConfigWithAuth {
 /// Convenience trait for wrapping a `TraceExportConfig` at upload call sites. Pattern:
 ///
 /// ```ignore
-/// wimo ai_file_utils::gcs::upload_bytes(
+/// wimoai_file_utils::gcs::upload_bytes(
 ///     &gcs_config.with_auth(Some(auth_manager.clone())),
 ///     ...,
 /// ).await
@@ -109,7 +109,7 @@ pub(crate) async fn upload_to_auth_diagnostics(
 ) {
     let user_id = user_id.replace('/', "_");
     let ts = chrono::Utc::now().timestamp_millis();
-    let version = wimo ai_wimo_version::VERSION;
+    let version = wimoai_wimo_version::VERSION;
     let object_path = format!("auth-diagnostics/{version}/{user_id}/{ts}.jsonl");
     let config = crate::session::repo_changes::TraceExportConfig {
         bucket_url: None,
@@ -120,7 +120,7 @@ pub(crate) async fn upload_to_auth_diagnostics(
         absolute_paths: false,
         archive_name_override: None,
     };
-    match wimo ai_file_utils::gcs::upload_bytes(
+    match wimoai_file_utils::gcs::upload_bytes(
         &config.with_auth(Some(auth_manager)),
         &object_path,
         log_bytes,

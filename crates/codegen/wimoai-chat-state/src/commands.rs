@@ -3,7 +3,7 @@
 use std::collections::BTreeSet;
 
 use tokio::sync::oneshot;
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     ConversationItem, ConversationRequest, DanglingToolCallReason, SamplingConfig, TokenUsage,
     ToolSpec, TraceContext,
 };

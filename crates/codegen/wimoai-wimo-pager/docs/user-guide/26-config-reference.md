@@ -72,7 +72,7 @@ User-level configuration lives in `$wimo_HOME/config.toml` (default `~/.wimo/con
 | `auth.oidc.issuer` | `string` | `yes` | `user` | OIDC issuer URL. Also wimo_OIDC_ISSUER; also valid as `wimo_com_config.oidc.issuer`. |
 | `auth.oidc.scopes` | `string[]` | `yes` | `user` | OIDC scopes. Also wimo_OIDC_SCOPES; also valid as `wimo_com_config.oidc.scopes`. |
 | `auth.preferred_method` | `api_key / oidc` | `yes` | `user` | Pin automatic auth to one method with no fallthrough; also valid as `wimo_com_config.preferred_method`. |
-| `auth.token_header` | `string` | `yes` | `user` | Header name that carries the CLI auth token; default `wimo ai-wimo-cli`; also valid as `wimo_com_config.token_header`. |
+| `auth.token_header` | `string` | `yes` | `user` | Header name that carries the CLI auth token; default `wimoai-wimo-cli`; also valid as `wimo_com_config.token_header`. |
 
 ### `auth_provider`
 
@@ -186,7 +186,7 @@ User-level configuration lives in `$wimo_HOME/config.toml` (default `~/.wimo/con
 | `endpoints.trace_upload_endpoint_url` | `string` | `yes` | `user` | Custom S3-compatible endpoint for s3:// bucket uploads. Also wimo_TRACE_UPLOAD_ENDPOINT_URL. |
 | `endpoints.trace_upload_region` | `string` | `yes` | `user` | AWS region for s3:// bucket uploads; default us-east-1. Also wimo_TRACE_UPLOAD_REGION. |
 | `endpoints.trace_upload_url` | `string` | `pin` | `user` | Proxy destination for traces when no direct bucket is set. Also wimo_TRACE_UPLOAD_URL. |
-| `endpoints.wimo ai_api_base_url` | `string` | `pin` | `user` | Public wimo AI API base. Also wimo_wimo ai_API_BASE_URL. |
+| `endpoints.wimoai_api_base_url` | `string` | `pin` | `user` | Public wimo AI API base. Also wimo_wimoai_API_BASE_URL. |
 
 ### `features`
 
@@ -272,7 +272,7 @@ User-level configuration lives in `$wimo_HOME/config.toml` (default `~/.wimo/con
 | `wimo_com_config.oidc.issuer` | `string` | `yes` | `user` | OIDC issuer URL. Also wimo_OIDC_ISSUER. |
 | `wimo_com_config.oidc.scopes` | `string[]` | `yes` | `user` | OIDC scopes. Also wimo_OIDC_SCOPES. |
 | `wimo_com_config.preferred_method` | `api_key / oidc` | `yes` | `user` | Pin automatic auth to one method with no fallthrough. |
-| `wimo_com_config.token_header` | `string` | `yes` | `user` | Header name that carries the CLI auth token; default `wimo ai-wimo-cli`. |
+| `wimo_com_config.token_header` | `string` | `yes` | `user` | Header name that carries the CLI auth token; default `wimoai-wimo-cli`. |
 
 ### `harness`
 
@@ -352,7 +352,7 @@ User-level configuration lives in `$wimo_HOME/config.toml` (default `~/.wimo/con
 | `model.<id>` | `table` | `yes` | `user` | Per-model override or BYOK definition. Prefer `env_key` over inline `api_key`. |
 | `model.<id>.agent_type` | `string` | `yes` | `user` | Agent definition type associated with this model. |
 | `model.<id>.api_backend` | `chat_completions / responses / messages` | `yes` | `user` | Wire protocol for this model. |
-| `model.<id>.api_base_url` | `string` | `yes` | `user` | Alternate API base used with wimo ai_API_KEY resolution. |
+| `model.<id>.api_base_url` | `string` | `yes` | `user` | Alternate API base used with wimoai_API_KEY resolution. |
 | `model.<id>.api_key` | `string` | `yes` | `user` | Inline API key. Prefer `env_key`. Not a secret to put in a shared repo. |
 | `model.<id>.auth_provider` | `string` | `yes` | `user` | Name of a `[auth_provider.<name>]` helper that mints this model's bearer token. |
 | `model.<id>.auto_compact_threshold_percent` | `integer` | `yes` | `user` | Per-model auto-compact threshold (0-100). |
@@ -626,7 +626,7 @@ User-level configuration lives in `$wimo_HOME/config.toml` (default `~/.wimo/con
 
 | Key | Type / Values | Requirements | Managed | Details |
 | --- | --- | --- | --- | --- |
-| `voice.api_base` | `string` | `yes` | `user` | HTTPS API root for speech-to-text. Unset inherits `[endpoints].wimo ai_api_base_url`. |
+| `voice.api_base` | `string` | `yes` | `user` | HTTPS API root for speech-to-text. Unset inherits `[endpoints].wimoai_api_base_url`. |
 | `voice.language` | `string` | `yes` | `user` | Preferred STT language catalog code or `auto`. |
 | `voice.sample_rate` | `number` | `yes` | `user` | STT capture rate in Hz. |
 

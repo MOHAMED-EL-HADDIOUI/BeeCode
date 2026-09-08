@@ -4,9 +4,9 @@
 //! constant.
 
 use serde_json::json;
-use wimo ai_computer_hub_core::{error_from_envelope, tool_error_from_wire};
-use wimo ai_tool_protocol::{JsonRpcError, RequestId, ToolErrorWire};
-use wimo ai_tool_runtime::ToolErrorKind;
+use wimoai_computer_hub_core::{error_from_envelope, tool_error_from_wire};
+use wimoai_tool_protocol::{JsonRpcError, RequestId, ToolErrorWire};
+use wimoai_tool_runtime::ToolErrorKind;
 
 #[test]
 fn internal_with_detail_reconstructs_the_wire_detail() {

@@ -1,7 +1,7 @@
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::AcpResult;
+use wimoai_acp_lib::AcpResult;
 
-pub use wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::{
+pub use wimoai_wimo_tools::implementations::wimo::exit_plan_mode::{
     ExitPlanModeExtRequest, ExitPlanModeExtResponse,
 };
 

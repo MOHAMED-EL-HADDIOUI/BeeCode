@@ -7,7 +7,7 @@
 //! identity.
 
 use serde::{Deserialize, Serialize};
-use wimo ai_tool_protocol::StreamingSpec;
+use wimoai_tool_protocol::StreamingSpec;
 
 use crate::tool::ToolProgress;
 

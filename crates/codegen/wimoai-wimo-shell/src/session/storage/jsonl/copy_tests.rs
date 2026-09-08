@@ -34,11 +34,11 @@ fn fork_agent_chunk(session_id: &str, text: &str) -> SessionUpdate {
 
 fn fork_rewind_marker(session_id: &str, target_prompt_index: usize) -> SessionUpdate {
     use crate::extensions::notification::{
-        SessionNotification as wimo aiSessionNotification, SessionUpdate as wimo aiSessionUpdateType,
+        SessionNotification as wimoaiSessionNotification, SessionUpdate as wimoaiSessionUpdateType,
     };
-    SessionUpdate::wimo ai(Box::new(wimo aiSessionNotification {
+    SessionUpdate::wimoai(Box::new(wimoaiSessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdateType::RewindMarker {
+        update: wimoaiSessionUpdateType::RewindMarker {
             target_prompt_index,
             created_at: "2026-01-01T00:00:00Z".to_string(),
         },
@@ -322,7 +322,7 @@ fn create_test_plan_state() -> TodoState {
 #[tokio::test]
 async fn copy_session_data_copies_compaction_segments_when_enabled() {
     use crate::extensions::notification::CompactionSegmentFile;
-    use wimo ai_wimo_sampling_types::ConversationItem;
+    use wimoai_wimo_sampling_types::ConversationItem;
 
     let temp_dir = TempDir::new().unwrap();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
@@ -346,7 +346,7 @@ async fn copy_session_data_copies_compaction_segments_when_enabled() {
     let seg = |s: &str| CompactionSegmentFile {
         items: vec![ConversationItem::user("a"), ConversationItem::user("b")],
         summary: s.to_string(),
-        detail: wimo ai_chat_state::CompactionDetail::Verbose,
+        detail: wimoai_chat_state::CompactionDetail::Verbose,
         timestamp: "2026-01-01T00:00:00Z".to_string(),
     };
     adapter
@@ -377,7 +377,7 @@ async fn copy_session_data_copies_compaction_segments_when_enabled() {
 
     let dst = adapter
         .session_dir(&target_info)
-        .join(wimo ai_compaction_transcript::COMPACTION_DIR);
+        .join(wimoai_compaction_transcript::COMPACTION_DIR);
     assert!(dst.join("segment_000.md").is_file());
     assert!(dst.join("segment_001.md").is_file());
     assert!(dst.join("INDEX.md").is_file());
@@ -399,7 +399,7 @@ async fn copy_session_data_copies_compaction_segments_when_enabled() {
     assert!(
         !adapter
             .session_dir(&target2)
-            .join(wimo ai_compaction_transcript::COMPACTION_DIR)
+            .join(wimoai_compaction_transcript::COMPACTION_DIR)
             .exists()
     );
 }
@@ -410,12 +410,12 @@ fn checkpoint_record(id: &str) -> SessionUpdate {
 
 fn checkpoint_record_with_path(id: &str, checkpoint_file: &str) -> SessionUpdate {
     use crate::extensions::notification::{
-        CompactionCheckpointInfo, SessionNotification as wimo aiSessionNotification,
-        SessionUpdate as wimo aiSessionUpdateType,
+        CompactionCheckpointInfo, SessionNotification as wimoaiSessionNotification,
+        SessionUpdate as wimoaiSessionUpdateType,
     };
-    SessionUpdate::wimo ai(Box::new(wimo aiSessionNotification {
+    SessionUpdate::wimoai(Box::new(wimoaiSessionNotification {
         session_id: acp::SessionId::new("ckpt-src"),
-        update: wimo aiSessionUpdateType::CompactionCheckpoint(Box::new(CompactionCheckpointInfo {
+        update: wimoaiSessionUpdateType::CompactionCheckpoint(Box::new(CompactionCheckpointInfo {
             checkpoint_id: id.to_string(),
             prompt_index_at_compaction: 1,
             checkpoint_file: checkpoint_file.to_string(),
@@ -691,10 +691,10 @@ async fn checkpoint_record_with_non_checkpoint_path_is_not_copied() {
     let loaded = adapter.load_session(&target_info).await.unwrap();
     assert_eq!(loaded.updates.len(), 1);
     match &loaded.updates[0] {
-        SessionUpdate::wimo ai(notification) => {
+        SessionUpdate::wimoai(notification) => {
             assert_eq!(notification.session_id.0.as_ref(), "ckpt-dst");
         }
-        other => panic!("Expected wimo ai update, got {other:?}"),
+        other => panic!("Expected wimoai update, got {other:?}"),
     }
 }
 
@@ -908,17 +908,17 @@ async fn copy_session_data_without_plan() {
 }
 
 #[tokio::test]
-async fn copy_session_data_transforms_wimo ai_updates() {
+async fn copy_session_data_transforms_wimoai_updates() {
     use crate::extensions::notification::{
-        DiffContent, SessionNotification as wimo aiSessionNotification,
-        SessionUpdate as wimo aiSessionUpdateType,
+        DiffContent, SessionNotification as wimoaiSessionNotification,
+        SessionUpdate as wimoaiSessionUpdateType,
     };
 
     let temp_dir = TempDir::new().unwrap();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
 
     let source_info = Info {
-        id: acp::SessionId::new("source-wimo ai"),
+        id: acp::SessionId::new("source-wimoai"),
         cwd: "/source".to_string(),
     };
 
@@ -927,9 +927,9 @@ async fn copy_session_data_transforms_wimo ai_updates() {
         .await
         .unwrap();
 
-    let wimo ai_notification = wimo aiSessionNotification {
-        session_id: acp::SessionId::new("source-wimo ai"),
-        update: wimo aiSessionUpdateType::DiffReview {
+    let wimoai_notification = wimoaiSessionNotification {
+        session_id: acp::SessionId::new("source-wimoai"),
+        update: wimoaiSessionUpdateType::DiffReview {
             content: vec![DiffContent {
                 diff: acp::Diff::new(std::path::PathBuf::from("/test/file.rs"), "new".to_string())
                     .old_text(Some("old".to_string())),
@@ -940,13 +940,13 @@ async fn copy_session_data_transforms_wimo ai_updates() {
     adapter
         .append_update(
             &source_info,
-            &SessionUpdate::wimo ai(Box::new(wimo ai_notification)),
+            &SessionUpdate::wimoai(Box::new(wimoai_notification)),
         )
         .await
         .unwrap();
 
     let target_info = Info {
-        id: acp::SessionId::new("fork-source-wimo ai-abcd1234"),
+        id: acp::SessionId::new("fork-source-wimoai-abcd1234"),
         cwd: "/target".to_string(),
     };
 
@@ -957,10 +957,10 @@ async fn copy_session_data_transforms_wimo ai_updates() {
 
     let loaded = adapter.load_session(&target_info).await.unwrap();
     match &loaded.updates[0] {
-        SessionUpdate::wimo ai(notification) => {
+        SessionUpdate::wimoai(notification) => {
             assert_eq!(
                 notification.session_id.0.as_ref(),
-                "fork-source-wimo ai-abcd1234"
+                "fork-source-wimoai-abcd1234"
             );
         }
         _ => panic!("Expected wimo AI update"),
@@ -1152,7 +1152,7 @@ async fn copy_session_data_inherits_source_summary_fields() {
 fn worktree_target_cwd(home: &std::path::Path) -> String {
     let cwd = home
         .join("worktrees")
-        .join("wimo ai")
+        .join("wimoai")
         .join("fix-bug")
         .join("src");
     std::fs::create_dir_all(&cwd).unwrap();
@@ -1163,7 +1163,7 @@ fn worktree_target_cwd(home: &std::path::Path) -> String {
 #[serial_test::serial]
 async fn fork_with_default_kind_into_worktree_cwd_stamps_worktree_identity() {
     let home = TempDir::new().unwrap();
-    let _env = wimo ai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path());
+    let _env = wimoai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path());
     let adapter = JsonlStorageAdapter::with_root(home.path().join("sessions-root"));
     let source_info = Info {
         id: acp::SessionId::new("src-plain-fork"),
@@ -1192,7 +1192,7 @@ async fn fork_with_default_kind_into_worktree_cwd_stamps_worktree_identity() {
 #[serial_test::serial]
 async fn explicit_subagent_fork_kind_wins_over_worktree_target_cwd() {
     let home = TempDir::new().unwrap();
-    let _env = wimo ai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path());
+    let _env = wimoai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path());
     let adapter = JsonlStorageAdapter::with_root(home.path().join("sessions-root"));
     let source_info = Info {
         id: acp::SessionId::new("src-subagent-fork"),
@@ -1288,7 +1288,7 @@ async fn assert_copy_clears_pending_relocation(fork_filter: bool) {
                 )
                 .await
                 .unwrap(),
-            wimo ai_chat_state::StrictAppendAck::AlreadyPresent(item)
+            wimoai_chat_state::StrictAppendAck::AlreadyPresent(item)
                 if item.text_content() == "switch"
         ));
         let retried = adapter.read_summary_sync(&target).unwrap();

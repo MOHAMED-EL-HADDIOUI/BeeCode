@@ -14,7 +14,7 @@
             combined_scrollback_entries: Vec::new(),
             chip_elements: Vec::new(),
         });
-        let update = wimo aiSessionUpdate::AutoCompactStarted {
+        let update = wimoaiSessionUpdate::AutoCompactStarted {
             tokens_used: 90000,
             context_window: 131072,
             percentage: 85,
@@ -48,7 +48,7 @@
             "authentication problem — re-authenticate using /login and retry.",
             "this conversation is too large to compact.",
         ] {
-            let update = wimo aiSessionUpdate::AutoCompactFailed {
+            let update = wimoaiSessionUpdate::AutoCompactFailed {
                 error: error.into(),
             };
             assert!(apply_session_event(&update, &mut session, &mut scrollback, false));
@@ -71,7 +71,7 @@
             "Image 1 was dropped: corrupt.".to_string(),
             "Image 2 was dropped: too small (4×3).".to_string(),
         ];
-        let update = wimo aiSessionUpdate::ImageDropped {
+        let update = wimoaiSessionUpdate::ImageDropped {
             notes: notes.clone(),
         };
         let changed = apply_session_event(&update, &mut session, &mut scrollback, false);
@@ -171,7 +171,7 @@
 
     #[test]
     fn retry_exhausted_rate_limited_empty_reason_uses_oauth_fallback() {
-        use wimo ai_wimo_shell::sampling::error::RATE_LIMITED_USER_MESSAGE_OAUTH;
+        use wimoai_wimo_shell::sampling::error::RATE_LIMITED_USER_MESSAGE_OAUTH;
 
         let empty = RetryState::Exhausted {
             attempts: 3,
@@ -215,7 +215,7 @@
 
     #[test]
     fn retry_exhausted_api_key_rewrites_consumer_subscription_upsell() {
-        use wimo ai_wimo_shell::sampling::error::RATE_LIMITED_USER_MESSAGE_API_KEY;
+        use wimoai_wimo_shell::sampling::error::RATE_LIMITED_USER_MESSAGE_API_KEY;
 
         let rpm = RetryState::Exhausted {
             attempts: 2,
@@ -300,7 +300,7 @@
 
     #[test]
     fn apply_retry_state_disk_full_pushes_session_event() {
-        use wimo ai_wimo_shell::extensions::notification::{
+        use wimoai_wimo_shell::extensions::notification::{
             DISK_FULL_ERROR_TYPE, DISK_FULL_USER_MESSAGE,
         };
         let mut session = make_session(Some("s1"));
@@ -614,7 +614,7 @@
     /// `PromptResponse` then suppresses the redundant `TurnFailed`.
     #[test]
     fn apply_retry_state_context_length_shows_context_too_large() {
-        use wimo ai_wimo_shell::extensions::notification::CONTEXT_LENGTH_ERROR_TYPE;
+        use wimoai_wimo_shell::extensions::notification::CONTEXT_LENGTH_ERROR_TYPE;
         let mut session = make_session(Some("s1"));
         let mut scrollback = ScrollbackState::new();
         apply_retry_state(
@@ -665,7 +665,7 @@
     /// The overflow path then does NOT stack a second `ContextTooLarge` prompt on top.
     #[test]
     fn apply_retry_state_context_length_does_not_duplicate_compaction_failed() {
-        use wimo ai_wimo_shell::extensions::notification::CONTEXT_LENGTH_ERROR_TYPE;
+        use wimoai_wimo_shell::extensions::notification::CONTEXT_LENGTH_ERROR_TYPE;
         let mut session = make_session(Some("s1"));
         let mut scrollback = ScrollbackState::new();
         scrollback.push_block(RenderBlock::session_event(SessionEvent::CompactionFailed {
@@ -692,7 +692,7 @@
         let mut session = make_session(Some("s1"));
         let mut scrollback = ScrollbackState::new();
         session.set_compaction_activity(Some(TurnActivity::AutoCompacting));
-        let update = wimo aiSessionUpdate::AutoCompactCompleted {
+        let update = wimoaiSessionUpdate::AutoCompactCompleted {
             tokens_before: Some(858_000),
             tokens_after: 66_000,
             elapsed_ms: Some(500),
@@ -729,7 +729,7 @@
     fn apply_compaction_completed_falls_back_to_estimate_without_confirmation() {
         let mut session = make_session(Some("s1"));
         let mut scrollback = ScrollbackState::new();
-        let update = wimo aiSessionUpdate::AutoCompactCompleted {
+        let update = wimoaiSessionUpdate::AutoCompactCompleted {
             tokens_before: Some(90_000),
             tokens_after: 20_000,
             elapsed_ms: Some(500),
@@ -754,7 +754,7 @@
         let mut session = make_session(Some("s1"));
         session.loading_replay = true;
         let mut scrollback = ScrollbackState::new();
-        let update = wimo aiSessionUpdate::AutoCompactCompleted {
+        let update = wimoaiSessionUpdate::AutoCompactCompleted {
             tokens_before: Some(90_000),
             tokens_after: 20_000,
             elapsed_ms: Some(500),
@@ -779,7 +779,7 @@
             .session
             .set_compaction_activity(Some(TurnActivity::AutoCompacting));
 
-        let update = wimo aiSessionUpdate::AutoCompactCompleted {
+        let update = wimoaiSessionUpdate::AutoCompactCompleted {
             tokens_before: Some(858_000),
             tokens_after: 66_000,
             elapsed_ms: Some(500),
@@ -817,24 +817,24 @@
         // Started refreshes with the count the trigger fired on; the banner percentage derives from it
         // Completed refreshes with the post-compact count
         // Failed/Cancelled carry no count; the next meta.totalTokens restamps
-        let started = wimo aiSessionUpdate::AutoCompactStarted {
+        let started = wimoaiSessionUpdate::AutoCompactStarted {
             tokens_used: 460_231,
             context_window: 500_000,
             percentage: 92,
             reason: "threshold".into(),
         };
         assert_eq!(compaction_context_refresh(&started), Some(460_231));
-        let completed = wimo aiSessionUpdate::AutoCompactCompleted {
+        let completed = wimoaiSessionUpdate::AutoCompactCompleted {
             tokens_before: Some(460_231),
             tokens_after: 21_502,
             elapsed_ms: Some(500),
             summary_preview: None,
         };
         assert_eq!(compaction_context_refresh(&completed), Some(21_502));
-        let failed = wimo aiSessionUpdate::AutoCompactFailed { error: "e".into() };
+        let failed = wimoaiSessionUpdate::AutoCompactFailed { error: "e".into() };
         assert_eq!(compaction_context_refresh(&failed), None);
-        let cancelled = wimo aiSessionUpdate::AutoCompactCancelled {
-            reason: wimo ai_wimo_shell::extensions::notification::AutoCompactCancelReason::UserCancelled,
+        let cancelled = wimoaiSessionUpdate::AutoCompactCancelled {
+            reason: wimoai_wimo_shell::extensions::notification::AutoCompactCancelReason::UserCancelled,
         };
         assert_eq!(compaction_context_refresh(&cancelled), None);
     }
@@ -843,7 +843,7 @@
     fn apply_unhandled_event_returns_false() {
         let mut session = make_session(Some("s1"));
         let mut scrollback = ScrollbackState::new();
-        let update = wimo aiSessionUpdate::MemoryFlushStarted;
+        let update = wimoaiSessionUpdate::MemoryFlushStarted;
         assert!(!apply_session_event(&update, &mut session, &mut scrollback, false));
     }
 
@@ -861,7 +861,7 @@
             .subagent_views
             .insert(child_sid.into(), Box::new(child_view));
 
-        let update = wimo aiSessionUpdate::AutoCompactCompleted {
+        let update = wimoaiSessionUpdate::AutoCompactCompleted {
             tokens_before: Some(90000),
             tokens_after: 25000,
             elapsed_ms: Some(300),
@@ -892,14 +892,14 @@
             .subagent_sessions
             .insert(child_sid.into(), make_subagent_info(child_sid));
         let mut child_view = make_agent(Some(child_sid));
-        child_view.context_state = Some(wimo ai_wimo_shell::session::ContextInfo::from_notification(
+        child_view.context_state = Some(wimoai_wimo_shell::session::ContextInfo::from_notification(
             90_000, 131_072,
         ));
         agent
             .subagent_views
             .insert(child_sid.into(), Box::new(child_view));
 
-        let update = wimo aiSessionUpdate::AutoCompactStarted {
+        let update = wimoaiSessionUpdate::AutoCompactStarted {
             tokens_used: 95_000,
             context_window: 131_072,
             percentage: 72,
@@ -918,7 +918,7 @@
     fn child_notification_without_view_returns_false() {
         let mut agent = make_agent(Some("root-sess"));
         // No child view is registered
-        let update = wimo aiSessionUpdate::AutoCompactStarted {
+        let update = wimoaiSessionUpdate::AutoCompactStarted {
             tokens_used: 90000,
             context_window: 131072,
             percentage: 85,
@@ -937,7 +937,7 @@
             .subagent_sessions
             .insert(child_sid.into(), make_subagent_info(child_sid));
 
-        let update = wimo aiSessionUpdate::AutoCompactCompleted {
+        let update = wimoaiSessionUpdate::AutoCompactCompleted {
             tokens_before: Some(90000),
             tokens_after: 25000,
             elapsed_ms: Some(300),
@@ -955,7 +955,7 @@
     #[test]
     fn child_unknown_event_returns_false() {
         let mut agent = make_agent(Some("root-sess"));
-        let update = wimo aiSessionUpdate::MemoryFlushStarted;
+        let update = wimoaiSessionUpdate::MemoryFlushStarted;
         let changed = handle_child_session_notification(update, "child-1", &mut agent, false);
         assert!(!changed);
     }
@@ -968,7 +968,7 @@
         let changed = handle(
             make_ext_session_notification(
                 "sess-1",
-                wimo aiSessionUpdate::ToolCallDeltaChunk {
+                wimoaiSessionUpdate::ToolCallDeltaChunk {
                     tool_call_id: Some("call_1".into()),
                     tool_index: 0,
                     name: Some("spawn_subagent".into()),
@@ -1006,7 +1006,7 @@
         let _ = handle(
             make_ext_session_notification(
                 "sess-1",
-                wimo aiSessionUpdate::ToolCallDeltaChunk {
+                wimoaiSessionUpdate::ToolCallDeltaChunk {
                     tool_call_id: Some("call_1".into()),
                     tool_index: 0,
                     name: Some("write".into()),
@@ -1031,17 +1031,17 @@
     #[test]
     fn hook_and_image_intake_notifications_keep_in_flight_prompt() {
         let updates = [
-            wimo aiSessionUpdate::HookExecution {
+            wimoaiSessionUpdate::HookExecution {
                 event_name: "user_prompt_submit".into(),
                 tool_name: None,
                 prompt_id: Some("p1".into()),
                 runs: vec![],
             },
-            wimo aiSessionUpdate::ImageCompressed {
+            wimoaiSessionUpdate::ImageCompressed {
                 images: vec![],
                 message: "resized".into(),
             },
-            wimo aiSessionUpdate::ImageDropped { notes: vec![] },
+            wimoaiSessionUpdate::ImageDropped { notes: vec![] },
         ];
         for update in updates {
             let label = format!("{update:?}");
@@ -1103,7 +1103,7 @@
         let changed = handle(
             make_ext_session_notification(
                 "sess-1",
-                wimo aiSessionUpdate::ToolCallDeltaChunk {
+                wimoaiSessionUpdate::ToolCallDeltaChunk {
                     tool_call_id: Some("call_1".into()),
                     tool_index: 0,
                     name: Some("write".into()),
@@ -1148,7 +1148,7 @@
         let (tx, _rx) = tokio::sync::oneshot::channel();
         let payload = SessionNotification {
             session_id: acp::SessionId::new("sess-1"),
-            update: wimo aiSessionUpdate::ToolCallDeltaChunk {
+            update: wimoaiSessionUpdate::ToolCallDeltaChunk {
                 tool_call_id: Some("call_1".into()),
                 tool_index: 0,
                 name: Some("write".into()),
@@ -1159,7 +1159,7 @@
         let raw = serde_json::value::to_raw_value(&payload).unwrap();
         let request = acp::ExtNotification::new("x.ai/session_notification", raw.into());
         let changed = handle(
-            AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+            AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
                 request,
                 response_tx: tx,
             }),
@@ -1182,7 +1182,7 @@
 
     #[test]
     fn retry_failed_encrypted_content_sets_model_incompatible() {
-        use wimo ai_wimo_shell::extensions::notification::RetryState;
+        use wimoai_wimo_shell::extensions::notification::RetryState;
         let mut session = make_session(Some("s1"));
         let mut scrollback = ScrollbackState::new();
 
@@ -1202,7 +1202,7 @@
 
     #[test]
     fn retry_failed_other_type_does_not_set_model_incompatible() {
-        use wimo ai_wimo_shell::extensions::notification::RetryState;
+        use wimoai_wimo_shell::extensions::notification::RetryState;
         let mut session = make_session(Some("s1"));
         let mut scrollback = ScrollbackState::new();
 
@@ -1225,13 +1225,13 @@
         title_is_manual: bool,
     ) -> acp::ExtNotification {
         let meta = if title_is_manual {
-            Some(wimo ai_wimo_shell::extensions::notification::title_is_manual_meta())
+            Some(wimoai_wimo_shell::extensions::notification::title_is_manual_meta())
         } else {
             None
         };
         let notif = SessionNotification {
             session_id: acp::SessionId::new(session_id),
-            update: wimo aiSessionUpdate::SessionSummaryGenerated {
+            update: wimoaiSessionUpdate::SessionSummaryGenerated {
                 session_summary: title.into(),
             },
             meta,
@@ -1321,7 +1321,7 @@
             Some("Pinned".into());
         let n = SessionNotification {
             session_id: acp::SessionId::new("sess-1"),
-            update: wimo aiSessionUpdate::SessionSummaryGenerated {
+            update: wimoaiSessionUpdate::SessionSummaryGenerated {
                 session_summary: String::new(),
             },
             meta: Some(serde_json::json!({ "x.ai/titleIsManual": false })),
@@ -1348,7 +1348,7 @@
             Some("Auto".into());
         let n = SessionNotification {
             session_id: acp::SessionId::new("sess-1"),
-            update: wimo aiSessionUpdate::SessionSummaryGenerated {
+            update: wimoaiSessionUpdate::SessionSummaryGenerated {
                 session_summary: String::new(),
             },
             meta: Some(serde_json::json!({ "x.ai/titleIsManual": false })),
@@ -1370,7 +1370,7 @@
 
     #[test]
     fn auto_title_notification_strips_controls_and_caps() {
-        use wimo ai_wimo_shell::session::persistence::MAX_TITLE_SCALARS;
+        use wimoai_wimo_shell::session::persistence::MAX_TITLE_SCALARS;
         let mut app = make_app_with_agent("sess-1");
         let dirty = format!(
             "ok\u{1b}]0;PWNED\u{07}{}",
@@ -1398,7 +1398,7 @@
 
     #[test]
     fn manual_title_notification_strips_controls_and_caps() {
-        use wimo ai_wimo_shell::session::persistence::MAX_TITLE_SCALARS;
+        use wimoai_wimo_shell::session::persistence::MAX_TITLE_SCALARS;
         let mut app = make_app_with_agent("sess-1");
         let dirty = format!("ok\u{1b}]0;PWNED\u{07}{}", "é".repeat(MAX_TITLE_SCALARS + 5));
         assert!(handle_session_notification(
@@ -1422,11 +1422,11 @@
 
     fn hooks_changed_ext(
         session_id: &str,
-        hooks: Vec<wimo ai_hooks_plugins_types::HookInfo>,
+        hooks: Vec<wimoai_hooks_plugins_types::HookInfo>,
     ) -> acp::ExtNotification {
         let notif = SessionNotification {
             session_id: acp::SessionId::new(session_id),
-            update: wimo aiSessionUpdate::HooksChanged {
+            update: wimoaiSessionUpdate::HooksChanged {
                 hooks,
                 project_trusted: true,
                 load_errors: Vec::new(),
@@ -1437,11 +1437,11 @@
         acp::ExtNotification::new("x.ai/session_notification", std::sync::Arc::from(raw))
     }
 
-    fn push_hook(name: &str, source_dir: &str) -> wimo ai_hooks_plugins_types::HookInfo {
-        wimo ai_hooks_plugins_types::HookInfo {
+    fn push_hook(name: &str, source_dir: &str) -> wimoai_hooks_plugins_types::HookInfo {
+        wimoai_hooks_plugins_types::HookInfo {
             name: name.to_string(),
-            event: wimo ai_hooks_plugins_types::HookEvent::PreToolUse,
-            handler_type: wimo ai_hooks_plugins_types::HookHandlerType::Command,
+            event: wimoai_hooks_plugins_types::HookEvent::PreToolUse,
+            handler_type: wimoai_hooks_plugins_types::HookHandlerType::Command,
             matcher: None,
             command: Some("/bin/true".to_string()),
             url: None,

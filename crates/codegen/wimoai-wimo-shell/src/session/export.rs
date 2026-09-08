@@ -15,13 +15,13 @@ struct AcpJsonRpcNotification<'a> {
 }
 
 #[derive(Debug, Serialize)]
-struct wimo aiJsonRpcNotification<'a> {
+struct wimoaiJsonRpcNotification<'a> {
     method: &'static str,
     params: &'a crate::extensions::notification::SessionNotification,
 }
 
 const ACP_SESSION_UPDATE_METHOD: &str = "session/update";
-const wimo ai_SESSION_UPDATE_METHOD: &str = "_x.ai/session/update";
+const wimoai_SESSION_UPDATE_METHOD: &str = "_x.ai/session/update";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExportedMessage {
@@ -48,11 +48,11 @@ impl ExportedMessage {
         Self { content, timestamp }
     }
 
-    pub(crate) fn from_wimo ai_notification(
+    pub(crate) fn from_wimoai_notification(
         notification: &crate::extensions::notification::SessionNotification,
     ) -> Self {
-        let wrapper = wimo aiJsonRpcNotification {
-            method: wimo ai_SESSION_UPDATE_METHOD,
+        let wrapper = wimoaiJsonRpcNotification {
+            method: wimoai_SESSION_UPDATE_METHOD,
             params: notification,
         };
         let content = serde_json::to_string(&wrapper).unwrap_or_else(|_| "{}".to_string());
@@ -160,8 +160,8 @@ impl ExportedSession {
                 SessionUpdate::Acp(notification) => {
                     ExportedMessage::from_notification(notification)
                 }
-                SessionUpdate::wimo ai(notification) => {
-                    ExportedMessage::from_wimo ai_notification(notification)
+                SessionUpdate::wimoai(notification) => {
+                    ExportedMessage::from_wimoai_notification(notification)
                 }
             })
             .collect()

@@ -37,8 +37,8 @@ impl TokenType {
     }
 
     /// Converts to the telemetry enum for the `manual_auth` KPI; the mapping is stable.
-    pub(crate) fn telemetry_kind(self) -> wimo ai_wimo_telemetry::events::AuthTokenKind {
-        use wimo ai_wimo_telemetry::events::AuthTokenKind as K;
+    pub(crate) fn telemetry_kind(self) -> wimoai_wimo_telemetry::events::AuthTokenKind {
+        use wimoai_wimo_telemetry::events::AuthTokenKind as K;
         match self {
             Self::OidcSession => K::OidcSession,
             Self::ExternalBinary => K::ExternalBinary,

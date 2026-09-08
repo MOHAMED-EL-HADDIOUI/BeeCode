@@ -1569,7 +1569,7 @@ mod tests {
     fn yank_selected_multiline_copies_full_text() {
         use std::sync::{Arc, Mutex};
 
-        use wimo ai_ratatui_textarea::ClipboardProvider;
+        use wimoai_ratatui_textarea::ClipboardProvider;
 
         #[derive(Debug, Clone)]
         struct RecordingClip {

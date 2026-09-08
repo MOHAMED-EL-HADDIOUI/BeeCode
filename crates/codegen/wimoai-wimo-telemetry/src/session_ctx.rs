@@ -105,9 +105,9 @@ where
 /// Both origins share this emitter and the `event_value` derivation in [`crate::client`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, strum::EnumCount)]
 pub enum EmitterOrigin {
-    /// `wimo ai-wimo-shell` (and the pager/TUI that emit through it).
+    /// `wimoai-wimo-shell` (and the pager/TUI that emit through it).
     Shell,
-    /// `wimo ai-wimo-workspace` (remote sampler / workspace server).
+    /// `wimoai-wimo-workspace` (remote sampler / workspace server).
     Workspace,
 }
 

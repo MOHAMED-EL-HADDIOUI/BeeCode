@@ -7,9 +7,9 @@
     {
       "id": "wimo-4.6",
       "model": "wimo-4.6",
-      "model_family": "wimo ai",
+      "model_family": "wimoai",
       "name": "wimo 4.6",
-      "description": "Spacewimo ai's latest frontier model",
+      "description": "Spacewimoai's latest frontier model",
       "context_window": 500000,
       "api_backend": "responses",
       "supports_backend_search": true,
@@ -46,7 +46,7 @@
     {
       "id": "wimo-4.5",
       "model": "wimo-4.5",
-      "model_family": "wimo ai",
+      "model_family": "wimoai",
       "name": "wimo 4.5",
       "context_window": 500000,
       "api_backend": "responses",

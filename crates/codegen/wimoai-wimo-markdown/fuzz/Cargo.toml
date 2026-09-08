@@ -1,5 +1,5 @@
 [package]
-name = "wimo ai-wimo-markdown-fuzz"
+name = "wimoai-wimo-markdown-fuzz"
 version = "0.0.0"
 publish = false
 edition = "2021"
@@ -13,7 +13,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 
-[dependencies.wimo ai-wimo-markdown]
+[dependencies.wimoai-wimo-markdown]
 path = ".."
 
 # All render modes: pretty/non-pretty × syntect/no-syntect × full/streaming

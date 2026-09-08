@@ -4,7 +4,7 @@ use crate::app::actions::Action;
 use crate::slash::command::{
     AppCtx, ArgItem, CommandExecCtx, CommandResult, SlashCommand, slash_meta,
 };
-use wimo ai_wimo_shell::session::persistence::{MAX_TITLE_SCALARS, sanitize_rename_title};
+use wimoai_wimo_shell::session::persistence::{MAX_TITLE_SCALARS, sanitize_rename_title};
 
 pub struct RenameCommand;
 

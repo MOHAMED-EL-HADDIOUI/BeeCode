@@ -508,13 +508,13 @@ impl TerminalContext {
     }
 
     /// Extract a flat snapshot of terminal details for telemetry.
-    pub fn telemetry_snapshot(&self) -> wimo ai_wimo_telemetry::events::TerminalTelemetry {
+    pub fn telemetry_snapshot(&self) -> wimoai_wimo_telemetry::events::TerminalTelemetry {
         let os = crate::host::HostOs::current();
         let server = crate::host::DisplayServer::current();
         let kb = self.keyboard_capabilities();
         let route = crate::clipboard::clipboard_route();
         let (term_version, term_version_source) = self.term_version();
-        wimo ai_wimo_telemetry::events::TerminalTelemetry {
+        wimoai_wimo_telemetry::events::TerminalTelemetry {
             brand: self.brand.to_string(),
             multiplexer: self.multiplexer.to_string(),
             is_ssh: self.is_ssh,
@@ -533,14 +533,14 @@ impl TerminalContext {
             hyperlink_osc8: self.hyperlink_capabilities().osc8.to_string(),
             hyperlink_skip_reason: self.hyperlink_skip_reason().unwrap_or("none").to_owned(),
             clipboard_route: route.to_string(),
-            clipboard_native_tool: wimo ai_wimo_shared::clipboard::native_tool_name().to_owned(),
+            clipboard_native_tool: wimoai_wimo_shared::clipboard::native_tool_name().to_owned(),
             clipboard_data_control: crate::clipboard::wayland_data_control_label().to_owned(),
         }
     }
 
     /// Extract terminal info for feedback submissions.
-    pub fn feedback_info(&self) -> wimo ai_wimo_shared::session::FeedbackTerminalInfo {
-        use wimo ai_wimo_shared::session::FeedbackTerminalInfo;
+    pub fn feedback_info(&self) -> wimoai_wimo_shared::session::FeedbackTerminalInfo {
+        use wimoai_wimo_shared::session::FeedbackTerminalInfo;
         // XTVERSION self-report lets feedback triage identify the terminal even when env detection failed (e.g. over SSH).
         let brand = match xtversion::detected() {
             Some(v) if self.brand == TerminalName::Unknown => format!("Unknown (XTVERSION: {v})"),
@@ -562,7 +562,7 @@ impl TerminalContext {
             },
             hyperlink_osc8_support: Some(self.hyperlink_capabilities().osc8.to_string()),
             clipboard_route: Some(crate::clipboard::clipboard_route().to_string()),
-            clipboard_native_tool: Some(wimo ai_wimo_shared::clipboard::native_tool_name().to_owned()),
+            clipboard_native_tool: Some(wimoai_wimo_shared::clipboard::native_tool_name().to_owned()),
             display_server: Some(crate::host::DisplayServer::current().to_string()),
         }
     }
@@ -633,7 +633,7 @@ fn is_official_vscode_remote_askpass(path: &str) -> bool {
 /// Detect the terminal brand from an injected environment map.
 ///
 /// A new env marker here, in [`detect_byobu_from_env`], or in [`detect_multiplexer_from_env`] must also go into `HOST_TERMINAL_ENV_VARS`.
-/// That list lives in `wimo ai-wimo-pager-pty-harness/src/pty.rs`.
+/// That list lives in `wimoai-wimo-pager-pty-harness/src/pty.rs`.
 /// The PTY harness strips every marker read here so the host terminal can't leak into tests.
 pub fn detect_terminal_brand_from_env(env: &HashMap<String, String>) -> TerminalName {
     // Some VS Code forks set TERM_PROGRAM=vscode, so check IDE-specific env vars first to disambiguate them from upstream VS Code

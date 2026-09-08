@@ -24,14 +24,14 @@ pub type SharedVoiceAuth = Arc<dyn VoiceAuthProvider>;
 pub(crate) async fn require_bearer(auth: &SharedVoiceAuth) -> Result<String, VoiceError> {
     auth.bearer().await.ok_or_else(|| {
         VoiceError::Auth(
-            "not signed in — run `wimo login`, set wimo ai_API_KEY, or set a model api_key/env_key"
+            "not signed in — run `wimo login`, set wimoai_API_KEY, or set a model api_key/env_key"
                 .into(),
         )
     })
 }
 
 /// A fixed bearer that never refreshes.
-/// Used by the standalone `voice-probe` binary and tests, where there is no `AuthManager`, only a raw `wimo ai_API_KEY`.
+/// Used by the standalone `voice-probe` binary and tests, where there is no `AuthManager`, only a raw `wimoai_API_KEY`.
 pub struct StaticVoiceAuth(pub String);
 
 impl std::fmt::Debug for StaticVoiceAuth {

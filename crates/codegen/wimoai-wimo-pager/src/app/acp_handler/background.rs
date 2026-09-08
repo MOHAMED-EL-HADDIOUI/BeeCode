@@ -69,7 +69,7 @@ pub(super) fn handle_task_backgrounded(notif: &acp::ExtNotification, app: &mut A
 
     let (tool_call_id, task_id, command, cwd, output_file, monitor_description, notif_description) =
         match session_notif.update {
-            wimo aiSessionUpdate::TaskBackgrounded {
+            wimoaiSessionUpdate::TaskBackgrounded {
                 tool_call_id,
                 task_id,
                 command,
@@ -237,7 +237,7 @@ pub(super) fn handle_monitor_event(notif: &acp::ExtNotification, app: &mut AppVi
         return false;
     };
     let (task_id, _description, event_text) = match session_notif.update {
-        wimo aiSessionUpdate::MonitorEvent {
+        wimoaiSessionUpdate::MonitorEvent {
             task_id,
             description,
             event_text,
@@ -276,7 +276,7 @@ pub(super) fn handle_scheduled_task_created(
         return false;
     };
     let (task_id, prompt, human_schedule, next_fire_at) = match session_notif.update {
-        wimo aiSessionUpdate::ScheduledTaskCreated {
+        wimoaiSessionUpdate::ScheduledTaskCreated {
             task_id,
             prompt,
             human_schedule,
@@ -329,7 +329,7 @@ pub(super) fn handle_scheduled_task_fired(notif: &acp::ExtNotification, app: &mu
         return false;
     };
     let (task_id, prompt, human_schedule, next_fire_at, subagent_id) = match session_notif.update {
-        wimo aiSessionUpdate::ScheduledTaskFired {
+        wimoaiSessionUpdate::ScheduledTaskFired {
             task_id,
             prompt,
             human_schedule,
@@ -386,7 +386,7 @@ pub(super) fn handle_scheduled_task_deleted(
         return false;
     };
     let (task_id, reason) = match session_notif.update {
-        wimo aiSessionUpdate::ScheduledTaskDeleted { task_id, reason } => (task_id, reason),
+        wimoaiSessionUpdate::ScheduledTaskDeleted { task_id, reason } => (task_id, reason),
         _ => return false,
     };
     let matched = match find_session_match(app, &session_notif.session_id) {
@@ -433,7 +433,7 @@ fn expired_task_notice(info: &crate::app::agent::ScheduledTaskInfo) -> String {
     format!(
         "Scheduled task expired: \"{head}\" ({}). Recurring tasks auto-expire after {} days; re-create it if still needed.",
         info.human_schedule,
-        wimo ai_wimo_tools::implementations::wimo::scheduler::types::RECURRING_TASK_TTL_DAYS,
+        wimoai_wimo_tools::implementations::wimo::scheduler::types::RECURRING_TASK_TTL_DAYS,
     )
 }
 
@@ -523,7 +523,7 @@ pub(super) fn derive_child_cwd(
 
 /// Updates the cached branch/worktree display on the matching agent so the status bar can render without spawning `git` on every frame.
 pub(super) fn handle_git_head_changed(notif: &acp::ExtNotification, app: &mut AppView) -> bool {
-    let Ok(params) = serde_json::from_str::<wimo ai_wimo_workspace::session::git::GitHeadChanged>(
+    let Ok(params) = serde_json::from_str::<wimoai_wimo_workspace::session::git::GitHeadChanged>(
         notif.params.get(),
     ) else {
         return false;
@@ -582,7 +582,7 @@ pub(super) fn handle_task_completed(notif: &acp::ExtNotification, app: &mut AppV
     };
 
     let task_snapshot = match session_notif.update {
-        wimo aiSessionUpdate::TaskCompleted { task_snapshot, .. } => task_snapshot,
+        wimoaiSessionUpdate::TaskCompleted { task_snapshot, .. } => task_snapshot,
         _ => return false,
     };
 

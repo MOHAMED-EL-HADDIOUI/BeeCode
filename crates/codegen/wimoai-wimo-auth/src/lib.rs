@@ -1,4 +1,4 @@
-//! Auth traits shared between `wimo ai-file-utils` (the holder) and `wimo ai-wimo-shell` (the implementer).
+//! Auth traits shared between `wimoai-file-utils` (the holder) and `wimoai-wimo-shell` (the implementer).
 //! Keeps shell types out of data-collector's import graph while still letting refresh-aware token resolution drive HTTP requests.
 
 pub mod auth_provider;

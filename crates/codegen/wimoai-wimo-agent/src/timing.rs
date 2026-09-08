@@ -1,4 +1,4 @@
-const TARGET: &str = "wimo ai_wimo_instrumentation";
+const TARGET: &str = "wimoai_wimo_instrumentation";
 
 pub struct TimingGuard {
     name: &'static str,

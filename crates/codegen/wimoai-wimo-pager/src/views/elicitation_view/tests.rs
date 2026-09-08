@@ -1,7 +1,7 @@
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use serde_json::json;
-use wimo ai_wimo_tools::mcp_elicitation::{
+use wimoai_wimo_tools::mcp_elicitation::{
     ElicitFieldKind, McpElicitExtRequest, McpElicitExtResponse, McpElicitModeFields,
 };
 

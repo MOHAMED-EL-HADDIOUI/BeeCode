@@ -34,10 +34,10 @@ fn auth_provider_env_set() -> bool {
 }
 
 fn auth_provider_config_set() -> bool {
-    let Ok(raw) = wimo ai_wimo_shell::config::load_effective_config() else {
+    let Ok(raw) = wimoai_wimo_shell::config::load_effective_config() else {
         return false;
     };
-    let Ok(cfg) = wimo ai_wimo_shell::agent::config::Config::new_from_toml_cfg(&raw) else {
+    let Ok(cfg) = wimoai_wimo_shell::agent::config::Config::new_from_toml_cfg(&raw) else {
         return false;
     };
     cfg.wimo_com_config

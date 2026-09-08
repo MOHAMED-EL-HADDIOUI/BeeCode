@@ -18,7 +18,7 @@ impl RoleCapability {
     /// Keyed on the `can_*` flags (`can_search` for grep, `can_execute` for terminal/bash).
     fn is_satisfied(
         self,
-        summary: &wimo ai_wimo_tools::implementations::wimo::task::types::SubagentTypeSummary,
+        summary: &wimoai_wimo_tools::implementations::wimo::task::types::SubagentTypeSummary,
     ) -> bool {
         match self {
             Self::Skeptic => summary.can_read && summary.can_search,
@@ -35,7 +35,7 @@ pub(crate) struct PanelResolveCache {
     /// Maps a harness `agent_type` to its describe outcome (the coordinator's answer for the role's `general-purpose` toolset on that harness).
     describe: std::collections::HashMap<
         String,
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome,
     >,
 }
 
@@ -47,7 +47,7 @@ fn role_tool_names_from(
     cache: &PanelResolveCache,
     inherit: &crate::session::goal_role_tools::RoleToolNames,
 ) -> crate::session::goal_role_tools::RoleToolNames {
-    use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome;
+    use wimoai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome;
     // `override_.agent_type` is the committed harness; the cache is keyed on it.
     match override_.agent_type.as_deref() {
         Some(harness) => match cache.describe.get(harness) {
@@ -88,7 +88,7 @@ impl SessionActor {
             Some(path) => tokio::fs::read_to_string(path)
                 .await
                 .ok()
-                .map(|text| wimo ai_wimo_tools::util::truncate_str(&text, 16 * 1024).to_owned()),
+                .map(|text| wimoai_wimo_tools::util::truncate_str(&text, 16 * 1024).to_owned()),
             None => None,
         };
         let active_model = self
@@ -143,7 +143,7 @@ impl SessionActor {
     }
 
     fn record_goal_round_progress(&self, detail: &str, failed: bool) {
-        let detail = wimo ai_wimo_tools::util::truncate_str(detail.trim(), 500).to_owned();
+        let detail = wimoai_wimo_tools::util::truncate_str(detail.trim(), 500).to_owned();
         let mut tracker = self.goal_tracker.lock();
         let round = tracker.snapshot_mut().map(|snapshot| {
             snapshot.total_worker_rounds = snapshot.total_worker_rounds.saturating_add(1);
@@ -630,7 +630,7 @@ impl SessionActor {
         choice: &crate::agent::config::GoalRoleModelChoice,
         capability: RoleCapability,
         event_tx: &tokio::sync::mpsc::UnboundedSender<
-            wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+            wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
         >,
     ) -> (
         crate::session::goal_planner::RoleSpawnOverride,
@@ -669,17 +669,17 @@ impl SessionActor {
         pair: &crate::util::config::GoalRoleModel,
         capability: RoleCapability,
         event_tx: &tokio::sync::mpsc::UnboundedSender<
-            wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+            wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
         >,
         available_models: &indexmap::IndexMap<String, crate::agent::config::ModelEntry>,
         cache: &mut PanelResolveCache,
     ) -> crate::session::goal_planner::RoleSpawnOverride {
         use crate::session::events::{Event, GoalRoleModelFailOpenReason as Reason};
         use crate::session::goal_planner::RoleSpawnOverride;
-        use wimo ai_wimo_tools::implementations::wimo::task::backend::{
+        use wimoai_wimo_tools::implementations::wimo::task::backend::{
             ChannelBackend, SubagentBackend,
         };
-        use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome;
+        use wimoai_wimo_tools::implementations::wimo::task::types::SubagentDescribeOutcome;
 
         let fail_open = |reason: Reason| {
             self.emit_event(Event::GoalRoleModelFailOpen {
@@ -697,7 +697,7 @@ impl SessionActor {
         if !entry.info.user_selectable {
             return fail_open(Reason::ModelUnauthorized);
         }
-        if wimo ai_wimo_agent::config::is_strict_harness_agent_type(&pair.agent_type)
+        if wimoai_wimo_agent::config::is_strict_harness_agent_type(&pair.agent_type)
             && !crate::agent::subagent::subagent_harness_flavor_is_representable(&pair.agent_type)
         {
             return fail_open(Reason::HarnessFlavorUnsupported);
@@ -749,7 +749,7 @@ impl SessionActor {
     }
 
     pub(super) async fn resolve_goal_tool_names(&self) -> GoalToolNames {
-        use wimo ai_wimo_tools::types::tool::ToolKind;
+        use wimoai_wimo_tools::types::tool::ToolKind;
         let bridge = self.agent.borrow().tool_bridge().clone();
         GoalToolNames {
             goal: bridge
@@ -770,7 +770,7 @@ impl SessionActor {
     pub(crate) async fn resolve_inherit_role_tool_names(
         &self,
     ) -> crate::session::goal_role_tools::RoleToolNames {
-        use wimo ai_wimo_tools::types::tool::ToolKind;
+        use wimoai_wimo_tools::types::tool::ToolKind;
         let bridge = self.agent.borrow().tool_bridge().clone();
         crate::session::goal_role_tools::RoleToolNames::from_parent(
             bridge.tool_for_kind(ToolKind::Read).await,
@@ -1102,7 +1102,7 @@ impl SessionActor {
     }
 
     pub(super) async fn prune_prior_goal_continuation_directives(&self) {
-        use wimo ai_wimo_sampling_types::conversation::SyntheticReason;
+        use wimoai_wimo_sampling_types::conversation::SyntheticReason;
 
         fn is_goal_continuation_directive(item: &ConversationItem) -> bool {
             matches!(
@@ -1570,7 +1570,7 @@ impl SessionActor {
 
     async fn has_pending_goal_todos(&self) -> bool {
         use crate::tools::todo::{TodoState, TodoStatus};
-        use wimo ai_wimo_tools::types::resources::State;
+        use wimoai_wimo_tools::types::resources::State;
         let bridge = self.tool_bridge_handle();
         match bridge.read_resource::<State<TodoState>>().await {
             Some(state) => state.0.todo_items_with_ids().any(|(_id, item)| {
@@ -1597,9 +1597,9 @@ impl SessionActor {
         &self,
         current_tokens: i64,
         purpose: DrainPurpose,
-        extra: Vec<wimo ai_wimo_tools::implementations::wimo::update_goal::UpdateGoalEnvelope>,
+        extra: Vec<wimoai_wimo_tools::implementations::wimo::update_goal::UpdateGoalEnvelope>,
     ) {
-        use wimo ai_wimo_tools::implementations::wimo::update_goal::{
+        use wimoai_wimo_tools::implementations::wimo::update_goal::{
             RejectReason, UpdateGoalAck,
         };
         if !self.goal_harness_enabled() {
@@ -2080,10 +2080,10 @@ impl SessionActor {
         attempt: u32,
         outcome: crate::session::goal_classifier::GoalClassifierOutcome,
         notify: &crate::session::goal_orchestrator::GoalNotifySender,
-    ) -> wimo ai_wimo_tools::implementations::wimo::update_goal::UpdateGoalAck {
+    ) -> wimoai_wimo_tools::implementations::wimo::update_goal::UpdateGoalAck {
         use crate::session::goal_classifier::GoalClassifierOutcome;
         use crate::session::goal_tracker::GoalClassifierVerdict;
-        use wimo ai_wimo_tools::implementations::wimo::update_goal::UpdateGoalAck;
+        use wimoai_wimo_tools::implementations::wimo::update_goal::UpdateGoalAck;
 
         let current_tokens = self.chat_state_handle.get_total_tokens().await as i64;
         let (tokens_used, finished_marginal) = self.goal_tokens(current_tokens);
@@ -2225,7 +2225,7 @@ impl SessionActor {
 #[cfg(test)]
 mod role_capability_tests {
     use super::RoleCapability;
-    use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentTypeSummary;
+    use wimoai_wimo_tools::implementations::wimo::task::types::SubagentTypeSummary;
 
     fn summary(can_read: bool, can_search: bool, can_execute: bool) -> SubagentTypeSummary {
         SubagentTypeSummary {
@@ -2256,10 +2256,10 @@ mod role_tool_names_tests {
     use super::{PanelResolveCache, role_tool_names_from};
     use crate::session::goal_planner::RoleSpawnOverride;
     use crate::session::goal_role_tools::RoleToolNames;
-    use wimo ai_wimo_tools::implementations::wimo::task::types::{
+    use wimoai_wimo_tools::implementations::wimo::task::types::{
         SubagentDescribeOutcome, SubagentTypeSummary,
     };
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::tool::ToolKind;
 
     /// A named summary (distinct from the inherit/default names) so tests can tell `from_summary` output from the inherit fallback.
     fn cursor_summary() -> SubagentTypeSummary {

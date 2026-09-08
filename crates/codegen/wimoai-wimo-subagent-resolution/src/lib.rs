@@ -1,4 +1,4 @@
-//! Extracts the pure-logic "resolution" phase of subagent spawning from `wimo ai-wimo-shell` into a reusable library.
+//! Extracts the pure-logic "resolution" phase of subagent spawning from `wimoai-wimo-shell` into a reusable library.
 //! Given a spawn request and a resolution context (roles, personas, parent state), this crate resolves:
 //!
 //! - Effective runtime config (model, persona, capability mode, isolation) via precedence: explicit override > role > persona > parent.
@@ -7,7 +7,7 @@
 //! - Resume identity validation (type/persona match checks; a model override is silently ignored).
 //!
 //! This crate has no dependency on session, coordinator, or transport types.
-//! It serves local hosts (e.g. `wimo ai-wimo-shell`) and any future remote spawn path that needs only pure resolution logic.
+//! It serves local hosts (e.g. `wimoai-wimo-shell`) and any future remote spawn path that needs only pure resolution logic.
 //!
 //! Definition discovery, gating, prompt context, runtime defaults, and capability/depth tool policy are shared here.
 //! Choosing the model from the catalog and creating the child workspace stay in the host adapters.
@@ -31,4 +31,4 @@ pub use definition::{
 pub use overrides::{intersect_capability_modes, resolve_effective_overrides};
 pub use resume::{ResumeValidationError, validate_resume_identity};
 pub use types::{ContextSource, EffectiveRuntimeConfig, ResolutionError, ResumeSourceData};
-pub use wimo ai_wimo_agent::config::AgentDefinition;
+pub use wimoai_wimo_agent::config::AgentDefinition;

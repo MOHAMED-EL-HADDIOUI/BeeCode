@@ -25,7 +25,7 @@
 
 use std::path::{Path, PathBuf};
 
-use wimo ai_fast_worktree::{
+use wimoai_fast_worktree::{
     CleanupReport, RemoveReport, WorktreeBuilder, WorktreeReport, cleanup_worktrees_in,
     remove_worktree,
 };
@@ -796,7 +796,7 @@ fn test_cleanup_orphaned_overlay_snapshots() {
     );
 
     // Run orphan cleanup.
-    let report = wimo ai_fast_worktree::cleanup_orphaned_overlay_snapshots();
+    let report = wimoai_fast_worktree::cleanup_orphaned_overlay_snapshots();
 
     eprintln!(
         "orphan cleanup report: removed={}, btrfs={}, errors={}",

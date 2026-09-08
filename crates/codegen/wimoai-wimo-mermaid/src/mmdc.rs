@@ -4,7 +4,7 @@
 //! A caller opts in via [`MmdcEngine::detect`] or [`MmdcEngine::new`].
 //! `mmdc` produces the SVG; we rasterize it through [`crate::rasterize`] so the same protections (no file resolvers, bundled font) and sizing apply.
 //!
-//! Security: the subprocess is spawned with [`wimo ai_tty_utils::detach_std_command`], [`wimo ai_tty_utils::pager_env`], and null stdio.
+//! Security: the subprocess is spawned with [`wimoai_tty_utils::detach_std_command`], [`wimoai_tty_utils::pager_env`], and null stdio.
 //! Source is passed via a private temp file.
 //! The shared [`crate::run_with_timeout`] enforces a wall-clock budget and reaps the process group (including Chromium grandchildren) on breach.
 
@@ -63,7 +63,7 @@ impl MermaidEngine for MmdcEngine {
         // IO failures below map to `Rasterize` (a render-pipeline failure), not `Unsupported`
         // A spawn failure stays `Unsupported`: the engine itself is unavailable
         let dir = tempfile::Builder::new()
-            .prefix("wimo ai-mermaid-")
+            .prefix("wimoai-mermaid-")
             .tempdir()
             .map_err(|e| MermaidError::Rasterize(format!("could not create temp dir: {e}")))?;
         let input = dir.path().join("diagram.mmd");
@@ -86,9 +86,9 @@ impl MermaidEngine for MmdcEngine {
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
-            .envs(wimo ai_tty_utils::pager_env());
+            .envs(wimoai_tty_utils::pager_env());
         // The setsid/console detach goes through the helper, never a raw pre_exec
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
 
         // Source goes via the temp file, so no stdin payload.
         run_with_timeout(cmd, None, self.timeout).map_err(map_subprocess_error)?;

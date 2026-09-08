@@ -1,6 +1,6 @@
 use super::*;
 use std::path::PathBuf;
-use wimo ai_tracing_macros::teprintln;
+use wimoai_tracing_macros::teprintln;
 
 #[test]
 fn test_map_event_kind() {

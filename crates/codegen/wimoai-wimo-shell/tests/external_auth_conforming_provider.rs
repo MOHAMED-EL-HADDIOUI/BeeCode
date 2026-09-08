@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use chrono::Utc;
-use wimo ai_wimo_shell::auth::{
+use wimoai_wimo_shell::auth::{
     AuthMode, wimoAuth, wimoComConfig, ensure_authenticated, try_ensure_fresh_auth,
 };
 
@@ -95,9 +95,9 @@ async fn a_provider_that_declines_the_headless_run_can_still_sign_the_user_in() 
     unsafe {
         std::env::set_var("wimo_HOME", home.path());
         std::env::set_var("wimo_CLI_CHAT_PROXY_BASE_URL", &dead);
-        std::env::set_var("wimo_wimo ai_API_BASE_URL", &dead);
-        std::env::remove_var("wimo ai_API_KEY");
-        std::env::remove_var("wimo_CODE_wimo ai_API_KEY");
+        std::env::set_var("wimo_wimoai_API_BASE_URL", &dead);
+        std::env::remove_var("wimoai_API_KEY");
+        std::env::remove_var("wimo_CODE_wimoai_API_KEY");
         std::env::set_var("wimo_TELEMETRY_ENABLED", "false");
         std::env::set_var("wimo_FEEDBACK_ENABLED", "false");
         std::env::set_var("wimo_TRACE_UPLOAD", "false");

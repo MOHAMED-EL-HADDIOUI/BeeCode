@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use wimo ai_tool_runtime::{SearchSnapshot, ServerSummary, ToolSearchIndex, ToolSearchResult};
+use wimoai_tool_runtime::{SearchSnapshot, ServerSummary, ToolSearchIndex, ToolSearchResult};
 
 struct StubIndex {
     summaries: Vec<ServerSummary>,

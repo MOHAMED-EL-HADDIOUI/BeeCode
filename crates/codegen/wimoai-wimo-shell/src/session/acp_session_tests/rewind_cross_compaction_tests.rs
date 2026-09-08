@@ -1,8 +1,8 @@
 use super::support::create_test_actor;
 
 use crate::extensions::notification::{
-    CompactionCheckpointFile, CompactionCheckpointInfo, SessionNotification as wimo aiNotification,
-    SessionUpdate as wimo aiSessionUpdate,
+    CompactionCheckpointFile, CompactionCheckpointInfo, SessionNotification as wimoaiNotification,
+    SessionUpdate as wimoaiSessionUpdate,
 };
 use crate::sampling::ConversationItem;
 use crate::session::storage::{SessionUpdate, SessionUpdateEnvelope};
@@ -35,9 +35,9 @@ fn agent_chunk(text: &str) -> SessionUpdate {
 }
 
 fn checkpoint_update(id: &str, prompt_index_at_compaction: usize) -> SessionUpdate {
-    SessionUpdate::wimo ai(Box::new(wimo aiNotification {
+    SessionUpdate::wimoai(Box::new(wimoaiNotification {
         session_id: acp::SessionId::new("s"),
-        update: wimo aiSessionUpdate::CompactionCheckpoint(Box::new(CompactionCheckpointInfo {
+        update: wimoaiSessionUpdate::CompactionCheckpoint(Box::new(CompactionCheckpointInfo {
             checkpoint_id: id.to_string(),
             prompt_index_at_compaction,
             checkpoint_file: format!("compaction_checkpoints/{id}.json"),
@@ -276,7 +276,7 @@ async fn rewind_before_compaction_clears_stale_compaction_marker() {
 }
 
 async fn run_clears_marker_scenario() {
-    use wimo ai_wimo_sampling_types::CompactionsRemaining;
+    use wimoai_wimo_sampling_types::CompactionsRemaining;
     let (gateway_tx, _gateway_rx) = tokio::sync::mpsc::unbounded_channel();
     let (persistence_tx, _persistence_rx) = tokio::sync::mpsc::unbounded_channel();
     let mut actor = create_test_actor(0, 200_000, 80, gateway_tx, persistence_tx).await;

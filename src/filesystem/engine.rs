@@ -1,5 +1,5 @@
 //! Safe file system engine — REAL atomic writes and safe edits (Section 14 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 use std::fs;
 
 pub fn safe_write(path: &str, content: &str) -> Result<(), std::io::Error> {

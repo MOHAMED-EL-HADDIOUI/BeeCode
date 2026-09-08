@@ -1,11 +1,11 @@
 //! Classify one stream item for `StreamSpanTiming::hold_until_first_content`.
 
-use wimo ai_wimo_sampling_types::{ChatCompletionChunk, messages, rs};
+use wimoai_wimo_sampling_types::{ChatCompletionChunk, messages, rs};
 
 use crate::span_timing::ItemClass;
 
 fn chat_chunk_has_content(chunk: &ChatCompletionChunk) -> bool {
-    use wimo ai_wimo_sampling_types::ChatChunkDelta;
+    use wimoai_wimo_sampling_types::ChatChunkDelta;
     chunk.choices.iter().any(|choice| {
         let ChatChunkDelta {
             role: _,

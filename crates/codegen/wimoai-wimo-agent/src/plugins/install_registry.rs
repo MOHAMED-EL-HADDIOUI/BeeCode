@@ -57,14 +57,14 @@ pub struct InstalledRepo {
     pub marketplace: Option<MarketplaceProvenance>,
 }
 
-/// Lives here (not in wimo ai-wimo-plugin-marketplace) to keep dependency direction sane.
+/// Lives here (not in wimoai-wimo-plugin-marketplace) to keep dependency direction sane.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MarketplaceProvenance {
     /// Canonical source identity (git URL or local path).
     pub source_url_or_path: String,
     /// User-facing source name (display only, not used for matching).
     pub source_display_name: String,
-    /// Plugin subdirectory within marketplace (e.g., "plugins/wimo ai-code-review").
+    /// Plugin subdirectory within marketplace (e.g., "plugins/wimoai-code-review").
     pub plugin_subdir: String,
 }
 
@@ -155,7 +155,7 @@ impl InstallRegistry {
         let content = serde_json::to_string_pretty(self).map_err(|e| InstallError::Json {
             detail: e.to_string(),
         })?;
-        if std::env::var_os("wimo ai_wimo_TEST_FAIL_REGISTRY_SAVE_AFTER_SERIALIZE").is_some() {
+        if std::env::var_os("wimoai_wimo_TEST_FAIL_REGISTRY_SAVE_AFTER_SERIALIZE").is_some() {
             return Err(InstallError::InstallFailed {
                 detail: "test-injected registry save failure".into(),
             });
@@ -243,15 +243,15 @@ impl InstallRegistry {
             return dir;
         }
 
-        wimo ai_wimo_config::wimo_home().join(DEFAULT_INSTALL_DIR_NAME)
+        wimoai_wimo_config::wimo_home().join(DEFAULT_INSTALL_DIR_NAME)
     }
 
     /// Read `[plugins].install_dir` from the effective config (managed_config.toml merged under config.toml; user wins).
     fn read_install_dir_from_config() -> Option<PathBuf> {
-        let root = wimo ai_wimo_config::load_effective_config_disk_only().ok()?;
+        let root = wimoai_wimo_config::load_effective_config_disk_only().ok()?;
         let value = root.get("plugins")?.get("install_dir")?.as_str()?;
         let expanded = if let Some(stripped) = value.strip_prefix("~/") {
-            wimo ai_dirs::home_dir()?.join(stripped)
+            wimoai_dirs::home_dir()?.join(stripped)
         } else {
             PathBuf::from(value)
         };

@@ -421,7 +421,7 @@ pub async fn run_login_flow_with_config(
     } else {
         // No client UI: print to stderr
         eprintln!();
-        let provider_label = if oidc.issuer == super::super::config::wimo ai_OAUTH2_ISSUER {
+        let provider_label = if oidc.issuer == super::super::config::wimoai_OAUTH2_ISSUER {
             "wimo".to_owned()
         } else {
             oidc.issuer.clone()

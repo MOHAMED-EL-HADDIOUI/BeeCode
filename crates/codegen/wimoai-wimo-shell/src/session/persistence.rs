@@ -26,7 +26,7 @@ use crate::remote::RemoteSync;
 use crate::sampling::Client as OaiCompatClient;
 use crate::sampling::ConversationItem;
 use crate::session::export::ExportedMetadata;
-use wimo ai_wimo_workspace::session::file_state::RewindPoint;
+use wimoai_wimo_workspace::session::file_state::RewindPoint;
 
 use crate::session::signals::SessionSignals;
 use crate::session::storage::relocation::{RelocationError, RelocationView};
@@ -35,12 +35,12 @@ use crate::session::visibility::ClassifiedSessionKind;
 use crate::tools::todo::TodoState;
 use crate::util::wimo_home::wimo_home;
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_wimo_sampling_types::ReasoningEffort;
 
 use crate::extensions::notification::{
     DISK_FULL_ERROR_TYPE, DISK_FULL_USER_MESSAGE, RetryState,
-    SessionNotification as wimo aiSessionNotification, SessionUpdate as wimo aiSessionUpdate,
+    SessionNotification as wimoaiSessionNotification, SessionUpdate as wimoaiSessionUpdate,
 };
 use crate::session::info::Info;
 use tokio::sync::{mpsc, watch};
@@ -219,7 +219,7 @@ pub enum PersistenceMsg {
     AppendCwdSwitchAndAck {
         item: ConversationItem,
         respond_to: tokio::sync::oneshot::Sender<
-            Result<wimo ai_chat_state::StrictAppendAck, wimo ai_chat_state::StrictAppendError>,
+            Result<wimoai_chat_state::StrictAppendAck, wimoai_chat_state::StrictAppendError>,
         >,
     },
     /// Replace the entire chat history (used for compaction)
@@ -333,7 +333,7 @@ pub enum PersistenceMsg {
     },
 }
 
-pub use wimo ai_wimo_shared::session::session_dir;
+pub use wimoai_wimo_shared::session::session_dir;
 
 type RelocationResult<T> = crate::session::storage::relocation::Result<T>;
 type SummaryReader = fn(&Path) -> RelocationResult<Summary>;
@@ -1026,7 +1026,7 @@ pub fn default_model_id() -> acp::ModelId {
 impl Summary {
     pub(crate) fn new(info: &Info, model_id: acp::ModelId) -> std::io::Result<Self> {
         let git_metadata =
-            wimo ai_wimo_workspace::session::git::resolve_persisted_session_git_metadata_sync(
+            wimoai_wimo_workspace::session::git::resolve_persisted_session_git_metadata_sync(
                 std::path::Path::new(&info.cwd),
             );
         let mut summary = Self {
@@ -1500,9 +1500,9 @@ impl SessionPersistence {
         let Some(gateway) = &self.gateway else {
             return;
         };
-        let notification = wimo aiSessionNotification {
+        let notification = wimoaiSessionNotification {
             session_id: self.info.id.clone(),
-            update: wimo aiSessionUpdate::RetryState(RetryState::Failed {
+            update: wimoaiSessionUpdate::RetryState(RetryState::Failed {
                 error_type: DISK_FULL_ERROR_TYPE.to_string(),
                 message: DISK_FULL_USER_MESSAGE.to_string(),
             }),
@@ -1824,7 +1824,7 @@ impl SessionPersistence {
                                 }
                             }
                         }
-                        SessionUpdate::wimo ai(_) => {
+                        SessionUpdate::wimoai(_) => {
                             // wimo AI notifications are written directly without merging
                             if let Err(error) = self.write_update(&update).await {
                                 tracing::warn!(%error, "failed to write update");
@@ -1868,12 +1868,12 @@ impl SessionPersistence {
                         .await
                         .map_err(|error| match error {
                             crate::session::storage::AppendCwdSwitchError::NotCommitted(error) => {
-                                wimo ai_chat_state::StrictAppendError::NotCommitted(error)
+                                wimoai_chat_state::StrictAppendError::NotCommitted(error)
                             }
                             crate::session::storage::AppendCwdSwitchError::Committed {
                                 acknowledgement,
                                 source,
-                            } => wimo ai_chat_state::StrictAppendError::Committed {
+                            } => wimoai_chat_state::StrictAppendError::Committed {
                                 acknowledgement,
                                 source,
                             },
@@ -2254,7 +2254,7 @@ impl SessionPersistence {
 
 /// Collect MCP server stderr logs from `~/.wimo/logs/mcp/` for inclusion in the session archive.
 fn collect_mcp_stderr_logs(files: &mut Vec<CopiedSessionFile>) {
-    let mcp_log_dir = wimo ai_wimo_config::wimo_home().join("logs").join("mcp");
+    let mcp_log_dir = wimoai_wimo_config::wimo_home().join("logs").join("mcp");
     let Ok(entries) = std::fs::read_dir(&mcp_log_dir) else {
         return;
     };
@@ -2839,7 +2839,7 @@ pub async fn delete_session_history(
     cwd: Option<&str>,
     needs_remote: bool,
     auth_manager: Arc<crate::auth::AuthManager>,
-    search_index: Option<&wimo ai_wimo_session_search::SearchIndexManager>,
+    search_index: Option<&wimoai_wimo_session_search::SearchIndexManager>,
 ) -> Result<SessionDeletion, DeleteSessionError> {
     let sid = acp::SessionId::new(Arc::from(session_id));
 
@@ -2955,7 +2955,7 @@ pub(crate) fn cleanup_stale_sessions(skip_session_dir: Option<&Path>) {
         let sessions_root = wimo_home().join("sessions");
 
         tracing::info!(
-            target: "wimo ai_wimo_shell::session::persistence",
+            target: "wimoai_wimo_shell::session::persistence",
             sessions_root = %sessions_root.display(),
             ttl_days,
             skip = ?skip_session_dir.map(|p| p.display().to_string()),
@@ -2970,7 +2970,7 @@ pub(crate) fn cleanup_stale_sessions(skip_session_dir: Option<&Path>) {
         );
 
         tracing::info!(
-            target: "wimo ai_wimo_shell::session::persistence",
+            target: "wimoai_wimo_shell::session::persistence",
             sessions_root = %sessions_root.display(),
             files_deleted = stats.files_deleted,
             dirs_removed = stats.dirs_removed,
@@ -3039,7 +3039,7 @@ fn cleanup_stale_sessions_inner(
             Ok(e) => e,
             Err(e) => {
                 tracing::debug!(
-                    target: "wimo ai_wimo_shell::session::persistence",
+                    target: "wimoai_wimo_shell::session::persistence",
                     error = %e,
                     "SESSION_CLEANUP_READ_ERROR"
                 );
@@ -3088,7 +3088,7 @@ fn cleanup_stale_sessions_inner(
                     Err(error) => {
                         stats.errors += 1;
                         tracing::debug!(
-                            target: "wimo ai_wimo_shell::session::persistence",
+                            target: "wimoai_wimo_shell::session::persistence",
                             path = %summary.display(),
                             %error,
                             "SESSION_CLEANUP_METADATA_ERROR"
@@ -3111,7 +3111,7 @@ fn cleanup_stale_sessions_inner(
             if child_stats.files_deleted > 0 && std::fs::remove_dir(&path).is_ok() {
                 stats.dirs_removed += 1;
                 tracing::debug!(
-                    target: "wimo ai_wimo_shell::session::persistence",
+                    target: "wimoai_wimo_shell::session::persistence",
                     dir = %path.display(),
                     "SESSION_CLEANUP_RMDIR"
                 );
@@ -3122,7 +3122,7 @@ fn cleanup_stale_sessions_inner(
             if std::fs::remove_file(&path).is_ok() {
                 stats.files_deleted += 1;
                 tracing::debug!(
-                    target: "wimo ai_wimo_shell::session::persistence",
+                    target: "wimoai_wimo_shell::session::persistence",
                     file = %path.display(),
                     "SESSION_CLEANUP_DELETE"
                 );

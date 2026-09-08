@@ -3,8 +3,8 @@
 use std::rc::Rc;
 use std::sync::Weak;
 
-use wimo ai_agent_lifecycle::LocalExtensionRegistry;
-use wimo ai_agent_lifecycle::LocalExtensionRegistryBuilder;
+use wimoai_agent_lifecycle::LocalExtensionRegistry;
+use wimoai_agent_lifecycle::LocalExtensionRegistryBuilder;
 
 use super::*;
 

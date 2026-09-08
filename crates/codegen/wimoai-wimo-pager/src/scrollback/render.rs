@@ -890,7 +890,7 @@ use super::types::BlockOutput;
 /// Also used by the `/btw` inline panel (no header offset; pure markdown body).
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn map_hyperlinks_to_overlay(
-    hyperlinks: &[wimo ai_wimo_markdown::HyperlinkTarget],
+    hyperlinks: &[wimoai_wimo_markdown::HyperlinkTarget],
     block_output: &BlockOutput,
     content_skip: usize,
     first_visible_screen_y: u16,

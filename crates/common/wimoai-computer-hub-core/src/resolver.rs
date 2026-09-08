@@ -14,12 +14,12 @@ use async_trait::async_trait;
 use futures::StreamExt;
 use serde_json::Value;
 
-use wimo ai_tool_protocol::{SessionId, ToolCapabilities, ToolId, ToolRegistration};
-use wimo ai_tool_runtime::{
+use wimoai_tool_protocol::{SessionId, ToolCapabilities, ToolId, ToolRegistration};
+use wimoai_tool_runtime::{
     ListToolsContext, Tool, ToolCallContext, ToolError, ToolOutput, ToolStream, ToolStreamItem,
     TypedToolOutput, terminal_only,
 };
-use wimo ai_tool_types::ToolDescription;
+use wimoai_tool_types::ToolDescription;
 
 use crate::registry::ToolRegistry;
 
@@ -180,7 +180,7 @@ where
                 Ok(value) => {
                     let custom = out.model_output();
                     let model_output = if custom.is_empty() {
-                        wimo ai_tool_runtime::extract_content_blocks(&value)
+                        wimoai_tool_runtime::extract_content_blocks(&value)
                     } else {
                         custom
                     };

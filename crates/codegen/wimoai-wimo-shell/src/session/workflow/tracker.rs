@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use serde::{Deserialize, Serialize};
-use wimo ai_workflow::{PauseKind, PhaseMeta, WorkflowOutcome};
+use wimoai_workflow::{PauseKind, PhaseMeta, WorkflowOutcome};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -88,7 +88,7 @@ const WORKFLOW_PAUSE_MESSAGE_MAX_BYTES: usize = 4 * 1024;
 
 fn capped_pause_message(message: impl Into<String>) -> String {
     let message = message.into();
-    wimo ai_wimo_tools::util::truncate_str(&message, WORKFLOW_PAUSE_MESSAGE_MAX_BYTES).to_string()
+    wimoai_wimo_tools::util::truncate_str(&message, WORKFLOW_PAUSE_MESSAGE_MAX_BYTES).to_string()
 }
 
 fn default_label_for(agents: &[WorkflowAgentRow], phase: Option<&str>) -> String {
@@ -528,7 +528,7 @@ impl WorkflowTracker {
             }
             WorkflowOutcome::BudgetExceeded { message } => {
                 run.state.status = WorkflowRunStatus::BudgetLimited;
-                let hint = if run.state.agents_used >= wimo ai_workflow::MAX_AGENT_BUDGET {
+                let hint = if run.state.agents_used >= wimoai_workflow::MAX_AGENT_BUDGET {
                     "finished work is kept, but this run reached the maximum agent budget and \
                      cannot be resumed; start a new run"
                 } else {

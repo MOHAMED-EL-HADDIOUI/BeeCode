@@ -1,5 +1,5 @@
 //! TUI layout — REAL layout framework (Section 26 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub struct TUILayout {
     pub header_text: String,
@@ -18,7 +18,7 @@ impl TUILayout {
             agent_panel: true,
             tasks_panel: true,
             processes_panel: true,
-            status_bar: "wimo ai — open source — anyone can contribute".to_string(),
+            status_bar: "wimoai — open source — anyone can contribute".to_string(),
         }
     }
 

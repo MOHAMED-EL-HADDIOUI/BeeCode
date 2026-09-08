@@ -4,7 +4,7 @@
 use crate::version::get_installed_wimo_version;
 use semver::Version;
 use tracing::warn;
-use wimo ai_wimo_shell::util::config::VersionPolicy;
+use wimoai_wimo_shell::util::config::VersionPolicy;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum RequiredRangeDecision {

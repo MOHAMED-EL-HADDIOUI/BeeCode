@@ -1,5 +1,5 @@
 use super::{fingerprint_prefix, prefire_lead_percent};
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_wimo_sampling_types::ConversationItem;
 
 #[test]
 fn fingerprint_stable_for_same_prefix() {

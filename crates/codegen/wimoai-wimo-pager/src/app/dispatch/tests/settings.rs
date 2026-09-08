@@ -157,7 +157,7 @@ fn plugin_cta_catalog_reload_empty_candidates_resets_matched_phase() {
     let id = AgentId(0);
     {
         let cta = &mut app.agents.get_mut(&id).unwrap().plugin_cta;
-        cta.source_url_or_path = Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
+        cta.source_url_or_path = Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
         cta.candidates = vec![cta_entry("figma", "not_installed")];
         cta.phase = CtaPhase::Matched {
             plugin_relative_path: "plugins/figma".into(),
@@ -166,11 +166,11 @@ fn plugin_cta_catalog_reload_empty_candidates_resets_matched_phase() {
         cta.hit_connect.rect = Some(ratatui::layout::Rect::new(0, 0, 9, 1));
         cta.hit_dismiss.rect = Some(ratatui::layout::Rect::new(10, 0, 3, 1));
     }
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
-            source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
+            source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
             source_kind: "git".into(),
-            source_url_or_path: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
+            source_url_or_path: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
             plugins: vec![cta_entry("figma", "installed")],
             error: None,
         }],

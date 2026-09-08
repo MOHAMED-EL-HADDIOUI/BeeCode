@@ -1,11 +1,11 @@
 use super::support::*;
 use super::*;
 async fn build_gate_actor() -> SessionActor {
-    use wimo ai_wimo_tools::implementations::wimo::enter_plan_mode::EnterPlanModeTool;
-    use wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeTool;
-    use wimo ai_wimo_tools::registry::types::ToolConfig;
+    use wimoai_wimo_tools::implementations::wimo::enter_plan_mode::EnterPlanModeTool;
+    use wimoai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeTool;
+    use wimoai_wimo_tools::registry::types::ToolConfig;
     let (gateway_tx, mut gateway_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+        tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
     let (persistence_tx, _persistence_rx) =
         tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
     let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -18,7 +18,7 @@ async fn build_gate_actor() -> SessionActor {
     .await;
     tokio::task::spawn_local(async move {
         while let Some(msg) = gateway_rx.recv().await {
-            if let wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) = msg {
+            if let wimoai_acp_lib::AcpClientMessage::SessionNotification(args) = msg {
                 let _ = args.response_tx.send(Ok(()));
             }
         }

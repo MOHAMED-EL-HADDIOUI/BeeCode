@@ -21,9 +21,9 @@ fn http1_only_client_stays_on_http11_against_an_h2_server() {
     // SAFETY: sole test in this binary; set before any client build resolves
     // the crate's env-backed root snapshot.
     unsafe {
-        std::env::remove_var(wimo ai_wimo_extra_ca::ENV_SSL_CERT_FILE);
+        std::env::remove_var(wimoai_wimo_extra_ca::ENV_SSL_CERT_FILE);
         std::env::set_var(
-            wimo ai_wimo_extra_ca::ENV_wimo_EXTRA_CA_BUNDLE,
+            wimoai_wimo_extra_ca::ENV_wimo_EXTRA_CA_BUNDLE,
             ca_path.as_os_str(),
         );
     }
@@ -58,7 +58,7 @@ fn http1_only_client_stays_on_http11_against_an_h2_server() {
         }
     });
 
-    let client = wimo ai_wimo_extra_ca::build_blocking_reqwest_client(|builder| {
+    let client = wimoai_wimo_extra_ca::build_blocking_reqwest_client(|builder| {
         builder
             .http1_only()
             .timeout(std::time::Duration::from_secs(10))

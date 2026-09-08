@@ -9,8 +9,8 @@
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, Request, Respond, ResponseTemplate};
 
-use wimo ai_wimo_update::auto_update::{download_silent, download_with_progress};
-use wimo ai_wimo_update::version::fetch_gcs_version_from_base;
+use wimoai_wimo_update::auto_update::{download_silent, download_with_progress};
+use wimoai_wimo_update::version::fetch_gcs_version_from_base;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Happy-path tests (fast, no retries triggered).

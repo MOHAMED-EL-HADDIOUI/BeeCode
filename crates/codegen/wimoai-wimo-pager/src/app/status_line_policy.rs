@@ -3,7 +3,7 @@
 
 use std::time::Instant;
 
-use wimo ai_wimo_status_line::{ResolvedStatusLine, StatusLineContext, StatusLineItem};
+use wimoai_wimo_status_line::{ResolvedStatusLine, StatusLineContext, StatusLineItem};
 
 use super::app_view::{AppView, TickDemand};
 use super::status_line::{

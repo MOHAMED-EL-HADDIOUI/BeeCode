@@ -402,7 +402,7 @@ mod tests {
         fn enabled(&self, metadata: &tracing::Metadata<'_>) -> bool {
             metadata
                 .target()
-                .starts_with("wimo ai_wimo_mcp::mcp_http_client")
+                .starts_with("wimoai_wimo_mcp::mcp_http_client")
         }
         fn new_span(&self, _: &tracing::span::Attributes<'_>) -> tracing::span::Id {
             tracing::span::Id::from_u64(1)

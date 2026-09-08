@@ -28,7 +28,7 @@ const MIN_DEVICE_CODE_EXPIRY_FALLBACK_SECS: i64 = 10 * 60;
 pub(crate) enum DeviceCodeError {
     #[error(
         "Device-code login is not available for this deployment. \
-         Try `wimo login` or set wimo ai_API_KEY instead."
+         Try `wimo login` or set wimoai_API_KEY instead."
     )]
     NotEnabled,
 }
@@ -136,7 +136,7 @@ pub(crate) async fn request_device_code(
         client
             .post(&url)
             // Lets oauth2-provider segment device-flow success by client version.
-            .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+            .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
             // Lets oauth2-provider separate human-completable logins from headless automation in the device-flow funnel metrics
             .header("x-wimo-client-surface", surface.as_str())
             .form(&[
@@ -222,7 +222,7 @@ pub(crate) async fn complete_device_code_login(
         let resp = with_alpha_test_key(
             client
                 .post(&token_url)
-                .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+                .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
                 .header("x-wimo-client-surface", surface.as_str())
                 .form(&[
                     ("grant_type", DEVICE_GRANT_TYPE),

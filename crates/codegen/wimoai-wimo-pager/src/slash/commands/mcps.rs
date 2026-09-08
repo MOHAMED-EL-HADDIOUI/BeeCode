@@ -13,7 +13,7 @@ impl SlashCommand for McpsCommand {
     fn run(&self, _ctx: &mut CommandExecCtx, _args: &str) -> CommandResult {
         CommandResult::Action(Action::OpenExtensionsModal {
             tab: crate::views::extensions_modal::ExtensionsTab::McpServers,
-            trigger: wimo ai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
+            trigger: wimoai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
         })
     }
 }

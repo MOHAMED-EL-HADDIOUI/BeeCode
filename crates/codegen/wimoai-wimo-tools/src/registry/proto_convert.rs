@@ -1,16 +1,16 @@
-//! Conversion from the gRPC wire config types (`wimo ai-wimo-tools-api`) to the
+//! Conversion from the gRPC wire config types (`wimoai-wimo-tools-api`) to the
 //! runtime registry types ([`ToolConfig`] / [`ToolServerConfig`]).
 //!
 //! The `params_json` parse/validation contract lives in
-//! [`wimo ai_wimo_tools_api::config_validation`] so every consumer (this
+//! [`wimoai_wimo_tools_api::config_validation`] so every consumer (this
 //! converter, save-time config validation, ...) shares one source of
 //! truth. The error types are re-exported here for back-compat.
 
 use super::types::{ToolConfig, ToolServerConfig};
 
-pub use wimo ai_wimo_tools_api::config_validation::{ToolConfigEntryError, ToolConfigEntryErrorKind};
+pub use wimoai_wimo_tools_api::config_validation::{ToolConfigEntryError, ToolConfigEntryErrorKind};
 
-/// Convert one wire [`wimo ai_wimo_tools_api::ToolConfigEntry`] to a runtime
+/// Convert one wire [`wimoai_wimo_tools_api::ToolConfigEntry`] to a runtime
 /// [`ToolConfig`].
 ///
 /// `index` is only used for error reporting. The result always has
@@ -18,9 +18,9 @@ pub use wimo ai_wimo_tools_api::config_validation::{ToolConfigEntryError, ToolCo
 /// capability-mode filtering intentionally keeps baseline `kind: None` tools.
 pub fn tool_config_from_entry(
     index: usize,
-    entry: wimo ai_wimo_tools_api::ToolConfigEntry,
+    entry: wimoai_wimo_tools_api::ToolConfigEntry,
 ) -> Result<ToolConfig, ToolConfigEntryError> {
-    let wimo ai_wimo_tools_api::ToolConfigEntry {
+    let wimoai_wimo_tools_api::ToolConfigEntry {
         id,
         params_json,
         name_override,
@@ -28,12 +28,12 @@ pub fn tool_config_from_entry(
         behavior_version,
         description_override,
     } = entry;
-    let params = wimo ai_wimo_tools_api::config_validation::parse_params_json(
+    let params = wimoai_wimo_tools_api::config_validation::parse_params_json(
         index,
         &id,
         params_json.as_deref(),
     )?;
-    wimo ai_wimo_tools_api::config_validation::validate_name_override(
+    wimoai_wimo_tools_api::config_validation::validate_name_override(
         index,
         &id,
         name_override.as_deref(),
@@ -59,7 +59,7 @@ pub fn tool_config_from_entry(
 /// `behavior_preset` is always `None` (the `"current"` default); per-tool
 /// `behavior_version` overrides on individual entries still apply.
 pub fn tool_server_config_from_entries(
-    entries: Vec<wimo ai_wimo_tools_api::ToolConfigEntry>,
+    entries: Vec<wimoai_wimo_tools_api::ToolConfigEntry>,
 ) -> Result<ToolServerConfig, ToolConfigEntryError> {
     let tools = entries
         .into_iter()
@@ -76,8 +76,8 @@ pub fn tool_server_config_from_entries(
 mod tests {
     use super::*;
 
-    fn entry(id: &str) -> wimo ai_wimo_tools_api::ToolConfigEntry {
-        wimo ai_wimo_tools_api::ToolConfigEntry {
+    fn entry(id: &str) -> wimoai_wimo_tools_api::ToolConfigEntry {
+        wimoai_wimo_tools_api::ToolConfigEntry {
             id: id.to_owned(),
             params_json: None,
             name_override: None,

@@ -154,7 +154,7 @@ fn external_prompt_editor_refuses_elements_with_visible_message() {
     let agent = app.agents.get_mut(&id).unwrap();
     agent.prompt.set_text("");
     let image = crate::prompt_images::PastedImage {
-        element_id: wimo ai_ratatui_textarea::ElementId::from_raw(0),
+        element_id: wimoai_ratatui_textarea::ElementId::from_raw(0),
         display_number: 0,
         mime_type: "image/png".to_owned(),
         dimensions: Some((8, 8)),
@@ -322,9 +322,9 @@ fn config_editor_action_still_uses_typed_request() {
 }
 fn seed_foreign_resume_hint(
     app: &mut AppView,
-    tool: wimo ai_wimo_foreign_sessions::ForeignSessionTool,
+    tool: wimoai_wimo_foreign_sessions::ForeignSessionTool,
 ) {
-    app.foreign_session_compat = wimo ai_wimo_foreign_sessions::EnabledForeignSessionSources {
+    app.foreign_session_compat = wimoai_wimo_foreign_sessions::EnabledForeignSessionSources {
         claude: true,
         codex: true,
         cursor: true,
@@ -345,7 +345,7 @@ fn seed_foreign_resume_hint(
     app.apply_foreign_resume_detection(
         launch_token,
         &canonical_cwd,
-        Some(wimo ai_wimo_foreign_sessions::RecentForeignSession {
+        Some(wimoai_wimo_foreign_sessions::RecentForeignSession {
             tool,
             native_id: "native-id".into(),
             age: std::time::Duration::from_secs(60),
@@ -401,7 +401,7 @@ fn quit_returns_quit_effect() {
 }
 #[test]
 fn resume_foreign_session_consumes_hint_and_uses_each_tools_prompt() {
-    use wimo ai_wimo_foreign_sessions::ForeignSessionTool;
+    use wimoai_wimo_foreign_sessions::ForeignSessionTool;
     for (tool, prompt) in [
         (ForeignSessionTool::Claude, "/resume-claude native-id"),
         (ForeignSessionTool::Codex, "/resume-codex native-id"),
@@ -436,7 +436,7 @@ fn resume_foreign_session_without_hint_is_noop() {
 }
 #[test]
 fn resume_foreign_session_stashes_prompt_behind_trust_and_auth() {
-    use wimo ai_wimo_foreign_sessions::ForeignSessionTool;
+    use wimoai_wimo_foreign_sessions::ForeignSessionTool;
     for (tool, prompt, auth_pending) in [
         (ForeignSessionTool::Codex, "/resume-codex native-id", false),
         (ForeignSessionTool::Cursor, "/resume-cursor native-id", true),
@@ -575,8 +575,8 @@ fn mark_turn_finished_clears_start_and_stamps_active() {
         "last_active_at must be stamped"
     );
 }
-fn critical_announcement(id: &str) -> wimo ai_wimo_announcements::RemoteAnnouncement {
-    wimo ai_wimo_announcements::RemoteAnnouncement {
+fn critical_announcement(id: &str) -> wimoai_wimo_announcements::RemoteAnnouncement {
+    wimoai_wimo_announcements::RemoteAnnouncement {
         id: Some(id.into()),
         title: Some(format!("{id} title")),
         message: Some(format!("{id} message")),
@@ -584,12 +584,12 @@ fn critical_announcement(id: &str) -> wimo ai_wimo_announcements::RemoteAnnounce
         ..Default::default()
     }
 }
-fn promo_announcement(id: &str) -> wimo ai_wimo_announcements::RemoteAnnouncement {
-    wimo ai_wimo_announcements::RemoteAnnouncement {
+fn promo_announcement(id: &str) -> wimoai_wimo_announcements::RemoteAnnouncement {
+    wimoai_wimo_announcements::RemoteAnnouncement {
         id: Some(id.into()),
         message: Some(format!("{id} message")),
         severity: Some("promo".into()),
-        cta: Some(wimo ai_wimo_announcements::AnnouncementCta {
+        cta: Some(wimoai_wimo_announcements::AnnouncementCta {
             label: Some("Go".into()),
             url: Some(format!("https://x.ai/{id}")),
             caption: None,
@@ -611,7 +611,7 @@ fn shown_banner_id(app: &AppView) -> Option<String> {
 #[serial_test::serial(wimo_TEST_OPEN_URL_FILE)]
 #[test]
 fn announcements_open_cta_opens_promo_and_noops_under_critical() {
-    use wimo ai_wimo_telemetry::events::AnnouncementCtaSurface;
+    use wimoai_wimo_telemetry::events::AnnouncementCtaSurface;
     let url_file = std::env::temp_dir().join(format!("wimo-cta-open-{}.txt", std::process::id()));
     let _ = std::fs::remove_file(&url_file);
     unsafe { std::env::set_var("wimo_TEST_OPEN_URL_FILE", &url_file) };
@@ -663,7 +663,7 @@ fn announcements_open_cta_opens_promo_and_noops_under_critical() {
 #[test]
 fn cta_impressions_latch_once_per_surface_and_reemit_for_new_id() {
     use crate::app::app_view::ActiveView;
-    use wimo ai_wimo_telemetry::events::AnnouncementCtaSurface;
+    use wimoai_wimo_telemetry::events::AnnouncementCtaSurface;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     app.active_view = ActiveView::Agent(id);
@@ -732,7 +732,7 @@ fn cta_impressions_respect_slot_gate_and_paint() {
 #[test]
 fn cta_impressions_suppressed_while_rect_occluded() {
     use crate::app::app_view::ActiveView;
-    use wimo ai_wimo_telemetry::events::AnnouncementCtaSurface;
+    use wimoai_wimo_telemetry::events::AnnouncementCtaSurface;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     app.active_view = ActiveView::Agent(id);
@@ -764,7 +764,7 @@ fn cta_impressions_suppressed_while_rect_occluded() {
 fn cta_impressions_cover_welcome_and_dashboard_surfaces() {
     use crate::app::app_view::ActiveView;
     use crate::views::dashboard::state::DashboardState;
-    use wimo ai_wimo_telemetry::events::AnnouncementCtaSurface;
+    use wimoai_wimo_telemetry::events::AnnouncementCtaSurface;
     let mut app = test_app();
     app.active_announcements = vec![promo_announcement("p")];
     let rect = Some(ratatui::layout::Rect::new(0, 0, 4, 1));
@@ -1027,7 +1027,7 @@ fn agent_type_mismatch_cancel_is_noop() {
 }
 #[test]
 fn agent_type_mismatch_with_effort_stashes_deferred_switch() {
-    use wimo ai_wimo_shell::sampling::types::ReasoningEffort;
+    use wimoai_wimo_shell::sampling::types::ReasoningEffort;
     let mut app = test_app_with_agent();
     let model_id = acp::ModelId::new(std::sync::Arc::from("cursor-reasoning"));
     let effort = Some(ReasoningEffort::High);
@@ -1625,7 +1625,7 @@ fn conversation_entry_load_sets_chat_kind_bit() {
     );
     assert_eq!(
         agent.rename_kind(),
-        wimo ai_wimo_shell::session::unified_list::SessionKind::Chat
+        wimoai_wimo_shell::session::unified_list::SessionKind::Chat
     );
     let rename = dispatch(
         Action::RenameSession {
@@ -1637,7 +1637,7 @@ fn conversation_entry_load_sets_chat_kind_bit() {
         matches!(
             &rename[..],
             [Effect::RenameSession { kind, .. }]
-                if *kind == wimo ai_wimo_shell::session::unified_list::SessionKind::Chat
+                if *kind == wimoai_wimo_shell::session::unified_list::SessionKind::Chat
         ),
         "conversation-entry rename must send kind=chat, got {rename:?}"
     );
@@ -1676,7 +1676,7 @@ fn chat_mode_resume_without_local_disk_loads_as_chat() {
     );
     assert_eq!(
         agent.rename_kind(),
-        wimo ai_wimo_shell::session::unified_list::SessionKind::Chat
+        wimoai_wimo_shell::session::unified_list::SessionKind::Chat
     );
     assert!(
         agent.app_chat_mode,
@@ -1692,7 +1692,7 @@ fn chat_mode_resume_without_local_disk_loads_as_chat() {
         matches!(
             &rename[..],
             [Effect::RenameSession { kind, .. }]
-                if *kind == wimo ai_wimo_shell::session::unified_list::SessionKind::Chat
+                if *kind == wimoai_wimo_shell::session::unified_list::SessionKind::Chat
         ),
         "sticky --chat gateway resume rename must send kind=chat, got {rename:?}"
     );
@@ -1736,7 +1736,7 @@ fn load_sticky_chat_history_bypass_rename_kind_is_build() {
     );
     assert_eq!(
         agent.rename_kind(),
-        wimo ai_wimo_shell::session::unified_list::SessionKind::Build
+        wimoai_wimo_shell::session::unified_list::SessionKind::Build
     );
     let rename = dispatch(
         Action::RenameSession {
@@ -1748,7 +1748,7 @@ fn load_sticky_chat_history_bypass_rename_kind_is_build() {
         matches!(
             &rename[..],
             [Effect::RenameSession { kind, title, .. }]
-                if *kind == wimo ai_wimo_shell::session::unified_list::SessionKind::Build
+                if *kind == wimoai_wimo_shell::session::unified_list::SessionKind::Build
                     && title == "local title"
         ),
         "history-bypass rename must send kind=build, got {rename:?}"
@@ -1802,7 +1802,7 @@ fn chat_mode_allows_conversation_entry_even_if_local_path() {
     );
     assert_eq!(
         agent.rename_kind(),
-        wimo ai_wimo_shell::session::unified_list::SessionKind::Chat
+        wimoai_wimo_shell::session::unified_list::SessionKind::Chat
     );
 }
 #[test]
@@ -1897,7 +1897,7 @@ fn dispatch_fork_no_flag_always_reopens_modal_after_previous_answer() {
 #[test]
 fn translate_local_submit_skipped_returns_changed_with_no_action() {
     use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
     let q = Question {
@@ -1928,7 +1928,7 @@ fn translate_local_submit_skipped_returns_changed_with_no_action() {
 #[test]
 fn translate_local_submit_no_selection_returns_changed_no_action() {
     use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
     let q = Question {
@@ -1959,7 +1959,7 @@ fn translate_local_submit_no_selection_returns_changed_no_action() {
 #[test]
 fn translate_local_submit_out_of_range_index_returns_changed_no_action() {
     use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
     let q = Question {
@@ -1991,7 +1991,7 @@ fn translate_local_submit_out_of_range_index_returns_changed_no_action() {
 #[test]
 fn handle_ask_user_question_does_not_push_system_block_when_displaced_acp_modal() {
     use crate::views::question_view::QuestionViewState;
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
     let mut app = fork_test_app();

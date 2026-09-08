@@ -266,7 +266,7 @@ impl DiagHandle {
             pid: process::id(),
             connected_at: inner.connected_at,
             state_changed_at: inner.state_changed_at,
-            version: wimo ai_wimo_version::VERSION,
+            version: wimoai_wimo_version::VERSION,
             error_class: failed.then_some(inner.error_class).flatten(),
             error_detail: if failed {
                 inner.error_detail.clone()

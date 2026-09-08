@@ -75,7 +75,7 @@ fn resolve_subscription_tier_prefers_display_then_api_key_then_jwt() {
         resolve_subscription_tier_for_telemetry(Some("Free".into()), None).as_deref(),
         Some("Free")
     );
-    let api = auth_with_mode(crate::auth::AuthMode::ApiKey, "wimo ai-not-a-jwt");
+    let api = auth_with_mode(crate::auth::AuthMode::ApiKey, "wimoai-not-a-jwt");
     assert_eq!(
         resolve_subscription_tier_for_telemetry(Some("  ".into()), Some(&api)).as_deref(),
         Some("api_key")
@@ -173,7 +173,7 @@ fn post_unblock_jwt_retry_in_flight_guard_clears_on_drop() {
 }
 mod hunk_tracking_mode {
     use super::super::{plan_hunk_tracking, resolve_hunk_tracking_mode};
-    use wimo ai_hunk_tracker::TrackingMode;
+    use wimoai_hunk_tracker::TrackingMode;
     #[test]
     fn off_and_disabled_disable_tracking() {
         assert_eq!(resolve_hunk_tracking_mode(Some("off")), None);
@@ -385,9 +385,9 @@ fn settings_allow_access_field_absent_is_allowed() {
     assert!(settings_allow_access(Some(&rs)));
 }
 /// Build a synthetic harness `task` call/result pair carrying the `<subagent_result>` footer, mirroring what the verifier/planner record.
-fn harness_pair(id: &str) -> Vec<wimo ai_wimo_sampling_types::conversation::ConversationItem> {
-    use wimo ai_wimo_sampling_types::ToolCall;
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+fn harness_pair(id: &str) -> Vec<wimoai_wimo_sampling_types::conversation::ConversationItem> {
+    use wimoai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     vec![
         ConversationItem::assistant_tool_calls(vec![ToolCall {
             id: id.into(),
@@ -431,7 +431,7 @@ async fn upload_harness_trace_turns_numbers_siblings_and_persists_counter() {
     let queue = crate::upload::trace::spawn_upload_queue(
         queue_home.path(),
         &queue_cfg,
-        Some(wimo ai_wimo_version::VERSION),
+        Some(wimoai_wimo_version::VERSION),
         agent.auth_manager.clone(),
     );
     let _ = handle.upload_queue.set(queue);
@@ -549,7 +549,7 @@ async fn upload_harness_trace_turns_build_per_turn_manifest() {
     let queue = crate::upload::trace::spawn_upload_queue(
         queue_home.path(),
         &queue_cfg,
-        Some(wimo ai_wimo_version::VERSION),
+        Some(wimoai_wimo_version::VERSION),
         agent.auth_manager.clone(),
     );
     let _ = handle.upload_queue.set(queue);
@@ -700,7 +700,7 @@ fn resolve_agent_definition_acp_profile_wins_when_model_agent_type_is_default() 
         std::env::remove_var("wimo_AGENT");
     }
     let tmp = tempfile::tempdir().unwrap();
-    let acp_profile = wimo ai_wimo_agent::AgentDefinition::from_json(&serde_json::json!(
+    let acp_profile = wimoai_wimo_agent::AgentDefinition::from_json(&serde_json::json!(
         { "name" : "custom-devbox-profile", "description" :
         "Custom devbox profile", "systemPrompt" :
         "You are a custom-configured devbox agent.", }
@@ -732,7 +732,7 @@ fn resolve_agent_definition_acp_profile_wins_for_explicit_wimo_family() {
         std::env::remove_var("wimo_AGENT");
     }
     let tmp = tempfile::tempdir().unwrap();
-    let acp_profile = wimo ai_wimo_agent::AgentDefinition::from_json(&serde_json::json!({
+    let acp_profile = wimoai_wimo_agent::AgentDefinition::from_json(&serde_json::json!({
         "name": "custom-devbox-profile",
         "description": "Custom devbox profile",
     }))
@@ -757,7 +757,7 @@ fn resolve_agent_definition_acp_profile_wins_for_explicit_wimo_family() {
 /// A non-strict (stock / vision-capable) model leaves the template alone, so such models keep native image input.
 #[test]
 fn inherited_harness_template_skips_nonstrict_model() {
-    use wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate;
+    use wimoai_wimo_agent::prompt::user_message::UserMessageTemplate;
     let tmp = tempfile::tempdir().unwrap();
     assert!(
         inherited_harness_template(
@@ -771,7 +771,7 @@ fn inherited_harness_template_skips_nonstrict_model() {
 /// An explicit (non-default) template is never overridden; inheritance only fills in the default.
 #[test]
 fn inherited_harness_template_respects_explicit_template() {
-    use wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate;
+    use wimoai_wimo_agent::prompt::user_message::UserMessageTemplate;
     let tmp = tempfile::tempdir().unwrap();
     let explicit = UserMessageTemplate::Custom("MY CUSTOM TEMPLATE".to_owned());
     assert!(inherited_harness_template(&explicit, Some("cursor"), tmp.path()).is_none());
@@ -828,7 +828,7 @@ fn resolve_agent_definition_agent_profile_with_model_override() {
     assert_eq!(def.name, "test-architect");
     assert_eq!(
         def.model,
-        wimo ai_wimo_agent::config::ModelOverride::Override("test-model-123".to_string()),
+        wimoai_wimo_agent::config::ModelOverride::Override("test-model-123".to_string()),
         "agent profile model override must be preserved through resolution"
     );
     match prev {
@@ -1034,9 +1034,9 @@ fn agent_name_unchanged_without_harness_rebuild() {
 #[tokio::test]
 async fn file_toolset_override_e2e_to_finalized_toolset() {
     use crate::tools::{FileToolset, ShellToolsetConfig};
-    use wimo ai_wimo_tools::computer::local::{LocalFs, LocalTerminalBackend};
-    use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-    use wimo ai_wimo_tools::registry::types::SessionContext;
+    use wimoai_wimo_tools::computer::local::{LocalFs, LocalTerminalBackend};
+    use wimoai_wimo_tools::notification::ToolNotificationHandle;
+    use wimoai_wimo_tools::registry::types::SessionContext;
     let tmp = tempfile::tempdir().unwrap();
     let mut def = MvpAgent::resolve_agent_definition(
         tmp.path(),
@@ -1054,7 +1054,7 @@ async fn file_toolset_override_e2e_to_finalized_toolset() {
         .tool_configs(&toolset_config.hashline)
         .expect("default hashline config should validate");
     def.override_file_tools(file_tools);
-    let builder = wimo ai_wimo_tools::registry::types::ToolRegistryBuilder::new();
+    let builder = wimoai_wimo_tools::registry::types::ToolRegistryBuilder::new();
     let ctx = SessionContext {
         backend: std::sync::Arc::new(LocalTerminalBackend::new()),
         fs: std::sync::Arc::new(LocalFs),
@@ -1068,16 +1068,16 @@ async fn file_toolset_override_e2e_to_finalized_toolset() {
         skills: vec![],
         state_path: tmp.path().join("state.json"),
         memory_backend: None,
-        web_search_config: wimo ai_wimo_tools::implementations::web_search::WebSearchConfig::default(),
+        web_search_config: wimoai_wimo_tools::implementations::web_search::WebSearchConfig::default(),
         web_fetch_config: Default::default(),
         lsp: None,
-        image_gen_config: wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig::default(),
-        video_gen_config: wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig::default(),
-        app_builder_deployer_config: wimo ai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig::default(),
+        image_gen_config: wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig::default(),
+        video_gen_config: wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig::default(),
+        app_builder_deployer_config: wimoai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig::default(),
         api_key_provider: None,
         auth_provider: None,
         attribution_callback: None,
-        system_reminder_tag: wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
+        system_reminder_tag: wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
     };
     let toolset = builder
         .finalize(def.tool_config, ctx)
@@ -1115,11 +1115,11 @@ fn make_test_handle(
     let (persistence_tx, _persistence_rx) = tokio::sync::mpsc::unbounded_channel();
     let (hunk_event_tx, _hunk_event_rx) = tokio::sync::mpsc::unbounded_channel();
     let hunk_cancel = tokio_util::sync::CancellationToken::new();
-    let hunk_tracker_handle = wimo ai_hunk_tracker::HunkTrackerActor::spawn(
+    let hunk_tracker_handle = wimoai_hunk_tracker::HunkTrackerActor::spawn(
         "test".to_string(),
         std::path::PathBuf::from("/tmp"),
         hunk_event_tx,
-        wimo ai_hunk_tracker::TrackingMode::AllDirty,
+        wimoai_hunk_tracker::TrackingMode::AllDirty,
         hunk_cancel,
     );
     crate::session::SessionHandle {
@@ -1141,7 +1141,7 @@ fn make_test_handle(
             scheduler_background_loops: true,
         },
         hunk_tracker_handle,
-        chat_state_handle: wimo ai_chat_state::ChatStateHandle::noop(),
+        chat_state_handle: wimoai_chat_state::ChatStateHandle::noop(),
         signals_handle: crate::session::signals::SessionSignalsHandle::new(),
         gateway_enabled: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true)),
         status_line_enabled: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
@@ -1154,8 +1154,8 @@ fn make_test_handle(
         upload_queue: Arc::new(OnceLock::new()),
         upload_failures_since_success: Arc::new(std::sync::atomic::AtomicU64::new(0)),
         tool_context: crate::tools::ToolContext::new_local_context(
-            wimo ai_wimo_paths::AbsPathBuf::new(std::path::PathBuf::from("/tmp")).unwrap(),
-            std::sync::Arc::new(wimo ai_wimo_workspace::file_system::LocalFs::new(
+            wimoai_wimo_paths::AbsPathBuf::new(std::path::PathBuf::from("/tmp")).unwrap(),
+            std::sync::Arc::new(wimoai_wimo_workspace::file_system::LocalFs::new(
                 std::path::PathBuf::from("/tmp"),
             )),
             std::sync::Arc::new(crate::terminal::LocalTerminalRunner),
@@ -1174,14 +1174,14 @@ fn make_test_handle(
             crate::session::plan_mode::PlanModeTracker::new(std::path::PathBuf::from("/tmp")),
         )),
         force_compact: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
-        permission_handle: wimo ai_wimo_workspace::permission::PermissionHandle::allow_all(),
+        permission_handle: wimoai_wimo_workspace::permission::PermissionHandle::allow_all(),
         attribution_callback: None,
         agent_name: "wimo".to_string(),
         managed_mcp_proxy_base_url: String::new(),
         session_default_agent_profile: None,
         allowed_subagent_types: None,
         hook_registry: None,
-        workspace_ops: wimo ai_wimo_workspace::WorkspaceOps::for_test(),
+        workspace_ops: wimoai_wimo_workspace::WorkspaceOps::for_test(),
         terminal_backend: None,
         tools_notification_handle: None,
         scheduler_handle: None,
@@ -1246,7 +1246,7 @@ async fn set_session_model_does_not_cross_contaminate() {
 #[tokio::test]
 async fn model_state_prefers_session_reasoning_effort_over_global() {
     use crate::agent::config::{EndpointsConfig, ModelEntry};
-    use wimo ai_wimo_sampling_types::{REASONING_EFFORT_META_KEY, ReasoningEffort};
+    use wimoai_wimo_sampling_types::{REASONING_EFFORT_META_KEY, ReasoningEffort};
     let agent = build_minimal_agent_for_tests();
     let mut entry = ModelEntry::fallback("effort-model", &EndpointsConfig::default());
     entry.info.supports_reasoning_effort = true;
@@ -1287,7 +1287,7 @@ async fn model_state_prefers_session_reasoning_effort_over_global() {
 async fn apply_supported_effort_assigns_only_when_supported() {
     use crate::agent::config::{EndpointsConfig, ModelEntry};
     use crate::agent::mvp_agent::reasoning_effort::EffortTarget;
-    use wimo ai_wimo_sampling_types::ReasoningEffort;
+    use wimoai_wimo_sampling_types::ReasoningEffort;
     let agent = build_minimal_agent_for_tests();
     let mut supported = ModelEntry::fallback("effort-model", &EndpointsConfig::default());
     supported.info.supports_reasoning_effort = true;
@@ -1333,7 +1333,7 @@ async fn apply_supported_effort_assigns_only_when_supported() {
 async fn an_effort_that_names_its_own_model_switches_the_id() {
     use crate::agent::config::{EndpointsConfig, ModelEntry, ModelVariant};
     use crate::agent::mvp_agent::reasoning_effort::EffortTarget;
-    use wimo ai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
+    use wimoai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
     let agent = build_minimal_agent_for_tests();
     let option = |value: ReasoningEffort, default: bool| ReasoningEffortOption {
         id: value.as_str().to_string(),
@@ -1397,7 +1397,7 @@ async fn an_effort_that_names_its_own_model_switches_the_id() {
 #[tokio::test]
 async fn a_routed_effort_id_resolves_back_to_its_entry() {
     use crate::agent::config::{EndpointsConfig, ModelEntry, ModelVariant};
-    use wimo ai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
+    use wimoai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
     let agent = build_minimal_agent_for_tests();
     let mut entry = ModelEntry::fallback("routed-high", &EndpointsConfig::default());
     entry.info.supports_reasoning_effort = true;
@@ -1434,7 +1434,7 @@ async fn a_routed_effort_id_resolves_back_to_its_entry() {
 #[test]
 fn resolve_new_session_effort_hint_prefers_meta_over_current() {
     use crate::agent::mvp_agent::reasoning_effort::resolve_new_session_effort_hint;
-    use wimo ai_wimo_sampling_types::ReasoningEffort;
+    use wimoai_wimo_sampling_types::ReasoningEffort;
     assert_eq!(
         resolve_new_session_effort_hint(Some(ReasoningEffort::High), Some(ReasoningEffort::Low)),
         Some(ReasoningEffort::High),
@@ -1449,7 +1449,7 @@ fn resolve_new_session_effort_hint_prefers_meta_over_current() {
 #[test]
 fn split_new_session_effort_routes_hint_to_one_slot() {
     use crate::agent::mvp_agent::reasoning_effort::{NewSessionEffort, split_new_session_effort};
-    use wimo ai_wimo_sampling_types::ReasoningEffort;
+    use wimoai_wimo_sampling_types::ReasoningEffort;
     assert_eq!(
         split_new_session_effort(None, Some(ReasoningEffort::High)),
         NewSessionEffort::Spawn(ReasoningEffort::High),
@@ -1473,7 +1473,7 @@ async fn new_session_meta_effort_seeds_spawn_for_supported_model_and_drops_for_u
     use crate::agent::mvp_agent::reasoning_effort::{
         EffortTarget, NewSessionEffort, split_new_session_effort,
     };
-    use wimo ai_wimo_sampling_types::{
+    use wimoai_wimo_sampling_types::{
         REASONING_EFFORT_META_KEY, ReasoningEffort, parse_reasoning_effort_meta,
         reasoning_effort_meta_value,
     };
@@ -1526,7 +1526,7 @@ async fn new_session_without_meta_keeps_current_effort_over_catalog_default() {
     use crate::agent::mvp_agent::reasoning_effort::{
         EffortTarget, NewSessionEffort, resolve_new_session_effort_hint, split_new_session_effort,
     };
-    use wimo ai_wimo_sampling_types::ReasoningEffort;
+    use wimoai_wimo_sampling_types::ReasoningEffort;
     let agent = build_minimal_agent_for_tests();
     let mut supported = ModelEntry::fallback("effort-model", &EndpointsConfig::default());
     supported.info.supports_reasoning_effort = true;
@@ -1561,9 +1561,9 @@ async fn new_session_without_meta_keeps_current_effort_over_catalog_default() {
 }
 /// Drive the real `restore_persisted_model` for a session pinned to an effort-capable model and report the effort it lands on the session handle.
 async fn restore_effort_via_load(
-    initial: Option<wimo ai_wimo_sampling_types::ReasoningEffort>,
-    persisted: Option<wimo ai_wimo_sampling_types::ReasoningEffort>,
-) -> Option<wimo ai_wimo_sampling_types::ReasoningEffort> {
+    initial: Option<wimoai_wimo_sampling_types::ReasoningEffort>,
+    persisted: Option<wimoai_wimo_sampling_types::ReasoningEffort>,
+) -> Option<wimoai_wimo_sampling_types::ReasoningEffort> {
     use crate::agent::config::{EndpointsConfig, ModelEntry};
     let agent = build_minimal_agent_for_tests();
     let mut entry = ModelEntry::fallback("effort-model", &EndpointsConfig::default());
@@ -1599,7 +1599,7 @@ async fn restore_effort_via_load(
 }
 #[tokio::test]
 async fn load_effort_precedence_prefers_meta_hint_over_persisted() {
-    use wimo ai_wimo_sampling_types::ReasoningEffort;
+    use wimoai_wimo_sampling_types::ReasoningEffort;
     assert_eq!(
         restore_effort_via_load(Some(ReasoningEffort::High), Some(ReasoningEffort::Low)).await,
         Some(ReasoningEffort::High),
@@ -1614,7 +1614,7 @@ async fn load_effort_precedence_prefers_meta_hint_over_persisted() {
 #[tokio::test]
 async fn session_config_options_resolves_routing_slug_to_catalog_model() {
     use crate::agent::config::{EndpointsConfig, ModelEntry};
-    use wimo ai_wimo_sampling_types::ReasoningEffort;
+    use wimoai_wimo_sampling_types::ReasoningEffort;
     let agent = build_minimal_agent_for_tests();
     let mut entry = ModelEntry::fallback("catalog-key-model", &EndpointsConfig::default());
     entry.info.model = "routing-slug".to_string();
@@ -2173,21 +2173,21 @@ fn make_trace_card_eligible(agent: &MvpAgent) {
     cfg.features.telemetry = Some(crate::agent::config::TelemetryMode::Enabled);
     cfg.telemetry.trace_upload = Some(false);
 }
-fn personal_wimo ai_oauth_auth() -> crate::auth::wimoAuth {
+fn personal_wimoai_oauth_auth() -> crate::auth::wimoAuth {
     crate::auth::wimoAuth {
         auth_mode: crate::auth::AuthMode::Oidc,
-        oidc_issuer: Some(crate::auth::wimo ai_OAUTH2_ISSUER.to_string()),
+        oidc_issuer: Some(crate::auth::wimoai_OAUTH2_ISSUER.to_string()),
         ..crate::auth::wimoAuth::test_default()
     }
 }
 #[tokio::test]
 #[serial_test::serial]
 async fn feedback_trace_offer_asks_personal_oauth_accounts() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let _e1 = EnvGuard::unset("wimo_TELEMETRY_ENABLED");
     let _e2 = EnvGuard::unset("wimo_TELEMETRY_TRACE_UPLOAD");
     let _e3 = EnvGuard::unset("wimo_FEEDBACK_TRACE_CARD");
-    let agent = build_agent_with_auth(personal_wimo ai_oauth_auth());
+    let agent = build_agent_with_auth(personal_wimoai_oauth_auth());
     make_trace_card_eligible(&agent);
     assert!(agent.feedback_trace_offer(), "every gate is open");
     assert!(
@@ -2201,7 +2201,7 @@ async fn feedback_trace_offer_asks_personal_oauth_accounts() {
 #[tokio::test]
 #[serial_test::serial]
 async fn feedback_trace_offer_suppressed_for_team_accounts_even_admins() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let _e1 = EnvGuard::unset("wimo_TELEMETRY_ENABLED");
     let _e2 = EnvGuard::unset("wimo_TELEMETRY_TRACE_UPLOAD");
     let _e3 = EnvGuard::unset("wimo_FEEDBACK_TRACE_CARD");
@@ -2209,7 +2209,7 @@ async fn feedback_trace_offer_suppressed_for_team_accounts_even_admins() {
         let agent = build_agent_with_auth(crate::auth::wimoAuth {
             team_name: Some("acme".into()),
             team_role: Some(role.into()),
-            ..personal_wimo ai_oauth_auth()
+            ..personal_wimoai_oauth_auth()
         });
         make_trace_card_eligible(&agent);
         assert!(
@@ -2228,11 +2228,11 @@ async fn feedback_trace_offer_suppressed_for_team_accounts_even_admins() {
 #[tokio::test]
 #[serial_test::serial]
 async fn feedback_trace_offer_suppressed_for_managed_deployments() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let _e1 = EnvGuard::unset("wimo_TELEMETRY_ENABLED");
     let _e2 = EnvGuard::unset("wimo_TELEMETRY_TRACE_UPLOAD");
     let _e3 = EnvGuard::unset("wimo_FEEDBACK_TRACE_CARD");
-    let agent = build_agent_with_auth(personal_wimo ai_oauth_auth());
+    let agent = build_agent_with_auth(personal_wimoai_oauth_auth());
     make_trace_card_eligible(&agent);
     agent.cfg.borrow_mut().endpoints.deployment_key = Some("dk-test".into());
     assert!(
@@ -2256,7 +2256,7 @@ async fn feedback_trace_offer_suppressed_for_managed_deployments() {
 async fn ensure_plugin_registry_lazily_populates_snapshot() {
     use crate::agent::config::Config as AgentConfig;
     use crate::auth::{AuthManager, wimoComConfig};
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let wimo_home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", wimo_home.path());
     let plugin_dir = tempfile::tempdir().unwrap();
@@ -2428,11 +2428,11 @@ async fn resident_activity_reports_needs_input_when_pending() {
 /// Drain the agent gateway, returning the first `x.ai/sessions/changed` payload that carries an upserted entry.
 /// Unrelated notifications parse into an empty `RosterChanged` and are ignored.
 fn drain_roster_changed(
-    rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) -> Option<crate::agent::roster::RosterChanged> {
     let mut found = None;
     while let Ok(msg) = rx.try_recv() {
-        if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg {
+        if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg {
             if found.is_none()
                 && let Ok(changed) = serde_json::from_str::<crate::agent::roster::RosterChanged>(
                     args.request.params.get(),
@@ -2867,7 +2867,7 @@ async fn auth_type_session_based_no_current_returns_session_token() {
         );
         assert_eq!(
             agent.auth_type(),
-            wimo ai_chat_state::AuthType::SessionToken,
+            wimoai_chat_state::AuthType::SessionToken,
             "{method_id}: session-based auth must report SessionToken even \
                  without a live token -- otherwise chat_state gets locked into \
                  auth_type = ApiKey and try_refresh_session_token will skip \
@@ -2875,20 +2875,20 @@ async fn auth_type_session_based_no_current_returns_session_token() {
         );
     }
 }
-/// BYOK guard. Users with `wimo ai.api_key` must continue to report `ApiKey` regardless of live-token state.
+/// BYOK guard. Users with `wimoai.api_key` must continue to report `ApiKey` regardless of live-token state.
 /// BYOK sessions have nothing to refresh.
 /// Reporting `SessionToken` would route through cli-chat-proxy paths (image_gen / video_gen base_url) that don't apply to BYOK keys.
 #[tokio::test(flavor = "current_thread")]
-async fn auth_type_wimo ai_api_key_no_current_returns_api_key() {
+async fn auth_type_wimoai_api_key_no_current_returns_api_key() {
     let agent = build_minimal_agent_for_tests();
     agent.set_auth_method(acp::AuthMethodId::new(
-        crate::agent::auth_method::wimo ai_API_KEY_METHOD_ID,
+        crate::agent::auth_method::wimoai_API_KEY_METHOD_ID,
     ));
     assert!(agent.auth_manager.current().is_none());
     assert_eq!(
         agent.auth_type(),
-        wimo ai_chat_state::AuthType::ApiKey,
-        "wimo ai.api_key auth must report ApiKey -- BYOK has no session-token \
+        wimoai_chat_state::AuthType::ApiKey,
+        "wimoai.api_key auth must report ApiKey -- BYOK has no session-token \
              behavior to fall back to."
     );
 }
@@ -2903,7 +2903,7 @@ async fn auth_type_session_based_with_current_returns_session_token() {
     ));
     agent.auth_manager.hot_swap(wimoAuth::test_default());
     assert!(agent.auth_manager.current().is_some());
-    assert_eq!(agent.auth_type(), wimo ai_chat_state::AuthType::SessionToken,);
+    assert_eq!(agent.auth_type(), wimoai_chat_state::AuthType::SessionToken,);
 }
 /// Defensive case: no `auth_method_id` selected yet (pre-`authenticate` state) and no live credential.
 /// We default to `ApiKey`.
@@ -2914,7 +2914,7 @@ async fn auth_type_no_method_id_no_current_returns_api_key() {
     let agent = build_minimal_agent_for_tests();
     assert!(agent.auth_method_id.load().is_none());
     assert!(agent.auth_manager.current().is_none());
-    assert_eq!(agent.auth_type(), wimo ai_chat_state::AuthType::ApiKey,);
+    assert_eq!(agent.auth_type(), wimoai_chat_state::AuthType::ApiKey,);
 }
 /// Live credential present but `auth_method_id` is still `None`.
 /// The in-memory bearer takes precedence: this is the order observed during `initialize()` silent refresh.
@@ -2927,7 +2927,7 @@ async fn auth_type_no_method_id_with_current_returns_session_token() {
     agent.auth_manager.hot_swap(wimoAuth::test_default());
     assert!(agent.auth_method_id.load().is_none());
     assert!(agent.auth_manager.current().is_some());
-    assert_eq!(agent.auth_type(), wimo ai_chat_state::AuthType::SessionToken,);
+    assert_eq!(agent.auth_type(), wimoai_chat_state::AuthType::SessionToken,);
 }
 /// Minimal agent whose `wimo_com_config` engages the api-key kill switch (`disable_api_key_auth = true`), mirroring a forced-IdP deployment.
 fn build_agent_with_api_key_auth_disabled() -> MvpAgent {
@@ -2942,36 +2942,36 @@ fn build_agent_with_api_key_auth_disabled() -> MvpAgent {
     cfg.wimo_com_config.disable_api_key_auth = Some(true);
     MvpAgent::new(gateway, &cfg, auth_manager, None).expect("valid test config")
 }
-/// Deployment-key / managed-config user: `wimo ai_API_KEY` resolves and the kill switch is off.
-/// A dead `cached_token` MUST then fall through to `wimo ai.api_key` (no browser).
+/// Deployment-key / managed-config user: `wimoai_API_KEY` resolves and the kill switch is off.
+/// A dead `cached_token` MUST then fall through to `wimoai.api_key` (no browser).
 /// This is the exact regression the fallthrough fixes.
 #[tokio::test(flavor = "current_thread")]
 #[serial_test::serial]
 async fn cached_token_fallthrough_prefers_api_key_for_deployment_key() {
-    use crate::agent::auth_method::{wimo ai_API_KEY_ENV_VAR, wimo ai_API_KEY_METHOD_ID};
-    use wimo ai_wimo_test_support::EnvGuard;
+    use crate::agent::auth_method::{wimoai_API_KEY_ENV_VAR, wimoai_API_KEY_METHOD_ID};
+    use wimoai_wimo_test_support::EnvGuard;
     let _lockdown = EnvGuard::unset("wimo_DISABLE_API_KEY_AUTH");
-    let _key = EnvGuard::set(wimo ai_API_KEY_ENV_VAR, "test-deployment-key");
+    let _key = EnvGuard::set(wimoai_API_KEY_ENV_VAR, "test-deployment-key");
     let agent = build_minimal_agent_for_tests();
     assert_eq!(
         agent
             .cached_token_fallthrough_method_id()
             .as_ref()
             .map(|id| id.0.as_ref()),
-        Some(wimo ai_API_KEY_METHOD_ID),
-        "deployment-key user (wimo ai_API_KEY set, no kill switch) must fall \
-         through to wimo ai.api_key on a dead cached_token -- not interactive login",
+        Some(wimoai_API_KEY_METHOD_ID),
+        "deployment-key user (wimoai_API_KEY set, no kill switch) must fall \
+         through to wimoai.api_key on a dead cached_token -- not interactive login",
     );
 }
-/// Forced-IdP deployment: even with `wimo ai_API_KEY` present, the admin kill switch keeps the fallthrough on interactive `wimo.com`.
+/// Forced-IdP deployment: even with `wimoai_API_KEY` present, the admin kill switch keeps the fallthrough on interactive `wimo.com`.
 /// Api-key auth is neither advertised nor an eligible fallthrough.
 #[tokio::test(flavor = "current_thread")]
 #[serial_test::serial]
 async fn cached_token_fallthrough_respects_kill_switch() {
-    use crate::agent::auth_method::{wimo_COM_METHOD_ID, wimo ai_API_KEY_ENV_VAR};
-    use wimo ai_wimo_test_support::EnvGuard;
+    use crate::agent::auth_method::{wimo_COM_METHOD_ID, wimoai_API_KEY_ENV_VAR};
+    use wimoai_wimo_test_support::EnvGuard;
     let _lockdown = EnvGuard::unset("wimo_DISABLE_API_KEY_AUTH");
-    let _key = EnvGuard::set(wimo ai_API_KEY_ENV_VAR, "test-deployment-key");
+    let _key = EnvGuard::set(wimoai_API_KEY_ENV_VAR, "test-deployment-key");
     let agent = build_agent_with_api_key_auth_disabled();
     assert_eq!(
         agent
@@ -2980,7 +2980,7 @@ async fn cached_token_fallthrough_respects_kill_switch() {
             .map(|id| id.0.as_ref()),
         Some(wimo_COM_METHOD_ID),
         "disable_api_key_auth must keep the cached_token fallthrough on \
-         interactive wimo.com so wimo ai_API_KEY can't bypass forced IdP login",
+         interactive wimo.com so wimoai_API_KEY can't bypass forced IdP login",
     );
 }
 /// No advertiseable credentials at all (no env key, no kill switch): the user genuinely needs to log in.
@@ -2989,12 +2989,12 @@ async fn cached_token_fallthrough_respects_kill_switch() {
 #[serial_test::serial]
 async fn cached_token_fallthrough_falls_to_wimo_com_without_credentials() {
     use crate::agent::auth_method::{
-        wimo_COM_METHOD_ID, LEGACY_wimo ai_API_KEY_ENV_VAR, wimo ai_API_KEY_ENV_VAR,
+        wimo_COM_METHOD_ID, LEGACY_wimoai_API_KEY_ENV_VAR, wimoai_API_KEY_ENV_VAR,
     };
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let _lockdown = EnvGuard::unset("wimo_DISABLE_API_KEY_AUTH");
-    let _new = EnvGuard::unset(wimo ai_API_KEY_ENV_VAR);
-    let _legacy = EnvGuard::unset(LEGACY_wimo ai_API_KEY_ENV_VAR);
+    let _new = EnvGuard::unset(wimoai_API_KEY_ENV_VAR);
+    let _legacy = EnvGuard::unset(LEGACY_wimoai_API_KEY_ENV_VAR);
     let agent = build_minimal_agent_for_tests();
     assert_eq!(
         agent
@@ -3015,7 +3015,7 @@ async fn cached_token_fallthrough_falls_to_wimo_com_without_credentials() {
 /// | true     | Some      | Enabled, S3 threaded (ZDR with upload path) |
 #[tokio::test(flavor = "current_thread")]
 async fn prepare_video_gen_config_disabled_when_zdr_flag_set() {
-    use wimo ai_wimo_tools::implementations::wimo::video_gen::{
+    use wimoai_wimo_tools::implementations::wimo::video_gen::{
         S3AccessCredentials, VideoGenConfig, ZdrVideoOutputS3Config,
     };
     fn zdr_s3() -> ZdrVideoOutputS3Config {
@@ -3073,7 +3073,7 @@ async fn prepare_video_gen_config_disabled_when_zdr_flag_set() {
 }
 #[tokio::test(flavor = "current_thread")]
 async fn prepare_video_gen_config_respects_feature_flag() {
-    use wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
+    use wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
     let agent = build_minimal_agent_for_tests();
     agent.sampling_config.borrow_mut().api_key = Some("test-key".to_string());
     assert!(matches!(
@@ -3092,7 +3092,7 @@ async fn prepare_video_gen_config_respects_feature_flag() {
 /// Guards against accidentally disabling a paid feature when tier info hasn't loaded.
 #[tokio::test(flavor = "current_thread")]
 async fn prepare_image_gen_config_fails_open_without_auth() {
-    use wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
+    use wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
     let agent = build_minimal_agent_for_tests();
     agent.sampling_config.borrow_mut().api_key = Some("test-key".to_string());
     let ImageGenConfig::Enabled {
@@ -3111,7 +3111,7 @@ async fn prepare_image_gen_config_fails_open_without_auth() {
 /// If this header is dropped, opted-out users' imagine prompts are logged/retained server-side.
 #[tokio::test(flavor = "current_thread")]
 async fn prepare_image_gen_config_sends_client_identifier_header() {
-    use wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
+    use wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
     let agent = build_minimal_agent_for_tests();
     agent.sampling_config.borrow_mut().api_key = Some("test-key".to_string());
     let ImageGenConfig::Enabled { extra_headers, .. } = agent.prepare_image_gen_config() else {
@@ -3129,7 +3129,7 @@ async fn prepare_image_gen_config_sends_client_identifier_header() {
 /// Same contract for video generation (also a direct API call).
 #[tokio::test(flavor = "current_thread")]
 async fn prepare_video_gen_config_sends_client_identifier_header() {
-    use wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
+    use wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
     let agent = build_minimal_agent_for_tests();
     agent.sampling_config.borrow_mut().api_key = Some("test-key".to_string());
     let VideoGenConfig::Enabled { extra_headers, .. } = agent.prepare_video_gen_config() else {
@@ -3387,8 +3387,8 @@ use crate::session::storage::search::IndexDecision;
 /// A wimo home of its own, with the switch left at its registered default.
 /// `decide_search_index` stops short of a session store, but do not reach `bootstrap_once`.
 /// `bootstrap_once` takes the process-cached `wimo_home()`, which these guards cannot redirect, so it could index the developer's own store.
-fn search_index_env() -> (tempfile::TempDir, [wimo ai_wimo_test_support::EnvGuard; 2]) {
-    use wimo ai_wimo_test_support::EnvGuard;
+fn search_index_env() -> (tempfile::TempDir, [wimoai_wimo_test_support::EnvGuard; 2]) {
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let guards = [
         EnvGuard::set("wimo_HOME", home.path()),
@@ -3401,7 +3401,7 @@ fn search_index_env() -> (tempfile::TempDir, [wimo ai_wimo_test_support::EnvGuar
 async fn search_index_honors_the_session_search_feature() {
     let (_home, _env) = search_index_env();
     {
-        let _off = wimo ai_wimo_test_support::EnvGuard::set("wimo_SESSION_SEARCH", "0");
+        let _off = wimoai_wimo_test_support::EnvGuard::set("wimo_SESSION_SEARCH", "0");
         let agent = build_agent_with_auth(crate::auth::wimoAuth::test_default());
         agent.decide_search_index();
         assert!(
@@ -3508,7 +3508,7 @@ async fn read_before_the_remote_settings_land_does_not_decide() {
 async fn exhausted_fetch_decides_on_the_local_layers() {
     use crate::agent::config::Config as AgentConfig;
     use crate::auth::{AuthManager, wimoComConfig};
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let (_home, _env) = search_index_env();
     let _no_inline_auth = EnvGuard::unset("wimo_AUTH");
     let _no_auth_path = EnvGuard::unset("wimo_AUTH_PATH");
@@ -4024,7 +4024,7 @@ where
 #[test]
 fn chat_session_spawn_options_matches_thin_profile() {
     let sid = acp::SessionId::new(std::sync::Arc::from("00000000-0000-0000-0000-000000000099"));
-    let cwd = wimo ai_wimo_paths::AbsPathBuf::new(std::env::temp_dir()).expect("temp cwd");
+    let cwd = wimoai_wimo_paths::AbsPathBuf::new(std::env::temp_dir()).expect("temp cwd");
     let opts = chat_session_spawn_options(
         SessionInfo {
             id: sid,
@@ -4056,14 +4056,14 @@ fn chat_session_spawn_options_matches_thin_profile() {
 async fn remove_session_releases_workspace_binding_and_side_maps() {
     let agent = build_minimal_agent_for_tests();
     let sid = acp::SessionId::new("test-session-workspace-release");
-    let ops = wimo ai_wimo_workspace::WorkspaceOps::for_test();
+    let ops = wimoai_wimo_workspace::WorkspaceOps::for_test();
     let toolset =
-        std::sync::Arc::new(wimo ai_wimo_tools::registry::types::FinalizedToolset::empty_for_test());
+        std::sync::Arc::new(wimoai_wimo_tools::registry::types::FinalizedToolset::empty_for_test());
     let toolset_weak = std::sync::Arc::downgrade(&toolset);
     ops.bind_local_session(
         sid.0.as_ref(),
         std::env::temp_dir(),
-        wimo ai_hunk_tracker::HunkTrackerHandle::noop(),
+        wimoai_hunk_tracker::HunkTrackerHandle::noop(),
         toolset,
         None,
     )
@@ -4075,7 +4075,7 @@ async fn remove_session_releases_workspace_binding_and_side_maps() {
         .set_unavailable_model(&sid, acp::ModelId::new(std::sync::Arc::from("gone-model")));
     agent.set_turn_number(&sid, 3);
     let (_permission_tx, permission_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_wimo_workspace::permission::PermissionEvent>();
+        tokio::sync::mpsc::unbounded_channel::<wimoai_wimo_workspace::permission::PermissionEvent>();
     agent
         .session_registry
         .set_permission_receiver(&sid, permission_rx);
@@ -5235,7 +5235,7 @@ fn gated_reconnect_tier_recheck_is_single_flight() {
             key: "gated-user-key".into(),
             user_id: "user-gated".into(),
             auth_mode: crate::auth::AuthMode::Oidc,
-            oidc_issuer: Some(crate::auth::wimo ai_OAUTH2_ISSUER.to_owned()),
+            oidc_issuer: Some(crate::auth::wimoai_OAUTH2_ISSUER.to_owned()),
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
             ..crate::auth::wimoAuth::test_default()
         };
@@ -5361,7 +5361,7 @@ fn gated_reconnect_recheck_lifts_gate_clearing_paywall_flash() {
             key: jwt_with_tier(5),
             user_id: "user-flash".into(),
             auth_mode: crate::auth::AuthMode::Oidc,
-            oidc_issuer: Some(crate::auth::wimo ai_OAUTH2_ISSUER.to_owned()),
+            oidc_issuer: Some(crate::auth::wimoai_OAUTH2_ISSUER.to_owned()),
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
             ..crate::auth::wimoAuth::test_default()
         };
@@ -5393,7 +5393,7 @@ fn build_agent_with_auth_and_proxy(
     mode: crate::agent::config::AgentMode,
 ) -> (
     MvpAgent,
-    tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) {
     use crate::agent::config::Config as AgentConfig;
     use crate::auth::{AuthManager, wimoComConfig};
@@ -5413,11 +5413,11 @@ fn build_agent_with_auth_and_proxy(
 }
 /// Drain the gateway, returning `true` if any `x.ai/settings/update` notification was emitted (and acking each so the sender doesn't warn).
 fn drained_settings_update(
-    rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) -> bool {
     let mut found = false;
     while let Ok(msg) = rx.try_recv() {
-        if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg {
+        if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg {
             if &*args.request.method == "x.ai/settings/update" {
                 found = true;
             }
@@ -5430,7 +5430,7 @@ fn drained_settings_update(
 struct RestoreOtelGate;
 impl Drop for RestoreOtelGate {
     fn drop(&mut self) {
-        wimo ai_wimo_telemetry::external::mark_external_otel_settings_resolved();
+        wimoai_wimo_telemetry::external::mark_external_otel_settings_resolved();
     }
 }
 /// Regression: `cfg.remote_settings` is not reset on an account switch, so the access gate must not read a previous identity's cached `allow_access`.
@@ -5438,9 +5438,9 @@ impl Drop for RestoreOtelGate {
 #[tokio::test]
 async fn access_gate_does_not_leak_verdict_across_identities() {
     use crate::agent::config::AgentMode;
-    use crate::auth::{wimoAuth, wimo ai_OAUTH2_ISSUER};
+    use crate::auth::{wimoAuth, wimoai_OAUTH2_ISSUER};
     let auth_a = wimoAuth {
-        oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+        oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
         user_id: "user-a".into(),
         ..wimoAuth::test_default()
     };
@@ -5458,11 +5458,11 @@ async fn access_gate_does_not_leak_verdict_across_identities() {
     }
     *agent.allow_access_resolved_for.borrow_mut() = Some("user-a".to_string());
     let auth_b = wimoAuth {
-        oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+        oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
         user_id: "user-b".into(),
         ..wimoAuth::test_default()
     };
-    assert!(auth_b.is_wimo ai_auth(), "precondition: first-party wimo AI auth");
+    assert!(auth_b.is_wimoai_auth(), "precondition: first-party wimo AI auth");
     agent.enforce_wimo_code_access(&auth_b).await;
     assert!(
         agent.tier_allowed.get(),
@@ -5473,40 +5473,40 @@ async fn access_gate_does_not_leak_verdict_across_identities() {
 /// The settings arrival also emits `x.ai/settings/update` and opens the external-OTEL gate.
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 #[serial_test::serial]
-async fn post_auth_settings_wimo ai_upgrades_writeback_emits_and_opens_gate() {
+async fn post_auth_settings_wimoai_upgrades_writeback_emits_and_opens_gate() {
     use crate::agent::config::AgentMode;
-    use crate::auth::{wimoAuth, wimo ai_OAUTH2_ISSUER};
+    use crate::auth::{wimoAuth, wimoai_OAUTH2_ISSUER};
     let _restore = RestoreOtelGate;
     let _storage_env = crate::env::EnvVarGuard::remove("wimo_STORAGE_MODE");
-    let server = wimo ai_wimo_test_support::MockInferenceServer::start()
+    let server = wimoai_wimo_test_support::MockInferenceServer::start()
         .await
         .unwrap();
     server.set_settings(serde_json::json!({
         "writeback_enabled": true,
         "allow_access": true,
     }));
-    let wimo ai_auth = wimoAuth {
-        oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+    let wimoai_auth = wimoAuth {
+        oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
         ..wimoAuth::test_default()
     };
-    assert!(wimo ai_auth.is_wimo ai_auth(), "precondition: first-party wimo AI auth");
+    assert!(wimoai_auth.is_wimoai_auth(), "precondition: first-party wimo AI auth");
     let (agent, mut rx) =
-        build_agent_with_auth_and_proxy(wimo ai_auth, server.url(), AgentMode::Leader);
+        build_agent_with_auth_and_proxy(wimoai_auth, server.url(), AgentMode::Leader);
     assert_eq!(
         agent.storage_mode(),
         StorageMode::Local,
         "precondition: leader boots in Local storage mode"
     );
-    wimo ai_wimo_telemetry::external::suppress_external_otel_until_settings();
-    assert!(!wimo ai_wimo_telemetry::external::is_settings_gate_open());
+    wimoai_wimo_telemetry::external::suppress_external_otel_until_settings();
+    assert!(!wimoai_wimo_telemetry::external::is_settings_gate_open());
     agent.maybe_fetch_post_auth_settings().await;
     assert_eq!(
         agent.storage_mode(),
         StorageMode::Writeback,
-        "wimo ai auth + writeback_enabled settings must upgrade storage to Writeback"
+        "wimoai auth + writeback_enabled settings must upgrade storage to Writeback"
     );
     assert!(
-        wimo ai_wimo_telemetry::external::is_settings_gate_open(),
+        wimoai_wimo_telemetry::external::is_settings_gate_open(),
         "a settings response must open the external-OTEL gate"
     );
     assert!(
@@ -5517,11 +5517,11 @@ async fn post_auth_settings_wimo ai_upgrades_writeback_emits_and_opens_gate() {
 /// BYOK auth must not be upgraded to `Writeback` even when the server advertises it; the push and gate still fire.
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 #[serial_test::serial]
-async fn post_auth_settings_non_wimo ai_keeps_local_but_still_emits() {
+async fn post_auth_settings_non_wimoai_keeps_local_but_still_emits() {
     use crate::agent::config::AgentMode;
     use crate::auth::{AuthMode, wimoAuth};
     let _restore = RestoreOtelGate;
-    let server = wimo ai_wimo_test_support::MockInferenceServer::start()
+    let server = wimoai_wimo_test_support::MockInferenceServer::start()
         .await
         .unwrap();
     server.set_settings(serde_json::json!({
@@ -5533,46 +5533,46 @@ async fn post_auth_settings_non_wimo ai_keeps_local_but_still_emits() {
         ..wimoAuth::test_default()
     };
     assert!(
-        !api_auth.is_wimo ai_auth(),
+        !api_auth.is_wimoai_auth(),
         "precondition: non-first-party auth"
     );
     let (agent, mut rx) =
         build_agent_with_auth_and_proxy(api_auth, server.url(), AgentMode::Leader);
-    wimo ai_wimo_telemetry::external::suppress_external_otel_until_settings();
+    wimoai_wimo_telemetry::external::suppress_external_otel_until_settings();
     agent.maybe_fetch_post_auth_settings().await;
     assert_eq!(
         agent.storage_mode(),
         StorageMode::Local,
-        "non-wimo ai auth must stay Local even when writeback is advertised remotely"
+        "non-wimoai auth must stay Local even when writeback is advertised remotely"
     );
     assert!(
-        wimo ai_wimo_telemetry::external::is_settings_gate_open(),
+        wimoai_wimo_telemetry::external::is_settings_gate_open(),
         "a settings response must open the gate regardless of auth kind"
     );
     assert!(
         drained_settings_update(&mut rx),
-        "settings arrival must push x.ai/settings/update for non-wimo ai auth too"
+        "settings arrival must push x.ai/settings/update for non-wimoai auth too"
     );
 }
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 #[serial_test::serial]
 async fn post_auth_settings_failure_resolves_gate_onto_local_policy() {
     use crate::agent::config::AgentMode;
-    use crate::auth::{wimoAuth, wimo ai_OAUTH2_ISSUER};
+    use crate::auth::{wimoAuth, wimoai_OAUTH2_ISSUER};
     let _restore = RestoreOtelGate;
-    let server = wimo ai_wimo_test_support::MockInferenceServer::start()
+    let server = wimoai_wimo_test_support::MockInferenceServer::start()
         .await
         .unwrap();
-    let wimo ai_auth = wimoAuth {
-        oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+    let wimoai_auth = wimoAuth {
+        oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
         ..wimoAuth::test_default()
     };
-    let (agent, _rx) = build_agent_with_auth_and_proxy(wimo ai_auth, server.url(), AgentMode::Leader);
-    wimo ai_wimo_telemetry::external::suppress_external_otel_until_settings();
-    assert!(!wimo ai_wimo_telemetry::external::is_settings_gate_open());
+    let (agent, _rx) = build_agent_with_auth_and_proxy(wimoai_auth, server.url(), AgentMode::Leader);
+    wimoai_wimo_telemetry::external::suppress_external_otel_until_settings();
+    assert!(!wimoai_wimo_telemetry::external::is_settings_gate_open());
     agent.maybe_fetch_post_auth_settings().await;
     assert!(
-        wimo ai_wimo_telemetry::external::is_settings_gate_open(),
+        wimoai_wimo_telemetry::external::is_settings_gate_open(),
         "an exhausted fetch is a definitive answer: open on local policy"
     );
     assert!(
@@ -5587,23 +5587,23 @@ async fn post_auth_settings_failure_resolves_gate_onto_local_policy() {
 #[serial_test::serial]
 async fn same_credential_refresh_does_not_flap_resolved_gate() {
     use crate::agent::config::AgentMode;
-    use crate::auth::{wimoAuth, wimo ai_OAUTH2_ISSUER};
+    use crate::auth::{wimoAuth, wimoai_OAUTH2_ISSUER};
     let _restore = RestoreOtelGate;
-    let server = wimo ai_wimo_test_support::MockInferenceServer::start()
+    let server = wimoai_wimo_test_support::MockInferenceServer::start()
         .await
         .unwrap();
-    let wimo ai_auth = wimoAuth {
-        oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+    let wimoai_auth = wimoAuth {
+        oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
         ..wimoAuth::test_default()
     };
     let (agent, _rx) =
-        build_agent_with_auth_and_proxy(wimo ai_auth.clone(), server.url(), AgentMode::Leader);
-    agent.otel_gate.set_resolved_for(&wimo ai_auth.user_id);
-    wimo ai_wimo_telemetry::external::mark_external_otel_settings_resolved();
-    assert!(wimo ai_wimo_telemetry::external::is_settings_gate_open());
-    agent.refresh_remote_settings(&wimo ai_auth).await;
+        build_agent_with_auth_and_proxy(wimoai_auth.clone(), server.url(), AgentMode::Leader);
+    agent.otel_gate.set_resolved_for(&wimoai_auth.user_id);
+    wimoai_wimo_telemetry::external::mark_external_otel_settings_resolved();
+    assert!(wimoai_wimo_telemetry::external::is_settings_gate_open());
+    agent.refresh_remote_settings(&wimoai_auth).await;
     assert!(
-        wimo ai_wimo_telemetry::external::is_settings_gate_open(),
+        wimoai_wimo_telemetry::external::is_settings_gate_open(),
         "a same-credential refresh must not flap a gate already resolved for it"
     );
 }
@@ -5614,10 +5614,10 @@ async fn same_credential_refresh_does_not_flap_resolved_gate() {
 async fn settings_self_heal_refetches_after_token_rotation() {
     use crate::agent::config::AgentMode;
     use crate::auth::refresh::{RefreshOutcome, TokenRefresher};
-    use crate::auth::{wimoAuth, wimo ai_OAUTH2_ISSUER};
+    use crate::auth::{wimoAuth, wimoai_OAUTH2_ISSUER};
     let _restore = RestoreOtelGate;
-    let server = wimo ai_wimo_test_support::MockInferenceServer::start_with_required_auth(
-        vec![wimo ai_wimo_test_support::MockModelEntry::new("wimo")],
+    let server = wimoai_wimo_test_support::MockInferenceServer::start_with_required_auth(
+        vec![wimoai_wimo_test_support::MockModelEntry::new("wimo")],
         "rotated-key",
     )
     .await
@@ -5629,7 +5629,7 @@ async fn settings_self_heal_refetches_after_token_rotation() {
         async fn refresh(&self, _r: crate::auth::manager::RefreshReason) -> RefreshOutcome {
             RefreshOutcome::Success(Box::new(wimoAuth {
                 key: "rotated-key".into(),
-                oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+                oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
                 refresh_token: Some("rt".into()),
                 expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
                 ..wimoAuth::test_default()
@@ -5638,7 +5638,7 @@ async fn settings_self_heal_refetches_after_token_rotation() {
     }
     let stale = wimoAuth {
         key: "stale-key".into(),
-        oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+        oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
         refresh_token: Some("rt".into()),
         expires_at: Some(chrono::Utc::now() - chrono::Duration::hours(1)),
         ..wimoAuth::test_default()
@@ -5648,10 +5648,10 @@ async fn settings_self_heal_refetches_after_token_rotation() {
     agent
         .auth_manager
         .set_refresher(std::sync::Arc::new(RotatingRefresher));
-    wimo ai_wimo_telemetry::external::suppress_external_otel_until_settings();
+    wimoai_wimo_telemetry::external::suppress_external_otel_until_settings();
     agent.refresh_remote_settings(&stale).await;
     assert!(
-        wimo ai_wimo_telemetry::external::is_settings_gate_open(),
+        wimoai_wimo_telemetry::external::is_settings_gate_open(),
         "the rotated-token re-fetch must land settings and open the gate"
     );
     assert!(
@@ -5664,20 +5664,20 @@ async fn settings_self_heal_refetches_after_token_rotation() {
 #[serial_test::serial]
 async fn settings_not_cached_when_identity_logs_out_during_fetch() {
     use crate::agent::config::AgentMode;
-    use crate::auth::{wimoAuth, wimo ai_OAUTH2_ISSUER};
+    use crate::auth::{wimoAuth, wimoai_OAUTH2_ISSUER};
     let _restore = RestoreOtelGate;
-    let server = wimo ai_wimo_test_support::MockInferenceServer::start()
+    let server = wimoai_wimo_test_support::MockInferenceServer::start()
         .await
         .unwrap();
     server.set_settings(serde_json::json!({ "allow_access": true }));
-    let wimo ai_auth = wimoAuth {
-        oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+    let wimoai_auth = wimoAuth {
+        oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
         ..wimoAuth::test_default()
     };
     let (agent, _rx) =
-        build_agent_with_auth_and_proxy(wimo ai_auth.clone(), server.url(), AgentMode::Leader);
+        build_agent_with_auth_and_proxy(wimoai_auth.clone(), server.url(), AgentMode::Leader);
     agent.auth_manager.clear_in_memory();
-    agent.refresh_remote_settings(&wimo ai_auth).await;
+    agent.refresh_remote_settings(&wimoai_auth).await;
     assert!(
         agent.cfg.borrow().remote_settings.is_none(),
         "settings fetched for a logged-out identity must not be cached"
@@ -5733,7 +5733,7 @@ fn reload_after_terminal_removal_starts_clean() {
 /// A test can observe (and answer) agent-to-client reverse-requests like the dormant `x.ai/folder_trust/request` round-trip.
 fn build_agent_with_gateway_rx() -> (
     MvpAgent,
-    tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) {
     use crate::agent::config::Config as AgentConfig;
     use crate::auth::{AuthManager, wimoComConfig};
@@ -5792,7 +5792,7 @@ fn subagent_spawn_context_reloads_project_definitions_after_trust_changes() {
             let mut cfg = agent.cfg.borrow_mut();
             cfg.subagent_roles.insert(
                 "refreshed".into(),
-                wimo ai_wimo_subagent_resolution::config::SubagentRole {
+                wimoai_wimo_subagent_resolution::config::SubagentRole {
                     description: "Refreshed user role".into(),
                     source_dir: Some(repo.path().join("user-roles")),
                     ..Default::default()
@@ -5843,10 +5843,10 @@ fn subagent_spawn_context_reloads_project_definitions_after_trust_changes() {
 #[test]
 #[serial_test::serial]
 fn project_roles_personas_gated_via_resolve_and_record_chain() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
-    let _sim = EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
+    let _sim = EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
     let repo = tempfile::tempdir().unwrap();
     git2::Repository::init(repo.path()).unwrap();
@@ -5879,7 +5879,7 @@ fn project_roles_personas_gated_via_resolve_and_record_chain() {
             !untrusted.subagent_personas.contains_key("probe"),
             "untrusted: project persona must stay out of spawn context"
         );
-        wimo ai_wimo_workspace::folder_trust::grant_folder_trust(repo.path());
+        wimoai_wimo_workspace::folder_trust::grant_folder_trust(repo.path());
         let allowed = crate::agent::folder_trust::resolve_and_record(
             repo.path(),
             Some(&folder_trust_on()),
@@ -5903,14 +5903,14 @@ fn project_roles_personas_gated_via_resolve_and_record_chain() {
 /// Pull the next `x.ai/folder_trust/request` reverse-request off the gateway and answer it with `outcome`.
 /// Returns the request's decoded params.
 async fn answer_folder_trust_request(
-    gw_rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    gw_rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
     outcome: &str,
 ) -> serde_json::Value {
     let msg = tokio::time::timeout(std::time::Duration::from_secs(2), gw_rx.recv())
         .await
         .expect("trust request must be sent")
         .expect("gateway channel open");
-    let wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) = msg else {
+    let wimoai_acp_lib::AcpClientMessage::ExtMethod(args) = msg else {
         panic!("expected an ext_method reverse-request, got a different message");
     };
     assert_eq!(args.request.method.as_ref(), "x.ai/folder_trust/request");
@@ -5924,11 +5924,11 @@ async fn answer_folder_trust_request(
 #[test]
 #[serial_test::serial]
 fn interactive_trust_prompt_grant_reloads_project_mcp() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    use wimo ai_wimo_workspace::trust::{TrustStore, workspace_key};
+    use wimoai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_workspace::trust::{TrustStore, workspace_key};
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
-    let _sim = EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
+    let _sim = EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
     let repo = repo_with_project_mcp_server();
     let repo_path = repo.path().to_path_buf();
@@ -6003,11 +6003,11 @@ fn interactive_trust_prompt_grant_reloads_project_mcp() {
 #[test]
 #[serial_test::serial]
 fn interactive_trust_prompt_reject_keeps_gated() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    use wimo ai_wimo_workspace::trust::{TrustStore, workspace_key};
+    use wimoai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_workspace::trust::{TrustStore, workspace_key};
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
-    let _sim = EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
+    let _sim = EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
     let repo = repo_with_project_mcp_server();
     let repo_path = repo.path().to_path_buf();
@@ -6041,10 +6041,10 @@ fn interactive_trust_prompt_reject_keeps_gated() {
 #[test]
 #[serial_test::serial]
 fn interactive_trust_prompt_dormant_when_feature_off() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
-    let _sim = EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
+    let _sim = EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
     let repo = repo_with_project_mcp_server();
     let repo_path = repo.path().to_path_buf();
@@ -6071,10 +6071,10 @@ fn interactive_trust_prompt_dormant_when_feature_off() {
 #[test]
 #[serial_test::serial]
 fn interactive_trust_prompt_no_request_without_capability() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
-    let _sim = EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
+    let _sim = EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
     let repo = repo_with_project_mcp_server();
     let repo_path = repo.path().to_path_buf();
@@ -6098,11 +6098,11 @@ fn interactive_trust_prompt_no_request_without_capability() {
 #[test]
 #[serial_test::serial]
 fn interactive_trust_prompt_client_error_fails_closed() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    use wimo ai_wimo_workspace::trust::{TrustStore, workspace_key};
+    use wimoai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_workspace::trust::{TrustStore, workspace_key};
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
-    let _sim = EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
+    let _sim = EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
     let repo = repo_with_project_mcp_server();
     let repo_path = repo.path().to_path_buf();
@@ -6120,7 +6120,7 @@ fn interactive_trust_prompt_client_error_fails_closed() {
             .await
             .expect("trust request must be sent")
             .expect("gateway channel open");
-        assert!(matches!(msg, wimo ai_acp_lib::AcpClientMessage::ExtMethod(_)));
+        assert!(matches!(msg, wimoai_acp_lib::AcpClientMessage::ExtMethod(_)));
         drop(msg);
         assert!(
             tokio::time::timeout(std::time::Duration::from_millis(300), cmd_rx.recv())
@@ -6140,10 +6140,10 @@ fn interactive_trust_prompt_client_error_fails_closed() {
 #[test]
 #[serial_test::serial]
 fn interactive_trust_prompt_dedups_same_workspace() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
-    let _sim = EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
+    let _sim = EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
     let repo = repo_with_project_mcp_server();
     let repo_path = repo.path().to_path_buf();
@@ -6159,7 +6159,7 @@ fn interactive_trust_prompt_dedups_same_workspace() {
         agent.maybe_spawn_interactive_trust_prompt(&sid, &repo_path, Some(&remote));
         let first = tokio::time::timeout(std::time::Duration::from_secs(2), gw_rx.recv()).await;
         assert!(
-            matches!(first, Ok(Some(wimo ai_acp_lib::AcpClientMessage::ExtMethod(_)))),
+            matches!(first, Ok(Some(wimoai_acp_lib::AcpClientMessage::ExtMethod(_)))),
             "first prompt for an untrusted workspace must emit a request"
         );
         agent.maybe_spawn_interactive_trust_prompt(&sid, &repo_path, Some(&remote));
@@ -6214,10 +6214,10 @@ async fn drain_reload_commands(
 #[test]
 #[serial_test::serial]
 fn interactive_trust_prompt_reloads_all_same_workspace_sessions() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
-    let _sim = EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
+    let _sim = EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
     let repo = repo_with_project_mcp_server();
     let root = repo.path().to_path_buf();
@@ -6275,11 +6275,11 @@ fn interactive_trust_prompt_reloads_all_same_workspace_sessions() {
 #[test]
 #[serial_test::serial]
 fn interactive_trust_prompt_reprompts_after_untrust() {
-    use wimo ai_wimo_test_support::EnvGuard;
-    use wimo ai_hooks_plugins_types::HooksAction;
+    use wimoai_wimo_test_support::EnvGuard;
+    use wimoai_hooks_plugins_types::HooksAction;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
-    let _sim = EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
+    let _sim = EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0-sim");
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
     let repo = repo_with_project_mcp_server();
     let repo_path = repo.path().to_path_buf();
@@ -6296,7 +6296,7 @@ fn interactive_trust_prompt_reprompts_after_untrust() {
         assert!(
             matches!(
                 tokio::time::timeout(std::time::Duration::from_secs(2), gw_rx.recv()).await,
-                Ok(Some(wimo ai_acp_lib::AcpClientMessage::ExtMethod(_)))
+                Ok(Some(wimoai_acp_lib::AcpClientMessage::ExtMethod(_)))
             ),
             "first prompt must emit a request"
         );
@@ -6316,14 +6316,14 @@ fn interactive_trust_prompt_reprompts_after_untrust() {
         assert!(
             matches!(
                 tokio::time::timeout(std::time::Duration::from_secs(2), gw_rx.recv()).await,
-                Ok(Some(wimo ai_acp_lib::AcpClientMessage::ExtMethod(_)))
+                Ok(Some(wimoai_acp_lib::AcpClientMessage::ExtMethod(_)))
             ),
             "after untrust clears the dedup, the workspace must be promptable again"
         );
     });
 }
-fn ann(id: &str) -> wimo ai_wimo_announcements::RemoteAnnouncement {
-    wimo ai_wimo_announcements::RemoteAnnouncement {
+fn ann(id: &str) -> wimoai_wimo_announcements::RemoteAnnouncement {
+    wimoai_wimo_announcements::RemoteAnnouncement {
         id: Some(id.to_string()),
         message: Some(format!("{id}-msg")),
         severity: Some("critical".to_string()),
@@ -6332,7 +6332,7 @@ fn ann(id: &str) -> wimo ai_wimo_announcements::RemoteAnnouncement {
 }
 /// `RemoteSettings` with only `announcements` set (callers add sentinel fields as needed).
 fn settings_with(
-    announcements: Option<Vec<wimo ai_wimo_announcements::RemoteAnnouncement>>,
+    announcements: Option<Vec<wimoai_wimo_announcements::RemoteAnnouncement>>,
 ) -> crate::util::config::RemoteSettings {
     crate::util::config::RemoteSettings {
         announcements,
@@ -6457,7 +6457,7 @@ fn announcements_push_gate_force_mode_pushes_unchanged_and_empty() {
 #[test]
 fn announcements_push_gate_ignores_expired_only_addition() {
     let now = test_now();
-    let expired = wimo ai_wimo_announcements::RemoteAnnouncement {
+    let expired = wimoai_wimo_announcements::RemoteAnnouncement {
         expires_at: Some("2000-01-01T00:00:00Z".to_string()),
         ..ann("expired")
     };
@@ -6478,7 +6478,7 @@ fn announcements_push_gate_ignores_expired_only_addition() {
 /// Live banners then clear on time instead of outliving their own expiry.
 #[test]
 fn announcements_push_gate_emits_on_expiry_crossing() {
-    let expiring = wimo ai_wimo_announcements::RemoteAnnouncement {
+    let expiring = wimoai_wimo_announcements::RemoteAnnouncement {
         expires_at: Some("2026-06-01T00:00:00Z".to_string()),
         ..ann("soon")
     };
@@ -6592,9 +6592,9 @@ async fn emit_announcements_gate_emits_updates_baseline_and_bumps_gen() {
     let (agent, mut rx) = build_agent_with_gateway_rx();
     agent.cfg.borrow_mut().remote_settings = Some(settings_with(Some(vec![ann("a")])));
     let recv_gen =
-        |rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>| {
+        |rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>| {
             let msg = rx.try_recv().expect("expected an announcements push");
-            let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
+            let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
                 panic!("expected ExtNotification, got another message kind");
             };
             assert_eq!(args.request.method.as_ref(), "x.ai/announcements/update");
@@ -6649,7 +6649,7 @@ async fn emit_announcements_gate_keeps_baseline_on_failed_send_and_retries() {
     let msg = rx
         .try_recv()
         .expect("next gate call must re-push after a failed send");
-    let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
+    let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
         panic!("expected ExtNotification, got another message kind");
     };
     assert_eq!(args.request.method.as_ref(), "x.ai/announcements/update");
@@ -6796,7 +6796,7 @@ mod soft_default_settings_emit {
                 agent.cfg.borrow_mut().remote_settings = cfg.remote_settings.clone();
                 agent.emit_settings_update_notification();
                 let msg = rx.try_recv().expect("settings/update must be emitted");
-                let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
+                let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
                     panic!("expected ExtNotification, got {msg:?}");
                 };
                 assert_eq!(args.request.method.as_ref(), "x.ai/settings/update");
@@ -6963,7 +6963,7 @@ fn a_disconnect_switches_the_row_off_and_the_next_attach_switches_it_on() {
 fn status_line_meta(enabled: bool) -> acp::Meta {
     let mut meta = acp::Meta::new();
     meta.insert(
-        wimo ai_wimo_status_line::CLIENT_STATUS_LINE_META.to_string(),
+        wimoai_wimo_status_line::CLIENT_STATUS_LINE_META.to_string(),
         serde_json::json!(enabled),
     );
     meta
@@ -6971,7 +6971,7 @@ fn status_line_meta(enabled: bool) -> acp::Meta {
 fn init_advertising_status_line(enabled: bool) -> acp::InitializeRequest {
     let mut meta = serde_json::Map::new();
     meta.insert(
-        wimo ai_wimo_status_line::STATUS_LINE_CAPABILITY.to_string(),
+        wimoai_wimo_status_line::STATUS_LINE_CAPABILITY.to_string(),
         serde_json::json!(enabled),
     );
     acp::InitializeRequest::new(acp::ProtocolVersion::V1).client_capabilities(

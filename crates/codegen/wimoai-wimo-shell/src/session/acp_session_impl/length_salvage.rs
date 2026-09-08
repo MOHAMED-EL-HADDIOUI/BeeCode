@@ -39,7 +39,7 @@ impl SessionActor {
     pub(super) fn length_salvage_budget(&self) -> Option<u32> {
         resolve_length_salvage_budget(
             self.is_cursor_agent(),
-            wimo ai_wimo_config::env_bool("wimo_LENGTH_SALVAGE"),
+            wimoai_wimo_config::env_bool("wimo_LENGTH_SALVAGE"),
             self.length_salvage_remote_budget,
         )
     }

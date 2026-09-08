@@ -25,7 +25,7 @@ use prometheus::{IntCounterVec, register_int_counter_vec};
 use std::os::unix::io::{AsRawFd, RawFd};
 
 /// True if `e` reports that an advisory `flock` is held by another process: `WouldBlock` on Unix, `ERROR_LOCK_VIOLATION` (OS error 33) on Windows.
-/// This is a private copy of `wimo ai_wimo_workspace::util::is_lock_contended`, so this crate does not depend on `wimo ai-wimo-workspace`.
+/// This is a private copy of `wimoai_wimo_workspace::util::is_lock_contended`, so this crate does not depend on `wimoai-wimo-workspace`.
 fn is_lock_contended(e: &io::Error) -> bool {
     e.kind() == io::ErrorKind::WouldBlock
         || (e.raw_os_error().is_some()
@@ -834,12 +834,12 @@ mod tests {
         assert!(taken.is_none());
     }
 
-    /// Fixture child killed on drop ([`wimo ai_tty_utils::KillOnDrop`]): an
+    /// Fixture child killed on drop ([`wimoai_tty_utils::KillOnDrop`]): an
     /// assertion failure between spawn and the explicit kill must not leak
     /// the predecessor (the SIGTERM-immune bash loop would otherwise run
     /// forever). `kill` is SIGKILL, so it also ends the trap-armed fixture.
     #[cfg(target_os = "linux")]
-    use wimo ai_tty_utils::KillOnDrop as FixtureChild;
+    use wimoai_tty_utils::KillOnDrop as FixtureChild;
 
     /// Spawn a long-sleeping child to stand in for a predecessor process.
     #[cfg(target_os = "linux")]
@@ -850,7 +850,7 @@ mod tests {
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null());
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         FixtureChild::new(cmd.spawn().expect("spawn sleep"))
     }
 
@@ -946,7 +946,7 @@ mod tests {
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null());
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         #[allow(clippy::disallowed_methods)] // test fixture; killed on drop
         let mut child = FixtureChild::new(cmd.spawn().expect("spawn stubborn child"));
         let trap_deadline = Instant::now() + Duration::from_secs(5);
@@ -1017,7 +1017,7 @@ mod tests {
     fn process_name_matches_own_argv0() {
         let pid = process::id();
         // Derive the fragment from this process's real argv0 basename rather than hardcoding a name
-        // Different test runners name the binary differently (e.g. Cargo uses `wimo ai_wimo_workspace_daemon-<hash>`).
+        // Different test runners name the binary differently (e.g. Cargo uses `wimoai_wimo_workspace_daemon-<hash>`).
         // A hardcoded fragment would match under one runner but not another
         let cmdline = fs::read(format!("/proc/{pid}/cmdline")).expect("read own cmdline");
         let argv0 = cmdline.split(|&b| b == 0).next().expect("argv0 present");
@@ -1091,11 +1091,11 @@ mod tests {
     #[test]
     fn basename_contains_ignores_directory_components() {
         assert!(basename_contains(
-            "/usr/local/bin/wimo ai-workspace-server",
+            "/usr/local/bin/wimoai-workspace-server",
             "workspace-server"
         ));
         assert!(basename_contains(
-            "C:\\Program Files\\wimo ai-Workspace-Server.exe",
+            "C:\\Program Files\\wimoai-Workspace-Server.exe",
             "workspace-server"
         ));
         assert!(

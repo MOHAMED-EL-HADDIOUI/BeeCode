@@ -95,7 +95,7 @@ struct BundleFile<'a> {
 }
 
 pub fn bundled_root() -> PathBuf {
-    wimo ai_wimo_config::wimo_home().join(BUNDLED_DIR_NAME)
+    wimoai_wimo_config::wimo_home().join(BUNDLED_DIR_NAME)
 }
 
 pub fn read_cached_manifest(root: &Path) -> Result<Option<BundleManifest>> {

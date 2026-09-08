@@ -8,7 +8,7 @@
 //! ([`AuthManager::current_or_expired`] -- hard-expired tokens stay
 //! visible, since most 401s arrive exactly then). The two sinks are:
 //!
-//! 1. [`wimo ai_wimo_telemetry::unified_log::warn`] for the local
+//! 1. [`wimoai_wimo_telemetry::unified_log::warn`] for the local
 //!    `~/.wimo/logs/unified.jsonl` file (best-effort; ships to GCS
 //!    only on OIDC refresh failure via `auth/refresh.rs`).
 //! 2. A discrete `tracing::warn_span!("auth_401_attribution", ...)` captured by the OTel layer in `util/otel_layer.rs` and shipped
@@ -36,20 +36,20 @@
 //!
 //! # Cross-crate wiring
 //!
-//! [`wimo ai_wimo_sampler`] is intentionally decoupled from this crate.
-//! It invokes the trait [`wimo ai_wimo_sampler::Auth401AttributionCallback`] at its six 401 arms.
-//! This module provides [`ShellAttribution`], the concrete impl wired into [`wimo ai_wimo_sampler::SamplerConfig::attribution_callback`].
+//! [`wimoai_wimo_sampler`] is intentionally decoupled from this crate.
+//! It invokes the trait [`wimoai_wimo_sampler::Auth401AttributionCallback`] at its six 401 arms.
+//! This module provides [`ShellAttribution`], the concrete impl wired into [`wimoai_wimo_sampler::SamplerConfig::attribution_callback`].
 //! The shell does that wiring at every sampler-construction site.
 //! Non-sampler sites (storage / feedback / registry / idle-resume) call [`record_consumer_401`] directly with their `(consumer_kind, op)` pair.
 
 use std::sync::Arc;
 
 use serde_json::Value as JsonValue;
-use wimo ai_wimo_sampler::{Auth401AttributionCallback, SamplingConsumer};
-use wimo ai_wimo_tools::{Auth401AttributionCallback as ToolAuth401AttributionCallback, ToolConsumer};
+use wimoai_wimo_sampler::{Auth401AttributionCallback, SamplingConsumer};
+use wimoai_wimo_tools::{Auth401AttributionCallback as ToolAuth401AttributionCallback, ToolConsumer};
 
 use crate::auth::{AuthManager, TOKEN_TTL};
-use wimo ai_wimo_auth::bearer_suffix;
+use wimoai_wimo_auth::bearer_suffix;
 
 /// `cfg(test)`-only process-global counter that bumps on every successful `record_auth_401` invocation.
 ///
@@ -93,7 +93,7 @@ impl std::fmt::Debug for ShellAttribution {
 
 impl ShellAttribution {
     /// Construct a shareable attribution callback wired to the given [`AuthManager`].
-    /// Returns `Arc<dyn Trait>` so callers can drop the value directly into [`wimo ai_wimo_sampler::SamplerConfig::attribution_callback`].
+    /// Returns `Arc<dyn Trait>` so callers can drop the value directly into [`wimoai_wimo_sampler::SamplerConfig::attribution_callback`].
     /// That field expects exactly `Arc<dyn Trait>`; keeping the boundary in one place avoids `as Arc<dyn _>` coercions at every call site.
     #[allow(clippy::new_ret_no_self)]
     pub(crate) fn new(
@@ -106,7 +106,7 @@ impl ShellAttribution {
         })
     }
 
-    /// Tool-side counterpart of [`Self::new`]: returns `Arc<dyn wimo ai_wimo_tools::Auth401AttributionCallback>` for the
+    /// Tool-side counterpart of [`Self::new`]: returns `Arc<dyn wimoai_wimo_tools::Auth401AttributionCallback>` for the
     /// `with_attribution_callback(...)` builder on each tool HTTP client (`ImageGenClient`, `VideoGenClient`, `WebSearchClient`).
     /// The two callbacks share the same underlying impl and emit the same `auth_401_attribution` event format.
     /// Only the trait signature differs (`SamplingConsumer` vs. `ToolConsumer`).
@@ -134,7 +134,7 @@ impl Auth401AttributionCallback for ShellAttribution {
     }
 }
 
-/// Tool-side hook: each tool client (image_gen, video_gen, web_search) in `wimo ai-wimo-tools` emits a 401 attribution event through this
+/// Tool-side hook: each tool client (image_gen, video_gen, web_search) in `wimoai-wimo-tools` emits a 401 attribution event through this
 /// trait when its HTTP request returns UNAUTHORIZED.
 /// Same shape as the sampler-side impl above; routes to the same pair of sinks.
 ///
@@ -178,13 +178,13 @@ pub(crate) enum ConsumerKind {
     /// Idle-resume model-metadata refresh in `session/acp_session.rs::maybe_refresh_model_metadata_on_resume`.
     /// No per-op discriminator; the consumer string is just `"IdleResumeModelRefresh"`.
     IdleResumeModelRefresh,
-    /// `wimo ai_wimo_tools::ToolConsumer::ImageGen`, the Imagine API (`POST /images/generations`).
+    /// `wimoai_wimo_tools::ToolConsumer::ImageGen`, the Imagine API (`POST /images/generations`).
     /// No per-op discriminator; consumer string is just `"ImageGen"`.
     ImageGen,
-    /// `wimo ai_wimo_tools::ToolConsumer::VideoGenStart` and `VideoGenPoll`, the Video Generation API.
+    /// `wimoai_wimo_tools::ToolConsumer::VideoGenStart` and `VideoGenPoll`, the Video Generation API.
     /// The op string is `"start"` (`POST /videos/generations`) or `"poll"` (`GET /videos/{request_id}`).
     VideoGen,
-    /// `wimo ai_wimo_tools::ToolConsumer::WebSearch`, web search via `POST /responses` with a `WebSearch` tool.
+    /// `wimoai_wimo_tools::ToolConsumer::WebSearch`, web search via `POST /responses` with a `WebSearch` tool.
     /// No per-op discriminator; consumer string is just `"WebSearch"`.
     WebSearch,
 }
@@ -227,7 +227,7 @@ fn format_consumer(kind: ConsumerKind, op: &str) -> String {
 /// Emit a single `auth 401 attribution` event for a per-consumer 401.
 ///
 /// Wraps [`record_auth_401`] with the canonical `consumer` formatting (e.g., `"StorageClient.upload"`, `"FeedbackClient.submit"`).
-/// All 401 emit sites in `wimo ai-wimo-shell` go through this helper.
+/// All 401 emit sites in `wimoai-wimo-shell` go through this helper.
 /// The per-client `record_401_attribution` wrappers in `agent/feedback_client.rs`, `agent/session_registry_client.rs`, and
 /// `upload/storage_client.rs` each resolve their bearer and call this with the right `(kind, op)`.
 ///
@@ -270,7 +270,7 @@ pub(crate) fn record_auth_401(
     // tracing event
     // The local file is reliable but only ships to GCS on OIDC refresh failure (auth/refresh.rs::spawn_diagnostic_upload)
     // By itself it does not show the steady-state 401 population; Sink 2 below provides that
-    wimo ai_wimo_telemetry::unified_log::warn(
+    wimoai_wimo_telemetry::unified_log::warn(
         "auth 401 attribution",
         session_id,
         Some(payload.clone()),
@@ -643,7 +643,7 @@ mod tests {
         );
     }
 
-    /// `ShellAttribution` implements `wimo ai_wimo_tools::Auth401AttributionCallback` by routing each `ToolConsumer` variant to the right
+    /// `ShellAttribution` implements `wimoai_wimo_tools::Auth401AttributionCallback` by routing each `ToolConsumer` variant to the right
     /// `(ConsumerKind, op)` pair, which formats to the expected `consumer` string in the emitted payload.
     #[test]
     #[serial_test::serial(attribution_emit_count)]

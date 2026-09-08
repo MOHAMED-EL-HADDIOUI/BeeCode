@@ -7,7 +7,7 @@ use crate::error::HookError;
 use crate::event::HookEventName;
 use crate::matcher::HookMatcher;
 
-pub use wimo ai_wimo_config::HookProvenance;
+pub use wimoai_wimo_config::HookProvenance;
 
 /// Parsed `hooks` object. Unknown event names are skipped, not errors.
 #[derive(Debug)]
@@ -405,9 +405,9 @@ pub fn parse_hooks_from_value_with_dir(
 /// Layers arrive highest-authority-first and specs preserve that order, so the caller's dedup keeps the higher-authority copy.
 /// Relative commands resolve against each layer's own directory; a layer that fails to parse is recorded and skipped, the rest still load.
 pub fn parse_hooks_from_config_layers(
-    layers: &[wimo ai_wimo_config::HookConfigLayer],
+    layers: &[wimoai_wimo_config::HookConfigLayer],
 ) -> (Vec<HookSpec>, Vec<HookError>) {
-    let home = wimo ai_wimo_config::user_wimo_home();
+    let home = wimoai_wimo_config::user_wimo_home();
     let mut all_specs = Vec::new();
     let mut all_errors = Vec::new();
 
@@ -790,7 +790,7 @@ mod tests {
             ),
         ];
         for (source_name, provenance, expected) in tiers {
-            let layer = wimo ai_wimo_config::HookConfigLayer::new(
+            let layer = wimoai_wimo_config::HookConfigLayer::new(
                 provenance,
                 source_name,
                 toml::from_str::<toml::Value>(
@@ -810,11 +810,11 @@ mod tests {
         }
     }
 
-    fn config_layer(source_name: &str, toml_src: &str) -> wimo ai_wimo_config::HookConfigLayer {
+    fn config_layer(source_name: &str, toml_src: &str) -> wimoai_wimo_config::HookConfigLayer {
         let value: toml::Value = toml::from_str(toml_src).unwrap();
         let hooks = value.get("hooks").cloned().unwrap();
-        wimo ai_wimo_config::HookConfigLayer::new(
-            wimo ai_wimo_config::HookProvenance::Managed,
+        wimoai_wimo_config::HookConfigLayer::new(
+            wimoai_wimo_config::HookProvenance::Managed,
             source_name,
             hooks,
         )
@@ -854,14 +854,14 @@ mod tests {
             let toml_src = format!(
                 "[[PreToolUse]]\n[[PreToolUse.hooks]]\ntype = \"command\"\ncommand = \"{cmd}\"\n"
             );
-            wimo ai_wimo_config::HookConfigLayer::new(
+            wimoai_wimo_config::HookConfigLayer::new(
                 prov,
                 src,
                 toml::from_str::<toml::Value>(&toml_src).unwrap(),
             )
         };
 
-        use wimo ai_wimo_config::HookProvenance::{Managed, User};
+        use wimoai_wimo_config::HookProvenance::{Managed, User};
         let (additive, _) = parse_hooks_from_config_layers(&[
             mk("managed", Managed, "m.sh"),
             mk("user", User, "u.sh"),

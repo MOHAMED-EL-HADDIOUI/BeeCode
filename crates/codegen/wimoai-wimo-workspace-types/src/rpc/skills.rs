@@ -1,6 +1,6 @@
 //! Discovery methods (`workspace.discover_skills`).
 //!
-//! SYNC: [`SkillInfo`] / [`SkillScope`] mirror the serde shape the server serializes in `wimo ai-wimo-tools/src/implementations/skills/types.rs`.
+//! SYNC: [`SkillInfo`] / [`SkillScope`] mirror the serde shape the server serializes in `wimoai-wimo-tools/src/implementations/skills/types.rs`.
 //! The fixture tests below pin the contract.
 //!
 //! Not to be confused with the event/chunk `SkillInfo` in `crate::types::skills` (`source`-keyed), which is **not** this RPC's wire shape.
@@ -168,7 +168,7 @@ mod tests {
         assert!(info.config_source.is_none());
     }
 
-    // Fixture mirrored field-for-field from the wimo ai-wimo-tools SkillInfo serialization
+    // Fixture mirrored field-for-field from the wimoai-wimo-tools SkillInfo serialization
     // Refresh from a captured live response when the wire shape is in question
     #[test]
     fn skill_info_deserializes_full_payload() {

@@ -145,7 +145,7 @@ fn fetch_models_uncommitted(
     match source.fetch(auth) {
         Ok(FetchModelsResult { models, etag }) if !models.is_empty() => {
             let api_base_url_override = match fetch_auth {
-                ModelFetchAuth::ApiKey => Some(endpoints.wimo ai_api_base_url.clone()),
+                ModelFetchAuth::ApiKey => Some(endpoints.wimoai_api_base_url.clone()),
                 _ => None,
             };
             let map = build_prefetched_map(models, api_base_url_override);

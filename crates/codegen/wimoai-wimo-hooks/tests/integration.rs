@@ -3,11 +3,11 @@
 
 use std::path::Path;
 
-use wimo ai_wimo_hooks::discovery::load_hooks;
-use wimo ai_wimo_hooks::dispatcher;
-use wimo ai_wimo_hooks::event::*;
-use wimo ai_wimo_hooks::result::HookDecision;
-use wimo ai_wimo_hooks::runner::RunContext;
+use wimoai_wimo_hooks::discovery::load_hooks;
+use wimoai_wimo_hooks::dispatcher;
+use wimoai_wimo_hooks::event::*;
+use wimoai_wimo_hooks::result::HookDecision;
+use wimoai_wimo_hooks::runner::RunContext;
 
 fn write_hook(dir: &Path, filename: &str, content: &str) {
     std::fs::write(dir.join(filename), content).unwrap();
@@ -180,7 +180,7 @@ async fn non_blocking_dispatch() {
     assert_eq!(results.len(), 1);
     assert!(matches!(
         &results[0],
-        wimo ai_wimo_hooks::result::HookRunResult::Success { .. }
+        wimoai_wimo_hooks::result::HookRunResult::Success { .. }
     ));
 }
 
@@ -338,7 +338,7 @@ async fn new_event_types_fire_and_receive_correct_envelope() {
             event_name: HookEventName::StopFailure,
             json_key: "StopFailure",
             payload: HookPayload::StopFailure {
-                error: wimo ai_wimo_hooks::event::StopFailureKind::RateLimit,
+                error: wimoai_wimo_hooks::event::StopFailureKind::RateLimit,
                 error_details: Some("429 Too Many Requests".into()),
                 last_assistant_message: Some("Turn failed: rate limited".into()),
                 subagent_type: None,
@@ -355,8 +355,8 @@ async fn new_event_types_fire_and_receive_correct_envelope() {
             event_name: HookEventName::StopCancelled,
             json_key: "StopCancelled",
             payload: HookPayload::StopCancelled {
-                reason: wimo ai_wimo_hooks::event::StopCancelledReason::UserInterrupt,
-                cancelled_by: wimo ai_wimo_hooks::event::CancelledBy::User,
+                reason: wimoai_wimo_hooks::event::StopCancelledReason::UserInterrupt,
+                cancelled_by: wimoai_wimo_hooks::event::CancelledBy::User,
                 cancel_trigger: Some("ctrl_c".into()),
                 reason_details: Some("read_file: user declined".into()),
                 last_assistant_message: Some("partial answer".into()),
@@ -414,7 +414,7 @@ async fn new_event_types_fire_and_receive_correct_envelope() {
         assert!(
             matches!(
                 &results[0],
-                wimo ai_wimo_hooks::result::HookRunResult::Success { .. }
+                wimoai_wimo_hooks::result::HookRunResult::Success { .. }
             ),
             "{}: hook did not succeed: {:?}",
             case.json_key,
@@ -673,7 +673,7 @@ async fn http_hook_url_env_expansion_end_to_end() {
     );
     assert_eq!(pre_result.results.len(), 1);
     let run = &pre_result.results[0];
-    use wimo ai_wimo_hooks::result::HookRunResult;
+    use wimoai_wimo_hooks::result::HookRunResult;
     let info = match run {
         HookRunResult::Failed {
             http_info, error, ..

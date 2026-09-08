@@ -37,7 +37,7 @@ impl ConfigWatcher {
     }
     /// Start with config loaded from disk (prod mode, no hot-reload).
     fn start_static() -> io::Result<Self> {
-        let config = wimo ai_wimo_config::user_wimo_home()
+        let config = wimoai_wimo_config::user_wimo_home()
             .and_then(|_| std::fs::read_to_string(Self::pager_config_path()).ok())
             .and_then(|content| {
                 toml::from_str::<super::config::RawAppearanceConfig>(&content)

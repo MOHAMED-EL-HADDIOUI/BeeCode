@@ -191,7 +191,7 @@ async fn handle_session_summaries(
             Ok(acp::ExtResponse::new(value))
         }
         "x.ai/session_summaries/workspace_list" => {
-            tracing::debug!("wimo ai/session_summaries/workspace_list is working");
+            tracing::debug!("wimoai/session_summaries/workspace_list is working");
             let _req = serde_json::from_str::<AllSessionOverviewRequest>(args.params.get())?;
 
             let _timer = crate::instrumentation_timer!("session.list_sessions_for_load");

@@ -1,7 +1,7 @@
 //! Integration tests for the actor and request_task layer.
 //!
 //! They live in `tests/` because they need a real `tokio::runtime` and a mock axum HTTP server for the `SamplingClient` to talk to.
-//! Happy-path SSE payloads come from `wimo ai_wimo_test_support::sse`.
+//! Happy-path SSE payloads come from `wimoai_wimo_test_support::sse`.
 
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -18,15 +18,15 @@ use serde_json::json;
 use tokio::net::TcpListener;
 use tokio::sync::{mpsc, oneshot};
 
-use wimo ai_wimo_sampler::{
+use wimoai_wimo_sampler::{
     ApiBackend, RequestId, RetryPolicy, SamplerActor, SamplerConfig, SamplingChannel,
     SamplingErrorKind, SamplingEvent, StripReason,
 };
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     ConversationItem, ConversationRequest, DoomLoopRecoveryPolicy, INVALID_IMAGE_ERROR_CODE,
     UserItem,
 };
-use wimo ai_wimo_test_support::{SseEvent, sse};
+use wimoai_wimo_test_support::{SseEvent, sse};
 
 // ---------------------------------------------------------------------------
 // Mock server harness
@@ -106,7 +106,7 @@ fn test_config(base_url: String, model: &str) -> SamplerConfig {
 fn user_request(text: &str) -> ConversationRequest {
     ConversationRequest {
         items: vec![ConversationItem::User(UserItem {
-            content: vec![wimo ai_wimo_sampling_types::ContentPart::Text {
+            content: vec![wimoai_wimo_sampling_types::ContentPart::Text {
                 text: std::sync::Arc::<str>::from(text),
             }],
             synthetic_reason: None,
@@ -489,7 +489,7 @@ async fn invalid_image_code_strips_and_retries() {
         events.iter().any(|e| match e {
             SamplingEvent::ImagesStripped {
                 stripped_urls,
-                reason: wimo ai_wimo_sampler::StripReason::ServerRejected,
+                reason: wimoai_wimo_sampler::StripReason::ServerRejected,
                 ..
             } => stripped_urls.len() == 1 && stripped_urls[0].as_ref() == IMAGE_URI,
             _ => false,
@@ -716,7 +716,7 @@ async fn fatal_decision_does_not_strip_or_emit_images_stripped() {
     let addr = listener.local_addr().unwrap();
     let (shutdown_tx, mut shutdown_rx) = oneshot::channel::<()>();
     tokio::spawn(async move {
-        // RST every connection: peek then drop (see wimo ai-wimo-http).
+        // RST every connection: peek then drop (see wimoai-wimo-http).
         loop {
             tokio::select! {
                 _ = &mut shutdown_rx => break,
@@ -768,7 +768,7 @@ async fn connection_reset_emits_payload_heuristic_and_strips_request() {
     let addr = listener.local_addr().unwrap();
     let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
     tokio::spawn(async move {
-        // Peek then drop so the peer sees RST (see wimo ai-wimo-http).
+        // Peek then drop so the peer sees RST (see wimoai-wimo-http).
         if let Ok((sock, _)) = listener.accept().await {
             let mut buf = [0u8; 64];
             let _ = sock.peek(&mut buf).await;
@@ -1077,7 +1077,7 @@ async fn messages_empty_refusal_completes_without_retry() {
         SamplingEvent::Completed { response, .. } => {
             assert_eq!(
                 response.stop_reason,
-                Some(wimo ai_wimo_sampling_types::StopReason::ContentFilter)
+                Some(wimoai_wimo_sampling_types::StopReason::ContentFilter)
             );
         }
         other => panic!("expected Completed, got {other:?}"),
@@ -1403,7 +1403,7 @@ async fn responses_doom_loop_does_not_resample_after_output_when_retry_only_befo
     assert!(
         matches!(
             result,
-            Err(wimo ai_wimo_sampling_types::SamplingError::DoomLoopDetected { .. })
+            Err(wimoai_wimo_sampling_types::SamplingError::DoomLoopDetected { .. })
         ),
         "the doomed turn is surfaced rather than resampled: {result:?}"
     );

@@ -17,9 +17,9 @@ use crate::session::goal_planner::{
 use crate::session::goal_role_tools::RoleToolNames;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use wimo ai_wimo_session_events::EventWriter;
-use wimo ai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_session_events::EventWriter;
+use wimoai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     SubagentOwner, SubagentRequest, SubagentRuntimeOverrides,
 };
 
@@ -89,16 +89,16 @@ pub(crate) fn strategist_should_fire(consecutive: u32, last_fired: u32, every: u
 
 pub(crate) struct ChannelSpawner {
     pub(crate) event_tx: tokio::sync::mpsc::UnboundedSender<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
     >,
     pub(crate) foreground_wait:
-        Option<wimo ai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait>,
+        Option<wimoai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait>,
     pub(crate) parent_session_id: String,
     pub(crate) parent_prompt_id: Option<String>,
     pub(crate) cwd: Option<String>,
     /// Trace-artifact sink and resolved `task` tool name; `None` disables recording.
     /// See [`crate::session::goal_classifier::record_subagent_trace`].
-    pub(crate) trace_sink: Option<(wimo ai_chat_state::ChatStateHandle, String)>,
+    pub(crate) trace_sink: Option<(wimoai_chat_state::ChatStateHandle, String)>,
     /// Resolved per-role model and toolset override.
     /// Default (inherit) keeps the historic `::default()` spawn behavior.
     pub(crate) role_override: RoleSpawnOverride,
@@ -538,7 +538,7 @@ mod tests {
 
     #[tokio::test]
     async fn channel_spawner_request_is_harness_internal() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
 
@@ -580,7 +580,7 @@ mod tests {
     /// 3-role parity: an explicit strategist pair threads `agent_type` as the request's `harness_agent_type`, not the subagent_type.
     #[tokio::test]
     async fn channel_spawner_threads_harness_override_to_request() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
         let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
@@ -1176,14 +1176,14 @@ mod tests {
     /// An explicit named toolset renders the tool names, and the explicit `from_summary` path leaves no tool placeholder unresolved.
     #[test]
     fn strategist_template_renders_per_agent_type_names() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentTypeSummary;
+        use wimoai_wimo_tools::implementations::wimo::task::types::SubagentTypeSummary;
         let mut tool_names = std::collections::HashMap::new();
         tool_names.insert(
-            wimo ai_wimo_tools::types::tool::ToolKind::Read,
+            wimoai_wimo_tools::types::tool::ToolKind::Read,
             "alt_read".to_string(),
         );
         tool_names.insert(
-            wimo ai_wimo_tools::types::tool::ToolKind::Execute,
+            wimoai_wimo_tools::types::tool::ToolKind::Execute,
             "alt_shell".to_string(),
         );
         let summary = SubagentTypeSummary {

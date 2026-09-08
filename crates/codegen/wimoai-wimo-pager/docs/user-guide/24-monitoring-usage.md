@@ -7,7 +7,7 @@
 wimo CLI can export usage **metrics** and **events** to your organization's
 own OpenTelemetry collector, so platform teams can monitor adoption, token
 consumption, tool-permission decisions, and errors across the fleet — without
-any data flowing through Spacewimo ai.
+any data flowing through Spacewimoai.
 
 ## Related settings
 
@@ -32,17 +32,17 @@ The external stream is:
 - **Content-free by default**: no prompts, no assistant prose, no code, no file
   paths (extension only), no tool arguments, no bash commands, and MCP/skill/plugin
   names collapsed to categories. Optional content gates re-enable some of these.
-- **Structurally separate** from Spacewimo ai-internal telemetry: its exporters carry
-  only the headers you configure, never Spacewimo ai credentials.
-- **Independent of Spacewimo ai data-retention opt-outs**: it works even when
+- **Structurally separate** from Spacewimoai-internal telemetry: its exporters carry
+  only the headers you configure, never Spacewimoai credentials.
+- **Independent of Spacewimoai data-retention opt-outs**: it works even when
   `telemetry` is disabled and for ZDR (zero-data-retention) teams. Those
-  settings govern Spacewimo ai-side retention; the external stream is governed solely
+  settings govern Spacewimoai-side retention; the external stream is governed solely
   by your own OTEL configuration.
 
 ### ZDR and this stream
 
 `/privacy` and Zero Data Retention do **not** disable this stream. ZDR turns
-off Spacewimo ai-side retention (product analytics, session-trace upload,
+off Spacewimoai-side retention (product analytics, session-trace upload,
 coding-data sharing). It does not mute `wimo_EXTERNAL_OTEL`.
 
 When the stream is on:
@@ -78,7 +78,7 @@ without the master switch.
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `wimo_EXTERNAL_OTEL` | `0` | Master switch. Distinct from `wimo_TELEMETRY_ENABLED`, which controls Spacewimo ai-internal product analytics — the two govern opposite-pointing data flows. |
+| `wimo_EXTERNAL_OTEL` | `0` | Master switch. Distinct from `wimo_TELEMETRY_ENABLED`, which controls Spacewimoai-internal product analytics — the two govern opposite-pointing data flows. |
 | `OTEL_METRICS_EXPORTER` | `none` | `otlp` \| `console` \| `none`. |
 | `OTEL_LOGS_EXPORTER` | `none` | `otlp` \| `console` \| `none`. Gates the event stream. |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` | `http/protobuf` \| `grpc`. Base protocol for both signals. |
@@ -222,7 +222,7 @@ non-empty address — it is identity, not a content gate, and is never taken fro
 git, an API key, or a deployment key. `prompt.id` (per-prompt UUID) appears on
 events only, never metrics.
 
-## Metrics (meter scope `ai.wimo ai.wimo_code`)
+## Metrics (meter scope `ai.wimoai.wimo_code`)
 
 | Metric | Unit | Attributes |
 |---|---|---|

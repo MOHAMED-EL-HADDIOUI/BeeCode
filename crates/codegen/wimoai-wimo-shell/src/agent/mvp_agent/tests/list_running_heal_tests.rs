@@ -6,7 +6,7 @@ use crate::agent::subagent::{LIVE_ORPHAN_RECONCILE_REASON, SubagentMeta};
 use crate::extensions::notification::SessionUpdate;
 use crate::session::SessionCommand;
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     SubagentEvent, SubagentInspection, SubagentSnapshot, SubagentSnapshotStatus,
 };
 
@@ -78,7 +78,7 @@ fn drain_cancelled_finishes(
 ) -> usize {
     let mut count = 0;
     while let Ok(cmd) = cmd_rx.try_recv() {
-        let SessionCommand::wimo aiSessionNotification { notification } = cmd else {
+        let SessionCommand::wimoaiSessionNotification { notification } = cmd else {
             continue;
         };
         let SessionUpdate::SubagentFinished {
@@ -103,7 +103,7 @@ fn drain_cancelled_finishes(
 }
 
 fn spawn_inspect_stub(
-    event_rx: wimo ai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinatorReceiver,
+    event_rx: wimoai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinatorReceiver,
     inspect: Option<SubagentInspection>,
 ) {
     let mut event_rx = event_rx.into_event_receiver();

@@ -81,7 +81,7 @@ impl Scenario {
 /// Wait for the pager to render the initial welcome screen.
 /// All scenarios that prompt or stream content rely on the pager being past startup.
 pub(crate) async fn wait_for_welcome(harness: &mut PtyHarness) -> Result<()> {
-    // Menu label on the normal welcome (and gate menus): capital Q; see `wimo ai-wimo-pager` `views/welcome/mod.rs` (`"Quit"` in `render_menu`)
+    // Menu label on the normal welcome (and gate menus): capital Q; see `wimoai-wimo-pager` `views/welcome/mod.rs` (`"Quit"` in `render_menu`)
     harness
         .wait_for_text("Quit", Duration::from_secs(15))
         .map_err(|e| anyhow::anyhow!("pager failed to reach welcome screen: {e}"))

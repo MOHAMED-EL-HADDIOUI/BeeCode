@@ -4,7 +4,7 @@
 
 use serde_json::Value;
 use serde_json::value::RawValue;
-use wimo ai_wimo_tools::types::TaskSnapshot;
+use wimoai_wimo_tools::types::TaskSnapshot;
 
 use crate::extensions::notification::{SessionNotification, SessionUpdate};
 

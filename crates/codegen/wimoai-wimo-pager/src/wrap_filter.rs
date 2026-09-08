@@ -365,7 +365,7 @@ fn strip_osc_terminator(body: &[u8]) -> &[u8] {
 
 /// Write decoded clipboard payload to the local system clipboard.
 ///
-/// Delegates to [`wimo ai_wimo_shell::util::clipboard::set_text`], which uses `pbcopy` on macOS and `arboard` elsewhere.
+/// Delegates to [`wimoai_wimo_shell::util::clipboard::set_text`], which uses `pbcopy` on macOS and `arboard` elsewhere.
 /// Failures are logged but do not propagate: clipboard access is best-effort.
 fn set_local_clipboard(data: &[u8]) {
     let text = match std::str::from_utf8(data) {
@@ -375,14 +375,14 @@ fn set_local_clipboard(data: &[u8]) {
             return;
         }
     };
-    if let Err(e) = wimo ai_wimo_shell::util::clipboard::set_text(text) {
+    if let Err(e) = wimoai_wimo_shell::util::clipboard::set_text(text) {
         tracing::warn!("clipboard copy failed: {e}");
     }
 }
 
 /// Encode a host clipboard image (or NONE) as a bracketed-paste frame.
 pub(crate) fn host_clipboard_image_frame() -> Vec<u8> {
-    let image = wimo ai_wimo_pager_render::clipboard::system_clipboard_get_image();
+    let image = wimoai_wimo_pager_render::clipboard::system_clipboard_get_image();
     crate::wrap_clipboard_image::encode_wrap_image_response(image.as_ref())
 }
 

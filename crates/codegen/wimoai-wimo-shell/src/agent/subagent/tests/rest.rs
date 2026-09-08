@@ -3,17 +3,17 @@ use super::*;
 use super::super::resume_window::resume_inherited_prefix_len;
 use crate::test_support::lsp_runtime::{ctx_with_toggle, test_gateway};
 use crate::upload::trace::SubagentSpawnedRef;
-use wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend;
+use wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend;
 #[test]
 fn normalize_forked_context_strips_project_layout() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let big_layout = "<project_layout>\nline1\nline2\nline3\n</project_layout>";
     let items = vec![
             ConversationItem::system("sys"),
             ConversationItem::user(big_layout),
             ConversationItem::assistant("ack"),
         ];
-    let (conv, _) = wimo ai_wimo_subagent_resolution::context::normalize_forked_context(
+    let (conv, _) = wimoai_wimo_subagent_resolution::context::normalize_forked_context(
         items,
     );
     if let ConversationItem::User(u) = &conv[1] {
@@ -21,7 +21,7 @@ fn normalize_forked_context_strips_project_layout() {
             .content
             .iter()
             .filter_map(|p| match p {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     Some(text.as_ref())
                 }
                 _ => None,
@@ -38,14 +38,14 @@ fn normalize_forked_context_strips_project_layout() {
 }
 #[test]
 fn normalize_forked_context_consecutive_users() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let items = vec![
             ConversationItem::system("sys"),
             ConversationItem::user("prefix"),
             ConversationItem::user("query"),
             ConversationItem::assistant("response"),
         ];
-    let (conv, prefix_len) = wimo ai_wimo_subagent_resolution::context::normalize_forked_context(
+    let (conv, prefix_len) = wimoai_wimo_subagent_resolution::context::normalize_forked_context(
         items,
     );
     assert_eq!(prefix_len, 2);
@@ -54,7 +54,7 @@ fn normalize_forked_context_consecutive_users() {
             .content
             .iter()
             .filter_map(|p| match p {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     Some(text.as_ref())
                 }
                 _ => None,
@@ -80,14 +80,14 @@ fn normalize_forked_context_consecutive_users() {
 /// The Prompt command then appends the task as [2], giving [System(child's), BackgroundContext, Task].
 #[test]
 fn end_to_end_normalized_conversation_shape() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let parent_conv = vec![
             ConversationItem::system("parent system prompt"),
             ConversationItem::user("user prefix with project info"),
             ConversationItem::user("implement quicksort"),
             ConversationItem::assistant("here is quicksort"),
         ];
-    let (mut conv, prefix_len) = wimo ai_wimo_subagent_resolution::context::normalize_forked_context(
+    let (mut conv, prefix_len) = wimoai_wimo_subagent_resolution::context::normalize_forked_context(
         parent_conv,
     );
     assert_eq!(prefix_len, 2);
@@ -108,7 +108,7 @@ fn end_to_end_normalized_conversation_shape() {
             .content
             .iter()
             .filter_map(|p| match p {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     Some(text.as_ref())
                 }
                 _ => None,
@@ -130,7 +130,7 @@ fn end_to_end_normalized_conversation_shape() {
             .content
             .iter()
             .filter_map(|p| match p {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     Some(text.as_ref())
                 }
                 _ => None,
@@ -144,20 +144,20 @@ fn end_to_end_normalized_conversation_shape() {
 /// Verify that the task prompt (not background context) would be the cached prompt text in the session pipeline.
 #[test]
 fn cached_prompt_text_is_task_not_background() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let parent_conv = vec![
             ConversationItem::system("sys"),
             ConversationItem::user("parent query"),
             ConversationItem::assistant("parent answer"),
         ];
-    let (conv, _) = wimo ai_wimo_subagent_resolution::context::normalize_forked_context(
+    let (conv, _) = wimoai_wimo_subagent_resolution::context::normalize_forked_context(
         parent_conv,
     );
     let background_text = if let ConversationItem::User(ref u) = conv[1] {
         u.content
             .iter()
             .filter_map(|p| match p {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     Some(text.as_ref())
                 }
                 _ => None,
@@ -180,13 +180,13 @@ fn cached_prompt_text_is_task_not_background() {
 /// Verify extract_last_real_user_query would return the task.
 #[test]
 fn last_user_message_is_task_after_normalization() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let parent_conv = vec![
             ConversationItem::system("sys"),
             ConversationItem::user("parent context"),
             ConversationItem::assistant("ack"),
         ];
-    let (mut conv, _) = wimo ai_wimo_subagent_resolution::context::normalize_forked_context(
+    let (mut conv, _) = wimoai_wimo_subagent_resolution::context::normalize_forked_context(
         parent_conv,
     );
     let task = "deploy the service to staging";
@@ -200,7 +200,7 @@ fn last_user_message_is_task_after_normalization() {
                     .content
                     .iter()
                     .filter_map(|p| match p {
-                        wimo ai_wimo_sampling_types::conversation::ContentPart::Text {
+                        wimoai_wimo_sampling_types::conversation::ContentPart::Text {
                             text,
                         } => Some(text.as_ref()),
                         _ => None,
@@ -223,13 +223,13 @@ fn last_user_message_is_task_after_normalization() {
 /// The result is [System(inherited), BackgroundContext(inherited), UserPrefix(compacted), Summary, ...].
 #[test]
 fn compaction_preserves_inherited_prefix() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let parent_conv = vec![
             ConversationItem::system("parent sys"),
             ConversationItem::user("parent question"),
             ConversationItem::assistant("parent answer"),
         ];
-    let (conv, prefix_len) = wimo ai_wimo_subagent_resolution::context::normalize_forked_context(
+    let (conv, prefix_len) = wimoai_wimo_subagent_resolution::context::normalize_forked_context(
         parent_conv,
     );
     assert_eq!(prefix_len, 2);
@@ -262,7 +262,7 @@ fn compaction_preserves_inherited_prefix() {
             .content
             .iter()
             .filter_map(|p| match p {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     Some(text.as_ref())
                 }
                 _ => None,
@@ -293,7 +293,7 @@ fn compaction_preserves_inherited_prefix() {
                     .any(|p| {
                         matches!(
                     p,
-                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } if text.contains("<background_context>")
+                    wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } if text.contains("<background_context>")
                 )
                     })
             } else {
@@ -309,7 +309,7 @@ fn compaction_preserves_inherited_prefix() {
 /// Verify that compaction with prefix_len=0 (non-forked) passes through unchanged.
 #[test]
 fn compaction_no_prefix_passes_through() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let compacted = vec![
             ConversationItem::system("sys"),
             ConversationItem::user("summary"),
@@ -571,12 +571,12 @@ fn subagent_worktree_snapshot_gate_local_enables() {
 #[test]
 fn subagent_tool_filter_removes_ask_user_question() {
     let mut tools = vec![
-            wimo ai_wimo_sampling_types::ToolSpec {
+            wimoai_wimo_sampling_types::ToolSpec {
                 name: "read_file".to_owned(),
                 description: None,
                 parameters: serde_json::json!({}),
             },
-            wimo ai_wimo_sampling_types::ToolSpec {
+            wimoai_wimo_sampling_types::ToolSpec {
                 name: "ask_user_question".to_owned(),
                 description: None,
                 parameters: serde_json::json!({}),
@@ -589,22 +589,22 @@ fn subagent_tool_filter_removes_ask_user_question() {
 #[test]
 fn inherited_child_toolset_cannot_reintroduce_workflow() {
     let mut tools = vec![
-            wimo ai_wimo_sampling_types::ToolSpec {
+            wimoai_wimo_sampling_types::ToolSpec {
                 name: "read_file".to_owned(),
                 description: None,
                 parameters: serde_json::json!({}),
             },
-            wimo ai_wimo_sampling_types::ToolSpec {
+            wimoai_wimo_sampling_types::ToolSpec {
                 name: "workflow".to_owned(),
                 description: None,
                 parameters: serde_json::json!({}),
             },
-            wimo ai_wimo_sampling_types::ToolSpec {
+            wimoai_wimo_sampling_types::ToolSpec {
                 name: "Wimo:workflow".to_owned(),
                 description: None,
                 parameters: serde_json::json!({}),
             },
-            wimo ai_wimo_sampling_types::ToolSpec {
+            wimoai_wimo_sampling_types::ToolSpec {
                 name: "run_terminal_cmd".to_owned(),
                 description: None,
                 parameters: serde_json::json!({}),
@@ -623,14 +623,14 @@ fn inherited_child_toolset_cannot_reintroduce_workflow() {
 /// A pointer sends resume down the rehydrate path, which deletes the directory and rebuilds it from a snapshot that lacks whatever kept it.
 #[tokio::test]
 async fn kept_worktree_leaves_no_resume_pointer() {
-    wimo ai_test_utils::require_git!();
-    use wimo ai_test_utils::git::{git_commit_all, seed_repo};
+    wimoai_test_utils::require_git!();
+    use wimoai_test_utils::git::{git_commit_all, seed_repo};
     let temp = tempfile::TempDir::new().unwrap();
     let repo = seed_repo(temp.path());
     std::fs::write(repo.join(".gitignore"), ".env\n").unwrap();
     git_commit_all(&repo, "ignore env");
     let wt = temp.path().join("subagent-keeps");
-    wimo ai_fast_worktree::WorktreeBuilder::new(&repo, &wt)
+    wimoai_fast_worktree::WorktreeBuilder::new(&repo, &wt)
         .standalone(true)
         .create()
         .unwrap();
@@ -678,12 +678,12 @@ async fn kept_worktree_leaves_no_resume_pointer() {
 /// Linked on purpose: only there is the registration's reflog the last name for a commit, which the second half of this test is about.
 #[tokio::test]
 async fn disposed_linked_worktree_persists_the_pointer_then_removes_the_directory() {
-    wimo ai_test_utils::require_git!();
-    use wimo ai_test_utils::git::seed_repo_with_remote;
+    wimoai_test_utils::require_git!();
+    use wimoai_test_utils::git::seed_repo_with_remote;
     let temp = tempfile::TempDir::new().unwrap();
     let (repo, _remote) = seed_repo_with_remote(temp.path());
     let wt = temp.path().join("subagent-reclaim-1");
-    wimo ai_fast_worktree::WorktreeBuilder::new(&repo, &wt).create().unwrap();
+    wimoai_fast_worktree::WorktreeBuilder::new(&repo, &wt).create().unwrap();
     let meta_dir = temp.path().join("meta");
     write_subagent_meta(&meta_dir, &snapshot_test_meta("reclaim-1"));
     let disposal = crate::agent::subagent::handle_request::dispose_worktree_after_completion(
@@ -715,12 +715,12 @@ async fn disposed_linked_worktree_persists_the_pointer_then_removes_the_director
 /// The disposal gives it a lasting second name in the repository before removing the directory, so the commit stays readable.
 #[tokio::test]
 async fn disposal_names_a_reflog_only_commit_before_removing_the_worktree() {
-    wimo ai_test_utils::require_git!();
-    use wimo ai_test_utils::git::{reflog_only_commit, run_git, seed_repo_with_remote};
+    wimoai_test_utils::require_git!();
+    use wimoai_test_utils::git::{reflog_only_commit, run_git, seed_repo_with_remote};
     let temp = tempfile::TempDir::new().unwrap();
     let (repo, _remote) = seed_repo_with_remote(temp.path());
     let wt = temp.path().join("subagent-reclaim-2");
-    wimo ai_fast_worktree::WorktreeBuilder::new(&repo, &wt).create().unwrap();
+    wimoai_fast_worktree::WorktreeBuilder::new(&repo, &wt).create().unwrap();
     let discarded = reflog_only_commit(&wt, None);
     let meta_dir = temp.path().join("meta");
     write_subagent_meta(&meta_dir, &snapshot_test_meta("reclaim-2"));
@@ -989,7 +989,7 @@ fn session_metadata_session_kind_for_resumed() {
 /// A prefix that covered the whole transcript is what stopped compaction from ever shrinking it.
 #[test]
 fn resume_initial_context_preserves_head_only() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let mut conversation = vec![ConversationItem::system("sys")];
     for i in 0..8 {
         conversation.push(ConversationItem::user(format!("u{i}")));
@@ -1013,7 +1013,7 @@ fn resume_initial_context_preserves_head_only() {
 }
 #[test]
 fn resume_prefix_len_is_system_head_only() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let mut conversation = vec![ConversationItem::system("sys")];
     for i in 0..6 {
         conversation.push(ConversationItem::user(format!("u{i}")));
@@ -1023,7 +1023,7 @@ fn resume_prefix_len_is_system_head_only() {
 }
 #[test]
 fn resume_prefix_len_is_zero_without_system_head() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let conversation = vec![
             ConversationItem::user("task"),
             ConversationItem::assistant("done"),
@@ -1032,7 +1032,7 @@ fn resume_prefix_len_is_zero_without_system_head() {
 }
 #[test]
 fn resume_prefix_len_counts_consecutive_system_head() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let conversation = vec![
             ConversationItem::system("sys a"),
             ConversationItem::system("sys b"),
@@ -1155,7 +1155,7 @@ fn select_override_cwd_fresh_spawn_uses_request_cwd() {
 }
 #[test]
 fn resumed_session_uses_current_runtime_contract() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let mut conversation = [
         ConversationItem::system("old source system prompt"),
         ConversationItem::user("task 1"),
@@ -1176,23 +1176,23 @@ fn resumed_session_uses_current_runtime_contract() {
 }
 #[test]
 fn token_estimation_for_window_safety() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let conversation = vec![
             ConversationItem::system("You are a helpful assistant."),
             ConversationItem::user("Hello, how are you?"),
             ConversationItem::assistant("I'm doing well, thank you!"),
         ];
-    let estimated = wimo ai_chat_state::estimate_conversation_tokens(&conversation);
+    let estimated = wimoai_chat_state::estimate_conversation_tokens(&conversation);
     assert!(estimated > 0, "should produce non-zero estimate");
     assert!(
             estimated < 100,
             "short conversation should have small token estimate"
         );
-    assert_eq!(wimo ai_chat_state::estimate_conversation_tokens(&[]), 0);
+    assert_eq!(wimoai_chat_state::estimate_conversation_tokens(&[]), 0);
 }
 #[test]
 fn token_estimation_accounts_for_images() {
-    use wimo ai_wimo_sampling_types::conversation::{ContentPart, ConversationItem, UserItem};
+    use wimoai_wimo_sampling_types::conversation::{ContentPart, ConversationItem, UserItem};
     let text_only = vec![ConversationItem::User(UserItem {
             content: vec![ContentPart::Text {
                 text: "describe this".into(),
@@ -1200,7 +1200,7 @@ fn token_estimation_accounts_for_images() {
             synthetic_reason: None,
             ..Default::default()
         })];
-    let text_tokens = wimo ai_chat_state::estimate_conversation_tokens(&text_only);
+    let text_tokens = wimoai_chat_state::estimate_conversation_tokens(&text_only);
     let with_image = vec![ConversationItem::User(UserItem {
             content: vec![
                 ContentPart::Text {
@@ -1213,7 +1213,7 @@ fn token_estimation_accounts_for_images() {
             synthetic_reason: None,
             ..Default::default()
         })];
-    let image_tokens = wimo ai_chat_state::estimate_conversation_tokens(&with_image);
+    let image_tokens = wimoai_chat_state::estimate_conversation_tokens(&with_image);
     assert_eq!(
             image_tokens,
             text_tokens + 765,
@@ -1228,7 +1228,7 @@ fn token_estimation_accounts_for_images() {
             synthetic_reason: None,
             ..Default::default()
         })];
-    let multi_tokens = wimo ai_chat_state::estimate_conversation_tokens(&multi_image);
+    let multi_tokens = wimoai_chat_state::estimate_conversation_tokens(&multi_image);
     assert_eq!(multi_tokens, 765 * 3, "three images = 3 * 765 tokens");
 }
 #[test]
@@ -1297,7 +1297,7 @@ fn drain_cancelled_finish_cmds(
 ) -> usize {
     let mut count = 0;
     while let Ok(cmd) = cmd_rx.try_recv() {
-        if let SessionCommand::wimo aiSessionNotification { notification } = cmd
+        if let SessionCommand::wimoaiSessionNotification { notification } = cmd
             && let SessionUpdate::SubagentFinished {
                 subagent_id,
                 status,
@@ -1327,7 +1327,7 @@ fn drain_cancelled_finish_broadcasts(
 ) -> usize {
     let mut count = 0;
     while let Ok(msg) = gateway_rx.try_recv() {
-        let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
+        let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
             continue;
         };
         assert_eq!(args.request.method.as_ref(), "x.ai/session_notification");
@@ -1549,7 +1549,7 @@ async fn reconcile_reemits_shared_actor_terminal_outcome() {
         .await;
     let finish = std::iter::from_fn(|| cmd_rx.try_recv().ok())
         .find_map(|command| {
-            let SessionCommand::wimo aiSessionNotification { notification } = command else {
+            let SessionCommand::wimoaiSessionNotification { notification } = command else {
                 return None;
             };
             let SessionUpdate::SubagentFinished { status, tool_calls, .. } = notification
@@ -1667,7 +1667,7 @@ async fn live_reconcile_reemitted_finish_has_will_wake_false() {
         .await;
     let finish = std::iter::from_fn(|| cmd_rx.try_recv().ok())
         .find_map(|command| {
-            let SessionCommand::wimo aiSessionNotification { notification } = command else {
+            let SessionCommand::wimoaiSessionNotification { notification } = command else {
                 return None;
             };
             let SessionUpdate::SubagentFinished { status, will_wake, .. } = notification
@@ -1712,7 +1712,7 @@ async fn live_reconcile_persists_terminal_meta_so_second_tick_is_noop() {
             std::iter::from_fn(|| cmd_rx.try_recv().ok())
                 .filter(|command| matches!(
                     command,
-                    SessionCommand::wimo aiSessionNotification {
+                    SessionCommand::wimoaiSessionNotification {
                         notification: SessionNotification {
                             update: SessionUpdate::SubagentFinished { .. },
                             ..
@@ -1791,7 +1791,7 @@ async fn live_reconcile_overlapping_ticks_emit_once() {
         .filter(|command| {
             matches!(
                     command,
-                    SessionCommand::wimo aiSessionNotification {
+                    SessionCommand::wimoaiSessionNotification {
                         notification: SessionNotification {
                             update: SessionUpdate::SubagentFinished { .. },
                             ..
@@ -1803,7 +1803,7 @@ async fn live_reconcile_overlapping_ticks_emit_once() {
     assert_eq!(cmd_finishes, 1);
     let mut gateway_finishes = 0;
     while let Ok(msg) = gateway_rx.try_recv() {
-        let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
+        let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
             continue;
         };
         let notification: SessionNotification = serde_json::from_str(
@@ -1884,7 +1884,7 @@ async fn live_reconcile_persists_failed_and_cancelled_inspection() {
             .await;
         let finish = std::iter::from_fn(|| cmd_rx.try_recv().ok())
             .find_map(|command| {
-                let SessionCommand::wimo aiSessionNotification { notification } = command
+                let SessionCommand::wimoaiSessionNotification { notification } = command
                 else {
                     return None;
                 };
@@ -1985,7 +1985,7 @@ fn resume_identity_does_not_gate_on_model() {
         model_id: Some("wimo-3".into()),
     };
     assert!(
-            wimo ai_wimo_subagent_resolution::validate_resume_identity(
+            wimoai_wimo_subagent_resolution::validate_resume_identity(
                 "general-purpose",
                 None,
                 &source,
@@ -2186,7 +2186,7 @@ async fn read_parent_sampling_config_keeps_auto_when_catalog_has_slug_key_only()
     ctx.parent_chat_state
         .as_ref()
         .unwrap()
-        .update_sampling_config(wimo ai_wimo_sampling_types::SamplingConfig {
+        .update_sampling_config(wimoai_wimo_sampling_types::SamplingConfig {
             api_backend: crate::sampling::ApiBackend::Responses,
             base_url: "https://api.x.ai/v1".to_string(),
             ..test_sampling_config("wimo-4.5")
@@ -2261,9 +2261,9 @@ async fn read_parent_sampling_config_live_never_strips_a_fallback_key() {
     );
     ctx.auth = None;
     let chat = spawn_test_parent_chat_state("wimo-4.5");
-    chat.update_credentials(wimo ai_chat_state::Credentials {
-        api_key: Some("wimo ai-env-fallback".to_string()),
-        auth_type: wimo ai_chat_state::AuthType::SessionToken,
+    chat.update_credentials(wimoai_chat_state::Credentials {
+        api_key: Some("wimoai-env-fallback".to_string()),
+        auth_type: wimoai_chat_state::AuthType::SessionToken,
         alpha_test_key: None,
         client_version: None,
     });
@@ -2273,10 +2273,10 @@ async fn read_parent_sampling_config_live_never_strips_a_fallback_key() {
             config.bearer_resolver.is_none(),
             "with no session, the live path must not displace a fallback key"
         );
-    assert_eq!(config.api_key.as_deref(), Some("wimo ai-env-fallback"));
+    assert_eq!(config.api_key.as_deref(), Some("wimoai-env-fallback"));
 }
 /// `would_strip_fallback_key` on the inherit-fallback path.
-/// The baseline keeps the env `wimo ai_API_KEY` even while `auth_type` flips to `SessionToken`, and no resolver may displace it.
+/// The baseline keeps the env `wimoai_API_KEY` even while `auth_type` flips to `SessionToken`, and no resolver may displace it.
 #[tokio::test]
 async fn read_parent_sampling_config_fallback_never_strips_a_fallback_key() {
     let mut ctx = ctx_with_toggle(HashMap::new());
@@ -2287,17 +2287,17 @@ async fn read_parent_sampling_config_fallback_never_strips_a_fallback_key() {
     ctx.auth = None;
     ctx.sampling_config.model = "wimo-4.5".to_string();
     ctx.sampling_config.base_url = "https://api.x.ai/v1".to_string();
-    ctx.sampling_config.api_key = Some("wimo ai-env-fallback".to_string());
+    ctx.sampling_config.api_key = Some("wimoai-env-fallback".to_string());
     let (config, _) = read_parent_sampling_config(&ctx).await;
     assert!(config.bearer_resolver.is_none());
-    assert_eq!(config.api_key.as_deref(), Some("wimo ai-env-fallback"));
+    assert_eq!(config.api_key.as_deref(), Some("wimoai-env-fallback"));
 }
 #[tokio::test]
 async fn read_parent_sampling_config_fallback_no_resolver_for_api_key_method() {
     let mut ctx = ctx_with_toggle(HashMap::new());
     ctx.parent_chat_state = None;
     ctx.auth_method_id = acp::AuthMethodId::new(
-        crate::agent::auth_method::wimo ai_API_KEY_METHOD_ID,
+        crate::agent::auth_method::wimoai_API_KEY_METHOD_ID,
     );
     ctx.sampling_config.model = "wimo-4.5".to_string();
     ctx.sampling_config.base_url = "https://api.x.ai/v1".to_string();
@@ -2335,7 +2335,7 @@ fn resolve_model_override_wires_resolver_for_fresh_and_hard_expired_session_keys
     }
 }
 /// `would_strip_fallback_key` on the override path.
-/// `wimo ai_API_KEY`'s presence varies by environment, so assert the rule itself rather than one branch of it.
+/// `wimoai_API_KEY`'s presence varies by environment, so assert the rule itself rather than one branch of it.
 #[test]
 fn resolve_model_override_to_config_never_strips_a_fallback_key() {
     let mut ctx = ctx_with_toggle(HashMap::new());
@@ -2406,7 +2406,7 @@ async fn read_parent_sampling_config_fallback_resolves_backend_search_from_catal
 }
 #[tokio::test]
 async fn read_parent_sampling_config_resolves_compactions_remaining_from_catalog() {
-    use wimo ai_wimo_sampling_types::CompactionsRemaining;
+    use wimoai_wimo_sampling_types::CompactionsRemaining;
     let mut entry = test_model_entry("wimo-4.5");
     entry.info.compactions_remaining = Some(CompactionsRemaining::Dynamic(true));
     let mut models = indexmap::IndexMap::new();
@@ -2422,7 +2422,7 @@ async fn read_parent_sampling_config_resolves_compactions_remaining_from_catalog
 }
 #[tokio::test]
 async fn read_parent_sampling_config_fallback_resolves_compactions_remaining_from_catalog() {
-    use wimo ai_wimo_sampling_types::CompactionsRemaining;
+    use wimoai_wimo_sampling_types::CompactionsRemaining;
     let mut entry = test_model_entry("wimo-4.5");
     entry.info.compactions_remaining = Some(CompactionsRemaining::Dynamic(true));
     let mut models = indexmap::IndexMap::new();
@@ -2452,7 +2452,7 @@ async fn read_parent_sampling_config_fallback_resolves_compactions_remaining_fro
 /// With `None` (inherit) the pin wins, and an unknown override falls through to the pin.
 #[tokio::test]
 async fn runtime_override_wins_over_subagents_models_pin_in_precedence_path() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let build_ctx = || {
         let mut models = indexmap::IndexMap::new();
         models.insert("goal-model".to_string(), test_model_entry("goal-model"));
@@ -2509,7 +2509,7 @@ async fn runtime_override_wins_over_subagents_models_pin_in_precedence_path() {
 /// The runtime override wins in `resolve_effective_model_config`.
 #[tokio::test]
 async fn fork_context_pins_parent_model_over_overrides() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let build_ctx = || {
         let mut ctx = ctx_with_toggle(HashMap::new());
         ctx.sampling_config.model = "parent-model".to_string();
@@ -2561,7 +2561,7 @@ async fn fork_context_pins_parent_model_over_overrides() {
 /// A "heavy"/custom parent is treated identically to any other.
 #[tokio::test]
 async fn resolve_subagent_inherits_parent_model_without_pins() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     for parent_model in ["wimo-4.5", "composer-2-fast", "my-custom-byok-model"] {
         let mut ctx = ctx_with_toggle(HashMap::new());
         ctx.sampling_config.model = parent_model.to_string();
@@ -2585,7 +2585,7 @@ async fn resolve_subagent_inherits_parent_model_without_pins() {
 /// honor the pin identically now that the heavy-model gate is gone.
 #[tokio::test]
 async fn resolve_subagent_config_override_pin_applies_for_any_parent() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     for parent_model in ["wimo-4.5", "composer-2-fast"] {
         let mut ctx = ctx_with_toggle(HashMap::new());
         ctx.sampling_config.model = parent_model.to_string();
@@ -2610,7 +2610,7 @@ async fn resolve_subagent_config_override_pin_applies_for_any_parent() {
 /// An explicit `AgentDefinition.model = Override(id)` pin routes the subagent to that model even when the parent runs a light model.
 #[tokio::test]
 async fn resolve_subagent_agent_definition_pin_applies_for_light_parent() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let mut ctx = ctx_with_toggle(HashMap::new());
     ctx.sampling_config.model = "wimo-4.5".to_string();
     ctx.model_id = acp::ModelId::new("wimo-4.5");
@@ -2629,7 +2629,7 @@ async fn resolve_subagent_agent_definition_pin_applies_for_light_parent() {
 /// Priority 1 (`[subagents.models]`) wins over Priority 2 (`AgentDefinition.model`) when both pins are set and both resolve.
 #[tokio::test]
 async fn resolve_subagent_config_override_wins_over_agent_definition() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let mut ctx = ctx_with_toggle(HashMap::new());
     ctx.sampling_config.model = "wimo-4.5".to_string();
     ctx.model_id = acp::ModelId::new("wimo-4.5");
@@ -2653,7 +2653,7 @@ async fn resolve_subagent_config_override_wins_over_agent_definition() {
 /// as an unknown id — inherit the parent.
 #[tokio::test]
 async fn resolve_subagent_config_override_unselectable_model_falls_through_to_inherit() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let mut ctx = ctx_with_toggle(HashMap::new());
     ctx.sampling_config.model = "wimo-4.5".to_string();
     ctx.model_id = acp::ModelId::new("wimo-4.5");
@@ -2684,7 +2684,7 @@ async fn resolve_subagent_config_override_unselectable_model_falls_through_to_in
 /// subagent overrides. Only a fleet pin does.
 #[tokio::test]
 async fn resolve_subagent_config_override_user_allowlist_still_applies() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let mut ctx = ctx_with_toggle(HashMap::new());
     ctx.sampling_config.model = "wimo-4.5".to_string();
     ctx.model_id = acp::ModelId::new("wimo-4.5");
@@ -2709,7 +2709,7 @@ async fn resolve_subagent_config_override_user_allowlist_still_applies() {
 /// Missing `agent_config` cannot be told from a fleet pin — fail closed.
 #[tokio::test]
 async fn resolve_subagent_config_override_none_agent_config_blocks_unselectable() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let mut ctx = ctx_with_toggle(HashMap::new());
     ctx.sampling_config.model = "wimo-4.5".to_string();
     ctx.model_id = acp::ModelId::new("wimo-4.5");
@@ -2731,7 +2731,7 @@ async fn resolve_subagent_config_override_none_agent_config_blocks_unselectable(
 /// An unresolvable `[subagents.models]` pin (model absent from `available_models`) falls through to inherit the parent model.
 #[tokio::test]
 async fn resolve_subagent_config_override_unknown_model_falls_through_to_inherit() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let mut ctx = ctx_with_toggle(HashMap::new());
     ctx.sampling_config.model = "wimo-4.5".to_string();
     ctx.model_id = acp::ModelId::new("wimo-4.5");
@@ -2749,7 +2749,7 @@ async fn resolve_subagent_config_override_unknown_model_falls_through_to_inherit
 /// An unresolvable `AgentDefinition.model` pin (model absent from `available_models`) falls through to inherit the parent model.
 #[tokio::test]
 async fn resolve_subagent_agent_definition_unknown_model_falls_through_to_inherit() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let mut ctx = ctx_with_toggle(HashMap::new());
     ctx.sampling_config.model = "wimo-4.5".to_string();
     ctx.model_id = acp::ModelId::new("wimo-4.5");
@@ -2766,7 +2766,7 @@ async fn resolve_subagent_agent_definition_unknown_model_falls_through_to_inheri
 /// Spawn-time credentials are cache-only: a cold spawn has no key, never the parent session key.
 #[tokio::test]
 async fn subagent_override_provider_model_spawns_cache_only_credentials() {
-    use wimo ai_wimo_agent::config::ModelOverride;
+    use wimoai_wimo_agent::config::ModelOverride;
     let dir = tempfile::tempdir().unwrap();
     let provider = crate::auth::test_counting_provider(
         "test-subagent-spawn",
@@ -2828,7 +2828,7 @@ fn key_prefix_empty_string() {
 }
 #[test]
 fn non_cursor_persona_injected_as_system_reminder() {
-    use wimo ai_wimo_sampling_types::conversation::{ConversationItem, SyntheticReason};
+    use wimoai_wimo_sampling_types::conversation::{ConversationItem, SyntheticReason};
     let persona = "You are a pragmatic implementer.";
     let mut conv = vec![
             ConversationItem::system("sys"),
@@ -2851,7 +2851,7 @@ fn non_cursor_persona_injected_as_system_reminder() {
             .content
             .first()
             .map(|c| match c {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     text.as_ref()
                 }
                 _ => "",
@@ -2870,7 +2870,7 @@ fn non_cursor_persona_injected_as_system_reminder() {
 }
 #[test]
 fn persona_injection_skipped_for_resumed() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let persona_instructions = Some("Be thorough.".to_string());
     let context_source = InitialContextSource::Resumed;
     let mut conv = vec![
@@ -2900,7 +2900,7 @@ fn persona_injection_skipped_for_resumed() {
 }
 #[test]
 fn persona_injection_into_empty_conversation() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let mut conv: Vec<ConversationItem> = vec![];
     let mut prefix_len: usize = 0;
     let reminder = ConversationItem::system_reminder(
@@ -2916,7 +2916,7 @@ fn persona_injection_into_empty_conversation() {
 mod cancellation_error_message_tests {
     use super::super::cancellation_error_message;
     use crate::session::commands::CancellationContext;
-    use wimo ai_wimo_session_events::types::CancellationCategory;
+    use wimoai_wimo_session_events::types::CancellationCategory;
     #[test]
     fn permission_rejected_with_context() {
         let ctx = CancellationContext {
@@ -3025,7 +3025,7 @@ fn filter_inheritance_all_passes_everything_through() {
     let pool = make_pool(&["github", "linear", "slack"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::All,
+        &wimoai_wimo_agent::config::McpInheritance::All,
     );
     let result = result.expect("All should return Some");
     assert_eq!(pool_names(&result), vec!["github", "linear", "slack"]);
@@ -3035,7 +3035,7 @@ fn filter_inheritance_none_returns_none() {
     let pool = make_pool(&["github", "linear"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::None,
+        &wimoai_wimo_agent::config::McpInheritance::None,
     );
     assert!(result.is_none());
 }
@@ -3044,7 +3044,7 @@ fn filter_inheritance_named_selects_specific_servers() {
     let pool = make_pool(&["github", "linear", "slack", "jira"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::Named(
+        &wimoai_wimo_agent::config::McpInheritance::Named(
             vec!["github".into(), "slack".into()],
         ),
     );
@@ -3056,7 +3056,7 @@ fn filter_inheritance_except_excludes_specific_servers() {
     let pool = make_pool(&["github", "linear", "slack", "jira"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::Except(
+        &wimoai_wimo_agent::config::McpInheritance::Except(
             vec!["linear".into(), "jira".into()],
         ),
     );
@@ -3068,7 +3068,7 @@ fn filter_inheritance_named_empty_list_gives_empty_pool() {
     let pool = make_pool(&["github", "linear"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::Named(vec![]),
+        &wimoai_wimo_agent::config::McpInheritance::Named(vec![]),
     );
     let result = result.expect("Named([]) should return Some (empty pool)");
     assert_eq!(result.server_names().count(), 0);
@@ -3078,7 +3078,7 @@ fn filter_inheritance_except_empty_list_keeps_all() {
     let pool = make_pool(&["github", "linear"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::Except(vec![]),
+        &wimoai_wimo_agent::config::McpInheritance::Except(vec![]),
     );
     let result = result.expect("Except([]) should return Some");
     assert_eq!(pool_names(&result), vec!["github", "linear"]);
@@ -3088,7 +3088,7 @@ fn filter_inheritance_named_nonexistent_servers_ignored() {
     let pool = make_pool(&["github", "linear"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::Named(
+        &wimoai_wimo_agent::config::McpInheritance::Named(
             vec![
                 "nonexistent".into(),
                 "github".into(),
@@ -3103,7 +3103,7 @@ fn filter_inheritance_except_nonexistent_servers_ignored() {
     let pool = make_pool(&["github", "linear"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::Except(vec!["nonexistent".into()]),
+        &wimoai_wimo_agent::config::McpInheritance::Except(vec!["nonexistent".into()]),
     );
     let result = result.expect("Except should return Some");
     assert_eq!(pool_names(&result), vec!["github", "linear"]);
@@ -3113,7 +3113,7 @@ fn filter_inheritance_named_all_nonexistent_gives_empty() {
     let pool = make_pool(&["github", "linear"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::Named(vec!["foo".into(), "bar".into()]),
+        &wimoai_wimo_agent::config::McpInheritance::Named(vec!["foo".into(), "bar".into()]),
     );
     let result = result.expect("Named should return Some");
     assert_eq!(result.server_names().count(), 0);
@@ -3123,7 +3123,7 @@ fn filter_inheritance_except_all_servers_gives_empty() {
     let pool = make_pool(&["github", "linear"]);
     let result = super::filter_pool_by_inheritance(
         pool,
-        &wimo ai_wimo_agent::config::McpInheritance::Except(
+        &wimoai_wimo_agent::config::McpInheritance::Except(
             vec!["github".into(), "linear".into()],
         ),
     );
@@ -3135,7 +3135,7 @@ fn resolve_inherited_pool_all_passes_parent_pool() {
     let pool = make_pool(&["github", "atlassian"]);
     let result = super::resolve_inherited_mcp_pool(
             Some(pool),
-            &wimo ai_wimo_agent::config::McpInheritance::All,
+            &wimoai_wimo_agent::config::McpInheritance::All,
         )
         .expect("All should return Some");
     assert_eq!(pool_names(&result), vec!["atlassian", "github"]);
@@ -3145,7 +3145,7 @@ fn resolve_inherited_pool_none_returns_none() {
     let pool = make_pool(&["github", "atlassian"]);
     let result = super::resolve_inherited_mcp_pool(
         Some(pool),
-        &wimo ai_wimo_agent::config::McpInheritance::None,
+        &wimoai_wimo_agent::config::McpInheritance::None,
     );
     assert!(result.is_none());
 }
@@ -3154,7 +3154,7 @@ fn resolve_inherited_pool_named_filters() {
     let pool = make_pool(&["github", "atlassian", "slack"]);
     let result = super::resolve_inherited_mcp_pool(
             Some(pool),
-            &wimo ai_wimo_agent::config::McpInheritance::Named(vec!["atlassian".into()]),
+            &wimoai_wimo_agent::config::McpInheritance::Named(vec!["atlassian".into()]),
         )
         .expect("Named should return Some");
     assert_eq!(pool_names(&result), vec!["atlassian"]);
@@ -3163,7 +3163,7 @@ fn resolve_inherited_pool_named_filters() {
 fn resolve_inherited_pool_missing_parent_returns_none() {
     let result = super::resolve_inherited_mcp_pool(
         None,
-        &wimo ai_wimo_agent::config::McpInheritance::All,
+        &wimoai_wimo_agent::config::McpInheritance::All,
     );
     assert!(result.is_none());
 }
@@ -3174,7 +3174,7 @@ fn plugin_agents_inherit_parent_mcp_pool_by_default() {
     let pool = make_pool(&["atlassian", "github"]);
     let inherited = super::resolve_inherited_mcp_pool(
             Some(pool),
-            &wimo ai_wimo_agent::config::McpInheritance::All,
+            &wimoai_wimo_agent::config::McpInheritance::All,
         )
         .expect("plugin children inherit parent pool with mcpInheritance=all");
     assert_eq!(pool_names(&inherited), vec!["atlassian", "github"]);
@@ -3184,7 +3184,7 @@ fn plugin_agents_can_opt_out_via_mcp_inheritance_none() {
     let pool = make_pool(&["atlassian"]);
     let inherited = super::resolve_inherited_mcp_pool(
         Some(pool),
-        &wimo ai_wimo_agent::config::McpInheritance::None,
+        &wimoai_wimo_agent::config::McpInheritance::None,
     );
     assert!(
             inherited.is_none(),
@@ -3194,13 +3194,13 @@ fn plugin_agents_can_opt_out_via_mcp_inheritance_none() {
 fn make_test_skill(
     name: &str,
     plugin: Option<&str>,
-) -> wimo ai_wimo_tools::implementations::skills::types::SkillInfo {
-    wimo ai_wimo_tools::implementations::skills::types::SkillInfo {
+) -> wimoai_wimo_tools::implementations::skills::types::SkillInfo {
+    wimoai_wimo_tools::implementations::skills::types::SkillInfo {
         name: name.into(),
         display_name: None,
         description: format!("{name} skill"),
         path: format!("/skills/{name}/SKILL.md"),
-        scope: wimo ai_wimo_tools::implementations::skills::types::SkillScope::Local,
+        scope: wimoai_wimo_tools::implementations::skills::types::SkillScope::Local,
         enabled: true,
         user_invocable: true,
         plugin_name: plugin.map(Into::into),
@@ -3299,8 +3299,8 @@ async fn progress_publisher_delivers_ticks_to_parent_cmd_channel() {
                 .expect("a tick must arrive within the publish interval")
                 .expect("channel open");
             cancel.cancel();
-            let SessionCommand::wimo aiSessionNotification { notification } = cmd else {
-                panic!("expected wimo aiSessionNotification");
+            let SessionCommand::wimoaiSessionNotification { notification } = cmd else {
+                panic!("expected wimoaiSessionNotification");
             };
             let SessionUpdate::SubagentProgress {
                 subagent_id,

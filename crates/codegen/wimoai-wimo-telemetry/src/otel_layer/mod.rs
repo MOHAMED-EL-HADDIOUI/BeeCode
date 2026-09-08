@@ -1,6 +1,6 @@
 //! Shared OpenTelemetry tracing layer for exporting spans to the cli-chat-proxy.
 //!
-//! `wimo ai-wimo-pager` uses this module to set up OTLP trace export.
+//! `wimoai-wimo-pager` uses this module to set up OTLP trace export.
 //! Session-level spans (with `session_id`, tool timings, inference latency, etc.) are available in the product observability backend.
 use crate::instrumentation;
 use opentelemetry::global;
@@ -11,7 +11,7 @@ use std::sync::{Arc, OnceLock};
 use tracing_opentelemetry::OpenTelemetryLayer;
 use tracing_subscriber::Layer as _;
 use tracing_subscriber::registry::LookupSpan;
-use wimo ai_wimo_auth::AuthCredentialProvider;
+use wimoai_wimo_auth::AuthCredentialProvider;
 mod redact;
 static TRACER_PROVIDER: OnceLock<SdkTracerProvider> = OnceLock::new();
 const ENV_OTEL_FILTER: &str = "wimo_OTEL_FILTER";
@@ -19,13 +19,13 @@ const DEFAULT_OTEL_FILTER: &str = "info";
 /// Runtime values for [`build_otel_layer`].
 /// Passing them in keeps this crate free of shell-internal types (`AuthManager`, `EndpointsConfig`, `wimoComConfig`).
 ///
-/// The binaries (`wimo ai-wimo-pager`) build this from their own configuration.
-/// The credentials provider is constructed by shell's `wimo ai_wimo_shell::auth::credential_provider::build_otel_credential_provider`.
+/// The binaries (`wimoai-wimo-pager`) build this from their own configuration.
+/// The credentials provider is constructed by shell's `wimoai_wimo_shell::auth::credential_provider::build_otel_credential_provider`.
 pub struct OtelLayerConfig {
     /// Live credential source.
     /// Each batch export reads it to get a fresh bearer token for the OTLP `Authorization` header.
     pub credentials: Arc<dyn AuthCredentialProvider>,
-    /// Value for the `X-wimo ai-Token-Auth` header (typically `"wimo ai-wimo-cli"`).
+    /// Value for the `X-wimoai-Token-Auth` header (typically `"wimoai-wimo-cli"`).
     pub token_header_value: String,
     /// Optional extra access key for traces.
     /// The key is injected only when the crate's optional non-production feature is enabled and only for matching first-party hosts.
@@ -116,7 +116,7 @@ struct RefreshableSpanExporter {
     /// Resource set by the `BatchSpanProcessor` via `set_resource()`.
     /// It is forwarded to each one-shot exporter so OTLP payloads include `service.name`, `service.version`, `user.id`, etc.
     resource: parking_lot::Mutex<opentelemetry_sdk::Resource>,
-    /// Value for `X-wimo ai-Token-Auth`. Only sent when `credentials.needs_token_auth_header()`.
+    /// Value for `X-wimoai-Token-Auth`. Only sent when `credentials.needs_token_auth_header()`.
     token_header_value: Arc<str>,
     extra_headers: Arc<Vec<(String, String)>>,
 }
@@ -135,7 +135,7 @@ fn build_export_headers(
     token: &str,
     token_auth_header: Option<&str>,
     extra_headers: &[(String, String)],
-    snapshot: &wimo ai_wimo_auth::CredentialSnapshot,
+    snapshot: &wimoai_wimo_auth::CredentialSnapshot,
 ) -> std::collections::HashMap<String, String> {
     let mut headers = static_headers.clone();
     for (name, value) in [
@@ -153,7 +153,7 @@ fn build_export_headers(
     }
     headers.insert("Authorization".to_string(), format!("Bearer {token}"));
     if let Some(value) = token_auth_header {
-        headers.insert("X-wimo ai-Token-Auth".to_string(), value.to_string());
+        headers.insert("X-wimoai-Token-Auth".to_string(), value.to_string());
     }
     for (k, v) in extra_headers {
         headers.insert(k.clone(), v.clone());
@@ -167,7 +167,7 @@ fn build_otlp_exporter(
     token_auth_header: Option<&str>,
     extra_headers: &[(String, String)],
     http_client: crate::otlp_http::BlockingOtlpClient,
-    snapshot: &wimo ai_wimo_auth::CredentialSnapshot,
+    snapshot: &wimoai_wimo_auth::CredentialSnapshot,
 ) -> Result<opentelemetry_otlp::SpanExporter, opentelemetry_otlp::ExporterBuildError> {
     let headers = build_export_headers(
         static_headers,
@@ -197,7 +197,7 @@ async fn export_batch(
 /// The ids are only known after auth is wired; stamping at init would leave them blank for a session that authenticates mid-run.
 fn resource_with_tenant_id(
     base: opentelemetry_sdk::Resource,
-    snapshot: &wimo ai_wimo_auth::CredentialSnapshot,
+    snapshot: &wimoai_wimo_auth::CredentialSnapshot,
 ) -> opentelemetry_sdk::Resource {
     let tenant_attrs: Vec<opentelemetry::KeyValue> = [
         ("deployment.id", &snapshot.deployment_id),
@@ -453,7 +453,7 @@ pub fn otel_guard() -> OtelGuard {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_auth::CredentialSnapshot;
+    use wimoai_wimo_auth::CredentialSnapshot;
     #[test]
     fn build_export_headers_tracks_snapshot_and_respects_overrides() {
         let static_headers = std::collections::HashMap::new();

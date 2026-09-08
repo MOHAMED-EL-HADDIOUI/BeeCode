@@ -1,8 +1,8 @@
-//! Re-exports of the crate-internal event types that live in `wimo ai-wimo-session-events`.
+//! Re-exports of the crate-internal event types that live in `wimoai-wimo-session-events`.
 //! The orphan-rule items (`From<&permission::Decision>` and the doom-loop categorizer) stay here since they need shell-local types.
 
-pub(crate) use wimo ai_wimo_session_events::tracker::EventTracker;
-pub(crate) use wimo ai_wimo_session_events::types::{
+pub(crate) use wimoai_wimo_session_events::tracker::EventTracker;
+pub(crate) use wimoai_wimo_session_events::types::{
     CancellationCategory, EVENT_SCHEMA_VERSION, Event, GoalClassifierVerdictTelemetry,
     GoalPauseReasonTelemetry, InterjectionSource, Phase, RedirectKind, SessionRelationship,
     ToolCompletedSource, ToolOutcome, TurnOutcomeLabel,
@@ -163,8 +163,8 @@ const _: () = assert!(
 /// (Interjection has no `CancellationCategory` because it never cancels a turn, so it is mapped directly at the drain site.)
 pub(crate) fn prior_turn_interrupt_from_cancellation(
     category: CancellationCategory,
-) -> Option<wimo ai_wimo_sampling_types::PriorTurnInterrupt> {
-    use wimo ai_wimo_sampling_types::PriorTurnInterrupt;
+) -> Option<wimoai_wimo_sampling_types::PriorTurnInterrupt> {
+    use wimoai_wimo_sampling_types::PriorTurnInterrupt;
     match category {
         CancellationCategory::MidTurnAbort => Some(PriorTurnInterrupt::MidTurnAbort),
         CancellationCategory::PermissionRejected => Some(PriorTurnInterrupt::PermissionRejected),
@@ -595,7 +595,7 @@ mod tests {
 
     #[test]
     fn prior_turn_interrupt_from_cancellation_maps_user_interrupts_only() {
-        use wimo ai_wimo_sampling_types::PriorTurnInterrupt;
+        use wimoai_wimo_sampling_types::PriorTurnInterrupt;
         // The three user-interrupt causes map to a marker.
         assert_eq!(
             prior_turn_interrupt_from_cancellation(CancellationCategory::MidTurnAbort),

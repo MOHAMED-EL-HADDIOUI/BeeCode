@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use super::common::*;
-use wimo ai_wimo_pager_pty_harness::StyledLine;
+use wimoai_wimo_pager_pty_harness::StyledLine;
 
 /// Per-cell `(bg, inverse)` styling for one screen line (`StyledLine.line` is 1-based), expanded from its runs in column order.
 /// Selection highlight shows up as a changed `bg` and/or `inverse` on these cells.

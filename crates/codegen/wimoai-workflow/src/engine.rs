@@ -333,7 +333,7 @@ fn host_call<T>(
     Ok(value)
 }
 
-const HOST_TERMINAL_KEY: &str = "__wimo ai_workflow_parallel_terminal";
+const HOST_TERMINAL_KEY: &str = "__wimoai_workflow_parallel_terminal";
 const TERMINAL_BUDGET: &str = "budget_exceeded";
 const TERMINAL_CANCELLED: &str = "cancelled";
 const TERMINAL_DROPPED_REPLY: &str = "dropped_reply";

@@ -8,7 +8,7 @@
 use std::collections::{BTreeSet, HashMap, HashSet};
 
 use agent_client_protocol as acp;
-use wimo ai_wimo_workspace::permission::resolution::McpServerAllowlist;
+use wimoai_wimo_workspace::permission::resolution::McpServerAllowlist;
 
 use crate::session::managed_mcp::{McpDiscoveryInputs, discover_mcp_definitions_ignoring_disable};
 
@@ -109,7 +109,7 @@ pub(crate) fn reenableable_disabled_stubs(
         return BTreeSet::new();
     }
     let index = McpDefinitionIndex::build(inputs);
-    let settings = wimo ai_wimo_workspace::permission::resolution::managed_settings();
+    let settings = wimoai_wimo_workspace::permission::resolution::managed_settings();
     index.reenableable_for_list(disabled_names, catalog_names, &settings.mcp_allowlist)
 }
 
@@ -117,8 +117,8 @@ pub(crate) fn reenableable_disabled_stubs(
 mod tests {
     use super::*;
     use crate::session::managed_mcp::mcp_server_name;
-    use wimo ai_wimo_tools::types::compat::CompatConfig;
-    use wimo ai_wimo_workspace::permission::resolution::AllowedMcpServer;
+    use wimoai_wimo_tools::types::compat::CompatConfig;
+    use wimoai_wimo_workspace::permission::resolution::AllowedMcpServer;
 
     fn unrestricted() -> McpServerAllowlist {
         McpServerAllowlist::new(vec![], vec![], None)
@@ -160,15 +160,15 @@ mod tests {
     /// Isolate HOME/wimo_HOME so ambient user MCP config cannot pad discovery.
     fn isolated_home() -> (
         tempfile::TempDir,
-        wimo ai_wimo_test_support::EnvGuard,
-        wimo ai_wimo_test_support::EnvGuard,
+        wimoai_wimo_test_support::EnvGuard,
+        wimoai_wimo_test_support::EnvGuard,
     ) {
         let home = tempfile::tempdir().unwrap();
         let wimo_home = home.path().join(".wimo");
         std::fs::create_dir_all(&wimo_home).unwrap();
         std::fs::write(wimo_home.join("config.toml"), "").unwrap();
-        let home_guard = wimo ai_wimo_test_support::EnvGuard::set("HOME", home.path());
-        let wimo_guard = wimo ai_wimo_test_support::EnvGuard::set("wimo_HOME", &wimo_home);
+        let home_guard = wimoai_wimo_test_support::EnvGuard::set("HOME", home.path());
+        let wimo_guard = wimoai_wimo_test_support::EnvGuard::set("wimo_HOME", &wimo_home);
         (home, home_guard, wimo_guard)
     }
 

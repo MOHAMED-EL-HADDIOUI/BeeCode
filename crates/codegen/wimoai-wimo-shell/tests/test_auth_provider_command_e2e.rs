@@ -12,7 +12,7 @@ use std::collections::BTreeMap;
 use std::path::Path;
 
 use chrono::Utc;
-use wimo ai_wimo_shell::auth::{AuthMode, wimoAuth, wimoComConfig, try_ensure_fresh_auth};
+use wimoai_wimo_shell::auth::{AuthMode, wimoAuth, wimoComConfig, try_ensure_fresh_auth};
 
 const SEED_TOKEN: &str = "stale-token-that-must-be-replaced";
 

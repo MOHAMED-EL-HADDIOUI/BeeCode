@@ -12,32 +12,32 @@ fn wimo_home_override_path_helpers() {
     }
 
     assert_eq!(
-        wimo ai_wimo_pager::util::pager_toml_path(),
+        wimoai_wimo_pager::util::pager_toml_path(),
         wimo_home.join("pager.toml")
     );
     assert_eq!(
-        wimo ai_wimo_pager::util::display_wimo_home_prefix(),
+        wimoai_wimo_pager::util::display_wimo_home_prefix(),
         "$wimo_HOME"
     );
     assert_eq!(
-        wimo ai_wimo_pager::util::display_user_wimo_path("config.toml"),
+        wimoai_wimo_pager::util::display_user_wimo_path("config.toml"),
         "$wimo_HOME/config.toml"
     );
 
     let memory_path = wimo_home.join("memory/MEMORY.md");
     assert_eq!(
-        wimo ai_wimo_pager::util::abbreviate_path(&memory_path.display().to_string()),
+        wimoai_wimo_pager::util::abbreviate_path(&memory_path.display().to_string()),
         "$wimo_HOME/memory/MEMORY.md"
     );
 
     // The copy toast abbreviates paths the same way, so a custom $wimo_HOME outside $HOME still shows the short form
     assert_eq!(
-        wimo ai_wimo_pager::clipboard::display_copy_path(&wimo_home.join("last-copy.txt")),
+        wimoai_wimo_pager::clipboard::display_copy_path(&wimo_home.join("last-copy.txt")),
         "$wimo_HOME/last-copy.txt"
     );
 
-    assert!(wimo ai_wimo_pager::util::is_under_user_wimo_home(&memory_path));
-    assert!(!wimo ai_wimo_pager::util::is_under_user_wimo_home(
+    assert!(wimoai_wimo_pager::util::is_under_user_wimo_home(&memory_path));
+    assert!(!wimoai_wimo_pager::util::is_under_user_wimo_home(
         PathBuf::from("/tmp/other").as_path()
     ));
 }
@@ -53,7 +53,7 @@ fn disk_usage_run_creates_no_wimo_home() {
     }
 
     for json in [false, true] {
-        wimo ai_wimo_pager::disk_usage_cmd::run(wimo ai_wimo_pager::disk_usage_cmd::DiskUsageArgs { json })
+        wimoai_wimo_pager::disk_usage_cmd::run(wimoai_wimo_pager::disk_usage_cmd::DiskUsageArgs { json })
             .expect("a missing home is not an error");
         assert!(
             !ghost.exists(),

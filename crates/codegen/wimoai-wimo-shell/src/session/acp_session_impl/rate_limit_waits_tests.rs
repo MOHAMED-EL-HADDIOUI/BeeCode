@@ -1,9 +1,9 @@
 use std::time::Duration;
 
 use pretty_assertions::assert_eq;
-use wimo ai_wimo_sampler::{SamplingErrorInfo, SamplingErrorKind};
+use wimoai_wimo_sampler::{SamplingErrorInfo, SamplingErrorKind};
 
-use wimo ai_wimo_telemetry::events::RateLimitWaitOutcome;
+use wimoai_wimo_telemetry::events::RateLimitWaitOutcome;
 
 use super::{
     BudgetLimit, RateLimitWaitBudget, RateLimitWaitConfig, RateLimitWaitDecision,
@@ -23,7 +23,7 @@ fn failure(kind: SamplingErrorKind, retry_after_secs: Option<u64>) -> SamplingEr
         empty_response_context: None,
         doom_loop_triggers: None,
         doom_loop_aborted_at_chunk: None,
-        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
     }
 }
 
@@ -58,7 +58,7 @@ async fn retry_after_hint_is_capped_and_jittered_like_any_other_wait() {
     };
 
     assert_eq!(attempt, 1);
-    let cap = wimo ai_wimo_sampler::MAX_RETRY_BACKOFF;
+    let cap = wimoai_wimo_sampler::MAX_RETRY_BACKOFF;
     assert!(
         backoff >= cap.mul_f32(0.8) && backoff <= cap.mul_f32(1.2),
         "a 120s hint must be capped at {cap:?} and jittered, got {backoff:?}"
@@ -155,7 +155,7 @@ fn budget_limit_cause_strings_are_stable() {
 
 #[test]
 fn default_attempts_ladder_exhausts_exactly_at_the_budget() {
-    let cap_ms = wimo ai_wimo_sampler::MAX_RETRY_BACKOFF.as_millis() as u64;
+    let cap_ms = wimoai_wimo_sampler::MAX_RETRY_BACKOFF.as_millis() as u64;
     // Mirrors `retry_backoff_with_jitter`'s pre-jitter base (2s doubling, capped); the 2s base is pinned by the sampler's own backoff test
     let ladder: Duration = (1..=RateLimitWaitConfig::DEFAULT_MAX_ATTEMPTS)
         .map(|attempt| {

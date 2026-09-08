@@ -6,16 +6,16 @@ fn main() {
         .read_to_string(&mut script)
         .expect("read stdin");
 
-    match wimo ai_workflow::validate_script(&script, None) {
+    match wimoai_workflow::validate_script(&script, None) {
         Ok(report) => {
             println!("META OK: name={} phases={}", report.name, report.phases);
             println!("RUN OK: {}", report.outcome_summary);
         }
-        Err(wimo ai_workflow::ValidationError::Meta(e)) => {
+        Err(wimoai_workflow::ValidationError::Meta(e)) => {
             println!("META FAIL: {e}");
             std::process::exit(1);
         }
-        Err(wimo ai_workflow::ValidationError::Run(e)) => {
+        Err(wimoai_workflow::ValidationError::Run(e)) => {
             println!("RUN FAIL: {e}");
             std::process::exit(2);
         }

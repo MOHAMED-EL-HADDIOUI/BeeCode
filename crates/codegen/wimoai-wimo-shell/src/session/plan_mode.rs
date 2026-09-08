@@ -588,8 +588,8 @@ mod tests {
         assert_eq!(t.state(), PlanModeState::Active);
     }
     use std::collections::HashMap;
-    use wimo ai_wimo_tools::types::template_renderer::TemplateRenderer;
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::template_renderer::TemplateRenderer;
+    use wimoai_wimo_tools::types::tool::ToolKind;
     /// Build a test TemplateRenderer with standard wimo Build tool mappings.
     fn test_renderer() -> TemplateRenderer {
         let tools: HashMap<ToolKind, String> = [

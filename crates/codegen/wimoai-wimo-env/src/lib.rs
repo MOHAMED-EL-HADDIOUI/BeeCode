@@ -190,7 +190,7 @@ mod tests {
     }
     #[test]
     fn env_var_guard_set_value_updates_then_restores_on_drop() {
-        const KEY: &str = "wimo ai_wimo_ENV_VAR_GUARD_SET_VALUE_PROBE";
+        const KEY: &str = "wimoai_wimo_ENV_VAR_GUARD_SET_VALUE_PROBE";
         let before = std::env::var(KEY).ok();
         {
             let guard = EnvVarGuard::set(KEY, "initial");
@@ -210,8 +210,8 @@ mod tests {
     }
     #[test]
     fn env_var_guard_chains_keys_under_one_lock_and_restores_all() {
-        const A: &str = "wimo ai_wimo_ENV_VAR_GUARD_CHAIN_A_PROBE";
-        const B: &str = "wimo ai_wimo_ENV_VAR_GUARD_CHAIN_B_PROBE";
+        const A: &str = "wimoai_wimo_ENV_VAR_GUARD_CHAIN_A_PROBE";
+        const B: &str = "wimoai_wimo_ENV_VAR_GUARD_CHAIN_B_PROBE";
         {
             let _guard = EnvVarGuard::set(A, "first")
                 .and_set(B, "b")
@@ -230,7 +230,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "this thread already holds a live guard")]
     fn env_var_guard_rejects_a_second_guard_on_the_same_thread() {
-        const KEY: &str = "wimo ai_wimo_ENV_VAR_GUARD_REENTRANCY_PROBE";
+        const KEY: &str = "wimoai_wimo_ENV_VAR_GUARD_REENTRANCY_PROBE";
         let _first = EnvVarGuard::set(KEY, "first");
         let _second = EnvVarGuard::set(KEY, "second");
     }

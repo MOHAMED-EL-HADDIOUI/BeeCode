@@ -1,13 +1,13 @@
 //! Extracting searchable text from session update files.
 //!
 //! The peek structs are shared with the resume/replay collectors in [`super`], so the indexed text cannot drift from what a resumed session replays.
-//! Everything downstream of the extracted string (hashing, dedup, the SQLite index itself) lives in `wimo ai-wimo-session-search`.
+//! Everything downstream of the extracted string (hashing, dedup, the SQLite index itself) lives in `wimoai-wimo-session-search`.
 
 use std::io::{self, BufRead};
 use std::path::Path;
 
 use super::{
-    ContentPeek, PromptExtractEvent, RawLinePeek, RawParamsPeek, wimo ai_SESSION_UPDATE_METHOD,
+    ContentPeek, PromptExtractEvent, RawLinePeek, RawParamsPeek, wimoai_SESSION_UPDATE_METHOD,
     collect_prompts_from_events,
 };
 use crate::session::wire_tags::{REWIND_MARKER, USER_MESSAGE_CHUNK};
@@ -127,11 +127,11 @@ pub(super) fn collect_all_indexable_content_single_pass(
             continue;
         }
 
-        let (raw_params, is_wimo ai) = if let Ok(env) = serde_json::from_str::<RawLinePeek<'_>>(trimmed)
+        let (raw_params, is_wimoai) = if let Ok(env) = serde_json::from_str::<RawLinePeek<'_>>(trimmed)
         {
             let raw = env.params.map(|p| p.get()).unwrap_or(trimmed);
-            let wimo ai = env.method == Some(wimo ai_SESSION_UPDATE_METHOD);
-            (raw, wimo ai)
+            let wimoai = env.method == Some(wimoai_SESSION_UPDATE_METHOD);
+            (raw, wimoai)
         } else {
             (trimmed, false)
         };
@@ -142,7 +142,7 @@ pub(super) fn collect_all_indexable_content_single_pass(
         let tag = update_peek.as_ref().map(|u| u.session_update);
 
         // Content events arrive on ACP "session/update"; control events (rewind markers) on the wimo AI "_x.ai/session/update" extension
-        if !is_wimo ai {
+        if !is_wimoai {
             match tag {
                 Some(t) if t == *USER_MESSAGE_CHUNK => {
                     flush_assistant(&mut current_assistant, &mut assistant_texts);

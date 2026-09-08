@@ -24,7 +24,7 @@ use crate::app::agent_view::AgentView;
 use crate::app::app_view::{ActiveView, AppView, DashboardReturn, TrustState};
 use crate::app::cancel_latency::CancelOrigin;
 use agent_client_protocol as acp;
-use wimo ai_wimo_telemetry::events::CancellationScope;
+use wimoai_wimo_telemetry::events::CancellationScope;
 
 // ---------------------------------------------------------------------------
 // Agent Dashboard dispatchers
@@ -209,7 +209,7 @@ pub(super) fn dispatch_open_dashboard(app: &mut AppView) -> Vec<Effect> {
             return vec![];
         }
         app.workspace_store_loading = true;
-        let db_path = wimo ai_wimo_dashboard_store::default_db_path(&wimo ai_wimo_config::wimo_home());
+        let db_path = wimoai_wimo_dashboard_store::default_db_path(&wimoai_wimo_config::wimo_home());
         return vec![Effect::LoadWorkspaceSnapshot { db_path }];
     }
     app.dashboard_sessions_loading = true;
@@ -731,7 +731,7 @@ pub(super) fn dispatch_dashboard_open_shortcuts_help(app: &mut AppView) {
 
 /// Short display label for a directory in the location picker: the basename (truncated), or `~` for the home directory itself.
 fn location_picker_label(path: &std::path::Path) -> String {
-    if wimo ai_dirs::home_dir().is_some_and(|h| h == path) {
+    if wimoai_dirs::home_dir().is_some_and(|h| h == path) {
         return "~".to_string();
     }
     let raw = path.file_name().and_then(|n| n.to_str()).unwrap_or("/");
@@ -749,9 +749,9 @@ pub(super) fn resolve_location_input(
         return None;
     }
     let expanded: std::path::PathBuf = if trimmed == "~" {
-        wimo ai_dirs::home_dir()?
+        wimoai_dirs::home_dir()?
     } else if let Some(rest) = trimmed.strip_prefix("~/") {
-        wimo ai_dirs::home_dir()?.join(rest)
+        wimoai_dirs::home_dir()?.join(rest)
     } else {
         std::path::PathBuf::from(trimmed)
     };
@@ -1243,8 +1243,8 @@ pub(super) fn dispatch_dashboard_dispatch_slash(app: &mut AppView, text: String)
         let reg = dashboard.dispatch.slash_controller.registry();
 
         {
-            use wimo ai_wimo_telemetry::events::{PagerCommandSource, PagerSlashCommand};
-            use wimo ai_wimo_telemetry::session_ctx::log_event;
+            use wimoai_wimo_telemetry::events::{PagerCommandSource, PagerSlashCommand};
+            use wimoai_wimo_telemetry::session_ctx::log_event;
             let source = if reg.is_builtin(invocation.token) {
                 PagerCommandSource::Builtin
             } else {
@@ -1451,7 +1451,7 @@ pub(super) fn dispatch_dashboard_dispatch_slash(app: &mut AppView, text: String)
 fn stage_dashboard_model(
     app: &mut AppView,
     model_id: acp::ModelId,
-    effort: Option<wimo ai_wimo_shell::sampling::types::ReasoningEffort>,
+    effort: Option<wimoai_wimo_shell::sampling::types::ReasoningEffort>,
 ) {
     let display = app
         .models
@@ -1508,7 +1508,7 @@ pub(super) fn apply_pending_dispatch_config(
         | DashboardDispatchMode::Auto
         | DashboardDispatchMode::AlwaysApprove => {}
         DashboardDispatchMode::Plan => {
-            agent.deferred_session_mode = Some(wimo ai_wimo_tools::types::SessionMode::Plan);
+            agent.deferred_session_mode = Some(wimoai_wimo_tools::types::SessionMode::Plan);
             // Optimistic so the agent view reflects plan mode immediately when
             // opened via Ctrl+S, before the ACP round-trip confirms it.
             agent.plan_mode_pending = Some(true);
@@ -1938,7 +1938,7 @@ fn stop_top_level_activity(agent: &mut crate::app::agent_view::AgentView) -> Opt
             effects.push(Effect::KillBgTask {
                 session_id: session_id.clone(),
                 task_id,
-                source: wimo ai_wimo_shell::extensions::task::TaskKillSource::Teardown,
+                source: wimoai_wimo_shell::extensions::task::TaskKillSource::Teardown,
             });
         }
         let scheduled: Vec<String> = agent.session.scheduled_tasks.keys().cloned().collect();

@@ -122,7 +122,7 @@ pub(crate) fn backup_corrupt_auth_file(path: &Path) -> Option<PathBuf> {
             );
             // Must reach unified.jsonl: the tracing line above is invisible in production captures
             // This is the only record of both the corruption and where the original bytes went
-            wimo ai_wimo_telemetry::unified_log::error(
+            wimoai_wimo_telemetry::unified_log::error(
                 "auth: corrupt auth.json backed up",
                 None,
                 Some(serde_json::json!({
@@ -134,7 +134,7 @@ pub(crate) fn backup_corrupt_auth_file(path: &Path) -> Option<PathBuf> {
         }
         Err(e) => {
             tracing::warn!(error = %e, "auth: failed to rename corrupt auth.json for backup");
-            wimo ai_wimo_telemetry::unified_log::error(
+            wimoai_wimo_telemetry::unified_log::error(
                 "auth: corrupt auth.json backup failed",
                 None,
                 Some(serde_json::json!({
@@ -199,7 +199,7 @@ fn write_auth_json_with(
             );
             // Must reach unified.jsonl: a silent in-memory-only credential (the prior behavior) leaves sibling processes with a stale refresh token
             // Without the log there is no record of why
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth: disk full, falling back to non-atomic in-place write",
                 None,
                 Some(serde_json::json!({
@@ -354,14 +354,14 @@ fn restore_prior_bytes(auth_file: &Path, bytes: &[u8]) -> std::io::Result<()> {
     Ok(())
 }
 
-/// Read the API key from the `wimo ai::api_key` scope in auth.json.
+/// Read the API key from the `wimoai::api_key` scope in auth.json.
 pub fn read_api_key(wimo_home: &Path) -> Option<String> {
     let path = wimo_home.join("auth.json");
     let map = read_auth_json(&path).ok()?;
     map.get(API_KEY_SCOPE).map(|a| a.key.clone())
 }
 
-/// Store a plain API key in auth.json under the `wimo ai::api_key` scope.
+/// Store a plain API key in auth.json under the `wimoai::api_key` scope.
 ///
 /// Uses the corrupt-recovery reader so a malformed auth.json (e.g. from a previous crash) can be healed when the user sets an API key.
 pub fn store_api_key(wimo_home: &Path, api_key: &str) -> std::io::Result<()> {
@@ -378,7 +378,7 @@ pub fn store_api_key(wimo_home: &Path, api_key: &str) -> std::io::Result<()> {
     write_auth_json(&path, &map)
 }
 
-/// Remove the `wimo ai::api_key` scope from auth.json.
+/// Remove the `wimoai::api_key` scope from auth.json.
 pub fn clear_api_key(wimo_home: &Path) -> std::io::Result<()> {
     let path = wimo_home.join("auth.json");
     if let Ok(mut map) = read_auth_json(&path) {

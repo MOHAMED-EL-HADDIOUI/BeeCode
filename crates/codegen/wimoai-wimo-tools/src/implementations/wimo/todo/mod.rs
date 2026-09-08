@@ -279,28 +279,28 @@ Use for any task with 3+ steps. Skip for trivial single-step work."#
     }
 }
 
-impl wimo ai_tool_runtime::Tool for TodoWriteTool {
+impl wimoai_tool_runtime::Tool for TodoWriteTool {
     type Args = TodoWriteInput;
     type Output = TodoWriteOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("todo_write").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("todo_write").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "todo_write",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -312,9 +312,9 @@ impl wimo ai_tool_runtime::Tool for TodoWriteTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: TodoWriteInput,
-    ) -> Result<TodoWriteOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<TodoWriteOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -391,7 +391,7 @@ mod tests {
     #[test]
     fn name_and_description() {
         let tool = TodoWriteTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "todo_write");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "todo_write");
     }
 
     #[tokio::test]
@@ -409,7 +409,7 @@ mod tests {
 
         let shared = resources.into_shared();
         let output = expect_success(
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
                 .await
                 .unwrap(),
         );
@@ -438,7 +438,7 @@ mod tests {
                 Some(TodoStatus::Completed),
             )],
         };
-        wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input1)
+        wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input1)
             .await
             .unwrap();
 
@@ -452,7 +452,7 @@ mod tests {
             )],
         };
         let output = expect_success(
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input2)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input2)
                 .await
                 .unwrap(),
         );
@@ -475,7 +475,7 @@ mod tests {
                 make_update("2", Some("Run tests"), Some(TodoStatus::Pending)),
             ],
         };
-        wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input1)
+        wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input1)
             .await
             .unwrap();
 
@@ -488,7 +488,7 @@ mod tests {
             ],
         };
         let output = expect_success(
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input2)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input2)
                 .await
                 .unwrap(),
         );
@@ -514,7 +514,7 @@ mod tests {
             todos: vec![make_update("explore", None, Some(TodoStatus::Completed))],
         };
         let output = expect_success(
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
                 .await
                 .unwrap(),
         );
@@ -536,7 +536,7 @@ mod tests {
                 make_update("dup", Some("B"), Some(TodoStatus::Pending)),
             ],
         };
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
         assert!(
@@ -555,7 +555,7 @@ mod tests {
             todos: vec![],
         };
         let output = expect_success(
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
                 .await
                 .unwrap(),
         );
@@ -573,7 +573,7 @@ mod tests {
             todos: vec![make_update("1", Some("Task"), Some(TodoStatus::Pending))],
         };
         let output = expect_success(
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
                 .await
                 .unwrap(),
         );
@@ -598,7 +598,7 @@ mod tests {
             ],
         };
         let shared = resources.into_shared();
-        wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
 
@@ -852,7 +852,7 @@ mod tests {
                 make_update("3", Some("Write tests"), Some(TodoStatus::Pending)),
             ],
         };
-        wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input1)
+        wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input1)
             .await
             .unwrap();
 
@@ -866,7 +866,7 @@ mod tests {
             ],
         };
         let output = expect_success(
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input2)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input2)
                 .await
                 .unwrap(),
         );

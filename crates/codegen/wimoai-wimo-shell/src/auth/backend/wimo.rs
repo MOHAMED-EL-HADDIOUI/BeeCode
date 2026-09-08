@@ -39,7 +39,7 @@ impl AuthBackend for wimoAuthBackend {
         super::host_of(&config.wimo_ws_origin)
     }
 
-    fn is_wimo ai_authority(&self) -> bool {
+    fn is_wimoai_authority(&self) -> bool {
         true
     }
 

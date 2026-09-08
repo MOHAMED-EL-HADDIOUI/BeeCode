@@ -1,24 +1,24 @@
 use agent_client_protocol as acp;
 use tokio::sync::{mpsc, oneshot};
 
-use crate::extensions::notification::SessionNotification as wimo aiSessionNotification;
+use crate::extensions::notification::SessionNotification as wimoaiSessionNotification;
 use acp::SessionNotification as AcpSessionNotification;
 
 /// A notification headed through `event_tx` into the high-frequency `ReplayBuffer`.
 /// The buffer debounces and merges everything, then `emit_buffered` emits it without firing per-chunk hooks or persistence writes.
 /// The two variants stay separate because ACP and wimo AI chunks merge under different rules and wire envelopes.
-/// One-shot wimo AI events (RetryState, ImageCompressed, HookExecution, etc.) instead take `send_wimo ai_notification` for per-event hooks and persistence.
+/// One-shot wimo AI events (RetryState, ImageCompressed, HookExecution, etc.) instead take `send_wimoai_notification` for per-event hooks and persistence.
 #[derive(Debug, Clone)]
 pub(crate) enum SessionNotification {
     Acp(Box<AcpSessionNotification>),
-    wimo ai(Box<wimo aiSessionNotification>),
+    wimoai(Box<wimoaiSessionNotification>),
 }
 
 impl SessionNotification {
     pub(crate) fn session_id(&self) -> &acp::SessionId {
         match self {
             Self::Acp(n) => &n.session_id,
-            Self::wimo ai(n) => &n.session_id,
+            Self::wimoai(n) => &n.session_id,
         }
     }
 
@@ -29,7 +29,7 @@ impl SessionNotification {
                 n.update,
                 acp::SessionUpdate::AgentMessageChunk(_) | acp::SessionUpdate::AgentThoughtChunk(_)
             ),
-            Self::wimo ai(n) => matches!(
+            Self::wimoai(n) => matches!(
                 n.update,
                 crate::extensions::notification::SessionUpdate::ToolCallDeltaChunk { .. }
             ),
@@ -43,7 +43,7 @@ impl SessionNotification {
                 .as_ref()
                 .and_then(|m| m.get("agentTimestampMs"))
                 .and_then(|v| v.as_u64()),
-            Self::wimo ai(n) => n
+            Self::wimoai(n) => n
                 .meta
                 .as_ref()
                 .and_then(|m| m.get("agentTimestampMs"))
@@ -68,9 +68,9 @@ impl From<AcpSessionNotification> for SessionNotification {
     }
 }
 
-impl From<wimo aiSessionNotification> for SessionNotification {
-    fn from(n: wimo aiSessionNotification) -> Self {
-        Self::wimo ai(Box::new(n))
+impl From<wimoaiSessionNotification> for SessionNotification {
+    fn from(n: wimoaiSessionNotification) -> Self {
+        Self::wimoai(Box::new(n))
     }
 }
 
@@ -79,14 +79,14 @@ impl SessionNotification {
     pub(crate) fn expect_acp(&self) -> &AcpSessionNotification {
         match self {
             Self::Acp(n) => n,
-            Self::wimo ai(_) => panic!("expected Acp notification, got wimo ai"),
+            Self::wimoai(_) => panic!("expected Acp notification, got wimoai"),
         }
     }
 
     pub(crate) fn into_acp(self) -> AcpSessionNotification {
         match self {
             Self::Acp(n) => *n,
-            Self::wimo ai(_) => panic!("expected Acp notification, got wimo ai"),
+            Self::wimoai(_) => panic!("expected Acp notification, got wimoai"),
         }
     }
 }

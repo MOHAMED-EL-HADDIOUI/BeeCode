@@ -1,7 +1,7 @@
 pub const PAGER_CLIENT_TYPE: &str = "wimo-pager";
 pub const HEADLESS_CLIENT_TYPE: &str = "wimo-shell";
 
-pub const PAGER_CLIENT_VERSION: &str = wimo ai_wimo_version::VERSION;
+pub const PAGER_CLIENT_VERSION: &str = wimoai_wimo_version::VERSION;
 
 /// `User-Agent` for the pager's own HTTP clients that call `api.x.ai` directly (voice STT).
 ///

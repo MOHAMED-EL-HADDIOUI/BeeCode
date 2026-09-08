@@ -15,7 +15,7 @@ fn external_stream_grpc_end_to_end() {
     let endpoint =
         col::start_collector_with_protocol(collected.clone(), col::CollectorProtocol::Grpc);
 
-    let mut cfg = wimo ai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
+    let mut cfg = wimoai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
         |name| match name {
             "wimo_EXTERNAL_OTEL" => Some("1".into()),
             "OTEL_LOGS_EXPORTER" | "OTEL_METRICS_EXPORTER" => Some("otlp".into()),
@@ -28,28 +28,28 @@ fn external_stream_grpc_end_to_end() {
         None,
     )
     .expect("double opt-in must resolve");
-    cfg.client = wimo ai_wimo_telemetry::external::config::ExternalClientInfo {
+    cfg.client = wimoai_wimo_telemetry::external::config::ExternalClientInfo {
         service_version: "0.0.0-test".into(),
         client_version: "0.0.0-test".into(),
         app_entrypoint: "cli".into(),
     };
 
-    wimo ai_wimo_telemetry::external::init(Some(cfg));
-    assert!(wimo ai_wimo_telemetry::external::is_active());
+    wimoai_wimo_telemetry::external::init(Some(cfg));
+    assert!(wimoai_wimo_telemetry::external::is_active());
 
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::SessionNew {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::SessionNew {
         session_id: "sess-grpc-1".into(),
         client_identifier: None,
         client_version: None,
         is_git_repo: true,
-        permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+        permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::SessionHarness {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::SessionHarness {
         session_id: "sess-grpc-1".into(),
         client_identifier: Some("wimo-pager".into()),
         model_id: "wimo-4".into(),
         agent_name: "wimo-plan".into(),
-        permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+        permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
         mcp_server_names: vec![CANARY_MCP.into()],
         plugin_names: vec![],
         skill_names: vec![],
@@ -57,11 +57,11 @@ fn external_stream_grpc_end_to_end() {
         hook_names: vec![],
         agents_md_dir_names: vec![],
         memory_enabled: false,
-        memory_retrieval_mode: wimo ai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
+        memory_retrieval_mode: wimoai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
         is_git_repo: true,
         auto_update: None,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::PromptSubmitted {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::PromptSubmitted {
         prompt_length: CANARY_PROMPT.len(),
         model_id: "wimo-4".into(),
         client_identifier: None,
@@ -69,7 +69,7 @@ fn external_stream_grpc_end_to_end() {
         prompt_text: Some(CANARY_PROMPT.into()),
         command_name: None,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::ModelResponseReceived {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::ModelResponseReceived {
         model_id: CANARY_MODEL.into(),
         duration_ms: 5,
         stop_reason: Some("stop".into()),
@@ -81,7 +81,7 @@ fn external_stream_grpc_end_to_end() {
         cost_usd_ticks: None,
     });
 
-    wimo ai_wimo_telemetry::external::flush();
+    wimoai_wimo_telemetry::external::flush();
     assert!(
         col::wait_until(std::time::Duration::from_secs(10), || {
             collected.logs_len() > 0 && collected.metrics_len() > 0
@@ -125,5 +125,5 @@ fn external_stream_grpc_end_to_end() {
         "MCP server name reached the gRPC wire"
     );
 
-    wimo ai_wimo_telemetry::external::shutdown();
+    wimoai_wimo_telemetry::external::shutdown();
 }

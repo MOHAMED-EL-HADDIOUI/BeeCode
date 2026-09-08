@@ -11,13 +11,13 @@ use crate::recovery;
 /// The journal-mode classifier inspects the parent directory, so a caller that means to write must go through [`search_db_path`] first.
 fn db_path_in(root_dir: &Path) -> PathBuf {
     let path = root_dir.join("sessions").join("session_search.sqlite");
-    wimo ai_sqlite_journal::JournalMode::for_db_path(&path).effective_db_path(&path)
+    wimoai_sqlite_journal::JournalMode::for_db_path(&path).effective_db_path(&path)
 }
 
 /// The same path, with the parent directory created owner only, because the index duplicates session text into the database file.
 /// Best effort: the classifier needs the directory to exist.
 pub(crate) fn search_db_path(root_dir: &Path) -> PathBuf {
-    let _ = wimo ai_wimo_config::create_dir_all_owner_only(&root_dir.join("sessions"));
+    let _ = wimoai_wimo_config::create_dir_all_owner_only(&root_dir.join("sessions"));
     db_path_in(root_dir)
 }
 
@@ -57,8 +57,8 @@ impl HealAwareLogCounter {
         let error_text = error.map(|e| e.to_string());
         if self.should_warn(kind) {
             tracing::warn!(error = error_text.as_deref(), session_id, "{message}");
-            wimo ai_wimo_telemetry::unified_log::emit(
-                wimo ai_wimo_telemetry::unified_log::LogLevel::Warn,
+            wimoai_wimo_telemetry::unified_log::emit(
+                wimoai_wimo_telemetry::unified_log::LogLevel::Warn,
                 message,
                 session_id,
                 error_text.map(|e| serde_json::json!({ "error": e })),

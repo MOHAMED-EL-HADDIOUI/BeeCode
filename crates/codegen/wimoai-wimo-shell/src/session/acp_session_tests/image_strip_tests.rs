@@ -6,8 +6,8 @@ use std::sync::Arc;
 
 use super::support::*;
 use super::*;
-use wimo ai_wimo_sampler::{InferenceLatencyStats, RequestId, SamplingEvent, StripReason};
-use wimo ai_wimo_sampling_types::{ContentPart, ConversationItem, ConversationResponse};
+use wimoai_wimo_sampler::{InferenceLatencyStats, RequestId, SamplingEvent, StripReason};
+use wimoai_wimo_sampling_types::{ContentPart, ConversationItem, ConversationResponse};
 
 const PERSIST_GATE_IMAGE_URI: &str = "data:image/png;base64,KEEPME";
 
@@ -43,7 +43,7 @@ async fn seed_image(actor: &SessionActor, url: &str) {
 
 /// Drain the gateway channel into debug strings for notification assertions.
 fn drain_gateway_debug(
-    rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    rx: &mut tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) -> String {
     let mut out = String::new();
     while let Ok(msg) = rx.try_recv() {
@@ -112,9 +112,9 @@ fn completed_event(request_id: &RequestId) -> SamplingEvent {
     }
 }
 
-fn failed_info() -> wimo ai_wimo_sampler::SamplingErrorInfo {
-    wimo ai_wimo_sampler::SamplingErrorInfo {
-        kind: wimo ai_wimo_sampler::SamplingErrorKind::Api,
+fn failed_info() -> wimoai_wimo_sampler::SamplingErrorInfo {
+    wimoai_wimo_sampler::SamplingErrorInfo {
+        kind: wimoai_wimo_sampler::SamplingErrorKind::Api,
         message: "400 Bad Request".to_string(),
         status_code: Some(400),
         is_retryable: false,
@@ -125,7 +125,7 @@ fn failed_info() -> wimo ai_wimo_sampler::SamplingErrorInfo {
         empty_response_context: None,
         doom_loop_triggers: None,
         doom_loop_aborted_at_chunk: None,
-        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
     }
 }
 
@@ -143,7 +143,7 @@ async fn heuristic_images_stripped_does_not_rewrite_history() {
     local
         .run_until(async {
             let (gateway_tx, mut gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);
@@ -183,7 +183,7 @@ async fn server_rejected_strip_persists_only_after_completed() {
     local
         .run_until(async {
             let (gateway_tx, mut gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);
@@ -246,7 +246,7 @@ async fn timed_out_strip_survives_new_turn_until_late_completed() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);
@@ -324,7 +324,7 @@ async fn rewind_cancels_detached_image_strip_before_it_runs() {
     local
         .run_until(async {
             let (gateway_tx, mut gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);
@@ -437,7 +437,7 @@ async fn rejected_rewind_preserves_queued_image_strip() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);
@@ -507,7 +507,7 @@ async fn failed_compaction_replay_preserves_queued_image_strip() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
             let unique = std::time::SystemTime::now()
@@ -530,10 +530,10 @@ async fn failed_compaction_replay_preserves_queued_image_strip() {
 
             let session_dir = crate::session::persistence::session_dir(&actor.session_info);
             std::fs::create_dir_all(&session_dir).expect("create session dir");
-            let checkpoint = crate::session::storage::SessionUpdate::wimo ai(Box::new(
+            let checkpoint = crate::session::storage::SessionUpdate::wimoai(Box::new(
                 crate::extensions::notification::SessionNotification {
                     session_id: actor.session_info.id.clone(),
-                    update: wimo aiSessionUpdate::CompactionCheckpoint(Box::new(
+                    update: wimoaiSessionUpdate::CompactionCheckpoint(Box::new(
                         crate::extensions::notification::CompactionCheckpointInfo {
                             checkpoint_id: "missing".into(),
                             prompt_index_at_compaction: 1,
@@ -618,7 +618,7 @@ async fn pending_strip_bound_preserves_detached_and_new_url_entries() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);
@@ -699,7 +699,7 @@ async fn timed_out_strip_survives_when_images_stripped_is_still_queued() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);
@@ -773,7 +773,7 @@ async fn non_applied_strip_outcome_still_notifies_the_user() {
     local
         .run_until(async {
             let (gateway_tx, mut gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);
@@ -811,7 +811,7 @@ async fn server_rejected_strip_dropped_when_retry_fails() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);
@@ -854,7 +854,7 @@ async fn multi_image_blame_is_judged_on_unique_urls() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
                 Arc::new(create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await);

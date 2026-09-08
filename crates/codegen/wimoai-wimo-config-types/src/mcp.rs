@@ -1,11 +1,11 @@
-//! MCP server configuration value types, extracted from wimo ai-wimo-shell so crates the shell depends on can use them.
+//! MCP server configuration value types, extracted from wimoai-wimo-shell so crates the shell depends on can use them.
 
 use agent_client_protocol as acp;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
-use wimo ai_wimo_mcp::oauth_config::McpOAuthConfig;
+use wimoai_wimo_mcp::oauth_config::McpOAuthConfig;
 
 /// serde default helper.
 fn default_true() -> bool {

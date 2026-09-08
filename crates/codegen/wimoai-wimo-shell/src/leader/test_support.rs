@@ -17,11 +17,11 @@ pub(crate) struct FakeVersions {
     pub(crate) binary_version: Option<String>,
 }
 impl FakeVersions {
-    /// The versions a same-build real leader would report (`run_leader` stamps `wimo ai_wimo_version::VERSION` into its metadata).
+    /// The versions a same-build real leader would report (`run_leader` stamps `wimoai_wimo_version::VERSION` into its metadata).
     pub(crate) fn current() -> Self {
         Self {
             protocol_version: Some(LEADER_PROTOCOL_VERSION),
-            binary_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+            binary_version: Some(wimoai_wimo_version::VERSION.to_string()),
         }
     }
 }

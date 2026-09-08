@@ -10,8 +10,8 @@ use fs2::FileExt;
 use std::fs::OpenOptions;
 use std::io::{self, Read, Seek, Write};
 use std::path::{Path, PathBuf};
-use wimo ai_chat_state::StrictAppendAck;
-use wimo ai_wimo_workspace::session::file_state::RewindPoint;
+use wimoai_chat_state::StrictAppendAck;
+use wimoai_wimo_workspace::session::file_state::RewindPoint;
 mod copy;
 #[derive(Clone)]
 enum SessionDirMode {
@@ -916,7 +916,7 @@ impl JsonlStorageAdapter {
                         .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))
                         .and_then(|effort| {
                             let parsed = effort
-                                .parse::<wimo ai_wimo_sampling_types::ReasoningEffort>()
+                                .parse::<wimoai_wimo_sampling_types::ReasoningEffort>()
                                 .map_err(|error| {
                                     io::Error::new(io::ErrorKind::InvalidData, error)
                                 })?;
@@ -974,7 +974,7 @@ impl JsonlStorageAdapter {
     /// Older sessions stored reasoning inline on the assistant (`AssistantItem.reasoning`).
     /// Early backend-search sessions stored it as `AssistantItem.raw_output: Vec<Value>`.
     /// Newer sessions don't have those fields on `AssistantItem` so serde would silently drop them.
-    /// We pre-extract them via [`wimo ai_wimo_sampling_types::upgrade_legacy_reasoning`].
+    /// We pre-extract them via [`wimoai_wimo_sampling_types::upgrade_legacy_reasoning`].
     /// The sibling `Reasoning` / `BackendToolCall` items are emitted *before* the corresponding assistant.
     /// That matches the order `response_to_conversation_items` would produce.
     /// The file on disk is not rewritten; this is a load-time-only transform so resumed sessions get sibling-shape replay without disk-write risk.
@@ -1036,7 +1036,7 @@ impl JsonlStorageAdapter {
                 }
             };
             let siblings =
-                wimo ai_wimo_sampling_types::upgrade_legacy_reasoning(&raw, &mut sibling_btc_ids_seen);
+                wimoai_wimo_sampling_types::upgrade_legacy_reasoning(&raw, &mut sibling_btc_ids_seen);
             for sib in siblings {
                 match &sib {
                     ConversationItem::Reasoning(_) => upgraded_reasoning_count += 1,
@@ -1128,9 +1128,9 @@ fn transform_session_id_in_update(
             notification.session_id = new_id.clone();
             super::SessionUpdate::Acp(notification)
         }
-        super::SessionUpdate::wimo ai(mut notification) => {
+        super::SessionUpdate::wimoai(mut notification) => {
             notification.session_id = new_id.clone();
-            super::SessionUpdate::wimo ai(notification)
+            super::SessionUpdate::wimoai(notification)
         }
     }
 }
@@ -1145,7 +1145,7 @@ async fn next_compaction_segment_index(compaction_dir: &std::path::Path) -> u64 
         if let Some(n) = entry
             .file_name()
             .to_str()
-            .and_then(wimo ai_compaction_transcript::parse_segment_index)
+            .and_then(wimoai_compaction_transcript::parse_segment_index)
         {
             next = next.max(n + 1);
         }
@@ -1180,7 +1180,7 @@ impl StorageAdapter for JsonlStorageAdapter {
         } else {
             tracing::info!("Creating new session in JSONL");
             let mut summary = Summary::new(info, model_id)?;
-            summary.sandbox_profile = wimo ai_wimo_sandbox::configured_profile_name().map(String::from);
+            summary.sandbox_profile = wimoai_wimo_sandbox::configured_profile_name().map(String::from);
             self.write_summary_sync(info, &summary)?;
             Ok(summary)
         }
@@ -1325,7 +1325,7 @@ impl StorageAdapter for JsonlStorageAdapter {
         info: &Info,
         model_id: &acp::ModelId,
         agent_name: Option<&str>,
-        reasoning_effort: Option<Option<wimo ai_wimo_sampling_types::ReasoningEffort>>,
+        reasoning_effort: Option<Option<wimoai_wimo_sampling_types::ReasoningEffort>>,
     ) -> io::Result<()> {
         self.apply_summary_patch(
             info,
@@ -1679,7 +1679,7 @@ impl StorageAdapter for JsonlStorageAdapter {
     async fn merge_rewind_points_from(&self, info: &Info, target_index: usize) -> io::Result<()> {
         let points = self.load_rewind_points(info).await?;
         let merged =
-            wimo ai_wimo_workspace::session::file_state::merge_rewind_points_from(points, target_index);
+            wimoai_wimo_workspace::session::file_state::merge_rewind_points_from(points, target_index);
         self.write_jsonl(self.rewind_points_file(info), &merged)
             .await
     }
@@ -1880,7 +1880,7 @@ impl StorageAdapter for JsonlStorageAdapter {
         segment: &crate::extensions::notification::CompactionSegmentFile,
     ) -> io::Result<()> {
         use tokio::io::AsyncWriteExt;
-        use wimo ai_compaction_transcript::{
+        use wimoai_compaction_transcript::{
             COMPACTION_DIR, INDEX_FILE, INDEX_HEADER, extract_keywords, render_index_row,
             render_segment_md, segment_filename,
         };

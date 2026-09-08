@@ -1,4 +1,4 @@
-//! Host-agnostic agent lifecycle hooks shared by multiple agent hosts (e.g. wimo ai-wimo-shell).
+//! Host-agnostic agent lifecycle hooks shared by multiple agent hosts (e.g. wimoai-wimo-shell).
 //! Contributors receive data-only per-hook inputs at dispatch time; anything they act through is a
 //! capability injected at install time, and they never own loop control.
 

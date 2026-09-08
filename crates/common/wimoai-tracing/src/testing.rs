@@ -19,13 +19,13 @@ impl OtelTestEnv {
     pub fn install() -> Self {
         global::set_text_map_propagator(TraceContextPropagator::new());
         let exporter = InMemorySpanExporterBuilder::new().build();
-        // Twin of `wimo ai-tracing-test`: AlwaysOn so children of an unsampled
+        // Twin of `wimoai-tracing-test`: AlwaysOn so children of an unsampled
         // OTel parent still reach the in-memory exporter.
         let provider = SdkTracerProvider::builder()
             .with_sampler(Sampler::AlwaysOn)
             .with_span_processor(SimpleSpanProcessor::new(exporter.clone()))
             .build();
-        let tracer = provider.tracer("wimo ai-tracing-test");
+        let tracer = provider.tracer("wimoai-tracing-test");
         let otel_layer = tracing_opentelemetry::layer()
             .with_tracer(tracer)
             .with_context_activation(false)

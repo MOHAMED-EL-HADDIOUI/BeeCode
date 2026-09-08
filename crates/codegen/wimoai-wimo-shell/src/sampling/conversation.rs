@@ -1,8 +1,8 @@
-//! Conversation types: re-exports the canonical set from `wimo ai_wimo_sampling_types` plus wimo-shell-specific additions.
+//! Conversation types: re-exports the canonical set from `wimoai_wimo_sampling_types` plus wimo-shell-specific additions.
 
 use std::collections::HashSet;
 
-pub use wimo ai_wimo_sampling_types::conversation::*;
+pub use wimoai_wimo_sampling_types::conversation::*;
 
 #[cfg(test)]
 #[path = "conversation_tests.rs"]
@@ -24,7 +24,7 @@ pub struct ConversationRequestTrace {
 /// Drops synthetic user messages, then truncates at the last complete turn so the child never sees a partial one.
 /// A turn is complete when the Assistant's tool calls are all answered; Reasoning and BackendToolCall items are transparent to the scan.
 ///
-/// Keep the "complete turn" definition in sync with `count_complete_turns` in `wimo ai-wimo-subagent-resolution/src/context.rs`.
+/// Keep the "complete turn" definition in sync with `count_complete_turns` in `wimoai-wimo-subagent-resolution/src/context.rs`.
 pub(crate) fn fork_filter_chat(items: &mut Vec<ConversationItem>) {
     items.retain(|item| match item {
         ConversationItem::User(u) => u.synthetic_reason.is_none(),

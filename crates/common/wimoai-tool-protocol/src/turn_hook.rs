@@ -13,11 +13,11 @@ pub const BEFORE_TURN_KIND: &str = "before_turn";
 pub const AFTER_TURN_KIND: &str = "after_turn";
 
 /// Default `session_relationship` wire value (mirrors
-/// `wimo ai_wimo_session_events::SessionRelationship::Primary`).
+/// `wimoai_wimo_session_events::SessionRelationship::Primary`).
 pub const DEFAULT_SESSION_RELATIONSHIP: &str = "primary";
 
 /// Default `schema_version` wire value. Bare literal (not the
-/// `wimo ai-wimo-session-events` constant) to avoid a dependency cycle.
+/// `wimoai-wimo-session-events` constant) to avoid a dependency cycle.
 pub const DEFAULT_SCHEMA_VERSION: &str = "1.0";
 
 fn default_session_relationship() -> String {
@@ -49,7 +49,7 @@ pub struct BeforeTurnPayload {
     #[serde(default)]
     pub conversation_message_count: usize,
     /// Snake-case mirror of `Event::TurnStarted::session_relationship`
-    /// (`"primary"` | `"subagent"`). A `String`, not the `wimo ai-file-utils`
+    /// (`"primary"` | `"subagent"`). A `String`, not the `wimoai-file-utils`
     /// enum, to avoid a dependency cycle; decoded by the workspace at emit time.
     #[serde(default = "default_session_relationship")]
     pub session_relationship: String,
@@ -104,7 +104,7 @@ pub struct AfterTurnPayload {
     /// Snake-case mirror of `Event::TurnEnded::cancellation_category` (e.g.
     /// `"doom_loop_repetition"`). Carried as a `String` for the same
     /// dep-cycle-avoidance reason as `BeforeTurnPayload::session_relationship`;
-    /// the workspace decodes it into the `wimo ai-file-utils`
+    /// the workspace decodes it into the `wimoai-file-utils`
     /// `CancellationCategory` enum at emit time. `None` for non-cancelled turns.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cancellation_category: Option<String>,

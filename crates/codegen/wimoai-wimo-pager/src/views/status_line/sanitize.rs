@@ -1,5 +1,5 @@
 //! Turning a script's bytes into the lines the frame paints.
-//! Separate from `wimo ai-wimo-pager-render`'s `vte::Perform`, which discards OSC and quantizes colour.
+//! Separate from `wimoai-wimo-pager-render`'s `vte::Perform`, which discards OSC and quantizes colour.
 //! This row needs OSC 8 spans in absolute screen columns.
 
 use std::borrow::Cow;
@@ -27,7 +27,7 @@ const MAX_SANITIZED_CHARS: usize = 1024;
 impl SanitizedText {
     #[must_use]
     pub fn new(text: &str) -> Self {
-        let expanded = wimo ai_wimo_pager_render::appearance::expand_tabs(text);
+        let expanded = wimoai_wimo_pager_render::appearance::expand_tabs(text);
         let (clean, mut links) = extract_osc8_links(&clamp_lines(&expanded));
         let mut lines = match clean.as_str().into_text() {
             Ok(parsed) if !parsed.lines.is_empty() => parsed.lines,

@@ -36,7 +36,7 @@ pub(crate) trait AuthBackend {
     fn login_host(&self, config: &wimoComConfig) -> String;
     /// Whether wimo AI issued this backend's credentials and may therefore receive them.
     /// Gates every request that carries the bearer to an wimo AI host, and every wimo AI-only policy.
-    fn is_wimo ai_authority(&self) -> bool;
+    fn is_wimoai_authority(&self) -> bool;
     /// Obtain a credential; the flag reports whether a login actually ran.
     async fn login(&self, req: LoginRequest<'_>) -> anyhow::Result<(wimoAuth, bool)>;
     /// The renewal authority for the credentials this backend mints.

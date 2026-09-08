@@ -9,9 +9,9 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Weak};
 
-use wimo ai_codebase_graph::{IndexManager, IndexManagerConfig, IndexManagerHandle};
+use wimoai_codebase_graph::{IndexManager, IndexManagerConfig, IndexManagerHandle};
 
-use wimo ai_wimo_tools::util::wimo_home::wimo_home;
+use wimoai_wimo_tools::util::wimo_home::wimo_home;
 
 /// Cache is stored in: `~/.wimo/indexes/{url_encoded_cwd}/goto_index.bin`
 pub fn get_index_cache_path(cwd: &Path) -> PathBuf {

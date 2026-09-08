@@ -273,28 +273,28 @@ impl crate::types::tool_metadata::ToolMetadata for CodexListDirTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for CodexListDirTool {
+impl wimoai_tool_runtime::Tool for CodexListDirTool {
     type Args = CodexListDirInput;
     type Output = ListDirOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("list_dir").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("list_dir").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "list_dir",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -306,9 +306,9 @@ impl wimo ai_tool_runtime::Tool for CodexListDirTool {
     )]
     async fn run(
         &self,
-        _ctx: wimo ai_tool_runtime::ToolCallContext,
+        _ctx: wimoai_tool_runtime::ToolCallContext,
         input: CodexListDirInput,
-    ) -> Result<ListDirOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ListDirOutput, wimoai_tool_runtime::ToolError> {
         let CodexListDirInput {
             dir_path,
             offset,
@@ -501,7 +501,7 @@ mod tests {
         std::fs::create_dir(tmp.path().join("sub")).unwrap();
 
         let tool = CodexListDirTool;
-        let ctx = wimo ai_tool_runtime::ToolCallContext::default();
+        let ctx = wimoai_tool_runtime::ToolCallContext::default();
 
         let input = CodexListDirInput {
             dir_path: tmp.path().to_string_lossy().to_string(),
@@ -510,7 +510,7 @@ mod tests {
             depth: 2,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, ctx, input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, ctx, input)
             .await
             .unwrap();
         match result {
@@ -531,7 +531,7 @@ mod tests {
     async fn tool_returns_error_for_invalid_offset() {
         let tmp = TempDir::new().unwrap();
         let tool = CodexListDirTool;
-        let ctx = wimo ai_tool_runtime::ToolCallContext::default();
+        let ctx = wimoai_tool_runtime::ToolCallContext::default();
 
         let input = CodexListDirInput {
             dir_path: tmp.path().to_string_lossy().to_string(),
@@ -540,7 +540,7 @@ mod tests {
             depth: 2,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, ctx, input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, ctx, input)
             .await
             .unwrap();
         match result {
@@ -555,7 +555,7 @@ mod tests {
     async fn tool_returns_error_for_nonexistent_dir() {
         let tmp = TempDir::new().unwrap();
         let tool = CodexListDirTool;
-        let ctx = wimo ai_tool_runtime::ToolCallContext::default();
+        let ctx = wimoai_tool_runtime::ToolCallContext::default();
 
         let input = CodexListDirInput {
             dir_path: tmp.path().join("nonexistent").to_string_lossy().to_string(),
@@ -564,7 +564,7 @@ mod tests {
             depth: 2,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, ctx, input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, ctx, input)
             .await
             .unwrap();
         match result {
@@ -581,7 +581,7 @@ mod tests {
     #[tokio::test]
     async fn tool_returns_error_for_relative_path() {
         let tool = CodexListDirTool;
-        let ctx = wimo ai_tool_runtime::ToolCallContext::default();
+        let ctx = wimoai_tool_runtime::ToolCallContext::default();
 
         let input = CodexListDirInput {
             dir_path: "relative/path".to_string(),
@@ -590,7 +590,7 @@ mod tests {
             depth: 2,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, ctx, input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, ctx, input)
             .await
             .unwrap();
         match result {
@@ -605,7 +605,7 @@ mod tests {
     async fn tool_returns_error_for_zero_limit() {
         let tmp = TempDir::new().unwrap();
         let tool = CodexListDirTool;
-        let ctx = wimo ai_tool_runtime::ToolCallContext::default();
+        let ctx = wimoai_tool_runtime::ToolCallContext::default();
 
         let input = CodexListDirInput {
             dir_path: tmp.path().to_string_lossy().to_string(),
@@ -614,7 +614,7 @@ mod tests {
             depth: 2,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, ctx, input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, ctx, input)
             .await
             .unwrap();
         match result {
@@ -629,7 +629,7 @@ mod tests {
     async fn tool_returns_error_for_zero_depth() {
         let tmp = TempDir::new().unwrap();
         let tool = CodexListDirTool;
-        let ctx = wimo ai_tool_runtime::ToolCallContext::default();
+        let ctx = wimoai_tool_runtime::ToolCallContext::default();
 
         let input = CodexListDirInput {
             dir_path: tmp.path().to_string_lossy().to_string(),
@@ -638,7 +638,7 @@ mod tests {
             depth: 0,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, ctx, input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, ctx, input)
             .await
             .unwrap();
         match result {
@@ -658,7 +658,7 @@ mod tests {
 
         // Also verify the tool-level wrapper returns Content, not Error.
         let tool = CodexListDirTool;
-        let ctx = wimo ai_tool_runtime::ToolCallContext::default();
+        let ctx = wimoai_tool_runtime::ToolCallContext::default();
         let input = CodexListDirInput {
             dir_path: tmp.path().to_string_lossy().to_string(),
             offset: 1,
@@ -666,7 +666,7 @@ mod tests {
             depth: 2,
         };
 
-        let output = wimo ai_tool_runtime::Tool::run(&tool, ctx, input)
+        let output = wimoai_tool_runtime::Tool::run(&tool, ctx, input)
             .await
             .unwrap();
         match output {

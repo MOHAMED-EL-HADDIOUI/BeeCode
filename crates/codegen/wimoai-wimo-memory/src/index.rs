@@ -15,12 +15,12 @@ use std::path::Path;
 use std::sync::Once;
 
 use rusqlite::params;
-use wimo ai_sqlite_journal::JournalMode;
+use wimoai_sqlite_journal::JournalMode;
 
 use super::chunker::{chunk_hash, chunk_markdown};
 use super::schema;
 use super::storage::MemoryStorage;
-use wimo ai_wimo_config_types::MemoryIndexConfig;
+use wimoai_wimo_config_types::MemoryIndexConfig;
 
 static SQLITE_VEC_INIT: Once = Once::new();
 

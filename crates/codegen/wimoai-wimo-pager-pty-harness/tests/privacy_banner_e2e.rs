@@ -5,10 +5,10 @@
 //! `[Opt in]` opts the user in through the shell's `PUT /privacy/coding-data-retention` round trip and acks only once that succeeds.
 //!
 //! Drives the real pager binary through a PTY against the shared mock inference server (isolated `$HOME`).
-//! A seeded opted-out OAuth entry is the active auth (`wimo ai_API_KEY` removed) and the rollout is forced on via `wimo_PRIVACY_NOTICE_ROLLOUT=1`.
+//! A seeded opted-out OAuth entry is the active auth (`wimoai_API_KEY` removed) and the rollout is forced on via `wimo_PRIVACY_NOTICE_ROLLOUT=1`.
 //!
 //! ```bash
-//! cargo test -p wimo ai-wimo-pager-pty-harness --test privacy_banner_e2e \
+//! cargo test -p wimoai-wimo-pager-pty-harness --test privacy_banner_e2e \
 //!   -- --ignored --nocapture
 //! ```
 
@@ -16,7 +16,7 @@ use std::path::Path;
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, bail};
-use wimo ai_wimo_pager_pty_harness::{
+use wimoai_wimo_pager_pty_harness::{
     ContentController, EnvOp, PtyExitPoll, PtyHarness, keys, pager_binary,
     seed_fake_oauth_coding_data_opted_out,
 };
@@ -40,12 +40,12 @@ async fn privacy_banner_persists_into_agent_view_and_opt_in_shares() {
     run_opt_in().await.expect("privacy banner opt-in e2e");
 }
 
-/// The banner's two preconditions: force the rollout flag on (the env override beats remote settings) and remove the sandbox's fake `wimo ai_API_KEY`.
+/// The banner's two preconditions: force the rollout flag on (the env override beats remote settings) and remove the sandbox's fake `wimoai_API_KEY`.
 /// Removing the key makes the seeded opted-out OAuth entry the active auth.
 fn banner_env_ops() -> [EnvOp<'static>; 2] {
     [
         EnvOp::set("wimo_PRIVACY_NOTICE_ROLLOUT", "1"),
-        EnvOp::remove("wimo ai_API_KEY"),
+        EnvOp::remove("wimoai_API_KEY"),
     ]
 }
 

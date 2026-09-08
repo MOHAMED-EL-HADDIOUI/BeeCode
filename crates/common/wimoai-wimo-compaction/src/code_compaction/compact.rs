@@ -8,7 +8,7 @@
 //! build prompt → sample (retry + classify) → clean → assemble
 //! ```
 //!
-//! Per-harness concerns stay in the product host (for example `wimo ai-wimo-shell`): the triggers, the
+//! Per-harness concerns stay in the product host (for example `wimoai-wimo-shell`): the triggers, the
 //! conversation *gathering / sanitization* that produces `llm_turns`, the
 //! verbatim→fitted→lossy input ladder, the live LLM transport (the
 //! [`CompactionSampler`] impl), persistence/replay, and the rendering of

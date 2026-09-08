@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     ApiErrorCode, ConversationResponse, EmptyResponseContext, ResponseModelMetadata, SamplingError,
     SentCredential,
 };
@@ -375,7 +375,7 @@ impl From<&SamplingError> for SamplingErrorInfo {
 mod tests {
     use super::*;
     use reqwest::StatusCode;
-    use wimo ai_wimo_sampling_types::ApiErrorCode;
+    use wimoai_wimo_sampling_types::ApiErrorCode;
 
     #[test]
     fn from_sampling_error_carries_should_retry_header() {

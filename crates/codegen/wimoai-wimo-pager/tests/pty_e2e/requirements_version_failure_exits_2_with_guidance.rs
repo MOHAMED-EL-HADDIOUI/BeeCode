@@ -7,7 +7,7 @@ use super::common::*;
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 #[ignore = "PTY e2e; run the owning pty_e2e_* Cargo test with --ignored (see Cargo.toml)"]
 async fn requirements_version_failure_exits_2_with_guidance() {
-    let sandbox = wimo ai_wimo_test_support::TestSandbox::new();
+    let sandbox = wimoai_wimo_test_support::TestSandbox::new();
     let home_path = sandbox.wimo_home();
     // With fail_closed set, a version_override whose version can't parse makes apply_version_overrides err, so startup aborts
     std::fs::write(

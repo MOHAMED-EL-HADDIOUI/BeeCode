@@ -18,9 +18,9 @@ use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Instant;
 
 use dashmap::DashMap;
-use wimo ai_file_utils::queue::UploadQueueStats;
-use wimo ai_wimo_session_events::{Event, EventWriter, ToolCompletedSource, ToolOutcome};
-use wimo ai_tool_protocol::{IdleWithholdReason, ToolServerLifecycleStatus, ToolServerStatusPayload};
+use wimoai_file_utils::queue::UploadQueueStats;
+use wimoai_wimo_session_events::{Event, EventWriter, ToolCompletedSource, ToolOutcome};
+use wimoai_tool_protocol::{IdleWithholdReason, ToolServerLifecycleStatus, ToolServerStatusPayload};
 
 const LIFECYCLE_NONE: u8 = 0;
 const LIFECYCLE_DRAINING: u8 = 1;
@@ -45,7 +45,7 @@ pub(crate) const RPC_ACTIVITY_WINDOW_MS: u64 = PREVIEW_ACTIVITY_WINDOW_MS;
 
 /// How long a client-presence note (`workspace.presence.note`) withholds `idle_since_ms`; `0` disables the withhold entirely (kill switch).
 pub(crate) const PRESENCE_ACTIVITY_WINDOW_MS: u64 =
-    wimo ai_wimo_workspace_types::rpc::presence::PRESENCE_ACTIVITY_WINDOW_MS;
+    wimoai_wimo_workspace_types::rpc::presence::PRESENCE_ACTIVITY_WINDOW_MS;
 
 /// Keep the sandbox awake while a live loop's next run is at most this far away.
 /// Set above the 12-hour sandbox lifetime, so a live loop keeps the sandbox awake until the sandbox dies.
@@ -938,7 +938,7 @@ impl ActivityTracker {
 
         ToolServerStatusPayload {
             status,
-            session_id: wimo ai_tool_protocol::SessionId::new(session_id).ok(),
+            session_id: wimoai_tool_protocol::SessionId::new(session_id).ok(),
             connection_id: None,
             active_tool_calls: active,
             active_tool_names,

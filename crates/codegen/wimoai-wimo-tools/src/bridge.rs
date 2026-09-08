@@ -1,4 +1,4 @@
-//! ToolBridge: adapter that wraps `wimo ai-wimo-tools`'s `ToolRegistry` and
+//! ToolBridge: adapter that wraps `wimoai-wimo-tools`'s `ToolRegistry` and
 //! exposes it through a session layer.
 //!
 //! The bridge:
@@ -72,9 +72,9 @@ impl ToolBridge {
         builder: ToolRegistryBuilder,
         config: ToolServerConfig,
         ctx: SessionContext,
-    ) -> Result<Self, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<Self, wimoai_tool_runtime::ToolError> {
         let finalized_toolset = builder.finalize(config, ctx).map_err(|errs| {
-            wimo ai_tool_runtime::ToolError::invalid_arguments(format!(
+            wimoai_tool_runtime::ToolError::invalid_arguments(format!(
                 "Requirements unsatisfied: {errs:?}"
             ))
         })?;
@@ -170,9 +170,9 @@ impl ToolBridge {
         mcp_name: String,
         tool: T,
         input_schema: Option<serde_json::Value>,
-    ) -> Result<(), wimo ai_tool_runtime::ToolError>
+    ) -> Result<(), wimoai_tool_runtime::ToolError>
     where
-        T: wimo ai_tool_runtime::Tool
+        T: wimoai_tool_runtime::Tool
             + crate::types::tool_metadata::ToolMetadata
             + std::fmt::Debug
             + Send
@@ -206,7 +206,7 @@ impl ToolBridge {
         client_function_name: &str,
         client_params: serde_json::Value,
         tool_call_id: &str,
-    ) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ToolRunResult, wimoai_tool_runtime::ToolError> {
         self.registry
             .call(client_function_name, client_params, tool_call_id, None)
             .await
@@ -216,7 +216,7 @@ impl ToolBridge {
         &self,
         client_function_name: &str,
         client_params: serde_json::Value,
-    ) -> Result<ToolInput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ToolInput, wimoai_tool_runtime::ToolError> {
         self.registry
             .try_parse(client_function_name, &client_params)
             .await
@@ -578,11 +578,11 @@ impl ToolBridge {
         &self,
         task_id: &str,
         source: KillSource,
-    ) -> Result<KillOutcome, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<KillOutcome, wimoai_tool_runtime::ToolError> {
         if let Some(terminal) = &self.terminal {
             Ok(terminal.kill_task_with_source(task_id, source).await)
         } else {
-            Err(wimo ai_tool_runtime::ToolError::invalid_arguments(format!(
+            Err(wimoai_tool_runtime::ToolError::invalid_arguments(format!(
                 "Missing Task Id: {task_id}"
             )))
         }
@@ -619,7 +619,7 @@ impl ToolBridge {
     pub async fn delete_scheduled_task(
         &self,
         task_id: &str,
-    ) -> Result<bool, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<bool, wimoai_tool_runtime::ToolError> {
         use crate::implementations::wimo::scheduler::types::{
             SchedulerCommand, SchedulerHandle,
         };
@@ -627,7 +627,7 @@ impl ToolBridge {
             let res = self.registry.resources.lock().await;
             res.get::<SchedulerHandle>()
                 .ok_or_else(|| {
-                    wimo ai_tool_runtime::ToolError::custom("missing_resource", "SchedulerHandle")
+                    wimoai_tool_runtime::ToolError::custom("missing_resource", "SchedulerHandle")
                 })?
                 .0
                 .clone()
@@ -639,12 +639,12 @@ impl ToolBridge {
                 reply: reply_tx,
             })
             .map_err(|_| {
-                wimo ai_tool_runtime::ToolError::custom("process_manager", "Scheduler actor stopped")
+                wimoai_tool_runtime::ToolError::custom("process_manager", "Scheduler actor stopped")
             })?;
         reply_rx
             .await
             .map_err(|_| {
-                wimo ai_tool_runtime::ToolError::custom(
+                wimoai_tool_runtime::ToolError::custom(
                     "process_manager",
                     "Scheduler actor dropped reply",
                 )
@@ -752,24 +752,24 @@ mod tests {
         }
     }
 
-    impl wimo ai_tool_runtime::Tool for KindFixture {
+    impl wimoai_tool_runtime::Tool for KindFixture {
         type Args = serde_json::Value;
         type Output = String;
 
-        fn id(&self) -> wimo ai_tool_protocol::ToolId {
-            wimo ai_tool_protocol::ToolId::new(self.id).expect("valid id")
+        fn id(&self) -> wimoai_tool_protocol::ToolId {
+            wimoai_tool_protocol::ToolId::new(self.id).expect("valid id")
         }
         fn description(
             &self,
-            _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-        ) -> wimo ai_tool_types::ToolDescription {
-            wimo ai_tool_types::ToolDescription::new(self.id, "kind fixture")
+            _ctx: &::wimoai_tool_runtime::ListToolsContext,
+        ) -> wimoai_tool_types::ToolDescription {
+            wimoai_tool_types::ToolDescription::new(self.id, "kind fixture")
         }
         async fn run(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> Result<String, wimo ai_tool_runtime::ToolError> {
+        ) -> Result<String, wimoai_tool_runtime::ToolError> {
             Ok("ok".into())
         }
     }

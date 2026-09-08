@@ -6,7 +6,7 @@ use super::settings::ui::{refresh_open_settings_modals, save_success_toast};
 use crate::app::actions::Effect;
 use crate::app::app_view::{ActiveView, AppView};
 use agent_client_protocol as acp;
-use wimo ai_wimo_telemetry::session_ctx::log_event;
+use wimoai_wimo_telemetry::session_ctx::log_event;
 
 /// Show the current plan: if a plan file exists, open it in the preview overlay popover.
 /// If no plan has been written yet, show a toast.
@@ -168,9 +168,9 @@ pub(super) fn set_plan_mode(
     // If the user was in `Ask` (shell-injection only), that preference is silently dropped
     // See `PLAN_MODE_CHOICES` in `settings/defs.rs`
     let mode_id = acp::SessionModeId::new(if new {
-        wimo ai_wimo_tools::types::SessionMode::Plan.as_id()
+        wimoai_wimo_tools::types::SessionMode::Plan.as_id()
     } else {
-        wimo ai_wimo_tools::types::SessionMode::Default.as_id()
+        wimoai_wimo_tools::types::SessionMode::Default.as_id()
     });
 
     vec![Effect::SetSessionMode {
@@ -325,10 +325,10 @@ pub(super) fn set_yolo_mode_inner(app: &mut AppView, new: bool) {
         } else {
             "default"
         };
-        wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::YoloToggled {
+        wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::YoloToggled {
             enabled: new,
             previous_state,
-            trigger: wimo ai_wimo_telemetry::events::YoloTrigger::Pager,
+            trigger: wimoai_wimo_telemetry::events::YoloTrigger::Pager,
             from_mode: Some(from_mode.to_owned()),
         });
         tracing::info!(target: "settings", key = "permission_mode", value = new, "setting changed");
@@ -526,9 +526,9 @@ pub(super) fn dispatch_cycle_mode(app: &mut AppView) -> Vec<Effect> {
         && let Some(agent) = app.agents.get_mut(&id)
         && agent.plan_mode_pending.unwrap_or(agent.plan_mode_active)
     {
-        log_event(wimo ai_wimo_telemetry::events::ContextualTip {
-            tip: wimo ai_wimo_telemetry::events::ContextualTipKind::PlanMode,
-            action: wimo ai_wimo_telemetry::events::ContextualTipAction::Accepted,
+        log_event(wimoai_wimo_telemetry::events::ContextualTip {
+            tip: wimoai_wimo_telemetry::events::ContextualTipKind::PlanMode,
+            action: wimoai_wimo_telemetry::events::ContextualTipAction::Accepted,
         });
         // Retire the now-stale nudge so one impression maps to at most one acceptance
         // A full mode loop back to Plan within the ~3s TTL would otherwise re-emit; the undo and image tips clear on accept the same way
@@ -635,7 +635,7 @@ fn dispatch_cycle_mode_inner(app: &mut AppView) -> Vec<Effect> {
             // Normal to Plan
             (false, false, false) => {
                 agent.plan_mode_pending = Some(true);
-                agent.deferred_session_mode = Some(wimo ai_wimo_tools::types::SessionMode::Plan);
+                agent.deferred_session_mode = Some(wimoai_wimo_tools::types::SessionMode::Plan);
                 agent.show_mode_switch_banner("Plan");
                 tracing::info!("Mode cycle (pre-session): Normal → Plan");
                 None
@@ -746,7 +746,7 @@ fn dispatch_cycle_mode_inner(app: &mut AppView) -> Vec<Effect> {
             tracing::info!("Mode cycle: Normal → Plan");
             vec![Effect::SetSessionMode {
                 session_id,
-                mode_id: acp::SessionModeId::new(wimo ai_wimo_tools::types::SessionMode::Plan.as_id()),
+                mode_id: acp::SessionModeId::new(wimoai_wimo_tools::types::SessionMode::Plan.as_id()),
             }]
         }
         // Plan to Auto (classifier mode; exit plan, not always-approve)
@@ -770,7 +770,7 @@ fn dispatch_cycle_mode_inner(app: &mut AppView) -> Vec<Effect> {
                         Effect::SetSessionMode {
                             session_id: session_id.clone(),
                             mode_id: acp::SessionModeId::new(
-                                wimo ai_wimo_tools::types::SessionMode::Default.as_id(),
+                                wimoai_wimo_tools::types::SessionMode::Default.as_id(),
                             ),
                         },
                         Effect::PersistPermissionMode {
@@ -791,7 +791,7 @@ fn dispatch_cycle_mode_inner(app: &mut AppView) -> Vec<Effect> {
                     Effect::SetSessionMode {
                         session_id: session_id.clone(),
                         mode_id: acp::SessionModeId::new(
-                            wimo ai_wimo_tools::types::SessionMode::Default.as_id(),
+                            wimoai_wimo_tools::types::SessionMode::Default.as_id(),
                         ),
                     },
                     Effect::PersistPermissionMode {
@@ -812,7 +812,7 @@ fn dispatch_cycle_mode_inner(app: &mut AppView) -> Vec<Effect> {
                 Effect::SetSessionMode {
                     session_id: session_id.clone(),
                     mode_id: acp::SessionModeId::new(
-                        wimo ai_wimo_tools::types::SessionMode::Default.as_id(),
+                        wimoai_wimo_tools::types::SessionMode::Default.as_id(),
                     ),
                 },
                 Effect::PersistPermissionMode {
@@ -882,7 +882,7 @@ fn dispatch_cycle_mode_inner(app: &mut AppView) -> Vec<Effect> {
                 Effect::SetSessionMode {
                     session_id: session_id.clone(),
                     mode_id: acp::SessionModeId::new(
-                        wimo ai_wimo_tools::types::SessionMode::Default.as_id(),
+                        wimoai_wimo_tools::types::SessionMode::Default.as_id(),
                     ),
                 },
                 Effect::PersistPermissionMode {
@@ -912,7 +912,7 @@ fn dispatch_cycle_mode_inner(app: &mut AppView) -> Vec<Effect> {
                 effects.push(Effect::SetSessionMode {
                     session_id: session_id.clone(),
                     mode_id: acp::SessionModeId::new(
-                        wimo ai_wimo_tools::types::SessionMode::Default.as_id(),
+                        wimoai_wimo_tools::types::SessionMode::Default.as_id(),
                     ),
                 });
             }

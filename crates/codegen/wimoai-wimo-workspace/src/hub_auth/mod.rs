@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use url::Url;
-use wimo ai_computer_hub_sdk::{
+use wimoai_computer_hub_sdk::{
     AuthCredential, AuthIdentity, AuthProvider, OidcAuthProviderBuilder, OnRefreshCallback,
     RefreshEvent,
 };
@@ -79,7 +79,7 @@ struct AuthEntry {
 }
 
 pub fn default_auth_path() -> anyhow::Result<PathBuf> {
-    let wimo = wimo ai_wimo_config::user_wimo_home()
+    let wimo = wimoai_wimo_config::user_wimo_home()
         .ok_or_else(|| anyhow::anyhow!("no user wimo home (set $wimo_HOME or $HOME)"))?;
     Ok(wimo.join("auth.json"))
 }
@@ -401,7 +401,7 @@ mod tests {
         let path = write_auth_json(
             dir.path(),
             r#"{
-            "legacy": { "key": "wimo ai-plainkey", "user_id": "u1" },
+            "legacy": { "key": "wimoai-plainkey", "user_id": "u1" },
             "oidc": {
                 "key": "eyJhbGciOiJFUzI1NiJ9.test",
                 "user_id": "u2",
@@ -427,7 +427,7 @@ mod tests {
         let path = write_auth_json(
             dir.path(),
             r#"{
-            "api_key": { "key": "wimo ai-plainkey", "user_id": "u1" }
+            "api_key": { "key": "wimoai-plainkey", "user_id": "u1" }
         }"#,
         );
 
@@ -558,7 +558,7 @@ mod tests {
         assert_eq!(kind, OidcProviderKind::Sdk);
         let cred = provider.current();
         match cred {
-            wimo ai_computer_hub_sdk::AuthCredential::Bearer { token } => {
+            wimoai_computer_hub_sdk::AuthCredential::Bearer { token } => {
                 assert_eq!(token, "eyJ.tok");
             }
             _ => panic!("expected Bearer"),
@@ -576,7 +576,7 @@ mod tests {
         let path = write_auth_json(
             dir.path(),
             r#"{
-            "legacy": { "key": "wimo ai-old", "user_id": "u1" },
+            "legacy": { "key": "wimoai-old", "user_id": "u1" },
             "oidc": { "key": "eyJ.old", "user_id": "u2", "refresh_token": "rt-old", "oidc_issuer": "https://auth.x.ai" }
         }"#,
         );
@@ -592,7 +592,7 @@ mod tests {
             serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
         assert_eq!(updated["oidc"]["key"], "eyJ.new");
         assert_eq!(updated["oidc"]["refresh_token"], "rt-new");
-        assert_eq!(updated["legacy"]["key"], "wimo ai-old");
+        assert_eq!(updated["legacy"]["key"], "wimoai-old");
     }
 
     /// With several OIDC entries (personal and enterprise login), the latest `expires_at` wins; the user's wimo sessions refresh that entry.

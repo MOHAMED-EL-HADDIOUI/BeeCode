@@ -2,8 +2,8 @@
 
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use wimo ai_chat_state::UsageLedger;
-use wimo ai_wimo_sampling_types::reported_cost_ticks;
+use wimoai_chat_state::UsageLedger;
+use wimoai_wimo_sampling_types::reported_cost_ticks;
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -75,7 +75,7 @@ impl UsageSummary {
         summary
     }
 
-    fn from_totals(totals: &wimo ai_chat_state::UsageTotals, incomplete: bool) -> Self {
+    fn from_totals(totals: &wimoai_chat_state::UsageTotals, incomplete: bool) -> Self {
         Self {
             input_tokens: totals.input_tokens,
             output_tokens: totals.output_tokens,

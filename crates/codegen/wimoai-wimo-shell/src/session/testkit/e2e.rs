@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 
 use agent_client_protocol::{self as acp};
 use tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
-use wimo ai_acp_lib::{
+use wimoai_acp_lib::{
     AcpAgentGatewayReceiver as GatewayReceiver, AcpAgentGatewaySender as GatewaySender,
     LineBufferedRead,
 };
@@ -53,7 +53,7 @@ pub async fn load_session_via_agent<C: acp::Client + 'static>(
         });
     tokio::task::spawn_local(
         GatewayReceiver::new(gw_rx, agent_conn)
-            .with_on_meta(wimo ai_file_utils::trace_context::span_from_meta_traceparent)
+            .with_on_meta(wimoai_file_utils::trace_context::span_from_meta_traceparent)
             .run(),
     );
     tokio::task::spawn_local(agent_io);
@@ -96,7 +96,7 @@ pub async fn load_session_via_agent<C: acp::Client + 'static>(
     if let Some(method) = init
         .auth_methods
         .iter()
-        .find(|m| &*m.id().0 == "wimo ai.api_key")
+        .find(|m| &*m.id().0 == "wimoai.api_key")
     {
         let _ = client_conn
             .authenticate(

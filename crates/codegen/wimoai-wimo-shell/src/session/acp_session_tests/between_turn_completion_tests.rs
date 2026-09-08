@@ -1,5 +1,5 @@
-use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentCompletionSummary;
-use wimo ai_wimo_tools::reminders::task_completion::format_between_turn_completions;
+use wimoai_wimo_tools::implementations::wimo::task::types::SubagentCompletionSummary;
+use wimoai_wimo_tools::reminders::task_completion::format_between_turn_completions;
 
 fn summary(
     id: &str,

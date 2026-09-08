@@ -93,7 +93,7 @@ pub(crate) fn finalize_killed_subagent(
 
     let payload = SessionNotification {
         session_id: session_id.clone(),
-        update: wimo aiSessionUpdate::SubagentFinished {
+        update: wimoaiSessionUpdate::SubagentFinished {
             subagent_id: subagent_id.to_string(),
             child_session_id: child_session_id.clone(),
             status: effective_status,

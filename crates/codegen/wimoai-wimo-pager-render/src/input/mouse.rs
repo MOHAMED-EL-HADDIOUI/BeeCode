@@ -43,7 +43,7 @@ impl ScrollInputMode {
     }
 }
 
-// The harness has no pager dependency, so six constants below are duplicated in `wimo ai-wimo-pager-pty-harness/src/scroll_matrix/gestures.rs`:
+// The harness has no pager dependency, so six constants below are duplicated in `wimoai-wimo-pager-pty-harness/src/scroll_matrix/gestures.rs`:
 // STREAM_GAP_MS, REDRAW_CADENCE_MS, DEFAULT_WHEEL_TICK_DETECT_MAX_MS, DEFAULT_TRACKPAD_ACCEL_MAX, ACCEL_MIN_INTERVAL_MS, MIN_LINES_PER_WHEEL_STREAM
 // Its gesture tables and invariants are shaped around these default values, so retune the mirrors together with any change here
 // Runtime may override via `set_redraw_cadence` (`wimo_SCROLL_CADENCE_MS` from the event loop); the harness still models the 16ms default

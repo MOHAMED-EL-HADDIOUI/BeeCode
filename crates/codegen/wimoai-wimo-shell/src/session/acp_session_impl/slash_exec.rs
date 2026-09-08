@@ -8,7 +8,7 @@ impl SessionActor {
     ) -> PromptTurnResult {
         // Builtin turns carry no user message, so a send-now may cancel from the start.
         self.mark_front_message_committed().await;
-        wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::SlashCommandUsed {
+        wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::SlashCommandUsed {
             command: action.command_name().to_string(),
             args_provided: action.args_provided(),
         });
@@ -32,11 +32,11 @@ impl SessionActor {
                     } else {
                         "default"
                     };
-                    wimo ai_wimo_telemetry::session_ctx::log_event(
-                        wimo ai_wimo_telemetry::events::YoloToggled {
+                    wimoai_wimo_telemetry::session_ctx::log_event(
+                        wimoai_wimo_telemetry::events::YoloToggled {
                             enabled: actual,
                             previous_state: was,
-                            trigger: wimo ai_wimo_telemetry::events::YoloTrigger::SlashCommand,
+                            trigger: wimoai_wimo_telemetry::events::YoloTrigger::SlashCommand,
                             from_mode: Some(from_mode.to_owned()),
                         },
                     );
@@ -91,14 +91,14 @@ impl SessionActor {
             BuiltinAction::HooksTrust => {
                 let msg = match Self::do_hooks_trust_project(&self.session_info.cwd) {
                     Ok(root) => {
-                        wimo ai_wimo_telemetry::session_ctx::log_event(
-                            wimo ai_wimo_telemetry::events::HookTrusted { success: true },
+                        wimoai_wimo_telemetry::session_ctx::log_event(
+                            wimoai_wimo_telemetry::events::HookTrusted { success: true },
                         );
                         format!("Trusted: {}.", root.display())
                     }
                     Err(e) => {
-                        wimo ai_wimo_telemetry::session_ctx::log_event(
-                            wimo ai_wimo_telemetry::events::HookTrusted { success: false },
+                        wimoai_wimo_telemetry::session_ctx::log_event(
+                            wimoai_wimo_telemetry::events::HookTrusted { success: false },
                         );
                         e
                     }
@@ -154,8 +154,8 @@ impl SessionActor {
                     // paths are under ~/.wimo/ to prevent hook path injection.
                     match crate::config::add_hooks_path(&path) {
                         Ok(()) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::HookAdded { success: true },
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::HookAdded { success: true },
                             );
                             self.send_host_turn_slash_command_output(&format!(
                                 "Added hook path: {path}\n\
@@ -164,8 +164,8 @@ impl SessionActor {
                             .await;
                         }
                         Err(e) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::HookAdded { success: false },
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::HookAdded { success: false },
                             );
                             self.send_host_turn_slash_command_output(&format!(
                                 "Failed to add hook path: {e}"
@@ -185,8 +185,8 @@ impl SessionActor {
                 } else {
                     match crate::config::remove_hooks_path(&path) {
                         Ok(true) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::HookRemoved { success: true },
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::HookRemoved { success: true },
                             );
                             self.send_host_turn_slash_command_output(&format!(
                                 "Removed hook path: {path}\nRestart session to stop loading hooks from this path."
@@ -194,8 +194,8 @@ impl SessionActor {
                             .await;
                         }
                         Ok(false) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::HookRemoved { success: false },
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::HookRemoved { success: false },
                             );
                             self.send_host_turn_slash_command_output(&format!(
                                 "{path} is not a user-registered hook directory; \
@@ -204,8 +204,8 @@ impl SessionActor {
                             .await;
                         }
                         Err(e) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::HookRemoved { success: false },
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::HookRemoved { success: false },
                             );
                             self.send_host_turn_slash_command_output(&format!(
                                 "Failed to remove hook path: {e}"
@@ -297,14 +297,14 @@ impl SessionActor {
                     Some(handle) => {
                         // An explicit user reload forces a full re-copy of locally installed plugins
                         let msg = self.reload_plugins_impl(handle, true).await;
-                        wimo ai_wimo_telemetry::session_ctx::log_event(
-                            wimo ai_wimo_telemetry::events::PluginReloaded { success: true },
+                        wimoai_wimo_telemetry::session_ctx::log_event(
+                            wimoai_wimo_telemetry::events::PluginReloaded { success: true },
                         );
                         self.send_host_turn_slash_command_output(&msg).await;
                     }
                     None => {
-                        wimo ai_wimo_telemetry::session_ctx::log_event(
-                            wimo ai_wimo_telemetry::events::PluginReloaded { success: false },
+                        wimoai_wimo_telemetry::session_ctx::log_event(
+                            wimoai_wimo_telemetry::events::PluginReloaded { success: false },
                         );
                         self.send_host_turn_slash_command_output(
                             "No plugin registry handle available. Start a new session to discover plugins.",
@@ -344,7 +344,7 @@ impl SessionActor {
                 };
 
                 let ctx = &info.context;
-                let context_pct = wimo ai_token_estimation::usage_percentage(ctx.used, ctx.total);
+                let context_pct = wimoai_token_estimation::usage_percentage(ctx.used, ctx.total);
 
                 let summary_path = crate::session::persistence::session_dir(&self.session_info)
                     .join("summary.json");
@@ -404,9 +404,9 @@ impl SessionActor {
                     let path_str = resolved.to_string_lossy().to_string();
                     match crate::config::add_plugin_path(&path_str) {
                         Ok(()) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::PluginAdded {
-                                    source: wimo ai_wimo_telemetry::events::PluginSource::LocalPath,
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::PluginAdded {
+                                    source: wimoai_wimo_telemetry::events::PluginSource::LocalPath,
                                     success: true,
                                 },
                             );
@@ -418,9 +418,9 @@ impl SessionActor {
                             }
                         }
                         Err(e) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::PluginAdded {
-                                    source: wimo ai_wimo_telemetry::events::PluginSource::LocalPath,
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::PluginAdded {
+                                    source: wimoai_wimo_telemetry::events::PluginSource::LocalPath,
                                     success: false,
                                 },
                             );
@@ -452,8 +452,8 @@ impl SessionActor {
                     let path_str = resolved.to_string_lossy().to_string();
                     match crate::config::remove_plugin_path(&path_str) {
                         Ok(()) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::PluginRemoved { success: true },
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::PluginRemoved { success: true },
                             );
                             let msg = format!("Removed plugin path: {path_str}");
                             self.send_host_turn_slash_command_output(&msg).await;
@@ -463,8 +463,8 @@ impl SessionActor {
                             }
                         }
                         Err(e) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::PluginRemoved { success: false },
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::PluginRemoved { success: false },
                             );
                             self.send_host_turn_slash_command_output(&format!(
                                 "Failed to remove plugin path: {e}"
@@ -491,17 +491,17 @@ impl SessionActor {
 
                     if !trust {
                         let install_source =
-                            wimo ai_wimo_agent::plugins::git_install::parse_install_source(
+                            wimoai_wimo_agent::plugins::git_install::parse_install_source(
                                 &source, cwd,
                             );
                         let source_desc = match &install_source {
-                            wimo ai_wimo_agent::plugins::git_install::InstallSource::Git {
+                            wimoai_wimo_agent::plugins::git_install::InstallSource::Git {
                                 url,
                                 ..
                             } => {
                                 format!("remote git repo: {url}")
                             }
-                            wimo ai_wimo_agent::plugins::git_install::InstallSource::Local {
+                            wimoai_wimo_agent::plugins::git_install::InstallSource::Local {
                                 path,
                                 ..
                             } => {
@@ -527,12 +527,12 @@ impl SessionActor {
                                     tracing::warn!("{w}");
                                 }
                                 let kind = if outcome.is_local {
-                                    wimo ai_wimo_telemetry::events::InstallKind::Local
+                                    wimoai_wimo_telemetry::events::InstallKind::Local
                                 } else {
-                                    wimo ai_wimo_telemetry::events::InstallKind::Git
+                                    wimoai_wimo_telemetry::events::InstallKind::Git
                                 };
-                                wimo ai_wimo_telemetry::session_ctx::log_event(
-                                    wimo ai_wimo_telemetry::events::PluginInstalled {
+                                wimoai_wimo_telemetry::session_ctx::log_event(
+                                    wimoai_wimo_telemetry::events::PluginInstalled {
                                         install_kind: kind,
                                         success: true,
                                         trust: true,
@@ -558,9 +558,9 @@ impl SessionActor {
                             Err(e) => {
                                 let error_category = Self::classify_install_error(&e);
                                 let kind = if crate::plugin::install_source_is_local(&source, cwd) {
-                                    wimo ai_wimo_telemetry::events::InstallKind::Local
+                                    wimoai_wimo_telemetry::events::InstallKind::Local
                                 } else {
-                                    wimo ai_wimo_telemetry::events::InstallKind::Git
+                                    wimoai_wimo_telemetry::events::InstallKind::Git
                                 };
                                 tracing::info_span!(
                                     "plugin.installed",
@@ -569,8 +569,8 @@ impl SessionActor {
                                     error_category = %error_category,
                                 )
                                 .in_scope(|| {});
-                                wimo ai_wimo_telemetry::session_ctx::log_event(
-                                    wimo ai_wimo_telemetry::events::PluginInstalled {
+                                wimoai_wimo_telemetry::session_ctx::log_event(
+                                    wimoai_wimo_telemetry::events::PluginInstalled {
                                         install_kind: kind,
                                         success: false,
                                         trust: true,
@@ -598,8 +598,8 @@ impl SessionActor {
                     use crate::plugin::UninstallError;
                     match crate::plugin::uninstall_plugin(&name, confirm, false) {
                         Ok(outcome) => {
-                            wimo ai_wimo_telemetry::session_ctx::log_event(
-                                wimo ai_wimo_telemetry::events::PluginUninstalled {
+                            wimoai_wimo_telemetry::session_ctx::log_event(
+                                wimoai_wimo_telemetry::events::PluginUninstalled {
                                     confirmed: true,
                                     success: true,
                                 },
@@ -743,7 +743,7 @@ impl SessionActor {
                     file_count = file_infos.len(),
                     "memory browse: listing files",
                 );
-                self.send_wimo ai_notification(wimo aiSessionUpdate::MemoryFiles { files: file_infos })
+                self.send_wimoai_notification(wimoaiSessionUpdate::MemoryFiles { files: file_infos })
                     .await;
                 ok_end_turn(0, None)
             }
@@ -771,7 +771,7 @@ impl SessionActor {
                             *self.memory.search_counter.borrow_mut() =
                                 Some(backend.search_counter.clone());
                             let backend: std::sync::Arc<
-                                dyn wimo ai_wimo_tools::types::memory_backend::MemoryBackend,
+                                dyn wimoai_wimo_tools::types::memory_backend::MemoryBackend,
                             > = std::sync::Arc::new(backend);
                             let bridge = self.agent.borrow().tool_bridge().clone();
                             bridge.update_resource(backend.clone()).await;
@@ -787,12 +787,12 @@ impl SessionActor {
                 } else if !enabled && self.memory.is_enabled() {
                     let bridge = self.agent.borrow().tool_bridge().clone();
                     if !bridge.unregister_tool_by_name(
-                        wimo ai_wimo_tools::implementations::memory::MEMORY_SEARCH_TOOL_NAME,
+                        wimoai_wimo_tools::implementations::memory::MEMORY_SEARCH_TOOL_NAME,
                     ) {
                         tracing::debug!("memory_search tool was not registered during unregister");
                     }
                     if !bridge.unregister_tool_by_name(
-                        wimo ai_wimo_tools::implementations::memory::MEMORY_GET_TOOL_NAME,
+                        wimoai_wimo_tools::implementations::memory::MEMORY_GET_TOOL_NAME,
                     ) {
                         tracing::debug!("memory_get tool was not registered during unregister");
                     }
@@ -968,7 +968,7 @@ impl SessionActor {
                 self.goal_turn_task_ids.lock().clear();
                 self.subagent_token_records.lock().clear();
                 self.clear_pending_classifier_completions();
-                self.send_wimo ai_notification(crate::session::goal_orchestrator::build_goal_cleared())
+                self.send_wimoai_notification(crate::session::goal_orchestrator::build_goal_cleared())
                     .await;
                 self.send_host_turn_slash_command_output("Goal cleared.")
                     .await;

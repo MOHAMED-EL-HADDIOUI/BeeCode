@@ -31,13 +31,13 @@ pub(crate) enum SamplerFailureRecovery {
     /// `credential` records what credential the rejected request carried on the wire.
     /// A 401 for a request that carried no credential (a fail-closed send) must not be charged against the per-incident auth-retry budget.
     RefreshAuthAndResubmit {
-        credential: wimo ai_wimo_sampling_types::SentCredential,
+        credential: wimoai_wimo_sampling_types::SentCredential,
         store: RecoveredStore,
     },
     /// Transient failure: back off and resubmit instead of killing the turn.
     /// Retries are bounded.
     RetryTransient {
-        kind: wimo ai_wimo_sampler::SamplingErrorKind,
+        kind: wimoai_wimo_sampler::SamplingErrorKind,
         status_code: Option<u16>,
     },
 }
@@ -48,18 +48,18 @@ pub(crate) enum SamplerTurnOutcome {
     /// Model responded, with per-call latency stats for `shell.turn.inference_done`.
     Response(
         Box<ConversationResponse>,
-        Box<wimo ai_wimo_sampler::InferenceLatencyStats>,
+        Box<wimoai_wimo_sampler::InferenceLatencyStats>,
     ),
     CompactAndResubmit,
     /// Auth recovery succeeded; the outer loop should retry.
     /// Mirrors [`SamplerFailureRecovery::RefreshAuthAndResubmit`].
     RefreshAuthAndResubmit {
-        credential: wimo ai_wimo_sampling_types::SentCredential,
+        credential: wimoai_wimo_sampling_types::SentCredential,
         store: RecoveredStore,
     },
     /// Mirrors [`SamplerFailureRecovery::RetryTransient`].
     RetryTransient {
-        kind: wimo ai_wimo_sampler::SamplingErrorKind,
+        kind: wimoai_wimo_sampler::SamplingErrorKind,
         status_code: Option<u16>,
     },
 }
@@ -222,8 +222,8 @@ pub(crate) enum DrainPurpose {
 /// Origin of a drain entry.
 /// `Pending` entries had their acks resolved at defer time; `Channel` entries still carry a live oneshot.
 pub(crate) enum DrainSource {
-    Pending(wimo ai_wimo_tools::implementations::wimo::update_goal::UpdateGoalInput),
-    Channel(wimo ai_wimo_tools::implementations::wimo::update_goal::UpdateGoalEnvelope),
+    Pending(wimoai_wimo_tools::implementations::wimo::update_goal::UpdateGoalInput),
+    Channel(wimoai_wimo_tools::implementations::wimo::update_goal::UpdateGoalEnvelope),
 }
 
 /// Reason a NotAchieved verdict was synthesized without invoking the sampler.

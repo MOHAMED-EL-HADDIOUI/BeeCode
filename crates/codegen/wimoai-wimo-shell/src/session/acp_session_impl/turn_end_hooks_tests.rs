@@ -5,7 +5,7 @@ use crate::session::CancelOptions;
 use crate::session::CancelTrigger as T;
 use crate::session::commands::PromptCompletionKind;
 use crate::session::events::CancellationCategory as Cat;
-use wimo ai_wimo_hooks::event::StopCancelledReason as Reason;
+use wimoai_wimo_hooks::event::StopCancelledReason as Reason;
 
 fn cancelled(category: Option<Cat>) -> PromptCompletionKind {
     PromptCompletionKind::Cancelled {

@@ -3,10 +3,10 @@
 //! This crate is the `compaction-core`: shared policy, prompts, selection,
 //! and assembly. Host-specific trigger wiring, transport, persistence /
 //! replay / rewind, state commit, metrics backends, and prompt-variant forks
-//! stay in each product host (for example `wimo ai-wimo-shell`).
+//! stay in each product host (for example `wimoai-wimo-shell`).
 //!
 //! The crate depends on **neither** a conversation-type crate nor
-//! `wimo ai-wimo-sampling-types`. It is decoupled from both wimo chat and
+//! `wimoai-wimo-sampling-types`. It is decoupled from both wimo chat and
 //! wimo hosts through a small set of trait seams:
 //!
 //! - [`CompactionItem`] / [`CompactionRole`] / [`CompactionItemBuilder`] —

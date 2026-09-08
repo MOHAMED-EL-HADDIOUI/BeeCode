@@ -16,7 +16,7 @@
 
 use std::sync::Arc;
 
-use wimo ai_tool_protocol::{SessionId, session_event::SessionEvent};
+use wimoai_tool_protocol::{SessionId, session_event::SessionEvent};
 
 use crate::harness::ToolHarness;
 

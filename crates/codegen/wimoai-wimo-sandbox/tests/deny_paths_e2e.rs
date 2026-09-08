@@ -82,7 +82,7 @@ fn run_hook_write_deny_scenario(
 /// Only `SANDBOX_E2E_REQUIRE_ENFORCEMENT` hard-requires enforcement; generic CI/`GITHUB_ACTIONS` alone must not (remote arm64 may lack usable bwrap).
 fn skip_if_enforcement_unavailable() -> bool {
     let require = std::env::var(REQUIRE_ENV).is_ok();
-    let support = wimo ai_wimo_sandbox::SandboxManager::support_info();
+    let support = wimoai_wimo_sandbox::SandboxManager::support_info();
     if !support.is_supported {
         if require {
             panic!(
@@ -211,8 +211,8 @@ fn bwrap_available() -> bool {
         .unwrap_or(false)
 }
 /// The custom profile under test, read from the env the parent set.
-fn profile_from_env() -> wimo ai_wimo_sandbox::ProfileName {
-    wimo ai_wimo_sandbox::ProfileName::Custom(std::env::var(PROFILE_ENV).expect(PROFILE_ENV))
+fn profile_from_env() -> wimoai_wimo_sandbox::ProfileName {
+    wimoai_wimo_sandbox::ProfileName::Custom(std::env::var(PROFILE_ENV).expect(PROFILE_ENV))
 }
 /// `#[ignore]`d: only runs when invoked by the parent test via `run_scenario` or `run_hook_write_deny_scenario`.
 #[test]
@@ -247,11 +247,11 @@ fn subprocess_entry() {
         }
     }
 }
-fn subprocess_profile_and_bwrap_reexec(profile: &wimo ai_wimo_sandbox::ProfileName, workspace: &Path) {
+fn subprocess_profile_and_bwrap_reexec(profile: &wimoai_wimo_sandbox::ProfileName, workspace: &Path) {
     #[cfg(target_os = "linux")]
     {
-        if !wimo ai_wimo_sandbox::is_inside_bwrap() {
-            match wimo ai_wimo_sandbox::bwrap_reexec_for_profile(profile, workspace) {
+        if !wimoai_wimo_sandbox::is_inside_bwrap() {
+            match wimoai_wimo_sandbox::bwrap_reexec_for_profile(profile, workspace) {
                 Some(mut cmd) => {
                     use std::os::unix::process::CommandExt;
                     let err = cmd.exec();
@@ -275,7 +275,7 @@ fn subprocess_block_deny(workspace: &Path) {
     let controls = list_from_env(CONTROLS_ENV);
     let profile = profile_from_env();
     subprocess_profile_and_bwrap_reexec(&profile, workspace);
-    let mut sandbox = wimo ai_wimo_sandbox::SandboxManager::new(profile.clone(), workspace);
+    let mut sandbox = wimoai_wimo_sandbox::SandboxManager::new(profile.clone(), workspace);
     if let Err(e) = sandbox.apply(workspace) {
         eprintln!("sandbox apply failed: {e}");
         std::process::exit(3);
@@ -285,7 +285,7 @@ fn subprocess_block_deny(workspace: &Path) {
         std::process::exit(4);
     }
     #[cfg(target_os = "linux")]
-    match wimo ai_wimo_sandbox::verify_read_deny_enforced(&profile, workspace) {
+    match wimoai_wimo_sandbox::verify_read_deny_enforced(&profile, workspace) {
         Ok(()) => eprintln!("OK: read-deny mounts verified"),
         Err(e) => {
             eprintln!("FAIL: read-deny verification must pass inside bwrap: {e}");
@@ -442,7 +442,7 @@ fn subprocess_hook_write_deny_marker_spoof(_wimo_home: &Path) {
         unsafe {
             std::env::set_var("__wimo_INSIDE_BWRAP", "1");
         }
-        match wimo ai_wimo_sandbox::verify_hook_write_deny_enforced() {
+        match wimoai_wimo_sandbox::verify_hook_write_deny_enforced() {
             Ok(()) => {
                 eprintln!("FAIL: marker alone must not satisfy write-deny verification");
                 std::process::exit(1);
@@ -478,7 +478,7 @@ fn subprocess_read_deny_marker_spoof(workspace: &Path) {
             std::env::set_var("__wimo_INSIDE_BWRAP", "1");
         }
         let profile = profile_from_env();
-        match wimo ai_wimo_sandbox::verify_read_deny_enforced(&profile, workspace) {
+        match wimoai_wimo_sandbox::verify_read_deny_enforced(&profile, workspace) {
             Ok(()) => {
                 eprintln!("FAIL: marker alone must not satisfy read-deny verification");
                 std::process::exit(1);
@@ -501,7 +501,7 @@ fn subprocess_read_deny_forged_mounts(workspace: &Path) {
     #[cfg(target_os = "linux")]
     {
         let profile = profile_from_env();
-        match wimo ai_wimo_sandbox::verify_read_deny_enforced(&profile, workspace) {
+        match wimoai_wimo_sandbox::verify_read_deny_enforced(&profile, workspace) {
             Ok(()) => {
                 eprintln!("FAIL: writable mode-000 deny path passed verification");
                 std::process::exit(1);
@@ -524,7 +524,7 @@ fn subprocess_read_deny_empty_set(workspace: &Path) {
     let profile = profile_from_env();
     subprocess_profile_and_bwrap_reexec(&profile, workspace);
     #[cfg(target_os = "linux")]
-    match wimo ai_wimo_sandbox::verify_read_deny_enforced(&profile, workspace) {
+    match wimoai_wimo_sandbox::verify_read_deny_enforced(&profile, workspace) {
         Ok(()) => {
             eprintln!("OK: empty-set read-deny verified inside bwrap");
             std::process::exit(0);
@@ -552,12 +552,12 @@ fn subprocess_devbox_marker_spoof(workspace: &Path) {
     }
     #[cfg(target_os = "linux")]
     {
-        if !wimo ai_wimo_sandbox::is_inside_bwrap() {
+        if !wimoai_wimo_sandbox::is_inside_bwrap() {
             eprintln!("FAIL: spoof subprocess expected the forged marker");
             std::process::exit(2);
         }
-        let verified = wimo ai_wimo_sandbox::verify_data_write_deny_enforced(
-            &wimo ai_wimo_sandbox::ProfileName::Devbox,
+        let verified = wimoai_wimo_sandbox::verify_data_write_deny_enforced(
+            &wimoai_wimo_sandbox::ProfileName::Devbox,
             workspace,
         );
         if std::env::var(DATA_STAGED_ENV).is_ok() {
@@ -577,7 +577,7 @@ fn subprocess_devbox_marker_spoof(workspace: &Path) {
             std::process::exit(5);
         }
         let mut sandbox =
-            wimo ai_wimo_sandbox::SandboxManager::new(wimo ai_wimo_sandbox::ProfileName::Devbox, workspace);
+            wimoai_wimo_sandbox::SandboxManager::new(wimoai_wimo_sandbox::ProfileName::Devbox, workspace);
         if let Err(e) = sandbox.apply(workspace) {
             eprintln!("sandbox apply failed: {e}");
             std::process::exit(3);
@@ -604,9 +604,9 @@ fn subprocess_devbox_marker_spoof(workspace: &Path) {
 }
 /// Genuine devbox re-exec: with the marker fast path removed, Landlock must now also apply inside the real bwrap without breaking startup.
 fn subprocess_devbox_genuine(workspace: &Path) {
-    let profile = wimo ai_wimo_sandbox::ProfileName::Devbox;
+    let profile = wimoai_wimo_sandbox::ProfileName::Devbox;
     subprocess_profile_and_bwrap_reexec(&profile, workspace);
-    let mut sandbox = wimo ai_wimo_sandbox::SandboxManager::new(profile, workspace);
+    let mut sandbox = wimoai_wimo_sandbox::SandboxManager::new(profile, workspace);
     if let Err(e) = sandbox.apply(workspace) {
         eprintln!("sandbox apply failed: {e}");
         std::process::exit(3);
@@ -616,8 +616,8 @@ fn subprocess_devbox_genuine(workspace: &Path) {
         std::process::exit(4);
     }
     #[cfg(target_os = "linux")]
-    if let Err(e) = wimo ai_wimo_sandbox::verify_data_write_deny_enforced(
-        &wimo ai_wimo_sandbox::ProfileName::Devbox,
+    if let Err(e) = wimoai_wimo_sandbox::verify_data_write_deny_enforced(
+        &wimoai_wimo_sandbox::ProfileName::Devbox,
         workspace,
     ) {
         eprintln!("FAIL: genuine devbox bwrap failed startup verification: {e}");
@@ -635,9 +635,9 @@ fn subprocess_devbox_genuine(workspace: &Path) {
 /// Workspace-profile wimo-owned hook write-deny probes (existing sources and first-run).
 fn subprocess_hook_write_deny(workspace: &Path, first_run: bool) {
     let home = PathBuf::from(std::env::var(wimo_HOME_ENV).expect(wimo_HOME_ENV));
-    let profile = wimo ai_wimo_sandbox::ProfileName::Workspace;
+    let profile = wimoai_wimo_sandbox::ProfileName::Workspace;
     subprocess_profile_and_bwrap_reexec(&profile, workspace);
-    let mut sandbox = wimo ai_wimo_sandbox::SandboxManager::new(profile, workspace);
+    let mut sandbox = wimoai_wimo_sandbox::SandboxManager::new(profile, workspace);
     if let Err(e) = sandbox.apply(workspace) {
         eprintln!("sandbox apply failed: {e}");
         std::process::exit(3);
@@ -649,7 +649,7 @@ fn subprocess_hook_write_deny(workspace: &Path, first_run: bool) {
     }
     let hooks_dir = home.join("hooks");
     let hooks_paths = home.join("hooks-paths");
-    let trust_boundary_files: Vec<(&str, PathBuf)> = wimo ai_wimo_config::TRUST_BOUNDARY_FILENAMES
+    let trust_boundary_files: Vec<(&str, PathBuf)> = wimoai_wimo_config::TRUST_BOUNDARY_FILENAMES
         .iter()
         .copied()
         .map(|name| (name, home.join(name)))
@@ -834,7 +834,7 @@ fn fixture_homes(
     let home = unique_temp_dir(&format!("{tag}-home"));
     let wimo = unique_temp_dir(&format!("{tag}-wimo"));
     let workspace = unique_temp_dir(&format!("{tag}-ws"));
-    fs::write(wimo.join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME), "")
+    fs::write(wimo.join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME), "")
         .expect("empty global sandbox.toml");
     (
         home.clone(),
@@ -869,7 +869,7 @@ fn run_deny_case(
     fs::create_dir_all(tmp.join(".wimo")).expect("mkdir .wimo");
     fs::write(
         tmp.join(".wimo")
-            .join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME),
+            .join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME),
         format!("[profiles.{profile}]\nextends = \"workspace\"\ndeny = [{deny_list}]\n"),
     )
     .expect("write sandbox.toml");
@@ -984,7 +984,7 @@ fn read_deny_marker_spoof_refused() {
     let (home, wimo, workspace, _ch, _cg, _cw) = fixture_homes("read-deny-spoof");
     fs::create_dir_all(workspace.join(".wimo")).expect("mkdir .wimo");
     fs::write(
-            workspace.join(".wimo").join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME),
+            workspace.join(".wimo").join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME),
             "[profiles.netspoof]\nextends = \"devbox\"\nrestrict_network = true\ndeny = [\"secret.pem\"]\n",
         )
         .expect("write sandbox.toml");
@@ -1020,7 +1020,7 @@ fn read_deny_forged_mounts_are_refused() {
     fs::write(
         workspace
             .join(".wimo")
-            .join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME),
+            .join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME),
         "[profiles.forged]\nextends = \"devbox\"\ndeny = [\"secret.pem\"]\n",
     )
     .expect("write sandbox.toml");
@@ -1066,7 +1066,7 @@ fn read_deny_empty_set_verifies_inside_bwrap() {
     fs::write(
         workspace
             .join(".wimo")
-            .join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME),
+            .join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME),
         "[profiles.netempty]\nextends = \"devbox\"\nrestrict_network = true\n",
     )
     .expect("write sandbox.toml");
@@ -1240,7 +1240,7 @@ fn workspace_protects_direct_hook_sources() {
             "expected '{needle}'\nstderr: {stderr}"
         );
     }
-    for name in wimo ai_wimo_config::TRUST_BOUNDARY_FILENAMES {
+    for name in wimoai_wimo_config::TRUST_BOUNDARY_FILENAMES {
         for action in ["write", "unlink", "rename"] {
             let needle = format!("OK: {name} {action} denied");
             assert!(
@@ -1327,7 +1327,7 @@ fn workspace_protects_direct_hook_sources_first_run() {
             "expected '{needle}'\nstderr: {stderr}"
         );
     }
-    for name in wimo ai_wimo_config::TRUST_BOUNDARY_FILENAMES {
+    for name in wimoai_wimo_config::TRUST_BOUNDARY_FILENAMES {
         let needle = format!("OK: {name} (first-run) write denied");
         assert!(
             stderr.contains(&needle),
@@ -1347,7 +1347,7 @@ fn workspace_protects_direct_hook_sources_first_run() {
         b"",
         "post-exit: first-run hooks-paths must be empty"
     );
-    for name in wimo ai_wimo_config::TRUST_BOUNDARY_FILENAMES {
+    for name in wimoai_wimo_config::TRUST_BOUNDARY_FILENAMES {
         assert!(
             wimo.join(name).is_file(),
             "post-exit: {name} must exist as a real file"

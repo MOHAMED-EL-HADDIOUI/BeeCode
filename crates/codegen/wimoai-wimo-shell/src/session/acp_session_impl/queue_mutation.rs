@@ -1,7 +1,7 @@
 //! Internal authorization for generic prompt-queue controls.
 
 use super::*;
-use wimo ai_agent_lifecycle::{InputPolicy, QueuePolicy, ShutdownPolicy};
+use wimoai_agent_lifecycle::{InputPolicy, QueuePolicy, ShutdownPolicy};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct InputOrigin(PromptOrigin);

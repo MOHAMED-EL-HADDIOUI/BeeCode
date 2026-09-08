@@ -19,7 +19,7 @@ const STRUCTURED_OUTPUT_SCHEMA_NAME: &str = "structured_output";
 
 /// Truncate to at most `max_bytes`, walking back to a char boundary.
 /// Plain `&s[..n]` panics when `n` lands inside a multi-byte character, which tool-call arguments routinely contain.
-/// Public because `wimo ai-wimo-shell` calls it.
+/// Public because `wimoai-wimo-shell` calls it.
 pub fn truncate_bytes(s: &str, max_bytes: usize) -> &str {
     if s.len() <= max_bytes {
         return s;
@@ -1369,7 +1369,7 @@ impl ConversationItem {
 // for `ConversationItem`
 // ---------------------------------------------------------------------------
 //
-// Lets the shared engine in `crates/common/wimo ai-wimo-compaction` operate over wimo's `ConversationItem` without depending on this crate
+// Lets the shared engine in `crates/common/wimoai-wimo-compaction` operate over wimo's `ConversationItem` without depending on this crate
 // The orphan rule forces the impls to live here, next to the type
 // Mirrors the harness's `impl CompactionItem` for its own turn type
 //
@@ -1378,9 +1378,9 @@ impl ConversationItem {
 // The full-replace assembler (`apply_full_replace_compaction` / `assemble_compacted_history`) uses it to rebuild the compacted history
 // Each factory constructor maps to the matching `ConversationItem` constructor
 // That preserves the `SyntheticReason` tags the replay / spawn-time idempotence guards rely on
-impl wimo ai_wimo_compaction::CompactionItem for ConversationItem {
-    fn role(&self) -> wimo ai_wimo_compaction::CompactionRole {
-        use wimo ai_wimo_compaction::CompactionRole;
+impl wimoai_wimo_compaction::CompactionItem for ConversationItem {
+    fn role(&self) -> wimoai_wimo_compaction::CompactionRole {
+        use wimoai_wimo_compaction::CompactionRole;
         // wimo has no distinct `Developer` role; everything maps onto the four `Role` variants `ConversationItem::role()` already returns
         match self.role() {
             Role::System => CompactionRole::System,
@@ -1408,7 +1408,7 @@ impl wimo ai_wimo_compaction::CompactionItem for ConversationItem {
         false
     }
 
-    fn attachment_refs(&self) -> Vec<wimo ai_wimo_compaction::CompactionFileRef> {
+    fn attachment_refs(&self) -> Vec<wimoai_wimo_compaction::CompactionFileRef> {
         // wimo `UserItem`s carry only `Text`/`Image { url }` content parts
         // There is no id-and-name attachment-ref concept like the chat harness's `wimoTurn` has
         // The full-replace path does not read this; revisit if image attachments need to survive into the `<wimo_user_queries>` preamble
@@ -1416,7 +1416,7 @@ impl wimo ai_wimo_compaction::CompactionItem for ConversationItem {
     }
 }
 
-impl wimo ai_wimo_compaction::CompactionItemFactory for ConversationItem {
+impl wimoai_wimo_compaction::CompactionItemFactory for ConversationItem {
     fn new_user(text: String) -> Self {
         Self::user(text)
     }
@@ -1547,7 +1547,7 @@ pub fn inject_streaming_reasoning_fallback(items: &mut Vec<ConversationItem>, te
 /// Singular `reasoning` path: builds a synthetic `rs::ReasoningItem`
 /// from the legacy `ReasoningContent { text, encrypted, id }`. `id` is
 /// preserved when present; Anthropic Thinking blocks never carried one
-/// ([stream/messages.rs:340](crates/codegen/wimo ai-wimo-sampler/src/stream/messages.rs))
+/// ([stream/messages.rs:340](crates/codegen/wimoai-wimo-sampler/src/stream/messages.rs))
 /// so the synthesized id is the empty string in that case.
 ///
 /// v0 `ChatRequestMessage` path: top-level `reasoning_content: String` becomes a single `SummaryText`-only sibling.
@@ -2232,7 +2232,7 @@ pub fn dedup_duplicate_tool_results(conversation: &mut Vec<ConversationItem>) ->
 #[cfg(test)]
 mod compaction_item_bridge_tests {
     use super::*;
-    use wimo ai_wimo_compaction::{CompactionItem, CompactionItemFactory, CompactionRole};
+    use wimoai_wimo_compaction::{CompactionItem, CompactionItemFactory, CompactionRole};
 
     #[test]
     fn role_maps_every_variant() {

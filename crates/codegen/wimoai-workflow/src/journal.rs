@@ -6,7 +6,7 @@ use sha2::Digest as _;
 pub const MAX_JOURNAL_BYTES: u64 = 64 * 1024 * 1024;
 pub const MAX_JOURNAL_ENTRIES: usize = crate::MAX_HOST_CALLS as usize;
 
-pub(crate) const HOST_ERROR_KEY: &str = "__wimo ai_workflow_host_error";
+pub(crate) const HOST_ERROR_KEY: &str = "__wimoai_workflow_host_error";
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct JournalEntry {

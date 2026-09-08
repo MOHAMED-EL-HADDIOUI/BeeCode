@@ -43,7 +43,7 @@ pub(super) struct OneTurnAttemptInput<'a> {
     pub request: &'a SubagentRequest,
     pub worktree_path: Option<&'a Path>,
     pub task_prompt_text: &'a str,
-    pub inherited_tool_overrides: Option<wimo ai_wimo_sampling_types::ToolOverrides>,
+    pub inherited_tool_overrides: Option<wimoai_wimo_sampling_types::ToolOverrides>,
     pub gcs_bucket_url: Option<&'a str>,
     pub gcs_upload_method: Option<&'a crate::session::repo_changes::UploadMethod>,
     pub cancel_token: CancellationToken,
@@ -111,7 +111,7 @@ pub(super) async fn run_one_turn_attempt(
         client_identifier: None,
         screen_mode: None,
         verbatim: true,
-        traceparent: wimo ai_file_utils::trace_context::current_traceparent(),
+        traceparent: wimoai_file_utils::trace_context::current_traceparent(),
         json_schema: input.request.runtime_overrides.output_schema.clone(),
         send_now: false,
         admission: None,
@@ -248,7 +248,7 @@ pub(super) async fn run_one_turn_attempt(
         cancellation_may_hide_usage,
     }
 }
-pub(super) fn canonical_total_tokens(totals: &wimo ai_chat_state::UsageTotals) -> u64 {
+pub(super) fn canonical_total_tokens(totals: &wimoai_chat_state::UsageTotals) -> u64 {
     totals.total_tokens()
 }
 pub(super) fn usage_is_incomplete(
@@ -259,7 +259,7 @@ pub(super) fn usage_is_incomplete(
 }
 pub(super) async fn record_subagent_usage(
     parent_cmd_tx: Option<&mpsc::UnboundedSender<SessionCommand>>,
-    by_model: Option<Vec<(String, wimo ai_chat_state::UsageTotals)>>,
+    by_model: Option<Vec<(String, wimoai_chat_state::UsageTotals)>>,
     parent_prompt_id: Option<String>,
     incomplete: bool,
 ) -> bool {

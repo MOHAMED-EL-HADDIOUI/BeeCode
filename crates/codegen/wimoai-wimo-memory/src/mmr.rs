@@ -14,7 +14,7 @@
 use std::collections::HashSet;
 
 use super::search::SearchResult;
-use wimo ai_wimo_config_types::MmrConfig;
+use wimoai_wimo_config_types::MmrConfig;
 
 /// Tokenize text for Jaccard comparison. Callers must lowercase snippets before calling this.
 /// Splits the same way as `query_expansion` but keeps stop words, since similarity needs full token overlap.

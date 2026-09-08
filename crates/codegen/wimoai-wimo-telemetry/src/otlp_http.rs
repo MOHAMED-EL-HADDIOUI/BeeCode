@@ -112,7 +112,7 @@ pub(crate) fn build_blocking_client_with_identity(
         .name("otlp-client-build".into())
         .spawn(move || {
             // Two additive trust sources sit on top of the embedded webpki roots
-            // The process-wide `wimo_EXTRA_CA_BUNDLE` is fail-open, handled inside wimo ai-wimo-extra-ca
+            // The process-wide `wimo_EXTRA_CA_BUNDLE` is fail-open, handled inside wimoai-wimo-extra-ca
             // The external stream's per-call `OTEL_EXPORTER_OTLP_CERTIFICATE` files are fail-closed, validated above
             let identity = match identity_pem {
                 Some(pem) => Some(reqwest::Identity::from_pem(&pem).map_err(|e| {
@@ -121,7 +121,7 @@ pub(crate) fn build_blocking_client_with_identity(
                 None => None,
             };
             // The rustls pin keeps Identity::from_pem (rustls PEM) working.
-            wimo ai_wimo_extra_ca::build_blocking_reqwest_client(|builder| {
+            wimoai_wimo_extra_ca::build_blocking_reqwest_client(|builder| {
                 let mut builder = builder.timeout(timeout);
                 for cert in &extra_roots {
                     builder = builder.add_root_certificate(cert.clone());

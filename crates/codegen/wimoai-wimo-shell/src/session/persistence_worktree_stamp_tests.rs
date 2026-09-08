@@ -1,6 +1,6 @@
 use agent_client_protocol as acp;
 use serial_test::serial;
-use wimo ai_wimo_test_support::EnvGuard;
+use wimoai_wimo_test_support::EnvGuard;
 
 use super::{OaiCompatClient, Summary, default_model_id, new_with_explicit_dir};
 use crate::session::info::Info;
@@ -8,7 +8,7 @@ use crate::session::info::Info;
 fn worktree_cwd_under(home: &std::path::Path) -> String {
     let cwd = home
         .join("worktrees")
-        .join("wimo ai")
+        .join("wimoai")
         .join("fix-bug")
         .join("src");
     std::fs::create_dir_all(&cwd).unwrap();
@@ -67,7 +67,7 @@ async fn new_with_explicit_dir_overrides_worktree_stamp_so_subagent_stays_hidden
     let cwd = worktree_cwd_under(home.path());
     let target_dir = home.path().join("child-session");
 
-    let sampling_client = OaiCompatClient::new(wimo ai_wimo_sampler::SamplerConfig::default()).unwrap();
+    let sampling_client = OaiCompatClient::new(wimoai_wimo_sampler::SamplerConfig::default()).unwrap();
     let _persistence = new_with_explicit_dir(
         &Info {
             id: acp::SessionId::new("subagent-in-worktree"),

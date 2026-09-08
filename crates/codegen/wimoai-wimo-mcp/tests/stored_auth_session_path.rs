@@ -7,9 +7,9 @@ use axum::http::{StatusCode, header};
 use axum::response::IntoResponse;
 use serde_json::{Value, json};
 use serial_test::serial;
-use wimo ai_wimo_mcp::credentials::McpCredentialStore;
-use wimo ai_wimo_mcp::rmcp;
-use wimo ai_wimo_mcp::servers::{McpOauthDiscovery, McpSpawnCtx, OauthInteractivity, start_mcp_server};
+use wimoai_wimo_mcp::credentials::McpCredentialStore;
+use wimoai_wimo_mcp::rmcp;
+use wimoai_wimo_mcp::servers::{McpOauthDiscovery, McpSpawnCtx, OauthInteractivity, start_mcp_server};
 
 const TOKEN: &str = "at-123";
 
@@ -107,8 +107,8 @@ fn make_http_server(name: &str, url: &str) -> acp::McpServer {
     acp::McpServer::Http(acp::McpServerHttp::new(name, url))
 }
 
-fn session_ctx(event_writer: &wimo ai_wimo_session_events::EventWriter) -> McpSpawnCtx<'_> {
-    wimo ai_wimo_mcp::isolate_wimo_home_for_tests();
+fn session_ctx(event_writer: &wimoai_wimo_session_events::EventWriter) -> McpSpawnCtx<'_> {
+    wimoai_wimo_mcp::isolate_wimo_home_for_tests();
     McpSpawnCtx::for_session(
         "sess",
         event_writer,
@@ -118,7 +118,7 @@ fn session_ctx(event_writer: &wimo ai_wimo_session_events::EventWriter) -> McpSp
 }
 
 fn seed_login_without_token(server_name: &str, url: &url::Url) {
-    wimo ai_wimo_mcp::isolate_wimo_home_for_tests();
+    wimoai_wimo_mcp::isolate_wimo_home_for_tests();
     McpCredentialStore::load_default()
         .unwrap_or_default()
         .insert_and_save(
@@ -130,7 +130,7 @@ fn seed_login_without_token(server_name: &str, url: &url::Url) {
 }
 
 fn seed_stored_token(server_name: &str, url: &url::Url) {
-    wimo ai_wimo_mcp::isolate_wimo_home_for_tests();
+    wimoai_wimo_mcp::isolate_wimo_home_for_tests();
     let creds: rmcp::transport::auth::StoredCredentials = serde_json::from_str(&format!(
         r#"{{"client_id":"c","token_response":{{"access_token":"{TOKEN}","token_type":"bearer","refresh_token":"rt-1"}}}}"#
     ))
@@ -142,7 +142,7 @@ fn seed_stored_token(server_name: &str, url: &url::Url) {
 }
 
 fn seed_expired_token(server_name: &str, url: &url::Url, refresh_token: Option<&str>) {
-    wimo ai_wimo_mcp::isolate_wimo_home_for_tests();
+    wimoai_wimo_mcp::isolate_wimo_home_for_tests();
     let received_at = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .expect("clock")
@@ -167,7 +167,7 @@ async fn stored_token_lifecycle_across_spawns() {
     let (url, requests, token_grants) = spawn_counting_gated_server().await;
     seed_stored_token("seeded", &url::Url::parse(&url).unwrap());
 
-    let event_writer = wimo ai_wimo_session_events::EventWriter::noop();
+    let event_writer = wimoai_wimo_session_events::EventWriter::noop();
 
     let requests_before = requests.load(Ordering::SeqCst);
     let client = start_mcp_server(
@@ -259,7 +259,7 @@ async fn stored_token_lifecycle_across_spawns() {
 async fn entry_without_token_fail_fasts_until_out_of_band_login() {
     let (url, requests, _token_grants) = spawn_counting_gated_server().await;
     let parsed_url = url::Url::parse(&url).unwrap();
-    let event_writer = wimo ai_wimo_session_events::EventWriter::noop();
+    let event_writer = wimoai_wimo_session_events::EventWriter::noop();
 
     seed_login_without_token("gated", &parsed_url);
 

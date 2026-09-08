@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use chrono::{DateTime, TimeZone, Utc};
-use wimo ai_wimo_workspace_types::*;
+use wimoai_wimo_workspace_types::*;
 
 fn round_trip<T>(value: T)
 where

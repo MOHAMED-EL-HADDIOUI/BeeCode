@@ -1,6 +1,6 @@
 //! Models the `Round` mutex protocol and the real `subscribe_if_waiting` implementation.
 //! Notify wakeups and `Arc`/`Weak` counts are checked by the tokio tests instead.
-//! Run: `cargo test --release --features loom -p wimo ai-wimo-shell --lib flock_wait::loom -- --test-threads=1`
+//! Run: `cargo test --release --features loom -p wimoai-wimo-shell --lib flock_wait::loom -- --test-threads=1`
 
 use std::io;
 use std::sync::Arc;

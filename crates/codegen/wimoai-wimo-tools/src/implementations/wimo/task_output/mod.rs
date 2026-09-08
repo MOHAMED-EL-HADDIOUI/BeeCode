@@ -21,7 +21,7 @@ use crate::types::requirements::{Expr, ToolParamsRequirement, ToolRequirement};
 use crate::types::resources::{SharedResources, Terminal, TruncationCfg};
 use crate::types::template_renderer::TemplateRenderer;
 use crate::types::tool::{ToolKind, ToolNamespace};
-use wimo ai_tool_types::{
+use wimoai_tool_types::{
     MultiTaskOutputResult, TaskOutputOutput, TaskOutputResult, TaskOutputToolInput,
 };
 
@@ -36,7 +36,7 @@ pub(crate) const DEFAULT_WAIT_TIMEOUT: Duration = Duration::from_secs(30);
 /// The same value fills `{max_wait_ms}` in the descriptions, so a wait can
 /// never exceed what the model was told it may ask for.
 pub(crate) fn max_wait_block() -> Duration {
-    Duration::from_millis(wimo ai_tool_types::max_wait_block_ms())
+    Duration::from_millis(wimoai_tool_types::max_wait_block_ms())
 }
 
 /// Resolve a model-supplied `timeout_ms` into the effective blocking-wait
@@ -150,7 +150,7 @@ pub(crate) fn background_bash_requires_exprs() -> Vec<Expr<ToolRequirement>> {
     use crate::types::tool_metadata::ToolMetadata;
     let wimo_bash = Expr::Value(ToolRequirement::Tool {
         namespace: ToolMetadata::tool_namespace(&BashTool).to_string(),
-        id: wimo ai_tool_runtime::Tool::id(&BashTool).as_str().to_string(),
+        id: wimoai_tool_runtime::Tool::id(&BashTool).as_str().to_string(),
         if_params: Some(Expr::Value(ToolParamsRequirement {
             key: "enabled_background".to_string(),
             value: Expr::Value(serde_json::Value::Bool(true)),
@@ -158,7 +158,7 @@ pub(crate) fn background_bash_requires_exprs() -> Vec<Expr<ToolRequirement>> {
     });
     let wimo_concise_bash = Expr::Value(ToolRequirement::Tool {
         namespace: ToolMetadata::tool_namespace(&BashConciseTool).to_string(),
-        id: wimo ai_tool_runtime::Tool::id(&BashConciseTool)
+        id: wimoai_tool_runtime::Tool::id(&BashConciseTool)
             .as_str()
             .to_string(),
         if_params: Some(Expr::Value(ToolParamsRequirement {
@@ -168,7 +168,7 @@ pub(crate) fn background_bash_requires_exprs() -> Vec<Expr<ToolRequirement>> {
     });
     let opencode_bash = Expr::Value(ToolRequirement::Tool {
         namespace: ToolMetadata::tool_namespace(&OpenCodeBashTool).to_string(),
-        id: wimo ai_tool_runtime::Tool::id(&OpenCodeBashTool)
+        id: wimoai_tool_runtime::Tool::id(&OpenCodeBashTool)
             .as_str()
             .to_string(),
         if_params: None,
@@ -181,7 +181,7 @@ pub(crate) fn task_output_requires_expr() -> Expr<ToolRequirement> {
     use crate::types::tool_metadata::ToolMetadata;
     let task_tool = Expr::Value(ToolRequirement::Tool {
         namespace: ToolMetadata::tool_namespace(&TaskTool).to_string(),
-        id: wimo ai_tool_runtime::Tool::id(&TaskTool).as_str().to_string(),
+        id: wimoai_tool_runtime::Tool::id(&TaskTool).as_str().to_string(),
         if_params: None,
     });
     let mut arms = background_bash_requires_exprs();
@@ -197,12 +197,12 @@ impl TaskOutputTool {
         &self,
         task_id: &str,
         timeout_ms: Option<u64>,
-        ctx: &wimo ai_tool_runtime::ToolCallContext,
+        ctx: &wimoai_tool_runtime::ToolCallContext,
         resources: SharedResources,
-    ) -> Result<TaskOutputOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<TaskOutputOutput, wimoai_tool_runtime::ToolError> {
         let contract_version = ctx
             .extensions
-            .get::<wimo ai_tool_runtime::BehaviorVersion>()
+            .get::<wimoai_tool_runtime::BehaviorVersion>()
             .map(|v| v.0.clone());
         let is_legacy = crate::versions::is_legacy_contract(contract_version.as_deref());
         let terminal;
@@ -210,7 +210,7 @@ impl TaskOutputTool {
             terminal = resources.lock().await.require::<Terminal>()?.0.clone();
         }
 
-        let waits = wimo ai_tool_types::task_output_waits(timeout_ms);
+        let waits = wimoai_tool_types::task_output_waits(timeout_ms);
         let wait_cap = max_wait_block();
         let wait_hint = if waits {
             WaitHint::Elapsed {
@@ -236,7 +236,7 @@ impl TaskOutputTool {
                 let renderer = res.require::<TemplateRenderer>()?;
                 read_file_name = renderer
                     .render("${{ tools.by_kind.read }}")
-                    .map_err(|e| wimo ai_tool_runtime::ToolError::invalid_arguments(e.to_string()))?;
+                    .map_err(|e| wimoai_tool_runtime::ToolError::invalid_arguments(e.to_string()))?;
             }
             let max_output_bytes = resources
                 .lock()
@@ -306,8 +306,8 @@ impl TaskOutputTool {
         timeout_ms: Option<u64>,
         resources: SharedResources,
         tool_name_for_truncation: &str,
-    ) -> Result<TaskOutputOutput, wimo ai_tool_runtime::ToolError> {
-        let waits = wimo ai_tool_types::task_output_waits(timeout_ms);
+    ) -> Result<TaskOutputOutput, wimoai_tool_runtime::ToolError> {
+        let waits = wimoai_tool_types::task_output_waits(timeout_ms);
         let requested = requested_wait_timeout(timeout_ms);
         let timeout = capped_wait_timeout(timeout_ms, max_wait_block());
 
@@ -318,7 +318,7 @@ impl TaskOutputTool {
             let renderer = res.require::<TemplateRenderer>()?;
             let rfn = renderer
                 .render("${{ tools.by_kind.read }}")
-                .map_err(|e| wimo ai_tool_runtime::ToolError::invalid_arguments(e.to_string()))?;
+                .map_err(|e| wimoai_tool_runtime::ToolError::invalid_arguments(e.to_string()))?;
             let mob = res
                 .get::<TruncationCfg>()
                 .map(|cfg| {
@@ -382,7 +382,7 @@ impl TaskOutputTool {
     }
 }
 
-pub(crate) use wimo ai_tool_types::MAX_MULTI_WAIT_IDS;
+pub(crate) use wimoai_tool_types::MAX_MULTI_WAIT_IDS;
 
 /// Terminal task statuses as produced by `snapshot_to_result` /
 /// `format_subagent_snapshot`; multi-wait summaries count these as finished.
@@ -730,7 +730,7 @@ fn format_subagent_snapshot(snap: &SubagentSnapshot, wait_hint: WaitHint) -> Tas
                 output.push_str(&format!("\n<worktree_path>{wt}</worktree_path>"));
             }
             output.push_str("\n\n");
-            output.push_str(&wimo ai_tool_types::format_resume_footer(
+            output.push_str(&wimoai_tool_types::format_resume_footer(
                 &snap.subagent_id,
                 &snap.subagent_type,
                 snap.persona.as_deref(),
@@ -821,7 +821,7 @@ impl crate::types::tool_metadata::ToolMetadata for TaskOutputTool {
         // renders it context-aware from the finalized toolset. This static
         // fallback mirrors the default wimo toolset.
         static DESC: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
-            wimo ai_tool_types::build_task_output_description(&wimo ai_tool_types::TaskOutputToolNaming {
+            wimoai_tool_types::build_task_output_description(&wimoai_tool_types::TaskOutputToolNaming {
                 monitor_tool: Some("monitor"),
                 read_tool: Some("read_file"),
                 bash_background_param: Some("is_background"),
@@ -868,7 +868,7 @@ impl crate::types::tool_metadata::ToolMetadata for TaskOutputTool {
 
 /// Resolve the model-facing `get_task_output` description from the finalized
 /// toolset, honoring an explicit config override. Wording lives in the shared
-/// [`wimo ai_tool_types::build_task_output_description`] builder so the CLI and
+/// [`wimoai_tool_types::build_task_output_description`] builder so the CLI and
 /// prod-chat can't drift; presence-gated clauses (monitor note, subagent
 /// source, read-file hint) follow the tools actually registered this turn.
 fn task_output_description(
@@ -881,7 +881,7 @@ fn task_output_description(
             ovr.to_string()
         });
     }
-    wimo ai_tool_types::build_task_output_description(&wimo ai_tool_types::TaskOutputToolNaming {
+    wimoai_tool_types::build_task_output_description(&wimoai_tool_types::TaskOutputToolNaming {
         monitor_tool: renderer.tool_for_kind(ToolKind::Monitor),
         read_tool: renderer.tool_for_kind(ToolKind::Read),
         bash_background_param: renderer.param_for_kind(ToolKind::Execute, "is_background"),
@@ -899,28 +899,28 @@ fn task_output_description(
     })
 }
 
-impl wimo ai_tool_runtime::Tool for TaskOutputTool {
+impl wimoai_tool_runtime::Tool for TaskOutputTool {
     type Args = TaskOutputToolInput;
     type Output = TaskOutputOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("get_task_output").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("get_task_output").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "get_task_output",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -932,20 +932,20 @@ impl wimo ai_tool_runtime::Tool for TaskOutputTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: TaskOutputToolInput,
-    ) -> Result<TaskOutputOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<TaskOutputOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
         let ids = input.resolved_task_ids();
         if ids.is_empty() {
-            return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(
+            return Err(wimoai_tool_runtime::ToolError::invalid_arguments(
                 "Provide a non-empty task_ids list.".to_string(),
             ));
         }
         if ids.len() > MAX_MULTI_WAIT_IDS {
-            return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(format!(
+            return Err(wimoai_tool_runtime::ToolError::invalid_arguments(format!(
                 "task_ids exceeds maximum of {MAX_MULTI_WAIT_IDS} entries."
             )));
         }
@@ -1100,7 +1100,7 @@ mod tests {
     // unbounded blocking wait wedged the turn for hours).
     #[test]
     fn capped_wait_timeout_clamps_and_defaults() {
-        let cap = Duration::from_millis(wimo ai_tool_types::MAX_WAIT_BLOCK_MS_DEFAULT);
+        let cap = Duration::from_millis(wimoai_tool_types::MAX_WAIT_BLOCK_MS_DEFAULT);
         assert_eq!(capped_wait_timeout(None, cap), DEFAULT_WAIT_TIMEOUT);
         assert_eq!(
             capped_wait_timeout(Some(5_000), cap),
@@ -1186,7 +1186,7 @@ mod tests {
     fn tool_name_and_description() {
         let tool = TaskOutputTool;
         assert_eq!(
-            wimo ai_tool_runtime::Tool::id(&tool).as_str(),
+            wimoai_tool_runtime::Tool::id(&tool).as_str(),
             "get_task_output"
         );
         // The static fallback is the shared builder's default wimo
@@ -1361,7 +1361,7 @@ mod tests {
         let resources = resources_with_terminal(Some(snapshot));
         let tool = TaskOutputTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1389,7 +1389,7 @@ mod tests {
         let resources = resources_with_terminal(Some(snapshot));
         let tool = TaskOutputTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1416,7 +1416,7 @@ mod tests {
         let resources = resources_with_terminal(Some(snapshot));
         let tool = TaskOutputTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1441,7 +1441,7 @@ mod tests {
         let resources = resources_with_terminal(None);
         let tool = TaskOutputTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1518,7 +1518,7 @@ mod tests {
         ));
 
         let tool = TaskOutputTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1591,7 +1591,7 @@ mod tests {
         ));
 
         let tool = TaskOutputTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1616,7 +1616,7 @@ mod tests {
         let resources = Resources::new();
         let tool = TaskOutputTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1649,7 +1649,7 @@ mod tests {
         ));
 
         let tool = TaskOutputTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1679,7 +1679,7 @@ mod tests {
         let resources = resources_with_terminal(Some(snapshot));
         let tool = TaskOutputTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1776,7 +1776,7 @@ mod tests {
         let snapshot = make_snapshot("task-done", true, Some(0));
         let (resources, waited, stamped) = resources_with_stamp_wait(snapshot);
         let started = std::time::Instant::now();
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskOutputTool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1810,7 +1810,7 @@ mod tests {
         let snapshot = make_snapshot("task-run", false, None);
         let (resources, waited, stamped) = resources_with_stamp_wait(snapshot);
         let started = std::time::Instant::now();
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskOutputTool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -1968,7 +1968,7 @@ mod tests {
         resources.insert(TruncationCfg(trunc));
 
         let tool = TaskOutputTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -2007,11 +2007,11 @@ mod tests {
         let tool = TaskOutputTool;
 
         let mut ctx = test_ctx(resources.into_shared());
-        ctx.extensions.insert(wimo ai_tool_runtime::BehaviorVersion(
+        ctx.extensions.insert(wimoai_tool_runtime::BehaviorVersion(
             "legacy-0.4.10".to_string(),
         ));
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             ctx,
             TaskOutputToolInput {
@@ -2038,7 +2038,7 @@ mod tests {
         let resources = resources_with_terminal(None);
         let tool = TaskOutputTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -2269,7 +2269,7 @@ mod tests {
         let resources = resources_with_terminal(None);
         let tool = TaskOutputTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -2293,7 +2293,7 @@ mod tests {
     async fn multi_task_ids_poll_returns_multi_result_mode_poll() {
         let resources = resources_with_terminal(None);
         let tool = TaskOutputTool;
-        let out = wimo ai_tool_runtime::Tool::run(
+        let out = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -2317,7 +2317,7 @@ mod tests {
     async fn one_element_task_ids_returns_single_result_not_multi() {
         let resources = resources_with_terminal(None);
         let tool = TaskOutputTool;
-        let out = wimo ai_tool_runtime::Tool::run(
+        let out = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -2395,7 +2395,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskOutputTool,
             test_ctx(shared),
             TaskOutputToolInput {
@@ -2446,7 +2446,7 @@ mod tests {
                 .unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskOutputTool,
             test_ctx(shared),
             TaskOutputToolInput {
@@ -2479,7 +2479,7 @@ mod tests {
             req.respond_to.send(None).unwrap();
         });
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskOutputTool,
             test_ctx(shared),
             TaskOutputToolInput {
@@ -2534,7 +2534,7 @@ mod tests {
         });
 
         let started = std::time::Instant::now();
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskOutputTool,
             test_ctx(shared),
             TaskOutputToolInput {
@@ -2588,7 +2588,7 @@ mod tests {
         });
 
         let started = std::time::Instant::now();
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskOutputTool,
             test_ctx(shared),
             TaskOutputToolInput {
@@ -2615,7 +2615,7 @@ mod tests {
     async fn blocking_get_on_unknown_task_returns_immediately() {
         let resources = resources_with_terminal(None);
         let started = std::time::Instant::now();
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &TaskOutputTool,
             test_ctx(resources.into_shared()),
             TaskOutputToolInput {
@@ -2678,7 +2678,7 @@ mod tests {
                 req.respond_to.send(Some(snapshot)).unwrap();
             });
             let started = std::time::Instant::now();
-            let result = wimo ai_tool_runtime::Tool::run(
+            let result = wimoai_tool_runtime::Tool::run(
                 &TaskOutputTool,
                 test_ctx(shared),
                 TaskOutputToolInput {

@@ -9,8 +9,8 @@
 
 use std::time::Duration;
 
-use wimo ai_wimo_pager_pty_harness::PtyHarness;
-pub(crate) use wimo ai_wimo_pager_pty_harness::{SGR_SCROLL_DOWN, SGR_SCROLL_UP};
+use wimoai_wimo_pager_pty_harness::PtyHarness;
+pub(crate) use wimoai_wimo_pager_pty_harness::{SGR_SCROLL_DOWN, SGR_SCROLL_UP};
 
 use super::common::{
     AgentTurnExpectation, ContentController, DEFAULT_COLS, DEFAULT_ROWS, MOCK_RESPONSE_SENTINEL,
@@ -41,7 +41,7 @@ pub(crate) const WHEEL_COL: u16 = 39;
 /// Prefer assertions that hold under either classification (scrolled at all, at least 1 frame, at most 1 frame per event).
 /// Deliberately dumb: no draining, no assertions; callers `update()` afterwards and assert on screen state / frame captures.
 ///
-/// Harness mirror: the scroll-matrix runner (`wimo ai-wimo-pager-pty-harness/src/scroll_matrix/runner.rs`) ports this send loop onto `WheelStep` tables.
+/// Harness mirror: the scroll-matrix runner (`wimoai-wimo-pager-pty-harness/src/scroll_matrix/runner.rs`) ports this send loop onto `WheelStep` tables.
 /// Apply fixes there too.
 pub(crate) fn send_wheel_sequence(
     h: &mut PtyHarness,
@@ -127,7 +127,7 @@ pub(crate) fn topmost_visible_marker(h: &PtyHarness) -> Option<usize> {
 /// A `_` binding drops it immediately, killing the mock server mid-test.
 /// That surfaces as a confusing 60s stream timeout instead of an obvious failure.
 ///
-/// Harness mirror: `spawn_settled_marker_session` in `wimo ai-wimo-pager-pty-harness/src/scroll_matrix/session.rs` is a port of this preamble.
+/// Harness mirror: `spawn_settled_marker_session` in `wimoai-wimo-pager-pty-harness/src/scroll_matrix/session.rs` is a port of this preamble.
 /// Fixes must flow both ways.
 pub(crate) async fn spawn_bottom_pinned_marker_scrollback(
     marker_count: usize,
@@ -221,7 +221,7 @@ fn streaming_marker_turn_text(marker_count: usize, tail_words: usize) -> String 
 /// Destructure the controller into a live binding (`content` / `_content`), never `_`.
 /// A `_` binding drops it immediately, killing the mock server mid-test and surfacing as a confusing stream timeout.
 ///
-/// Harness mirror: `spawn_streaming_marker_session` in `wimo ai-wimo-pager-pty-harness/src/scroll_matrix/session.rs` is a port of this preamble.
+/// Harness mirror: `spawn_streaming_marker_session` in `wimoai-wimo-pager-pty-harness/src/scroll_matrix/session.rs` is a port of this preamble.
 /// Fixes must flow both ways.
 pub(crate) async fn spawn_streaming_marker_turn(
     marker_count: usize,

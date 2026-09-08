@@ -1,5 +1,5 @@
 //! Version / release info — REAL version tracking (Section 41/36 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub const VERSION: &str = "1.0.0-wimo";
 pub const RELEASE_TARGETS: &[&str] = &[
@@ -11,5 +11,5 @@ pub const RELEASE_TARGETS: &[&str] = &[
 ];
 
 pub fn version_string() -> String {
-    format!("wimo {} (wimo ai open source)", VERSION)
+    format!("wimo {} (wimoai open source)", VERSION)
 }

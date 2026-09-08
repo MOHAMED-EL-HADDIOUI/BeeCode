@@ -14,7 +14,7 @@ use crate::auth::{AuthManager, wimoAuth, wimoComConfig};
 use crate::remote::{FetchModelsResult, ModelSource, active_model_source};
 use crate::sampling::SamplerConfig as SamplingConfig;
 use globset::{Glob, GlobSet, GlobSetBuilder};
-use wimo ai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
+use wimoai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
 
 // ── Auth method for model fetching ──────────────────────────────────────────
 
@@ -36,7 +36,7 @@ impl ModelFetchAuth {
             Self::Session
         } else if endpoints.deployment_key.is_some() {
             Self::Deployment
-        } else if crate::agent::auth_method::has_wimo ai_api_key_env() {
+        } else if crate::agent::auth_method::has_wimoai_api_key_env() {
             Self::ApiKey
         } else {
             Self::Session
@@ -125,7 +125,7 @@ struct Inner {
     auth_manager: Arc<AuthManager>,
     cfg: RwLock<config::Config>,
     fetch_auth: RwLock<ModelFetchAuth>,
-    gateway: RwLock<Option<wimo ai_acp_lib::AcpAgentGatewaySender>>,
+    gateway: RwLock<Option<wimoai_acp_lib::AcpAgentGatewaySender>>,
     cache: ModelsCacheManager,
     endpoint: Arc<dyn ModelsEndpoint>,
     /// Guard to prevent overlapping retry loops.
@@ -374,7 +374,7 @@ impl ModelsManager {
         Ok(mgr)
     }
 
-    pub(crate) fn set_gateway(&self, gateway: wimo ai_acp_lib::AcpAgentGatewaySender) {
+    pub(crate) fn set_gateway(&self, gateway: wimoai_acp_lib::AcpAgentGatewaySender) {
         *self.inner.gateway.write() = Some(gateway);
     }
 
@@ -616,7 +616,7 @@ impl ModelsManager {
     pub(crate) fn model_compactions_remaining(
         &self,
         model_id: &str,
-    ) -> Option<wimo ai_wimo_sampling_types::CompactionsRemaining> {
+    ) -> Option<wimoai_wimo_sampling_types::CompactionsRemaining> {
         self.inner
             .catalog
             .read()
@@ -628,7 +628,7 @@ impl ModelsManager {
     pub(crate) fn model_compaction_at_tokens(
         &self,
         model_id: &str,
-    ) -> Option<wimo ai_wimo_sampling_types::CompactionAtTokens> {
+    ) -> Option<wimoai_wimo_sampling_types::CompactionAtTokens> {
         self.inner
             .catalog
             .read()
@@ -770,7 +770,7 @@ impl ModelsManager {
         };
         if needs_bundled_fallback {
             if remote_fetch_enabled {
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "model catalog: falling back to bundled defaults only",
                     None,
                     Some(serde_json::json!({
@@ -795,7 +795,7 @@ impl ModelsManager {
         let available = self.available();
         let current = self.current_model_id();
         let count = available.len();
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "model catalog: notifying clients",
             None,
             Some(serde_json::json!({
@@ -846,7 +846,7 @@ impl ModelsManager {
         let count = cached.models.len();
         self.apply_catalog(&cfg, cached.models, cached.etag);
         tracing::info!(count, "model catalog hot-reloaded from disk cache");
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "model catalog: reloaded from external disk-cache write",
             None,
             Some(serde_json::json!({ "model_count": count })),
@@ -905,7 +905,7 @@ impl ModelsManager {
                     }
                 },
                 |attempt, max_retries, delay| async move {
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "model catalog: retry scheduled",
                         None,
                         Some(serde_json::json!({
@@ -921,7 +921,7 @@ impl ModelsManager {
             match result {
                 Ok(()) => {
                     let count = mgr.available().len();
-                    wimo ai_wimo_telemetry::unified_log::info(
+                    wimoai_wimo_telemetry::unified_log::info(
                         "model catalog: retry succeeded",
                         None,
                         Some(serde_json::json!({ "model_count": count })),
@@ -929,7 +929,7 @@ impl ModelsManager {
                     mgr.notify_models_updated();
                 }
                 Err(e) => {
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "model catalog: all retries exhausted",
                         None,
                         Some(serde_json::json!({ "error": e })),
@@ -958,7 +958,7 @@ impl ModelsManager {
     pub fn start_auth_refresh_watcher(&self, notify: Arc<tokio::sync::Notify>) {
         let mgr = self.clone();
         let had_catalog_at_start = self.inner.catalog.read().has_fetched_real_catalog;
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "model catalog: auth refresh watcher started",
             None,
             Some(serde_json::json!({
@@ -977,7 +977,7 @@ impl ModelsManager {
                 }
                 let had_catalog = mgr.inner.catalog.read().has_fetched_real_catalog;
                 let old_count = mgr.available().len();
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "model catalog: auth refresh watcher triggered",
                     None,
                     Some(serde_json::json!({
@@ -990,7 +990,7 @@ impl ModelsManager {
                 let new_count = mgr.available().len();
                 if has_catalog {
                     if !had_catalog || new_count != old_count {
-                        wimo ai_wimo_telemetry::unified_log::info(
+                        wimoai_wimo_telemetry::unified_log::info(
                             "model catalog: auth refresh watcher updated catalog",
                             None,
                             Some(serde_json::json!({
@@ -1002,7 +1002,7 @@ impl ModelsManager {
                     }
                     mgr.notify_models_updated();
                 } else {
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "model catalog: auth refresh watcher fetch failed",
                         None,
                         Some(serde_json::json!({
@@ -1167,7 +1167,7 @@ impl ModelsManager {
         let has_auth = auth.is_some();
         let fetch_auth = *self.inner.fetch_auth.read();
         let cfg = self.inner.cfg.read().clone();
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "model catalog: fetching",
             None,
             Some(serde_json::json!({
@@ -1193,7 +1193,7 @@ impl ModelsManager {
         };
         let success = self.apply_refresh_result_fenced(&cfg, new_prefetched, None, generation);
         if success {
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "model catalog: fetch succeeded",
                 None,
                 Some(serde_json::json!({
@@ -1289,7 +1289,7 @@ impl ModelsManager {
                     });
                 }
             }
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "model catalog refresh failed",
                 None,
                 Some(serde_json::json!({

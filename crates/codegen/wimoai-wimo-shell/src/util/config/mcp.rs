@@ -5,23 +5,23 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use toml::Value as TomlValue;
 use toml::map::Map as TomlMap;
-use wimo ai_wimo_agent::prompt::skills::SkillsConfig;
-use wimo ai_wimo_tools::types::compat::{CompatConfig, CompatConfigToml};
+use wimoai_wimo_agent::prompt::skills::SkillsConfig;
+use wimoai_wimo_tools::types::compat::{CompatConfig, CompatConfigToml};
 
-pub use wimo ai_wimo_mcp::oauth_config::{McpOAuthConfig, McpOAuthConfigMap};
-// MCP server config value types moved to `wimo ai-wimo-config-types`; the re-export keeps `crate::util::config::*` paths working
-pub use wimo ai_wimo_config_types::{
+pub use wimoai_wimo_mcp::oauth_config::{McpOAuthConfig, McpOAuthConfigMap};
+// MCP server config value types moved to `wimoai-wimo-config-types`; the re-export keeps `crate::util::config::*` paths working
+pub use wimoai_wimo_config_types::{
     KNOWN_MCP_SERVER_FIELDS, McpJsonOAuthBlock, McpPreferenceSource, McpPreferencesFile,
     McpServerConfig, McpServerConfigProblem, McpServerPreferences, McpServerProblemSeverity,
     McpServerTransportConfig, McpSetupConfig, McpSetupDerivedValue, McpSetupField,
     McpSetupFieldType, McpSetupOption, McpSetupResolution,
 };
 // Permission-policy value types likewise extracted; re-exported to keep paths stable.
-pub use wimo ai_wimo_config_types::{
+pub use wimoai_wimo_config_types::{
     PatternMode, PermissionConfig, PermissionRule, RuleAction, ToolFilter,
 };
 // Relay-sync and MCP-config value types extracted; re-exported to keep paths stable
-pub use wimo ai_wimo_config_types::{McpConfig, RelaySyncConfig};
+pub use wimoai_wimo_config_types::{McpConfig, RelaySyncConfig};
 
 /// TUI/CLI settings. Composed from typed section configs defined in `agent::config`.
 #[derive(Debug, Clone, Default)]
@@ -376,7 +376,7 @@ pub(crate) fn all_toml_mcp_server_names(
 }
 
 pub(crate) fn mcp_preferences_path() -> PathBuf {
-    wimo ai_wimo_config::wimo_home().join("mcp_preferences.json")
+    wimoai_wimo_config::wimo_home().join("mcp_preferences.json")
 }
 
 /// Corrupt files are readable as empty for resolution but must not be overwritten (would clobber other servers).
@@ -497,7 +497,7 @@ pub struct McpSetupServerEntry {
 /// Other sources still skip native `enabled = false` because Space cannot unstick those flags.
 pub(crate) fn collect_mcp_setup_configs(
     cwd: &std::path::Path,
-    plugin_registry: Option<&wimo ai_wimo_agent::plugins::PluginRegistry>,
+    plugin_registry: Option<&wimoai_wimo_agent::plugins::PluginRegistry>,
     compat: &CompatConfig,
 ) -> IndexMap<String, McpSetupServerEntry> {
     let mut result = IndexMap::new();
@@ -576,7 +576,7 @@ pub(crate) fn collect_mcp_setup_configs(
             }
             if let Some(ref inline_value) = plugin.inline_mcp_servers {
                 let normalized =
-                    wimo ai_wimo_agent::plugins::manifest::normalize_inline_mcp_servers(inline_value);
+                    wimoai_wimo_agent::plugins::manifest::normalize_inline_mcp_servers(inline_value);
                 for (name, server) in mcp_config_from_json_value(&normalized).mcp_servers {
                     plugin_configs.entry(name).or_insert(server);
                 }
@@ -1042,7 +1042,7 @@ pub async fn delete_mcp_server_config_at(
     tokio::fs::rename(&tmp, &path).await?;
 
     // Clean up OAuth credentials for the deleted server.
-    if let Ok(mut cred_store) = wimo ai_wimo_mcp::credentials::McpCredentialStore::load_default() {
+    if let Ok(mut cred_store) = wimoai_wimo_mcp::credentials::McpCredentialStore::load_default() {
         let removed = cred_store.remove_by_server_name(server_name);
         if removed > 0 {
             let _ = cred_store.save_default();
@@ -1188,9 +1188,9 @@ pub(crate) fn parse_mcp_servers_from_toml(root: &TomlValue) -> IndexMap<String, 
 
 // ── .mcp.json support ────────────────────────────────────────────────
 
-// `.mcp.json` discovery moved to `wimo ai-wimo-workspace` (client-side, shared with the folder-trust gate)
+// `.mcp.json` discovery moved to `wimoai-wimo-workspace` (client-side, shared with the folder-trust gate)
 // The re-export keeps `crate::util::config::*` paths working
-pub use wimo ai_wimo_workspace::project_config::{
+pub use wimoai_wimo_workspace::project_config::{
     MCP_JSON_FILENAME, find_mcp_json_files, mcp_json_candidate_paths,
 };
 
@@ -1312,7 +1312,7 @@ pub(crate) fn load_claude_json_mcp_servers(
         return vec![];
     }
 
-    let Some(home) = wimo ai_dirs::home_dir() else {
+    let Some(home) = wimoai_dirs::home_dir() else {
         return vec![];
     };
     let claude_json_path = home.join(".claude.json");
@@ -1326,7 +1326,7 @@ pub(crate) fn load_claude_json_mcp_servers(
 pub(crate) fn load_claude_json_mcp_servers_for_attribution(
     cwd: &std::path::Path,
 ) -> Vec<acp::McpServer> {
-    let Some(home) = wimo ai_dirs::home_dir() else {
+    let Some(home) = wimoai_dirs::home_dir() else {
         return vec![];
     };
     load_claude_json_mcp_servers_from(&home.join(".claude.json"), cwd)
@@ -1354,7 +1354,7 @@ pub(crate) fn load_claude_json_mcp_servers_as_configs(
 pub(crate) fn load_claude_json_mcp_servers_as_configs_unfiltered(
     cwd: &std::path::Path,
 ) -> IndexMap<String, McpServerConfig> {
-    let Some(home) = wimo ai_dirs::home_dir() else {
+    let Some(home) = wimoai_dirs::home_dir() else {
         return IndexMap::new();
     };
     let claude_json_path = home.join(".claude.json");
@@ -1448,7 +1448,7 @@ pub(crate) fn load_cursor_mcp_servers(
     }
 
     // Global (lower priority)
-    if let Some(home) = wimo ai_dirs::home_dir() {
+    if let Some(home) = wimoai_dirs::home_dir() {
         let global_path = home.join(".cursor").join("mcp.json");
         for server in load_mcp_json_file(&global_path) {
             let name = match &server {
@@ -1490,7 +1490,7 @@ pub(crate) fn load_cursor_mcp_servers_as_configs(
     }
 
     // Global (lower priority; or_insert so project wins)
-    if let Some(home) = wimo ai_dirs::home_dir() {
+    if let Some(home) = wimoai_dirs::home_dir() {
         let global_path = home.join(".cursor").join("mcp.json");
         if global_path.is_file()
             && let Some(config) = read_mcp_json(&global_path)
@@ -1705,20 +1705,20 @@ pub fn cli_known_mcp_server_names(cwd: &std::path::Path) -> std::collections::Ha
 /// Resolves the same cwd-effective `[plugins]` table as session startup (`resolve_effective_plugins_config`).
 /// Trusted project `[plugins].paths` plugins are therefore included, not just the global config.
 /// Also used by the pager's `/agents` modal to list plugin-provided agents without a live session registry snapshot.
-pub fn load_cli_plugin_registry(cwd: &std::path::Path) -> wimo ai_wimo_agent::plugins::PluginRegistry {
-    let trust_store = wimo ai_wimo_agent::plugins::TrustStore::load();
+pub fn load_cli_plugin_registry(cwd: &std::path::Path) -> wimoai_wimo_agent::plugins::PluginRegistry {
+    let trust_store = wimoai_wimo_agent::plugins::TrustStore::load();
     // Resolve/record the folder-trust verdict first: the effective-plugins resolve below gates project [plugins].paths on the cached verdict
     let project_trusted = crate::agent::folder_trust::resolve_and_record(cwd, None, false);
     let plugins_cfg = crate::config::resolve_effective_plugins_config(cwd);
     let mut plugin_config = plugins_cfg.to_discovery_config();
-    let discovered = wimo ai_wimo_agent::plugins::discover_plugins(
+    let discovered = wimoai_wimo_agent::plugins::discover_plugins(
         Some(cwd),
         &plugin_config,
         &trust_store,
         project_trusted,
     );
     plugin_config.populate_plugin_lists(&discovered);
-    wimo ai_wimo_agent::plugins::PluginRegistry::from_discovered(
+    wimoai_wimo_agent::plugins::PluginRegistry::from_discovered(
         discovered,
         &plugin_config.disabled,
         &plugin_config.enabled,
@@ -1812,7 +1812,7 @@ pub(crate) fn session_registry_from_toml_opt(root: &TomlValue) -> Option<bool> {
 pub const SESSION_REGISTRY_ENV_VAR: &str = "wimo_SESSION_REGISTRY";
 
 pub(crate) fn session_registry_from_env_opt() -> Option<bool> {
-    wimo ai_wimo_config::env_bool(SESSION_REGISTRY_ENV_VAR)
+    wimoai_wimo_config::env_bool(SESSION_REGISTRY_ENV_VAR)
 }
 
 /// Where a local session-registry override came from.
@@ -1860,7 +1860,7 @@ mod tests {
     fn session_registry_local_override_precedence() {
         let toml_true: TomlValue = toml::from_str("[cli]\nsession_registry = true").unwrap();
         {
-            let _g = wimo ai_wimo_test_support::EnvGuard::set(SESSION_REGISTRY_ENV_VAR, "false");
+            let _g = wimoai_wimo_test_support::EnvGuard::set(SESSION_REGISTRY_ENV_VAR, "false");
             assert_eq!(
                 session_registry_local_override_sourced(Some(&toml_true)),
                 Some((false, RegistrySource::Env)),
@@ -1868,7 +1868,7 @@ mod tests {
             );
         }
         {
-            let _g = wimo ai_wimo_test_support::EnvGuard::set(SESSION_REGISTRY_ENV_VAR, "bogus");
+            let _g = wimoai_wimo_test_support::EnvGuard::set(SESSION_REGISTRY_ENV_VAR, "bogus");
             assert_eq!(
                 session_registry_local_override_sourced(Some(&toml_true)),
                 Some((true, RegistrySource::ConfigToml)),
@@ -1876,7 +1876,7 @@ mod tests {
             );
         }
         {
-            let _g = wimo ai_wimo_test_support::EnvGuard::unset(SESSION_REGISTRY_ENV_VAR);
+            let _g = wimoai_wimo_test_support::EnvGuard::unset(SESSION_REGISTRY_ENV_VAR);
             assert_eq!(session_registry_local_override_sourced(None), None);
         }
     }
@@ -1887,7 +1887,7 @@ mod tests {
     #[serial_test::serial]
     fn load_cli_plugin_registry_includes_project_config_path_plugins() {
         let home = tempfile::tempdir().unwrap();
-        let _env = wimo ai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path());
+        let _env = wimoai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path());
 
         let repo = tempfile::tempdir().unwrap();
         git2::Repository::init(repo.path()).unwrap();
@@ -1920,7 +1920,7 @@ mod tests {
             registry.get("proj-plugin").is_some(),
             "project [plugins].paths plugin must be discovered"
         );
-        let agents = wimo ai_wimo_agent::discovery::plugin_agents(&registry);
+        let agents = wimoai_wimo_agent::discovery::plugin_agents(&registry);
         assert!(
             agents
                 .iter()

@@ -6,7 +6,7 @@
 //!
 //! Also covers shell-rc rewrite: stowed/symlinked `~/.bashrc` etc. must survive reinstall without being replaced by a plain file.
 //!
-//! The installer lives in the sibling `wimo ai-wimo-pager` crate; it is resolved by relative path.
+//! The installer lives in the sibling `wimoai-wimo-pager` crate; it is resolved by relative path.
 //! If it cannot be found (e.g. a sandbox that does not vendor it) the test skips rather than fail.
 //! Under the repo's `cargo nextest` workflow the path resolves and the installer is exercised end to end.
 
@@ -18,7 +18,7 @@ use std::process::Command;
 
 fn script_path(name: &str) -> Option<PathBuf> {
     dunce::canonicalize(
-        Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("../wimo ai-wimo-pager/scripts/{name}")),
+        Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("../wimoai-wimo-pager/scripts/{name}")),
     )
     .ok()
     .filter(|p| p.exists())

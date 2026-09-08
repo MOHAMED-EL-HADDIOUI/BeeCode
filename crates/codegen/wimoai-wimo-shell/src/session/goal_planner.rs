@@ -8,9 +8,9 @@ use crate::session::events::{Event, GoalPlannerFailClosedReason, GoalRoleModelFa
 use crate::session::goal_role_tools::RoleToolNames;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use wimo ai_wimo_session_events::EventWriter;
-use wimo ai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_session_events::EventWriter;
+use wimoai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     SubagentOwner, SubagentRequest, SubagentRuntimeOverrides,
 };
 
@@ -21,7 +21,7 @@ use wimo ai_wimo_tools::implementations::wimo::task::types::{
 /// The subagent_type stays fixed so the role keeps a capable toolset on whichever harness is chosen.
 /// The three role spawners and the parent-side `describe_subagent_type` probe all read it, so the gated/probed toolset matches the spawned one.
 ///
-/// [`SubagentRuntimeOverrides::harness_agent_type`]: wimo ai_wimo_tools::implementations::wimo::task::types::SubagentRuntimeOverrides::harness_agent_type
+/// [`SubagentRuntimeOverrides::harness_agent_type`]: wimoai_wimo_tools::implementations::wimo::task::types::SubagentRuntimeOverrides::harness_agent_type
 pub(crate) const GOAL_ROLE_SUBAGENT_TYPE: &str = "general-purpose";
 pub(crate) const GOAL_ROLE_AWAIT_BUDGET_EXCEEDED: &str =
     "goal role subagent exceeded foreground wait budget";
@@ -226,16 +226,16 @@ pub(crate) fn parse_terminal_response(text: &str) -> bool {
 
 pub(crate) struct ChannelSpawner {
     pub(crate) event_tx: tokio::sync::mpsc::UnboundedSender<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
     >,
     pub(crate) foreground_wait:
-        Option<wimo ai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait>,
+        Option<wimoai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait>,
     pub(crate) parent_session_id: String,
     pub(crate) parent_prompt_id: Option<String>,
     pub(crate) cwd: Option<String>,
     /// Trace-artifact sink and resolved `task` tool name; `None` disables recording.
     /// See [`super::goal_classifier::record_subagent_trace`].
-    pub(crate) trace_sink: Option<(wimo ai_chat_state::ChatStateHandle, String)>,
+    pub(crate) trace_sink: Option<(wimoai_chat_state::ChatStateHandle, String)>,
     /// Resolved per-role model and toolset override.
     /// Default (inherit) keeps the historic `::default()` spawn behavior.
     pub(crate) role_override: RoleSpawnOverride,
@@ -504,7 +504,7 @@ mod tests {
     use super::*;
     use crate::session::goal_role_tools::tests::{assert_no_tool_placeholders, summary_with};
     use std::sync::{Arc, Mutex};
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::tool::ToolKind;
 
     #[test]
     fn planner_template_default_render_has_no_placeholders() {
@@ -565,7 +565,7 @@ mod tests {
 
     #[tokio::test]
     async fn channel_spawner_request_is_harness_internal() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
 
@@ -1009,7 +1009,7 @@ mod tests {
 
     #[tokio::test]
     async fn channel_spawner_threads_harness_override_to_request() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
         let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
@@ -1272,7 +1272,7 @@ mod tests {
     #[tokio::test]
     async fn fail_open_retry_emits_spawn_failed_event() {
         let dir = tempfile::tempdir().unwrap();
-        let writer = wimo ai_wimo_session_events::EventWriter::open(dir.path());
+        let writer = wimoai_wimo_session_events::EventWriter::open(dir.path());
         let ov = RoleSpawnOverride {
             model: Some("m".into()),
             agent_type: Some("t".into()),
@@ -1301,7 +1301,7 @@ mod tests {
 
     #[tokio::test]
     async fn planner_retries_to_inherit_instead_of_failing_closed() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
         let plan_file = tmp_plan_file("retry-failopen");
@@ -1369,7 +1369,7 @@ mod tests {
     #[tokio::test]
     async fn planner_cancellation_pauses_as_aborted_without_retry() {
         use std::sync::atomic::{AtomicUsize, Ordering};
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
         let plan_file = tmp_plan_file("cancel-aborted");

@@ -1,10 +1,10 @@
 //! `StatusLineContext` is the payload clients receive.
-//! What each field means is documented once, in `wimo ai-wimo-pager/docs/user-guide/25-status-line.md`, and a test holds that guide to this type.
+//! What each field means is documented once, in `wimoai-wimo-pager/docs/user-guide/25-status-line.md`, and a test holds that guide to this type.
 //! The comments here record only what that guide cannot.
 //!
 //! Two rules hold it together.
 //! A value wimo cannot source is `None` rather than zero.
-//! Fields are snake_case, the one exception to the camelCase rule in `wimo ai-wimo-pager/docs/internal/28-extension-methods.md`.
+//! Fields are snake_case, the one exception to the camelCase rule in `wimoai-wimo-pager/docs/internal/28-extension-methods.md`.
 //! They stay that way because renaming one silently breaks every script that reads it.
 
 use serde::{Deserialize, Serialize};

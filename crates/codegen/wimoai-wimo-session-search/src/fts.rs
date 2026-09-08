@@ -17,7 +17,7 @@ use std::path::Path;
 use std::time::Duration;
 
 use rusqlite::{Connection, OptionalExtension, params};
-use wimo ai_sqlite_journal::JournalMode;
+use wimoai_sqlite_journal::JournalMode;
 
 use crate::recovery;
 
@@ -113,7 +113,7 @@ impl SessionSearchIndex {
     pub fn open_or_create(db_path: &Path) -> Result<Self, rusqlite::Error> {
         if let Some(parent) = db_path.parent() {
             // The parent is usually the sessions root; never (re)create it with loose permissions
-            let _ = wimo ai_wimo_config::create_dir_all_owner_only(parent);
+            let _ = wimoai_wimo_config::create_dir_all_owner_only(parent);
         }
 
         let journal_mode = JournalMode::for_db_path(db_path);

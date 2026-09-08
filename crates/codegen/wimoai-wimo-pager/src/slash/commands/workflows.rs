@@ -3,7 +3,7 @@
 use crate::app::actions::Action;
 use crate::slash::command::{CommandExecCtx, CommandResult, SlashCommand, slash_meta};
 use crate::views::extensions_modal::ExtensionsTab;
-use wimo ai_wimo_telemetry::events::ExtensionsModalTrigger;
+use wimoai_wimo_telemetry::events::ExtensionsModalTrigger;
 
 /// Open the extensions modal on the Workflows catalog tab.
 pub struct WorkflowsCommand;

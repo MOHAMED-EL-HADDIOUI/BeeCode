@@ -13,8 +13,8 @@ use std::sync::Weak;
 use async_trait::async_trait;
 use serde_json::Value;
 
-use wimo ai_tool_protocol::{SessionId, ToolId};
-use wimo ai_tool_runtime::{
+use wimoai_tool_protocol::{SessionId, ToolId};
+use wimoai_tool_runtime::{
     ToolCallContext, ToolDispatch, ToolError, ToolStream, TypedToolOutput, terminal_only,
 };
 

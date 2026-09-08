@@ -15,8 +15,8 @@ async fn storage_upload_parks_on_401_and_drains_after_recovery() {
     // Storage auth is down from the start; chat endpoints stay healthy
     content.set_storage_unauthorized(true);
 
-    // Trace uploads are gated on first-party wimo AI OAuth (`is_wimo ai_auth()` means AuthMode::Oidc with the wimo AI issuer)
-    // The harness's wimo ai_API_KEY is ApiKey mode and never uploads, so seed a fake OAuth entry instead
+    // Trace uploads are gated on first-party wimo AI OAuth (`is_wimoai_auth()` means AuthMode::Oidc with the wimo AI issuer)
+    // The harness's wimoai_API_KEY is ApiKey mode and never uploads, so seed a fake OAuth entry instead
     // The mock accepts any bearer, and the entry's failing refresh_token is exactly the parked state under test
     seed_fake_oauth(&content, "pty-park-e2e");
 
@@ -67,7 +67,7 @@ async fn storage_upload_parks_on_401_and_drains_after_recovery() {
     // This checks that requests stay bounded while parked, not that the queue goes fully quiet
     // The unit tests cover the fully-quiet case with the production probe interval
     //
-    // Accounting (wimo ai-file-utils upload queue):
+    // Accounting (wimoai-file-utils upload queue):
     // - `DEFAULT_MAX_CONCURRENT` = 8 workers
     // - each post-park wire attempt may do a probe and a credential refresh retry, so 2 storage requests per wake
     // - `AUTH_PARK_WAIT_INTERVAL` is 5s, so a single wait-slice timeout should not fire inside this 3s window

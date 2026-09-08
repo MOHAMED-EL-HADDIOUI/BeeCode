@@ -1,9 +1,9 @@
 //! PTY e2e tests for the runtime XTVERSION probe, run with:
-//! `cargo test -p wimo ai-wimo-pager --test pty_xtversion -- --ignored --nocapture`
+//! `cargo test -p wimoai-wimo-pager --test pty_xtversion -- --ignored --nocapture`
 
 use std::time::Duration;
 
-use wimo ai_wimo_pager_pty_harness::{PtyHarness, pager_binary};
+use wimoai_wimo_pager_pty_harness::{PtyHarness, pager_binary};
 
 const ROWS: u16 = 50;
 const COLS: u16 = 120;

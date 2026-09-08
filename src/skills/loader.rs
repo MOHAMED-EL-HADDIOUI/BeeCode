@@ -1,5 +1,5 @@
 //! Skills loader — REAL skills framework (Section 25 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub struct Skill {
     pub name: String,

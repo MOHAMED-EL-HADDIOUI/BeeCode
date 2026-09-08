@@ -14,7 +14,7 @@ use tokio::sync::{mpsc, oneshot};
 use tokio_util::sync::CancellationToken;
 use tracing::Instrument;
 
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     ApiErrorCode, ConversationRequest, ConversationResponse, EmptyResponseContext, SamplingError,
     SentCredential, error::Result as SamplingResult,
 };
@@ -63,7 +63,7 @@ enum AttemptOutcome {
     Failed {
         error: SamplingError,
         doom_loop_signals: Vec<String>,
-        recovery_items: Vec<wimo ai_wimo_sampling_types::ConversationItem>,
+        recovery_items: Vec<wimoai_wimo_sampling_types::ConversationItem>,
     },
     /// `cancel_token` fired mid-attempt.
     /// The retry loop bails out without further attempts.
@@ -537,7 +537,7 @@ async fn run_one_attempt(
     idle_timeout: Duration,
     event_tx: &mpsc::UnboundedSender<SamplingEvent>,
     cancel_token: &CancellationToken,
-    doom_check: Option<wimo ai_wimo_sampling_types::DoomLoopRecoveryPolicy>,
+    doom_check: Option<wimoai_wimo_sampling_types::DoomLoopRecoveryPolicy>,
     output_observed: Arc<AtomicBool>,
 ) -> AttemptOutcome {
     let length_policy = request.length_policy;
@@ -662,10 +662,10 @@ async fn drive_l2(
     event_tx: &mpsc::UnboundedSender<SamplingEvent>,
     cancel_token: &CancellationToken,
     captured: ErrorCell,
-    doom_check: Option<wimo ai_wimo_sampling_types::DoomLoopRecoveryPolicy>,
+    doom_check: Option<wimoai_wimo_sampling_types::DoomLoopRecoveryPolicy>,
     failed_response: FailedResponseCapture,
     output_observed: Arc<AtomicBool>,
-    length_policy: wimo ai_wimo_sampling_types::LengthPolicy,
+    length_policy: wimoai_wimo_sampling_types::LengthPolicy,
 ) -> AttemptOutcome {
     let mut l2 = pin!(l2);
     let mut doom_loop_signals = Vec::new();
@@ -722,7 +722,7 @@ async fn drive_l2(
                     // content_filter stop reason) is legitimately content-less and
                     // deterministic — resampling it would retry-storm.
                     let content_filtered = response.stop_reason
-                        == Some(wimo ai_wimo_sampling_types::StopReason::ContentFilter);
+                        == Some(wimoai_wimo_sampling_types::StopReason::ContentFilter);
                     if !content_filtered && let Some(reason) = response.empty_reason() {
                         let context = build_empty_context(reason, &response);
                         return AttemptOutcome::Empty {
@@ -847,7 +847,7 @@ fn synthesize_from_info(info: &SamplingErrorInfo) -> SamplingError {
 
 /// Build an [`EmptyResponseContext`] from a completed-but-empty response.
 fn build_empty_context(
-    reason: wimo ai_wimo_sampling_types::EmptyReason,
+    reason: wimoai_wimo_sampling_types::EmptyReason,
     response: &ConversationResponse,
 ) -> EmptyResponseContext {
     let had_reasoning = response
@@ -983,21 +983,21 @@ fn send_completion(
 mod tests {
     use super::*;
     use futures_util::stream;
-    use wimo ai_wimo_sampling_types::ApiErrorCode;
+    use wimoai_wimo_sampling_types::ApiErrorCode;
 
     fn completed_response(
-        stop_reason: Option<wimo ai_wimo_sampling_types::StopReason>,
+        stop_reason: Option<wimoai_wimo_sampling_types::StopReason>,
         content: &str,
     ) -> ConversationResponse {
         ConversationResponse {
-            items: vec![wimo ai_wimo_sampling_types::ConversationItem::assistant(
+            items: vec![wimoai_wimo_sampling_types::ConversationItem::assistant(
                 content,
             )],
             stop_reason,
             usage: None,
             cost_usd_ticks: None,
             message_chunks_emitted: u64::from(!content.is_empty()),
-            doom_loop_signals: vec![wimo ai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
+            doom_loop_signals: vec![wimoai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
                 "exact_repetition:42x3@thinking",
             )],
             stop_message: None,
@@ -1009,7 +1009,7 @@ mod tests {
 
     fn length_completed_event(text: &str) -> SamplingEvent {
         let mut response =
-            completed_response(Some(wimo ai_wimo_sampling_types::StopReason::Length), text);
+            completed_response(Some(wimoai_wimo_sampling_types::StopReason::Length), text);
         response.doom_loop_signals.clear();
         SamplingEvent::Completed {
             request_id: RequestId::random(),
@@ -1020,7 +1020,7 @@ mod tests {
 
     async fn drive_length_event(
         event: SamplingEvent,
-        policy: wimo ai_wimo_sampling_types::LengthPolicy,
+        policy: wimoai_wimo_sampling_types::LengthPolicy,
     ) -> AttemptOutcome {
         let (event_tx, _event_rx) = mpsc::unbounded_channel();
         drive_l2(
@@ -1052,7 +1052,7 @@ mod tests {
             None,
             FailedResponseCapture::default(),
             Arc::new(AtomicBool::new(false)),
-            wimo ai_wimo_sampling_types::LengthPolicy::Fail,
+            wimoai_wimo_sampling_types::LengthPolicy::Fail,
         )
         .await
     }
@@ -1060,7 +1060,7 @@ mod tests {
     #[tokio::test]
     async fn length_and_empty_outcomes_retain_terminal_detector_signals() {
         let length = terminal_outcome(completed_response(
-            Some(wimo ai_wimo_sampling_types::StopReason::Length),
+            Some(wimoai_wimo_sampling_types::StopReason::Length),
             "truncated",
         ))
         .await;
@@ -1087,15 +1087,15 @@ mod tests {
         use crate::doom_loop::{MAX_COLLECTED_DOOM_LOOP_SIGNALS, MAX_DOOM_LOOP_SIGNAL_BYTES};
 
         let mut response = completed_response(
-            Some(wimo ai_wimo_sampling_types::StopReason::Length),
+            Some(wimoai_wimo_sampling_types::StopReason::Length),
             "truncated",
         );
         response.doom_loop_signals =
-            std::iter::once(wimo ai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
+            std::iter::once(wimoai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
                 &"x".repeat(MAX_DOOM_LOOP_SIGNAL_BYTES + 1),
             ))
             .chain((0..MAX_COLLECTED_DOOM_LOOP_SIGNALS + 20).map(|index| {
-                wimo ai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(&format!(
+                wimoai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(&format!(
                     "unknown_{index}@thinking"
                 ))
             }))
@@ -1115,7 +1115,7 @@ mod tests {
             None,
             FailedResponseCapture::default(),
             Arc::new(AtomicBool::new(false)),
-            wimo ai_wimo_sampling_types::LengthPolicy::Fail,
+            wimoai_wimo_sampling_types::LengthPolicy::Fail,
         )
         .await;
 
@@ -1143,7 +1143,7 @@ mod tests {
     async fn length_policy_fail_converts_completed_to_failed() {
         let outcome = drive_length_event(
             length_completed_event("partial"),
-            wimo ai_wimo_sampling_types::LengthPolicy::Fail,
+            wimoai_wimo_sampling_types::LengthPolicy::Fail,
         )
         .await;
         assert!(matches!(
@@ -1159,7 +1159,7 @@ mod tests {
     async fn length_policy_salvage_completes_with_partial_content() {
         let outcome = drive_length_event(
             length_completed_event("partial"),
-            wimo ai_wimo_sampling_types::LengthPolicy::CompletePartial,
+            wimoai_wimo_sampling_types::LengthPolicy::CompletePartial,
         )
         .await;
         let AttemptOutcome::Completed { response, .. } = outcome else {
@@ -1168,7 +1168,7 @@ mod tests {
         assert_eq!(response.assistant_text(), "partial");
         assert_eq!(
             response.stop_reason,
-            Some(wimo ai_wimo_sampling_types::StopReason::Length)
+            Some(wimoai_wimo_sampling_types::StopReason::Length)
         );
     }
 
@@ -1176,12 +1176,12 @@ mod tests {
         let SamplingEvent::Completed { response, .. } = &mut event else {
             unreachable!("helper builds Completed");
         };
-        let Some(wimo ai_wimo_sampling_types::ConversationItem::Assistant(a)) =
+        let Some(wimoai_wimo_sampling_types::ConversationItem::Assistant(a)) =
             response.items.last_mut()
         else {
             unreachable!("helper builds a trailing Assistant item");
         };
-        a.tool_calls = vec![wimo ai_wimo_sampling_types::ToolCall {
+        a.tool_calls = vec![wimoai_wimo_sampling_types::ToolCall {
             id: "call_1".into(),
             name: "do_thing".into(),
             arguments: arguments.into(),
@@ -1193,8 +1193,8 @@ mod tests {
     #[tokio::test]
     async fn length_policy_truncated_tool_call_arguments_still_fail() {
         for policy in [
-            wimo ai_wimo_sampling_types::LengthPolicy::CompleteToolCalls,
-            wimo ai_wimo_sampling_types::LengthPolicy::CompletePartial,
+            wimoai_wimo_sampling_types::LengthPolicy::CompleteToolCalls,
+            wimoai_wimo_sampling_types::LengthPolicy::CompletePartial,
         ] {
             let event = with_tool_call(length_completed_event("partial"), "{\"x\": \"trunc");
             let outcome = drive_length_event(event, policy).await;
@@ -1212,14 +1212,14 @@ mod tests {
     async fn length_policy_default_completes_with_completed_tool_calls() {
         let event = with_tool_call(length_completed_event("partial"), "{\"x\": 1}");
         let outcome =
-            drive_length_event(event, wimo ai_wimo_sampling_types::LengthPolicy::default()).await;
+            drive_length_event(event, wimoai_wimo_sampling_types::LengthPolicy::default()).await;
         match outcome {
             AttemptOutcome::Completed { response, .. } => {
                 assert_eq!(response.tool_calls().len(), 1);
                 assert_eq!(response.tool_calls()[0].arguments.as_ref(), "{\"x\": 1}");
                 assert_eq!(
                     response.stop_reason,
-                    Some(wimo ai_wimo_sampling_types::StopReason::Length)
+                    Some(wimoai_wimo_sampling_types::StopReason::Length)
                 );
             }
             other => panic!("expected Completed, got {other:?}"),
@@ -1230,7 +1230,7 @@ mod tests {
     async fn length_policy_salvage_empty_still_fails() {
         let outcome = drive_length_event(
             length_completed_event(""),
-            wimo ai_wimo_sampling_types::LengthPolicy::CompletePartial,
+            wimoai_wimo_sampling_types::LengthPolicy::CompletePartial,
         )
         .await;
         assert!(matches!(

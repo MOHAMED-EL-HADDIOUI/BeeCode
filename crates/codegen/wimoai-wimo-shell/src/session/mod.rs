@@ -28,27 +28,27 @@ pub use prod_mc_cli_chat_proxy_types::feedback_types::{
     MAX_FEEDBACK_IMAGE_TOTAL_BYTES, MAX_FEEDBACK_IMAGES, RatingType, feedback_image_extension,
     validate_feedback_images,
 };
-pub use wimo ai_fsnotify::{FsConfig, FsEvent, FsEventKind, FsEventSource, FsNotifyError, GitMetaKind};
+pub use wimoai_fsnotify::{FsConfig, FsEvent, FsEventKind, FsEventSource, FsNotifyError, GitMetaKind};
 /// `false` twin: this template is not compiled into this build, so no template matches.
 /// Keeps ungated call sites compiling in both configurations.
 pub(crate) fn is_cursor_user_template(
-    _template: &wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate,
+    _template: &wimoai_wimo_agent::prompt::user_message::UserMessageTemplate,
 ) -> bool {
     false
 }
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub(crate) struct CompactionPins {
-    pub mode: wimo ai_chat_state::CompactionMode,
+    pub mode: wimoai_chat_state::CompactionMode,
     pub two_pass: bool,
 }
 pub(crate) fn cursor_compaction_pins(
-    resolved_mode: wimo ai_chat_state::CompactionMode,
+    resolved_mode: wimoai_chat_state::CompactionMode,
     resolved_two_pass: bool,
     is_cursor: bool,
 ) -> CompactionPins {
     if is_cursor {
         CompactionPins {
-            mode: wimo ai_chat_state::CompactionMode::Summary,
+            mode: wimoai_chat_state::CompactionMode::Summary,
             two_pass: false,
         }
     } else {
@@ -60,7 +60,7 @@ pub(crate) fn cursor_compaction_pins(
 }
 /// `false` twin of [`is_cursor_system_template`]; see [`is_cursor_user_template`].
 pub(crate) fn is_cursor_system_template(
-    _template: &wimo ai_wimo_agent::prompt::context::TemplateOverride,
+    _template: &wimoai_wimo_agent::prompt::context::TemplateOverride,
 ) -> bool {
     false
 }
@@ -76,7 +76,7 @@ pub(crate) fn image_blocks(
         })
         .collect()
 }
-pub use wimo ai_agent_lifecycle::{
+pub use wimoai_agent_lifecycle::{
     AnalyticsClass, CompactionClass, InputAuthority, InputPolicy, QueuePolicy, ShutdownPolicy,
     TurnBoundary,
 };
@@ -463,7 +463,7 @@ pub mod helpers;
 pub(crate) mod image_describe;
 pub(crate) mod image_normalize;
 pub(crate) mod inference_metrics;
-pub use wimo ai_wimo_shared::session::info;
+pub use wimoai_wimo_shared::session::info;
 pub mod managed_mcp;
 pub(crate) mod mcp_descriptors;
 pub(crate) mod mcp_dispatcher;
@@ -476,7 +476,7 @@ pub mod memory;
 pub(crate) mod memory_observation;
 pub(crate) mod normalize_cache;
 pub mod persistence;
-pub use wimo ai_wimo_shared::placeholder_images;
+pub use wimoai_wimo_shared::placeholder_images;
 pub mod plan_mode;
 pub mod prompt_history;
 pub mod prompt_parser;

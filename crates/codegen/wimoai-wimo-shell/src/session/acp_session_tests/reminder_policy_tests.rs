@@ -4,9 +4,9 @@ use super::{
 };
 use crate::session::persistence::PersistenceMsg;
 use crate::util::config::RemoteSettings;
-use wimo ai_wimo_agent::AgentDefinition;
-use wimo ai_wimo_agent::prompt::context::{PromptAudience, TemplateOverride};
-use wimo ai_wimo_agent::system_reminder::{
+use wimoai_wimo_agent::AgentDefinition;
+use wimoai_wimo_agent::prompt::context::{PromptAudience, TemplateOverride};
+use wimoai_wimo_agent::system_reminder::{
     DEFAULT_TODO_GATE_MAX_FIRES, ReminderPolicy, TodoGateConfig,
 };
 /// Helper: a `RemoteSettings` whose only non-default fields are the TodoGate knobs we want to vary.
@@ -275,7 +275,7 @@ async fn same_session_rolls_over_once_when_local_date_advances() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(50_000, 256_000, 85, gateway_tx, persistence_tx).await;
             let today = chrono::Local::now().date_naive();
@@ -316,13 +316,13 @@ async fn rollover_reminder_follows_the_custom_template_date_intent() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(50_000, 256_000, 85, gateway_tx, persistence_tx).await;
             let today = chrono::Local::now().date_naive();
             let yesterday = today.pred_opt().expect("today is never the min date");
             *actor.agent.borrow_mut() = test_agent_with_user_message_template(
-                wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate::Custom(
+                wimoai_wimo_agent::prompt::user_message::UserMessageTemplate::Custom(
                     "Workspace: ${{ workspace_path }}".to_string(),
                 ),
             )
@@ -335,7 +335,7 @@ async fn rollover_reminder_follows_the_custom_template_date_intent() {
                 "a date-free custom template must suppress the rollover reminder"
             );
             *actor.agent.borrow_mut() = test_agent_with_user_message_template(
-                wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate::Custom(
+                wimoai_wimo_agent::prompt::user_message::UserMessageTemplate::Custom(
                     "Today is ${{ today_local }}".to_string(),
                 ),
             )
@@ -362,13 +362,13 @@ async fn rollover_reminder_fires_when_fallback_stamps_a_date_free_template() {
     local
         .run_until(async {
             let (gateway_tx, _) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(50_000, 256_000, 85, gateway_tx, persistence_tx).await;
             let today = chrono::Local::now().date_naive();
             let yesterday = today.pred_opt().expect("today is never the min date");
             *actor.agent.borrow_mut() = test_agent_with_user_message_template(
-                wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate::Custom(
+                wimoai_wimo_agent::prompt::user_message::UserMessageTemplate::Custom(
                     "Workspace: ${{ workspace_path }}".to_string(),
                 ),
             )

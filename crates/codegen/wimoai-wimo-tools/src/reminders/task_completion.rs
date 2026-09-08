@@ -23,9 +23,9 @@ use crate::types::tool::{Reminder, ToolKind};
 use crate::util::truncate::{PREVIEW_SIZE, PartialOutput, truncate_with_preview};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use wimo ai_tool_types::KillTaskOutput;
-use wimo ai_tool_types::SubagentCompletedOutput;
-use wimo ai_tool_types::TaskOutputOutput;
+use wimoai_tool_types::KillTaskOutput;
+use wimoai_tool_types::SubagentCompletedOutput;
+use wimoai_tool_types::TaskOutputOutput;
 /// Default tool name used in auto-wake completion messages.
 pub const DEFAULT_TASK_OUTPUT_TOOL: &str = "get_task_output";
 /// UI/Stop kill with no live waiter: tell the model not to relaunch the task.
@@ -584,7 +584,7 @@ pub fn format_between_turn_bash_completions(
 /// learned about from this tool result. Used by:
 /// - `TaskCompletionReminder::collect_reminders` to suppress the
 ///   per-tool-call `<system-reminder>` for the same ID.
-/// - `wimo ai-wimo-shell`'s `SessionActor` to sweep matching synthetic
+/// - `wimoai-wimo-shell`'s `SessionActor` to sweep matching synthetic
 ///   auto-wake prompts and notifications out of `pending_inputs` /
 ///   `pending_notifications` (closes the TOCTOU race that produces
 ///   trailing `<system-reminder>` items in `chat_history.jsonl`).
@@ -1315,8 +1315,8 @@ mod tests {
     use crate::types::resources::Resources;
     use std::sync::Arc;
     use std::time::Duration;
-    use wimo ai_tool_types::KillTaskResult;
-    use wimo ai_tool_types::{MultiTaskOutputResult, TaskOutputResult};
+    use wimoai_tool_types::KillTaskResult;
+    use wimoai_tool_types::{MultiTaskOutputResult, TaskOutputResult};
     struct MockTerminal {
         tasks: Vec<TaskSnapshot>,
     }

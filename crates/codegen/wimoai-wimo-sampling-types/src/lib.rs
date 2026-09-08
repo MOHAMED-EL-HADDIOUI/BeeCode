@@ -2,7 +2,7 @@
 //!
 //! API-agnostic conversation, chat-completion request/response, streaming, and error types used across the wimo AI agent stack.
 //! It contains no I/O: no HTTP clients, no file system access.
-//! Downstream crates like `wimo ai-chat-state` can depend on it without pulling in the full `wimo ai-wimo-shell`.
+//! Downstream crates like `wimoai-chat-state` can depend on it without pulling in the full `wimoai-wimo-shell`.
 
 pub mod conversation;
 pub mod doom_loop;

@@ -9,19 +9,19 @@ use async_trait::async_trait;
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 
-use wimo ai_computer_hub_core::{
+use wimoai_computer_hub_core::{
     CompoundResolver, ConnectionCleanupReport, ErasedTool, InnerDispatchForResolver, ResolvedTool,
     SessionCleanupReport, ToolHandle, ToolRegistry, ToolSessionBindOutcome,
     ToolSessionUnbindOutcome,
 };
-use wimo ai_tool_protocol::{
+use wimoai_tool_protocol::{
     ConnectionId, RegistrationOutcome, ServerId, SessionId, ToolDefinitionMode, ToolId,
     ToolRegistration, ToolServerRegistration, TransportKind, UserId,
 };
-use wimo ai_tool_runtime::{
+use wimoai_tool_runtime::{
     SearchSnapshot, ServerSummary, Tool, ToolCallContext, ToolDispatch, ToolError, ToolStreamItem,
 };
-use wimo ai_tool_types::ToolDescription;
+use wimoai_tool_types::ToolDescription;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, schemars::JsonSchema)]
 struct EchoArgs {
@@ -39,7 +39,7 @@ impl Tool for EchoTool {
         ToolId::new("echo").expect("tool id")
     }
 
-    fn description(&self, _ctx: &::wimo ai_tool_runtime::ListToolsContext) -> ToolDescription {
+    fn description(&self, _ctx: &::wimoai_tool_runtime::ListToolsContext) -> ToolDescription {
         ToolDescription::new("echo", "Echoes its input.")
     }
 
@@ -66,7 +66,7 @@ impl InMemRegistry {
             sessions: Some(vec![session.clone()]),
             user_id: UserId::new("alice").expect("user id"),
             server_id: None,
-            description: handle.description(&wimo ai_tool_runtime::ListToolsContext::default()),
+            description: handle.description(&wimoai_tool_runtime::ListToolsContext::default()),
             input_schema: None,
             capabilities: Some(handle.capabilities()),
             notification_schemas: None,
@@ -156,15 +156,15 @@ impl ToolRegistry for InMemRegistry {
 
     fn list_servers_for_user(
         &self,
-        _user_id: &wimo ai_tool_protocol::UserId,
-    ) -> Vec<wimo ai_computer_hub_core::registry::ServerRecord> {
+        _user_id: &wimoai_tool_protocol::UserId,
+    ) -> Vec<wimoai_computer_hub_core::registry::ServerRecord> {
         Vec::new()
     }
 
     fn get_server_record(
         &self,
         _connection_id: &ConnectionId,
-    ) -> Option<wimo ai_computer_hub_core::registry::ServerRecord> {
+    ) -> Option<wimoai_computer_hub_core::registry::ServerRecord> {
         None
     }
 }
@@ -219,7 +219,7 @@ async fn inner_dispatch_returns_not_found_when_tool_absent() {
     let item = stream.next().await.expect("terminal");
     match item {
         ToolStreamItem::Terminal(Err(ref e))
-            if e.kind == wimo ai_tool_runtime::ToolErrorKind::NotFound =>
+            if e.kind == wimoai_tool_runtime::ToolErrorKind::NotFound =>
         {
             assert!(
                 e.detail.contains("ghost"),
@@ -255,7 +255,7 @@ async fn inner_dispatch_uses_bound_session_not_context_session() {
     let item = stream.next().await.expect("terminal");
     match item {
         ToolStreamItem::Terminal(Err(ref e))
-            if e.kind == wimo ai_tool_runtime::ToolErrorKind::NotFound => {}
+            if e.kind == wimoai_tool_runtime::ToolErrorKind::NotFound => {}
         other => panic!("session-A registration must not be visible from session-B, got {other:?}"),
     }
 }
@@ -279,7 +279,7 @@ async fn inner_dispatch_after_resolver_drop_returns_computer_hub_dropped() {
     let item = stream.next().await.expect("terminal");
     match item {
         ToolStreamItem::Terminal(Err(ref e))
-            if e.kind == wimo ai_tool_runtime::ToolErrorKind::Custom =>
+            if e.kind == wimoai_tool_runtime::ToolErrorKind::Custom =>
         {
             assert!(
                 e.detail.contains("computer_hub_dropped")
@@ -313,5 +313,5 @@ async fn inner_dispatch_implements_object_safe_tool_dispatch() {
             ToolCallContext::default(),
         )
         .await;
-    assert!(matches!(result, Err(ref e) if e.kind == wimo ai_tool_runtime::ToolErrorKind::NotFound));
+    assert!(matches!(result, Err(ref e) if e.kind == wimoai_tool_runtime::ToolErrorKind::NotFound));
 }

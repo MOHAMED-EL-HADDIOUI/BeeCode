@@ -11,7 +11,7 @@ mod perf_harness;
 mod support;
 use support::*;
 use tempfile::TempDir;
-use wimo ai_wimo_shell::waterfall;
+use wimoai_wimo_shell::waterfall;
 
 #[test]
 #[ignore = "perf regression tier; drives real subagent bursts; run with --ignored --nocapture"]
@@ -82,7 +82,7 @@ fn regression_bootstrap_cost() {
             sessboot.0, sessboot.1, bridge.0, bridge.1
         );
         eprintln!(
-            "reproduce: cargo test -p wimo ai-wimo-shell --test subagent_bootstrap_regression -- --exact regression_bootstrap_cost --ignored --nocapture"
+            "reproduce: cargo test -p wimoai-wimo-shell --test subagent_bootstrap_regression -- --exact regression_bootstrap_cost --ignored --nocapture"
         );
     }
     assert!(

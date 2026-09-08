@@ -3,7 +3,7 @@
 //! This module owns the wire envelope shapes and the method-to-event mapping, kept out of `headless.rs`.
 
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::{AcpArgsBox, AcpResult};
+use wimoai_acp_lib::{AcpArgsBox, AcpResult};
 
 use crate::headless::reducer::{Lifecycle, StreamEvent};
 
@@ -17,8 +17,8 @@ fn ext_response_from<T: serde::Serialize>(value: &T) -> AcpResult<acp::ExtRespon
 /// Answer a reverse `ext_method` request without a UI.
 /// Known interaction methods get a policy reply; dropping `response_tx` instead would fail the whole turn with a channel `recv_failed`.
 pub(crate) fn reply_headless_ext_method(args: AcpArgsBox<acp::ExtRequest>) {
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionExtResponse;
-    use wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtResponse;
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionExtResponse;
+    use wimoai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtResponse;
 
     let method = args.request.method.as_ref();
     // Known methods are answered without parsing params: even a malformed request gets the policy reply rather than a dropped channel
@@ -26,7 +26,7 @@ pub(crate) fn reply_headless_ext_method(args: AcpArgsBox<acp::ExtRequest>) {
         // The model sees the tool's NO_OPERATOR_TEXT (headless sessions are non-interactive), not the interactive "user declined" cancel text
         "x.ai/ask_user_question" => ext_response_from(&AskUserQuestionExtResponse::Cancelled),
         "x.ai/mcp/elicit" => {
-            use wimo ai_wimo_tools::mcp_elicitation::McpElicitExtResponse;
+            use wimoai_wimo_tools::mcp_elicitation::McpElicitExtResponse;
             ext_response_from(&McpElicitExtResponse::Cancel)
         }
         // The model sees "Your plan has been approved. You can now start coding.".
@@ -78,7 +78,7 @@ pub(crate) enum ExtEvent {
 }
 
 pub(crate) fn handle_ext_notification(
-    notif: &wimo ai_acp_lib::AcpArgsBox<acp::ExtNotification>,
+    notif: &wimoai_acp_lib::AcpArgsBox<acp::ExtNotification>,
 ) -> ExtEvent {
     let method = notif.request.method.as_ref();
     let params = notif.request.params.get();
@@ -203,7 +203,7 @@ fn decode_task_completed(method: &str, params: &str) -> ExtEvent {
 fn decode_session_notification(method: &str, params: &str) -> ExtEvent {
     #[derive(serde::Deserialize)]
     #[serde(rename_all = "snake_case", tag = "sessionUpdate")]
-    enum wimo aiUpdate {
+    enum wimoaiUpdate {
         AutoCompactStarted {
             percentage: u8,
         },
@@ -255,7 +255,7 @@ fn decode_session_notification(method: &str, params: &str) -> ExtEvent {
             #[serde(default)]
             stop_reason: Option<String>,
             #[serde(default)]
-            usage: Option<wimo ai_wimo_shell::extensions::notification::ResponseUsage>,
+            usage: Option<wimoai_wimo_shell::extensions::notification::ResponseUsage>,
             #[serde(default)]
             signature: Option<String>,
             #[serde(default)]
@@ -265,11 +265,11 @@ fn decode_session_notification(method: &str, params: &str) -> ExtEvent {
         Other,
     }
     #[derive(serde::Deserialize)]
-    struct wimo aiNotif {
-        update: wimo aiUpdate,
+    struct wimoaiNotif {
+        update: wimoaiUpdate,
     }
 
-    let wimo ai_notif = match serde_json::from_str::<wimo aiNotif>(params) {
+    let wimoai_notif = match serde_json::from_str::<wimoaiNotif>(params) {
         Ok(n) => n,
         Err(e) => {
             tracing::warn!(
@@ -281,34 +281,34 @@ fn decode_session_notification(method: &str, params: &str) -> ExtEvent {
         }
     };
 
-    match wimo ai_notif.update {
-        wimo aiUpdate::AutoCompactStarted { percentage } => {
+    match wimoai_notif.update {
+        wimoaiUpdate::AutoCompactStarted { percentage } => {
             ExtEvent::Lifecycle(Lifecycle::CompactStarted { percentage })
         }
-        wimo aiUpdate::AutoCompactCompleted { tokens_before } => {
+        wimoaiUpdate::AutoCompactCompleted { tokens_before } => {
             ExtEvent::Lifecycle(Lifecycle::CompactCompleted {
                 pre_tokens: tokens_before.unwrap_or(0),
             })
         }
-        wimo aiUpdate::AutoCompactFailed { error } => {
+        wimoaiUpdate::AutoCompactFailed { error } => {
             ExtEvent::Lifecycle(Lifecycle::CompactFailed { error })
         }
-        wimo aiUpdate::AutoCompactCancelled {} => ExtEvent::Lifecycle(Lifecycle::CompactCancelled),
-        wimo aiUpdate::AutoContinueCompleted { total_tokens } => {
+        wimoaiUpdate::AutoCompactCancelled {} => ExtEvent::Lifecycle(Lifecycle::CompactCancelled),
+        wimoaiUpdate::AutoContinueCompleted { total_tokens } => {
             ExtEvent::Lifecycle(Lifecycle::AutoContinue { total_tokens })
         }
-        wimo aiUpdate::ImageCompressed { message } => {
+        wimoaiUpdate::ImageCompressed { message } => {
             ExtEvent::Lifecycle(Lifecycle::ImageCompressed { message })
         }
-        wimo aiUpdate::MemoryFlushStarted {} => ExtEvent::Lifecycle(Lifecycle::MemoryFlushStarted),
-        wimo aiUpdate::MemoryFlushCompleted { result, path } => {
+        wimoaiUpdate::MemoryFlushStarted {} => ExtEvent::Lifecycle(Lifecycle::MemoryFlushStarted),
+        wimoaiUpdate::MemoryFlushCompleted { result, path } => {
             ExtEvent::Lifecycle(Lifecycle::MemoryFlushCompleted { result, path })
         }
-        wimo aiUpdate::SubagentSpawned { subagent_id } => ExtEvent::SubagentSpawned { subagent_id },
-        wimo aiUpdate::SubagentFinished { subagent_id, .. } => {
+        wimoaiUpdate::SubagentSpawned { subagent_id } => ExtEvent::SubagentSpawned { subagent_id },
+        wimoaiUpdate::SubagentFinished { subagent_id, .. } => {
             ExtEvent::SubagentFinished { subagent_id }
         }
-        wimo aiUpdate::ResponseStarted {
+        wimoaiUpdate::ResponseStarted {
             message_id,
             model,
             input_tokens,
@@ -321,10 +321,10 @@ fn decode_session_notification(method: &str, params: &str) -> ExtEvent {
             cache_read_input_tokens,
             cache_creation_input_tokens,
         })),
-        wimo aiUpdate::ReasoningCompleted { signature } => {
+        wimoaiUpdate::ReasoningCompleted { signature } => {
             ExtEvent::Stream(Box::new(StreamEvent::ReasoningCompleted { signature }))
         }
-        wimo aiUpdate::ResponseCompleted {
+        wimoaiUpdate::ResponseCompleted {
             message_id,
             stop_reason,
             usage,
@@ -339,7 +339,7 @@ fn decode_session_notification(method: &str, params: &str) -> ExtEvent {
         })),
         // A task_backgrounded or task_completed tag arriving here belongs on its dedicated method; log loudly
         // Any other unknown tag stays a clean ignore
-        wimo aiUpdate::Other => {
+        wimoaiUpdate::Other => {
             if let Some(tag) = session_update_tag(params)
                 && matches!(tag.as_str(), "task_backgrounded" | "task_completed")
             {

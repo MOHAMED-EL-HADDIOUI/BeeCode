@@ -1,8 +1,8 @@
 //! Applies a reasoning-effort hint only when the model supports it; shared by session creation, model switch, and the summary client.
 
 use agent_client_protocol as acp;
-use wimo ai_wimo_sampler::SamplerConfig;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
+use wimoai_wimo_sampler::SamplerConfig;
+use wimoai_wimo_sampling_types::ReasoningEffort;
 
 use crate::agent::models::ModelsManager;
 

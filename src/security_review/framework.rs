@@ -1,5 +1,5 @@
 //! Security review framework — REAL security checks (Section 47 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub fn run_security_review() -> Vec<String> {
     vec![

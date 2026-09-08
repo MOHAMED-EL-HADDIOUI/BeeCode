@@ -90,13 +90,13 @@
         title: &str,
         options: Vec<acp::PermissionOption>,
     ) -> acp::RequestPermissionRequest {
-        let ask = wimo ai_wimo_workspace::permission::HookAsk {
+        let ask = wimoai_wimo_workspace::permission::HookAsk {
             hook_name: "guard".to_owned(),
             reason: Some("confirm this".to_owned()),
         };
         let mut meta = serde_json::Map::new();
         meta.insert(
-            wimo ai_wimo_workspace::permission::HOOK_ASK_META_KEY.to_owned(),
+            wimoai_wimo_workspace::permission::HOOK_ASK_META_KEY.to_owned(),
             serde_json::to_value(&ask).unwrap(),
         );
         let fields = acp::ToolCallUpdateFields::new()

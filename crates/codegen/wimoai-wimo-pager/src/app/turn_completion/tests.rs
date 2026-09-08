@@ -354,7 +354,7 @@ fn hook_denied_finalize_requeues_blocked_prompt_and_opens_card() {
     use crate::views::question_view::LocalQuestionKind;
 
     // The context is built through the shared wire type, so the test breaks if the shell's serialization and the pager's parse ever drift apart
-    let context = serde_json::to_value(wimo ai_wimo_shell::session::commands::CancellationContext {
+    let context = serde_json::to_value(wimoai_wimo_shell::session::commands::CancellationContext {
         hook_name: Some("global/block-hihi:user_prompt_submit[0].hooks[0]".into()),
         reason: Some("it contains 'hihi'".into()),
         ..Default::default()
@@ -734,7 +734,7 @@ fn saving_unrelated_row_keeps_hold_and_reopens_card() {
 #[test]
 fn deferred_card_reopens_when_other_question_closes() {
     use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
 
@@ -798,7 +798,7 @@ fn deferred_card_reopens_when_other_question_closes() {
 #[test]
 fn deferred_card_reopens_when_feedback_report_closes() {
     use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
 
@@ -1602,7 +1602,7 @@ fn viewer_finalize_truncation_wire_pair_renders_exact_user_copy() {
         TerminalSignal {
             prompt_id: Some("p1"),
             stop_reason: Some("error"),
-            agent_result: Some(wimo ai_wimo_shell::sampling::error::MAX_TOKENS_TRUNCATION_MESSAGE),
+            agent_result: Some(wimoai_wimo_shell::sampling::error::MAX_TOKENS_TRUNCATION_MESSAGE),
             error_kind: Some(WireErrorType::MaxTokensTruncation),
             ..Default::default()
         },

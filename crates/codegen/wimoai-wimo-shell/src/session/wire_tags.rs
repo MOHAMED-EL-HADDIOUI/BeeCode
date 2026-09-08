@@ -7,9 +7,9 @@
 use std::sync::LazyLock;
 
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::types::TaskSnapshot;
+use wimoai_wimo_tools::types::TaskSnapshot;
 
-use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
 
 /// Serialize an internally-tagged session-update value and return the `sessionUpdate` discriminant serde itself emits for that variant.
 fn tagged_discriminant<T: serde::Serialize>(value: &T) -> String {
@@ -51,14 +51,14 @@ pub(crate) static TOOL_CALL_STATUS_IN_PROGRESS: LazyLock<String> = LazyLock::new
 
 /// Appears verbatim in compact JSON, so it doubles as a cheap substring pre-filter.
 pub(crate) static REWIND_MARKER: LazyLock<String> = LazyLock::new(|| {
-    tagged_discriminant(&wimo aiSessionUpdate::RewindMarker {
+    tagged_discriminant(&wimoaiSessionUpdate::RewindMarker {
         target_prompt_index: 0,
         created_at: String::new(),
     })
 });
 
 pub(crate) static TASK_BACKGROUNDED: LazyLock<String> = LazyLock::new(|| {
-    tagged_discriminant(&wimo aiSessionUpdate::TaskBackgrounded {
+    tagged_discriminant(&wimoaiSessionUpdate::TaskBackgrounded {
         tool_call_id: String::new(),
         task_id: String::new(),
         command: String::new(),
@@ -70,7 +70,7 @@ pub(crate) static TASK_BACKGROUNDED: LazyLock<String> = LazyLock::new(|| {
 });
 
 pub(crate) static TASK_COMPLETED: LazyLock<String> = LazyLock::new(|| {
-    tagged_discriminant(&wimo aiSessionUpdate::TaskCompleted {
+    tagged_discriminant(&wimoaiSessionUpdate::TaskCompleted {
         task_snapshot: TaskSnapshot {
             task_id: String::new(),
             command: String::new(),

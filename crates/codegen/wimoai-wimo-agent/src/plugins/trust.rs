@@ -18,7 +18,7 @@ use std::io::{BufRead, Write};
 use std::path::{Path, PathBuf};
 
 /// Name of the trust-store file under `~/.wimo/`.
-const TRUST_FILE_NAME: &str = wimo ai_wimo_config::TRUSTED_PLUGINS_FILENAME;
+const TRUST_FILE_NAME: &str = wimoai_wimo_config::TRUSTED_PLUGINS_FILENAME;
 
 #[derive(Debug, Clone)]
 pub struct TrustStore {
@@ -33,7 +33,7 @@ impl TrustStore {
     pub fn load() -> Self {
         // Gate on user_wimo_home() so a project's `.wimo/trusted-plugins` is never read as the user trust store
         // That happens when neither wimo_HOME nor a home dir resolves
-        let Some(wimo) = wimo ai_wimo_config::user_wimo_home() else {
+        let Some(wimo) = wimoai_wimo_config::user_wimo_home() else {
             return Self {
                 trusted: HashSet::new(),
                 file_path: PathBuf::new(),
@@ -150,7 +150,7 @@ impl TrustStore {
     /// is under the user's home directory.  Otherwise it requires explicit
     /// trust via `~/.wimo/trusted-plugins`.
     pub fn is_config_path_auto_trusted(plugin_root: &Path) -> bool {
-        let Some(home) = wimo ai_dirs::home_dir() else {
+        let Some(home) = wimoai_dirs::home_dir() else {
             return false;
         };
         match dunce::canonicalize(plugin_root) {

@@ -2,5 +2,5 @@
 //!
 //! Old tests deleted (Phase 6) — they used removed page-fetch tool impls.
 //! Citation counter behavior is covered by unit tests on
-//! [`wimo ai_wimo_tools::types::resources::WebCitationCounter`] and by
+//! [`wimoai_wimo_tools::types::resources::WebCitationCounter`] and by
 //! web-tool integration tests that share the counter via Resources.

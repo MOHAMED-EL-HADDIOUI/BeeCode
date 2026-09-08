@@ -1,4 +1,4 @@
-use wimo ai_wimo_sampling_types::{SearchDateBound, ToolOverrides, WebSearchOptions, XSearchOptions};
+use wimoai_wimo_sampling_types::{SearchDateBound, ToolOverrides, WebSearchOptions, XSearchOptions};
 
 use super::{
     CLASSIFIER_REQUEST_TOKEN_RESERVE, LengthSalvageAction, LengthSalvageStreak,
@@ -100,7 +100,7 @@ fn non_empty_base_cutoff_wins_per_tool_and_an_empty_one_reverts_to_the_seed() {
 
 #[test]
 fn inherited_cutoff_agrees_with_the_wire_echo_so_the_two_implementations_cannot_drift() {
-    use wimo ai_wimo_sampling_types::{HostedTool, apply_tool_overrides};
+    use wimoai_wimo_sampling_types::{HostedTool, apply_tool_overrides};
     let web = WebSearchOptions {
         allowed_domains: Some(vec!["x.com".into()]),
         excluded_domains: None,

@@ -140,8 +140,8 @@ pub(super) fn reseed_tip_for_new_session(app: &mut AppView) {
     if !matches!(app.active_view, ActiveView::Agent(_)) || app.tips.is_empty() {
         return;
     }
-    let wimo_home = wimo ai_wimo_tools::util::wimo_home::wimo_home();
-    app.tip = wimo ai_wimo_shell::util::tips::pick_and_advance(&app.tips, &wimo_home);
+    let wimo_home = wimoai_wimo_tools::util::wimo_home::wimo_home();
+    app.tip = wimoai_wimo_shell::util::tips::pick_and_advance(&app.tips, &wimo_home);
 }
 
 /// Switch to the welcome screen, clearing ephemeral per-visit state.

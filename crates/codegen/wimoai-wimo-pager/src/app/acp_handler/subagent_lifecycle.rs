@@ -45,18 +45,18 @@ pub(super) struct SubagentLifecycleUpdate<'a> {
 }
 
 pub(super) fn classify_subagent_lifecycle(
-    update: &wimo aiSessionUpdate,
+    update: &wimoaiSessionUpdate,
     origin: LifecycleOrigin,
 ) -> Option<SubagentLifecycleUpdate<'_>> {
     match update {
-        wimo aiSessionUpdate::SubagentSpawned {
+        wimoaiSessionUpdate::SubagentSpawned {
             child_session_id, ..
         } => Some(SubagentLifecycleUpdate {
             child_session_id,
             transition: SubagentLifecycle::Spawned,
             origin,
         }),
-        wimo aiSessionUpdate::SubagentFinished {
+        wimoaiSessionUpdate::SubagentFinished {
             child_session_id, ..
         } => Some(SubagentLifecycleUpdate {
             child_session_id,
@@ -209,7 +209,7 @@ pub(super) fn redispatched_subagent_finish(
 }
 
 fn strip_deferred_finish_output(notification: &mut SessionNotification) {
-    if let wimo aiSessionUpdate::SubagentFinished { output, .. } = &mut notification.update {
+    if let wimoaiSessionUpdate::SubagentFinished { output, .. } = &mut notification.update {
         *output = None;
     }
 }
@@ -253,7 +253,7 @@ mod tests {
     fn finish_notification(child: &str, output: Option<String>) -> SessionNotification {
         SessionNotification {
             session_id: acp::SessionId::new("sess-parent"),
-            update: wimo aiSessionUpdate::SubagentFinished {
+            update: wimoaiSessionUpdate::SubagentFinished {
                 subagent_id: child.into(),
                 child_session_id: child.into(),
                 status: "completed".into(),
@@ -323,7 +323,7 @@ mod tests {
             deferred
                 .values()
                 .all(|entry| match &entry.notification.update {
-                    wimo aiSessionUpdate::SubagentFinished { output, .. } => output.is_none(),
+                    wimoaiSessionUpdate::SubagentFinished { output, .. } => output.is_none(),
                     _ => false,
                 })
         );

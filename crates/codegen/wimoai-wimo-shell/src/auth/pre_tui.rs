@@ -144,13 +144,13 @@ mod tests {
 
     #[tokio::test]
     async fn provider_echo_token_signs_in() {
-        let (_dir, mgr) = isolated_manager(Some("printf '%s' wimo ai-ext-token"));
-        let outcome = run_pre_tui_external_login_with(&mgr, "printf '%s' wimo ai-ext-token", false)
+        let (_dir, mgr) = isolated_manager(Some("printf '%s' wimoai-ext-token"));
+        let outcome = run_pre_tui_external_login_with(&mgr, "printf '%s' wimoai-ext-token", false)
             .await
             .expect("provider must mint");
         match outcome {
             PreTuiLoginOutcome::SignedIn(auth) => {
-                assert_eq!(auth.key, "wimo ai-ext-token");
+                assert_eq!(auth.key, "wimoai-ext-token");
                 assert!(mgr.current().is_some());
             }
             PreTuiLoginOutcome::Skipped => panic!("unsigned start must run the provider"),

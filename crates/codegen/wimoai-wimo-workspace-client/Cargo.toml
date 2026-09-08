@@ -1,9 +1,9 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-workspace-client"
+name = "wimoai-wimo-workspace-client"
 version = "0.1.0"
 edition.workspace = true
-description = "Lightweight typed client for hub-proxied workspace.* RPCs (shared by wimo ai-wimo-shell proxy mode and other consumers)"
+description = "Lightweight typed client for hub-proxied workspace.* RPCs (shared by wimoai-wimo-shell proxy mode and other consumers)"
 
 [dependencies]
 semver = { workspace = true }
@@ -12,10 +12,10 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["time"] }
 tracing = { workspace = true }
-wimo ai-computer-hub-sdk = { workspace = true }
-wimo ai-wimo-workspace-types = { workspace = true }
-wimo ai-tool-protocol = { workspace = true }
-wimo ai-tool-runtime = { workspace = true }
+wimoai-computer-hub-sdk = { workspace = true }
+wimoai-wimo-workspace-types = { workspace = true }
+wimoai-tool-protocol = { workspace = true }
+wimoai-tool-runtime = { workspace = true }
 
 [features]
 default = []
@@ -23,7 +23,7 @@ default-bazel = []
 [dev-dependencies]
 schemars = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt", "test-util"] }
-wimo ai-tool-types = { workspace = true }
+wimoai-tool-types = { workspace = true }
 
 [lints]
 workspace = true

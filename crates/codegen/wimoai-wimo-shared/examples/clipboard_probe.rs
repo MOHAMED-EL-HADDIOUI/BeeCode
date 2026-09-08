@@ -6,7 +6,7 @@
 //! ```text
 //! # put an image on the pasteboard first, e.g.:
 //! #   osascript -e 'set the clipboard to (read (POSIX file "shot.png") as «class PNGf»)'
-//! cargo build --release -p wimo ai-wimo-shared --example clipboard_probe
+//! cargo build --release -p wimoai-wimo-shared --example clipboard_probe
 //! hyperfine --warmup 2 \
 //!   -n native './target/release/examples/clipboard_probe' \
 //!   -n osascript 'wimo_CLIPBOARD_NO_NATIVE_READ=1 ./target/release/examples/clipboard_probe'
@@ -16,7 +16,7 @@
 
 fn main() -> anyhow::Result<()> {
     let started = std::time::Instant::now();
-    let attachments = wimo ai_wimo_shared::clipboard::get_attachments()?;
+    let attachments = wimoai_wimo_shared::clipboard::get_attachments()?;
     let elapsed_ms = started.elapsed().as_secs_f64() * 1e3;
 
     let image = attachments

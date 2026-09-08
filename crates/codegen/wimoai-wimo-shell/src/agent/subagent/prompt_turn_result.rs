@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::session::commands::{PromptCompletionKind, PromptTurnResult};
-use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentResult;
+use wimoai_wimo_tools::implementations::wimo::task::types::SubagentResult;
 
 pub(super) enum PromptTurnResultMode {
     Initial { requires_structured_output: bool },

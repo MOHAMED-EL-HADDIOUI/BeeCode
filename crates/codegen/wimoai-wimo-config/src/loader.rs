@@ -173,8 +173,8 @@ pub fn managed_config_layers_at(
     layers
 }
 
-/// A hook's origin (held by `wimo ai_wimo_hooks::HookSpec::layer`).
-/// Defined here, not in `wimo ai-wimo-hooks`, since the dep direction is `wimo ai-wimo-hooks -> wimo ai-wimo-config`.
+/// A hook's origin (held by `wimoai_wimo_hooks::HookSpec::layer`).
+/// Defined here, not in `wimoai-wimo-hooks`, since the dep direction is `wimoai-wimo-hooks -> wimoai-wimo-config`.
 /// This crate sets the config tiers; `File`/`Plugin` are set downstream.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -448,7 +448,7 @@ pub fn hook_config_layers_at(
 /// Applies matching `[[version_overrides]]` patches against the running CLI version; strips the section either way.
 /// If the installed version can't be parsed (broken `wimo_TEST_VERSION` in dev), it silently strips without applying, keeping the CLI usable.
 pub fn apply_version_overrides_with_registered(value: &mut toml::Value) -> std::io::Result<()> {
-    match wimo ai_wimo_version::installed_semver() {
+    match wimoai_wimo_version::installed_semver() {
         Ok(version) => apply_version_overrides(value, &version)
             .map_err(|e| std::io::Error::other(e.redacted())),
         Err(_) => {
@@ -837,7 +837,7 @@ mod tests {
         // Duplicate key: the message names the key; the secret-bearing source line is only in Display.
         std::fs::write(
             &path,
-            "api_key = \"wimo ai-secretmustnotleak\"\napi_key = \"wimo ai-secretmustnotleak2\"\n",
+            "api_key = \"wimoai-secretmustnotleak\"\napi_key = \"wimoai-secretmustnotleak2\"\n",
         )
         .unwrap();
 
@@ -848,7 +848,7 @@ mod tests {
         );
         assert!(msg.contains("duplicate key"), "want parser kind: {msg}");
         assert!(
-            !msg.contains("wimo ai-secretmustnotleak"),
+            !msg.contains("wimoai-secretmustnotleak"),
             "leaked the secret value: {msg}"
         );
         assert!(

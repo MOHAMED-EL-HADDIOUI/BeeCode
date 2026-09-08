@@ -1,8 +1,8 @@
-//! Probes the first-party env key (`GET {wimo ai_api_base_url}/api-key`) before `initialize` advertises `wimo ai.api_key`.
+//! Probes the first-party env key (`GET {wimoai_api_base_url}/api-key`) before `initialize` advertises `wimoai.api_key`.
 //! BYOK keys are never probed.
 //!
-//! The base URL is the caller's effective `endpoints.wimo ai_api_base_url`, so the probe hits the same host turn traffic uses.
-//! That value comes from `wimo_wimo ai_API_BASE_URL` or `[endpoints] wimo ai_api_base_url`.
+//! The base URL is the caller's effective `endpoints.wimoai_api_base_url`, so the probe hits the same host turn traffic uses.
+//! That value comes from `wimo_wimoai_API_BASE_URL` or `[endpoints] wimoai_api_base_url`.
 //!
 //! Unusable (an auth error, or a 200 with a blocked, disabled, or team_blocked flag) means the key is not advertised.
 //! Unknown (a timeout, a network error, or exhausted retries) fails open and the key is still advertised.
@@ -118,14 +118,14 @@ fn classify_probe_response(status: u16, body: &[u8]) -> ApiKeyProbeVerdict {
 
 /// Fails open on a timeout or transport error after retries; the raw key is never logged.
 ///
-/// `api_base_url` must be the endpoint the env key is actually sent to (`endpoints.wimo ai_api_base_url`), not a hardcoded public default.
-async fn probe_wimo ai_api_key(key: &str, api_base_url: &str, timeout: Duration) -> ApiKeyProbeVerdict {
+/// `api_base_url` must be the endpoint the env key is actually sent to (`endpoints.wimoai_api_base_url`), not a hardcoded public default.
+async fn probe_wimoai_api_key(key: &str, api_base_url: &str, timeout: Duration) -> ApiKeyProbeVerdict {
     let url = api_key_info_url(api_base_url);
-    probe_wimo ai_api_key_at_url(key, &url, timeout).await
+    probe_wimoai_api_key_at_url(key, &url, timeout).await
 }
 
 /// Takes the full URL so tests can point the probe at a local server.
-async fn probe_wimo ai_api_key_at_url(key: &str, url: &str, timeout: Duration) -> ApiKeyProbeVerdict {
+async fn probe_wimoai_api_key_at_url(key: &str, url: &str, timeout: Duration) -> ApiKeyProbeVerdict {
     if key.trim().is_empty() {
         return ApiKeyProbeVerdict::Unusable;
     }
@@ -179,7 +179,7 @@ async fn probe_wimo ai_api_key_at_url(key: &str, url: &str, timeout: Duration) -
     }
 
     let elapsed_ms = started.elapsed().as_millis() as u64;
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "auth: first-party API key probe",
         None,
         Some(serde_json::json!({
@@ -197,16 +197,16 @@ async fn probe_wimo ai_api_key_at_url(key: &str, url: &str, timeout: Duration) -
 
 /// Probes the env key when one is set; without an env key this returns false and the caller combines the result with BYOK.
 ///
-/// `api_base_url` is the caller's effective `endpoints.wimo ai_api_base_url`, so the probe follows the same endpoint as turn traffic.
-/// In tests that is the mock server the fixtures already set via `wimo_wimo ai_API_BASE_URL`.
+/// `api_base_url` is the caller's effective `endpoints.wimoai_api_base_url`, so the probe follows the same endpoint as turn traffic.
+/// In tests that is the mock server the fixtures already set via `wimo_wimoai_API_BASE_URL`.
 pub(crate) async fn first_party_env_key_allows_advertise(
     api_base_url: &str,
     timeout: Duration,
 ) -> bool {
-    let Ok(key) = crate::agent::auth_method::read_wimo ai_api_key_env() else {
+    let Ok(key) = crate::agent::auth_method::read_wimoai_api_key_env() else {
         return false;
     };
-    probe_wimo ai_api_key(&key, api_base_url, timeout)
+    probe_wimoai_api_key(&key, api_base_url, timeout)
         .await
         .allows_advertise()
 }
@@ -320,7 +320,7 @@ mod tests {
     #[tokio::test]
     async fn empty_key_is_unusable_without_network() {
         assert_eq!(
-            probe_wimo ai_api_key(
+            probe_wimoai_api_key(
                 "   ",
                 "https://example.invalid/v1",
                 Duration::from_millis(50)
@@ -361,7 +361,7 @@ mod tests {
             "HTTP/1.1 400 Bad Request",
             br#"{"error":"Incorrect API key"}"#,
         );
-        let v = probe_wimo ai_api_key_at_url("wimo ai-bad", &url, Duration::from_secs(2)).await;
+        let v = probe_wimoai_api_key_at_url("wimoai-bad", &url, Duration::from_secs(2)).await;
         assert_eq!(v, ApiKeyProbeVerdict::Unusable);
     }
 
@@ -371,7 +371,7 @@ mod tests {
             "HTTP/1.1 200 OK",
             br#"{"api_key_blocked":true,"api_key_disabled":false}"#,
         );
-        let v = probe_wimo ai_api_key_at_url("wimo ai-blocked", &url, Duration::from_secs(2)).await;
+        let v = probe_wimoai_api_key_at_url("wimoai-blocked", &url, Duration::from_secs(2)).await;
         assert_eq!(v, ApiKeyProbeVerdict::Unusable);
     }
 
@@ -381,7 +381,7 @@ mod tests {
             "HTTP/1.1 200 OK",
             br#"{"api_key_id":"abc","api_key_blocked":false,"api_key_disabled":false}"#,
         );
-        let v = probe_wimo ai_api_key_at_url("wimo ai-good", &url, Duration::from_secs(2)).await;
+        let v = probe_wimoai_api_key_at_url("wimoai-good", &url, Duration::from_secs(2)).await;
         assert_eq!(v, ApiKeyProbeVerdict::Usable);
     }
 
@@ -393,7 +393,7 @@ mod tests {
         );
         // serve_sequence returns the full .../v1/api-key URL; strip it back to the base the way config stores it
         let base = url.trim_end_matches("/api-key");
-        let v = probe_wimo ai_api_key("wimo ai-good", base, Duration::from_secs(2)).await;
+        let v = probe_wimoai_api_key("wimoai-good", base, Duration::from_secs(2)).await;
         assert_eq!(v, ApiKeyProbeVerdict::Usable);
     }
 
@@ -409,7 +409,7 @@ mod tests {
                 br#"{"api_key_id":"ok","api_key_blocked":false,"api_key_disabled":false}"#.to_vec(),
             ),
         ]);
-        let v = probe_wimo ai_api_key_at_url("wimo ai-retry", &url, Duration::from_secs(2)).await;
+        let v = probe_wimoai_api_key_at_url("wimoai-retry", &url, Duration::from_secs(2)).await;
         assert_eq!(v, ApiKeyProbeVerdict::Usable);
     }
 
@@ -427,7 +427,7 @@ mod tests {
         });
 
         let url = format!("http://{addr}/v1/api-key");
-        let v = probe_wimo ai_api_key_at_url("wimo ai-slow", &url, Duration::from_millis(80)).await;
+        let v = probe_wimoai_api_key_at_url("wimoai-slow", &url, Duration::from_millis(80)).await;
         assert_eq!(v, ApiKeyProbeVerdict::Unknown);
         assert!(v.allows_advertise());
     }

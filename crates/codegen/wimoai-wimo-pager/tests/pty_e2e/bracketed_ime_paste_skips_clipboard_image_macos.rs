@@ -15,7 +15,7 @@ use super::common::*;
 #[ignore]
 #[serial_test::serial(host_clipboard)]
 async fn bracketed_ime_paste_skips_clipboard_image_macos() {
-    use wimo ai_wimo_pager_pty_harness::host_clipboard::{
+    use wimoai_wimo_pager_pty_harness::host_clipboard::{
         HostClipboardTextGuard, clipboard_roundtrip_works, set_clipboard_png, write_fixture_png,
     };
 

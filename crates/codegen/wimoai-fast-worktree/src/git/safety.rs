@@ -31,7 +31,7 @@ use reachability::find_reflog_only_commits;
 use reachability::{find_missing_objects, find_unpushed_commits};
 use working_tree::{find_gitlink_content, find_working_tree_content};
 
-const NO_SUCH_PATH: &str = "/nonexistent/wimo ai-fast-worktree/no-such-file";
+const NO_SUCH_PATH: &str = "/nonexistent/wimoai-fast-worktree/no-such-file";
 
 /// Whether `<worktree>/.git` is *definitively* absent. `NotFound` and
 /// `NotADirectory` (a non-dir sits where the worktree should be, so nothing can

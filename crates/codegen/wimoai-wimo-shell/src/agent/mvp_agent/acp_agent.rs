@@ -1,9 +1,9 @@
 #![cfg_attr(rustfmt, rustfmt::skip)]
 #![allow(unused_imports)]
 use super::*;
-use wimo ai_wimo_telemetry::instrument_task;
-use wimo ai_wimo_telemetry::region;
-use wimo ai_wimo_telemetry::region::Parent;
+use wimoai_wimo_telemetry::instrument_task;
+use wimoai_wimo_telemetry::region;
+use wimoai_wimo_telemetry::region::Parent;
 use crate::auth::{CachedTokenState, SilentRefresh};
 use crate::upload::trace::PromptMetadataParams;
 use crate::leader::protocol::InternalMethod;
@@ -92,8 +92,8 @@ impl acp::Agent for MvpAgent {
         arguments: acp::InitializeRequest,
     ) -> Result<acp::InitializeResponse, acp::Error> {
         tracing::debug!(target: "sampling_log", "Received initialize request");
-        wimo ai_wimo_telemetry::unified_log::info("agent initialized", None, None);
-        wimo ai_wimo_telemetry::startup::mark_agent_serving();
+        wimoai_wimo_telemetry::unified_log::info("agent initialized", None, None);
+        wimoai_wimo_telemetry::startup::mark_agent_serving();
         self.start_subagent_coordinator();
         if self.cfg.borrow().remote_settings.is_none() {
             self.spawn_settings_reapply();
@@ -105,7 +105,7 @@ impl acp::Agent for MvpAgent {
                 "auto worktree gc and session search deferred until remote_settings arrive"
             );
         }
-        let wimo_home = wimo ai_fast_worktree::resolve_wimo_home();
+        let wimo_home = wimoai_fast_worktree::resolve_wimo_home();
         tokio::task::spawn_blocking(move || {
             crate::session::worktree_pool::cleanup_stale_pool_worktrees(None);
             if !remote_settled {
@@ -124,27 +124,27 @@ impl acp::Agent for MvpAgent {
         CLEANUP_PERMISSIONS_ONCE
             .call_once(|| {
                 tokio::task::spawn(
-                    wimo ai_wimo_workspace::permission::cleanup_stale_permission_state(
+                    wimoai_wimo_workspace::permission::cleanup_stale_permission_state(
                         std::time::Duration::from_secs(
                             PERMISSION_CLEANUP_TTL_DAYS * 24 * 60 * 60,
                         ),
                     ),
                 );
             });
-        wimo ai_wimo_workspace::trust::migrate_legacy_hook_trust();
+        wimoai_wimo_workspace::trust::migrate_legacy_hook_trust();
         if let Some(auth) = self.auth_manager.current() {
             let user_id = auth.user_id.trim();
             let needs_user_info = user_id.is_empty()
                 || user_id.eq_ignore_ascii_case("unknown");
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth init user_info check",
                 None,
                 Some(
                     serde_json::json!({
                     "user_id": user_id,
                     "needs_user_info": needs_user_info,
-                    "key_prefix": wimo ai_wimo_auth::bearer_suffix(&auth.key),
-                    "rt_prefix": auth.refresh_token.as_deref().map(wimo ai_wimo_auth::bearer_suffix),
+                    "key_prefix": wimoai_wimo_auth::bearer_suffix(&auth.key),
+                    "rt_prefix": auth.refresh_token.as_deref().map(wimoai_wimo_auth::bearer_suffix),
                 }),
                 ),
             );
@@ -228,24 +228,24 @@ impl acp::Agent for MvpAgent {
             .auth_manager
             .current()
             .map(|a| (
-                wimo ai_wimo_auth::bearer_suffix(&a.key).to_owned(),
+                wimoai_wimo_auth::bearer_suffix(&a.key).to_owned(),
                 a
                     .refresh_token
                     .as_deref()
-                    .map(|t| wimo ai_wimo_auth::bearer_suffix(t).to_owned()),
+                    .map(|t| wimoai_wimo_auth::bearer_suffix(t).to_owned()),
             ));
         self.auth_manager.force_reload_from_disk();
         let post = self
             .auth_manager
             .current()
             .map(|a| (
-                wimo ai_wimo_auth::bearer_suffix(&a.key).to_owned(),
+                wimoai_wimo_auth::bearer_suffix(&a.key).to_owned(),
                 a
                     .refresh_token
                     .as_deref()
-                    .map(|t| wimo ai_wimo_auth::bearer_suffix(t).to_owned()),
+                    .map(|t| wimoai_wimo_auth::bearer_suffix(t).to_owned()),
             ));
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth init disk refresh",
             None,
             Some(
@@ -258,7 +258,7 @@ impl acp::Agent for MvpAgent {
             }),
             ),
         );
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth: initialize() refreshed auth state from disk",
             None,
             Some(
@@ -270,15 +270,15 @@ impl acp::Agent for MvpAgent {
             ),
         );
         if !self.cfg.borrow().wimo_com_config.api_key_auth_disabled()
-            && auth_method::read_wimo ai_api_key_env().is_err()
+            && auth_method::read_wimoai_api_key_env().is_err()
             && let Some(api_key) = crate::auth::read_api_key(
                 &crate::util::wimo_home::wimo_home(),
             )
         {
-            unsafe { std::env::set_var("wimo ai_API_KEY", &api_key) };
-            tracing::info!("auth: loaded API key from auth.json (wimo ai::api_key scope)");
-            wimo ai_wimo_telemetry::unified_log::info(
-                "auth: loaded API key from auth.json (wimo ai::api_key scope)",
+            unsafe { std::env::set_var("wimoai_API_KEY", &api_key) };
+            tracing::info!("auth: loaded API key from auth.json (wimoai::api_key scope)");
+            wimoai_wimo_telemetry::unified_log::info(
+                "auth: loaded API key from auth.json (wimoai::api_key scope)",
                 None,
                 None,
             );
@@ -292,7 +292,7 @@ impl acp::Agent for MvpAgent {
             let cfg = self.cfg.borrow();
             let gc = &cfg.wimo_com_config;
             if disable_api_key_auth || gc.force_login_team_uuid.is_some() {
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "auth: enterprise login policy active",
                     None,
                     Some(
@@ -306,7 +306,7 @@ impl acp::Agent for MvpAgent {
             }
         }
         let preferred_method_early = self.cfg.borrow().wimo_com_config.preferred_method;
-        let wimo ai_api_base_url = self.cfg.borrow().endpoints.wimo ai_api_base_url.clone();
+        let wimoai_api_base_url = self.cfg.borrow().endpoints.wimoai_api_base_url.clone();
         let has_byok = self
             .models_manager
             .models()
@@ -315,11 +315,11 @@ impl acp::Agent for MvpAgent {
         let first_party_env_ok = if crate::auth::should_probe_first_party_env_key(
             disable_api_key_auth,
             has_byok,
-            auth_method::has_wimo ai_api_key_env(),
+            auth_method::has_wimoai_api_key_env(),
             preferred_method_early.is_some(),
         ) {
             crate::auth::first_party_env_key_allows_advertise(
-                    &wimo ai_api_base_url,
+                    &wimoai_api_base_url,
                     crate::auth::DEFAULT_PROBE_TIMEOUT,
                 )
                 .await
@@ -327,7 +327,7 @@ impl acp::Agent for MvpAgent {
             true
         };
         self.auth_manager.set_first_party_env_api_key_ok(first_party_env_ok);
-        let has_external_api_key = auth_method::should_advertise_wimo ai_api_key_with_env_ok(
+        let has_external_api_key = auth_method::should_advertise_wimoai_api_key_with_env_ok(
             disable_api_key_auth,
             self.models_manager.models().values(),
             first_party_env_ok,
@@ -335,7 +335,7 @@ impl acp::Agent for MvpAgent {
         let init_token_state = self.auth_manager.cached_token_state();
         let init_has_current = matches!(init_token_state, CachedTokenState::Valid(_));
         let init_is_expired = matches!(init_token_state, CachedTokenState::Expired);
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth init token state",
             None,
             Some(
@@ -377,7 +377,7 @@ impl acp::Agent for MvpAgent {
                 issuer = %issuer,
                 "auth: advertising enterprise OIDC auth method",
             );
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth: advertising enterprise OIDC auth method",
                 None,
                 Some(serde_json::json!({ "issuer": issuer })),
@@ -408,7 +408,7 @@ impl acp::Agent for MvpAgent {
             preferred_method,
         });
         let auth_methods = built.methods;
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth: initialize() built auth_methods for ACP response",
             None,
             Some(
@@ -434,9 +434,9 @@ impl acp::Agent for MvpAgent {
                     auth_methods
                         .first()
                         .map(|m| auth_method::AuthMethodKind::from_id(m.id())),
-                    Some(auth_method::AuthMethodKind::wimo aiApiKey)
+                    Some(auth_method::AuthMethodKind::wimoaiApiKey)
                 ),
-            "BYOK invariant violated: wimo ai.api_key MUST be auth_methods.first() \
+            "BYOK invariant violated: wimoai.api_key MUST be auth_methods.first() \
              when has_external_api_key is true; got {:?}",
             auth_methods.first().map(|m| m.id()),
         );
@@ -445,7 +445,7 @@ impl acp::Agent for MvpAgent {
             .as_ref()
             .map(|id| id.0.to_string());
         if let Some(default_id) = built.default_auth_method_id {
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth method selection",
                 None,
                 Some(
@@ -527,12 +527,12 @@ impl acp::Agent for MvpAgent {
                     "defaultAuthMethodId": default_auth_method_id_wire,
                     // The agent can drive in-process SDK MCP servers over the ACP reverse channel (`x.ai/mcp/sdk_call`)
                     // The SDK reads this to enable transport="acp"
-                    (wimo ai_wimo_mcp::wire::MCP_SDK): true,
+                    (wimoai_wimo_mcp::wire::MCP_SDK): true,
                     // `session/new` / `session/load` accept per-session plugin roots in `_meta.pluginDirs`
                     // The SDKs gate `wimoOptions.plugins` on this
                     (SESSION_PLUGIN_DIRS_CAPABILITY_KEY): true,
                     "currentWorkingDirectory": current_working_directory.to_string_lossy().to_string(),
-                    "agentVersion": wimo ai_wimo_version::VERSION,
+                    "agentVersion": wimoai_wimo_version::VERSION,
                     "agentId": agent_id(),
                     "agentInstanceId": agent_instance_id(),
                     "hostname": hostname.to_string_lossy().to_string(),
@@ -562,7 +562,7 @@ impl acp::Agent for MvpAgent {
         arguments: acp::AuthenticateRequest,
     ) -> Result<AuthenticateResponse, acp::Error> {
         tracing::info!(method = %arguments.method_id.0, "auth: authenticate request");
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth started",
             None,
             Some(serde_json::json!({"method": arguments.method_id.0.as_ref()})),
@@ -592,7 +592,7 @@ impl acp::Agent for MvpAgent {
             }
         }
         match arguments.method_id.0.as_ref() {
-            auth_method::wimo ai_API_KEY_METHOD_ID => {
+            auth_method::wimoai_API_KEY_METHOD_ID => {
                 if self.cfg.borrow().wimo_com_config.api_key_auth_disabled() {
                     emit_login_span(false, "api_key", None, Some("disabled_by_admin"));
                     return Err(
@@ -602,14 +602,14 @@ impl acp::Agent for MvpAgent {
                 }
                 let mut sampling_config = self.sampling_config.borrow_mut();
                 if sampling_config.api_key.is_none() {
-                    if let Ok(api_key) = auth_method::read_wimo ai_api_key_env() {
+                    if let Ok(api_key) = auth_method::read_wimoai_api_key_env() {
                         sampling_config.api_key = Some(api_key.clone());
                         if let Err(e) = crate::auth::store_api_key(
                             &crate::util::wimo_home::wimo_home(),
                             &api_key,
                         ) {
                             tracing::warn!("failed to persist API key to auth.json: {e}");
-                            wimo ai_wimo_telemetry::unified_log::warn(
+                            wimoai_wimo_telemetry::unified_log::warn(
                                 "failed to persist API key to auth.json",
                                 None,
                                 Some(serde_json::json!({ "error": e.to_string() })),
@@ -625,7 +625,7 @@ impl acp::Agent for MvpAgent {
                         return Err(
                             acp::Error::auth_required()
                                 .data(
-                                    "Set wimo ai_API_KEY or add api_key/env_key to config.toml.",
+                                    "Set wimoai_API_KEY or add api_key/env_key to config.toml.",
                                 ),
                         );
                     }
@@ -637,7 +637,7 @@ impl acp::Agent for MvpAgent {
                     self.chat_modes.warm_in_background();
                 }
                 emit_login_span(true, "api_key", None, None);
-                log_event(wimo ai_wimo_telemetry::events::Login {
+                log_event(wimoai_wimo_telemetry::events::Login {
                     auth_method: "api_key".to_string(),
                     user_id: None,
                 });
@@ -662,7 +662,7 @@ impl acp::Agent for MvpAgent {
                 let is_legacy = current_auth
                     .as_ref()
                     .is_some_and(|a| a.auth_mode == crate::auth::AuthMode::WebLogin);
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "auth cached_token check",
                     None,
                     Some(
@@ -679,7 +679,7 @@ impl acp::Agent for MvpAgent {
                     Some(crate::auth::PreferredAuthMethod::ApiKey)
                 );
                 if is_devbox && is_legacy && !pin_blocks_oidc_mint {
-                    wimo ai_wimo_telemetry::unified_log::info(
+                    wimoai_wimo_telemetry::unified_log::info(
                         "auth cached_token: devbox legacy migration starting",
                         None,
                         None,
@@ -700,14 +700,14 @@ impl acp::Agent for MvpAgent {
                                     {
                                         tracing::warn!(error = ?e, "auth: failed to remove legacy scope (non-fatal)");
                                     }
-                                    wimo ai_wimo_telemetry::unified_log::info(
+                                    wimoai_wimo_telemetry::unified_log::info(
                                         "auth cached_token: devbox legacy migration succeeded",
                                         None,
                                         None,
                                     );
                                 }
                                 Err(e) => {
-                                    wimo ai_wimo_telemetry::unified_log::warn(
+                                    wimoai_wimo_telemetry::unified_log::warn(
                                         "auth cached_token: devbox migration save failed",
                                         None,
                                         Some(serde_json::json!({ "error": e.to_string() })),
@@ -716,7 +716,7 @@ impl acp::Agent for MvpAgent {
                             }
                         }
                         Err(e) => {
-                            wimo ai_wimo_telemetry::unified_log::warn(
+                            wimoai_wimo_telemetry::unified_log::warn(
                                 "auth cached_token: devbox mint failed, will reject legacy token",
                                 None,
                                 Some(serde_json::json!({ "error": format!("{e}") })),
@@ -746,7 +746,7 @@ impl acp::Agent for MvpAgent {
                         "No cached auth token found"
                     };
                     tracing::info!(%message, "cached_token missing/expired, falling through");
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "auth cached_token fallthrough",
                         None,
                         Some(serde_json::json!({ "reason": message })),
@@ -757,7 +757,7 @@ impl acp::Agent for MvpAgent {
                 };
                 if auth.auth_mode == crate::auth::AuthMode::WebLogin {
                     tracing::info!("auth: rejecting legacy WebLogin token");
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "auth cached_token legacy rejected",
                         None,
                         Some(
@@ -782,7 +782,7 @@ impl acp::Agent for MvpAgent {
                     let mut sampling_config = self.sampling_config.borrow_mut();
                     sampling_config.api_key = Some(auth.key);
                     tracing::debug!("auth: cached_token handler set api_key (SessionToken)");
-                    wimo ai_wimo_telemetry::unified_log::debug(
+                    wimoai_wimo_telemetry::unified_log::debug(
                         "auth: cached_token handler set api_key (SessionToken)",
                         None,
                         None,
@@ -795,7 +795,7 @@ impl acp::Agent for MvpAgent {
                 }
                 let uid = self.auth_manager.current().map(|a| a.user_id);
                 emit_login_span(true, "cached_token", uid.as_deref(), None);
-                log_event(wimo ai_wimo_telemetry::events::Login {
+                log_event(wimoai_wimo_telemetry::events::Login {
                     auth_method: "cached_token".to_string(),
                     user_id: uid,
                 });
@@ -812,7 +812,7 @@ impl acp::Agent for MvpAgent {
                     use_oauth = auth_meta.use_oauth,
                     "auth: inline auth flow",
                 );
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "auth: inline auth flow",
                     None,
                     Some(
@@ -830,7 +830,7 @@ impl acp::Agent for MvpAgent {
                 let cli_oauth = auth_meta.use_oauth.then_some(true);
                 let use_oidc = self.cfg.borrow().resolve_wimo_oauth(cli_oauth);
                 tracing::debug!(resolved = use_oidc.value, source = ?use_oidc.source, "auth: method resolved");
-                wimo ai_wimo_telemetry::unified_log::debug(
+                wimoai_wimo_telemetry::unified_log::debug(
                     "auth: method resolved",
                     None,
                     Some(
@@ -916,7 +916,7 @@ impl acp::Agent for MvpAgent {
                     let mut sampling_config = self.sampling_config.borrow_mut();
                     sampling_config.api_key = Some(auth.key.clone());
                     tracing::debug!("auth: wimo.com/oidc handler set api_key (SessionToken)");
-                    wimo ai_wimo_telemetry::unified_log::debug(
+                    wimoai_wimo_telemetry::unified_log::debug(
                         "auth: wimo.com/oidc handler set api_key (SessionToken)",
                         None,
                         None,
@@ -939,7 +939,7 @@ impl acp::Agent for MvpAgent {
                     Some(auth.user_id.as_str()),
                     None,
                 );
-                log_event(wimo ai_wimo_telemetry::events::Login {
+                log_event(wimoai_wimo_telemetry::events::Login {
                     auth_method: arguments.method_id.0.as_ref().to_string(),
                     user_id: Some(auth.user_id.clone()),
                 });
@@ -1001,7 +1001,7 @@ impl acp::Agent for MvpAgent {
     ) -> Result<acp::PromptResponse, acp::Error> {
         use crate::session::plan_mode::PromptMode;
         if let Some(meta) = arguments.meta.as_ref() {
-            wimo ai_file_utils::trace_context::link_current_span_to_meta(
+            wimoai_file_utils::trace_context::link_current_span_to_meta(
                 &serde_json::Value::Object(meta.clone()),
             );
         }
@@ -1011,7 +1011,7 @@ impl acp::Agent for MvpAgent {
             session_id = %arguments.session_id.0,
             "Received prompt request"
         );
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "prompt received",
             Some(arguments.session_id.0.as_ref()),
             None,
@@ -1051,7 +1051,7 @@ impl acp::Agent for MvpAgent {
                     model_id = %restore_model_id.0,
                     "prompt: previously-unavailable model is back in the catalog; restoring it and unblocking the session"
                 );
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "prompt: previously-unavailable model recovered, unblocking session",
                     Some(arguments.session_id.0.as_ref()),
                     Some(
@@ -1087,7 +1087,7 @@ impl acp::Agent for MvpAgent {
                     available_keys = ?available.keys().take(10).collect::<Vec<_>>(),
                     "prompt blocked: session model unavailable since load and still missing from the catalog"
                 );
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "prompt blocked: model unavailable",
                     Some(arguments.session_id.0.as_ref()),
                     Some(
@@ -1225,7 +1225,7 @@ impl acp::Agent for MvpAgent {
                 prompt_verbatim: if verbatim { Some(true) } else { None },
                 cwd: Some(ctx.session_info.cwd.clone()),
                 agent_type: Some(ctx.session_handle.agent_name.clone()),
-                shell_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+                shell_version: Some(wimoai_wimo_version::VERSION.to_string()),
                 sandbox: local_sandbox_telemetry(),
                 ..Default::default()
             });
@@ -1317,7 +1317,7 @@ impl acp::Agent for MvpAgent {
         {
             None => None,
             Some(value) => {
-                match wimo ai_wimo_sampling_types::ToolOverridesUpdate::parse(value) {
+                match wimoai_wimo_sampling_types::ToolOverridesUpdate::parse(value) {
                     Ok(update) => Some(update),
                     Err(reason) => {
                         return Err(
@@ -1332,7 +1332,7 @@ impl acp::Agent for MvpAgent {
         let artifact_upload_ctx = trace_context
             .as_ref()
             .map(|ctx| ctx.artifact_upload_context());
-        let traceparent = wimo ai_file_utils::trace_context::current_traceparent();
+        let traceparent = wimoai_file_utils::trace_context::current_traceparent();
         let dispatch_result: Result<(), acp::Error> = if send_now {
             handle
                 .cmd_tx
@@ -1359,8 +1359,8 @@ impl acp::Agent for MvpAgent {
                         .data(format!("failed to dispatch prompt to session: {e}"))
                 })
         } else {
-            let envelope = wimo ai_message_delivery_core::DeliveryEnvelope::from_human(
-                wimo ai_message_delivery_core::Operation::Queue,
+            let envelope = wimoai_message_delivery_core::DeliveryEnvelope::from_human(
+                wimoai_message_delivery_core::Operation::Queue,
                 crate::session::message_delivery::HumanPromptContent {
                     prompt_blocks,
                     prompt_mode,
@@ -1564,7 +1564,7 @@ impl acp::Agent for MvpAgent {
                     .await;
                 let permission_events = self
                     .collect_permission_events(&arguments.session_id);
-                let turn_messages: Option<wimo ai_chat_state::TurnCapture> = {
+                let turn_messages: Option<wimoai_chat_state::TurnCapture> = {
                     let (tx, rx) = oneshot::channel();
                     if handle
                         .cmd_tx
@@ -1735,7 +1735,7 @@ impl acp::Agent for MvpAgent {
                         Parent::Root,
                         async move {
                             let git_out = |args: &[&str]| -> Option<String> {
-                                wimo ai_tty_utils::git_command()
+                                wimoai_tty_utils::git_command()
                                     .current_dir(&cwd_str)
                                     .args(args)
                                     .output()
@@ -1828,7 +1828,7 @@ impl acp::Agent for MvpAgent {
                         turn: i32,
                         cwd: String,
                     ) {
-                        let repo_head_at_end = wimo ai_tty_utils::git_command()
+                        let repo_head_at_end = wimoai_tty_utils::git_command()
                             .current_dir(&cwd)
                             .args(["rev-parse", "HEAD"])
                             .output()
@@ -1883,11 +1883,11 @@ impl acp::Agent for MvpAgent {
                         let cwd = cwd_for_git.clone();
                         let cmd_tx = handle.cmd_tx.clone();
                         tokio::spawn(async move {
-                            let head = wimo ai_wimo_workspace::session::git::get_current_commit(
+                            let head = wimoai_wimo_workspace::session::git::get_current_commit(
                                     std::path::Path::new(&cwd),
                                 )
                                 .await;
-                            let branch = wimo ai_wimo_workspace::session::git::get_branch(
+                            let branch = wimoai_wimo_workspace::session::git::get_branch(
                                     std::path::Path::new(&cwd),
                                 )
                                 .await;
@@ -2008,7 +2008,7 @@ impl acp::Agent for MvpAgent {
                         &prompt_id,
                     )
                     .await;
-                let turn_messages: Option<wimo ai_chat_state::TurnCapture> = {
+                let turn_messages: Option<wimoai_chat_state::TurnCapture> = {
                     let (tx, rx) = oneshot::channel();
                     if handle
                         .cmd_tx
@@ -2172,7 +2172,7 @@ impl acp::Agent for MvpAgent {
             .and_then(|m| m.get("cancelTrigger"))
             .and_then(|v| v.as_str())
             .map(crate::session::CancelTrigger::from_client);
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "shell.cancel.received",
             Some(args.session_id.0.as_ref()),
             Some(
@@ -2273,7 +2273,7 @@ impl acp::Agent for MvpAgent {
             .ok()
             .and_then(|v| v.get("_meta").cloned());
         if let Some(meta) = &request_meta {
-            wimo ai_file_utils::trace_context::link_current_span_to_meta(meta);
+            wimoai_file_utils::trace_context::link_current_span_to_meta(meta);
         }
         tracing::info!("Received extension method call: method={}", args.method);
         #[allow(unused_mut)]
@@ -2341,7 +2341,7 @@ impl acp::Agent for MvpAgent {
             | "x.ai/btw" => crate::extensions::feedback::handle(self, &args).await,
             "x.ai/recap" => crate::extensions::recap::handle(self, &args).await,
             "x.ai/cloud/terminate" => {
-                crate::extensions::auth_gate::require_wimo ai_auth(
+                crate::extensions::auth_gate::require_wimoai_auth(
                     &self.auth_manager,
                     "Authentication required",
                     "Run `wimo login` to authenticate.",
@@ -2373,7 +2373,7 @@ impl acp::Agent for MvpAgent {
                 crate::extensions::to_raw_response(&serde_json::json!({ "ok": true }))
             }
             "x.ai/cloud/env/list" => {
-                crate::extensions::auth_gate::require_wimo ai_auth(
+                crate::extensions::auth_gate::require_wimoai_auth(
                     &self.auth_manager,
                     "Authentication required",
                     "Run `wimo login` to authenticate.",
@@ -2398,7 +2398,7 @@ impl acp::Agent for MvpAgent {
                 )
             }
             "x.ai/cloud/env/create" => {
-                crate::extensions::auth_gate::require_wimo ai_auth(
+                crate::extensions::auth_gate::require_wimoai_auth(
                     &self.auth_manager,
                     "Authentication required",
                     "Run `wimo login` to authenticate.",
@@ -2455,7 +2455,7 @@ impl acp::Agent for MvpAgent {
                 )
             }
             "x.ai/cloud/env/update" => {
-                crate::extensions::auth_gate::require_wimo ai_auth(
+                crate::extensions::auth_gate::require_wimoai_auth(
                     &self.auth_manager,
                     "Authentication required",
                     "Run `wimo login` to authenticate.",
@@ -2515,7 +2515,7 @@ impl acp::Agent for MvpAgent {
                 )
             }
             "x.ai/cloud/env/delete" => {
-                crate::extensions::auth_gate::require_wimo ai_auth(
+                crate::extensions::auth_gate::require_wimoai_auth(
                     &self.auth_manager,
                     "Authentication required",
                     "Run `wimo login` to authenticate.",
@@ -2846,7 +2846,7 @@ impl acp::Agent for MvpAgent {
                 if let Some(handle) = self.resident_handle(&notification.session_id) {
                     let _ = handle
                         .cmd_tx
-                        .send(crate::session::SessionCommand::wimo aiSessionNotification {
+                        .send(crate::session::SessionCommand::wimoaiSessionNotification {
                             notification,
                         });
                 } else {
@@ -2876,7 +2876,7 @@ impl acp::Agent for MvpAgent {
                     client_version = ?params.client_version,
                     "non_git_decision",
                 );
-                wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::NonGitDecisionEvent {
+                wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::NonGitDecisionEvent {
                     decision: params.decision,
                     session_id: params.session_id,
                     client_version: params.client_version,
@@ -2902,14 +2902,14 @@ impl acp::Agent for MvpAgent {
                     params.preferred_agent_label
                 );
                 let total_agents = 1 + params.other_agents.len();
-                wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::MultiAgentFollowup {
+                wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::MultiAgentFollowup {
                     preferred_agent_label: params.preferred_agent_label.to_string(),
                     preferred_agent_session_id: params.preferred_agent_session_id,
                     preferred_agent_model_id: params.preferred_agent_model_id,
                     other_agents: params
                         .other_agents
                         .into_iter()
-                        .map(|(l, s, m)| wimo ai_wimo_telemetry::events::AgentInfo {
+                        .map(|(l, s, m)| wimoai_wimo_telemetry::events::AgentInfo {
                             label: l.to_string(),
                             session_id: s,
                             model_id: m,
@@ -2938,14 +2938,14 @@ impl acp::Agent for MvpAgent {
                     params.applied_agent_label
                 );
                 let total_agents = 1 + params.discarded_agents.len();
-                wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::MultiAgentApply {
+                wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::MultiAgentApply {
                     applied_agent_label: params.applied_agent_label.to_string(),
                     applied_agent_session_id: params.applied_agent_session_id,
                     applied_agent_model_id: params.applied_agent_model_id,
                     discarded_agents: params
                         .discarded_agents
                         .into_iter()
-                        .map(|(l, s, m)| wimo ai_wimo_telemetry::events::AgentInfo {
+                        .map(|(l, s, m)| wimoai_wimo_telemetry::events::AgentInfo {
                             label: l.to_string(),
                             session_id: s,
                             model_id: m,
@@ -2971,11 +2971,11 @@ impl acp::Agent for MvpAgent {
                     params.discarded_agents.len()
                 );
                 let total = params.discarded_agents.len();
-                wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::MultiAgentDiscard {
+                wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::MultiAgentDiscard {
                     discarded_agents: params
                         .discarded_agents
                         .into_iter()
-                        .map(|(l, s, m)| wimo ai_wimo_telemetry::events::AgentInfo {
+                        .map(|(l, s, m)| wimoai_wimo_telemetry::events::AgentInfo {
                             label: l.to_string(),
                             session_id: s,
                             model_id: m,
@@ -2987,12 +2987,12 @@ impl acp::Agent for MvpAgent {
                 tracing::warn!("Failed to parse multi-agent discard telemetry params");
             }
         }
-        if args.method.as_ref() == wimo ai_wimo_telemetry::unified_log::LOG_METHOD
+        if args.method.as_ref() == wimoai_wimo_telemetry::unified_log::LOG_METHOD
             && let Ok(params) = serde_json::from_str::<
-                wimo ai_wimo_telemetry::unified_log::LogNotificationParams,
+                wimoai_wimo_telemetry::unified_log::LogNotificationParams,
             >(args.params.get())
         {
-            wimo ai_wimo_telemetry::unified_log::ingest_client_entries(
+            wimoai_wimo_telemetry::unified_log::ingest_client_entries(
                 params.src,
                 &params.entries,
             );

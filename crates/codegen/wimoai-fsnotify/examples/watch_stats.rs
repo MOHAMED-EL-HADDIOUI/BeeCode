@@ -6,9 +6,9 @@
 //!
 //! ```bash
 //! # Generate a synthetic tree, then measure both strategies against it:
-//! cargo run --release -p wimo ai-fsnotify --example watch_stats -- gen js /tmp/js-repo
-//! wimo_FSNOTIFY_PER_DIR=0 cargo run --release -p wimo ai-fsnotify --example watch_stats -- run /tmp/js-repo 5
-//! wimo_FSNOTIFY_PER_DIR=1 cargo run --release -p wimo ai-fsnotify --example watch_stats -- run /tmp/js-repo 5
+//! cargo run --release -p wimoai-fsnotify --example watch_stats -- gen js /tmp/js-repo
+//! wimo_FSNOTIFY_PER_DIR=0 cargo run --release -p wimoai-fsnotify --example watch_stats -- run /tmp/js-repo 5
+//! wimo_FSNOTIFY_PER_DIR=1 cargo run --release -p wimoai-fsnotify --example watch_stats -- run /tmp/js-repo 5
 //! ```
 //!
 //! Tree shapes are scaled replicas of synthetic large-repo measurements:
@@ -23,7 +23,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-use wimo ai_fsnotify::{FsConfig, FsEventSource};
+use wimoai_fsnotify::{FsConfig, FsEventSource};
 
 fn make_dirs(base: &Path, count: usize, fanout: usize) {
     for i in 0..count {

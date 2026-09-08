@@ -2,10 +2,10 @@
 
 use std::path::{Path, PathBuf};
 
-use wimo ai_wimo_workspace::session::git::find_git_root_from_path;
-use wimo ai_wimo_workspace::worktree::remove_jj_workspace;
+use wimoai_wimo_workspace::session::git::find_git_root_from_path;
+use wimoai_wimo_workspace::worktree::remove_jj_workspace;
 
-const WORKTREE_LOG: &str = "wimo ai_worktree";
+const WORKTREE_LOG: &str = "wimoai_worktree";
 
 /// Best-effort teardown of a dest created by a resume that later failed.
 #[tracing::instrument(skip_all)]
@@ -13,7 +13,7 @@ pub(crate) async fn cleanup_worktree_on_failure(source_cwd: &str, worktree_path:
     let wt = Path::new(worktree_path);
     let is_jj = find_git_root_from_path(Path::new(source_cwd))
         .ok()
-        .is_some_and(|root| wimo ai_wimo_workspace::session::git::detect_vcs_kind(&root).is_jj());
+        .is_some_and(|root| wimoai_wimo_workspace::session::git::detect_vcs_kind(&root).is_jj());
     if is_jj {
         if let Err(e) = remove_jj_workspace(worktree_path).await {
             tracing::warn!(
@@ -26,7 +26,7 @@ pub(crate) async fn cleanup_worktree_on_failure(source_cwd: &str, worktree_path:
     }
 
     let wt_path = wt.to_path_buf();
-    match tokio::task::spawn_blocking(move || wimo ai_fast_worktree::remove_worktree(&wt_path)).await {
+    match tokio::task::spawn_blocking(move || wimoai_fast_worktree::remove_worktree(&wt_path)).await {
         Ok(Ok(_)) => {}
         Ok(Err(e)) => {
             tracing::warn!(
@@ -48,7 +48,7 @@ pub(crate) async fn cleanup_worktree_on_failure(source_cwd: &str, worktree_path:
 
     // `remove_stale_worktree_registration` stats the dest
     // Only run it when the mount table says dest is unmounted (safe to stat)
-    if !wimo ai_fast_worktree::dest_is_known_unmounted(wt) {
+    if !wimoai_fast_worktree::dest_is_known_unmounted(wt) {
         return;
     }
     let Ok(root) = find_git_root_from_path(Path::new(source_cwd)) else {
@@ -56,7 +56,7 @@ pub(crate) async fn cleanup_worktree_on_failure(source_cwd: &str, worktree_path:
     };
     let wt_path = PathBuf::from(wt);
     let _ = tokio::task::spawn_blocking(move || {
-        wimo ai_fast_worktree::remove_stale_worktree_registration(&root, &wt_path)
+        wimoai_fast_worktree::remove_stale_worktree_registration(&root, &wt_path)
     })
     .await;
 }

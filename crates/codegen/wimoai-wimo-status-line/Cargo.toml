@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-status-line"
+name = "wimoai-wimo-status-line"
 version = "0.1.0"
 edition.workspace = true
 description = "The status-line contract: the `[ui.status_line]` config a user writes and the payload the agent sends clients."

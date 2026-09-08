@@ -3,17 +3,17 @@
 //!
 //! ```bash
 //! # Test workspace profile (should allow writes to CWD, block ~/Desktop)
-//! cargo run -p wimo ai-wimo-sandbox --example sandbox_smoke_test
+//! cargo run -p wimoai-wimo-sandbox --example sandbox_smoke_test
 //!
 //! # Test strict profile
-//! cargo run -p wimo ai-wimo-sandbox --example sandbox_smoke_test -- strict
+//! cargo run -p wimoai-wimo-sandbox --example sandbox_smoke_test -- strict
 //!
 //! # Test read-only profile
-//! cargo run -p wimo ai-wimo-sandbox --example sandbox_smoke_test -- read-only
+//! cargo run -p wimoai-wimo-sandbox --example sandbox_smoke_test -- read-only
 //! ```
 
 use std::path::Path;
-use wimo ai_wimo_sandbox::{ProfileName, SandboxManager};
+use wimoai_wimo_sandbox::{ProfileName, SandboxManager};
 
 fn main() {
     // Parse profile from args (default: workspace).
@@ -76,7 +76,7 @@ fn main() {
     test_read("Read /tmp", Path::new("/tmp"));
 
     // Test 3: Read home directory (should work for workspace/read-only, blocked for strict)
-    if let Some(home) = wimo ai_dirs::home_dir() {
+    if let Some(home) = wimoai_dirs::home_dir() {
         test_read("Read ~/", &home);
     }
 
@@ -91,14 +91,14 @@ fn main() {
     let _ = std::fs::remove_file(tmp_test);
 
     // Test 6: Write outside workspace (should be blocked for all active profiles)
-    if let Some(home) = wimo ai_dirs::home_dir() {
+    if let Some(home) = wimoai_dirs::home_dir() {
         let outside = home.join(".sandbox-test-blocked");
         test_write("Write to ~/", &outside);
         let _ = std::fs::remove_file(&outside);
     }
 
     // Test 7: Read ~/.ssh (a custom profile's `deny` list could block this)
-    if let Some(home) = wimo ai_dirs::home_dir() {
+    if let Some(home) = wimoai_dirs::home_dir() {
         let ssh = home.join(".ssh");
         if ssh.exists() {
             test_read("Read ~/.ssh/", &ssh);

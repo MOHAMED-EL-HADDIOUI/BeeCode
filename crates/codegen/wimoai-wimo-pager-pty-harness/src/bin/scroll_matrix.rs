@@ -10,8 +10,8 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result, bail};
 use clap::{Parser as ClapParser, ValueEnum};
-use wimo ai_wimo_pager_pty_harness::pager_binary;
-use wimo ai_wimo_pager_pty_harness::scroll_matrix::{
+use wimoai_wimo_pager_pty_harness::pager_binary;
+use wimoai_wimo_pager_pty_harness::scroll_matrix::{
     CELLS, CellReport, MatrixCell, Tier, exit_code, run_cell, summary_table, write_report_json,
 };
 
@@ -26,7 +26,7 @@ enum TierArg {
 #[derive(ClapParser, Debug)]
 #[command(
     name = "scroll-matrix",
-    about = "Run the scroll validation matrix against wimo ai-wimo-pager",
+    about = "Run the scroll validation matrix against wimoai-wimo-pager",
     long_about = None,
 )]
 struct Cli {
@@ -51,7 +51,7 @@ struct Cli {
     artifacts: PathBuf,
 
     /// Pager binary.
-    /// Defaults to PAGER_BINARY, CARGO_BIN_EXE_wimo ai-wimo-pager, or a locally-built debug binary.
+    /// Defaults to PAGER_BINARY, CARGO_BIN_EXE_wimoai-wimo-pager, or a locally-built debug binary.
     #[arg(long, value_name = "PATH")]
     binary: Option<PathBuf>,
 }

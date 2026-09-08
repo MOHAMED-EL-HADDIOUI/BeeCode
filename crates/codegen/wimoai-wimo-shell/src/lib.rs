@@ -9,36 +9,36 @@
 #[cfg(all(test, feature = "dhat-heap"))]
 #[global_allocator]
 static DHAT_ALLOC: dhat::Alloc = dhat::Alloc;
-pub(crate) use wimo ai_wimo_telemetry::unified_log;
-pub use wimo ai_tracing_macros::{teprintln, timed, tprintln};
+pub(crate) use wimoai_wimo_telemetry::unified_log;
+pub use wimoai_tracing_macros::{teprintln, timed, tprintln};
 pub mod agent;
 pub mod auth;
 pub mod builtin;
-pub use wimo ai_wimo_bundle as bundle;
+pub use wimoai_wimo_bundle as bundle;
 pub mod claude_import;
 pub mod claude_import_state;
 pub mod cli_models;
 pub mod config;
 #[cfg(all(test, feature = "config-docs"))]
 pub mod config_docs;
-pub use wimo ai_wimo_shell_base::cpu_profile;
-pub use wimo ai_wimo_shell_base::env;
+pub use wimoai_wimo_shell_base::cpu_profile;
+pub use wimoai_wimo_shell_base::env;
 pub mod extensions;
-pub use wimo ai_wimo_foreign_sessions as foreign_sessions;
+pub use wimoai_wimo_foreign_sessions as foreign_sessions;
 pub mod heap_profile;
-pub use wimo ai_wimo_http as http;
+pub use wimoai_wimo_http as http;
 pub mod inspect;
 pub mod instrumentation;
 pub mod leader;
 pub mod managed_config;
 pub mod mcp_doctor;
-pub use wimo ai_wimo_models as models;
+pub use wimoai_wimo_models as models;
 pub mod plugin;
 pub mod relay;
 pub mod remote;
 pub mod sampling;
 pub mod session;
-pub use wimo ai_wimo_shell_terminal as terminal;
+pub use wimoai_wimo_shell_terminal as terminal;
 #[cfg(test)]
 pub(crate) mod test_support;
 pub mod tier;

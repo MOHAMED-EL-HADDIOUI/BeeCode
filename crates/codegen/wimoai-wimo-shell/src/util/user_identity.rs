@@ -426,7 +426,7 @@ pub(crate) async fn cached_identity(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_test_support::env::EnvGuard;
+    use wimoai_wimo_test_support::env::EnvGuard;
 
     fn cfg() -> FeedbackUserConfig {
         FeedbackUserConfig::default()

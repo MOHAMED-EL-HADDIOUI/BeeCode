@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 use anyhow::{Context, Result};
 use clap::{Parser, ValueEnum};
 use serde::Serialize;
-use wimo ai_wimo_pager_pty_harness::{ContentController, PtyExitPoll, PtyHarness};
+use wimoai_wimo_pager_pty_harness::{ContentController, PtyExitPoll, PtyHarness};
 
 const WELCOME_SENTINEL: &str = "Quit";
 const COMPOSER_PROBE_KEYS: &str = "zzx";
@@ -105,7 +105,7 @@ async fn run(args: &Args) -> Result<Observation> {
     let log = content
         .sandbox()
         .wimo_home()
-        // `wimo ai_wimo_telemetry::unified_log::LOG_DIR` is unreachable without a telemetry dependency.
+        // `wimoai_wimo_telemetry::unified_log::LOG_DIR` is unreachable without a telemetry dependency.
         .join("logs")
         .join("unified.jsonl");
     std::fs::copy(&log, &args.log_out).with_context(|| {

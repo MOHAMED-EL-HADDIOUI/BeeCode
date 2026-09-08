@@ -1,4 +1,4 @@
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_wimo_sampling_types::ConversationItem;
 
 /// Select a recent window of the conversation history for the flush model.
 ///
@@ -76,14 +76,14 @@ mod tests {
         let agent = ConversationItem::agent_message("agent context");
         let window = select_flush_window(vec![human.clone(), agent], 20);
         let projected =
-            wimo ai_chat_state::compaction_utils::ModelRequestHistory::from_raw(window).into_items();
+            wimoai_chat_state::compaction_utils::ModelRequestHistory::from_raw(window).into_items();
 
         assert_eq!(projected[0].text_content(), human.text_content());
         assert_eq!(
             projected[1].text_content(),
             format!(
                 "{}\nagent context",
-                wimo ai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL
+                wimoai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL
             )
         );
     }

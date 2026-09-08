@@ -1,13 +1,13 @@
 //! Per-request transport for server-reported doom-loop signals.
 //!
-//! The wire shapes and tolerant parsers live in [`wimo ai_wimo_sampling_types::doom_loop`].
+//! The wire shapes and tolerant parsers live in [`wimoai_wimo_sampling_types::doom_loop`].
 //! This module only moves the parsed signals across the layer boundary.
 //! The Layer-1 SSE decoder in [`crate::client`] records them as raw payloads arrive.
 //! The Layer-2 transform in [`crate::stream::responses`] drains them into the final `ConversationResponse`.
 
 use std::sync::{Arc, Mutex};
 
-use wimo ai_wimo_sampling_types::doom_loop::{
+use wimoai_wimo_sampling_types::doom_loop::{
     DOOM_LOOP_CHECK_EVENT_TYPE, DoomLoopPeek, DoomLoopRecoveryPolicy, DoomLoopSignal,
     peek_doom_loop,
 };
@@ -127,7 +127,7 @@ impl DoomLoopSignalCollector {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_sampling_types::doom_loop::{
+    use wimoai_wimo_sampling_types::doom_loop::{
         DoomLoopSignalKind, SAMPLE_CHECK_EVENT_DATA, SAMPLE_CHECK_EVENT_DATA_CUMULATIVE,
     };
 

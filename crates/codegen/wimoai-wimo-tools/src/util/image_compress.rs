@@ -1,6 +1,6 @@
 //! Shared image re-encoding with PNG+JPEG format selection.
 //!
-//! Both the user-attachment normalizer (`wimo ai-wimo-shell`) and the `read_file`
+//! Both the user-attachment normalizer (`wimoai-wimo-shell`) and the `read_file`
 //! tool image path use this to compress images under a byte-size cap while
 //! respecting per-caller dimension and quality parameters.
 

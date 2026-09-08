@@ -6,12 +6,12 @@ use serde_json::Value;
 use tokio::fs;
 use tokio::process::Command;
 
-use wimo ai_wimo_shell::env::WimoEnvironment;
-use wimo ai_wimo_shell::util::wimo_home::wimo_home;
+use wimoai_wimo_shell::env::WimoEnvironment;
+use wimoai_wimo_shell::util::wimo_home::wimo_home;
 
 const TTL_SECONDS_BEFORE_AUTO_UPDATE: Duration = Duration::from_secs(60 * 30);
-const NPM_PACKAGE: &str = "@wimo ai-official/wimo";
-pub const GH_RELEASE_REPO: &str = "wimo ai-org-shared/wimo";
+const NPM_PACKAGE: &str = "@wimoai-official/wimo";
+pub const GH_RELEASE_REPO: &str = "wimoai-org-shared/wimo";
 
 /// Primary CLI base URL: Cloudflare-fronted x.ai endpoint with edge caching for binaries and origin-respecting no-cache for channel pointers.
 pub(crate) const CLI_BASE_URL_PRIMARY: &str = "https://x.ai/cli";
@@ -80,7 +80,7 @@ impl UpdateConfig {
     pub fn from_environment(env: &WimoEnvironment) -> Self {
         Self {
             proxy_base_url: env.cli_chat_proxy_base_url(),
-            auth_scope: wimo ai_wimo_shell::auth::wimoComConfig::default().auth_scope(),
+            auth_scope: wimoai_wimo_shell::auth::wimoComConfig::default().auth_scope(),
             deployment_key: None,
             alpha_test_key: None,
             channel: "stable".to_string(),
@@ -174,8 +174,8 @@ async fn fetch_npm_tag(tag: &str, npm_registry: Option<&str>) -> Result<String> 
     }
     let mut cmd = Command::new("npm");
     cmd.args(&args).stdin(std::process::Stdio::null());
-    wimo ai_wimo_tools::util::detach_command(&mut cmd);
-    cmd.envs(wimo ai_wimo_tools::util::pager_env());
+    wimoai_wimo_tools::util::detach_command(&mut cmd);
+    cmd.envs(wimoai_wimo_tools::util::pager_env());
     let output = cmd.output().await?;
 
     if !output.status.success() {
@@ -230,8 +230,8 @@ async fn fetch_gh_release_latest(exclude_pre: bool) -> Result<String> {
     }
     let mut cmd = Command::new("gh");
     cmd.args(&args).stdin(std::process::Stdio::null());
-    wimo ai_wimo_tools::util::detach_command(&mut cmd);
-    cmd.envs(wimo ai_wimo_tools::util::pager_env());
+    wimoai_wimo_tools::util::detach_command(&mut cmd);
+    cmd.envs(wimoai_wimo_tools::util::pager_env());
     let output = cmd.output().await?;
 
     if !output.status.success() {
@@ -293,7 +293,7 @@ pub async fn fetch_gcs_version_from_base(channel: &str, base_url: &str) -> Resul
 
 async fn fetch_gcs_channel_pointer(channel: &str, base_url: &str) -> Result<String> {
     let url = format!("{}/{}", base_url, channel);
-    let client = wimo ai_wimo_extra_ca::build_reqwest_client(|builder| {
+    let client = wimoai_wimo_extra_ca::build_reqwest_client(|builder| {
         builder.timeout(Duration::from_secs(15))
     })?;
 
@@ -431,7 +431,7 @@ pub async fn is_version_cache_fresh() -> bool {
     false
 }
 
-pub use wimo ai_wimo_version::installed as get_installed_wimo_version;
+pub use wimoai_wimo_version::installed as get_installed_wimo_version;
 
 /// Version of the managed wimo binary currently on disk, read from the
 /// `~/.wimo/bin/wimo` symlink target (`../downloads/wimo-<version>-<platform>`)
@@ -451,7 +451,7 @@ pub use wimo ai_wimo_version::installed as get_installed_wimo_version;
 pub fn installed_on_disk_version() -> Option<String> {
     #[cfg(unix)]
     {
-        let app = wimo ai_wimo_shell::util::wimo_home::wimo_application();
+        let app = wimoai_wimo_shell::util::wimo_home::wimo_application();
         let target = std::fs::read_link(&app).ok()?;
         // metadata() follows the symlink: Err means the target is gone (dangling link) and the version it names is not actually on disk
         std::fs::metadata(&app).ok()?;
@@ -535,7 +535,7 @@ pub fn channel_name() -> Option<&'static str> {
     static NAME: OnceLock<Option<&'static str>> = OnceLock::new();
     *NAME.get_or_init(|| {
         let stable = cached_stable_version()?;
-        derive_channel(wimo ai_wimo_version::VERSION, &stable)
+        derive_channel(wimoai_wimo_version::VERSION, &stable)
     })
 }
 
@@ -556,7 +556,7 @@ pub fn channel_label() -> &'static str {
             Some(s) => s,
             None => return "",
         };
-        match derive_channel(wimo ai_wimo_version::VERSION, &stable) {
+        match derive_channel(wimoai_wimo_version::VERSION, &stable) {
             Some("alpha") => " [alpha]",
             Some(_) => " [stable]",
             None => "",

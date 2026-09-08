@@ -77,7 +77,7 @@ impl WorkspacesClient {
 
     pub(crate) async fn list_workspaces(&self, q: &WsQuery) -> Result<ListWorkspacesPage, WsError> {
         let auth = self.auth.auth().await.map_err(|_| WsError::NoOauth)?;
-        if !auth.is_wimo ai_auth() {
+        if !auth.is_wimoai_auth() {
             return Err(WsError::NoOauth);
         }
 
@@ -99,11 +99,11 @@ impl WorkspacesClient {
             .query(&query)
             .header("Authorization", format!("Bearer {}", auth.key))
             .header(
-                "X-wimo ai-Token-Auth",
+                "X-wimoai-Token-Auth",
                 self.auth.wimo_com_config().token_header.clone(),
             )
             .header("x-userid", &auth.user_id)
-            .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+            .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
             .header(
                 "x-wimo-client-identifier",
                 crate::http::process_client_identifier(),
@@ -116,7 +116,7 @@ impl WorkspacesClient {
         if let Some(email) = &auth.email {
             builder = builder.header("x-email", email);
         }
-        let builder = wimo ai_file_utils::trace_context::inject_trace_context_into_request(builder);
+        let builder = wimoai_file_utils::trace_context::inject_trace_context_into_request(builder);
 
         let response = builder.send().await?;
         let status = response.status();

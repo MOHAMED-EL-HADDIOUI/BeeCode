@@ -1,9 +1,9 @@
 use std::rc::Rc;
 use std::time::Duration;
 
-use wimo ai_agent_lifecycle::LocalExtensionRegistryBuilder;
-use wimo ai_agent_lifecycle::{LocalSessionLifecycleContributor, LocalTurnLifecycleContributor};
-use wimo ai_agent_lifecycle::{
+use wimoai_agent_lifecycle::LocalExtensionRegistryBuilder;
+use wimoai_agent_lifecycle::{LocalSessionLifecycleContributor, LocalTurnLifecycleContributor};
+use wimoai_agent_lifecycle::{
     SessionIdleInput, TurnAbortInput, TurnDoneInput, TurnErrorInput, TurnStartInput,
 };
 
@@ -130,7 +130,7 @@ mod idle_notification_delay_tests {
 mod idle_after_interrupt_tests {
     use super::*;
     use std::cell::RefCell;
-    use wimo ai_agent_lifecycle::TurnAbortReason;
+    use wimoai_agent_lifecycle::TurnAbortReason;
 
     #[derive(Default)]
     struct RecordingSink {

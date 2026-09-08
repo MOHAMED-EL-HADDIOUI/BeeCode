@@ -2280,7 +2280,7 @@ source = { source = "local", path = "/tmp/mp" }
 "#,
     )
     .unwrap();
-    let layers = wimo ai_wimo_config::managed_config_layers_at(Some(system.path()), Some(user.path()));
+    let layers = wimoai_wimo_config::managed_config_layers_at(Some(system.path()), Some(user.path()));
     let ms = resolve_managed_settings(None, managed_toml_policy_layers(layers, vec![]));
     assert!(
         ms.mcp_allowlist

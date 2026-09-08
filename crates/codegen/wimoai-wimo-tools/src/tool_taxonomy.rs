@@ -2,7 +2,7 @@
 //! `_meta` envelope.
 //!
 //! Depends only on `ToolKind`/`ToolNamespace` + `serde`/`serde_json` (no
-//! `ToolInput`, proto, or runtime). A future `wimo ai-tool-taxonomy` leaf crate
+//! `ToolInput`, proto, or runtime). A future `wimoai-tool-taxonomy` leaf crate
 //! would need those two (dependency-free) enums moved here too — coherence ties
 //! the inherent impls to the enum definitions. The `ToolInput`-coupled
 //! projection lives in [`crate::normalization`].
@@ -302,7 +302,7 @@ mod tests {
     #[test]
     fn writing_tool_kind_matches_definition_sites() {
         use crate::types::tool_metadata::ToolMetadata;
-        use wimo ai_tool_runtime::Tool;
+        use wimoai_tool_runtime::Tool;
         fn covered<T: Tool + ToolMetadata>(tool: T) {
             assert_eq!(
                 writing_tool_kind(tool.id().as_str()),

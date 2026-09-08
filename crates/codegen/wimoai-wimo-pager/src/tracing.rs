@@ -256,12 +256,12 @@ impl TracingModel {
 /// (Bash `raw_output` byte arrays reach hundreds of KB per line.)
 /// Payload fields on this target must be wrapped in [`LazyJson`] so serialization only happens inside a recording subscriber.
 /// That is the dev pane filter (dev builds) or the firehose (`wimo_DEBUG_LOG` / `wimo_LOG_FILE`).
-pub use wimo ai_wimo_telemetry::debug_log::ACP_UPDATE_PAYLOAD_TARGET;
+pub use wimoai_wimo_telemetry::debug_log::ACP_UPDATE_PAYLOAD_TARGET;
 /// Target for the always-on compact ACP update summary line (kind, ids, status, payload sizes).
 /// Cheap to format at streaming rate.
 ///
-/// Defined in `wimo ai-wimo-telemetry` so the firehose directives and the pager filter share one constant (re-exported here for callsites).
-pub use wimo ai_wimo_telemetry::debug_log::ACP_UPDATE_TARGET;
+/// Defined in `wimoai-wimo-telemetry` so the firehose directives and the pager filter share one constant (re-exported here for callsites).
+pub use wimoai_wimo_telemetry::debug_log::ACP_UPDATE_TARGET;
 /// Lazily JSON-serializes a value inside `Display::fmt`.
 ///
 /// Use as a `%`-captured event field so `serde_json::to_string` runs only when a layer whose filter passed actually records the field.
@@ -376,11 +376,11 @@ pub fn init_tracing() -> TracingHandle {
     use tracing_subscriber::{
         EnvFilter, Layer as _, filter::LevelFilter, fmt, layer::SubscriberExt as _,
     };
-    use wimo ai_wimo_telemetry::debug_log::RMCP_SSE_NOISE_TARGET;
+    use wimoai_wimo_telemetry::debug_log::RMCP_SSE_NOISE_TARGET;
     let (make_writer, rx) = TracingChannelMakeWriter::new();
     let payload_level = "off";
     let directives = format!(
-        "wimo ai_wimo_shell=info,wimo ai_wimo_pager=trace,wimo ai_wimo_tools=info,wimo ai_wimo_session_search=info,wimo ai_acp_lib=info,{RMCP_SSE_NOISE_TARGET}=error,sampling_log=off,{ACP_UPDATE_TARGET}=debug,{ACP_UPDATE_PAYLOAD_TARGET}={payload_level}"
+        "wimoai_wimo_shell=info,wimoai_wimo_pager=trace,wimoai_wimo_tools=info,wimoai_wimo_session_search=info,wimoai_acp_lib=info,{RMCP_SSE_NOISE_TARGET}=error,sampling_log=off,{ACP_UPDATE_TARGET}=debug,{ACP_UPDATE_PAYLOAD_TARGET}={payload_level}"
     );
     let env_filter = EnvFilter::builder()
         .with_default_directive(LevelFilter::WARN.into())
@@ -389,31 +389,31 @@ pub fn init_tracing() -> TracingHandle {
         .with_target(true)
         .with_ansi(true)
         .with_writer(make_writer);
-    let otel_layer = wimo ai_wimo_telemetry::otel_layer::build_otel_layer(
-        wimo ai_wimo_telemetry::otel_layer::OtelClientInfo {
+    let otel_layer = wimoai_wimo_telemetry::otel_layer::build_otel_layer(
+        wimoai_wimo_telemetry::otel_layer::OtelClientInfo {
             client_name: "wimo-pager",
-            client_version: wimo ai_wimo_version::VERSION,
-            service_version: wimo ai_wimo_version::full_version(),
+            client_version: wimoai_wimo_version::VERSION,
+            service_version: wimoai_wimo_version::full_version(),
             app_entrypoint: "tui",
         },
-        wimo ai_wimo_shell::auth::credential_provider::build_default_otel_layer_config(),
+        wimoai_wimo_shell::auth::credential_provider::build_default_otel_layer_config(),
     );
-    let instrumentation_layer = wimo ai_wimo_telemetry::instrumentation::layer();
-    let sampling_log_layer = wimo ai_wimo_telemetry::sampling_log::layer();
-    let hooks_log_layer = wimo ai_wimo_telemetry::hooks_log::layer();
+    let instrumentation_layer = wimoai_wimo_telemetry::instrumentation::layer();
+    let sampling_log_layer = wimoai_wimo_telemetry::sampling_log::layer();
+    let hooks_log_layer = wimoai_wimo_telemetry::hooks_log::layer();
     let registry = tracing_subscriber::registry()
         .with(fmt_layer.with_filter(env_filter))
         .with(instrumentation_layer)
         .with(sampling_log_layer)
-        .with(wimo ai_wimo_telemetry::span_profile::layer("tui"))
+        .with(wimoai_wimo_telemetry::span_profile::layer("tui"))
         .with(hooks_log_layer)
         .with(otel_layer);
-    wimo ai_wimo_telemetry::debug_log::install_firehose(registry, "tui");
-    wimo ai_wimo_telemetry::external::init(
-        wimo ai_wimo_shell::agent::config::resolve_external_otel_config(
-            wimo ai_wimo_telemetry::external::config::ExternalClientInfo {
-                service_version: wimo ai_wimo_version::full_version().to_owned(),
-                client_version: wimo ai_wimo_version::VERSION.to_owned(),
+    wimoai_wimo_telemetry::debug_log::install_firehose(registry, "tui");
+    wimoai_wimo_telemetry::external::init(
+        wimoai_wimo_shell::agent::config::resolve_external_otel_config(
+            wimoai_wimo_telemetry::external::config::ExternalClientInfo {
+                service_version: wimoai_wimo_version::full_version().to_owned(),
+                client_version: wimoai_wimo_version::VERSION.to_owned(),
                 app_entrypoint: "tui".to_owned(),
             },
         ),

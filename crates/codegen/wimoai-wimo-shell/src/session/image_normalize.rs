@@ -7,8 +7,8 @@ use agent_client_protocol::ImageContent;
 use base64::Engine as _;
 use bytes::Bytes;
 use std::borrow::Cow;
-use wimo ai_wimo_tools::util::format_bytes;
-use wimo ai_wimo_tools::util::image_compress::{FilterType, ReEncodeParams, re_encode_under_limit};
+use wimoai_wimo_tools::util::format_bytes;
+use wimoai_wimo_tools::util::image_compress::{FilterType, ReEncodeParams, re_encode_under_limit};
 /// Decoded attachment bytes above this are re-encoded to fit this cap.
 ///
 /// Kept low so many images fit under the inference proxy's ~50 MB request-body limit before the downstream byte budget starts evicting images.
@@ -169,11 +169,11 @@ fn params_for(harness: HarnessVariant) -> &'static ReEncodeParams {
         HarnessVariant::Default => &NORMALIZE_PARAMS,
     }
 }
-/// Resolve the active reminder tag via the canonical constants in `wimo ai_wimo_tools::reminders`.
+/// Resolve the active reminder tag via the canonical constants in `wimoai_wimo_tools::reminders`.
 /// A free function because this module has no `SessionActor`; see `reminder_wrapper_tag`.
 fn reminder_tag(is_cursor: bool) -> &'static str {
     let _ = is_cursor;
-    wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG
+    wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG
 }
 fn render_notice(notes: &[String], is_cursor: bool, inner_tag: &str) -> String {
     if notes.is_empty() {
@@ -247,7 +247,7 @@ pub(crate) fn render_compression_notice(
 /// The reason is logged when the loader strips an image; the strip is re-persisted (irreversible), so the evidence must reach logs.
 pub(crate) fn persisted_image_reject_reason(bytes: &[u8]) -> Option<String> {
     use image::ImageFormat as F;
-    use wimo ai_wimo_tools::util::image_validate as iv;
+    use wimoai_wimo_tools::util::image_validate as iv;
     let Ok(format) = image::guess_format(bytes) else {
         return Some(format!("unrecognized format ({} bytes)", bytes.len()));
     };
@@ -299,7 +299,7 @@ pub(crate) fn inline_attach_verdict(data_b64: &str) -> InlineAttachVerdict {
         return InlineAttachVerdict::Unreadable;
     };
     let Ok((w, h, _)) =
-        wimo ai_wimo_tools::util::image_validate::validate_image_bytes_with(&raw, false)
+        wimoai_wimo_tools::util::image_validate::validate_image_bytes_with(&raw, false)
     else {
         return InlineAttachVerdict::Unreadable;
     };
@@ -336,7 +336,7 @@ async fn normalize_one_in(
         Ok(b) => b,
         Err(e) => return fail(index, format!("base64 decode: {e}")),
     };
-    use wimo ai_wimo_tools::util::image_validate as iv;
+    use wimoai_wimo_tools::util::image_validate as iv;
     let (img, raw_bytes) = if iv::needs_endpoint_transcode(&raw_bytes) {
         let png = match run_blocking(move || match iv::transcode_to_endpoint_png(&raw_bytes) {
             Some(r) => r.map_err(|e| NormalizeError(format!("non-native image transcode: {e}"))),
@@ -406,9 +406,9 @@ fn compute_normalized_blocking(
 ) -> Result<NormalizedEntry, NormalizeError> {
     let original_bytes = raw_bytes.len();
     let (orig_w, orig_h, orig_mime) =
-        wimo ai_wimo_tools::util::image_validate::validate_image_bytes_with(&raw_bytes, false)
+        wimoai_wimo_tools::util::image_validate::validate_image_bytes_with(&raw_bytes, false)
             .map_err(|e| NormalizeError(format!("validate: {e}")))?;
-    if !wimo ai_wimo_tools::util::image_validate::image_structurally_complete(&raw_bytes) {
+    if !wimoai_wimo_tools::util::image_validate::image_structurally_complete(&raw_bytes) {
         return Err(NormalizeError(
             "integrity check failed: image bytes are truncated".to_owned(),
         ));
@@ -427,7 +427,7 @@ fn compute_normalized_blocking(
     let exceeded_size = original_bytes > MAX_IMAGE_BYTES;
     let exceeded_dimensions = params.exceeds_dimension_caps(orig_w, orig_h);
     if !exceeded_size && !exceeded_dimensions {
-        if let Err(e) = wimo ai_wimo_tools::util::image_validate::validate_image_bytes(&raw_bytes) {
+        if let Err(e) = wimoai_wimo_tools::util::image_validate::validate_image_bytes(&raw_bytes) {
             return Err(NormalizeError(format!("integrity check failed: {e}")));
         }
         return Ok(NormalizedEntry::Unchanged {

@@ -126,7 +126,7 @@ async fn validate_hook_url(url: &str) -> Result<(), String> {
 }
 
 fn build_hook_client(timeout_ms: u64) -> reqwest::Client {
-    wimo ai_wimo_extra_ca::build_reqwest_client(|builder| {
+    wimoai_wimo_extra_ca::build_reqwest_client(|builder| {
         builder
             .timeout(Duration::from_millis(timeout_ms))
             // SECURITY: only the initial URL is SSRF-validated; do not follow redirects.

@@ -1,5 +1,5 @@
 //! TaskManager — central scheduler (Section 3 / Section 135-161 of prompt_ai.md)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub enum AgentState {
     IDLE,

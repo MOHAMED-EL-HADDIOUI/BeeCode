@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::time::Duration;
 
 use agent_client_protocol as acp;
-use wimo ai_wimo_paths::AbsPathBuf;
+use wimoai_wimo_paths::AbsPathBuf;
 
 #[derive(thiserror::Error, Debug)]
 pub enum TerminalError {

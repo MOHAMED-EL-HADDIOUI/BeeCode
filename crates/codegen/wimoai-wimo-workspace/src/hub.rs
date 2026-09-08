@@ -28,18 +28,18 @@ use serde_json::Value;
 use std::sync::Arc;
 use tokio::task::JoinHandle;
 use url::Url;
-use wimo ai_computer_hub_sdk::{
+use wimoai_computer_hub_sdk::{
     AuthProvider, CLOSE_CODE_SANDBOX_TERMINATED, ClientError, HubConnectionPool, ToolServer,
     ToolServerBuilder, ToolServerHandler,
 };
-use wimo ai_wimo_diag_server::DiagHandle;
-use wimo ai_wimo_tools::registry::types::ToolConfig;
-use wimo ai_tool_protocol::ToolId;
-use wimo ai_tool_runtime::{
+use wimoai_wimo_diag_server::DiagHandle;
+use wimoai_wimo_tools::registry::types::ToolConfig;
+use wimoai_tool_protocol::ToolId;
+use wimoai_tool_runtime::{
     ToolCallContext, ToolError, ToolErrorKind, ToolStream, ToolStreamItem, TypedToolOutput,
     terminal_only,
 };
-use wimo ai_tool_types::ToolDescription;
+use wimoai_tool_types::ToolDescription;
 /// Configuration for connecting to a server instance.
 ///
 /// Passed via [`WorkspaceConfig::hub_config`](crate::config::WorkspaceConfig::hub_config).
@@ -204,8 +204,8 @@ impl HubHandle {
         ws: HubWsTiming,
         tool_handlers: Vec<std::sync::Arc<dyn ToolServerHandler>>,
         server_metadata: Option<serde_json::Value>,
-        session_handler_resolver: Option<wimo ai_computer_hub_sdk::SessionHandlerResolver>,
-        on_session_unbound: Option<std::sync::Arc<wimo ai_computer_hub_sdk::SessionUnboundCallback>>,
+        session_handler_resolver: Option<wimoai_computer_hub_sdk::SessionHandlerResolver>,
+        on_session_unbound: Option<std::sync::Arc<wimoai_computer_hub_sdk::SessionUnboundCallback>>,
     ) -> Result<Self, ClientError> {
         let pool = HubConnectionPool::new();
         let server_url = config.url.clone();
@@ -214,7 +214,7 @@ impl HubHandle {
             .url(server_url)
             .auth_provider(config.auth.clone())
             .allow_insecure_ws(config.allow_insecure_ws)
-            .binary_version(wimo ai_wimo_version::VERSION)
+            .binary_version(wimoai_wimo_version::VERSION)
             .image_capabilities(
                 crate::image_capabilities::image_capabilities()
                     .wire()
@@ -372,7 +372,7 @@ impl HubHandle {
 pub(crate) struct SessionRoutedToolHandler {
     tool_id: ToolId,
     desc: ToolDescription,
-    semantic_kind: Option<wimo ai_wimo_tools::types::tool::ToolKind>,
+    semantic_kind: Option<wimoai_wimo_tools::types::tool::ToolKind>,
     schema: Option<Value>,
     workspace: WorkspaceHandle,
 }
@@ -380,10 +380,10 @@ impl SessionRoutedToolHandler {
     pub(crate) fn new(
         name: String,
         desc: ToolDescription,
-        semantic_kind: Option<wimo ai_wimo_tools::types::tool::ToolKind>,
+        semantic_kind: Option<wimoai_wimo_tools::types::tool::ToolKind>,
         schema: Option<Value>,
         workspace: WorkspaceHandle,
-    ) -> Result<Self, wimo ai_tool_protocol::IdError> {
+    ) -> Result<Self, wimoai_tool_protocol::IdError> {
         Ok(Self {
             tool_id: ToolId::new(name)?,
             desc,
@@ -409,7 +409,7 @@ struct CallCompletedGuard {
     tracker: Arc<crate::activity::ActivityTracker>,
     call_id: String,
     session_id: Option<String>,
-    outcome: wimo ai_wimo_session_events::ToolOutcome,
+    outcome: wimoai_wimo_session_events::ToolOutcome,
 }
 impl CallCompletedGuard {
     fn new(
@@ -421,10 +421,10 @@ impl CallCompletedGuard {
             tracker,
             call_id,
             session_id,
-            outcome: wimo ai_wimo_session_events::ToolOutcome::Cancelled,
+            outcome: wimoai_wimo_session_events::ToolOutcome::Cancelled,
         }
     }
-    fn set_outcome(&mut self, outcome: wimo ai_wimo_session_events::ToolOutcome) {
+    fn set_outcome(&mut self, outcome: wimoai_wimo_session_events::ToolOutcome) {
         self.outcome = outcome;
     }
 }
@@ -449,7 +449,7 @@ impl ToolServerHandler for SessionRoutedToolHandler {
         let tool_id = self.tool_id();
         let hub_session = ctx
             .extensions
-            .get::<wimo ai_tool_runtime::SessionContext>()
+            .get::<wimoai_tool_runtime::SessionContext>()
             .map(|s| s.0.clone());
         let tracker = &self.workspace.shared.activity_tracker;
         if tracker.is_draining() {
@@ -562,7 +562,7 @@ impl ToolServerHandler for SessionRoutedToolHandler {
                         yield ToolStreamItem::Progress(p);
                     }
                     ToolStreamItem::Terminal(Ok(run_result)) => {
-                        _guard.set_outcome(wimo ai_wimo_session_events::ToolOutcome::Success);
+                        _guard.set_outcome(wimoai_wimo_session_events::ToolOutcome::Success);
                         let output = run_result.into_typed_tool_output(tool_id);
                         let output = match &virt {
                             Some(v) => v.rewrite_typed_output(output),
@@ -579,7 +579,7 @@ impl ToolServerHandler for SessionRoutedToolHandler {
                             kind = %e.variant_name(),
                             "tool call failed"
                         );
-                        _guard.set_outcome(wimo ai_wimo_session_events::ToolOutcome::Error);
+                        _guard.set_outcome(wimoai_wimo_session_events::ToolOutcome::Error);
                         let e = match &virt {
                             Some(v) => v.rewrite_error(e),
                             None => e,
@@ -656,8 +656,8 @@ pub(crate) fn apply_tools_changed(
     }
     new_tools
 }
-fn parse_server_id(id: &str) -> Result<wimo ai_tool_protocol::ServerId, ClientError> {
-    wimo ai_tool_protocol::ServerId::new(id)
+fn parse_server_id(id: &str) -> Result<wimoai_tool_protocol::ServerId, ClientError> {
+    wimoai_tool_protocol::ServerId::new(id)
         .map_err(|e| ClientError::InvalidConfig(format!("invalid server_id {id:?}: {e}")))
 }
 /// Map a [`ClientError`] into a [`WorkspaceError::HubError`].
@@ -671,7 +671,7 @@ pub(crate) fn hub_result<T>(result: Result<T, ClientError>) -> WorkspaceResult<T
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::tool::ToolKind;
     #[test]
     fn hub_tool_ids_to_tool_configs_basic() {
         let ids = vec![
@@ -716,7 +716,7 @@ mod tests {
         assert_eq!(result[0].id, "hub:tool_a");
     }
     use futures::StreamExt;
-    use wimo ai_tool_runtime::{SessionContext, ToolCallId};
+    use wimoai_tool_runtime::{SessionContext, ToolCallId};
     fn make_handler(workspace: &WorkspaceHandle, tool_name: &str) -> SessionRoutedToolHandler {
         SessionRoutedToolHandler::new(
             tool_name.to_owned(),
@@ -745,13 +745,13 @@ mod tests {
     #[tokio::test]
     async fn renamed_active_message_handler_keeps_semantic_hitl_classification() {
         let handle = crate::handle::tests::make_handle();
-        let mut config = wimo ai_wimo_tools::registry::types::ToolConfig::for_tool::<
-            wimo ai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
+        let mut config = wimoai_wimo_tools::registry::types::ToolConfig::for_tool::<
+            wimoai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
         >();
         config.name_override = Some("relay_to_subagent".to_owned());
         assert_eq!(
             config.kind,
-            Some(wimo ai_wimo_tools::types::tool::ToolKind::ActiveAgentMessage)
+            Some(wimoai_wimo_tools::types::tool::ToolKind::ActiveAgentMessage)
         );
         let model_name = config.name_override.clone().expect("name override");
         let desc = ToolDescription::new(model_name.clone(), "relay");
@@ -857,7 +857,7 @@ mod tests {
                 );
                 assert_eq!(
                     typed.model_output,
-                    vec![wimo ai_tool_runtime::ContentBlock::Text {
+                    vec![wimoai_tool_runtime::ContentBlock::Text {
                         text: run_result.prompt_text.clone(),
                     }],
                     "model_output must be the prompt_text, not a JSON dump"
@@ -919,45 +919,45 @@ mod tests {
             "dropping the stream must run the RAII completion guard"
         );
     }
-    use wimo ai_wimo_tools::types::tool_metadata::ToolMetadata as wimo aiToolMetadata;
+    use wimoai_wimo_tools::types::tool_metadata::ToolMetadata as wimoaiToolMetadata;
     #[derive(Debug)]
     struct GateStreamingStub;
-    impl wimo aiToolMetadata for GateStreamingStub {
+    impl wimoaiToolMetadata for GateStreamingStub {
         fn kind(&self) -> ToolKind {
             ToolKind::Other
         }
-        fn tool_namespace(&self) -> wimo ai_wimo_tools::types::tool::ToolNamespace {
-            wimo ai_wimo_tools::types::tool::ToolNamespace::MCP
+        fn tool_namespace(&self) -> wimoai_wimo_tools::types::tool::ToolNamespace {
+            wimoai_wimo_tools::types::tool::ToolNamespace::MCP
         }
         fn description_template(&self) -> &str {
             "gate streaming stub"
         }
     }
-    impl wimo ai_tool_runtime::Tool for GateStreamingStub {
+    impl wimoai_tool_runtime::Tool for GateStreamingStub {
         type Args = serde_json::Value;
         type Output = String;
-        fn id(&self) -> wimo ai_tool_protocol::ToolId {
-            wimo ai_tool_protocol::ToolId::new("gate_streaming_stub").expect("valid tool id")
+        fn id(&self) -> wimoai_tool_protocol::ToolId {
+            wimoai_tool_protocol::ToolId::new("gate_streaming_stub").expect("valid tool id")
         }
         fn description(
             &self,
-            _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-        ) -> wimo ai_tool_types::ToolDescription {
-            wimo ai_tool_types::ToolDescription::new("gate_streaming_stub", "gate streaming stub")
+            _ctx: &::wimoai_tool_runtime::ListToolsContext,
+        ) -> wimoai_tool_types::ToolDescription {
+            wimoai_tool_types::ToolDescription::new("gate_streaming_stub", "gate streaming stub")
         }
         async fn run(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> Result<String, wimo ai_tool_runtime::ToolError> {
+        ) -> Result<String, wimoai_tool_runtime::ToolError> {
             Ok("terminal-value".into())
         }
         async fn execute(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> wimo ai_tool_runtime::ToolStream<String> {
-            use wimo ai_tool_runtime::{ToolProgress, ToolStreamItem};
+        ) -> wimoai_tool_runtime::ToolStream<String> {
+            use wimoai_tool_runtime::{ToolProgress, ToolStreamItem};
             Box::pin(futures::stream::iter(vec![
                 ToolStreamItem::Progress(ToolProgress::Text {
                     text: "stub-progress-1".into(),
@@ -980,7 +980,7 @@ mod tests {
             )
             .expect("register_tool must succeed");
     }
-    async fn drain_counts<T>(mut stream: wimo ai_tool_runtime::ToolStream<T>) -> (usize, usize, bool) {
+    async fn drain_counts<T>(mut stream: wimoai_tool_runtime::ToolStream<T>) -> (usize, usize, bool) {
         let mut progress = 0;
         let mut terminal = 0;
         let mut last_is_terminal = false;
@@ -1026,8 +1026,8 @@ mod tests {
     use crate::capability::CapabilityMode;
     use crate::session::tool_config::test_support::tc;
     use std::time::Duration;
-    use wimo ai_wimo_tools::notification::types::{ToolNotification, ToolNotificationHandle};
-    use wimo ai_wimo_tools::registry::types::ToolServerConfig;
+    use wimoai_wimo_tools::notification::types::{ToolNotification, ToolNotificationHandle};
+    use wimoai_wimo_tools::registry::types::ToolServerConfig;
     fn bg_config() -> ToolServerConfig {
         ToolServerConfig {
             tools: vec![
@@ -1066,9 +1066,9 @@ mod tests {
     }
     async fn wait_until(
         tracker: &crate::activity::ActivityTracker,
-        pred: impl Fn(&wimo ai_tool_protocol::ToolServerStatusPayload) -> bool,
+        pred: impl Fn(&wimoai_tool_protocol::ToolServerStatusPayload) -> bool,
         timeout: Duration,
-    ) -> wimo ai_tool_protocol::ToolServerStatusPayload {
+    ) -> wimoai_tool_protocol::ToolServerStatusPayload {
         let deadline = tokio::time::Instant::now() + timeout;
         loop {
             let snap = tracker.snapshot();
@@ -1089,7 +1089,7 @@ mod tests {
         }
     }
     fn bg_started_notif(task_id: &str) -> ToolNotification {
-        use wimo ai_wimo_tools::notification::types::{
+        use wimoai_wimo_tools::notification::types::{
             BashExecutionBackgrounded, BashNotificationBase,
         };
         ToolNotification::BashExecutionBackgrounded(BashExecutionBackgrounded {
@@ -1108,7 +1108,7 @@ mod tests {
         })
     }
     fn task_completed_notif(task_id: &str) -> ToolNotification {
-        use wimo ai_wimo_tools::computer::types::{TaskKind, TaskSnapshot};
+        use wimoai_wimo_tools::computer::types::{TaskKind, TaskSnapshot};
         ToolNotification::TaskCompleted(TaskSnapshot {
             task_id: task_id.to_owned(),
             command: "sleep 1".to_owned(),
@@ -1467,34 +1467,34 @@ mod tests {
     struct PathEchoStub {
         received: Arc<std::sync::Mutex<Option<serde_json::Value>>>,
     }
-    impl wimo aiToolMetadata for PathEchoStub {
+    impl wimoaiToolMetadata for PathEchoStub {
         fn kind(&self) -> ToolKind {
             ToolKind::Other
         }
-        fn tool_namespace(&self) -> wimo ai_wimo_tools::types::tool::ToolNamespace {
-            wimo ai_wimo_tools::types::tool::ToolNamespace::MCP
+        fn tool_namespace(&self) -> wimoai_wimo_tools::types::tool::ToolNamespace {
+            wimoai_wimo_tools::types::tool::ToolNamespace::MCP
         }
         fn description_template(&self) -> &str {
             "path echo stub"
         }
     }
-    impl wimo ai_tool_runtime::Tool for PathEchoStub {
+    impl wimoai_tool_runtime::Tool for PathEchoStub {
         type Args = serde_json::Value;
         type Output = serde_json::Value;
-        fn id(&self) -> wimo ai_tool_protocol::ToolId {
-            wimo ai_tool_protocol::ToolId::new("path_echo").expect("valid tool id")
+        fn id(&self) -> wimoai_tool_protocol::ToolId {
+            wimoai_tool_protocol::ToolId::new("path_echo").expect("valid tool id")
         }
         fn description(
             &self,
-            _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-        ) -> wimo ai_tool_types::ToolDescription {
-            wimo ai_tool_types::ToolDescription::new("path_echo", "path echo stub")
+            _ctx: &::wimoai_tool_runtime::ListToolsContext,
+        ) -> wimoai_tool_types::ToolDescription {
+            wimoai_tool_types::ToolDescription::new("path_echo", "path echo stub")
         }
         async fn run(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             input: serde_json::Value,
-        ) -> Result<serde_json::Value, wimo ai_tool_runtime::ToolError> {
+        ) -> Result<serde_json::Value, wimoai_tool_runtime::ToolError> {
             *self.received.lock().expect("path echo lock") = Some(input.clone());
             Ok(serde_json::json!({
                 "received": input.get("path").cloned().unwrap_or(serde_json::Value::Null),
@@ -1503,10 +1503,10 @@ mod tests {
         }
         async fn execute(
             &self,
-            ctx: wimo ai_tool_runtime::ToolCallContext,
+            ctx: wimoai_tool_runtime::ToolCallContext,
             input: serde_json::Value,
-        ) -> wimo ai_tool_runtime::ToolStream<serde_json::Value> {
-            use wimo ai_tool_runtime::{ToolProgress, ToolStreamItem};
+        ) -> wimoai_tool_runtime::ToolStream<serde_json::Value> {
+            use wimoai_tool_runtime::{ToolProgress, ToolStreamItem};
             let value = self.run(ctx, input).await;
             Box::pin(futures::stream::iter(vec![
                 ToolStreamItem::Progress(ToolProgress::Text {
@@ -1538,10 +1538,10 @@ mod tests {
         received
     }
     async fn drain_terminal(
-        stream: wimo ai_tool_runtime::ToolStream<wimo ai_tool_runtime::TypedToolOutput>,
+        stream: wimoai_tool_runtime::ToolStream<wimoai_tool_runtime::TypedToolOutput>,
     ) -> (
-        Vec<wimo ai_tool_runtime::ToolProgress>,
-        wimo ai_tool_runtime::TypedToolOutput,
+        Vec<wimoai_tool_runtime::ToolProgress>,
+        wimoai_tool_runtime::TypedToolOutput,
     ) {
         use futures::StreamExt;
         let mut progress = Vec::new();
@@ -1594,7 +1594,7 @@ mod tests {
             "outbound must not leak the real root: {dumped}"
         );
         match progress.first() {
-            Some(wimo ai_tool_runtime::ToolProgress::Text { text }) => {
+            Some(wimoai_tool_runtime::ToolProgress::Text { text }) => {
                 assert_eq!(text, "wrote /workspace/out.txt");
             }
             other => panic!("expected rewritten progress, got {other:?}"),
@@ -1796,36 +1796,36 @@ mod tests {
     }
     #[derive(Debug)]
     struct PathErrorStub;
-    impl wimo aiToolMetadata for PathErrorStub {
+    impl wimoaiToolMetadata for PathErrorStub {
         fn kind(&self) -> ToolKind {
             ToolKind::Other
         }
-        fn tool_namespace(&self) -> wimo ai_wimo_tools::types::tool::ToolNamespace {
-            wimo ai_wimo_tools::types::tool::ToolNamespace::MCP
+        fn tool_namespace(&self) -> wimoai_wimo_tools::types::tool::ToolNamespace {
+            wimoai_wimo_tools::types::tool::ToolNamespace::MCP
         }
         fn description_template(&self) -> &str {
             "path error stub"
         }
     }
-    impl wimo ai_tool_runtime::Tool for PathErrorStub {
+    impl wimoai_tool_runtime::Tool for PathErrorStub {
         type Args = serde_json::Value;
         type Output = serde_json::Value;
-        fn id(&self) -> wimo ai_tool_protocol::ToolId {
-            wimo ai_tool_protocol::ToolId::new("path_error").expect("valid tool id")
+        fn id(&self) -> wimoai_tool_protocol::ToolId {
+            wimoai_tool_protocol::ToolId::new("path_error").expect("valid tool id")
         }
         fn description(
             &self,
-            _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-        ) -> wimo ai_tool_types::ToolDescription {
-            wimo ai_tool_types::ToolDescription::new("path_error", "path error stub")
+            _ctx: &::wimoai_tool_runtime::ListToolsContext,
+        ) -> wimoai_tool_types::ToolDescription {
+            wimoai_tool_types::ToolDescription::new("path_error", "path error stub")
         }
         async fn run(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> Result<serde_json::Value, wimo ai_tool_runtime::ToolError> {
-            Err(wimo ai_tool_runtime::ToolError::new(
-                wimo ai_tool_runtime::ToolErrorKind::Execution,
+        ) -> Result<serde_json::Value, wimoai_tool_runtime::ToolError> {
+            Err(wimoai_tool_runtime::ToolError::new(
+                wimoai_tool_runtime::ToolErrorKind::Execution,
                 "missing /workspace/conv-abc/gone.txt",
             )
             .with_details(serde_json::json!({
@@ -1876,41 +1876,41 @@ mod tests {
     }
     #[derive(Debug)]
     struct BashCcoPathStub;
-    impl wimo aiToolMetadata for BashCcoPathStub {
+    impl wimoaiToolMetadata for BashCcoPathStub {
         fn kind(&self) -> ToolKind {
             ToolKind::Execute
         }
-        fn tool_namespace(&self) -> wimo ai_wimo_tools::types::tool::ToolNamespace {
-            wimo ai_wimo_tools::types::tool::ToolNamespace::MCP
+        fn tool_namespace(&self) -> wimoai_wimo_tools::types::tool::ToolNamespace {
+            wimoai_wimo_tools::types::tool::ToolNamespace::MCP
         }
         fn description_template(&self) -> &str {
             "bash cco path stub"
         }
     }
-    impl wimo ai_tool_runtime::Tool for BashCcoPathStub {
+    impl wimoai_tool_runtime::Tool for BashCcoPathStub {
         type Args = serde_json::Value;
-        type Output = wimo ai_wimo_tools::types::output::ToolOutput;
-        fn id(&self) -> wimo ai_tool_protocol::ToolId {
-            wimo ai_tool_protocol::ToolId::new("bash_cco_path").expect("valid tool id")
+        type Output = wimoai_wimo_tools::types::output::ToolOutput;
+        fn id(&self) -> wimoai_tool_protocol::ToolId {
+            wimoai_tool_protocol::ToolId::new("bash_cco_path").expect("valid tool id")
         }
         fn description(
             &self,
-            _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-        ) -> wimo ai_tool_types::ToolDescription {
-            wimo ai_tool_types::ToolDescription::new("bash_cco_path", "bash cco path stub")
+            _ctx: &::wimoai_tool_runtime::ListToolsContext,
+        ) -> wimoai_tool_types::ToolDescription {
+            wimoai_tool_types::ToolDescription::new("bash_cco_path", "bash cco path stub")
         }
         async fn run(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> Result<wimo ai_wimo_tools::types::output::ToolOutput, wimo ai_tool_runtime::ToolError>
+        ) -> Result<wimoai_wimo_tools::types::output::ToolOutput, wimoai_tool_runtime::ToolError>
         {
             let stdout = "/workspace/conv-abc/out.txt";
-            Ok(wimo ai_wimo_tools::types::output::ToolOutput::Bash(
-                wimo ai_wimo_tools::types::output::BashOutput {
+            Ok(wimoai_wimo_tools::types::output::ToolOutput::Bash(
+                wimoai_wimo_tools::types::output::BashOutput {
                     output: stdout.as_bytes().to_vec(),
                     output_for_prompt:
-                        wimo ai_wimo_tools::types::output::BashOutput::make_output_for_prompt(stdout),
+                        wimoai_wimo_tools::types::output::BashOutput::make_output_for_prompt(stdout),
                     exit_code: 0,
                     command: "cat /workspace/conv-abc/out.txt".into(),
                     truncated: false,

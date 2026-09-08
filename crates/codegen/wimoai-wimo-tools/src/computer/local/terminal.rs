@@ -709,7 +709,7 @@ impl LocalTerminalActor {
         let mut cmd = tokio::process::Command::new(&prep.binary);
         cmd.args(&prep.args)
             .current_dir(cwd)
-            .stdin(wimo ai_tty_utils::null_stdio())
+            .stdin(wimoai_tty_utils::null_stdio())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .kill_on_drop(true);
@@ -725,10 +725,10 @@ impl LocalTerminalActor {
             .map_err(|e| ComputerError::io(format!("fd mapping: {e}")))?;
 
         unsafe {
-            cmd.pre_exec(wimo ai_tty_utils::detach_pre_exec_hook());
+            cmd.pre_exec(wimoai_tty_utils::detach_pre_exec_hook());
         }
 
-        wimo ai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
+        wimoai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
 
         #[allow(clippy::disallowed_methods)] // attached to a process group below
         let child = cmd.spawn().map_err(|e| {
@@ -828,7 +828,7 @@ impl LocalTerminalActor {
         let mut cmd = tokio::process::Command::new(&prep.binary);
         cmd.args(&prep.args)
             .current_dir(&prep.cwd)
-            .stdin(wimo ai_tty_utils::null_stdio())
+            .stdin(wimoai_tty_utils::null_stdio())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .kill_on_drop(true);
@@ -841,10 +841,10 @@ impl LocalTerminalActor {
             .map_err(|e| ComputerError::io(format!("fd mapping: {e}")))?;
 
         unsafe {
-            cmd.pre_exec(wimo ai_tty_utils::detach_pre_exec_hook());
+            cmd.pre_exec(wimoai_tty_utils::detach_pre_exec_hook());
         }
 
-        wimo ai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
+        wimoai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
 
         #[allow(clippy::disallowed_methods)] // attached to a process group below
         let child = cmd.spawn().map_err(|e| {
@@ -3044,12 +3044,12 @@ async fn capture_login_env() -> HashMap<String, String> {
     let result = tokio::time::timeout(Duration::from_secs(5), async {
         let mut cmd = tokio::process::Command::new(shell.binary_path());
         cmd.args(["-lc", &script])
-            .stdin(wimo ai_tty_utils::null_stdio())
+            .stdin(wimoai_tty_utils::null_stdio())
             .stdout(Stdio::piped())
-            .stderr(wimo ai_tty_utils::null_stdio())
+            .stderr(wimoai_tty_utils::null_stdio())
             .kill_on_drop(true);
         crate::util::detach_command(&mut cmd);
-        wimo ai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
+        wimoai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
         cmd.envs(crate::util::pager_env());
         #[allow(clippy::disallowed_methods)] // probe killed on drop
         let mut child = cmd.spawn().ok()?;
@@ -3198,7 +3198,7 @@ fn spawn_shell_command(
         cmd.arg("-c")
             .arg(&wrapped_command)
             .current_dir(cwd)
-            .stdin(wimo ai_tty_utils::null_stdio())
+            .stdin(wimoai_tty_utils::null_stdio())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             // Do NOT set .process_group(0): std runs setpgid() before pre_exec
@@ -3211,7 +3211,7 @@ fn spawn_shell_command(
         // /dev/tty and compete with the TUI for terminal input.
         crate::util::detach_command(&mut cmd);
 
-        wimo ai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
+        wimoai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
         cmd
     };
 
@@ -3221,11 +3221,11 @@ fn spawn_shell_command(
             CREATE_BREAKAWAY_FROM_JOB, CREATE_NEW_PROCESS_GROUP, CREATE_NO_WINDOW,
         };
 
-        let inv = wimo ai_wimo_config::shell::shell_command_argv(command);
+        let inv = wimoai_wimo_config::shell::shell_command_argv(command);
         let mut cmd = tokio::process::Command::new(&inv.program);
         cmd.args(&inv.args)
             .current_dir(cwd)
-            .stdin(wimo ai_tty_utils::null_stdio())
+            .stdin(wimoai_tty_utils::null_stdio())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .kill_on_drop(true);

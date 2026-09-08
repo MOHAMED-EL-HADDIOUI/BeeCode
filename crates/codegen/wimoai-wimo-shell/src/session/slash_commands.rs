@@ -2,9 +2,9 @@
 use agent_client_protocol as acp;
 use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
-use wimo ai_wimo_tools::implementations::wimo::LoopFireMode;
-use wimo ai_wimo_tools::implementations::skills::skill::format_skill_name;
-use wimo ai_wimo_tools::implementations::skills::types::SkillInfo;
+use wimoai_wimo_tools::implementations::wimo::LoopFireMode;
+use wimoai_wimo_tools::implementations::skills::skill::format_skill_name;
+use wimoai_wimo_tools::implementations::skills::types::SkillInfo;
 pub(crate) struct BuiltinCommand {
     pub name: &'static str,
     pub description: &'static str,
@@ -1161,10 +1161,10 @@ pub(crate) fn acu_skill_source(is_chat_kind: bool) -> AcuSkillSource {
 ///   Product REST failure still advertises builtins only (empty product skills).
 pub(crate) async fn list_commands(
     cwd: Option<&str>,
-    skills_config: &wimo ai_wimo_agent::prompt::skills::SkillsConfig,
-    plugin_registry: Option<&wimo ai_wimo_agent::plugins::PluginRegistry>,
+    skills_config: &wimoai_wimo_agent::prompt::skills::SkillsConfig,
+    plugin_registry: Option<&wimoai_wimo_agent::plugins::PluginRegistry>,
     availability: CommandAvailability,
-    compat: wimo ai_wimo_tools::types::compat::CompatConfig,
+    compat: wimoai_wimo_tools::types::compat::CompatConfig,
     include_project_workflows: bool,
     kind: Option<&str>,
     auth: Option<std::sync::Arc<crate::auth::AuthManager>>,
@@ -1180,7 +1180,7 @@ pub(crate) async fn list_commands(
             tools: None,
         });
     }
-    let skills = wimo ai_wimo_agent::prompt::skills::list_skills_with_plugins(
+    let skills = wimoai_wimo_agent::prompt::skills::list_skills_with_plugins(
         cwd,
         skills_config,
         plugin_registry,
@@ -1472,7 +1472,7 @@ pub(super) async fn build_skill_information_for_refs(
     slash_skills: &[SkillInfo],
     session_id: &str,
 ) -> Option<String> {
-    use wimo ai_wimo_tools::implementations::skills::skill::{
+    use wimoai_wimo_tools::implementations::skills::skill::{
         SkillRef, SubstitutionContext, apply_substitutions, build_skill_block,
         build_skill_information, load_skill_content,
     };
@@ -1657,11 +1657,11 @@ pub(super) fn resolve_human_intent(
     }
     Ok(prompt_blocks)
 }
-/// The wording (usage hint and scheduling instruction) is sourced from `wimo ai-wimo-tools`.
+/// The wording (usage hint and scheduling instruction) is sourced from `wimoai-wimo-tools`.
 /// It stays identical to the pager's `LoopCommand`, so the two front-ends can't drift.
 /// Like the pager, there is no host-side interval default: the model derives the cadence from the request and asks when none is given.
 fn build_loop_prompt_blocks(args: &str, mode: LoopFireMode) -> Vec<acp::ContentBlock> {
-    use wimo ai_wimo_tools::implementations::wimo::{
+    use wimoai_wimo_tools::implementations::wimo::{
         loop_schedule_instruction, loop_usage_message,
     };
     let text = if args.trim().is_empty() {

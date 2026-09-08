@@ -1,7 +1,7 @@
 // Per-test-case module for the `pty_e2e` integration test crate.
 #[allow(unused_imports)]
 use crate::common::*;
-use wimo ai_wimo_pager_pty_harness::{
+use wimoai_wimo_pager_pty_harness::{
     InferenceEndpoint, InferenceExpectation, InferenceRequestMatcher,
 };
 

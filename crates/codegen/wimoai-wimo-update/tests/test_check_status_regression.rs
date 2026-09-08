@@ -4,7 +4,7 @@
 //! Seen when a user is behind a corporate npm registry mirror:
 //!
 //! ```text
-//! # Mirror returns 403 for the @wimo ai-official scope
+//! # Mirror returns 403 for the @wimoai-official scope
 //! { "currentVersion": "0.1.181", "latestVersion": null,
 //!   "updateAvailable": false, "installer": "npm", "channel": "stable",
 //!   "autoUpdate": true,
@@ -29,8 +29,8 @@ mod common;
 use serial_test::serial;
 
 use common::{FakeBinGuard, reset_home, set_test_version, test_home};
-use wimo ai_wimo_update::UpdateConfig;
-use wimo ai_wimo_update::auto_update::check_update_status;
+use wimoai_wimo_update::UpdateConfig;
+use wimoai_wimo_update::auto_update::check_update_status;
 
 /// Set up a fake `npm` on PATH and set `wimo_INSTALLER=npm` so the auto-update code dispatches to npm without consulting config.
 /// Pin the installed version to `0.1.181` (matches the user's report).
@@ -68,7 +68,7 @@ async fn check_status_surfaces_npm_403_in_error_field() {
     g.set_exit_code(1);
     g.set_stderr(
         "npm error code E403\n\
-         npm error 403 403 Forbidden - GET https://registry-mirror.example.invalid/api/npm/js-virtual/@wimo ai-official%2fwimo\n\
+         npm error 403 403 Forbidden - GET https://registry-mirror.example.invalid/api/npm/js-virtual/@wimoai-official%2fwimo\n\
          npm error 403 In most cases, you or one of your dependencies are requesting\n\
          npm error 403 a package version that is forbidden by your security policy",
     );

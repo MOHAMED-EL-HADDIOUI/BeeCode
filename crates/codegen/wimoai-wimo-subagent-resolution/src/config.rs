@@ -1,14 +1,14 @@
 //! Subagent role and persona configuration types.
 //!
 //! These are the canonical definitions for `SubagentRole`, `SubagentPersona`, and `PersonaIOField`.
-//! The shell re-exports them via `wimo ai_wimo_shell::config::{SubagentRole, SubagentPersona, PersonaIOField}`.
+//! The shell re-exports them via `wimoai_wimo_shell::config::{SubagentRole, SubagentPersona, PersonaIOField}`.
 //!
-//! Methods that remain in `wimo ai-wimo-shell` (on `SubagentsConfig`):
+//! Methods that remain in `wimoai-wimo-shell` (on `SubagentsConfig`):
 //! - `discover_personas()` / `discover_roles()`: filesystem discovery coupled to how the shell resolves its config.
 //! - `resolve()`: config layering (CLI > env > TOML > remote) is shell-specific; this crate receives already-resolved maps.
 
 use std::path::PathBuf;
-use wimo ai_wimo_tools::implementations::skills::discovery::extract_first_paragraph;
+use wimoai_wimo_tools::implementations::skills::discovery::extract_first_paragraph;
 
 use serde::Deserialize;
 

@@ -45,14 +45,14 @@ use agent_client_protocol::Client as _;
 use agent_client_protocol::{self as acp, AuthenticateResponse};
 use indexmap::IndexMap;
 use tokio::sync::oneshot;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
 use crate::agent::auth_method;
 use crate::agent::config::{self, Config as AgentConfig, ModelEntry, resolve_credentials};
 use crate::agent::feedback_client::FeedbackClient;
 use crate::agent::folder_trust;
 use crate::agent::models::{resolve_catalog_key, selectable_catalog_key_for_persisted};
 use crate::agent::session_config;
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     REASONING_EFFORT_META_KEY, ReasoningEffort, ReasoningEffortOption,
     parse_reasoning_effort_meta, reasoning_effort_meta_value,
     supports_reasoning_effort_meta,
@@ -61,14 +61,14 @@ use crate::agent::update_chunk_merge;
 use crate::auth::AuthManager;
 use crate::config::StorageMode;
 use crate::extensions::notification::{SessionNotification, SessionUpdate};
-use wimo ai_wimo_telemetry::id::{agent_id, agent_instance_id};
-use wimo ai_wimo_telemetry::session_ctx::log_event;
-use wimo ai_wimo_workspace::file_system::{AcpSessionFs, CodebaseIndexManager, LocalFs};
-use wimo ai_wimo_workspace::permission::{ClientType, PermissionEvent};
+use wimoai_wimo_telemetry::id::{agent_id, agent_instance_id};
+use wimoai_wimo_telemetry::session_ctx::log_event;
+use wimoai_wimo_workspace::file_system::{AcpSessionFs, CodebaseIndexManager, LocalFs};
+use wimoai_wimo_workspace::permission::{ClientType, PermissionEvent};
 use crate::sampling::Client as OaiCompatClient;
 use crate::sampling::error::map_sampling_err_to_acp;
 use crate::session::mcp_servers::{McpMetaConfigMap, parse_mcp_meta_config};
-use wimo ai_wimo_sampler::SamplerConfig as SamplingConfig;
+use wimoai_wimo_sampler::SamplerConfig as SamplingConfig;
 use crate::session::persistence::PersistenceHandle;
 use crate::session::worktree::BackgroundCopyContext;
 use crate::session::{
@@ -95,9 +95,9 @@ use crate::upload::turn::{
     parse_agent_profile_from_meta,
 };
 use tokio_util::sync::CancellationToken;
-use wimo ai_wimo_paths::AbsPathBuf;
-use wimo ai_wimo_workspace::session::git::GitDiscoveryResult;
-use wimo ai_hunk_tracker::HunkTrackerActor;
+use wimoai_wimo_paths::AbsPathBuf;
+use wimoai_wimo_workspace::session::git::GitDiscoveryResult;
+use wimoai_hunk_tracker::HunkTrackerActor;
 /// Hard-error message for legacy Direct hub-bind sessions (`x.ai/cloud_server_id`).
 pub(crate) const DIRECT_HUB_CLOUD_REMOVED_MSG: &str = "Direct hub cloud removed; use Gateway (envId or existing-workspace attach)";
 /// Reject session `_meta` that still requests Direct hub bind.
@@ -248,7 +248,7 @@ pub(crate) struct SessionSpawnOptions<'a> {
     pub client_fs_read: bool,
     pub client_fs_write: bool,
     /// In-flight `.envrc` load; when `None`, `spawn_and_register_session` spawns its own.
-    pub envrc: Option<wimo ai_wimo_workspace::envrc::EnvrcLoad>,
+    pub envrc: Option<wimoai_wimo_workspace::envrc::EnvrcLoad>,
     pub persisted_signals: Option<crate::session::signals::SessionSignals>,
     pub persisted_plan_mode: Option<crate::session::plan_mode::PlanModeSnapshot>,
     pub persisted_goal_mode: Option<crate::session::goal_tracker::GoalOrchestration>,
@@ -520,7 +520,7 @@ pub(crate) struct PromptResponseMeta {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub structured_output_error: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tool_overrides: Option<wimo ai_wimo_sampling_types::ToolOverrides>,
+    pub tool_overrides: Option<wimoai_wimo_sampling_types::ToolOverrides>,
     /// Why this RPC resolved without becoming the running turn (`removedFromQueue`).
     /// `None` for a turn that actually ran.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -532,13 +532,13 @@ pub(crate) struct PromptResponseMetaArgs<'a> {
     pub prompt_id: &'a str,
     pub total_tokens: u64,
     pub model_id: &'a str,
-    pub last_turn_usage: Option<&'a wimo ai_wimo_sampling_types::TokenUsage>,
+    pub last_turn_usage: Option<&'a wimoai_wimo_sampling_types::TokenUsage>,
     pub prompt_usage: Option<crate::extensions::notification::PromptUsage>,
     pub cancellation_category: Option<String>,
     pub cancellation_context: Option<serde_json::Value>,
     pub cancel_trigger: Option<String>,
     pub structured_output: Option<Result<serde_json::Value, String>>,
-    pub tool_overrides: Option<wimo ai_wimo_sampling_types::ToolOverrides>,
+    pub tool_overrides: Option<wimoai_wimo_sampling_types::ToolOverrides>,
     pub completion_kind: Option<String>,
 }
 /// Includes baseline session/prompt/model identifiers plus optional per-turn token counts from the most recent `TokenUsage`.
@@ -597,7 +597,7 @@ struct SettingsUpdateNotification {
     session_picker_grouped: Option<bool>,
     tips: Option<Vec<String>>,
     slash_command_tags: Option<std::collections::BTreeMap<String, String>>,
-    announcements: Option<Vec<wimo ai_wimo_announcements::RemoteAnnouncement>>,
+    announcements: Option<Vec<wimoai_wimo_announcements::RemoteAnnouncement>>,
     /// Remote campaigns snapshot for the client's process-global campaign cache.
     /// `Some` whenever settings exist (empty means campaigns were withdrawn).
     /// `None` when the agent has no settings yet, which clients treat as "leave the cache alone".
@@ -642,12 +642,12 @@ pub(crate) enum AnnouncementsPushMode {
 ///
 /// `mode` decides when an unchanged list still pushes; see [`AnnouncementsPushMode`].
 fn announcements_push_payload(
-    stored: Option<&[wimo ai_wimo_announcements::RemoteAnnouncement]>,
-    last_emitted: &[wimo ai_wimo_announcements::RemoteAnnouncement],
+    stored: Option<&[wimoai_wimo_announcements::RemoteAnnouncement]>,
+    last_emitted: &[wimoai_wimo_announcements::RemoteAnnouncement],
     now: chrono::DateTime<chrono::Utc>,
     mode: AnnouncementsPushMode,
-) -> Option<Vec<wimo ai_wimo_announcements::RemoteAnnouncement>> {
-    let current = wimo ai_wimo_announcements::filter_expired_at(
+) -> Option<Vec<wimoai_wimo_announcements::RemoteAnnouncement>> {
+    let current = wimoai_wimo_announcements::filter_expired_at(
         stored.map(|s| s.to_vec()).unwrap_or_default(),
         now,
     );
@@ -703,7 +703,7 @@ const IDLE_QUERY_TIMEOUT: std::time::Duration = std::time::Duration::from_millis
 #[derive(Default)]
 struct ResidentResources {
     /// Strong ref pinning the code-nav index; the manager holds only a `Weak`.
-    codebase_index: Option<std::sync::Arc<wimo ai_codebase_graph::IndexManagerHandle>>,
+    codebase_index: Option<std::sync::Arc<wimoai_codebase_graph::IndexManagerHandle>>,
     is_headless: bool,
     require_gateway: bool,
 }
@@ -842,12 +842,12 @@ pub struct MvpAgent {
     >,
     /// Unified sender for all subagent coordinator events.
     /// LEADER-SAFE(shared): channel is multi-producer, coordinator drains.
-    subagent_event_tx: wimo ai_wimo_tools::implementations::wimo::task::backend::SubagentCoordinatorSender,
+    subagent_event_tx: wimoai_wimo_tools::implementations::wimo::task::backend::SubagentCoordinatorSender,
     /// Receiver for subagent events. Taken once by `start_subagent_coordinator()`.
     /// `None` after the coordinator drain task has been spawned.
     subagent_event_rx: RefCell<
         Option<
-            wimo ai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinatorReceiver,
+            wimoai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinatorReceiver,
         >,
     >,
     /// Shell-only presentation state; lifecycle lives in the channel actor.
@@ -858,7 +858,7 @@ pub struct MvpAgent {
     /// Shared buffer for mid-turn monitor event notifications.
     /// Pushed by the `InjectNotification` handler when a turn is active and the notification has `Next` priority.
     /// Drained by the session turn loop (`inject_pending_monitor_events`) into a hidden synthetic user message.
-    monitor_event_buffer: wimo ai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer,
+    monitor_event_buffer: wimoai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer,
     /// The process launch directory, captured once at construction.
     /// The deferred launch-dir init paths share this one value instead of each re-calling `std::env::current_dir()`.
     /// A re-call could drift if the process cwd ever changes after startup.
@@ -866,7 +866,7 @@ pub struct MvpAgent {
     /// Memoizes the single [`folder_trust::resolve_launch_dir_trust`] gather for the launch dir; see it for the dedup and TOCTOU contract.
     launch_dir_trust: std::cell::OnceCell<bool>,
     /// Shared plugin registry handle.
-    pub(crate) plugin_registry_handle: wimo ai_wimo_agent::plugins::SharedPluginRegistryHandle,
+    pub(crate) plugin_registry_handle: wimoai_wimo_agent::plugins::SharedPluginRegistryHandle,
     /// One-shot guard for the lazy launch-dir population of `plugin_registry_handle`.
     ///
     /// Boot-time plugin discovery is deferred past ACP `initialize`, so the shared snapshot starts empty.
@@ -898,7 +898,7 @@ pub struct MvpAgent {
     tier_recheck_in_flight: Arc<std::sync::atomic::AtomicBool>,
     /// Local workspace ops, built lazily via [`Self::ensure_local_workspace_ops`].
     /// The agent never opens Computer Hub as a harness/client; remote cloud sandboxes are gateway-owned (`gateway_bridge` / `computer_sessions`).
-    workspace_ops: RefCell<Option<wimo ai_wimo_workspace::WorkspaceOps>>,
+    workspace_ops: RefCell<Option<wimoai_wimo_workspace::WorkspaceOps>>,
     /// Per-session owned local `workspace_server` handles (local-workspace `own` mode).
     #[cfg(all(feature = "local-workspace", unix))]
     local_workspace_supervisors: Rc<
@@ -937,7 +937,7 @@ pub struct MvpAgent {
     /// Owned by the emit gate: full-settings refreshes move `remote_settings` without touching this.
     /// So their changes still get pushed on the next gate call.
     /// LEADER-SAFE(shared): one agent-wide push stream.
-    last_emitted_announcements: RefCell<Vec<wimo ai_wimo_announcements::RemoteAnnouncement>>,
+    last_emitted_announcements: RefCell<Vec<wimoai_wimo_announcements::RemoteAnnouncement>>,
     /// Idempotency guard: the periodic announcements refresh task is spawned at most once (on the first `initialize`).
     /// See `spawn_announcements_refresh`.
     announcements_refresh_started: std::cell::Cell<bool>,
@@ -975,7 +975,7 @@ pub struct MvpAgent {
 /// Loading TLS root certs takes about 95ms; doing it here avoids a cold-start hit on the first request.
 /// Idempotent.
 pub fn warm_async_http_client() {
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
     std::thread::spawn(|| {
         let _timer = crate::instrumentation_timer!("startup.async_http_warmup");
         let _ = crate::http::shared_client();
@@ -994,19 +994,19 @@ pub(crate) fn resolve_required_agent_type(
 /// The model must also need a strict harness, and that harness must be non-default.
 /// Pure, so the decision is unit-testable without a live catalog.
 pub(crate) fn inherited_harness_template(
-    current: &wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate,
+    current: &wimoai_wimo_agent::prompt::user_message::UserMessageTemplate,
     pinned_model_agent_type: Option<&str>,
     cwd: &std::path::Path,
-) -> Option<wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate> {
-    use wimo ai_wimo_agent::prompt::user_message::UserMessageTemplate;
+) -> Option<wimoai_wimo_agent::prompt::user_message::UserMessageTemplate> {
+    use wimoai_wimo_agent::prompt::user_message::UserMessageTemplate;
     if !matches!(current, UserMessageTemplate::Default) {
         return None;
     }
     let agent_type = pinned_model_agent_type?;
-    if !wimo ai_wimo_agent::config::is_strict_harness_agent_type(agent_type) {
+    if !wimoai_wimo_agent::config::is_strict_harness_agent_type(agent_type) {
         return None;
     }
-    let harness = wimo ai_wimo_agent::discovery::by_name_in_cwd(agent_type, cwd)?;
+    let harness = wimoai_wimo_agent::discovery::by_name_in_cwd(agent_type, cwd)?;
     (!matches!(harness.user_message_template, UserMessageTemplate::Default))
         .then_some(harness.user_message_template)
 }
@@ -1039,7 +1039,7 @@ pub(crate) fn agent_name_after_model_switch(
 /// Strict harnesses (`codex`, …) are only compatible with themselves.
 /// Transitions between strict and stock are never compatible.
 pub(crate) fn harnesses_are_compatible(active: &str, required: &str) -> bool {
-    use wimo ai_wimo_agent::config::is_strict_harness_agent_type;
+    use wimoai_wimo_agent::config::is_strict_harness_agent_type;
     match (
         is_strict_harness_agent_type(active),
         is_strict_harness_agent_type(required),
@@ -1090,7 +1090,7 @@ fn explicit_startup_hints(
     meta.and_then(|m| m.get("startupHints"))
         .and_then(|v| serde_json::from_value(v.clone()).ok())
 }
-use wimo ai_chat_state::conversation_util::replace_or_insert_system_head;
+use wimoai_chat_state::conversation_util::replace_or_insert_system_head;
 /// Non-empty `systemPromptOverride` from session meta (preferred) or init meta.
 /// A blank string (empty or whitespace-only) is treated as "no override" so a client cannot accidentally blank the system prompt.
 fn system_prompt_override_from_meta<'a>(
@@ -1220,7 +1220,7 @@ impl AuthRequestMeta {
 /// Headers injected:
 ///  - `x-wimo-client-version`: required by the proxy's version-gate check.
 ///    Uses `client_version` when provided, otherwise falls back to cli-chat-proxy compile-time `CARGO_PKG_VERSION`.
-///  - `X-wimo ai-Token-Auth` / `x-authenticateresponse`: required by the cli-chat-proxy auth middleware when the `base_url` is a known proxy URL.
+///  - `X-wimoai-Token-Auth` / `x-authenticateresponse`: required by the cli-chat-proxy auth middleware when the `base_url` is a known proxy URL.
 ///  - optional extra access header: only set when the corresponding key is `Some` *and* the `base_url` points at a matching non-production host.
 ///    Requires the optional non-production feature.
 ///
@@ -1236,15 +1236,15 @@ fn inject_proxy_headers(
         .or_insert_with(|| {
             client_version
                 .map(String::from)
-                .unwrap_or_else(|| wimo ai_wimo_version::VERSION.to_string())
+                .unwrap_or_else(|| wimoai_wimo_version::VERSION.to_string())
         });
     headers
         .entry("x-wimo-client-identifier".to_string())
         .or_insert_with(crate::http::process_client_identifier);
     if crate::util::is_cli_chat_proxy_url(base_url) {
         headers
-            .entry("X-wimo ai-Token-Auth".to_string())
-            .or_insert_with(|| "wimo ai-wimo-cli".to_string());
+            .entry("X-wimoai-Token-Auth".to_string())
+            .or_insert_with(|| "wimoai-wimo-cli".to_string());
         headers
             .entry("x-authenticateresponse".to_string())
             .or_insert_with(|| "authenticate-response".to_string());
@@ -1331,7 +1331,7 @@ impl MvpAgent {
 /// Absent, blank, `off`, or `disabled` yields `None`; unknown yields `AllDirty`.
 fn resolve_hunk_tracking_mode(
     mode_str: Option<&str>,
-) -> Option<wimo ai_hunk_tracker::TrackingMode> {
+) -> Option<wimoai_hunk_tracker::TrackingMode> {
     let mode = mode_str.map(str::trim)?;
     if mode.is_empty() || mode.eq_ignore_ascii_case("off")
         || mode.eq_ignore_ascii_case("disabled")
@@ -1340,7 +1340,7 @@ fn resolve_hunk_tracking_mode(
     }
     Some(
         serde_json::from_value(serde_json::Value::String(mode.to_ascii_lowercase()))
-            .unwrap_or(wimo ai_hunk_tracker::TrackingMode::AllDirty),
+            .unwrap_or(wimoai_hunk_tracker::TrackingMode::AllDirty),
     )
 }
 /// Session wiring derived from the resolved tracking mode.
@@ -1349,7 +1349,7 @@ fn resolve_hunk_tracking_mode(
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct HunkTrackingPlan {
     /// `Some` means spawn the actor in this mode; `None` means use `noop()`, no actor.
-    actor_mode: Option<wimo ai_hunk_tracker::TrackingMode>,
+    actor_mode: Option<wimoai_hunk_tracker::TrackingMode>,
 }
 impl HunkTrackingPlan {
     /// Gate for the fs-notify forward sites (via `ToolContext.hunk_tracking_enabled`) and LOC-sink eligibility.
@@ -1486,7 +1486,7 @@ impl MvpAgent {
         &self,
         session_id: &acp::SessionId,
         updates_file_path: &Option<PathBuf>,
-    ) -> Vec<tokio::sync::oneshot::Receiver<wimo ai_acp_lib::AcpResult<()>>> {
+    ) -> Vec<tokio::sync::oneshot::Receiver<wimoai_acp_lib::AcpResult<()>>> {
         let orphaned = Self::find_orphaned_background_tasks(updates_file_path);
         if orphaned.is_empty() {
             return Vec::new();
@@ -1496,7 +1496,7 @@ impl MvpAgent {
         }
         let mut completions = Vec::with_capacity(orphaned.len());
         for task in &orphaned {
-            let snapshot = wimo ai_wimo_tools::types::TaskSnapshot {
+            let snapshot = wimoai_wimo_tools::types::TaskSnapshot {
                 task_id: task.task_id.clone(),
                 command: task.command.clone(),
                 display_command: None,
@@ -1509,7 +1509,7 @@ impl MvpAgent {
                 exit_code: None,
                 signal: Some("session_restart".to_string()),
                 completed: true,
-                kind: wimo ai_wimo_tools::computer::types::TaskKind::Bash,
+                kind: wimoai_wimo_tools::computer::types::TaskKind::Bash,
                 block_waited: false,
                 explicitly_killed: false,
                 kill_result_delivered: false,
@@ -1601,7 +1601,7 @@ impl MvpAgent {
     /// For wimo AI OAuth2 users, reads `allow_access` from remote settings (explicit `false` blocks; absent field fails open).
     /// When settings have not arrived yet the gate is provisionally open and re-resolved on arrival.
     pub(super) async fn enforce_wimo_code_access(&self, auth: &crate::auth::wimoAuth) {
-        if !auth.is_wimo ai_auth() {
+        if !auth.is_wimoai_auth() {
             self.tier_allowed.set(true);
             return;
         }
@@ -1677,7 +1677,7 @@ impl MvpAgent {
                 new_tier = %unblocked.new_tier,
                 "subscription detected, lifting gate"
             );
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "paywall_check_gate_lifting",
                 None,
                 Some(
@@ -1716,7 +1716,7 @@ impl MvpAgent {
                     new_tier = %unblocked.new_tier,
                     "subscription detected but allow_access still false, keeping gate"
                 );
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "paywall_check_gate_kept_allow_access_false",
                     None,
                     Some(
@@ -1742,7 +1742,7 @@ impl MvpAgent {
                 tracing::info!(
                     "post-unblock: skipping forced mint, single_check's bounded refresh still in flight"
                 );
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "paywall_check_skip_redundant_mint",
                     None,
                     Some(serde_json::json!({ "user_id": user_id })),
@@ -1760,7 +1760,7 @@ impl MvpAgent {
                     {
                         Ok(_) => {
                             tracing::info!("post-unblock: JWT refresh_chain succeeded");
-                            wimo ai_wimo_telemetry::unified_log::info(
+                            wimoai_wimo_telemetry::unified_log::info(
                                 "paywall_check_jwt_refreshed",
                                 None,
                                 Some(serde_json::json!({ "user_id": user_id })),
@@ -1769,7 +1769,7 @@ impl MvpAgent {
                         }
                         Err(e) => {
                             tracing::warn!(error = %e, "post-unblock: JWT refresh failed, user may need to re-login on next restart");
-                            wimo ai_wimo_telemetry::unified_log::warn(
+                            wimoai_wimo_telemetry::unified_log::warn(
                                 "paywall_check_error",
                                 None,
                                 Some(
@@ -1805,7 +1805,7 @@ impl MvpAgent {
                 let new_tier = unblocked.new_tier.clone();
                 let jwt_claim_log = jwt_claim.clone();
                 tokio::task::spawn(async move {
-                    wimo ai_wimo_telemetry::unified_log::info(
+                    wimoai_wimo_telemetry::unified_log::info(
                         "model catalog: post_subscription_unblock refresh",
                         None,
                         Some(
@@ -1827,7 +1827,7 @@ impl MvpAgent {
                     new_tier = %unblocked.new_tier,
                     "post-unblock: JWT tier claim missing or stale vs live tier; deferring model catalog refresh with retry"
                 );
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "model catalog: post_subscription_unblock deferred (jwt tier missing or stale)",
                     None,
                     Some(
@@ -1848,7 +1848,7 @@ impl MvpAgent {
                 );
             }
         } else {
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "paywall_check_no_subscription",
                 None,
                 Some(serde_json::json!({
@@ -1978,7 +1978,7 @@ impl MvpAgent {
         }
         #[cfg(test)] self.auto_gc_spawn_count.set(self.auto_gc_spawn_count.get() + 1);
         let auto_gc_policy = self.cfg.borrow().resolve_worktree_auto_gc();
-        let wimo_home = wimo ai_fast_worktree::resolve_wimo_home();
+        let wimo_home = wimoai_fast_worktree::resolve_wimo_home();
         tokio::task::spawn_blocking(move || Self::reclaim_worktrees(
             wimo_home,
             auto_gc_policy,
@@ -1988,11 +1988,11 @@ impl MvpAgent {
     /// This deletes worktrees under what it finds.
     pub(super) fn reclaim_worktrees(
         wimo_home: anyhow::Result<std::path::PathBuf>,
-        policy: wimo ai_fast_worktree::ResolvedWorktreeAutoGc,
+        policy: wimoai_fast_worktree::ResolvedWorktreeAutoGc,
     ) {
         if let Err(e) = wimo_home
-            .and_then(|home| wimo ai_fast_worktree::WorktreeDb::open(&home))
-            .and_then(|db| wimo ai_fast_worktree::maybe_auto_gc(&db, &policy))
+            .and_then(|home| wimoai_fast_worktree::WorktreeDb::open(&home))
+            .and_then(|db| wimoai_fast_worktree::maybe_auto_gc(&db, &policy))
         {
             tracing::warn!(error = %e, "auto worktree gc failed");
         }
@@ -2120,7 +2120,7 @@ impl MvpAgent {
         {
             return false;
         }
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "tier re-check identity changed, discarding result",
             None,
             Some(
@@ -2250,7 +2250,7 @@ async fn handle_synthetic_turn_trace(
         let auth = this.auth_manager.current();
         let user_id = auth
             .as_ref()
-            .filter(|a| a.is_wimo ai_auth())
+            .filter(|a| a.is_wimoai_auth())
             .map(|a| a.user_id.clone());
         let user_email = auth.as_ref().and_then(|a| a.email.clone());
         let init_meta = this.initialize_request.get().and_then(|req| req.meta.as_ref());
@@ -2302,7 +2302,7 @@ async fn handle_synthetic_turn_trace(
         prompt_was_truncated: Some(false),
         prompt_verbatim: Some(true),
         cwd: Some(info.cwd.clone()),
-        shell_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+        shell_version: Some(wimoai_wimo_version::VERSION.to_string()),
         sandbox: local_sandbox_telemetry(),
         ..Default::default()
     });
@@ -2385,7 +2385,7 @@ async fn handle_synthetic_turn_trace(
             upload_turn_result(&ctx, &turn_result_metadata, UploadWait::Confirm).await;
         }
     }
-    let turn_messages: Option<wimo ai_chat_state::TurnCapture> = {
+    let turn_messages: Option<wimoai_chat_state::TurnCapture> = {
         let (tx, rx) = tokio::sync::oneshot::channel();
         if ctx
             .session_handle
@@ -2514,7 +2514,7 @@ fn spawn_post_unblock_jwt_and_catalog_retry(
         tracing::debug!(
             "post-unblock JWT/catalog retry already in flight, skipping duplicate spawn"
         );
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "model catalog: post_subscription_unblock jwt retry skipped (already in flight)",
             None,
             Some(serde_json::json!({
@@ -2583,7 +2583,7 @@ fn spawn_post_unblock_jwt_and_catalog_retry(
                     let user_id = user_id.clone();
                     let new_tier = new_tier.clone();
                     async move {
-                        wimo ai_wimo_telemetry::unified_log::warn(
+                        wimoai_wimo_telemetry::unified_log::warn(
                             "model catalog: post_subscription_unblock jwt retry scheduled",
                             None,
                             Some(
@@ -2602,7 +2602,7 @@ fn spawn_post_unblock_jwt_and_catalog_retry(
             .await;
         match result {
             Ok(()) => {
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "model catalog: post_subscription_unblock refresh (after jwt retry)",
                     None,
                     Some(
@@ -2615,7 +2615,7 @@ fn spawn_post_unblock_jwt_and_catalog_retry(
                 models_manager.on_auth_changed().await;
             }
             Err(e) => {
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "model catalog: post_subscription_unblock jwt retry exhausted",
                     None,
                     Some(

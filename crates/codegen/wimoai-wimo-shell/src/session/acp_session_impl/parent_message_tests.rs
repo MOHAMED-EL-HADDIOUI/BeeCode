@@ -1,6 +1,6 @@
 use super::*;
 use std::sync::Arc;
-use wimo ai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessage;
+use wimoai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessage;
 
 #[expect(
     clippy::unwrap_used,
@@ -14,7 +14,7 @@ fn admission_response(
 
 const TEST_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(5);
 
-use wimo ai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation;
+use wimoai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation;
 
 fn message(id: &str) -> ActiveAgentMessage {
     ActiveAgentMessage {
@@ -107,7 +107,7 @@ async fn receipt_backpressure_waits_before_queue_commit() {
                 result: occupied_rx,
                 telemetry: crate::session::telemetry::ActiveAgentMessageAdmissionTelemetry::new(
                     std::time::Instant::now(),
-                    wimo ai_wimo_telemetry::TelemetryCtx::new(
+                    wimoai_wimo_telemetry::TelemetryCtx::new(
                         "parent".to_owned(),
                         Arc::new(tokio::sync::Mutex::new(0)),
                     ),
@@ -351,16 +351,16 @@ async fn running_steer_projects_at_safe_point_with_agent_provenance() {
             let mut state = await_with_timeout(actor.state.lock()).await;
             let task = state.running_task.as_ref().expect("running task");
             let binding =
-                wimo ai_message_delivery_core::TurnBinding::new(task.prompt_id.clone(), task.epoch);
+                wimoai_message_delivery_core::TurnBinding::new(task.prompt_id.clone(), task.epoch);
             let (completions, _) = actor.transition_parent_messages(
                 &mut state,
-                wimo ai_message_delivery_core::TerminalTarget::Turn(&binding),
-                wimo ai_message_delivery_core::TerminalCause::Completion,
+                wimoai_message_delivery_core::TerminalTarget::Turn(&binding),
+                wimoai_message_delivery_core::TerminalCause::Completion,
             );
             let (second, _) = actor.transition_parent_messages(
                 &mut state,
-                wimo ai_message_delivery_core::TerminalTarget::Turn(&binding),
-                wimo ai_message_delivery_core::TerminalCause::Completion,
+                wimoai_message_delivery_core::TerminalTarget::Turn(&binding),
+                wimoai_message_delivery_core::TerminalCause::Completion,
             );
             assert!(second.is_empty());
             completions
@@ -385,7 +385,7 @@ async fn completion_fallback_appends_after_retained_queue() {
     await_with_timeout(local.run_until(async {
         let (actor, _) = await_with_timeout(super::super::support::build_actor()).await;
         let task = super::super::support::running_task_stub("running");
-        let binding = wimo ai_message_delivery_core::TurnBinding::new("running".to_owned(), task.epoch);
+        let binding = wimoai_message_delivery_core::TurnBinding::new("running".to_owned(), task.epoch);
         let (completion_tx, _completion_rx) = mpsc::unbounded_channel();
         {
             let mut state = await_with_timeout(actor.state.lock()).await;
@@ -415,8 +415,8 @@ async fn completion_fallback_appends_after_retained_queue() {
         let mut state = await_with_timeout(actor.state.lock()).await;
         let (completions, had_fallbacks) = actor.transition_parent_messages(
             &mut state,
-            wimo ai_message_delivery_core::TerminalTarget::Turn(&binding),
-            wimo ai_message_delivery_core::TerminalCause::Completion,
+            wimoai_message_delivery_core::TerminalTarget::Turn(&binding),
+            wimoai_message_delivery_core::TerminalCause::Completion,
         );
         assert!(had_fallbacks);
         assert!(completions.is_empty());
@@ -495,7 +495,7 @@ async fn cancel_running_turn_shutdown_drains_after_stale_rewind_cancel() {
         let (gateway_tx, mut gateway_rx) = mpsc::unbounded_channel();
         tokio::task::spawn_local(async move {
             while let Some(message) = gateway_rx.recv().await {
-                if let wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) = message {
+                if let wimoai_acp_lib::AcpClientMessage::SessionNotification(args) = message {
                     let _ = args.response_tx.send(Ok(()));
                 }
             }
@@ -523,7 +523,7 @@ async fn cancel_running_turn_shutdown_drains_after_stale_rewind_cancel() {
             event_rx,
             None,
             Arc::new(parking_lot::Mutex::new(
-                wimo ai_wimo_workspace::file_system::CodebaseIndexManager::new(),
+                wimoai_wimo_workspace::file_system::CodebaseIndexManager::new(),
             )),
             std::path::PathBuf::from("/tmp"),
             crate::session::fs_watch::FsWatchCapabilities::none(),
@@ -600,7 +600,7 @@ async fn unresolved_persistence_barrier_does_not_block_hard_teardown() {
 
         await_with_timeout(
             actor
-                .settle_all_parent_messages(wimo ai_message_delivery_core::TerminalCause::HardTeardown),
+                .settle_all_parent_messages(wimoai_message_delivery_core::TerminalCause::HardTeardown),
         )
         .await;
         let state = actor.state.lock().await;
@@ -694,7 +694,7 @@ async fn teardown_settlement_during_barrier_skips_persist_and_push() {
         // The command channel closing settles all receipts with `ActorDrop`
         // while the drain is suspended on its persistence barrier.
         await_with_timeout(
-            actor.settle_all_parent_messages(wimo ai_message_delivery_core::TerminalCause::ActorDrop),
+            actor.settle_all_parent_messages(wimoai_message_delivery_core::TerminalCause::ActorDrop),
         )
         .await;
         let settled = await_with_timeout(receipt.result)
@@ -738,7 +738,7 @@ async fn delivered_message_is_durable_in_updates_and_chat_history_before_shutdow
     await_with_timeout(local.run_until(async {
         let session_dir = tempfile::tempdir().expect("session dir");
         let sampling_client =
-            crate::sampling::Client::new(wimo ai_wimo_sampler::SamplerConfig::default())
+            crate::sampling::Client::new(wimoai_wimo_sampler::SamplerConfig::default())
                 .expect("sampling client");
         let info = crate::session::info::Info {
             id: acp::SessionId::new("parent-message-durable"),
@@ -757,7 +757,7 @@ async fn delivered_message_is_durable_in_updates_and_chat_history_before_shutdow
         let (gateway_tx, mut gateway_rx) = mpsc::unbounded_channel();
         tokio::task::spawn_local(async move {
             while let Some(message) = gateway_rx.recv().await {
-                if let wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) = message {
+                if let wimoai_acp_lib::AcpClientMessage::SessionNotification(args) = message {
                     let _ = args.response_tx.send(Ok(()));
                 }
             }
@@ -785,7 +785,7 @@ async fn delivered_message_is_durable_in_updates_and_chat_history_before_shutdow
             event_rx,
             None,
             Arc::new(parking_lot::Mutex::new(
-                wimo ai_wimo_workspace::file_system::CodebaseIndexManager::new(),
+                wimoai_wimo_workspace::file_system::CodebaseIndexManager::new(),
             )),
             std::path::PathBuf::from("/tmp"),
             crate::session::fs_watch::FsWatchCapabilities::none(),

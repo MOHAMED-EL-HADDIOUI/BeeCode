@@ -162,7 +162,7 @@ pub struct MarketplaceEntry {
     pub domains: Vec<String>,
     /// Homepage URL (from index).
     pub homepage: Option<String>,
-    /// Relative path within marketplace (e.g., "plugins/wimo ai-code-review").
+    /// Relative path within marketplace (e.g., "plugins/wimoai-code-review").
     pub relative_path: String,
     pub skill_count: usize,
     pub has_hooks: bool,
@@ -181,7 +181,7 @@ pub struct MarketplaceEntry {
     /// Structured inventory from the marketplace catalog (`plugin-index.json`).
     /// `None` means the catalog has no data for this plugin.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub components: Option<wimo ai_hooks_plugins_types::PluginComponents>,
+    pub components: Option<wimoai_hooks_plugins_types::PluginComponents>,
 }
 
 #[derive(Debug, Clone)]

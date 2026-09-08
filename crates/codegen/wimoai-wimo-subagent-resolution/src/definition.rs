@@ -3,17 +3,17 @@ use crate::config::{SubagentPersona, SubagentRole};
 use crate::types::{EffectiveRuntimeConfig, ResolutionError};
 use std::collections::HashMap;
 use std::path::Path;
-use wimo ai_wimo_agent::config::{AgentDefinition, IsolationMode};
-use wimo ai_wimo_agent::plugins::PluginRegistry;
-use wimo ai_wimo_agent::prompt::context::{PromptAudience, PromptContext};
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_agent::config::{AgentDefinition, IsolationMode};
+use wimoai_wimo_agent::plugins::PluginRegistry;
+use wimoai_wimo_agent::prompt::context::{PromptAudience, PromptContext};
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     SubagentCapabilityModeExt, SubagentRuntimeOverrides, prune_orphaned_background_task_tools,
 };
-use wimo ai_wimo_tools::registry::types::ToolConfig;
-use wimo ai_wimo_tools::types::compat::CompatConfig;
-use wimo ai_wimo_tools::types::template_renderer::TemplateRenderer;
-use wimo ai_wimo_tools::types::tool::ToolKind;
-use wimo ai_tool_types::{SubagentCapabilityMode, SubagentIsolationMode};
+use wimoai_wimo_tools::registry::types::ToolConfig;
+use wimoai_wimo_tools::types::compat::CompatConfig;
+use wimoai_wimo_tools::types::template_renderer::TemplateRenderer;
+use wimoai_wimo_tools::types::tool::ToolKind;
+use wimoai_tool_types::{SubagentCapabilityMode, SubagentIsolationMode};
 /// Inputs that affect definition discovery and spawn permission.
 pub struct DefinitionResolutionContext<'a> {
     pub cwd: &'a Path,
@@ -64,7 +64,7 @@ pub fn discover_agent_definition(
     subagent_type: &str,
     context: &DefinitionResolutionContext<'_>,
 ) -> Option<AgentDefinition> {
-    wimo ai_wimo_agent::discovery::by_name_in_cwd_with_plugins(
+    wimoai_wimo_agent::discovery::by_name_in_cwd_with_plugins(
         subagent_type,
         context.cwd,
         context.plugins,
@@ -79,7 +79,7 @@ pub fn discover_agent_definition(
 }
 /// Sorted agent names the model can request under the current discovery context.
 pub fn available_agent_names(context: &DefinitionResolutionContext<'_>) -> Vec<String> {
-    let mut available: Vec<String> = wimo ai_wimo_agent::discovery::all_subagents_with_plugins(
+    let mut available: Vec<String> = wimoai_wimo_agent::discovery::all_subagents_with_plugins(
         context.cwd,
         context.toggles,
         context.plugins,
@@ -132,14 +132,14 @@ pub fn validate_agent_name(
         .cli_agent_names
         .iter()
         .any(|name| name == subagent_type)
-        || wimo ai_wimo_agent::discovery::by_name_in_cwd_with_plugins(
+        || wimoai_wimo_agent::discovery::by_name_in_cwd_with_plugins(
             subagent_type,
             context.cwd,
             context.plugins,
         )
         .is_some();
     if !resolves {
-        let mut available: Vec<String> = wimo ai_wimo_agent::discovery::all_subagents_with_plugins(
+        let mut available: Vec<String> = wimoai_wimo_agent::discovery::all_subagents_with_plugins(
             context.cwd,
             context.toggles,
             context.plugins,
@@ -234,7 +234,7 @@ pub fn apply_child_tool_policy(
         prune_orphaned_background_task_tools(&mut definition.tool_config);
     }
     definition.tool_config.tools.retain(|tool| {
-        !wimo ai_wimo_tools::implementations::wimo::is_workflow_tool(tool.kind, &tool.id)
+        !wimoai_wimo_tools::implementations::wimo::is_workflow_tool(tool.kind, &tool.id)
     });
 }
 /// Resolve runtime overrides and definition defaults in the production order.
@@ -289,7 +289,7 @@ pub async fn render_subagent_initial_user_message(
     if !definition.agents_md {
         return None;
     }
-    let agents_md_files = wimo ai_wimo_agent::prompt::agents_md::read_agents_config_with_paths(
+    let agents_md_files = wimoai_wimo_agent::prompt::agents_md::read_agents_config_with_paths(
         &working_directory.to_string_lossy(),
         compat,
     )
@@ -344,7 +344,7 @@ mod tests {
             resolve_agent_definition("general-purpose", &context(cwd.path(), &toggles)).unwrap();
         assert!(
             definition.tool_config.tools.iter().all(|tool| {
-                !wimo ai_wimo_tools::implementations::wimo::is_workflow_tool(tool.kind, &tool.id)
+                !wimoai_wimo_tools::implementations::wimo::is_workflow_tool(tool.kind, &tool.id)
             }),
             "general-purpose must declare its own list without workflow"
         );
@@ -366,7 +366,7 @@ mod tests {
         definition
             .tool_config
             .tools
-            .push((&wimo ai_wimo_tools::implementations::wimo::WorkflowTool).into());
+            .push((&wimoai_wimo_tools::implementations::wimo::WorkflowTool).into());
         let before: Vec<String> = definition
             .tool_config
             .tools
@@ -397,7 +397,7 @@ mod tests {
         definition
             .tool_config
             .tools
-            .push((&wimo ai_wimo_tools::implementations::wimo::WorkflowTool).into());
+            .push((&wimoai_wimo_tools::implementations::wimo::WorkflowTool).into());
         apply_child_tool_policy(&mut definition, None, true);
         assert!(
             definition
@@ -426,7 +426,7 @@ mod tests {
         assert!(definition.tool_config.tools.iter().all(|tool| {
             tool.kind != Some(ToolKind::Workflow)
                 && tool.id.rsplit(':').next()
-                    != Some(wimo ai_wimo_tools::implementations::wimo::WORKFLOW_TOOL_NAME)
+                    != Some(wimoai_wimo_tools::implementations::wimo::WORKFLOW_TOOL_NAME)
         }));
     }
     #[test]

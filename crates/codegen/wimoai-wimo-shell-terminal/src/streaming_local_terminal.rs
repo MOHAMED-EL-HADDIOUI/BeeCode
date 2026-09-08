@@ -12,7 +12,7 @@ use tokio::sync::Mutex;
 
 use crate::runner::{AsyncTerminalRunner, TerminalError, TerminalRunRequest, TerminalRunResult};
 use crate::{TerminalInfo, TerminalStatus};
-use wimo ai_wimo_tools::types::output::{BashOutput, ToolOutput};
+use wimoai_wimo_tools::types::output::{BashOutput, ToolOutput};
 
 const DEFAULT_NOTIFICATION_INTERVAL_MS: u64 = 100;
 const READ_BUFFER_SIZE: usize = 8192;
@@ -66,7 +66,7 @@ pub trait SessionNotificationSender: Send + Sync {
 }
 
 #[async_trait::async_trait]
-impl SessionNotificationSender for wimo ai_acp_lib::AcpAgentGatewaySender {
+impl SessionNotificationSender for wimoai_acp_lib::AcpAgentGatewaySender {
     async fn session_notification(
         &self,
         notification: acp::SessionNotification,
@@ -826,7 +826,7 @@ fn spawn_shell_command(
     }
     #[cfg(not(unix))]
     {
-        let inv = wimo ai_wimo_config::shell::shell_command_argv(command);
+        let inv = wimoai_wimo_config::shell::shell_command_argv(command);
         spawn_with_argv(&inv.program, cwd, env, |cmd| {
             cmd.args(&inv.args).envs(inv.env);
         })
@@ -866,7 +866,7 @@ fn spawn_with_argv(
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped());
 
-            wimo ai_wimo_sandbox::child_net::restrict_child_network(cmd);
+            wimoai_wimo_sandbox::child_net::restrict_child_network(cmd);
         });
         // setsid: detach from the TTY and start a new process group for tree teardown
         cmd.wrap(ProcessSession);
@@ -990,7 +990,7 @@ async fn wait_background_completion(
     command: String,
     cwd: String,
 ) {
-    use wimo ai_wimo_tools::types::output::{BashOutput, ToolOutput};
+    use wimoai_wimo_tools::types::output::{BashOutput, ToolOutput};
 
     // Wait for the process to exit
     loop {
@@ -1128,7 +1128,7 @@ async fn run_output_collector(
 mod tests {
     use super::*;
     use crate::DEFAULT_OUTPUT_BYTE_LIMIT;
-    use wimo ai_wimo_paths::AbsPathBuf;
+    use wimoai_wimo_paths::AbsPathBuf;
 
     struct TestNotifier {
         notifications: Mutex<Vec<acp::SessionNotification>>,

@@ -11,7 +11,7 @@ use tokio_util::sync::CancellationToken;
 use crate::session::{
     CancelOptions, CancelTrigger, SessionCommand, ShutdownKind, commands::PromptTurnResult,
 };
-use wimo ai_wimo_tools::implementations::wimo::task::types::SubagentResult;
+use wimoai_wimo_tools::implementations::wimo::task::types::SubagentResult;
 
 pub(super) const ACTIVE_MESSAGE_RECEIPT_CAPACITY: usize = 64;
 const CANCELLED_RECEIPT_SETTLEMENT_GRACE: std::time::Duration = std::time::Duration::from_secs(5);

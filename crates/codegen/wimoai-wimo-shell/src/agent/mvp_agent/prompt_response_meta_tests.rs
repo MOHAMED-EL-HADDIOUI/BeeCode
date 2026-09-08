@@ -1,5 +1,5 @@
 use super::{PromptResponseMetaArgs, build_prompt_response_meta};
-use wimo ai_wimo_sampling_types::TokenUsage;
+use wimoai_wimo_sampling_types::TokenUsage;
 
 /// Baseline args with no usage, cancellation, or structured output.
 fn args<'a>(
@@ -83,7 +83,7 @@ fn preserves_zero_token_values() {
 
 #[test]
 fn usage_object_lands_on_meta() {
-    let mut ledger = wimo ai_chat_state::UsageLedger::default();
+    let mut ledger = wimoai_chat_state::UsageLedger::default();
     ledger.record_main_loop_call(
         "m",
         &TokenUsage {
@@ -126,10 +126,10 @@ fn cancel_trigger_lands_as_camelcase_meta_key() {
 
 #[test]
 fn tool_overrides_land_as_camelcase_meta_key() {
-    let overrides = wimo ai_wimo_sampling_types::ToolOverrides {
-        x_search: Some(wimo ai_wimo_sampling_types::XSearchOptions {
+    let overrides = wimoai_wimo_sampling_types::ToolOverrides {
+        x_search: Some(wimoai_wimo_sampling_types::XSearchOptions {
             date_bound: Some(
-                wimo ai_wimo_sampling_types::SearchDateBound::new(None, Some("2024-03-15".to_string()))
+                wimoai_wimo_sampling_types::SearchDateBound::new(None, Some("2024-03-15".to_string()))
                     .unwrap(),
             ),
         }),

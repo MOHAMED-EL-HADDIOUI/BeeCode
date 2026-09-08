@@ -1,4 +1,4 @@
-//! Extension API layer over wimo ai-hunk-tracker: tracks file changes with agent/external attribution.
+//! Extension API layer over wimoai-hunk-tracker: tracks file changes with agent/external attribution.
 
 use std::collections::HashSet;
 use std::path::PathBuf;
@@ -9,12 +9,12 @@ use serde::{Deserialize, Serialize};
 
 use super::{ExtResult, parse_params, to_ext_response};
 use crate::agent::MvpAgent;
-use wimo ai_wimo_workspace::workspace_ops::{
+use wimoai_wimo_workspace::workspace_ops::{
     FileContentEntryWire, FileContentStatusWire, FileContentViewWire, HunkActionKind,
     HunkActionReq, HunkAllActionReq, HunkFileActionReq, HunkGetAllFileContentsReq,
     HunkGetSessionSummaryReq, HunkSingleActionReq, HunkTurnActionReq,
 };
-use wimo ai_hunk_tracker::{
+use wimoai_hunk_tracker::{
     FileContentEntry, FileContentStatus, FileContentView, Hunk, HunkTrackerHandle,
 };
 
@@ -295,7 +295,7 @@ fn compute_file_summaries(
 
 pub async fn handle(
     agent: &MvpAgent,
-    ops: &wimo ai_wimo_workspace::WorkspaceOps,
+    ops: &wimoai_wimo_workspace::WorkspaceOps,
     args: &acp::ExtRequest,
 ) -> ExtResult {
     match args.method.as_ref() {
@@ -541,7 +541,7 @@ mod tests {
     use std::collections::HashSet;
     use std::path::PathBuf;
     use std::sync::Arc;
-    use wimo ai_hunk_tracker::{
+    use wimoai_hunk_tracker::{
         FileContentStatus, FileContentView, Hunk, HunkId, HunkLineInfo, HunkSource,
     };
 
@@ -878,7 +878,7 @@ mod tests {
     /// GetAllFileContentsResponse serializes with all fields using camelCase
     #[test]
     fn get_all_file_contents_response_serializes_correctly() {
-        use wimo ai_hunk_tracker::FileContentEntry;
+        use wimoai_hunk_tracker::FileContentEntry;
 
         let response = GetAllFileContentsResponse {
             files: vec![FileContentEntry {
@@ -919,7 +919,7 @@ mod tests {
     /// GetAllFileContentsResponse handles missing baseline (new file)
     #[test]
     fn get_all_file_contents_response_missing_baseline() {
-        use wimo ai_hunk_tracker::FileContentEntry;
+        use wimoai_hunk_tracker::FileContentEntry;
 
         let response = GetAllFileContentsResponse {
             files: vec![FileContentEntry {
@@ -945,7 +945,7 @@ mod tests {
     /// GetAllFileContentsResponse handles binary files
     #[test]
     fn get_all_file_contents_response_binary_file() {
-        use wimo ai_hunk_tracker::FileContentEntry;
+        use wimoai_hunk_tracker::FileContentEntry;
 
         let response = GetAllFileContentsResponse {
             files: vec![FileContentEntry {
@@ -983,7 +983,7 @@ mod tests {
     /// GetAllFileContentsResponse with multiple files preserves all entries
     #[test]
     fn get_all_file_contents_response_multiple_files() {
-        use wimo ai_hunk_tracker::FileContentEntry;
+        use wimoai_hunk_tracker::FileContentEntry;
 
         let response = GetAllFileContentsResponse {
             files: vec![

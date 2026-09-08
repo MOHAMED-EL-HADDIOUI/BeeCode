@@ -94,7 +94,7 @@ pub fn render_dashboard(
     roster: &[crate::app::roster::RosterEntry],
     // Dashboard v2 reads membership exclusively from `workspace_snapshot`.
     workspace_dashboard_enabled: bool,
-    workspace_snapshot: Option<&wimo ai_wimo_dashboard_store::WorkspaceSnapshot>,
+    workspace_snapshot: Option<&wimoai_wimo_dashboard_store::WorkspaceSnapshot>,
     // Whether the local on-disk session roster is still being fetched (non-leader mode)
     // When true and there's nothing to show yet, the empty body reads "Loading sessions…" instead of the "no agents yet" hint
     // That way a fresh open doesn't flash an empty-looking screen
@@ -1937,7 +1937,7 @@ fn row_bg(theme: &Theme, state: &DashboardState, row: &DashboardRow) -> Color {
 /// Visual:
 ///
 /// ```text
-///   ◆ Add responsiveness to /context · wimo ai my-branch-2 worktree       4 mins
+///   ◆ Add responsiveness to /context · wimoai my-branch-2 worktree       4 mins
 ///     Pending: plan approval plan.md
 /// ```
 ///
@@ -2172,7 +2172,7 @@ fn render_row(
             cx += label_w;
         }
 
-        // Subtitle: ` · wimo ai my-branch-2 worktree`.
+        // Subtitle: ` · wimoai my-branch-2 worktree`.
         if let Some(sub) = row.subtitle.as_deref()
             && cx + 4 < right_x
         {
@@ -2765,7 +2765,7 @@ fn render_dispatch(
             }
             0
         } else {
-            let viewport = wimo ai_ratatui_textarea::EditBuffer::from_parts(
+            let viewport = wimoai_ratatui_textarea::EditBuffer::from_parts(
                 state.dispatch.text(),
                 state.dispatch.cursor(),
             )
@@ -3540,11 +3540,11 @@ fn badge_color(badge: RowBadge, theme: &Theme) -> Color {
     }
 }
 
-/// Process-wide cached home directory via [`wimo ai_dirs::home_dir`].
+/// Process-wide cached home directory via [`wimoai_dirs::home_dir`].
 /// Shared by render and dispatch (`dispatch_dashboard_select`) so we don't re-resolve on every keystroke.
 pub(crate) fn cached_home() -> Option<&'static str> {
     HOME.get_or_init(|| {
-        wimo ai_dirs::home_dir()
+        wimoai_dirs::home_dir()
             .map(|home| home.to_string_lossy().into_owned())
             .filter(|s| !s.is_empty())
     })

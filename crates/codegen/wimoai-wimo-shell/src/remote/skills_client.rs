@@ -19,8 +19,8 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use serde::Deserialize;
-use wimo ai_wimo_tools::implementations::skills::skill::extract_skill_body;
-use wimo ai_wimo_tools::implementations::skills::types::{SkillInfo, SkillScope};
+use wimoai_wimo_tools::implementations::skills::skill::extract_skill_body;
+use wimoai_wimo_tools::implementations::skills::types::{SkillInfo, SkillScope};
 
 use crate::auth::AuthManager;
 
@@ -398,11 +398,11 @@ impl SkillsClient {
         let mut builder = builder
             .header("Authorization", format!("Bearer {key}"))
             .header(
-                "X-wimo ai-Token-Auth",
+                "X-wimoai-Token-Auth",
                 self.auth.wimo_com_config().token_header.clone(),
             )
             .header("x-userid", user_id)
-            .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+            .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
             .header(
                 "x-wimo-client-identifier",
                 crate::http::process_client_identifier(),
@@ -415,7 +415,7 @@ impl SkillsClient {
         if let Some(email) = email {
             builder = builder.header("x-email", email);
         }
-        wimo ai_file_utils::trace_context::inject_trace_context_into_request(builder)
+        wimoai_file_utils::trace_context::inject_trace_context_into_request(builder)
     }
 
     /// wimo.com product Skills require first-party session auth (the same gate as managed MCP and sibling wimo.com clients), not plain BYOK API keys.
@@ -802,7 +802,7 @@ mod tests {
     }
 
     fn test_auth_manager() -> Arc<AuthManager> {
-        use crate::auth::{AuthMode, wimoAuth, wimoComConfig, wimo ai_OAUTH2_ISSUER};
+        use crate::auth::{AuthMode, wimoAuth, wimoComConfig, wimoai_OAUTH2_ISSUER};
         let dir = tempfile::tempdir().unwrap();
         let mgr = AuthManager::new(dir.path(), wimoComConfig::default());
         mgr.hot_swap(wimoAuth {
@@ -812,7 +812,7 @@ mod tests {
             user_id: "user-1".into(),
             email: Some("test@example.com".into()),
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
             ..Default::default()
         });
         std::mem::forget(dir);

@@ -8,7 +8,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 use tokio::io::AsyncBufReadExt as _;
 use tokio::sync::{mpsc, oneshot};
-use wimo ai_wimo_telemetry::events::{LoginFailed, LoginFailureKind};
+use wimoai_wimo_telemetry::events::{LoginFailed, LoginFailureKind};
 pub(crate) type StderrCallback = Box<dyn Fn(&str)>;
 /// Reject a cached credential that lacks `oidc_issuer`, has a mismatched issuer, or whose team principal violates the `force_login_team_uuid` pin.
 /// Interactive login then starts fresh instead of reusing a stale or wrong-team session.
@@ -195,8 +195,8 @@ pub(crate) async fn run_external_auth_provider(
     } else {
         cmd.stderr(std::process::Stdio::piped());
     }
-    wimo ai_wimo_tools::util::detach_command(&mut cmd);
-    cmd.envs(wimo ai_wimo_tools::util::pager_env());
+    wimoai_wimo_tools::util::detach_command(&mut cmd);
+    cmd.envs(wimoai_wimo_tools::util::pager_env());
     #[allow(clippy::disallowed_methods)]
     let mut child = cmd
         .spawn()
@@ -410,7 +410,7 @@ async fn run_auth_flow_inner(
     if let Err(err) = &result
         && let Some(event) = login_failure_event(err)
     {
-        wimo ai_wimo_telemetry::session_ctx::log_event(event);
+        wimoai_wimo_telemetry::session_ctx::log_event(event);
     }
     result
 }
@@ -465,7 +465,7 @@ pub(super) async fn run_auth_flow_steps(
     if !force_interactive && let Some(auth) = auth_manager.current() {
         if is_cached_credential_compatible(&auth, wimo_com_config) {
             tracing::info!(auth_mode = ?auth.auth_mode, "auth: using cached credentials");
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth: using cached credentials",
                 None,
                 Some(serde_json::json!({ "auth_mode": format!("{:?}", auth.auth_mode) })),
@@ -492,7 +492,7 @@ pub(super) async fn run_auth_flow_steps(
             .into_guard();
         let disk_auth = auth_manager.read_disk_auth();
         let disk_expired = disk_auth.as_ref().is_some_and(crate::auth::is_expired);
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth run_auth_flow expired path",
             None,
             Some(serde_json::json!({
@@ -504,7 +504,7 @@ pub(super) async fn run_auth_flow_steps(
         if disk_auth.as_ref().is_some_and(|d| {
             !crate::auth::is_expired(d) && is_cached_credential_compatible(d, wimo_com_config)
         }) {
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth run_auth_flow using valid disk token",
                 None,
                 None,
@@ -526,7 +526,7 @@ pub(super) async fn run_auth_flow_steps(
                         )
                     ) && d.refresh_token.is_some()
                 }) {
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "auth run_auth_flow refresh failed, deferring to consumer refresh",
                         None,
                         Some(serde_json::json!({
@@ -537,7 +537,7 @@ pub(super) async fn run_auth_flow_steps(
                     auth_manager.hot_swap(d);
                     return Ok((ret, false));
                 }
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "auth run_auth_flow refresh failed, falling through to interactive",
                     None,
                     Some(serde_json::json!({
@@ -569,7 +569,7 @@ pub(super) async fn run_auth_flow_steps(
             Ok(new_auth) => match auth_manager.save_without_enrichment(new_auth).await {
                 Ok(auth) => {
                     let _ = auth_manager.remove_scope(LEGACY_AUTH_SCOPE);
-                    wimo ai_wimo_telemetry::unified_log::info(
+                    wimoai_wimo_telemetry::unified_log::info(
                         "auth: devbox migration in auth flow succeeded",
                         None,
                         Some(serde_json::json!({
@@ -690,7 +690,7 @@ async fn try_noninteractive_auth_no_mint_with(auth_manager: &Arc<AuthManager>) -
 fn expired_refreshable_session(auth_manager: &AuthManager) -> Option<wimoAuth> {
     auth_manager
         .current_or_expired()
-        .filter(|a| a.is_wimo ai_auth() && a.refresh_token.is_some())
+        .filter(|a| a.is_wimoai_auth() && a.refresh_token.is_some())
 }
 /// Cold-start mint via non-interactive providers (external command, devbox); `None` when none is available.
 /// Persists the result into `auth_manager` (disk and in-memory) so per-request `auth()` self-heals.
@@ -700,7 +700,7 @@ pub(crate) async fn mint_session_noninteractive(
     auth_manager: &Arc<AuthManager>,
 ) -> Option<wimoAuth> {
     let wimo_com_config = auth_manager.wimo_com_config();
-    if !ActiveAuthBackend::default().is_wimo ai_authority() {
+    if !ActiveAuthBackend::default().is_wimoai_authority() {
         return None;
     }
     if wimo_com_config.blocks_automatic_oidc() {
@@ -827,7 +827,7 @@ pub async fn run_cli_login(
     devbox: bool,
 ) -> anyhow::Result<()> {
     if devbox {
-        if !ActiveAuthBackend::default().is_wimo ai_authority() {
+        if !ActiveAuthBackend::default().is_wimoai_authority() {
             anyhow::bail!("--devbox mints an wimo AI credential, which this build cannot use");
         }
         let auth = super::devbox_login::run_devbox_login(config).await?;
@@ -839,7 +839,7 @@ pub async fn run_cli_login(
     ));
     crate::agent::init::update_telemetry_config(config, &auth_manager);
     let result = run_cli_login_steps(config, &auth_manager, oauth, device_auth).await;
-    wimo ai_wimo_telemetry::session_ctx::drain_pending(wimo ai_wimo_telemetry::session_ctx::CLI_DRAIN)
+    wimoai_wimo_telemetry::session_ctx::drain_pending(wimoai_wimo_telemetry::session_ctx::CLI_DRAIN)
         .await;
     result
 }
@@ -852,7 +852,7 @@ async fn run_cli_login_steps(
     let login_override = LoginTransportOverride::from_flags(oauth, device_auth);
     let authenticated = if cli_should_use_device(&config.wimo_com_config, login_override).await {
         if config.wimo_com_config.oauth2.is_none() {
-            anyhow::bail!("Sign-in is not available for this deployment. Set wimo ai_API_KEY instead.");
+            anyhow::bail!("Sign-in is not available for this deployment. Set wimoai_API_KEY instead.");
         }
         let (auth, did_auth) = run_auth_flow_interactive(
             auth_manager,
@@ -918,7 +918,7 @@ pub struct LogoutResult {
     pub was_logged_in: bool,
     /// Email of the session that was cleared (if available).
     pub email: Option<String>,
-    /// `true` if `wimo ai_API_KEY` / `wimo_CODE_wimo ai_API_KEY` env var is set.
+    /// `true` if `wimoai_API_KEY` / `wimo_CODE_wimoai_API_KEY` env var is set.
     pub api_key_still_set: bool,
 }
 /// Core logout logic shared by the CLI subcommand and the ACP handler.
@@ -932,7 +932,7 @@ pub fn perform_logout(
     let auth = auth_manager.current_or_expired();
     let email = auth.as_ref().and_then(|a| a.email.clone());
     let was_logged_in = auth.is_some();
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "auth: logout",
         None,
         Some(serde_json::json!({
@@ -942,10 +942,10 @@ pub fn perform_logout(
         })),
     );
     if was_logged_in {
-        wimo ai_wimo_telemetry::external::set_identity(
-            wimo ai_wimo_telemetry::external::IdentityAttrs::default(),
+        wimoai_wimo_telemetry::external::set_identity(
+            wimoai_wimo_telemetry::external::IdentityAttrs::default(),
         );
-        wimo ai_wimo_telemetry::external::flush();
+        wimoai_wimo_telemetry::external::flush();
         if let Some(scope) = scope {
             auth_manager.remove_scope(scope)?;
         } else {
@@ -956,7 +956,7 @@ pub fn perform_logout(
     Ok(LogoutResult {
         was_logged_in,
         email,
-        api_key_still_set: crate::agent::auth_method::has_wimo ai_api_key_env(),
+        api_key_still_set: crate::agent::auth_method::has_wimoai_api_key_env(),
     })
 }
 pub fn run_cli_logout(config: &crate::agent::config::Config) -> anyhow::Result<()> {
@@ -967,7 +967,7 @@ pub fn run_cli_logout(config: &crate::agent::config::Config) -> anyhow::Result<(
     if !result.was_logged_in {
         eprintln!("No cached session to log out of.");
         if result.api_key_still_set {
-            eprintln!("You are authenticated via wimo ai_API_KEY (environment variable).");
+            eprintln!("You are authenticated via wimoai_API_KEY (environment variable).");
         }
         return Ok(());
     }
@@ -977,7 +977,7 @@ pub fn run_cli_logout(config: &crate::agent::config::Config) -> anyhow::Result<(
         eprintln!("Logged out");
     }
     if result.api_key_still_set {
-        eprintln!("wimo ai_API_KEY is still set and will be used for authentication.");
+        eprintln!("wimoai_API_KEY is still set and will be used for authentication.");
     }
     Ok(())
 }
@@ -985,11 +985,11 @@ pub fn run_cli_logout(config: &crate::agent::config::Config) -> anyhow::Result<(
 mod tests {
     use super::*;
     use crate::auth::AuthMode;
-    use crate::auth::config::wimo ai_OAUTH2_ISSUER;
+    use crate::auth::config::wimoai_OAUTH2_ISSUER;
     use crate::env::EnvVarGuard;
     use chrono::Utc;
     use std::path::Path;
-    /// `os_error` and the reqwest classification are covered in `wimo ai-wimo-http`.
+    /// `os_error` and the reqwest classification are covered in `wimoai-wimo-http`.
     /// What's local is which `LoginFailureKind` each maps to, and that a decode failure never reads as a transport one.
     #[test]
     fn failure_kinds_map_one_to_one() {
@@ -1020,7 +1020,7 @@ mod tests {
     }
     /// A login that never reached the network is not a transport failure.
     /// The positive path needs a real `reqwest::Error`, but building a client here flips `jsonwebtoken` into its "no CryptoProvider" panic.
-    /// That breaks unrelated auth tests, so classification is covered in `wimo ai-wimo-http`.
+    /// That breaks unrelated auth tests, so classification is covered in `wimoai-wimo-http`.
     #[test]
     fn non_http_login_failures_are_not_reported() {
         let abandoned = anyhow::anyhow!("Login timed out after 10 minutes. Please try again.");
@@ -1042,7 +1042,7 @@ mod tests {
         wimoAuth {
             key: key.into(),
             auth_mode: AuthMode::Oidc,
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.to_string()),
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.to_string()),
             refresh_token: refresh.map(str::to_string),
             ..wimoAuth::test_default()
         }
@@ -1116,14 +1116,14 @@ mod tests {
     async fn mint_session_noninteractive_uses_external_provider() {
         let dir = tempfile::tempdir().unwrap();
         let cfg = wimoComConfig {
-            auth_provider_command: Some("printf '%s' wimo ai-ext-token".to_string()),
+            auth_provider_command: Some("printf '%s' wimoai-ext-token".to_string()),
             ..wimoComConfig::default()
         };
         let mgr = Arc::new(
             AuthManager::new(dir.path(), cfg.clone()).with_proxy_base_url(&dead_proxy_url()),
         );
         let auth = mint_session_noninteractive(&mgr).await;
-        assert_eq!(auth.map(|a| a.key), Some("wimo ai-ext-token".to_string()));
+        assert_eq!(auth.map(|a| a.key), Some("wimoai-ext-token".to_string()));
     }
     #[tokio::test]
     async fn interactive_login_carries_no_expired_flag_even_over_a_stale_credential() {
@@ -1255,7 +1255,7 @@ mod tests {
     async fn device_flow_still_runs_external_provider() {
         let dir = tempfile::tempdir().unwrap();
         let cfg = wimoComConfig {
-            auth_provider_command: Some("printf '%s' wimo ai-ext-token".to_string()),
+            auth_provider_command: Some("printf '%s' wimoai-ext-token".to_string()),
             ..wimoComConfig::default()
         };
         assert!(
@@ -1276,7 +1276,7 @@ mod tests {
         .await
         .expect("external provider should satisfy login without device flow");
         assert_eq!(
-            auth.key, "wimo ai-ext-token",
+            auth.key, "wimoai-ext-token",
             "external provider token must win"
         );
         assert!(did_auth);
@@ -1365,9 +1365,9 @@ mod tests {
             !cli_should_use_device(&cfg, LoginTransportOverride::ForceDevice).await,
             "enterprise OIDC must stay on loopback"
         );
-        let wimo ai = wimoComConfig::default();
-        assert!(wimo ai.oauth2.is_some() && wimo ai.oidc.is_none());
-        assert!(cli_should_use_device(&wimo ai, LoginTransportOverride::ForceDevice).await);
+        let wimoai = wimoComConfig::default();
+        assert!(wimoai.oauth2.is_some() && wimoai.oidc.is_none());
+        assert!(cli_should_use_device(&wimoai, LoginTransportOverride::ForceDevice).await);
     }
     #[test]
     fn device_flow_precedence_cli_beats_env_config_remote() {
@@ -1535,7 +1535,7 @@ mod tests {
     fn oidc_cred_with_matching_issuer_is_compatible() {
         let cfg = wimoComConfig::default();
         assert!(is_cached_credential_compatible(
-            &oidc_auth(wimo ai_OAUTH2_ISSUER),
+            &oidc_auth(wimoai_OAUTH2_ISSUER),
             &cfg,
         ));
     }
@@ -1545,7 +1545,7 @@ mod tests {
         assert!(is_cached_credential_compatible(
             &wimoAuth {
                 auth_mode: AuthMode::External,
-                ..oidc_auth(wimo ai_OAUTH2_ISSUER)
+                ..oidc_auth(wimoai_OAUTH2_ISSUER)
             },
             &cfg,
         ));
@@ -1586,7 +1586,7 @@ mod tests {
     fn cached_cred_with_wrong_team_is_incompatible() {
         let auth = wimoAuth {
             key: team_jwt("team-wrong"),
-            ..oidc_auth(wimo ai_OAUTH2_ISSUER)
+            ..oidc_auth(wimoai_OAUTH2_ISSUER)
         };
         assert!(!is_cached_credential_compatible(
             &auth,
@@ -1598,7 +1598,7 @@ mod tests {
     fn cached_cred_with_matching_team_is_compatible() {
         let auth = wimoAuth {
             key: team_jwt("team-good"),
-            ..oidc_auth(wimo ai_OAUTH2_ISSUER)
+            ..oidc_auth(wimoai_OAUTH2_ISSUER)
         };
         assert!(is_cached_credential_compatible(
             &auth,
@@ -1618,7 +1618,7 @@ mod tests {
             auth_mode: AuthMode::Oidc,
             expires_at: Some(Utc::now() + chrono::Duration::hours(1)),
             refresh_token: Some("new-rt".into()),
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.into()),
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.into()),
             oidc_client_id: Some("client-1".into()),
             ..wimoAuth::test_default()
         };
@@ -1629,7 +1629,7 @@ mod tests {
             auth_mode: AuthMode::Oidc,
             expires_at: Some(Utc::now() - chrono::Duration::hours(1)),
             refresh_token: Some("old-rt".into()),
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.into()),
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.into()),
             oidc_client_id: Some("client-1".into()),
             ..wimoAuth::test_default()
         };
@@ -1660,7 +1660,7 @@ mod tests {
             key: "still-valid".into(),
             auth_mode: AuthMode::Oidc,
             expires_at: Some(Utc::now() + chrono::Duration::hours(1)),
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.into()),
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.into()),
             oidc_client_id: Some("client-1".into()),
             ..wimoAuth::test_default()
         };
@@ -1691,7 +1691,7 @@ mod tests {
             auth_mode: AuthMode::Oidc,
             expires_at: Some(Utc::now() - chrono::Duration::hours(1)),
             refresh_token: Some("valid-refresh-token".into()),
-            oidc_issuer: Some(wimo ai_OAUTH2_ISSUER.into()),
+            oidc_issuer: Some(wimoai_OAUTH2_ISSUER.into()),
             oidc_client_id: Some("client-1".into()),
             ..wimoAuth::test_default()
         };

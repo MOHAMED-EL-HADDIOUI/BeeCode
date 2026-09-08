@@ -7,15 +7,15 @@ use std::path::Path;
 use std::sync::RwLock;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use wimo ai_wimo_config::campaigns::{
+use wimoai_wimo_config::campaigns::{
     CampaignEntry, filter_active_campaigns, ids_touching_paths, merge_campaign_entries,
 };
-use wimo ai_wimo_config::config_override::{PatchPath, patch_touches_any};
-use wimo ai_wimo_config::{
+use wimoai_wimo_config::config_override::{PatchPath, patch_touches_any};
+use wimoai_wimo_config::{
     CampaignsState, ConfigLayers, campaigns_state_path, load_dismissed_ids_from_home,
     user_wimo_home,
 };
-use wimo ai_wimo_config_types::{CampaignOverride, RemoteSettings};
+use wimoai_wimo_config_types::{CampaignOverride, RemoteSettings};
 
 /// FIFO cap on persisted dismissed ids.
 /// Evicting the oldest can re-nudge for a still-live campaign after a user dismisses more than this over the CLI's life.
@@ -412,7 +412,7 @@ pub(super) async fn persist_user_choice(
 /// `None` clears the field.
 pub async fn persist_models_default(
     value: Option<String>,
-    reasoning_effort: Option<wimo ai_wimo_sampling_types::ReasoningEffort>,
+    reasoning_effort: Option<wimoai_wimo_sampling_types::ReasoningEffort>,
 ) -> anyhow::Result<()> {
     let s = value.unwrap_or_default();
     if s.len() > super::settings_writes::MAX_DEFAULT_MODEL_LEN {
@@ -436,8 +436,8 @@ mod tests {
     use super::*;
     use serial_test::serial;
     use tempfile::tempdir;
-    use wimo ai_wimo_config::ConfigLayers;
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_config::ConfigLayers;
+    use wimoai_wimo_test_support::EnvGuard;
 
     fn models_default_patch(default: &str) -> toml::Table {
         let mut models = toml::map::Map::new();

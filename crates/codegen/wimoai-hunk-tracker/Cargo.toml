@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-hunk-tracker"
+name = "wimoai-hunk-tracker"
 version = "0.1.0"
 edition.workspace = true
 description = "Track file hunks (diffs) with agent/external attribution"
@@ -12,7 +12,7 @@ dunce = { workspace = true }
 rustc-hash = { workspace = true }
 gix = { workspace = true, features = ["status", "index", "parallel"] }
 serde = { workspace = true, features = ["derive", "rc"] }
-wimo ai-gix-status = { workspace = true }
+wimoai-gix-status = { workspace = true }
 serde_json = { workspace = true }
 similar = { workspace = true }
 thiserror = { workspace = true }
@@ -23,4 +23,4 @@ uuid = { workspace = true, features = ["v4"] }
 
 [dev-dependencies]
 tempfile = { workspace = true }
-wimo ai-test-utils = { workspace = true }
+wimoai-test-utils = { workspace = true }

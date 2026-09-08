@@ -38,7 +38,7 @@ use serde::{Deserialize, Serialize};
 ///        from metadata.json (prompt content is no longer uploaded in metadata).
 /// v1.24: Prompt metadata updates.
 pub const GCS_SCHEMA_VERSION: &str = "v1.24";
-/// OS-level sandbox state for a trace turn (local `wimo ai-wimo-sandbox`, not cloud sandbox).
+/// OS-level sandbox state for a trace turn (local `wimoai-wimo-sandbox`, not cloud sandbox).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LocalSandboxTelemetry {
     /// Resolved profile at process startup (e.g. "off", "workspace", "strict").
@@ -116,7 +116,7 @@ pub struct PromptMetadata {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_type: Option<String>,
     /// Version of the wimo-shell agent binary that handled this turn
-    /// (`wimo ai_wimo_version::VERSION`). Self-reported by the agent, so it reflects
+    /// (`wimoai_wimo_version::VERSION`). Self-reported by the agent, so it reflects
     /// the binary actually running. Distinct from `client_version`, which is the
     /// UI client's version — for the TUI these coincide, but for embedding clients
     /// like wimo-desktop the bundled shell differs from the app version.
@@ -261,10 +261,10 @@ mod tests {
     #[test]
     fn cwd_round_trips() {
         let mut meta: PromptMetadata = serde_json::from_str(minimal_json()).unwrap();
-        meta.cwd = Some("/root/code/wimo ai".into());
+        meta.cwd = Some("/root/code/wimoai".into());
         let json = serde_json::to_string(&meta).unwrap();
         let deserialized: PromptMetadata = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized.cwd.as_deref(), Some("/root/code/wimo ai"));
+        assert_eq!(deserialized.cwd.as_deref(), Some("/root/code/wimoai"));
     }
     #[test]
     fn sandbox_round_trips() {

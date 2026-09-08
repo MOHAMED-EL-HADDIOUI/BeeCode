@@ -57,7 +57,7 @@ fn load_or_compute_agent_id() -> String {
         }
     }
 
-    let cache_path = wimo ai_wimo_config::wimo_home().join("agent_id");
+    let cache_path = wimoai_wimo_config::wimo_home().join("agent_id");
     if let Ok(cached) = std::fs::read_to_string(&cache_path) {
         let cached = cached.trim();
         if !cached.is_empty() {
@@ -94,7 +94,7 @@ fn write_agent_id_cache(path: &std::path::Path, id: &str) -> std::io::Result<()>
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
-    wimo ai_wimo_config::fs_atomic::write_atomically(path, id, Some(0o600))
+    wimoai_wimo_config::fs_atomic::write_atomically(path, id, Some(0o600))
 }
 
 /// Best effort: tightens caches written world-readable by older builds.
@@ -152,9 +152,9 @@ mod tests {
     }
 }
 
-/// Coarse gate for features that need a full workspace checkout; external installs leave `wimo ai_ROOT` and `wimo ai_USER` unset.
+/// Coarse gate for features that need a full workspace checkout; external installs leave `wimoai_ROOT` and `wimoai_USER` unset.
 pub fn has_workspace_env_markers() -> bool {
-    std::env::var("wimo ai_ROOT").is_ok() && std::env::var("wimo ai_USER").is_ok()
+    std::env::var("wimoai_ROOT").is_ok() && std::env::var("wimoai_USER").is_ok()
 }
 
 /// Opt-in special-user gate for telemetry (`wimo_TELEMETRY_SPECIAL_USER`).

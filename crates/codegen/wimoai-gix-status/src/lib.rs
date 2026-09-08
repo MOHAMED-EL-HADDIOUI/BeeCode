@@ -172,7 +172,7 @@ fn status_finds_suffix(
 mod tests {
     use super::*;
     use std::path::PathBuf;
-    use wimo ai_test_utils::git::run_git;
+    use wimoai_test_utils::git::run_git;
 
     #[test]
     fn compute_from_table() {
@@ -277,8 +277,8 @@ mod nproc_tests {
     use std::sync::Arc;
     use std::sync::atomic::{AtomicBool, Ordering};
 
-    const CHILD_ENV: &str = "wimo ai_GIX_STATUS_NPROC_CHILD";
-    const REPO_ENV: &str = "wimo ai_GIX_STATUS_NPROC_REPO";
+    const CHILD_ENV: &str = "wimoai_GIX_STATUS_NPROC_CHILD";
+    const REPO_ENV: &str = "wimoai_GIX_STATUS_NPROC_REPO";
 
     /// Child exit protocol; 0 means the scan survived and saw the dirty file.
     const EXIT_SKIP: i32 = 2;

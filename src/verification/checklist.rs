@@ -1,5 +1,5 @@
 //! Verification checklist — REAL verification framework (Section 47 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub fn check_startup() -> bool {
     std::fs::metadata("/home/mohamed-el-haddioui/Downloads/WIMO/wimo/src/startup/optimization.rs").is_ok()

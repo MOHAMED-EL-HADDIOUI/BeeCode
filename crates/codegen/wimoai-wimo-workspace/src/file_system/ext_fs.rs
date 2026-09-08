@@ -1,6 +1,6 @@
 //! Filesystem extension ops (`workspace.fs_*`): the server-proxied backing for the shell's `x.ai/fs/*` ACP extension methods.
 //!
-//! These mirror the pure functions that previously lived only in the shell (`wimo ai-wimo-shell/src/session/file_system.rs`).
+//! These mirror the pure functions that previously lived only in the shell (`wimoai-wimo-shell/src/session/file_system.rs`).
 //! In proxy mode a `x.ai/fs/*` request executes on the *remote* workspace server instead of the agent host.
 //! Each request type implements [`WorkspaceOp`]: local sessions run it in-process, proxy sessions route it over the server `workspace_rpc` tool.
 //! The wire output is identical either way.
@@ -15,9 +15,9 @@ use crate::error::{WorkspaceError, WorkspaceResult};
 use crate::handle::WorkspaceHandle;
 use crate::workspace_ops::WorkspaceOp;
 
-// Canonical in wimo ai-wimo-workspace-types; re-exported for existing paths.
-use wimo ai_wimo_workspace_types::rpc::fs::FsReadEncoding;
-pub use wimo ai_wimo_workspace_types::rpc::fs::{
+// Canonical in wimoai-wimo-workspace-types; re-exported for existing paths.
+use wimoai_wimo_workspace_types::rpc::fs::FsReadEncoding;
+pub use wimoai_wimo_workspace_types::rpc::fs::{
     FsDeleteFileReq, FsExistsData, FsExistsReq, FsListData, FsListNode, FsListReq, FsReadFileData,
     FsReadFileReq, FsWriteFileReq,
 };

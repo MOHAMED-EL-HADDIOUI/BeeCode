@@ -1,4 +1,4 @@
-//! Build script for bundling ripgrep for the wimo ai-wimo-tools crate.
+//! Build script for bundling ripgrep for the wimoai-wimo-tools crate.
 //!
 //! - If `wimo_TOOLS_BUNDLE_RG_PATH` is set, always bundle it
 //! - Otherwise, only bundle in release builds

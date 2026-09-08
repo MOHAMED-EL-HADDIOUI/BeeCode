@@ -6,7 +6,7 @@
 use std::sync::LazyLock;
 
 /// The raw JSON, embedded at compile time.
-/// It is `pub` because `wimo ai_wimo_shell::models` re-exports it and `agent::config` reads it.
+/// It is `pub` because `wimoai_wimo_shell::models` re-exports it and `agent::config` reads it.
 pub const DEFAULT_MODELS_JSON: &str = include_str!("../default_models.json");
 
 #[derive(serde::Deserialize)]

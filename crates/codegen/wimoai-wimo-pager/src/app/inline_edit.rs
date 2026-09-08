@@ -10,7 +10,7 @@ use ratatui::layout::Rect;
 use ratatui::style::Style;
 use ratatui::widgets::StatefulWidgetRef;
 use unicode_width::UnicodeWidthStr;
-use wimo ai_ratatui_textarea::{TextArea, TextAreaState};
+use wimoai_ratatui_textarea::{TextArea, TextAreaState};
 
 use crate::key;
 use crate::scrollback::block::RenderBlock;

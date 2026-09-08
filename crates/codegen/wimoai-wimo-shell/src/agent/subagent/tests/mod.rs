@@ -19,13 +19,13 @@ use super::handle_request::{
     resolve_child_model, take_child_streaming_partial, take_child_turn_messages,
 };
 use crate::test_support::lsp_runtime::{ctx_with_toggle, test_gateway_with_receiver};
-use wimo ai_wimo_subagent_resolution::resolve_effective_overrides;
-use wimo ai_wimo_tools::implementations::wimo::task::coordinator::{
+use wimoai_wimo_subagent_resolution::resolve_effective_overrides;
+use wimoai_wimo_tools::implementations::wimo::task::coordinator::{
     ChildCompletion, CompletionDisposition,
 };
 #[test]
 fn canonical_total_tokens_does_not_double_count_reasoning() {
-    let totals = wimo ai_chat_state::UsageTotals {
+    let totals = wimoai_chat_state::UsageTotals {
         input_tokens: 100,
         output_tokens: 40,
         reasoning_tokens: 25,
@@ -46,7 +46,7 @@ async fn usage_ack_precedes_terminal_presentation() {
     ctx.parent_cmd_tx = Some(parent_cmd_tx);
     let by_model = vec![(
             "test-model".to_string(),
-            wimo ai_chat_state::UsageTotals {
+            wimoai_chat_state::UsageTotals {
                 input_tokens: 10,
                 output_tokens: 4,
                 ..Default::default()
@@ -102,7 +102,7 @@ async fn usage_ack_precedes_terminal_presentation() {
     present_child_completion(completion, &gateway, will_wake);
     assert!(matches!(
             parent_cmd_rx.try_recv(),
-            Ok(SessionCommand::wimo aiSessionNotification {
+            Ok(SessionCommand::wimoaiSessionNotification {
                 notification: SessionNotification {
                     update: SessionUpdate::SubagentFinished { .. },
                     ..
@@ -190,11 +190,11 @@ fn wedged_child_handle() -> (
     let (cmd_tx, cmd_rx) = mpsc::unbounded_channel();
     let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel();
     let (hunk_event_tx, _hunk_event_rx) = mpsc::unbounded_channel();
-    let hunk_tracker_handle = wimo ai_hunk_tracker::HunkTrackerActor::spawn(
+    let hunk_tracker_handle = wimoai_hunk_tracker::HunkTrackerActor::spawn(
         "test".to_string(),
         PathBuf::from("/tmp"),
         hunk_event_tx,
-        wimo ai_hunk_tracker::TrackingMode::AllDirty,
+        wimoai_hunk_tracker::TrackingMode::AllDirty,
         CancellationToken::new(),
     );
     let (signals_handle, signals_actor) = crate::session::signals::SessionSignalsActor::new();
@@ -215,7 +215,7 @@ fn wedged_child_handle() -> (
             scheduler_background_loops: true,
         },
         hunk_tracker_handle,
-        chat_state_handle: wimo ai_chat_state::ChatStateHandle::noop(),
+        chat_state_handle: wimoai_chat_state::ChatStateHandle::noop(),
         signals_handle,
         gateway_enabled: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true)),
         status_line_enabled: std::sync::Arc::new(
@@ -232,9 +232,9 @@ fn wedged_child_handle() -> (
             std::sync::atomic::AtomicU64::new(0),
         ),
         tool_context: crate::tools::ToolContext::new_local_context(
-            wimo ai_wimo_paths::AbsPathBuf::new(PathBuf::from("/tmp")).unwrap(),
+            wimoai_wimo_paths::AbsPathBuf::new(PathBuf::from("/tmp")).unwrap(),
             std::sync::Arc::new(
-                wimo ai_wimo_workspace::file_system::LocalFs::new(PathBuf::from("/tmp")),
+                wimoai_wimo_workspace::file_system::LocalFs::new(PathBuf::from("/tmp")),
             ),
             std::sync::Arc::new(crate::terminal::LocalTerminalRunner),
         ),
@@ -251,14 +251,14 @@ fn wedged_child_handle() -> (
             ),
         ),
         force_compact: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
-        permission_handle: wimo ai_wimo_workspace::permission::PermissionHandle::allow_all(),
+        permission_handle: wimoai_wimo_workspace::permission::PermissionHandle::allow_all(),
         attribution_callback: None,
         agent_name: "wimo".to_string(),
         managed_mcp_proxy_base_url: String::new(),
         session_default_agent_profile: None,
         allowed_subagent_types: None,
         hook_registry: None,
-        workspace_ops: wimo ai_wimo_workspace::WorkspaceOps::for_test(),
+        workspace_ops: wimoai_wimo_workspace::WorkspaceOps::for_test(),
         terminal_backend: None,
         tools_notification_handle: None,
         scheduler_handle: None,
@@ -342,7 +342,7 @@ async fn usage_fold_is_bounded_when_parent_never_services_commands() {
     let (parent_cmd_tx, _parent_cmd_rx) = mpsc::unbounded_channel();
     let by_model = vec![(
             "test-model".to_string(),
-            wimo ai_chat_state::UsageTotals {
+            wimoai_chat_state::UsageTotals {
                 input_tokens: 10,
                 ..Default::default()
             },
@@ -445,54 +445,54 @@ async fn usage_not_applied_mark_goes_straight_to_coordinator_without_parent() {
 /// actor starved by a busy turn.
 struct StarvedTerminal;
 #[async_trait::async_trait]
-impl wimo ai_wimo_tools::computer::types::TerminalBackend for StarvedTerminal {
+impl wimoai_wimo_tools::computer::types::TerminalBackend for StarvedTerminal {
     async fn run(
         &self,
-        _request: wimo ai_wimo_tools::computer::types::TerminalRunRequest,
+        _request: wimoai_wimo_tools::computer::types::TerminalRunRequest,
     ) -> Result<
-        wimo ai_wimo_tools::computer::types::TerminalRunResult,
-        wimo ai_wimo_tools::computer::types::ComputerError,
+        wimoai_wimo_tools::computer::types::TerminalRunResult,
+        wimoai_wimo_tools::computer::types::ComputerError,
     > {
         std::future::pending().await
     }
     async fn run_background(
         &self,
-        _request: wimo ai_wimo_tools::computer::types::TerminalRunRequest,
+        _request: wimoai_wimo_tools::computer::types::TerminalRunRequest,
     ) -> Result<
-        wimo ai_wimo_tools::computer::types::BackgroundHandle,
-        wimo ai_wimo_tools::computer::types::ComputerError,
+        wimoai_wimo_tools::computer::types::BackgroundHandle,
+        wimoai_wimo_tools::computer::types::ComputerError,
     > {
         std::future::pending().await
     }
     async fn get_task(
         &self,
         _task_id: &str,
-    ) -> Option<wimo ai_wimo_tools::computer::types::TaskSnapshot> {
+    ) -> Option<wimoai_wimo_tools::computer::types::TaskSnapshot> {
         std::future::pending().await
     }
     async fn kill_task(
         &self,
         _task_id: &str,
-    ) -> wimo ai_wimo_tools::computer::types::KillOutcome {
+    ) -> wimoai_wimo_tools::computer::types::KillOutcome {
         std::future::pending().await
     }
     async fn wait_for_completion(
         &self,
         _task_id: &str,
         _timeout: Option<std::time::Duration>,
-    ) -> Option<wimo ai_wimo_tools::computer::types::TaskSnapshot> {
+    ) -> Option<wimoai_wimo_tools::computer::types::TaskSnapshot> {
         std::future::pending().await
     }
-    async fn list_tasks(&self) -> Vec<wimo ai_wimo_tools::computer::types::TaskSnapshot> {
+    async fn list_tasks(&self) -> Vec<wimoai_wimo_tools::computer::types::TaskSnapshot> {
         std::future::pending().await
     }
     async fn reparent_notifications(
         &self,
         _old_owner_session_id: &str,
         _new_owner_session_id: &str,
-        _new_handle: wimo ai_wimo_tools::notification::types::ToolNotificationHandle,
+        _new_handle: wimoai_wimo_tools::notification::types::ToolNotificationHandle,
         _backend_weak: std::sync::Weak<
-            dyn wimo ai_wimo_tools::computer::types::TerminalBackend,
+            dyn wimoai_wimo_tools::computer::types::TerminalBackend,
         >,
     ) {
         std::future::pending().await
@@ -505,9 +505,9 @@ impl wimo ai_wimo_tools::computer::types::TerminalBackend for StarvedTerminal {
 #[tokio::test(start_paused = true)]
 async fn reparent_is_bounded_when_terminal_actor_never_answers() {
     let parent_tb: std::sync::Arc<
-        dyn wimo ai_wimo_tools::computer::types::TerminalBackend,
+        dyn wimoai_wimo_tools::computer::types::TerminalBackend,
     > = std::sync::Arc::new(StarvedTerminal);
-    let notif_handle = wimo ai_wimo_tools::notification::types::ToolNotificationHandle::noop();
+    let notif_handle = wimoai_wimo_tools::notification::types::ToolNotificationHandle::noop();
     let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel();
     tokio::time::timeout(
             20 * PARENT_ACK_TIMEOUT,
@@ -534,7 +534,7 @@ async fn reparent_is_bounded_when_terminal_actor_never_answers() {
 /// They flow through `resolve_agent_definition` so the spawn path can't skip them.
 #[tokio::test]
 async fn subagent_inherits_session_cli_overrides() {
-    use wimo ai_wimo_agent::config::{AgentDefinition, PermissionMode};
+    use wimoai_wimo_agent::config::{AgentDefinition, PermissionMode};
     let mut probe = AgentDefinition::general_purpose();
     probe.name = "session-override-probe".into();
     probe.permission_mode = PermissionMode::Plan;
@@ -564,8 +564,8 @@ async fn subagent_inherits_session_cli_overrides() {
 }
 #[test]
 fn subagent_bypass_permission_mode_gated_by_policy_pin() {
-    use wimo ai_wimo_agent::config::PermissionMode;
-    const PIN: &str = wimo ai_wimo_workspace::permission::resolution::YoloPinReason::DisableBypassPermissionsMode
+    use wimoai_wimo_agent::config::PermissionMode;
+    const PIN: &str = wimoai_wimo_workspace::permission::resolution::YoloPinReason::DisableBypassPermissionsMode
         .message();
     assert_eq!(
             resolve_subagent_permission_mode(PermissionMode::BypassPermissions, false, None),
@@ -609,7 +609,7 @@ async fn emit_subagent_notification_stamps_one_event_id_on_both_paths() {
         Some(&cmd_tx),
     );
     let persisted_id = match cmd_rx.try_recv().expect("persist hop must fire") {
-        SessionCommand::wimo aiSessionNotification { notification } => {
+        SessionCommand::wimoaiSessionNotification { notification } => {
             notification
                 .meta
                 .as_ref()
@@ -618,11 +618,11 @@ async fn emit_subagent_notification_stamps_one_event_id_on_both_paths() {
                 .expect("persisted subagent lines must carry an eventId")
                 .to_string()
         }
-        _ => panic!("expected wimo aiSessionNotification"),
+        _ => panic!("expected wimoaiSessionNotification"),
     };
     assert!(persisted_id.starts_with("parent-sess-"));
     let broadcast_id = match gateway_rx.try_recv().expect("broadcast must fire") {
-        wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) => {
+        wimoai_acp_lib::AcpClientMessage::ExtNotification(args) => {
             let params: serde_json::Value = serde_json::from_str(
                     args.request.params.get(),
                 )
@@ -766,7 +766,7 @@ fn completed_followup_wakes_parent_with_exactly_one_prompt() {
     let mut prompt_count = 0;
     while let Ok(command) = parent_cmd_rx.try_recv() {
         match command {
-            SessionCommand::wimo aiSessionNotification {
+            SessionCommand::wimoaiSessionNotification {
                 notification: SessionNotification {
                     update: SessionUpdate::SubagentFinished {
                         status,
@@ -792,7 +792,7 @@ fn completed_followup_wakes_parent_with_exactly_one_prompt() {
 #[test]
 fn inject_subagent_completed_prompt_sends_prompt_and_marks_delivered() {
     let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel::<SessionCommand>();
-    let reservations = wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default();
+    let reservations = wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default();
     let mut request = auto_wake_test_request("sa-1");
     request.runtime_overrides.loop_task_id = Some("loop-123".into());
     let result = SubagentResult {
@@ -871,7 +871,7 @@ fn inject_subagent_completed_prompt_omits_cleanup_without_loop_task() {
 #[test]
 fn inject_subagent_completed_prompt_bails_when_goal_loop_activates_in_gap() {
     let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel::<SessionCommand>();
-    let reservations = wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default();
+    let reservations = wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default();
     reservations.reserve("sa-goal".into());
     inject_subagent_completed_prompt(InjectParams {
         subagent_id: "sa-goal",
@@ -896,7 +896,7 @@ fn inject_subagent_completed_prompt_bails_when_goal_loop_activates_in_gap() {
 fn inject_subagent_completed_prompt_releases_reservation_when_parent_closed() {
     let (cmd_tx, cmd_rx) = mpsc::unbounded_channel::<SessionCommand>();
     drop(cmd_rx);
-    let reservations = wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default();
+    let reservations = wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default();
     reservations.reserve("sa-closed".into());
     reservations.reserve("sa-closed".into());
     let (trace_tx, mut trace_rx) = mpsc::unbounded_channel();
@@ -964,7 +964,7 @@ fn partial_override_fills_from_role() {
         model: Some("explicit-model".into()),
         ..Default::default()
     };
-    let role = wimo ai_wimo_subagent_resolution::config::SubagentRole {
+    let role = wimoai_wimo_subagent_resolution::config::SubagentRole {
         description: "test".into(),
         default_capability_mode: Some("execute".into()),
         ..Default::default()
@@ -979,13 +979,13 @@ fn partial_override_fills_from_role() {
     assert_eq!(resolved.model.as_deref(), Some("explicit-model"));
     assert_eq!(
             resolved.capability_mode,
-            Some(wimo ai_tool_types::SubagentCapabilityMode::Execute)
+            Some(wimoai_tool_types::SubagentCapabilityMode::Execute)
         );
 }
 #[test]
 fn invalid_role_capability_mode_ignored() {
     let overrides = SubagentRuntimeOverrides::default();
-    let role = wimo ai_wimo_subagent_resolution::config::SubagentRole {
+    let role = wimoai_wimo_subagent_resolution::config::SubagentRole {
         description: "test".into(),
         default_capability_mode: Some("invalid-mode".into()),
         ..Default::default()
@@ -1012,7 +1012,7 @@ fn persona_resolved_from_config() {
     personas
         .insert(
             "researcher".to_string(),
-            wimo ai_wimo_subagent_resolution::config::SubagentPersona {
+            wimoai_wimo_subagent_resolution::config::SubagentPersona {
                 instructions: Some("Be thorough.".into()),
                 ..Default::default()
             },
@@ -1036,7 +1036,7 @@ fn persona_inline_plus_file_merged_in_order() {
     personas
         .insert(
             "combo".to_string(),
-            wimo ai_wimo_subagent_resolution::config::SubagentPersona {
+            wimoai_wimo_subagent_resolution::config::SubagentPersona {
                 instructions: Some("Inline first.".into()),
                 instructions_file: Some("extra.md".into()),
                 ..Default::default()
@@ -1065,12 +1065,12 @@ fn model_precedence_explicit_over_role_over_persona() {
     personas
         .insert(
             "dev".to_string(),
-            wimo ai_wimo_subagent_resolution::config::SubagentPersona {
+            wimoai_wimo_subagent_resolution::config::SubagentPersona {
                 model: Some("persona-model".into()),
                 ..Default::default()
             },
         );
-    let role = wimo ai_wimo_subagent_resolution::config::SubagentRole {
+    let role = wimoai_wimo_subagent_resolution::config::SubagentRole {
         description: "test".into(),
         model: Some("role-model".into()),
         ..Default::default()
@@ -1088,7 +1088,7 @@ fn model_precedence_explicit_over_role_over_persona() {
     };
     let r = resolve_effective_overrides(&overrides, Some(&role), &personas, None, None);
     assert_eq!(r.model.as_deref(), Some("role-model"));
-    let role_no_model = wimo ai_wimo_subagent_resolution::config::SubagentRole {
+    let role_no_model = wimoai_wimo_subagent_resolution::config::SubagentRole {
         description: "test".into(),
         ..Default::default()
     };
@@ -1110,12 +1110,12 @@ fn reasoning_effort_precedence_explicit_over_role_over_persona() {
     personas
         .insert(
             "dev".to_string(),
-            wimo ai_wimo_subagent_resolution::config::SubagentPersona {
+            wimoai_wimo_subagent_resolution::config::SubagentPersona {
                 reasoning_effort: Some("low".into()),
                 ..Default::default()
             },
         );
-    let role = wimo ai_wimo_subagent_resolution::config::SubagentRole {
+    let role = wimoai_wimo_subagent_resolution::config::SubagentRole {
         description: "test".into(),
         reasoning_effort: Some("medium".into()),
         ..Default::default()
@@ -1133,7 +1133,7 @@ fn reasoning_effort_precedence_explicit_over_role_over_persona() {
     };
     let r = resolve_effective_overrides(&overrides, Some(&role), &personas, None, None);
     assert_eq!(r.reasoning_effort.as_deref(), Some("medium"));
-    let role_no_re = wimo ai_wimo_subagent_resolution::config::SubagentRole {
+    let role_no_re = wimoai_wimo_subagent_resolution::config::SubagentRole {
         description: "test".into(),
         ..Default::default()
     };
@@ -1213,7 +1213,7 @@ fn no_persona_produces_none() {
 }
 #[test]
 fn forked_initial_context_normalizes_parent_history() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let items = vec![
             ConversationItem::system("parent system"),
             ConversationItem::user("UNIQUE_FORK_MARKER_abc123 implement multi-repo fix"),
@@ -1229,7 +1229,7 @@ fn forked_initial_context_normalizes_parent_history() {
             .content
             .iter()
             .filter_map(|p| match p {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     Some(text.as_ref())
                 }
                 _ => None,
@@ -1246,11 +1246,11 @@ fn forked_initial_context_normalizes_parent_history() {
 }
 #[test]
 fn forked_initial_context_inherits_parent_across_reasoning() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let items = vec![
             ConversationItem::system("parent system"),
             ConversationItem::user("remember UNIQUE_FORK_MARKER_TEST"),
-            ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item(
+            ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item(
                 "deliberating",
             )),
             ConversationItem::assistant("ack"),
@@ -1264,7 +1264,7 @@ fn forked_initial_context_inherits_parent_across_reasoning() {
             .content
             .iter()
             .filter_map(|p| match p {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     Some(text.as_ref())
                 }
                 _ => None,
@@ -1291,7 +1291,7 @@ fn forked_initial_context_empty_fails_open_to_new() {
 }
 #[test]
 fn resume_vs_fork_helper_shapes_differ() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let resume_items = vec![
             ConversationItem::system("child system"),
             ConversationItem::user("prior subagent work"),
@@ -1307,14 +1307,14 @@ fn resume_vs_fork_helper_shapes_differ() {
             Some(ConversationItem::User(u))
                 if u.content.iter().any(|p| matches!(
                     p,
-                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text }
+                    wimoai_wimo_sampling_types::conversation::ContentPart::Text { text }
                         if text.contains("<background_context>")
                 ))
         ));
 }
 #[test]
 fn forked_initial_context_applies_fork_filter_before_normalize() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let items = vec![
             ConversationItem::system("sys"),
             ConversationItem::user("complete user"),
@@ -1328,7 +1328,7 @@ fn forked_initial_context_applies_fork_filter_before_normalize() {
             .content
             .iter()
             .filter_map(|p| match p {
-                wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                     Some(text.as_ref())
                 }
                 _ => None,
@@ -1345,7 +1345,7 @@ fn forked_initial_context_applies_fork_filter_before_normalize() {
 }
 #[test]
 fn verbatim_fork_keeps_items_byte_for_byte_when_small() {
-    use wimo ai_wimo_sampling_types::conversation::{
+    use wimoai_wimo_sampling_types::conversation::{
         ContentPart, ConversationItem, SyntheticReason, UserItem,
     };
     let items = vec![
@@ -1358,7 +1358,7 @@ fn verbatim_fork_keeps_items_byte_for_byte_when_small() {
                 synthetic_reason: Some(SyntheticReason::SystemReminder),
                 ..Default::default()
             }),
-            ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item(
+            ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item(
                 "thinking",
             )),
             ConversationItem::assistant("ack"),
@@ -1407,7 +1407,7 @@ fn verbatim_fork_keeps_items_byte_for_byte_when_small() {
 }
 #[test]
 fn verbatim_fork_falls_back_to_summary_on_incomplete_tail() {
-    use wimo ai_wimo_sampling_types::conversation::{
+    use wimoai_wimo_sampling_types::conversation::{
         AssistantItem, ContentPart, ConversationItem, ToolCall,
     };
     let items = vec![
@@ -1445,7 +1445,7 @@ fn verbatim_fork_falls_back_to_summary_on_incomplete_tail() {
 }
 #[test]
 fn summarized_fork_is_not_a_verbatim_mirror() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let items = vec![
             ConversationItem::system("parent system prompt"),
             ConversationItem::user("turn one UNIQUE_FORK_MARKER_TEST"),
@@ -1463,7 +1463,7 @@ fn summarized_fork_is_not_a_verbatim_mirror() {
 }
 #[test]
 fn verbatim_fork_falls_back_to_summary_when_oversize() {
-    use wimo ai_wimo_sampling_types::conversation::{ContentPart, ConversationItem};
+    use wimoai_wimo_sampling_types::conversation::{ContentPart, ConversationItem};
     let items = vec![
             ConversationItem::system("parent system"),
             ConversationItem::user("turn one UNIQUE_FORK_MARKER_TEST with some text"),
@@ -1491,7 +1491,7 @@ fn verbatim_fork_falls_back_to_summary_when_oversize() {
 }
 #[test]
 fn verbatim_fork_empty_after_filter_fails_open_to_new() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let items = vec![ConversationItem::user("/goal do the thing")];
     let ctx = verbatim_or_normalize_fork(items, 256_000);
     assert_eq!(ctx.source, InitialContextSource::New);
@@ -1500,7 +1500,7 @@ fn verbatim_fork_empty_after_filter_fails_open_to_new() {
 }
 #[test]
 fn forked_initial_context_system_only_fails_open_to_new() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let ctx = forked_initial_context(vec![ConversationItem::system("sys")]);
     assert_eq!(ctx.source, InitialContextSource::New);
     assert!(!ctx.verbatim_fork);
@@ -1522,7 +1522,7 @@ fn fork_context_normalized_only_for_summarized() {
             &InitialContextSource::Resumed,
             false
         ));
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let verbatim = verbatim_or_normalize_fork(
         vec![
                 ConversationItem::system("sys"),
@@ -1634,7 +1634,7 @@ async fn bootstrap_fork_without_parent_fails_open() {
 }
 #[tokio::test]
 async fn bootstrap_fork_live_parent_chat_state_is_forked_with_marker() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     const MARKER: &str = "UNIQUE_LIVE_FORK_MARKER_xyz789";
     let req = bootstrap_test_request(true);
     let mut ctx = ctx_with_toggle(HashMap::new());
@@ -1688,7 +1688,7 @@ async fn bootstrap_fork_live_parent_chat_state_is_forked_with_marker() {
                                 .content
                                 .iter()
                                 .filter_map(|p| match p {
-                                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text {
+                                    wimoai_wimo_sampling_types::conversation::ContentPart::Text {
                                         text,
                                     } => Some(text.as_ref()),
                                     _ => None,
@@ -1906,8 +1906,8 @@ fn validate_subagent_type_recognizes_cli_agent_by_name() {
 }
 #[test]
 fn summarize_tool_config_uses_name_override_and_strips_namespace() {
-    use wimo ai_wimo_tools::registry::types::{ToolConfig, ToolServerConfig};
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::registry::types::{ToolConfig, ToolServerConfig};
+    use wimoai_wimo_tools::types::tool::ToolKind;
     let mut read = ToolConfig::from_id("Wimo:read_file");
     read.kind = Some(ToolKind::Read);
     let mut read_dup = ToolConfig::from_id("Codex:read_file");
@@ -1952,7 +1952,7 @@ fn describe_subagent_type_unknown_returns_sorted_available() {
 /// The planner gate must therefore key on the Edit capability.
 #[test]
 fn describe_default_host_general_purpose_has_edit_not_write() {
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::tool::ToolKind;
     let ctx = ctx_with_toggle(HashMap::new());
     let SubagentDescribeOutcome::Ok(summary) = describe_subagent_type(
         "general-purpose",
@@ -1992,7 +1992,7 @@ fn goal_harness_override_unresolvable_returns_unknown() {
 /// A custom profile running a stock/vision model leaves subagents on the default harness, so they keep native image input.
 #[test]
 fn subagent_keeps_default_flavor_when_parent_model_is_non_strict() {
-    use wimo ai_wimo_agent::config::BuiltinAgentName;
+    use wimoai_wimo_agent::config::BuiltinAgentName;
     let mut ctx = ctx_with_toggle(HashMap::new());
     ctx.parent_agent_name = Some("ai-oncall-bot".to_string());
     ctx.parent_model_agent_type = Some(
@@ -2071,7 +2071,7 @@ async fn cancel_pending_shell_child_presents_one_cancelled_finish() {
     while let Ok(command) = parent_cmd_rx.try_recv() {
         if matches!(
                 command,
-                SessionCommand::wimo aiSessionNotification {
+                SessionCommand::wimoaiSessionNotification {
                     notification: SessionNotification {
                         update: SessionUpdate::SubagentFinished { status, .. },
                         ..
@@ -2086,7 +2086,7 @@ async fn cancel_pending_shell_child_presents_one_cancelled_finish() {
     while let Ok(message) = gateway_rx.try_recv() {
         if matches!(
                 message,
-                wimo ai_acp_lib::AcpClientMessage::ExtNotification(args)
+                wimoai_acp_lib::AcpClientMessage::ExtNotification(args)
                     if args.request.params.get().contains("\"status\":\"cancelled\"")
             ) {
             live += 1;
@@ -2126,8 +2126,8 @@ async fn run_promote_cancel_with_worktree(
 /// A pending cancel removes a freshly-created worktree but preserves a resumed child worktree owned by its source.
 #[tokio::test]
 async fn cancel_pending_at_promote_removes_fresh_worktree_preserves_resumed() {
-    wimo ai_test_utils::require_git!();
-    use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+    wimoai_test_utils::require_git!();
+    use wimoai_test_utils::git::{git_commit_all, init_git_repo};
     let temp = tempfile::TempDir::new().unwrap();
     let repo = temp.path().join("repo");
     std::fs::create_dir(&repo).unwrap();
@@ -2135,7 +2135,7 @@ async fn cancel_pending_at_promote_removes_fresh_worktree_preserves_resumed() {
     std::fs::write(repo.join("tracked.txt"), "original").unwrap();
     git_commit_all(&repo, "initial");
     let fresh = temp.path().join("subagent-fresh");
-    wimo ai_fast_worktree::WorktreeBuilder::new(&repo, &fresh)
+    wimoai_fast_worktree::WorktreeBuilder::new(&repo, &fresh)
         .standalone(true)
         .create()
         .unwrap();
@@ -2146,7 +2146,7 @@ async fn cancel_pending_at_promote_removes_fresh_worktree_preserves_resumed() {
             "freshly-created worktree must be removed on pending-kill"
         );
     let resumed = temp.path().join("subagent-resumed");
-    wimo ai_fast_worktree::WorktreeBuilder::new(&repo, &resumed)
+    wimoai_fast_worktree::WorktreeBuilder::new(&repo, &resumed)
         .standalone(true)
         .create()
         .unwrap();
@@ -2290,7 +2290,7 @@ async fn startup_admission_timeout_is_failed_not_cancelled() {
     while let Ok(command) = parent_cmd_rx.try_recv() {
         if matches!(
                 command,
-                SessionCommand::wimo aiSessionNotification {
+                SessionCommand::wimoaiSessionNotification {
                     notification: SessionNotification {
                         update: SessionUpdate::SubagentFinished { status, .. },
                         ..
@@ -2305,7 +2305,7 @@ async fn startup_admission_timeout_is_failed_not_cancelled() {
     while let Ok(message) = gateway_rx.try_recv() {
         if matches!(
                 message,
-                wimo ai_acp_lib::AcpClientMessage::ExtNotification(args)
+                wimoai_acp_lib::AcpClientMessage::ExtNotification(args)
                     if args.request.params.get().contains("\"status\":\"failed\"")
             ) {
             live += 1;
@@ -2366,10 +2366,10 @@ fn byok_model_entry(model_id: &str) -> crate::agent::config::ModelEntry {
 }
 #[test]
 fn subagent_auth_type_rule() {
-    use crate::agent::auth_method::{CACHED_TOKEN_AUTH_METHOD_ID, wimo ai_API_KEY_METHOD_ID};
-    use wimo ai_chat_state::AuthType;
+    use crate::agent::auth_method::{CACHED_TOKEN_AUTH_METHOD_ID, wimoai_API_KEY_METHOD_ID};
+    use wimoai_chat_state::AuthType;
     let session = acp::AuthMethodId::new(CACHED_TOKEN_AUTH_METHOD_ID);
-    let api_key = acp::AuthMethodId::new(wimo ai_API_KEY_METHOD_ID);
+    let api_key = acp::AuthMethodId::new(wimoai_API_KEY_METHOD_ID);
     let byok = byok_model_entry("wimo-byok");
     let plain = test_model_entry("wimo-plain");
     assert_eq!(
@@ -2551,18 +2551,18 @@ fn harness_model_override_keeps_internal_fallback_behavior() {
 }
 #[test]
 fn normalize_forked_context_empty_parent() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     let items = vec![ConversationItem::system("sys prompt")];
-    let (conv, prefix_len) = wimo ai_wimo_subagent_resolution::context::normalize_forked_context(
+    let (conv, prefix_len) = wimoai_wimo_subagent_resolution::context::normalize_forked_context(
         items,
     );
     assert_eq!(conv.len(), 1);
     assert_eq!(prefix_len, 1);
     assert!(matches!(conv[0], ConversationItem::System(_)));
 }
-fn test_sampling_config(model_slug: &str) -> wimo ai_wimo_sampling_types::SamplingConfig {
+fn test_sampling_config(model_slug: &str) -> wimoai_wimo_sampling_types::SamplingConfig {
     use std::num::NonZeroU64;
-    wimo ai_wimo_sampling_types::SamplingConfig {
+    wimoai_wimo_sampling_types::SamplingConfig {
         base_url: "https://api.test/v1".to_string(),
         model: model_slug.to_string(),
         max_completion_tokens: None,
@@ -2577,11 +2577,11 @@ fn test_sampling_config(model_slug: &str) -> wimo ai_wimo_sampling_types::Sampli
         stream_tool_calls: None,
     }
 }
-fn spawn_test_parent_chat_state(model_slug: &str) -> wimo ai_chat_state::ChatStateHandle {
-    let (mock, _persistence_rx) = wimo ai_chat_state::MockChatPersistence::new();
+fn spawn_test_parent_chat_state(model_slug: &str) -> wimoai_chat_state::ChatStateHandle {
+    let (mock, _persistence_rx) = wimoai_chat_state::MockChatPersistence::new();
     let (event_tx, _event_rx) = mpsc::unbounded_channel();
     let token = tokio_util::sync::CancellationToken::new();
-    wimo ai_chat_state::ChatStateActor::spawn(
+    wimoai_chat_state::ChatStateActor::spawn(
         vec![],
         test_sampling_config(model_slug),
         Box::new(mock),

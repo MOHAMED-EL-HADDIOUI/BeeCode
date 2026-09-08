@@ -293,7 +293,7 @@ impl SessionActor {
             .borrow()
             .tool_bridge()
             .update_resources_with(move |resources| {
-                use wimo ai_wimo_tools::implementations::wimo::task::types::CurrentPromptIdResource;
+                use wimoai_wimo_tools::implementations::wimo::task::types::CurrentPromptIdResource;
                 if resources
                     .get::<CurrentPromptIdResource>()
                     .is_some_and(|current| current.0 == prompt_id)
@@ -322,7 +322,7 @@ impl SessionActor {
             .borrow()
             .tool_bridge()
             .update_resources_with(move |resources| {
-                use wimo ai_wimo_tools::implementations::wimo::task::types::{
+                use wimoai_wimo_tools::implementations::wimo::task::types::{
                     CurrentPromptIdResource, GoalLoopActive,
                 };
                 if resources
@@ -387,7 +387,7 @@ impl AgentTask {
             prompt_id: request.prompt_id.clone(),
             epoch,
             identity: identity.clone(),
-            handle: wimo ai_wimo_telemetry::session_ctx::spawn_local_in_session_ctx(run_task(
+            handle: wimoai_wimo_telemetry::session_ctx::spawn_local_in_session_ctx(run_task(
                 session,
                 request,
                 epoch,

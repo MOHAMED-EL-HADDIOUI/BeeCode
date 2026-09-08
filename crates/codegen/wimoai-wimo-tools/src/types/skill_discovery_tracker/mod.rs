@@ -166,7 +166,7 @@ enum PendingKind {
 }
 
 /// Dedup helpers -- defined here so the tracker can compute projections
-/// without depending on wimo ai-wimo-agent.
+/// without depending on wimoai-wimo-agent.
 fn dedup_by_canonical_path(primary: &[SkillInfo], secondary: &[SkillInfo]) -> Vec<SkillInfo> {
     let mut seen_paths = HashSet::new();
     let mut result = Vec::with_capacity(primary.len() + secondary.len());

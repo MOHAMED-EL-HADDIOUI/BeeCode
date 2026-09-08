@@ -1,5 +1,5 @@
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::implementations::wimo::{
+use wimoai_wimo_tools::implementations::wimo::{
     IMAGE_GEN_TOOL_NAME, IMAGINE_COMMAND_NAME, imagine_instruction, imagine_usage_message,
 };
 

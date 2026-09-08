@@ -1,9 +1,9 @@
 use axum::{Json, Router, extract::State, routing::post};
 use serde_json::{Value, json};
-use wimo ai_wimo_tools::computer::local::{LocalFs, LocalTerminalBackend};
-use wimo ai_wimo_tools::computer::types::{AsyncFileSystem, TerminalBackend};
-use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-use wimo ai_wimo_tools::registry::types::{SessionContext, ToolConfig, ToolServerConfig};
+use wimoai_wimo_tools::computer::local::{LocalFs, LocalTerminalBackend};
+use wimoai_wimo_tools::computer::types::{AsyncFileSystem, TerminalBackend};
+use wimoai_wimo_tools::notification::ToolNotificationHandle;
+use wimoai_wimo_tools::registry::types::{SessionContext, ToolConfig, ToolServerConfig};
 
 #[tokio::test]
 async fn web_search_uses_model_override_from_config_end_to_end() {
@@ -99,7 +99,7 @@ async fn web_search_uses_model_override_from_config_end_to_end() {
         skills: vec![],
         state_path: std::env::temp_dir().join("wimo-web-search-e2e/state.json"),
         memory_backend: None,
-        web_search_config: wimo ai_wimo_tools::implementations::web_search::WebSearchConfig::Enabled {
+        web_search_config: wimoai_wimo_tools::implementations::web_search::WebSearchConfig::Enabled {
             api_key: web_search_sampling.api_key.clone().unwrap(),
             base_url: web_search_sampling.base_url.clone(),
             model: web_search_sampling.model.clone(),
@@ -119,7 +119,7 @@ async fn web_search_uses_model_override_from_config_end_to_end() {
         api_key_provider: None,
         auth_provider: None,
         attribution_callback: None,
-        system_reminder_tag: wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
+        system_reminder_tag: wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
     };
     let bridge = crate::tools::bridge::ToolBridge::finalize_builder(builder, config, ctx)
         .await
@@ -180,7 +180,7 @@ async fn web_search_errors_when_configured_model_cannot_be_resolved() {
         skills: vec![],
         state_path: std::env::temp_dir().join("wimo-web-search-disabled/state.json"),
         memory_backend: None,
-        web_search_config: wimo ai_wimo_tools::implementations::web_search::WebSearchConfig::Disabled,
+        web_search_config: wimoai_wimo_tools::implementations::web_search::WebSearchConfig::Disabled,
         web_fetch_config: Default::default(),
         lsp: None,
         image_gen_config: Default::default(),
@@ -189,7 +189,7 @@ async fn web_search_errors_when_configured_model_cannot_be_resolved() {
         api_key_provider: None,
         auth_provider: None,
         attribution_callback: None,
-        system_reminder_tag: wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
+        system_reminder_tag: wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
     };
     let bridge = crate::tools::bridge::ToolBridge::finalize_builder(builder, config, ctx)
         .await

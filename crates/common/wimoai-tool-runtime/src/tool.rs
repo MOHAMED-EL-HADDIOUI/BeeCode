@@ -22,8 +22,8 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use wimo ai_tool_protocol::{ToolCapabilities, ToolId};
-use wimo ai_tool_types::ToolDescription;
+use wimoai_tool_protocol::{ToolCapabilities, ToolId};
+use wimoai_tool_types::ToolDescription;
 
 use crate::context::{ListToolsContext, ToolCallContext};
 use crate::error::ToolError;

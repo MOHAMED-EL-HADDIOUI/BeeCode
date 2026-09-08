@@ -13,7 +13,7 @@ use std::time::{Duration, Instant};
 use futures_util::StreamExt;
 use futures_util::stream::{BoxStream, Stream};
 
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     ConversationItem, ConversationResponse, ResponseModelMetadata, SamplingError, StopReason,
     TokenUsage, messages as messages_types, rs,
 };
@@ -456,7 +456,7 @@ pub(crate) fn stream_responses_tracked<'a>(
                         error_code: response
                             .error
                             .as_ref()
-                            .map(|e| wimo ai_wimo_sampling_types::ApiErrorCode::parse(&e.code)),
+                            .map(|e| wimoai_wimo_sampling_types::ApiErrorCode::parse(&e.code)),
                     };
                     yield SamplingEvent::Failed {
                         request_id: request_id.clone(),
@@ -481,7 +481,7 @@ pub(crate) fn stream_responses_tracked<'a>(
                         error_code: error_event
                             .code
                             .as_deref()
-                            .map(wimo ai_wimo_sampling_types::ApiErrorCode::parse),
+                            .map(wimoai_wimo_sampling_types::ApiErrorCode::parse),
                     };
                     yield SamplingEvent::Failed {
                         request_id: request_id.clone(),
@@ -651,8 +651,8 @@ pub(crate) fn stream_responses_tracked<'a>(
         // Convert to ConversationItem(s); patch in accumulated reasoning text as a fallback when the final response lacks `content` or `summary`
         // The streaming deltas may have arrived out of band
         // Splice policy lives in `inject_streaming_reasoning_fallback`.
-        let mut items = wimo ai_wimo_sampling_types::response_to_conversation_items(response);
-        wimo ai_wimo_sampling_types::inject_streaming_reasoning_fallback(&mut items, reasoning_acc);
+        let mut items = wimoai_wimo_sampling_types::response_to_conversation_items(response);
+        wimoai_wimo_sampling_types::inject_streaming_reasoning_fallback(&mut items, reasoning_acc);
 
         let has_tool_calls = items.iter().any(|i| match i {
             ConversationItem::Assistant(a) => !a.tool_calls.is_empty(),
@@ -874,10 +874,10 @@ mod tests {
             let capture = FailedResponseCapture::armed();
             // A collector that has already seen a confident trigger: the next non-terminal frame aborts the attempt
             let collector = crate::doom_loop::DoomLoopSignalCollector::new(
-                wimo ai_wimo_sampling_types::DoomLoopRecoveryPolicy::default(),
+                wimoai_wimo_sampling_types::DoomLoopRecoveryPolicy::default(),
             );
             collector.absorb(
-                wimo ai_wimo_sampling_types::doom_loop::DOOM_LOOP_CHECK_EVENT_TYPE,
+                wimoai_wimo_sampling_types::doom_loop::DOOM_LOOP_CHECK_EVENT_TYPE,
                 r#"{"type":"response.doom_loop_check","doom_loop_check":{"triggers":["tail_repetition:8@thinking"]}}"#,
             );
 
@@ -1150,7 +1150,7 @@ mod tests {
                 // The wire code passes through verbatim; dropping it here would disable strip recovery for coded Responses failures
                 assert_eq!(
                     error.error_code,
-                    Some(wimo ai_wimo_sampling_types::ApiErrorCode::Other(
+                    Some(wimoai_wimo_sampling_types::ApiErrorCode::Other(
                         "server_error".into()
                     ))
                 );
@@ -1165,7 +1165,7 @@ mod tests {
     async fn response_error_event_carries_code_into_failed() {
         let error_event = rs::ResponseStreamEvent::ResponseError(rs_types::ResponseErrorEvent {
             sequence_number: 0,
-            code: Some(wimo ai_wimo_sampling_types::INVALID_IMAGE_ERROR_CODE.into()),
+            code: Some(wimoai_wimo_sampling_types::INVALID_IMAGE_ERROR_CODE.into()),
             message: "could not decode image".into(),
             param: None,
         });
@@ -1183,7 +1183,7 @@ mod tests {
             SamplingEvent::Failed { error, .. } => {
                 assert_eq!(
                     error.error_code,
-                    Some(wimo ai_wimo_sampling_types::ApiErrorCode::InvalidImage)
+                    Some(wimoai_wimo_sampling_types::ApiErrorCode::InvalidImage)
                 );
             }
             other => panic!("expected Failed, got {other:?}"),
@@ -1525,7 +1525,7 @@ mod tests {
 
     #[tokio::test]
     async fn doom_loop_collector_signals_land_on_completed_response() {
-        use wimo ai_wimo_sampling_types::doom_loop::{
+        use wimoai_wimo_sampling_types::doom_loop::{
             DOOM_LOOP_CHECK_EVENT_TYPE, SAMPLE_CHECK_EVENT_DATA,
         };
         let collector = crate::doom_loop::DoomLoopSignalCollector::default();

@@ -135,8 +135,8 @@ pub(super) fn build_todo_gate_reminder(pending: &[&str], unbacked_in_progress: &
 pub(crate) fn resolve_reminder_policy(
     remote: Option<&crate::util::config::RemoteSettings>,
     todo_gate: bool,
-) -> wimo ai_wimo_agent::ReminderPolicy {
-    let mut policy = wimo ai_wimo_agent::ReminderPolicy::default();
+) -> wimoai_wimo_agent::ReminderPolicy {
+    let mut policy = wimoai_wimo_agent::ReminderPolicy::default();
     if let Some(remote) = remote {
         if let Some(enabled) = remote.todo_gate_enabled {
             policy.todo_gate.enabled = enabled;
@@ -171,10 +171,10 @@ pub(super) const WORKFLOW_OBJECTIVE_REMINDER_CAP: usize = 256;
 fn workflow_completion_detail(detail: &str) -> std::borrow::Cow<'_, str> {
     let normalized = detail.split_whitespace().collect::<Vec<_>>().join(" ");
     if normalized == detail {
-        wimo ai_wimo_tools::util::truncate_str_with_marker(detail, WORKFLOW_RESULT_SUMMARY_REMINDER_CAP)
+        wimoai_wimo_tools::util::truncate_str_with_marker(detail, WORKFLOW_RESULT_SUMMARY_REMINDER_CAP)
     } else {
         std::borrow::Cow::Owned(
-            wimo ai_wimo_tools::util::truncate_str_with_marker(
+            wimoai_wimo_tools::util::truncate_str_with_marker(
                 &normalized,
                 WORKFLOW_RESULT_SUMMARY_REMINDER_CAP,
             )
@@ -199,7 +199,7 @@ impl SessionActor {
         let mut body = format!(
             "The user {verb} background workflow '{display_name}' (run id {run_id}) with the \
              slash command: {}\nThis was handled host-side; no tool call was involved.",
-            wimo ai_wimo_tools::util::truncate_str(&command_line, WORKFLOW_OBJECTIVE_REMINDER_CAP)
+            wimoai_wimo_tools::util::truncate_str(&command_line, WORKFLOW_OBJECTIVE_REMINDER_CAP)
         );
         let objective = objective.split_whitespace().collect::<Vec<_>>().join(" ");
         let objective_redundant = !objective.is_empty()
@@ -207,7 +207,7 @@ impl SessionActor {
         if !objective.is_empty() && !objective_redundant {
             body.push_str(&format!(
                 "\nObjective: {}",
-                wimo ai_wimo_tools::util::truncate_str(&objective, WORKFLOW_OBJECTIVE_REMINDER_CAP)
+                wimoai_wimo_tools::util::truncate_str(&objective, WORKFLOW_OBJECTIVE_REMINDER_CAP)
             ));
         }
         body.push_str(&format!(
@@ -260,7 +260,7 @@ fn format_workflow_status_reminder(
             let _ = write!(
                 buf,
                 "\n  Objective: {}",
-                wimo ai_wimo_tools::util::truncate_str(&objective, WORKFLOW_OBJECTIVE_REMINDER_CAP)
+                wimoai_wimo_tools::util::truncate_str(&objective, WORKFLOW_OBJECTIVE_REMINDER_CAP)
             );
         }
         if let Some(line) = workflow_phase_line(run) {
@@ -295,12 +295,12 @@ fn format_workflow_status_reminder(
                 let _ = write!(
                     buf,
                     "\n  Paused: {}",
-                    wimo ai_wimo_tools::util::truncate_str(msg, WORKFLOW_RESULT_SUMMARY_REMINDER_CAP)
+                    wimoai_wimo_tools::util::truncate_str(msg, WORKFLOW_RESULT_SUMMARY_REMINDER_CAP)
                 );
             }
             let max_budget_exhausted = run.status
                 == crate::session::workflow::tracker::WorkflowRunStatus::BudgetLimited
-                && run.agents_used >= wimo ai_workflow::MAX_AGENT_BUDGET;
+                && run.agents_used >= wimoai_workflow::MAX_AGENT_BUDGET;
             if max_budget_exhausted {
                 let _ = write!(buf, "\n  Not resumable: start a new workflow run.");
             } else {
@@ -408,7 +408,7 @@ fn format_workflow_completion_reminder(
             let _ = write!(
                 buf,
                 "\n  Objective: {}",
-                wimo ai_wimo_tools::util::truncate_str(&objective, WORKFLOW_OBJECTIVE_REMINDER_CAP)
+                wimoai_wimo_tools::util::truncate_str(&objective, WORKFLOW_OBJECTIVE_REMINDER_CAP)
             );
         }
         let _ = write!(
@@ -418,7 +418,7 @@ fn format_workflow_completion_reminder(
         );
         if let Some(summary) = run.result_summary.as_deref() {
             let capped =
-                wimo ai_wimo_tools::util::truncate_str(summary, WORKFLOW_RESULT_SUMMARY_REMINDER_CAP);
+                wimoai_wimo_tools::util::truncate_str(summary, WORKFLOW_RESULT_SUMMARY_REMINDER_CAP);
             buf.push_str("\n  Result:\n");
             for line in capped.lines() {
                 let _ = writeln!(buf, "    {line}");
@@ -437,7 +437,7 @@ fn format_workflow_completion_reminder(
             buf.push('\n');
         }
         if run.status == crate::session::workflow::tracker::WorkflowRunStatus::BudgetLimited {
-            if run.agents_used >= wimo ai_workflow::MAX_AGENT_BUDGET {
+            if run.agents_used >= wimoai_workflow::MAX_AGENT_BUDGET {
                 let _ = writeln!(
                     buf,
                     "  Not resumable: this run reached the maximum agent budget; start a new \
@@ -482,8 +482,8 @@ fn format_workflow_completion_reminder(
 /// TodoGate when enabled and the prompt carries `<task_completion_discipline>` (`{DISCIPLINE_BLOCK}`), but NOT while the goal loop is active.
 /// The continuation directive drives the loop there (see the body).
 pub(super) fn todo_gate_active(
-    policy: &wimo ai_wimo_agent::system_reminder::ReminderPolicy,
-    audience: wimo ai_wimo_agent::prompt::context::PromptAudience,
+    policy: &wimoai_wimo_agent::system_reminder::ReminderPolicy,
+    audience: wimoai_wimo_agent::prompt::context::PromptAudience,
     definition: &AgentDefinition,
     goal_harness_enabled: bool,
     goal_status: Option<crate::session::goal_tracker::GoalStatus>,
@@ -542,11 +542,11 @@ impl SessionActor {
         self.push_system_reminder_with_tag(content, "system-reminder");
     }
     pub(super) fn reminder_wrapper_tag(&self) -> &'static str {
-        wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG
+        wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG
     }
     pub(super) fn wrap_hook_note(
         &self,
-        event: wimo ai_wimo_hooks::event::HookEventName,
+        event: wimoai_wimo_hooks::event::HookEventName,
         kind: HookNoteKind,
         hook_name: &str,
         text: &str,
@@ -572,8 +572,8 @@ impl SessionActor {
         if ids.is_empty() {
             return;
         }
-        use wimo ai_wimo_tools::reminders::task_completion::ReportedTaskCompletions;
-        use wimo ai_wimo_tools::types::resources::State;
+        use wimoai_wimo_tools::reminders::task_completion::ReportedTaskCompletions;
+        use wimoai_wimo_tools::types::resources::State;
         let bridge = self.agent.borrow().tool_bridge().clone();
         let resources = bridge.shared_resources().await;
         let mut res = resources.lock().await;
@@ -611,14 +611,14 @@ impl SessionActor {
                     "draining between-turn bash task completions"
                 );
                 let task_output_name =
-                    wimo ai_wimo_tools::reminders::task_completion::resolve_task_output_tool_name(
+                    wimoai_wimo_tools::reminders::task_completion::resolve_task_output_tool_name(
                         &bridge,
                     )
                     .await;
                 let read_tool_name =
-                    wimo ai_wimo_tools::reminders::task_completion::resolve_read_tool_name(&bridge)
+                    wimoai_wimo_tools::reminders::task_completion::resolve_read_tool_name(&bridge)
                         .await;
-                let reminder = wimo ai_wimo_tools::reminders::task_completion::format_between_turn_bash_completions(
+                let reminder = wimoai_wimo_tools::reminders::task_completion::format_between_turn_bash_completions(
                     &bash_completions,
                     task_output_name.as_deref(),
                     read_tool_name.as_deref(),
@@ -631,7 +631,7 @@ impl SessionActor {
         let Some(tx) = &self.tool_context.subagent_event_tx else {
             return;
         };
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentCompletionsRequest, SubagentEvent,
         };
         let suppress_ids = self
@@ -674,7 +674,7 @@ impl SessionActor {
             "draining between-turn subagent completions"
         );
         let reminder =
-            wimo ai_wimo_tools::reminders::task_completion::format_between_turn_completion_reminder(
+            wimoai_wimo_tools::reminders::task_completion::format_between_turn_completion_reminder(
                 &completions,
                 &bridge,
             )
@@ -704,7 +704,7 @@ impl SessionActor {
         let session_dir = crate::session::persistence::session_dir(&self.session_info);
         let bridge = self.tool_bridge_handle();
         let read_tool_name =
-            wimo ai_wimo_tools::reminders::task_completion::resolve_read_tool_name(&bridge).await;
+            wimoai_wimo_tools::reminders::task_completion::resolve_read_tool_name(&bridge).await;
         if !restored.is_empty() {
             self.push_system_reminder(&format_workflow_completion_reminder(
                 &restored,
@@ -772,7 +772,7 @@ impl SessionActor {
     /// Turn-end TodoGate config, or `None` when [`todo_gate_active`] is false.
     pub(super) fn todo_gate_policy(
         &self,
-    ) -> Option<wimo ai_wimo_agent::system_reminder::TodoGateConfig> {
+    ) -> Option<wimoai_wimo_agent::system_reminder::TodoGateConfig> {
         let goal_status = self.goal_tracker.lock().status();
         let agent = self.agent.borrow();
         let policy = agent.reminder_policy();
@@ -800,7 +800,7 @@ impl SessionActor {
     /// No `RefCell::Ref<Agent>` guard is held across a suspension point.
     pub(super) async fn collect_todo_gate_input(&self, prompt_id: &str) -> CollectedTodoGateInput {
         use crate::tools::todo::{TodoState, TodoStatus};
-        use wimo ai_wimo_tools::types::resources::State;
+        use wimoai_wimo_tools::types::resources::State;
         let bridge = self.tool_bridge_handle();
         let todos: Vec<(String, String, TodoStatus)> = bridge
             .read_resource::<State<TodoState>>()
@@ -822,7 +822,7 @@ impl SessionActor {
             .list_background_tasks()
             .await
             .into_iter()
-            .filter(wimo ai_wimo_tools::computer::types::TaskSnapshot::is_outstanding)
+            .filter(wimoai_wimo_tools::computer::types::TaskSnapshot::is_outstanding)
             .count();
         let backing_task_count = outstanding_live + incomplete_terminal_tasks;
         CollectedTodoGateInput {

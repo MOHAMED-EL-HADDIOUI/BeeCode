@@ -1,5 +1,5 @@
 //! Release / Distribution framework — REAL release targets (Section 36 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub enum PlatformTarget {
     LinuxX86_64,

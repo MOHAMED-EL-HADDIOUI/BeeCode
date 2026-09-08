@@ -1,4 +1,4 @@
-//! Bridges wimo ai-wimo-tools LspBackend trait to LspManager.
+//! Bridges wimoai-wimo-tools LspBackend trait to LspManager.
 //!
 //! `dispatch_on_sockets` is a thin router; each LSP operation has its own helper.
 

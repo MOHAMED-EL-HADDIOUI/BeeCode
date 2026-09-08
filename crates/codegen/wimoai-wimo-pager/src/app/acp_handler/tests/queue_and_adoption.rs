@@ -42,7 +42,7 @@
         let notification =
             |session_id: &str, entries: &[(&str, u64, &str)], running_prompt_id: Option<&str>| {
                 let (tx, _rx) = tokio::sync::oneshot::channel();
-                AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+                AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
                     request: queue_changed_versioned(session_id, entries, running_prompt_id),
                     response_tx: tx,
                 })
@@ -397,9 +397,9 @@
     /// `handle_queue_changed` adopts `current_prompt_id` from `runningPromptId` only when it was `None`, never overriding an already-set one.
     #[test]
     fn queue_changed_adopts_running_prompt_id_only_when_unset() {
-        // Shell and pager share the wimo ai-prompt-queue type
+        // Shell and pager share the wimoai-prompt-queue type
         // Serializing the payload as the shell emits it pins the wire shape the handler consumes, not cross-crate compat
-        let shell_payload = wimo ai_wimo_shell::session::prompt_queue::QueueChanged {
+        let shell_payload = wimoai_wimo_shell::session::prompt_queue::QueueChanged {
             session_id: "sess-1".to_string(),
             entries: Vec::new(),
             running_prompt_id: Some("prompt-running".to_string()),
@@ -616,7 +616,7 @@
         // The load clears loading_replay; the terminal set persists until the next replay window
         app.agents.get_mut(&id).unwrap().session.loading_replay = true;
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-1", "p-run", "end_turn", true),
+            &wimoai_turn_completed_notif("sess-1", "p-run", "end_turn", true),
             &mut app,
         );
         app.agents.get_mut(&id).unwrap().session.loading_replay = false;
@@ -653,7 +653,7 @@
         // A DIFFERENT turn's terminal is recorded in replay.
         app.agents.get_mut(&id).unwrap().session.loading_replay = true;
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-1", "p-old", "end_turn", true),
+            &wimoai_turn_completed_notif("sess-1", "p-old", "end_turn", true),
             &mut app,
         );
         app.agents.get_mut(&id).unwrap().session.loading_replay = false;
@@ -803,7 +803,7 @@
                     .cloned(),
             );
             handle(
-                AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+                AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
                     request,
                     response_tx: tx,
                 }),
@@ -896,7 +896,7 @@
                     .cloned(),
             );
             handle(
-                AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+                AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
                     request,
                     response_tx: tx,
                 }),
@@ -974,7 +974,7 @@
                     .cloned(),
             );
             handle(
-                AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+                AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
                     request,
                     response_tx: tx,
                 }),
@@ -1046,7 +1046,7 @@
             ))),
         )
         .meta(serde_json::json!({ "promptId": "p2" }).as_object().cloned());
-        let msg = AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+        let msg = AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
             request,
             response_tx: tx,
         });
@@ -1130,7 +1130,7 @@
                 .cloned(),
         );
         handle(
-            AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+            AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
                 request,
                 response_tx: tx,
             }),
@@ -1365,7 +1365,7 @@
                 .cloned(),
         );
         let affected = handle(
-            AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+            AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
                 request,
                 response_tx: tx,
             }),
@@ -1426,7 +1426,7 @@
                 .cloned(),
         );
         handle(
-            AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+            AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
                 request,
                 response_tx: tx,
             }),
@@ -1493,10 +1493,10 @@
     /// The entry `kind` survives serialization, and on adoption a `bash` entry drives the bash turn-start shim (`bash_turn = true`, no user block).
     #[test]
     fn bash_kind_round_trips_and_adoption_sets_bash_turn() {
-        // Shell and pager share the wimo ai-prompt-queue type; pin kind through a serde cycle.
-        let shell = wimo ai_wimo_shell::session::prompt_queue::QueueChanged {
+        // Shell and pager share the wimoai-prompt-queue type; pin kind through a serde cycle.
+        let shell = wimoai_wimo_shell::session::prompt_queue::QueueChanged {
             session_id: "sess-1".to_string(),
-            entries: vec![wimo ai_wimo_shell::session::prompt_queue::QueueEntryWire {
+            entries: vec![wimoai_wimo_shell::session::prompt_queue::QueueEntryWire {
                 id: "b1".to_string(),
                 version: 0,
                 owner: None,
@@ -1928,7 +1928,7 @@
                 .cloned(),
         );
         let _ = handle(
-            AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+            AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
                 request,
                 response_tx: tx,
             }),
@@ -1981,7 +1981,7 @@
                 .cloned(),
         );
         let _ = handle(
-            AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+            AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
                 request,
                 response_tx: tx,
             }),
@@ -2002,11 +2002,11 @@
         let mut agent = make_agent(Some("sess-a"));
         agent.last_seen_event_id = Some("sess-a-7".into());
         agent.last_applied_event_seq = Some(7);
-        agent.last_applied_wimo ai_event_seq = Some(8);
+        agent.last_applied_wimoai_event_seq = Some(8);
         agent.deferred_subagent_finishes.insert(
             "child-stale".into(),
             crate::app::agent_view::DeferredSubagentFinish {
-                notification: wimo ai_wimo_shell::extensions::notification::SessionNotification {
+                notification: wimoai_wimo_shell::extensions::notification::SessionNotification {
                     session_id: acp::SessionId::new("sess-a"),
                     update: test_subagent_finished("child-stale"),
                     meta: None,
@@ -2020,7 +2020,7 @@
         assert_eq!(agent.session_binding_epoch, epoch);
         assert_eq!(agent.last_seen_event_id.as_deref(), Some("sess-a-7"));
         assert_eq!(agent.last_applied_event_seq, Some(7));
-        assert_eq!(agent.last_applied_wimo ai_event_seq, Some(8));
+        assert_eq!(agent.last_applied_wimoai_event_seq, Some(8));
         assert_eq!(agent.deferred_subagent_finishes.len(), 1);
 
         agent.bind_session_id(acp::SessionId::new("sess-b"));
@@ -2034,7 +2034,7 @@
             "another session's cursor must not survive a rebind"
         );
         assert!(agent.last_applied_event_seq.is_none());
-        assert!(agent.last_applied_wimo ai_event_seq.is_none());
+        assert!(agent.last_applied_wimoai_event_seq.is_none());
         assert!(
             agent.deferred_subagent_finishes.is_empty(),
             "deferred finishes are meaningless against another session"
@@ -2481,7 +2481,7 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-view-hooks", "pid-v", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-view-hooks", "pid-v", "end_turn", false),
             &mut app,
         );
         assert_eq!(
@@ -2491,7 +2491,7 @@
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif("sess-view-hooks", "stop", false),
+            &wimoai_hook_execution_notif("sess-view-hooks", "stop", false),
             &mut app,
         );
 
@@ -2509,7 +2509,7 @@
 
         // A second, differently-named batch of the same turn (stop_failure and stop on error turns) merges too…
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif("sess-view-hooks", "stop_failure", false),
+            &wimoai_hook_execution_notif("sess-view-hooks", "stop_failure", false),
             &mut app,
         );
         let agent = app.agents.get(&AgentId(0)).unwrap();
@@ -2522,7 +2522,7 @@
 
         // …but a same-name repeat (e.g. the session-end `stop` batch) does not belong to this marker and stays standalone.
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif("sess-view-hooks", "stop", false),
+            &wimoai_hook_execution_notif("sess-view-hooks", "stop", false),
             &mut app,
         );
         let agent = app.agents.get(&AgentId(0)).unwrap();
@@ -2546,7 +2546,7 @@
         app.agents.get_mut(&id).unwrap().session.loading_replay = true;
         // A DIFFERENT turn's terminal arrives in replay.
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-1", "p-old", "end_turn", true),
+            &wimoai_turn_completed_notif("sess-1", "p-old", "end_turn", true),
             &mut app,
         );
 

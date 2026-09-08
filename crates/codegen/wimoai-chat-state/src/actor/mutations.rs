@@ -1,6 +1,6 @@
 //! Mutation handlers for the ChatStateActor.
 
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     ContentPart, ConversationItem, DanglingToolCallReason, dedup_duplicate_tool_results,
     repair_dangling_tool_calls,
 };
@@ -147,9 +147,9 @@ impl ChatStateActor {
     pub(super) fn pop_stranded_continue_reminder(&mut self) {
         if !matches!(
             self.state.conversation.last(),
-            Some(wimo ai_wimo_sampling_types::ConversationItem::User(u))
+            Some(wimoai_wimo_sampling_types::ConversationItem::User(u))
                 if u.synthetic_reason
-                    == Some(wimo ai_wimo_sampling_types::SyntheticReason::LengthContinue)
+                    == Some(wimoai_wimo_sampling_types::SyntheticReason::LengthContinue)
         ) {
             return;
         }
@@ -157,9 +157,9 @@ impl ChatStateActor {
             let mut stranded = 0;
             while matches!(
                 conversation.last(),
-                Some(wimo ai_wimo_sampling_types::ConversationItem::User(u))
+                Some(wimoai_wimo_sampling_types::ConversationItem::User(u))
                     if u.synthetic_reason
-                        == Some(wimo ai_wimo_sampling_types::SyntheticReason::LengthContinue)
+                        == Some(wimoai_wimo_sampling_types::SyntheticReason::LengthContinue)
             ) {
                 conversation.pop();
                 stranded += 1;
@@ -209,7 +209,7 @@ impl ChatStateActor {
     ) -> Option<(usize, tokio::sync::oneshot::Receiver<std::io::Result<()>>)> {
         let (stripped, disk_ack) =
             self.rewrite_history(HistoryRewrite::ImageStrip, |conversation| {
-                let stripped = wimo ai_wimo_sampling_types::strip_images_by_url(conversation, urls);
+                let stripped = wimoai_wimo_sampling_types::strip_images_by_url(conversation, urls);
                 if stripped > 0 {
                     tracing::warn!(
                         stripped,
@@ -314,7 +314,7 @@ impl ChatStateActor {
         // at these pushes: its continuation is still in flight (interjection
         // drains are deferred while one is).
         {
-            use wimo ai_wimo_sampling_types::SyntheticReason as R;
+            use wimoai_wimo_sampling_types::SyntheticReason as R;
             if matches!(
                 &item,
                 ConversationItem::User(u)
@@ -487,7 +487,7 @@ impl ChatStateActor {
                 ConversationItem::ToolResult(tr) => tr.content.len(),
                 ConversationItem::BackendToolCall(b) => b.text_summary().len(),
                 ConversationItem::Reasoning(r) => {
-                    wimo ai_wimo_sampling_types::reasoning_item_text(r).len()
+                    wimoai_wimo_sampling_types::reasoning_item_text(r).len()
                         + r.encrypted_content.as_deref().map(str::len).unwrap_or(0)
                 }
             })
@@ -506,14 +506,14 @@ impl ChatStateActor {
     /// Stash the per-turn `TokenUsage` from the most recent model response.
     /// No event is emitted — this slot is read on demand at `PromptResponse`
     /// construction time, not pushed to subscribers.
-    pub(super) fn record_last_turn_usage(&mut self, usage: wimo ai_wimo_sampling_types::TokenUsage) {
+    pub(super) fn record_last_turn_usage(&mut self, usage: wimoai_wimo_sampling_types::TokenUsage) {
         self.state.last_turn_usage = Some(usage);
     }
 
     pub(super) fn record_model_call_usage(
         &mut self,
         model_id: Option<String>,
-        usage: &wimo ai_wimo_sampling_types::TokenUsage,
+        usage: &wimoai_wimo_sampling_types::TokenUsage,
         api_duration_ms: Option<u64>,
         cost_usd_ticks: Option<i64>,
     ) {

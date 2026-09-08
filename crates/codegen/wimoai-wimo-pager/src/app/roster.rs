@@ -89,8 +89,8 @@ mod tests {
     use super::*;
 
     /// Build a representative agent-side roster entry with every field set to a non-default value so the round-trip exercises name/case mapping.
-    fn agent_entry() -> wimo ai_wimo_shell::agent::roster::RosterEntry {
-        use wimo ai_wimo_shell::agent::roster as agent;
+    fn agent_entry() -> wimoai_wimo_shell::agent::roster::RosterEntry {
+        use wimoai_wimo_shell::agent::roster as agent;
         agent::RosterEntry {
             session_id: "sess-abc".to_string(),
             title: Some("Fix the roster".to_string()),
@@ -113,8 +113,8 @@ mod tests {
     /// The `naive` assertion below pins that trap; `parse_roster_list_response` must unwrap `result` first.
     #[test]
     fn roster_list_response_survives_result_envelope() {
-        use wimo ai_wimo_shell::agent::roster as agent;
-        use wimo ai_wimo_shell::session::ExtMethodResult;
+        use wimoai_wimo_shell::agent::roster as agent;
+        use wimoai_wimo_shell::session::ExtMethodResult;
 
         let agent_resp = agent::RosterListResponse {
             sessions: vec![agent_entry()],
@@ -175,7 +175,7 @@ mod tests {
     /// The pager's `RosterChanged` must recover `upserted`, `removed`, and the nested entry fields (camelCase).
     #[test]
     fn roster_changed_round_trips() {
-        use wimo ai_wimo_shell::agent::roster as agent;
+        use wimoai_wimo_shell::agent::roster as agent;
 
         let agent_changed = agent::RosterChanged {
             upserted: vec![agent_entry()],

@@ -154,9 +154,9 @@ pub async fn bridge_elicit(
 }
 
 pub fn elicit_result_from_wire(
-    response: &wimo ai_wimo_tools::mcp_elicitation::McpElicitExtResponse,
+    response: &wimoai_wimo_tools::mcp_elicitation::McpElicitExtResponse,
 ) -> ElicitResult {
-    use wimo ai_wimo_tools::mcp_elicitation::McpElicitExtResponse;
+    use wimoai_wimo_tools::mcp_elicitation::McpElicitExtResponse;
     match response {
         McpElicitExtResponse::Accept { content } => accept_result(content.clone()),
         McpElicitExtResponse::Decline => decline_result(),
@@ -167,15 +167,15 @@ pub fn elicit_result_from_wire(
 /// The message and mode-tagged fields of a supported, size-validated elicitation request.
 /// This is exactly what [`McpElicitExtRequest`] still needs on top of the session/tool-call identifiers the shell adds.
 ///
-/// [`McpElicitExtRequest`]: wimo ai_wimo_tools::mcp_elicitation::McpElicitExtRequest
+/// [`McpElicitExtRequest`]: wimoai_wimo_tools::mcp_elicitation::McpElicitExtRequest
 #[derive(Debug, Clone)]
 pub struct WireElicitFields {
     pub message: String,
-    pub mode: wimo ai_wimo_tools::mcp_elicitation::McpElicitModeFields,
+    pub mode: wimoai_wimo_tools::mcp_elicitation::McpElicitModeFields,
 }
 
 pub fn wire_mode_and_fields(params: &ElicitRequestParams) -> Option<WireElicitFields> {
-    use wimo ai_wimo_tools::mcp_elicitation::{
+    use wimoai_wimo_tools::mcp_elicitation::{
         MAX_ELICIT_ID_CHARS, MAX_ELICIT_MESSAGE_CHARS, MAX_ELICIT_SCHEMA_BYTES,
         MAX_ELICIT_URL_CHARS, McpElicitModeFields, chars_within,
     };
@@ -410,7 +410,7 @@ mod tests {
 
     #[test]
     fn wire_mapping_form_and_url() {
-        use wimo ai_wimo_tools::mcp_elicitation::McpElicitModeFields;
+        use wimoai_wimo_tools::mcp_elicitation::McpElicitModeFields;
         let schema = ElicitationSchema::builder()
             .required_property("x", PrimitiveSchemaDefinition::String(StringSchema::new()))
             .build()
@@ -450,7 +450,7 @@ mod tests {
 
     #[test]
     fn oversized_message_is_declined() {
-        use wimo ai_wimo_tools::mcp_elicitation::MAX_ELICIT_MESSAGE_CHARS;
+        use wimoai_wimo_tools::mcp_elicitation::MAX_ELICIT_MESSAGE_CHARS;
         let schema = ElicitationSchema::builder()
             .required_property("x", PrimitiveSchemaDefinition::String(StringSchema::new()))
             .build()

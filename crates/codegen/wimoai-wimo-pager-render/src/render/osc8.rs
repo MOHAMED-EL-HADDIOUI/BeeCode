@@ -2,7 +2,7 @@
 //!
 //! [`scan_lines_for_url_overlays`] detects plain-text URLs and absolute file paths across all block types and collects them into a [`LinkOverlay`].
 //! The collected links reach the terminal as `LinkSpan`s.
-//! The frame diff (`wimo ai_ratatui_inline::Terminal::flush_with_links`) emits them as OSC 8 hyperlinks.
+//! The frame diff (`wimoai_ratatui_inline::Terminal::flush_with_links`) emits them as OSC 8 hyperlinks.
 
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
@@ -392,9 +392,9 @@ fn relative_link_target(
     }
     // Not generated media: resolve against the session cwd, refusing any `..` that would escape it
     let cwd = cwd?;
-    let joined = wimo ai_wimo_paths::normalize_lexically(&cwd.join(path));
+    let joined = wimoai_wimo_paths::normalize_lexically(&cwd.join(path));
     joined
-        .starts_with(wimo ai_wimo_paths::normalize_lexically(cwd))
+        .starts_with(wimoai_wimo_paths::normalize_lexically(cwd))
         .then_some(joined)
 }
 
@@ -1406,7 +1406,7 @@ mod tests {
         // Previously each row was scanned in isolation, so only the `/Users/alice` fragment on the first row matched and became clickable
         let row0 =
             make_line("Image generated and saved to /Users/alice/.wimo/sessions/%2FUsers%2Fali");
-        let row1 = make_line("ce%2Fcode%2Fwimo ai/00000000-0000-0000-0000-000000000001/images/1.jpg");
+        let row1 = make_line("ce%2Fcode%2Fwimoai/00000000-0000-0000-0000-000000000001/images/1.jpg");
         let rows: Vec<(u16, &Line<'static>, Option<&str>)> =
             vec![(3, &row0, None), (4, &row1, Some(""))];
         let mut overlay = LinkOverlay::new();
@@ -1414,7 +1414,7 @@ mod tests {
 
         assert_eq!(overlay.links().len(), 2, "one overlay region per row");
         let expected_url = "file:///Users/alice/.wimo/sessions/%252FUsers%252Fali\
-                            ce%252Fcode%252Fwimo ai/00000000-0000-0000-0000-000000000001/images/1.jpg";
+                            ce%252Fcode%252Fwimoai/00000000-0000-0000-0000-000000000001/images/1.jpg";
         for link in overlay.links() {
             assert_eq!(
                 &*resolve_link_target(&link.target)
@@ -1441,7 +1441,7 @@ mod tests {
         assert_eq!(
             l1.col_end,
             2 + UnicodeWidthStr::width(
-                "ce%2Fcode%2Fwimo ai/00000000-0000-0000-0000-000000000001/images/1.jpg"
+                "ce%2Fcode%2Fwimoai/00000000-0000-0000-0000-000000000001/images/1.jpg"
             ) as u16
         );
     }
@@ -1897,8 +1897,8 @@ mod tests {
 
     #[test]
     fn scan_relative_path_not_partially_linkified() {
-        // A relative path like `crates/codegen/wimo ai-wimo-pager/src/render` should NOT produce a link for the `/wimo ai-wimo-pager/src/render` substring
-        let line = make_line("find crates/codegen/wimo ai-wimo-pager/src/render -name '*.rs'");
+        // A relative path like `crates/codegen/wimoai-wimo-pager/src/render` should NOT produce a link for the `/wimoai-wimo-pager/src/render` substring
+        let line = make_line("find crates/codegen/wimoai-wimo-pager/src/render -name '*.rs'");
         let mut overlay = LinkOverlay::new();
         scan_unjoined(std::iter::once((0, &line)), 0, &[], &mut overlay);
 

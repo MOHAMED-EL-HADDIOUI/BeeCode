@@ -11,7 +11,7 @@ use std::time::Duration;
 
 use agent_client_protocol::{self as acp, Agent as _};
 use tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
-use wimo ai_acp_lib::LineBufferedRead;
+use wimoai_acp_lib::LineBufferedRead;
 
 use crate::env::wimo_binary;
 use crate::mock_server::MockInferenceServer;
@@ -247,15 +247,15 @@ impl LeaderFixture {
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null());
         sandbox.apply_to_std_command(&mut cmd);
-        cmd.envs(wimo ai_tty_utils::pager_env())
+        cmd.envs(wimoai_tty_utils::pager_env())
             .env("wimo_CLI_CHAT_PROXY_BASE_URL", base_url)
-            .env("wimo_wimo ai_API_BASE_URL", base_url)
+            .env("wimo_wimoai_API_BASE_URL", base_url)
             .env("wimo_MODELS_BASE_URL", base_url)
             .env("wimo_FEEDBACK_BASE_URL", base_url)
             .env("wimo_TRACE_UPLOAD_URL", base_url)
-            .env("wimo ai_API_KEY", "test-key-for-ci")
+            .env("wimoai_API_KEY", "test-key-for-ci")
             .env("wimo_LEADER_SOCKET", &socket)
-            .env("RUST_LOG", "wimo ai_wimo_shell=debug");
+            .env("RUST_LOG", "wimoai_wimo_shell=debug");
         let log_path = sandbox.wimo_home().join("leader.log");
         match std::fs::File::create(&log_path) {
             Ok(log) => {
@@ -265,7 +265,7 @@ impl LeaderFixture {
                 cmd.stderr(std::process::Stdio::null());
             }
         }
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         #[allow(clippy::disallowed_methods)]
         let mut child = cmd.spawn()?;
         let pid = child.id();
@@ -632,13 +632,13 @@ impl LeaderStdioClient {
                 .stdin(TestStdin::Piped)
                 .stdout(TestOutput::Piped)
                 .env("wimo_CLI_CHAT_PROXY_BASE_URL", base_url)
-                .env("wimo_wimo ai_API_BASE_URL", base_url)
+                .env("wimo_wimoai_API_BASE_URL", base_url)
                 .env("wimo_MODELS_BASE_URL", base_url)
                 .env("wimo_FEEDBACK_BASE_URL", base_url)
                 .env("wimo_TRACE_UPLOAD_URL", base_url)
-                .env("wimo ai_API_KEY", "test-key-for-ci")
+                .env("wimoai_API_KEY", "test-key-for-ci")
                 .env("wimo_LEADER_SOCKET", leader_socket)
-                .env("RUST_LOG", "wimo ai_wimo_shell=debug"),
+                .env("RUST_LOG", "wimoai_wimo_shell=debug"),
         )
         .map_err(|error| {
             io::Error::new(
@@ -752,8 +752,8 @@ impl LeaderStdioClient {
         let api_key_method = init
             .auth_methods
             .iter()
-            .find(|method| &*method.id().0 == "wimo ai.api_key")
-            .expect("wimo ai.api_key auth method");
+            .find(|method| &*method.id().0 == "wimoai.api_key")
+            .expect("wimoai.api_key auth method");
         self.conn
             .authenticate(
                 acp::AuthenticateRequest::new(api_key_method.id().clone())
@@ -892,8 +892,8 @@ mod tests {
             .stdin(std::process::Stdio::null())
             .stdout(std::process::Stdio::null())
             .stderr(std::process::Stdio::null())
-            .envs(wimo ai_tty_utils::pager_env());
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+            .envs(wimoai_tty_utils::pager_env());
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         #[allow(clippy::disallowed_methods)] // test fixture; the test reaps it
         let child = cmd.spawn().expect("spawn fake persistent leader");
         let pid = child.id();

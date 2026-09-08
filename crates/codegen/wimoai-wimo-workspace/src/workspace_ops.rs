@@ -23,21 +23,21 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use wimo ai_computer_hub_sdk::ToolHarness;
-use wimo ai_wimo_tools::types::output::ToolRunResult;
-use wimo ai_wimo_workspace_client::{WorkspaceClient, is_transport_fatal};
-pub use wimo ai_wimo_workspace_types::rpc::agents_md::DiscoverAgentsMdReq;
-pub use wimo ai_wimo_workspace_types::rpc::code_nav::{
+use wimoai_computer_hub_sdk::ToolHarness;
+use wimoai_wimo_tools::types::output::ToolRunResult;
+use wimoai_wimo_workspace_client::{WorkspaceClient, is_transport_fatal};
+pub use wimoai_wimo_workspace_types::rpc::agents_md::DiscoverAgentsMdReq;
+pub use wimoai_wimo_workspace_types::rpc::code_nav::{
     CodeFindDefinitionsReq, CodeFindReferencesReq, CodeGotoDefinitionReq, CodeGotoReferencesReq,
     CodeIndexStats, CodeIndexStatusReq, CodeIndexStatusResponse, CodeNavLocation, CodeNavResponse,
 };
-pub use wimo ai_wimo_workspace_types::rpc::export_github::ExportGithubReq;
-pub use wimo ai_wimo_workspace_types::rpc::fs::{
+pub use wimoai_wimo_workspace_types::rpc::export_github::ExportGithubReq;
+pub use wimoai_wimo_workspace_types::rpc::fs::{
     ClientFsListNode, ClientFsListReq, ClientFsListRes, ClientFsReadFileReq, ClientFsReadFileRes,
     ClientFsStatReq, ClientFsStatRes, GetFileEntry, GetFileResult, GetFilesReq, GetFilesRes,
     PutFileEntry, PutFileResult, PutFilesReq, PutFilesRes,
 };
-pub use wimo ai_wimo_workspace_types::rpc::git::{
+pub use wimoai_wimo_workspace_types::rpc::git::{
     BinaryFileInfoData, CheckoutCommitResponse, CommitWithPatchData, DetectVcsKindReq,
     DiffStatsSummary, GitBranchesReq, GitCheckoutCommitReq, GitCheckoutReq, GitCollectChangesReq,
     GitCollectChangesResponse, GitCommitReq, GitCurrentCommitReq, GitDiffReq, GitDiscardReq,
@@ -46,10 +46,10 @@ pub use wimo ai_wimo_workspace_types::rpc::git::{
     GitStatusFormat, GitStatusReq, GitSyncBaseReq, GitUnstageReq, IdentityData, PublicBaseData,
     RepoInfo, UNTRACKED_CONTENT_THRESHOLD, UncommittedChangesData, UntrackedFileData,
 };
-pub use wimo ai_wimo_workspace_types::rpc::hooks::{
+pub use wimoai_wimo_workspace_types::rpc::hooks::{
     HookEventNameWire, HookRegistryReq, HookRegistryWire, HookSpecWire,
 };
-pub use wimo ai_wimo_workspace_types::rpc::hunks::{
+pub use wimoai_wimo_workspace_types::rpc::hunks::{
     BulkHunkActionResponse, FileContentEntryWire, FileContentStatusWire, FileContentViewWire,
     FileSummary, FilteredHunksResponse, HunkActionKind, HunkActionReq, HunkActionResponse,
     HunkAllActionReq, HunkFileActionReq, HunkGetAllFileContentsReq, HunkGetAllHunksReq,
@@ -57,20 +57,20 @@ pub use wimo ai_wimo_workspace_types::rpc::hunks::{
     HunkGetStagedFilesReq, HunkLineInfoWire, HunkSingleActionReq, HunkSourceWire,
     HunkTurnActionReq, HunkWire, SessionStatsWire, SessionSummaryWire, TurnSummaryWire,
 };
-pub use wimo ai_wimo_workspace_types::rpc::repos::{
+pub use wimoai_wimo_workspace_types::rpc::repos::{
     ProvisionedRepo, RepoManifest, ReposListReq, ReposListResponse,
 };
-pub use wimo ai_wimo_workspace_types::rpc::search::{FuzzyChangeReq, FuzzyCloseReq, FuzzyOpenReq};
-pub use wimo ai_wimo_workspace_types::rpc::session::{BeginPromptReq, EndPromptReq, RewindToReq};
-pub use wimo ai_wimo_workspace_types::rpc::skills::DiscoverSkillsReq;
-pub use wimo ai_wimo_workspace_types::rpc::workspace::WorkspaceInfoReq;
-pub use wimo ai_wimo_workspace_types::rpc::worktree::{
+pub use wimoai_wimo_workspace_types::rpc::search::{FuzzyChangeReq, FuzzyCloseReq, FuzzyOpenReq};
+pub use wimoai_wimo_workspace_types::rpc::session::{BeginPromptReq, EndPromptReq, RewindToReq};
+pub use wimoai_wimo_workspace_types::rpc::skills::DiscoverSkillsReq;
+pub use wimoai_wimo_workspace_types::rpc::workspace::WorkspaceInfoReq;
+pub use wimoai_wimo_workspace_types::rpc::worktree::{
     CreateWorktreeFromWorktreeRequestWire, CreateWorktreeFromWorktreeSyncReq,
     PrepareWorktreeFromWorktreeResponse, WorktreeCleanArtifactsReq, WorktreeDbPathReq,
     WorktreeDbPathResponse, WorktreeDbRebuildReq, WorktreeDbStatsReq, WorktreeDetachReq,
     WorktreeGcReq, WorktreeListReq, WorktreeSalvageReq, WorktreeShowReq,
 };
-pub use wimo ai_wimo_workspace_types::rpc::{RpcActivityClass, WorkspaceRpc};
+pub use wimoai_wimo_workspace_types::rpc::{RpcActivityClass, WorkspaceRpc};
 /// Implements [`WorkspaceRpc`] for request types whose responses reference crate-internal types and so cannot live in the types crate.
 /// The activity class is a required argument for the same reason the trait const has no default: every method's author must decide.
 macro_rules! workspace_rpc {
@@ -97,7 +97,7 @@ pub trait WorkspaceOp: WorkspaceRpc + DeserializeOwned + Send + Sync {
 /// Prepare a worktree fork from an existing worktree (validation + path resolution).
 /// Returns a serialized result with `spawn_task` flag and the response.
 fn hub_transfer_client() -> WorkspaceResult<reqwest::Client> {
-    wimo ai_wimo_extra_ca::build_reqwest_client(|builder| {
+    wimoai_wimo_extra_ca::build_reqwest_client(|builder| {
         builder.timeout(std::time::Duration::from_secs(600))
     })
     .map_err(|e| WorkspaceError::HubError(format!("failed to create HTTP client: {e}")))
@@ -146,7 +146,7 @@ impl WorkspaceRpc for GetRewindPointsReq {
     const ACTIVITY: RpcActivityClass = RpcActivityClass::Read;
     type Response = Vec<crate::session::file_state::RewindPoint>;
 }
-fn hunk_line_info_to_wire(info: &wimo ai_hunk_tracker::types::HunkLineInfo) -> HunkLineInfoWire {
+fn hunk_line_info_to_wire(info: &wimoai_hunk_tracker::types::HunkLineInfo) -> HunkLineInfoWire {
     HunkLineInfoWire {
         old_start: info.old_start,
         old_count: info.old_count,
@@ -154,15 +154,15 @@ fn hunk_line_info_to_wire(info: &wimo ai_hunk_tracker::types::HunkLineInfo) -> H
         new_count: info.new_count,
     }
 }
-fn hunk_source_to_wire(source: wimo ai_hunk_tracker::types::HunkSource) -> HunkSourceWire {
-    use wimo ai_hunk_tracker::types::HunkSource as S;
+fn hunk_source_to_wire(source: wimoai_hunk_tracker::types::HunkSource) -> HunkSourceWire {
+    use wimoai_hunk_tracker::types::HunkSource as S;
     match source {
         S::AgentEdit { prompt_index } => HunkSourceWire::AgentEdit { prompt_index },
         S::ExternalEditOnAgentFile => HunkSourceWire::ExternalEditOnAgentFile,
         S::External => HunkSourceWire::External,
     }
 }
-fn hunk_to_wire(hunk: &wimo ai_hunk_tracker::types::Hunk) -> HunkWire {
+fn hunk_to_wire(hunk: &wimoai_hunk_tracker::types::Hunk) -> HunkWire {
     HunkWire {
         id: hunk.id.as_str().to_owned(),
         path: hunk.path.clone(),
@@ -175,9 +175,9 @@ fn hunk_to_wire(hunk: &wimo ai_hunk_tracker::types::Hunk) -> HunkWire {
     }
 }
 fn file_content_status_to_wire(
-    status: wimo ai_hunk_tracker::types::FileContentStatus,
+    status: wimoai_hunk_tracker::types::FileContentStatus,
 ) -> FileContentStatusWire {
-    use wimo ai_hunk_tracker::types::FileContentStatus as S;
+    use wimoai_hunk_tracker::types::FileContentStatus as S;
     match status {
         S::Missing => FileContentStatusWire::Missing,
         S::Binary => FileContentStatusWire::Binary,
@@ -188,7 +188,7 @@ fn file_content_status_to_wire(
     }
 }
 fn file_content_view_to_wire(
-    view: wimo ai_hunk_tracker::types::FileContentView,
+    view: wimoai_hunk_tracker::types::FileContentView,
 ) -> FileContentViewWire {
     FileContentViewWire {
         status: file_content_status_to_wire(view.status),
@@ -196,7 +196,7 @@ fn file_content_view_to_wire(
         content: view.content,
     }
 }
-fn file_content_entry_to_wire(entry: wimo ai_hunk_tracker::FileContentEntry) -> FileContentEntryWire {
+fn file_content_entry_to_wire(entry: wimoai_hunk_tracker::FileContentEntry) -> FileContentEntryWire {
     FileContentEntryWire {
         path: entry.path,
         baseline: file_content_view_to_wire(entry.baseline),
@@ -205,7 +205,7 @@ fn file_content_entry_to_wire(entry: wimo ai_hunk_tracker::FileContentEntry) -> 
         staged: entry.staged,
     }
 }
-fn session_stats_to_wire(stats: &wimo ai_hunk_tracker::types::SessionStats) -> SessionStatsWire {
+fn session_stats_to_wire(stats: &wimoai_hunk_tracker::types::SessionStats) -> SessionStatsWire {
     SessionStatsWire {
         accepted_hunks: stats.accepted_hunks,
         rejected_hunks: stats.rejected_hunks,
@@ -215,7 +215,7 @@ fn session_stats_to_wire(stats: &wimo ai_hunk_tracker::types::SessionStats) -> S
         rejected_lines_removed: stats.rejected_lines_removed,
     }
 }
-fn turn_summary_to_wire(turn: wimo ai_hunk_tracker::types::TurnSummary) -> TurnSummaryWire {
+fn turn_summary_to_wire(turn: wimoai_hunk_tracker::types::TurnSummary) -> TurnSummaryWire {
     TurnSummaryWire {
         prompt_index: turn.prompt_index,
         files: turn.files,
@@ -224,7 +224,7 @@ fn turn_summary_to_wire(turn: wimo ai_hunk_tracker::types::TurnSummary) -> TurnS
         lines_removed: turn.lines_removed,
     }
 }
-fn session_summary_to_wire(summary: wimo ai_hunk_tracker::SessionSummary) -> SessionSummaryWire {
+fn session_summary_to_wire(summary: wimoai_hunk_tracker::SessionSummary) -> SessionSummaryWire {
     SessionSummaryWire {
         stats: session_stats_to_wire(&summary.stats),
         turns: summary
@@ -240,17 +240,17 @@ fn session_summary_to_wire(summary: wimo ai_hunk_tracker::SessionSummary) -> Ses
         unattributed_pending: summary.unattributed_pending,
     }
 }
-fn tracker_action(kind: HunkActionKind) -> wimo ai_hunk_tracker::types::HunkAction {
+fn tracker_action(kind: HunkActionKind) -> wimoai_hunk_tracker::types::HunkAction {
     match kind {
-        HunkActionKind::Accept => wimo ai_hunk_tracker::types::HunkAction::Accept,
-        HunkActionKind::Reject => wimo ai_hunk_tracker::types::HunkAction::Reject,
+        HunkActionKind::Accept => wimoai_hunk_tracker::types::HunkAction::Accept,
+        HunkActionKind::Reject => wimoai_hunk_tracker::types::HunkAction::Reject,
     }
 }
 /// Access the per-session hunk tracker; the op must carry a session.
 fn session_tracker(
     ws: &WorkspaceHandle,
     session_id: Option<&str>,
-) -> WorkspaceResult<wimo ai_hunk_tracker::HunkTrackerHandle> {
+) -> WorkspaceResult<wimoai_hunk_tracker::HunkTrackerHandle> {
     let sid = session_id
         .ok_or_else(|| WorkspaceError::HubError("per-session hunk op requires a session".into()))?;
     let session = ws
@@ -267,15 +267,15 @@ const REPOS_MANIFEST_MAX_ANCESTOR_HOPS: usize = 16;
 /// Does not escape the sandbox workspace or load `~/.wimo/repos.json` /
 /// `$wimo_HOME/repos.json` (user-global, not a provisioned workspace).
 fn repos_manifest_search_dirs(start: &std::path::Path) -> Vec<std::path::PathBuf> {
-    let rel = wimo ai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH;
-    let home = wimo ai_dirs::home_dir();
+    let rel = wimoai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH;
+    let home = wimoai_dirs::home_dir();
     let mut global_manifests = Vec::with_capacity(2);
     if let Some(v) = std::env::var_os("wimo_HOME")
         && !v.is_empty()
     {
         global_manifests.push(std::path::PathBuf::from(v).join("repos.json"));
     }
-    if let Some(user_home) = wimo ai_wimo_config::user_wimo_home() {
+    if let Some(user_home) = wimoai_wimo_config::user_wimo_home() {
         global_manifests.push(user_home.join("repos.json"));
     }
     let mut out = Vec::new();
@@ -306,7 +306,7 @@ impl WorkspaceOp for ReposListReq {
         ws: &WorkspaceHandle,
         _session_id: Option<&str>,
     ) -> WorkspaceResult<Self::Response> {
-        let rel = wimo ai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH;
+        let rel = wimoai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH;
         let start = ws.root_cwd()?;
         let mut manifest = RepoManifest::new(Vec::new());
         for d in repos_manifest_search_dirs(&start) {
@@ -357,7 +357,7 @@ pub(crate) async fn materialized_git_roots(
     Ok(manifest.materialized_mounts(&root))
 }
 async fn load_repos_manifest(root: &std::path::Path) -> WorkspaceResult<RepoManifest> {
-    let path = root.join(wimo ai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH);
+    let path = root.join(wimoai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH);
     match tokio::fs::read(&path).await {
         Ok(bytes) => RepoManifest::from_json_bytes(&bytes)
             .map_err(|e| WorkspaceError::HubError(e.to_string())),
@@ -746,7 +746,7 @@ impl WorkspaceOp for HunkSingleActionReq {
         ws: &WorkspaceHandle,
         session_id: Option<&str>,
     ) -> WorkspaceResult<Self::Response> {
-        let hunk_id = wimo ai_hunk_tracker::types::HunkId::from_string(self.action.hunk_id.clone());
+        let hunk_id = wimoai_hunk_tracker::types::HunkId::from_string(self.action.hunk_id.clone());
         let hunk_action = tracker_action(self.action.action);
         session_tracker(ws, session_id)?
             .hunk_action(hunk_id, hunk_action)
@@ -905,7 +905,7 @@ impl WorkspaceOp for HunkGetFileSummariesReq {
             let path_str = h.path.to_string_lossy().to_string();
             let is_agent = matches!(
                 h.source,
-                wimo ai_hunk_tracker::types::HunkSource::AgentEdit { .. }
+                wimoai_hunk_tracker::types::HunkSource::AgentEdit { .. }
             );
             let entry = file_map.entry(path_str).or_insert((0, false));
             entry.0 += 1;
@@ -996,7 +996,7 @@ impl WorkspaceOp for ContentSearchRequest {
 }
 /// The `hooks` map is private, so a serde round-trip stands in for field-by-field construction.
 fn hook_registry_to_wire(
-    registry: &wimo ai_wimo_hooks::discovery::HookRegistry,
+    registry: &wimoai_wimo_hooks::discovery::HookRegistry,
 ) -> WorkspaceResult<HookRegistryWire> {
     let value =
         serde_json::to_value(registry).map_err(|e| WorkspaceError::HubError(e.to_string()))?;
@@ -1006,7 +1006,7 @@ fn hook_registry_to_wire(
 /// Unknown event keys (a newer peer) are dropped so one can't fail the whole decode, and matchers are recompiled fail-closed after decoding.
 fn wire_to_hook_registry(
     wire: &HookRegistryWire,
-) -> WorkspaceResult<wimo ai_wimo_hooks::discovery::HookRegistry> {
+) -> WorkspaceResult<wimoai_wimo_hooks::discovery::HookRegistry> {
     let dropped: Vec<&str> = wire
         .hooks
         .keys()
@@ -1032,7 +1032,7 @@ fn wire_to_hook_registry(
     };
     let value =
         serde_json::to_value(&known).map_err(|e| WorkspaceError::HubError(e.to_string()))?;
-    let mut registry: wimo ai_wimo_hooks::discovery::HookRegistry =
+    let mut registry: wimoai_wimo_hooks::discovery::HookRegistry =
         serde_json::from_value(value).map_err(|e| WorkspaceError::HubError(e.to_string()))?;
     registry.recompile_matchers();
     Ok(registry)
@@ -1113,7 +1113,7 @@ fn resolve_index_for_workspace(
     ws: &WorkspaceHandle,
     root: Option<&std::path::Path>,
 ) -> WorkspaceResult<(
-    std::sync::Arc<wimo ai_codebase_graph::IndexManagerHandle>,
+    std::sync::Arc<wimoai_codebase_graph::IndexManagerHandle>,
     std::path::PathBuf,
 )> {
     let index_root = index_root_for(ws, root)?;
@@ -1125,7 +1125,7 @@ fn resolve_index_for_file(
     root: Option<&std::path::Path>,
     file: &str,
 ) -> WorkspaceResult<(
-    std::sync::Arc<wimo ai_codebase_graph::IndexManagerHandle>,
+    std::sync::Arc<wimoai_codebase_graph::IndexManagerHandle>,
     std::path::PathBuf,
 )> {
     if root.is_none() {
@@ -1239,7 +1239,7 @@ impl WorkspaceOp for CodeIndexStatusReq {
     }
 }
 fn query_result_to_response(
-    result: Result<wimo ai_codebase_graph::QueryResult, wimo ai_codebase_graph::QueryError>,
+    result: Result<wimoai_codebase_graph::QueryResult, wimoai_codebase_graph::QueryError>,
 ) -> CodeNavResponse {
     match result {
         Ok(qr) => CodeNavResponse {
@@ -1257,7 +1257,7 @@ fn query_result_to_response(
     }
 }
 fn symbol_locations_to_response(
-    locations: Vec<wimo ai_codebase_graph::SymbolLocation>,
+    locations: Vec<wimoai_codebase_graph::SymbolLocation>,
 ) -> CodeNavResponse {
     CodeNavResponse {
         locations: locations
@@ -1422,7 +1422,7 @@ impl WorkspaceOp for WorktreeDbStatsReq {
 ///
 /// - **`Local`** wraps a [`WorkspaceHandle`].
 ///   Extensions dispatch through the handle.
-///   Tool calls dispatch through the workspace session's [`FinalizedToolset`](wimo ai_wimo_tools::registry::types::FinalizedToolset).
+///   Tool calls dispatch through the workspace session's [`FinalizedToolset`](wimoai_wimo_tools::registry::types::FinalizedToolset).
 ///   Call [`bind_local_session`](Self::bind_local_session) after building the agent to install the toolset on the workspace session.
 ///
 /// - **`Proxy`** wraps a [`WorkspaceClient`] connected to a remote hub.
@@ -1486,9 +1486,9 @@ impl WorkspaceOps {
         &self,
         session_id: &str,
         cwd: std::path::PathBuf,
-        hunk_tracker: wimo ai_hunk_tracker::HunkTrackerHandle,
-        toolset: Arc<wimo ai_wimo_tools::registry::types::FinalizedToolset>,
-        viewer_ctx: Option<wimo ai_tool_runtime::WorkspaceViewerContext>,
+        hunk_tracker: wimoai_hunk_tracker::HunkTrackerHandle,
+        toolset: Arc<wimoai_wimo_tools::registry::types::FinalizedToolset>,
+        viewer_ctx: Option<wimoai_tool_runtime::WorkspaceViewerContext>,
     ) -> WorkspaceResult<()> {
         let Self::Local { handle } = self else {
             return Ok(());
@@ -1523,7 +1523,7 @@ impl WorkspaceOps {
     pub async fn on_before_turn(
         &self,
         session_id: &str,
-        payload: &wimo ai_tool_protocol::turn_hook::BeforeTurnPayload,
+        payload: &wimoai_tool_protocol::turn_hook::BeforeTurnPayload,
     ) {
         match self {
             Self::Local { handle } => {
@@ -1537,7 +1537,7 @@ impl WorkspaceOps {
     pub async fn on_after_turn(
         &self,
         session_id: &str,
-        payload: &wimo ai_tool_protocol::turn_hook::AfterTurnPayload,
+        payload: &wimoai_tool_protocol::turn_hook::AfterTurnPayload,
     ) {
         match self {
             Self::Local { handle } => {
@@ -1600,7 +1600,7 @@ impl WorkspaceOps {
     /// It is `None` before the first bind or against servers predating the field.
     pub fn server_version(&self) -> Option<String> {
         match self {
-            Self::Local { .. } => Some(wimo ai_wimo_version::VERSION.to_owned()),
+            Self::Local { .. } => Some(wimoai_wimo_version::VERSION.to_owned()),
             Self::Proxy { client } => client.server_binary_version(),
         }
     }
@@ -1622,7 +1622,7 @@ impl WorkspaceOps {
     pub async fn repos_list(&self) -> WorkspaceResult<ReposListResponse> {
         self.dispatch(&ReposListReq {}, None).await
     }
-    pub async fn hook_registry(&self) -> WorkspaceResult<wimo ai_wimo_hooks::discovery::HookRegistry> {
+    pub async fn hook_registry(&self) -> WorkspaceResult<wimoai_wimo_hooks::discovery::HookRegistry> {
         let wire = self.dispatch(&HookRegistryReq {}, None).await?;
         wire_to_hook_registry(&wire)
     }
@@ -1668,7 +1668,7 @@ impl WorkspaceOps {
     }
     /// Dispatch a tool call through the workspace.
     ///
-    /// - **Local**: dispatches through the workspace session's [`FinalizedToolset`](wimo ai_wimo_tools::registry::types::FinalizedToolset) (in-process).
+    /// - **Local**: dispatches through the workspace session's [`FinalizedToolset`](wimoai_wimo_tools::registry::types::FinalizedToolset) (in-process).
     ///   Requires `session_id` to look up the session.
     /// - **Proxy**: routes through the server `ToolHarness` (remote).
     pub async fn call_tool(
@@ -1677,17 +1677,17 @@ impl WorkspaceOps {
         args: Value,
         call_id: &str,
         session_id: Option<&str>,
-    ) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ToolRunResult, wimoai_tool_runtime::ToolError> {
         match self {
             Self::Local { handle } => {
                 let session_id = session_id.ok_or_else(|| {
-                    wimo ai_tool_runtime::ToolError::custom(
+                    wimoai_tool_runtime::ToolError::custom(
                         "missing_session",
                         "session_id required for local tool dispatch",
                     )
                 })?;
                 let session = handle.session(session_id).ok_or_else(|| {
-                    wimo ai_tool_runtime::ToolError::custom(
+                    wimoai_tool_runtime::ToolError::custom(
                         "session_not_found",
                         format!(
                             "workspace session not found: {session_id} \
@@ -1699,20 +1699,20 @@ impl WorkspaceOps {
             }
             Self::Proxy { client } => {
                 if !client.is_connected() {
-                    return Err(wimo ai_tool_runtime::ToolError::network_error(
+                    return Err(wimoai_tool_runtime::ToolError::network_error(
                         "The workspace server connection was lost. \
                          Please restart your session to reconnect.",
                     ));
                 }
-                let tool_id = wimo ai_tool_protocol::ToolId::new(name).map_err(|e| {
-                    wimo ai_tool_runtime::ToolError::custom(
+                let tool_id = wimoai_tool_protocol::ToolId::new(name).map_err(|e| {
+                    wimoai_tool_runtime::ToolError::custom(
                         "hub_proxy_error",
                         format!("invalid tool name: {e}"),
                     )
                 })?;
-                let mut ctx = wimo ai_tool_runtime::ToolCallContext::default();
+                let mut ctx = wimoai_tool_runtime::ToolCallContext::default();
                 ctx.call_id =
-                    wimo ai_tool_protocol::ToolCallId::new(call_id.to_owned()).unwrap_or(ctx.call_id);
+                    wimoai_tool_protocol::ToolCallId::new(call_id.to_owned()).unwrap_or(ctx.call_id);
                 let mut stream = client.harness().call(tool_id, args, ctx).await;
                 let typed = crate::hub_channel::consume_stream_terminal(&mut stream)
                     .await
@@ -1722,7 +1722,7 @@ impl WorkspaceOps {
                         }
                     })?;
                 serde_json::from_value::<ToolRunResult>(typed.value).map_err(|e| {
-                    wimo ai_tool_runtime::ToolError::custom(
+                    wimoai_tool_runtime::ToolError::custom(
                         "tool_result_deserialize",
                         format!("tool result deserialization failed: {e}"),
                     )
@@ -1753,7 +1753,7 @@ impl WorkspaceOps {
 mod tests {
     use super::*;
     /// Pins these workspace methods' `workspace.*` wire names.
-    /// The request types live in `wimo ai-wimo-workspace-types`, re-exported here for existing call sites.
+    /// The request types live in `wimoai-wimo-workspace-types`, re-exported here for existing call sites.
     /// The gateway's typed dispatch in `workspace_typed/` consumes them without depending on this crate.
     /// Pinning the `::METHOD` strings stops a rename silently changing the wire contract.
     #[test]
@@ -1787,8 +1787,8 @@ mod tests {
             unreachable!("for_test builds a local handle");
         };
         let workspace_root = handle.root_cwd().unwrap();
-        let window_a = std::path::PathBuf::from("/repos/wimo ai-main");
-        let window_b = std::path::PathBuf::from("/repos/wimo ai-main-2");
+        let window_a = std::path::PathBuf::from("/repos/wimoai-main");
+        let window_b = std::path::PathBuf::from("/repos/wimoai-main-2");
         assert_eq!(
             git_op_cwd(handle, &Some(window_a.clone())).await.unwrap(),
             window_a
@@ -1807,7 +1807,7 @@ mod tests {
         assert!(empty.repos.is_empty(), "missing manifest → empty list");
         assert_eq!(
             empty.version,
-            wimo ai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_VERSION
+            wimoai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_VERSION
         );
         let one = RepoManifest::new(vec![ProvisionedRepo {
             name: "app".into(),
@@ -1819,7 +1819,7 @@ mod tests {
         std::fs::create_dir_all(tmp.path().join(".wimo")).unwrap();
         std::fs::write(
             tmp.path()
-                .join(wimo ai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH),
+                .join(wimoai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH),
             one.to_json_bytes().unwrap(),
         )
         .unwrap();
@@ -1844,7 +1844,7 @@ mod tests {
         ]);
         std::fs::write(
             tmp.path()
-                .join(wimo ai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH),
+                .join(wimoai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH),
             many.to_json_bytes().unwrap(),
         )
         .unwrap();
@@ -1867,7 +1867,7 @@ mod tests {
         }]);
         std::fs::create_dir_all(sandbox_ws.join(".wimo")).unwrap();
         std::fs::write(
-            sandbox_ws.join(wimo ai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH),
+            sandbox_ws.join(wimoai_wimo_workspace_types::rpc::repos::REPOS_MANIFEST_RELATIVE_PATH),
             one.to_json_bytes().unwrap(),
         )
         .unwrap();
@@ -1975,13 +1975,13 @@ mod tests {
         };
         let sid = "sess-teardown";
         let toolset = std::sync::Arc::new(
-            wimo ai_wimo_tools::registry::types::FinalizedToolset::empty_for_test(),
+            wimoai_wimo_tools::registry::types::FinalizedToolset::empty_for_test(),
         );
         let weak = std::sync::Arc::downgrade(&toolset);
         ops.bind_local_session(
             sid,
             handle.root_cwd().unwrap(),
-            wimo ai_hunk_tracker::HunkTrackerHandle::noop(),
+            wimoai_hunk_tracker::HunkTrackerHandle::noop(),
             toolset,
             None,
         )
@@ -2055,7 +2055,7 @@ mod tests {
     /// A `Hunk`'s wire mirror serializes byte-for-byte like the heavy type.
     #[test]
     fn hunk_to_wire_serializes_identically() {
-        use wimo ai_hunk_tracker::types::{Hunk, HunkSource};
+        use wimoai_hunk_tracker::types::{Hunk, HunkSource};
         let mut hunk = Hunk::file_created(
             std::path::PathBuf::from("/repo/a.rs"),
             "new\n".to_string(),
@@ -2072,8 +2072,8 @@ mod tests {
     /// A `FileContentEntry`'s wire mirror serializes identically (including the `skip_serializing_if` handling on absent baseline content).
     #[test]
     fn file_content_entry_to_wire_serializes_identically() {
-        use wimo ai_hunk_tracker::FileContentEntry;
-        use wimo ai_hunk_tracker::types::FileContentView;
+        use wimoai_hunk_tracker::FileContentEntry;
+        use wimoai_hunk_tracker::types::FileContentView;
         let entry = FileContentEntry {
             path: std::path::PathBuf::from("/repo/a.rs"),
             baseline: FileContentView::missing(),
@@ -2090,8 +2090,8 @@ mod tests {
     #[test]
     fn session_summary_to_wire_serializes_identically() {
         use std::sync::Arc;
-        use wimo ai_hunk_tracker::SessionSummary;
-        use wimo ai_hunk_tracker::types::{Hunk, HunkSource, TurnSummary};
+        use wimoai_hunk_tracker::SessionSummary;
+        use wimoai_hunk_tracker::types::{Hunk, HunkSource, TurnSummary};
         let hunk = Hunk::file_created(
             std::path::PathBuf::from("/repo/a.rs"),
             "x\n".to_string(),
@@ -2117,10 +2117,10 @@ mod tests {
     /// `HookRegistry` round-trips through the wire mirror in both directions (heavy to wire serializes identically; wire to heavy is the inverse).
     #[test]
     fn hook_registry_wire_round_trip_both_directions() {
-        let spec = wimo ai_wimo_hooks::config::HookSpec {
+        let spec = wimoai_wimo_hooks::config::HookSpec {
             name: "global/safety".to_string(),
-            event: wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
-            handler_type: wimo ai_wimo_hooks::config::HandlerType::Command,
+            event: wimoai_wimo_hooks::event::HookEventName::PreToolUse,
+            handler_type: wimoai_wimo_hooks::config::HandlerType::Command,
             configured_matcher: Some("Bash".to_string()),
             matcher: None,
             enabled: true,
@@ -2131,9 +2131,9 @@ mod tests {
             timeout_ms: 5000,
             source_dir: std::path::PathBuf::from("/home/u/.wimo/hooks"),
             extra_env: std::collections::HashMap::from([("FOO".to_string(), "bar".to_string())]),
-            layer: wimo ai_wimo_hooks::config::HookProvenance::File,
+            layer: wimoai_wimo_hooks::config::HookProvenance::File,
         };
-        let mut registry = wimo ai_wimo_hooks::discovery::HookRegistry::default();
+        let mut registry = wimoai_wimo_hooks::discovery::HookRegistry::default();
         registry.append_specs(vec![spec]);
         let wire = hook_registry_to_wire(&registry).expect("heavy → wire");
         assert_eq!(
@@ -2153,7 +2153,7 @@ mod tests {
     /// The assertion also pins that each variant's serialized key is byte-identical on both sides.
     #[test]
     fn hook_event_name_wire_covers_all_upstream_variants() {
-        use wimo ai_wimo_hooks::event::HookEventName as E;
+        use wimoai_wimo_hooks::event::HookEventName as E;
         fn to_wire(e: E) -> HookEventNameWire {
             match e {
                 E::SessionStart => HookEventNameWire::SessionStart,
@@ -2200,14 +2200,14 @@ mod tests {
         }
     }
     /// Compile-time drift guard for `HookSpecWire`, the struct analog of `hook_event_name_wire_covers_all_upstream_variants`.
-    /// The lean types crate can't depend on `wimo ai-wimo-hooks`, and `hook_registry_to_wire` only couples the two via a serde round-trip.
+    /// The lean types crate can't depend on `wimoai-wimo-hooks`, and `hook_registry_to_wire` only couples the two via a serde round-trip.
     /// A new serialized field on upstream `HookSpec` would otherwise be dropped on the wire silently.
     /// The exhaustive destructuring below (no `..`) fails to compile when upstream adds or renames a field.
     /// Rebuilding `HookSpecWire` from those bindings catches wire-side drift; the assertion pins that both serde shapes stay byte-identical.
     /// The compiled `matcher` is `#[serde(skip)]` and is the only field intentionally absent from the wire.
     #[test]
     fn hook_spec_wire_covers_all_upstream_fields() {
-        use wimo ai_wimo_hooks::config::HookSpec;
+        use wimoai_wimo_hooks::config::HookSpec;
         fn to_wire(spec: HookSpec) -> HookSpecWire {
             let HookSpec {
                 name,
@@ -2244,8 +2244,8 @@ mod tests {
         }
         let spec = HookSpec {
             name: "global/safety".to_string(),
-            event: wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
-            handler_type: wimo ai_wimo_hooks::config::HandlerType::Command,
+            event: wimoai_wimo_hooks::event::HookEventName::PreToolUse,
+            handler_type: wimoai_wimo_hooks::config::HandlerType::Command,
             configured_matcher: Some("Bash".to_string()),
             matcher: None,
             enabled: true,
@@ -2256,7 +2256,7 @@ mod tests {
             timeout_ms: 5000,
             source_dir: std::path::PathBuf::from("/home/u/.wimo/hooks"),
             extra_env: std::collections::HashMap::from([("FOO".to_string(), "bar".to_string())]),
-            layer: wimo ai_wimo_hooks::config::HookProvenance::Managed,
+            layer: wimoai_wimo_hooks::config::HookProvenance::Managed,
         };
         assert_eq!(
             serde_json::to_value(&spec).unwrap(),

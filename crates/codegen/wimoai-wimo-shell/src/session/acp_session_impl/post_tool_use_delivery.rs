@@ -1,9 +1,9 @@
 use super::*;
-use wimo ai_wimo_hooks::dispatcher::{
+use wimoai_wimo_hooks::dispatcher::{
     AdditionalContext, OutputReplacement, PostToolUseBlock, PostToolUseResult, SelectedReplacement,
 };
-use wimo ai_wimo_hooks::event::{MAX_HOOK_OUTPUT_REPLACEMENT_CHARS, clip_text};
-use wimo ai_wimo_hooks::result::HookRunResult;
+use wimoai_wimo_hooks::event::{MAX_HOOK_OUTPUT_REPLACEMENT_CHARS, clip_text};
+use wimoai_wimo_hooks::result::HookRunResult;
 
 #[derive(Debug, Default, PartialEq)]
 pub(super) struct PostToolUseDelivery {

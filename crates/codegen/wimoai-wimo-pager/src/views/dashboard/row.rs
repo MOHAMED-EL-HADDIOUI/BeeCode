@@ -17,7 +17,7 @@ pub struct DashboardRow {
     pub id: DashboardRowId,
     /// Display label (e.g. `"implementer · fix login bug"`).
     pub label: String,
-    /// Right-of-label subtitle painted after a ` · ` separator in dim text (e.g. `"wimo ai my-branch-2 worktree"`).
+    /// Right-of-label subtitle painted after a ` · ` separator in dim text (e.g. `"wimoai my-branch-2 worktree"`).
     /// `None` when the row has no repo / branch context worth showing.
     pub subtitle: Option<String>,
     /// Coarse state used for grouping.
@@ -133,7 +133,7 @@ pub fn build_rows_with_roster(
 /// A matching live agent contributes its richer runtime row; otherwise stored metadata produces a read-only idle row.
 pub fn build_rows_with_workspace(
     agents: &IndexMap<AgentId, AgentView>,
-    snapshot: &wimo ai_wimo_dashboard_store::WorkspaceSnapshot,
+    snapshot: &wimoai_wimo_dashboard_store::WorkspaceSnapshot,
     home: Option<&str>,
 ) -> Vec<DashboardRow> {
     let live_by_session: std::collections::HashMap<&str, (AgentId, &AgentView)> = agents
@@ -149,7 +149,7 @@ pub fn build_rows_with_workspace(
     snapshot
         .members
         .iter()
-        .filter(|member| matches!(member.kind, wimo ai_wimo_dashboard_store::MemberKind::Build))
+        .filter(|member| matches!(member.kind, wimoai_wimo_dashboard_store::MemberKind::Build))
         .map(|member| {
             if let Some((id, agent)) = live_by_session.get(member.session_id.as_ref()) {
                 return top_level_row(*id, agent, false, home);
@@ -159,7 +159,7 @@ pub fn build_rows_with_workspace(
         .collect()
 }
 fn workspace_member_row(
-    member: &wimo ai_wimo_dashboard_store::Member,
+    member: &wimoai_wimo_dashboard_store::Member,
     home: Option<&str>,
 ) -> DashboardRow {
     let session_id = member.session_id.as_ref();
@@ -1044,11 +1044,11 @@ mod tests {
         session_id: &str,
         title: &str,
         summary: Option<&str>,
-    ) -> wimo ai_wimo_dashboard_store::Member {
-        wimo ai_wimo_dashboard_store::Member {
-            session_id: wimo ai_wimo_dashboard_store::SessionId::new(session_id).unwrap(),
-            kind: wimo ai_wimo_dashboard_store::MemberKind::Build,
-            origin: wimo ai_wimo_dashboard_store::MemberOrigin::Local,
+    ) -> wimoai_wimo_dashboard_store::Member {
+        wimoai_wimo_dashboard_store::Member {
+            session_id: wimoai_wimo_dashboard_store::SessionId::new(session_id).unwrap(),
+            kind: wimoai_wimo_dashboard_store::MemberKind::Build,
+            origin: wimoai_wimo_dashboard_store::MemberOrigin::Local,
             cwd: Some(format!("/tmp/{session_id}")),
             title: Some(title.to_owned()),
             model: Some("wimo-test".to_owned()),
@@ -1060,10 +1060,10 @@ mod tests {
         }
     }
     fn workspace_snapshot(
-        members: Vec<wimo ai_wimo_dashboard_store::Member>,
-    ) -> wimo ai_wimo_dashboard_store::WorkspaceSnapshot {
-        wimo ai_wimo_dashboard_store::WorkspaceSnapshot {
-            grouping: wimo ai_wimo_dashboard_store::Grouping::State,
+        members: Vec<wimoai_wimo_dashboard_store::Member>,
+    ) -> wimoai_wimo_dashboard_store::WorkspaceSnapshot {
+        wimoai_wimo_dashboard_store::WorkspaceSnapshot {
+            grouping: wimoai_wimo_dashboard_store::Grouping::State,
             members,
             data_version: 1,
         }
@@ -1089,7 +1089,7 @@ mod tests {
     #[test]
     fn workspace_rows_ignore_non_build_members() {
         let mut conversation = workspace_member("shared", "Conversation", None);
-        conversation.kind = wimo ai_wimo_dashboard_store::MemberKind::Conversation;
+        conversation.kind = wimoai_wimo_dashboard_store::MemberKind::Conversation;
         let snapshot = workspace_snapshot(vec![
             workspace_member("shared", "Build", None),
             conversation,
@@ -1874,7 +1874,7 @@ mod tests {
     #[test]
     fn subtitle_non_worktree_shows_branch_and_folder() {
         let mut agent = make_idle_agent_with_model(None);
-        agent.session.cwd = PathBuf::from("/home/me/wimo ai/crates/foo");
+        agent.session.cwd = PathBuf::from("/home/me/wimoai/crates/foo");
         agent.is_worktree = false;
         agent.current_branch = Some("main".to_string());
         assert_eq!(top_level_subtitle(&agent).as_deref(), Some("main foo"));

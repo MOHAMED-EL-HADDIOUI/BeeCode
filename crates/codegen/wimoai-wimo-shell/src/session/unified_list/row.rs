@@ -221,7 +221,7 @@ mod tests {
             session_id: "sess_abc123".into(),
             summary: "Implement session list API".into(),
             updated_at: "2026-10-29T14:22:15Z".into(),
-            cwd: "/Users/me/wimo ai".into(),
+            cwd: "/Users/me/wimoai".into(),
             ..MergedSession::default()
         };
         let info = merged_session_to_row(merged, facet_registry()).into_session_info();

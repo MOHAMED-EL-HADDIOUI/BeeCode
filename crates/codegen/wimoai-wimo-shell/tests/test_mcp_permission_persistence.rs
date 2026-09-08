@@ -4,12 +4,12 @@ use std::sync::{Arc, OnceLock};
 use agent_client_protocol as acp;
 use serial_test::serial;
 use tokio::sync::{mpsc, oneshot};
-use wimo ai_acp_lib::{AcpAgentGatewaySender, AcpClientMessage};
-use wimo ai_wimo_paths::AbsPathBuf;
-use wimo ai_wimo_workspace::permission::types::{
+use wimoai_acp_lib::{AcpAgentGatewaySender, AcpClientMessage};
+use wimoai_wimo_paths::AbsPathBuf;
+use wimoai_wimo_workspace::permission::types::{
     PatternMode, PermissionConfig, PermissionRule, RuleAction, ToolFilter,
 };
-use wimo ai_wimo_workspace::permission::{
+use wimoai_wimo_workspace::permission::{
     AccessKind, ClientType, Decision, PermissionCommand, PermissionHandle, PermissionRequest,
     PermissionState, spawn_permission_manager, spawn_permission_manager_with_hub,
 };
@@ -592,7 +592,7 @@ async fn allow_always_mcp_server_downgrades_when_access_has_no_separator() {
 #[tokio::test]
 #[serial]
 async fn dont_ask_policy_denies_without_prompting() {
-    use wimo ai_wimo_workspace::permission::types::{PermissionConfig, PromptPolicy};
+    use wimoai_wimo_workspace::permission::types::{PermissionConfig, PromptPolicy};
 
     let mut policy = PermissionConfig::new(vec![]);
     policy.prompt_policy = PromptPolicy::Deny;

@@ -75,11 +75,11 @@ mod tests {
         assert!(!is_grove_strategy("linked"));
     }
     use tempfile::TempDir;
-    use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+    use wimoai_test_utils::git::{git_commit_all, init_git_repo};
 
     #[test]
     fn test_create_worktree_simple() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -108,7 +108,7 @@ mod tests {
 
     #[test]
     fn test_create_worktree_creates_parent_dirs() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -134,7 +134,7 @@ mod tests {
 
     #[test]
     fn test_create_worktree_with_ignored_files() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -172,7 +172,7 @@ mod tests {
 
     #[test]
     fn test_create_worktree_skip_ignored_files() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -218,7 +218,7 @@ mod tests {
 
     #[test]
     fn test_copy_ignored_only_standalone() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         let dest_path = temp.path().join("dest");
@@ -259,7 +259,7 @@ mod tests {
 
     #[test]
     fn test_copy_ignored_only_with_skip_patterns() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         let dest_path = temp.path().join("dest");
@@ -318,7 +318,7 @@ mod tests {
     #[test]
     #[cfg(unix)]
     fn test_worktree_with_symlinks() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         use std::os::unix::fs::symlink;
 
         let temp = TempDir::new().unwrap();
@@ -381,7 +381,7 @@ mod tests {
     #[test]
     #[cfg(unix)]
     fn test_copy_ignored_only_with_symlinks() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         use std::os::unix::fs::symlink;
 
         let temp = TempDir::new().unwrap();
@@ -427,7 +427,7 @@ mod tests {
 
     #[test]
     fn test_worktree_with_dirty_files() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -457,7 +457,7 @@ mod tests {
 
     #[test]
     fn test_worktree_preserves_git_status_for_dirty_files() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -516,7 +516,7 @@ mod tests {
 
     #[test]
     fn test_git_status_is_instant_after_worktree_creation() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -599,7 +599,7 @@ mod tests {
 
     #[test]
     fn test_clean_files_dont_show_as_modified() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -646,7 +646,7 @@ mod tests {
 
     #[test]
     fn test_worktree_clean_state() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -676,7 +676,7 @@ mod tests {
 
     #[test]
     fn test_worktree_clean_all_state() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -725,7 +725,7 @@ mod tests {
 
     #[test]
     fn test_background_finalization() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -748,7 +748,7 @@ mod tests {
 
     #[test]
     fn test_worktree_with_nested_directories() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -779,7 +779,7 @@ mod tests {
 
     #[test]
     fn test_worktree_preserves_file_content() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -818,7 +818,7 @@ mod tests {
     #[test]
     #[cfg(unix)]
     fn test_worktree_preserves_permissions() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         use std::os::unix::fs::PermissionsExt;
 
         let temp = TempDir::new().unwrap();
@@ -855,7 +855,7 @@ mod tests {
 
     #[test]
     fn test_worktree_with_btrfs_disabled() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         use crate::BtrfsMode;
 
         let temp = TempDir::new().unwrap();
@@ -884,7 +884,7 @@ mod tests {
 
     #[test]
     fn test_worktree_with_btrfs_auto_on_non_btrfs() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         use crate::BtrfsMode;
 
         let temp = TempDir::new().unwrap();
@@ -1017,7 +1017,7 @@ mod tests {
 
     #[test]
     fn test_standalone_worktree_simple() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -1043,7 +1043,7 @@ mod tests {
 
     #[test]
     fn test_standalone_worktree_is_independent() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -1088,7 +1088,7 @@ mod tests {
 
     #[test]
     fn test_standalone_worktree_no_worktrees_dir() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -1129,7 +1129,7 @@ mod tests {
 
     #[test]
     fn test_standalone_worktree_preserves_dirty_files() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -1156,7 +1156,7 @@ mod tests {
 
     #[test]
     fn test_standalone_worktree_clean_tracked() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -1183,7 +1183,7 @@ mod tests {
 
     #[test]
     fn test_standalone_worktree_promotable_via_rename() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -1231,7 +1231,7 @@ mod tests {
 
     #[test]
     fn test_standalone_worktree_with_ignored_files() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -1260,7 +1260,7 @@ mod tests {
 
     #[test]
     fn test_standalone_worktree_narrows_origin_fetch() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
@@ -1268,17 +1268,17 @@ mod tests {
         std::fs::write(repo_path.join("file.txt"), "content").unwrap();
         git_commit_all(&repo_path, "initial");
         let branch =
-            wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "--abbrev-ref", "HEAD"]);
-        wimo ai_test_utils::git::run_git(
+            wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "--abbrev-ref", "HEAD"]);
+        wimoai_test_utils::git::run_git(
             &repo_path,
             &[
                 "remote",
                 "add",
                 "origin",
-                "https://github.com/wimo ai-org/wimo ai.git",
+                "https://github.com/wimoai-org/wimoai.git",
             ],
         );
-        wimo ai_test_utils::git::run_git(
+        wimoai_test_utils::git::run_git(
             &repo_path,
             &[
                 "config",
@@ -1288,7 +1288,7 @@ mod tests {
             ],
         );
         assert_eq!(
-            wimo ai_test_utils::git::run_git(&repo_path, &["config", "--get", "remote.origin.fetch"]),
+            wimoai_test_utils::git::run_git(&repo_path, &["config", "--get", "remote.origin.fetch"]),
             "+refs/heads/*"
         );
 
@@ -1299,36 +1299,36 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            wimo ai_test_utils::git::run_git(
+            wimoai_test_utils::git::run_git(
                 &worktree_path,
                 &["config", "--get-all", "remote.origin.fetch"]
             ),
             format!("+refs/heads/{branch}:refs/remotes/origin/{branch}")
         );
         assert_eq!(
-            wimo ai_test_utils::git::run_git(&worktree_path, &["config", "--get", "remote.origin.url"]),
-            "https://github.com/wimo ai-org/wimo ai.git"
+            wimoai_test_utils::git::run_git(&worktree_path, &["config", "--get", "remote.origin.url"]),
+            "https://github.com/wimoai-org/wimoai.git"
         );
     }
 
     #[test]
     fn test_standalone_worktree_drops_inconsistent_shallow() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
         init_git_repo(&repo_path);
         std::fs::write(repo_path.join("a.txt"), "a").unwrap();
         git_commit_all(&repo_path, "A");
-        let a = wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
+        let a = wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
         std::fs::write(repo_path.join("b.txt"), "b").unwrap();
         git_commit_all(&repo_path, "B");
-        let b = wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
-        wimo ai_test_utils::git::run_git(&repo_path, &["checkout", "-b", "feature", &a]);
+        let b = wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
+        wimoai_test_utils::git::run_git(&repo_path, &["checkout", "-b", "feature", &a]);
         std::fs::write(repo_path.join("d.txt"), "d").unwrap();
         git_commit_all(&repo_path, "D");
-        wimo ai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/heads/main", &b]);
-        wimo ai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/remotes/origin/main", &b]);
+        wimoai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/heads/main", &b]);
+        wimoai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/remotes/origin/main", &b]);
         std::fs::write(repo_path.join(".git/shallow"), format!("{b}\n")).unwrap();
 
         let worktree_path = temp.path().join("standalone");
@@ -1339,47 +1339,47 @@ mod tests {
 
         assert!(!worktree_path.join(".git/shallow").exists());
         assert_eq!(
-            wimo ai_test_utils::git::run_git(&worktree_path, &["rev-parse", "--is-shallow-repository"]),
+            wimoai_test_utils::git::run_git(&worktree_path, &["rev-parse", "--is-shallow-repository"]),
             "false"
         );
         assert_eq!(
-            wimo ai_test_utils::git::run_git(&worktree_path, &["rev-parse", "HEAD^"]),
+            wimoai_test_utils::git::run_git(&worktree_path, &["rev-parse", "HEAD^"]),
             a
         );
     }
 
     #[test]
     fn test_standalone_worktree_sanitizes_after_checkout_ref() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
         init_git_repo(&repo_path);
         std::fs::write(repo_path.join("a.txt"), "a").unwrap();
         git_commit_all(&repo_path, "A");
-        let a = wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
+        let a = wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
         std::fs::write(repo_path.join("b.txt"), "b").unwrap();
         git_commit_all(&repo_path, "B");
-        let b = wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
+        let b = wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
         std::fs::write(repo_path.join("c.txt"), "c").unwrap();
         git_commit_all(&repo_path, "C");
         let source_branch =
-            wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "--abbrev-ref", "HEAD"]);
-        wimo ai_test_utils::git::run_git(&repo_path, &["checkout", "-b", "feature", &a]);
+            wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "--abbrev-ref", "HEAD"]);
+        wimoai_test_utils::git::run_git(&repo_path, &["checkout", "-b", "feature", &a]);
         std::fs::write(repo_path.join("d.txt"), "d").unwrap();
         git_commit_all(&repo_path, "D");
-        wimo ai_test_utils::git::run_git(&repo_path, &["checkout", &source_branch]);
+        wimoai_test_utils::git::run_git(&repo_path, &["checkout", &source_branch]);
         assert_ne!(source_branch, "feature");
-        wimo ai_test_utils::git::run_git(
+        wimoai_test_utils::git::run_git(
             &repo_path,
             &[
                 "remote",
                 "add",
                 "origin",
-                "https://github.com/wimo ai-org/wimo ai.git",
+                "https://github.com/wimoai-org/wimoai.git",
             ],
         );
-        wimo ai_test_utils::git::run_git(
+        wimoai_test_utils::git::run_git(
             &repo_path,
             &[
                 "config",
@@ -1388,12 +1388,12 @@ mod tests {
                 "+refs/heads/*",
             ],
         );
-        wimo ai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/remotes/origin/main", &b]);
-        wimo ai_test_utils::git::run_git(
+        wimoai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/remotes/origin/main", &b]);
+        wimoai_test_utils::git::run_git(
             &repo_path,
             &["update-ref", "refs/remotes/origin/feature", &a],
         );
-        wimo ai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/remotes/origin/noise", &b]);
+        wimoai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/remotes/origin/noise", &b]);
         std::fs::write(repo_path.join(".git/shallow"), format!("{b}\n")).unwrap();
 
         let worktree_path = temp.path().join("standalone");
@@ -1404,11 +1404,11 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            wimo ai_test_utils::git::run_git(&worktree_path, &["rev-parse", "--abbrev-ref", "HEAD"]),
+            wimoai_test_utils::git::run_git(&worktree_path, &["rev-parse", "--abbrev-ref", "HEAD"]),
             "feature"
         );
         assert_eq!(
-            wimo ai_test_utils::git::run_git(
+            wimoai_test_utils::git::run_git(
                 &worktree_path,
                 &["rev-parse", "refs/remotes/origin/feature"]
             ),
@@ -1425,7 +1425,7 @@ mod tests {
             "unrelated origin/noise must still be pruned after checkout sanitize"
         );
         assert_eq!(
-            wimo ai_test_utils::git::run_git(
+            wimoai_test_utils::git::run_git(
                 &worktree_path,
                 &["config", "--get-all", "remote.origin.fetch"]
             ),
@@ -1436,43 +1436,43 @@ mod tests {
             "after checkout, graft B is unused and its parent is in the ODB"
         );
         assert_eq!(
-            wimo ai_test_utils::git::run_git(&worktree_path, &["rev-parse", "--is-shallow-repository"]),
+            wimoai_test_utils::git::run_git(&worktree_path, &["rev-parse", "--is-shallow-repository"]),
             "false"
         );
         assert_eq!(
-            wimo ai_test_utils::git::run_git(&worktree_path, &["rev-parse", "HEAD^"]),
+            wimoai_test_utils::git::run_git(&worktree_path, &["rev-parse", "HEAD^"]),
             a
         );
     }
 
     #[test]
     fn test_standalone_worktree_keeps_origin_ref_after_detached_checkout() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
         init_git_repo(&repo_path);
         std::fs::write(repo_path.join("a.txt"), "a").unwrap();
         git_commit_all(&repo_path, "A");
-        let a = wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
+        let a = wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
         std::fs::write(repo_path.join("b.txt"), "b").unwrap();
         git_commit_all(&repo_path, "B");
-        let b = wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
-        wimo ai_test_utils::git::run_git(&repo_path, &["branch", "feature", &a]);
-        wimo ai_test_utils::git::run_git(
+        let b = wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
+        wimoai_test_utils::git::run_git(&repo_path, &["branch", "feature", &a]);
+        wimoai_test_utils::git::run_git(
             &repo_path,
             &[
                 "remote",
                 "add",
                 "origin",
-                "https://github.com/wimo ai-org/wimo ai.git",
+                "https://github.com/wimoai-org/wimoai.git",
             ],
         );
-        wimo ai_test_utils::git::run_git(
+        wimoai_test_utils::git::run_git(
             &repo_path,
             &["update-ref", "refs/remotes/origin/feature", &a],
         );
-        wimo ai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/remotes/origin/noise", &b]);
+        wimoai_test_utils::git::run_git(&repo_path, &["update-ref", "refs/remotes/origin/noise", &b]);
 
         let worktree_path = temp.path().join("standalone");
         WorktreeBuilder::new(repo_path, worktree_path.clone())
@@ -1482,11 +1482,11 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            wimo ai_test_utils::git::run_git(&worktree_path, &["rev-parse", "HEAD"]),
+            wimoai_test_utils::git::run_git(&worktree_path, &["rev-parse", "HEAD"]),
             a
         );
         assert_eq!(
-            wimo ai_test_utils::git::run_git(
+            wimoai_test_utils::git::run_git(
                 &worktree_path,
                 &["rev-parse", "refs/remotes/origin/feature"]
             ),
@@ -1506,21 +1506,21 @@ mod tests {
 
     #[test]
     fn test_standalone_worktree_skips_extra_origin_remotes() {
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");
         std::fs::create_dir(&repo_path).unwrap();
         init_git_repo(&repo_path);
         std::fs::write(repo_path.join("file.txt"), "content").unwrap();
         git_commit_all(&repo_path, "initial");
-        let head = wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
+        let head = wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "HEAD"]);
         let branch =
-            wimo ai_test_utils::git::run_git(&repo_path, &["rev-parse", "--abbrev-ref", "HEAD"]);
-        wimo ai_test_utils::git::run_git(
+            wimoai_test_utils::git::run_git(&repo_path, &["rev-parse", "--abbrev-ref", "HEAD"]);
+        wimoai_test_utils::git::run_git(
             &repo_path,
             &["update-ref", "refs/remotes/origin/main", &head],
         );
-        wimo ai_test_utils::git::run_git(
+        wimoai_test_utils::git::run_git(
             &repo_path,
             &[
                 "update-ref",
@@ -1529,7 +1529,7 @@ mod tests {
             ],
         );
         for i in 0..40 {
-            wimo ai_test_utils::git::run_git(
+            wimoai_test_utils::git::run_git(
                 &repo_path,
                 &[
                     "update-ref",
@@ -1546,14 +1546,14 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            wimo ai_test_utils::git::run_git(
+            wimoai_test_utils::git::run_git(
                 &worktree_path,
                 &["rev-parse", "refs/remotes/origin/main"]
             ),
             head
         );
         assert_eq!(
-            wimo ai_test_utils::git::run_git(
+            wimoai_test_utils::git::run_git(
                 &worktree_path,
                 &["rev-parse", &format!("refs/remotes/origin/{branch}")]
             ),
@@ -1584,7 +1584,7 @@ mod tests {
         // The partial worktree dir AND its `.git/worktrees/<name>` registration
         // must both be cleaned up, so a later create at the same dest isn't
         // blocked by a stale registration.
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         use crate::CreationMode;
         use tokio_util::sync::CancellationToken;
 
@@ -1623,7 +1623,7 @@ mod tests {
         // covers the join-before-teardown ORDERING structurally (no timing
         // fault-injection); the unconditional join in execute.rs makes it safe
         // regardless of thread timing.
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         use tokio_util::sync::CancellationToken;
 
         let temp = TempDir::new().unwrap();
@@ -1651,7 +1651,7 @@ mod tests {
         // reclaim the dir AND deregister `.git/worktrees/<name>` — proves the
         // guard fires on the error path, not only on cancel. An invalid
         // ignored-files glob makes the ignored-copy phase fail deterministically.
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
         use crate::{CreationMode, IgnoredFilesMode};
 
         let temp = TempDir::new().unwrap();
@@ -1687,7 +1687,7 @@ mod tests {
     fn test_standalone_hard_error_reclaims_dest() {
         // A hard (non-cancel) error after the guard is armed (a bogus non-HEAD
         // ref → checkout fails) must reclaim the partial standalone dest.
-        wimo ai_test_utils::require_git!();
+        wimoai_test_utils::require_git!();
 
         let temp = TempDir::new().unwrap();
         let repo_path = temp.path().join("repo");

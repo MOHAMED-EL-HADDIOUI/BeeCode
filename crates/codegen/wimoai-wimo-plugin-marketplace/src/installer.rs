@@ -6,11 +6,11 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use wimo ai_wimo_agent::plugins::git_install::{self, InstallSource};
-use wimo ai_wimo_agent::plugins::install_registry::{
+use wimoai_wimo_agent::plugins::git_install::{self, InstallSource};
+use wimoai_wimo_agent::plugins::install_registry::{
     InstallError, InstallKind, InstallRegistry, InstalledRepo, MarketplaceProvenance, RepoPlugin,
 };
-use wimo ai_wimo_agent::plugins::manifest::{ManifestLoadResult, load_manifest, name_from_dirname};
+use wimoai_wimo_agent::plugins::manifest::{ManifestLoadResult, load_manifest, name_from_dirname};
 
 use crate::types::{MarketplaceEntry, MarketplaceRelativePath};
 
@@ -503,7 +503,7 @@ fn clone_repo_to_path(
     }
 
     // git_command applies the same auth/LFS/SSH suppression as the marketplace cache clones
-    let mut cmd = wimo ai_tty_utils::git_command();
+    let mut cmd = wimoai_tty_utils::git_command();
     cmd.arg("clone").arg("--depth").arg("1");
     if let Some(r) = git_ref {
         cmd.arg("--branch").arg(r);
@@ -564,7 +564,7 @@ fn run_git_in(cwd: &Path, args: &[&str]) -> Result<(), String> {
 }
 
 fn run_git_in_capture(cwd: &Path, args: &[&str]) -> Result<std::process::Output, String> {
-    let mut cmd = wimo ai_tty_utils::git_command();
+    let mut cmd = wimoai_tty_utils::git_command();
     cmd.args(args).current_dir(cwd);
     let output = cmd
         .output()
@@ -1110,7 +1110,7 @@ mod tests {
                 .find(|p| p.relative_path == "plugins/demo")
                 .unwrap();
 
-            unsafe { std::env::set_var("wimo ai_wimo_TEST_FAIL_REGISTRY_SAVE_AFTER_SERIALIZE", "1") };
+            unsafe { std::env::set_var("wimoai_wimo_TEST_FAIL_REGISTRY_SAVE_AFTER_SERIALIZE", "1") };
             let result = update_from_marketplace_entry_transactional(
                 marketplace.path(),
                 &entry,
@@ -1118,7 +1118,7 @@ mod tests {
                 registry,
                 false, // require_sha off: pin policy has its own tests
             );
-            unsafe { std::env::remove_var("wimo ai_wimo_TEST_FAIL_REGISTRY_SAVE_AFTER_SERIALIZE") };
+            unsafe { std::env::remove_var("wimoai_wimo_TEST_FAIL_REGISTRY_SAVE_AFTER_SERIALIZE") };
 
             assert!(result.is_err());
             assert_eq!(

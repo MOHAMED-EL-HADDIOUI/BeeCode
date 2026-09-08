@@ -6,7 +6,7 @@
 use std::time::Duration;
 
 use anyhow::{Context, Result};
-use wimo ai_wimo_pager_pty_harness::{ContentController, PtyHarness, keys, pager_binary};
+use wimoai_wimo_pager_pty_harness::{ContentController, PtyHarness, keys, pager_binary};
 
 const ROWS: u16 = 50;
 const COLS: u16 = 120;

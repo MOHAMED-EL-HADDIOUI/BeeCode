@@ -33,15 +33,15 @@ impl WireErrorType {
         match s {
             "auth_transient" => Self::AuthTransient,
             "legacy_auth" => Self::LegacyAuth,
-            s if s == wimo ai_wimo_shell::extensions::notification::CONTEXT_LENGTH_ERROR_TYPE => {
+            s if s == wimoai_wimo_shell::extensions::notification::CONTEXT_LENGTH_ERROR_TYPE => {
                 Self::ContextLength
             }
             "encrypted_content_mismatch" => Self::EncryptedContentMismatch,
-            s if s == wimo ai_wimo_shell::extensions::notification::DISK_FULL_ERROR_TYPE => {
+            s if s == wimoai_wimo_shell::extensions::notification::DISK_FULL_ERROR_TYPE => {
                 Self::DiskFull
             }
             s => s
-                .parse::<wimo ai_wimo_shell::sampling::error::SamplingErrorKind>()
+                .parse::<wimoai_wimo_shell::sampling::error::SamplingErrorKind>()
                 .map(Into::into)
                 .unwrap_or(Self::Other),
         }
@@ -55,9 +55,9 @@ pub(crate) fn wire_error_kind(raw: Option<&str>) -> Option<WireErrorType> {
 }
 
 /// The shared vocabulary maps 1:1 onto the pager's wire types; kinds without their own copy render as [`Self::Other`].
-impl From<wimo ai_wimo_shell::sampling::error::SamplingErrorKind> for WireErrorType {
-    fn from(kind: wimo ai_wimo_shell::sampling::error::SamplingErrorKind) -> Self {
-        use wimo ai_wimo_shell::sampling::error::SamplingErrorKind as K;
+impl From<wimoai_wimo_shell::sampling::error::SamplingErrorKind> for WireErrorType {
+    fn from(kind: wimoai_wimo_shell::sampling::error::SamplingErrorKind) -> Self {
+        use wimoai_wimo_shell::sampling::error::SamplingErrorKind as K;
         match kind {
             K::Auth => Self::Auth,
             K::Http => Self::Http,
@@ -204,7 +204,7 @@ pub(crate) fn format_request_failure(
 fn truncation_recovered_from_untyped_raw(error_type: Option<WireErrorType>, raw: &str) -> bool {
     error_type.is_none()
         && parse_http_status(raw).is_none()
-        && raw.contains(wimo ai_wimo_shell::sampling::error::MAX_TOKENS_TRUNCATION_MESSAGE)
+        && raw.contains(wimoai_wimo_shell::sampling::error::MAX_TOKENS_TRUNCATION_MESSAGE)
 }
 
 fn refine_untyped_wire(

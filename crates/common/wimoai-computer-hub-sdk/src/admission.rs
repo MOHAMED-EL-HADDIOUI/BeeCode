@@ -18,11 +18,11 @@ use dashmap::DashMap;
 use serde_json::Value;
 use tokio::sync::{OwnedSemaphorePermit, Semaphore};
 use tokio::time::Instant;
-use wimo ai_tool_protocol::{
+use wimoai_tool_protocol::{
     JsonRpcError, JsonRpcId, JsonRpcResponse, JsonRpcVersion, ResponseOutcome, SessionId,
 };
 
-/// Numeric JSON-RPC code for overload rejection (`wimo ai-tool-protocol`
+/// Numeric JSON-RPC code for overload rejection (`wimoai-tool-protocol`
 /// `error_codes.rs`: `-32016` "tool_busy").
 pub(crate) const TOOL_BUSY_CODE: i32 = -32016;
 
@@ -38,7 +38,7 @@ pub(crate) const DEFAULT_CONN_MAX_INFLIGHT: usize = 256;
 pub(crate) const DEFAULT_ADMISSION_WAIT_TIMEOUT: Duration = Duration::from_secs(3);
 
 /// Ops-tunable override for the process-wide global cap (Helm `env:`).
-const GLOBAL_MAX_INFLIGHT_ENV: &str = "wimo ai_TOOL_SERVER_GLOBAL_MAX_INFLIGHT";
+const GLOBAL_MAX_INFLIGHT_ENV: &str = "wimoai_TOOL_SERVER_GLOBAL_MAX_INFLIGHT";
 
 /// Inflight-gauge scope labels, in acquisition order. A held [`AdmitGuard`]
 /// counts against all three.
@@ -64,7 +64,7 @@ pub(crate) fn overloaded_response(id: JsonRpcId, session_id: SessionId) -> JsonR
 /// Process-wide global admission semaphore, shared by every connection.
 ///
 /// Initialized once at first use: the value comes from
-/// `wimo ai_TOOL_SERVER_GLOBAL_MAX_INFLIGHT` when present and parseable as a
+/// `wimoai_TOOL_SERVER_GLOBAL_MAX_INFLIGHT` when present and parseable as a
 /// positive integer, otherwise `default_cap` (the builder knob, default
 /// [`DEFAULT_GLOBAL_MAX_INFLIGHT`]). Because the cell initializes exactly
 /// once, the first caller's `default_cap` and the env var at that instant

@@ -1,8 +1,8 @@
 use std::io;
 
 use tokio::sync::{mpsc, oneshot};
-use wimo ai_chat_state::{ChatPersistence, StrictAppendAck, StrictAppendError};
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_chat_state::{ChatPersistence, StrictAppendAck, StrictAppendError};
+use wimoai_wimo_sampling_types::ConversationItem;
 
 use super::persistence::PersistenceMsg;
 

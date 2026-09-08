@@ -1,4 +1,4 @@
-//! Reminder policy: wraps wimo ai-wimo-tools reminder config.
+//! Reminder policy: wraps wimoai-wimo-tools reminder config.
 
 /// Default per-prompt fire cap for the runtime turn-end TodoGate.
 /// Used only as the default for `TodoGateConfig`.
@@ -51,7 +51,7 @@ impl Default for TodoNudgeConfig {
 ///
 /// The gate inspects `TodoState` after every content-only assistant message.
 /// It forces another turn via `<system-reminder>` injection if pending or unbacked in-progress todos remain.
-/// See `wimo ai-wimo-shell::session::acp_session::evaluate_todo_gate`.
+/// See `wimoai-wimo-shell::session::acp_session::evaluate_todo_gate`.
 ///
 /// **Disabled by default.** Operators opt in via the `todo_gate_enabled = true` remote settings key.
 /// The `--todo-gate` CLI flag also force-enables it for the session, at highest precedence.

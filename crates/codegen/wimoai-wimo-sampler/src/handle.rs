@@ -1,6 +1,6 @@
 use tokio::sync::{mpsc, oneshot};
 
-use wimo ai_wimo_sampling_types::{ConversationRequest, ConversationResponse, SamplingError};
+use wimoai_wimo_sampling_types::{ConversationRequest, ConversationResponse, SamplingError};
 
 use crate::actor::request_task::CompletionResult;
 use crate::commands::SamplerCommand;

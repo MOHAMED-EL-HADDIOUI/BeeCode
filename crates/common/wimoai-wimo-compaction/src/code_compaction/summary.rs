@@ -1,6 +1,6 @@
 //! Summary output cleaning and carrier formatting.
 //!
-//! Moved verbatim from `wimo ai-chat-state`'s `compaction_utils`. Covers:
+//! Moved verbatim from `wimoai-chat-state`'s `compaction_utils`. Covers:
 //!
 //! - cleaning the compaction model's raw output ([`format_compact_summary`]),
 //! - the wimo continuation carrier ([`format_compact_summary_content`]),

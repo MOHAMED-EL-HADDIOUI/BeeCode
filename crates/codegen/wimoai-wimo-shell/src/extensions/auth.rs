@@ -63,7 +63,7 @@ async fn handle_get_bearer_token(agent: &MvpAgent) -> ExtResult {
 }
 
 fn handle_get_api_key() -> ExtResult {
-    let key = crate::agent::auth_method::read_wimo ai_api_key_env().ok();
+    let key = crate::agent::auth_method::read_wimoai_api_key_env().ok();
     ExtMethodResult::success(serde_json::json!({ "key": key }))
         .to_ext_response()
         .map_err(|e| acp::Error::internal_error().data(e.to_string()))
@@ -78,18 +78,18 @@ fn handle_set_api_key(args: &acp::ExtRequest) -> ExtResult {
             crate::auth::clear_api_key(&wimo_home)
                 .map_err(|e| acp::Error::internal_error().data(e.to_string()))?;
             // SAFETY: ext_method is single-threaded per agent
-            unsafe { std::env::remove_var("wimo ai_API_KEY") };
+            unsafe { std::env::remove_var("wimoai_API_KEY") };
         } else {
             crate::auth::store_api_key(&wimo_home, k)
                 .map_err(|e| acp::Error::internal_error().data(e.to_string()))?;
             // SAFETY: ext_method is single-threaded per agent
-            unsafe { std::env::set_var("wimo ai_API_KEY", k) };
+            unsafe { std::env::set_var("wimoai_API_KEY", k) };
         }
     } else {
         crate::auth::clear_api_key(&wimo_home)
             .map_err(|e| acp::Error::internal_error().data(e.to_string()))?;
         // SAFETY: ext_method is single-threaded per agent
-        unsafe { std::env::remove_var("wimo ai_API_KEY") };
+        unsafe { std::env::remove_var("wimoai_API_KEY") };
     }
     ExtMethodResult::success(serde_json::json!({ "ok": true }))
         .to_ext_response()

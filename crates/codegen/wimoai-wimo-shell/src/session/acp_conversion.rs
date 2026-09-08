@@ -1,6 +1,6 @@
-//! ACP conversion functions for `wimo ai-wimo-tools`'s `ToolOutput`.
+//! ACP conversion functions for `wimoai-wimo-tools`'s `ToolOutput`.
 //!
-//! These standalone functions convert `wimo ai_wimo_tools::types::output::ToolOutput`
+//! These standalone functions convert `wimoai_wimo_tools::types::output::ToolOutput`
 //! into ACP protocol types (`acp::ToolCallUpdate`, `acp::Plan`).
 //!
 //! `raw_output` is serialized directly from ToolOutput via serde, with no manual JSON
@@ -12,11 +12,11 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::types::output::{
+use wimoai_wimo_tools::types::output::{
     ApplyPatchOutput, CodexGrepFilesOutput, ListDirOutput, MCPOutputDetails, ReadFileOutput,
     SearchReplaceEditContextInformation, SearchReplaceEditDetail, SearchReplaceOutput, ToolOutput,
 };
-use wimo ai_tool_types::{KillTaskOutput, TaskOutputOutput};
+use wimoai_tool_types::{KillTaskOutput, TaskOutputOutput};
 
 /// Rewrites real worktree paths to display paths in serialized output.
 ///
@@ -148,7 +148,7 @@ pub(crate) fn acp_tool_update(
                 }
                 ReadFileOutput::ImageContent(image_content) => {
                     // Construct the ACP `ImageContent` directly from the tool's local image type rather than going
-                    // through a `From` impl on the tools crate, so that `wimo ai-wimo-tools` stays free of an `agent-client-protocol` dependency
+                    // through a `From` impl on the tools crate, so that `wimoai-wimo-tools` stays free of an `agent-client-protocol` dependency
                     let content = Some(vec![acp::ToolCallContent::from(acp::ContentBlock::Image(
                         acp::ImageContent::new(
                             image_content.data.clone(),
@@ -291,7 +291,7 @@ pub(crate) fn acp_tool_update(
         // Success (Content) maps to Completed; errors (DomainNotAllowed, CrossHostRedirect) map to Failed
         // This matches the pattern used by ReadFile, ListDir, and SearchReplace.
         ToolOutput::WebFetch(web_fetch_output) => {
-            use wimo ai_wimo_tools::types::output::WebFetchOutput;
+            use wimoai_wimo_tools::types::output::WebFetchOutput;
             let status = match web_fetch_output {
                 WebFetchOutput::Content(_) => acp::ToolCallStatus::Completed,
                 WebFetchOutput::DomainNotAllowed(_)
@@ -315,7 +315,7 @@ pub(crate) fn acp_tool_update(
         // Error variants (e.g., DuplicateId) get `Failed` status so the Python
         // side can distinguish tool-logic errors from infra errors via raw_output.
         ToolOutput::Todo(todo_output) => {
-            use wimo ai_wimo_tools::types::output::TodoWriteOutput;
+            use wimoai_wimo_tools::types::output::TodoWriteOutput;
             let (status, content) = match todo_output {
                 TodoWriteOutput::TodosUpdated(_) => (acp::ToolCallStatus::Completed, None),
                 TodoWriteOutput::DuplicateId(msg) | TodoWriteOutput::InvalidArgument(msg) => (
@@ -549,7 +549,7 @@ pub(crate) fn acp_tool_update(
             ))
         }
         ToolOutput::SendSubagentMessage(send) => {
-            use wimo ai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageDisposition;
+            use wimoai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageDisposition;
 
             let status = match send.disposition() {
                 SendSubagentMessageDisposition::Accepted
@@ -568,10 +568,10 @@ pub(crate) fn acp_tool_update(
         }
         ToolOutput::AskUserQuestion(ask) => {
             let message = match ask {
-                wimo ai_wimo_tools::types::output::AskUserQuestionOutput::UserAnswered { message } => {
+                wimoai_wimo_tools::types::output::AskUserQuestionOutput::UserAnswered { message } => {
                     message.clone()
                 }
-                wimo ai_wimo_tools::types::output::AskUserQuestionOutput::QuestionsSent {
+                wimoai_wimo_tools::types::output::AskUserQuestionOutput::QuestionsSent {
                     message,
                     ..
                 } => message.clone(),
@@ -588,7 +588,7 @@ pub(crate) fn acp_tool_update(
         }
         ToolOutput::EnterPlanMode(enter) => {
             let message = match enter {
-                wimo ai_wimo_tools::types::output::EnterPlanModeOutput::Entered { message, .. } => {
+                wimoai_wimo_tools::types::output::EnterPlanModeOutput::Entered { message, .. } => {
                     message.clone()
                 }
             };
@@ -605,10 +605,10 @@ pub(crate) fn acp_tool_update(
         }
         ToolOutput::ExitPlanMode(exit) => {
             let message = match exit {
-                wimo ai_wimo_tools::types::output::ExitPlanModeOutput::PlanReady {
+                wimoai_wimo_tools::types::output::ExitPlanModeOutput::PlanReady {
                     message, ..
                 } => message.clone(),
-                wimo ai_wimo_tools::types::output::ExitPlanModeOutput::EmptyPlan {
+                wimoai_wimo_tools::types::output::ExitPlanModeOutput::EmptyPlan {
                     message, ..
                 } => message.clone(),
             };
@@ -645,12 +645,12 @@ pub(crate) fn acp_tool_update(
 ///
 /// Returns `None` for non-Todo outputs.
 ///
-/// This converts `wimo ai-wimo-tools`' TodoItem (which has `id`, `content: Option<String>`,
+/// This converts `wimoai-wimo-tools`' TodoItem (which has `id`, `content: Option<String>`,
 /// `status: Option<String>`) to `acp::PlanEntry` (which has `content`, `priority`, `status`).
 /// The `id` is not directly represented in `PlanEntry` but the ordering is preserved.
 pub(crate) fn acp_plan_update(output: &ToolOutput) -> Option<acp::Plan> {
     use crate::tools::todo::plan_entry_from_todo_item;
-    use wimo ai_wimo_tools::types::output::TodoWriteOutput;
+    use wimoai_wimo_tools::types::output::TodoWriteOutput;
     match output {
         ToolOutput::Todo(TodoWriteOutput::TodosUpdated(success)) => {
             let entries = success
@@ -753,11 +753,11 @@ fn build_apply_patch_edit_details(
 mod tests {
     use super::*;
     use std::path::PathBuf;
-    use wimo ai_wimo_tools::types::output::*;
+    use wimoai_wimo_tools::types::output::*;
 
     #[test]
     fn test_acp_tool_update_send_subagent_message_outcomes_are_terminal() {
-        use wimo ai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageOutput::*;
+        use wimoai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageOutput::*;
 
         for (send, expected_status) in [
             (
@@ -823,7 +823,7 @@ mod tests {
         let output = ToolOutput::Todo(TodoWriteOutput::TodosUpdated(TodoWriteSuccess {
             summary_for_prompt: "tasks".to_string(),
             todos: vec![],
-            state: wimo ai_wimo_tools::implementations::wimo::todo::TodoState::default(),
+            state: wimoai_wimo_tools::implementations::wimo::todo::TodoState::default(),
         }));
         let update = acp_tool_update(&output, "call-1", None, None).unwrap();
         assert_eq!(update.fields.status, Some(acp::ToolCallStatus::Completed));
@@ -832,7 +832,7 @@ mod tests {
     #[test]
     fn test_turn_end_plan_cleanup_preserves_semantics_and_priority() {
         use crate::tools::todo::plan_entry_from_todo_item;
-        use wimo ai_wimo_tools::implementations::wimo::todo::{
+        use wimoai_wimo_tools::implementations::wimo::todo::{
             TodoItem, TodoPriority, TodoStatus,
         };
 
@@ -902,16 +902,16 @@ mod tests {
         let output = ToolOutput::Todo(TodoWriteOutput::TodosUpdated(TodoWriteSuccess {
             summary_for_prompt: "tasks".to_string(),
             todos: vec![
-                wimo ai_wimo_tools::implementations::wimo::todo::TodoItem {
+                wimoai_wimo_tools::implementations::wimo::todo::TodoItem {
                     content: "Task 1".to_string(),
                     priority:
-                        wimo ai_wimo_tools::implementations::wimo::todo::TodoPriority::Medium,
+                        wimoai_wimo_tools::implementations::wimo::todo::TodoPriority::Medium,
                     status:
-                        wimo ai_wimo_tools::implementations::wimo::todo::TodoStatus::Completed,
+                        wimoai_wimo_tools::implementations::wimo::todo::TodoStatus::Completed,
                     meta: None,
                 },
             ],
-            state: wimo ai_wimo_tools::implementations::wimo::todo::TodoState::default(),
+            state: wimoai_wimo_tools::implementations::wimo::todo::TodoState::default(),
         }));
         let plan = acp_plan_update(&output).unwrap();
         assert_eq!(plan.entries.len(), 1);

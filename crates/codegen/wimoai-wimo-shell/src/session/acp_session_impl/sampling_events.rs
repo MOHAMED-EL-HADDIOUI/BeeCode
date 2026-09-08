@@ -11,16 +11,16 @@ impl SessionActor {
         .await;
     }
 
-    /// Translate one [`wimo ai_wimo_sampler::SamplingEvent`] from the per-session sampler actor into the corresponding ACP / shell side-effects.
+    /// Translate one [`wimoai_wimo_sampler::SamplingEvent`] from the per-session sampler actor into the corresponding ACP / shell side-effects.
     ///
     /// Called from the drainer task spawned in `spawn_session_actor`, which loops `while let Some(event) = sampler_event_rx.recv().await`.
     /// This function only maps events; recovery (compaction, friendly errors) lives in [`Self::handle_sampling_failure`] in the turn loop.
     /// Recovery runs there because it needs per-turn state and may call back into `sampler_handle.update_config` or resubmit.
     pub(crate) async fn handle_sampling_event(
         self: &Arc<Self>,
-        event: wimo ai_wimo_sampler::SamplingEvent,
+        event: wimoai_wimo_sampler::SamplingEvent,
     ) {
-        use wimo ai_wimo_sampler::{SamplingChannel, SamplingEvent};
+        use wimoai_wimo_sampler::{SamplingChannel, SamplingEvent};
 
         let request_owned = self
             .turn_stream_drained
@@ -160,7 +160,7 @@ impl SessionActor {
                 // Forward to clients as a `tool_call_delta_chunk` wimo AI session update through the buffered path
                 // This mirrors how AgentMessageChunk and AgentThoughtChunk are routed: no per-chunk hook dispatch, no persistence
                 // The canonical acp::SessionUpdate::ToolCall is the source of truth for replay
-                self.send_buffered_wimo ai_update(wimo aiSessionUpdate::ToolCallDeltaChunk {
+                self.send_buffered_wimoai_update(wimoaiSessionUpdate::ToolCallDeltaChunk {
                     tool_call_id: id,
                     tool_index,
                     name,
@@ -178,7 +178,7 @@ impl SessionActor {
             } => {
                 // Ride the buffered chunk rail (the same FIFO `event_tx` as `send_update`) so this lands ahead of the response's first agent chunk
                 // That lets partial framing in headless mode emit the real `message_start` id and input usage in order
-                self.send_buffered_wimo ai_update(wimo aiSessionUpdate::ResponseStarted {
+                self.send_buffered_wimoai_update(wimoaiSessionUpdate::ResponseStarted {
                     message_id: Some(message_id),
                     model: Some(model),
                     input_tokens,
@@ -190,7 +190,7 @@ impl SessionActor {
             SamplingEvent::ReasoningCompleted { signature, .. } => {
                 // Ride the buffered chunk rail so this lands right after the response's thought chunks and before its text
                 // That lets partial framing in headless mode emit `signature_delta` before the thinking block's `content_block_stop`
-                self.send_buffered_wimo ai_update(wimo aiSessionUpdate::ReasoningCompleted {
+                self.send_buffered_wimoai_update(wimoaiSessionUpdate::ReasoningCompleted {
                     signature: Some(signature),
                 })
                 .await;
@@ -324,7 +324,7 @@ impl SessionActor {
                 if !self.turn_stream_drained.lock().contains_key(&request_id) {
                     return;
                 }
-                if kind == wimo ai_wimo_sampler::SamplingErrorKind::DoomLoopDetected {
+                if kind == wimoai_wimo_sampler::SamplingErrorKind::DoomLoopDetected {
                     let triggers = doom_loop_triggers.unwrap_or_default();
                     let (should_count, should_stamp) = {
                         let mut tally = self.doom_loop_turn_tally.lock();
@@ -353,7 +353,7 @@ impl SessionActor {
                         );
                     }
                 }
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "shell.turn.inference_retry",
                     Some(self.session_info.id.0.as_ref()),
                     Some(serde_json::json!({
@@ -364,7 +364,7 @@ impl SessionActor {
                         "reason": crate::util::truncate(&reason, 300),
                     })),
                 );
-                self.send_wimo ai_notification(wimo aiSessionUpdate::RetryState(
+                self.send_wimoai_notification(wimoaiSessionUpdate::RetryState(
                     crate::extensions::notification::RetryState::Retrying {
                         attempt,
                         max_retries,
@@ -385,7 +385,7 @@ impl SessionActor {
                 // This arm only records telemetry
                 // The terminal error fires through `submit_and_collect`'s Result branch
                 // The turn loop's `handle_sampling_failure` decides whether to compact or show a friendly message
-                wimo ai_wimo_telemetry::unified_log::error(
+                wimoai_wimo_telemetry::unified_log::error(
                     "shell.turn.inference_failed",
                     Some(self.session_info.id.0.as_ref()),
                     Some(serde_json::json!({

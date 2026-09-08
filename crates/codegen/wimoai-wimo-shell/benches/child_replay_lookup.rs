@@ -7,10 +7,10 @@
 //! order as a fat local `~/.wimo/sessions`). Override with env:
 //!
 //! ```text
-//! cargo bench -p wimo ai-wimo-shell --bench child_replay_lookup
+//! cargo bench -p wimoai-wimo-shell --bench child_replay_lookup
 //! CHILD_REPLAY_LOOKUP_CWDS=3000 CHILD_REPLAY_LOOKUP_PER_CWD=3 cargo bench ...
 //! # read-only against a real store (no writes):
-//! CHILD_REPLAY_LOOKUP_HOME=$HOME/.wimo cargo bench -p wimo ai-wimo-shell --bench child_replay_lookup
+//! CHILD_REPLAY_LOOKUP_HOME=$HOME/.wimo cargo bench -p wimoai-wimo-shell --bench child_replay_lookup
 //! ```
 
 use std::fs;
@@ -22,8 +22,8 @@ use criterion::{
     BenchmarkId, Criterion, SamplingMode, Throughput, criterion_group, criterion_main,
 };
 use tempfile::TempDir;
-use wimo ai_wimo_config::encode_cwd_dirname;
-use wimo ai_wimo_shell::session::storage::{
+use wimoai_wimo_config::encode_cwd_dirname;
+use wimoai_wimo_shell::session::storage::{
     ReplayEmission, ReplayLookupFallback, ReplayPathHint, stream_replay_updates_at_hinted,
 };
 

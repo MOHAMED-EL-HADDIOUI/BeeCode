@@ -519,7 +519,7 @@ impl<'a, 'b, 'syn, 'oc> MarkdownParser<'a, 'b, 'syn, 'oc> {
         self.pending_code_block = None;
 
         for (event, range) in
-            TextMergeWithOffset::new(wimo ai_wimo_markdown_core::offset_events(self.text))
+            TextMergeWithOffset::new(wimoai_wimo_markdown_core::offset_events(self.text))
         {
             self.on_event(event, range);
         }

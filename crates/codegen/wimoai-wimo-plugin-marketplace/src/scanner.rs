@@ -155,9 +155,9 @@ fn scan_filesystem(root: &Path) -> Vec<MarketplaceEntry> {
 
 fn scan_single_plugin(plugin_dir: &Path, relative_path: &str) -> MarketplaceEntry {
     // Load manifest using runtime conventions.
-    let manifest_result = wimo ai_wimo_agent::plugins::manifest::load_manifest(plugin_dir);
+    let manifest_result = wimoai_wimo_agent::plugins::manifest::load_manifest(plugin_dir);
     let manifest = match &manifest_result {
-        Ok(wimo ai_wimo_agent::plugins::manifest::ManifestLoadResult::Found(m)) => Some(m.as_ref()),
+        Ok(wimoai_wimo_agent::plugins::manifest::ManifestLoadResult::Found(m)) => Some(m.as_ref()),
         _ => None,
     };
     let dir_name = plugin_dir

@@ -7,13 +7,13 @@
 )]
 //! Local data collection: upload queueing and S3-compatible blob storage.
 pub(crate) mod circuit_breaker_observer;
-/// Wrap a raw client with [`wimo ai_wimo_auth::AuthRetryMiddleware`] for automatic 401 retry.
+/// Wrap a raw client with [`wimoai_wimo_auth::AuthRetryMiddleware`] for automatic 401 retry.
 pub fn with_auth_retry(
     client: reqwest::Client,
-    credentials: std::sync::Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider>,
+    credentials: std::sync::Arc<dyn wimoai_wimo_auth::AuthCredentialProvider>,
 ) -> reqwest_middleware::ClientWithMiddleware {
     reqwest_middleware::ClientBuilder::new(client)
-        .with(wimo ai_wimo_auth::AuthRetryMiddleware::new(credentials, 1))
+        .with(wimoai_wimo_auth::AuthRetryMiddleware::new(credentials, 1))
         .build()
 }
 pub mod gcs;

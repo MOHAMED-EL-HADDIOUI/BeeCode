@@ -8,11 +8,11 @@
 //!
 //! Both accounts also suppress the welcome privacy banner even with `wimo_PRIVACY_NOTICE_ROLLOUT=1`.
 //! That is asserted on the authenticated welcome screen before opening settings.
-//! Row/input details are unit-tested in `wimo ai-wimo-pager` (`views/settings_modal/tests.rs`, `locked_coding_*`).
+//! Row/input details are unit-tested in `wimoai-wimo-pager` (`views/settings_modal/tests.rs`, `locked_coding_*`).
 //! This suite covers the auth-to-render pipeline.
 //!
 //! ```bash
-//! cargo test -p wimo ai-wimo-pager-pty-harness --test settings_locked_row_e2e \
+//! cargo test -p wimoai-wimo-pager-pty-harness --test settings_locked_row_e2e \
 //!   -- --ignored --nocapture
 //! ```
 
@@ -20,7 +20,7 @@ use std::path::Path;
 use std::time::Duration;
 
 use anyhow::{Context, Result};
-use wimo ai_wimo_pager_pty_harness::{
+use wimoai_wimo_pager_pty_harness::{
     ContentController, EnvOp, PtyHarness, keys, pager_binary, seed_fake_oauth_team_member,
     seed_fake_oauth_zdr_team,
 };
@@ -37,7 +37,7 @@ const TEAM_REASON: &str = "Managed by your team admin.";
 /// Head of the row's description in `settings/defs.rs`.
 /// It is kept short so it can't span one of the modal's word wraps.
 /// `contains_text` joins rows with `\n`, so a match on wrapped copy would silently never fire.
-const DESCRIPTION_PREFIX: &str = "Opt-in to provide Spacewimo ai";
+const DESCRIPTION_PREFIX: &str = "Opt-in to provide Spacewimoai";
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 #[ignore] // opt-in: spawns the real pager binary in a PTY (CI runs with --ignored)
@@ -52,14 +52,14 @@ async fn team_member_sees_admin_managed_row_and_no_banner() {
 }
 
 /// The rollout flag is forced on: the banner would show for a plain opted-out user.
-/// The sandbox's fake `wimo ai_API_KEY` is removed so the seeded team OAuth entry is the active auth.
+/// The sandbox's fake `wimoai_API_KEY` is removed so the seeded team OAuth entry is the active auth.
 /// ZDR product access is enabled; without it a ZDR account gets the blocked welcome screen ("not yet available") and can never reach settings.
 /// The row lock and banner suppression key off `is_zdr` regardless.
 fn locked_row_env_ops() -> [EnvOp<'static>; 3] {
     [
         EnvOp::set("wimo_PRIVACY_NOTICE_ROLLOUT", "1"),
         EnvOp::set("wimo_ZDR_ACCESS_ENABLED", "1"),
-        EnvOp::remove("wimo ai_API_KEY"),
+        EnvOp::remove("wimoai_API_KEY"),
     ]
 }
 

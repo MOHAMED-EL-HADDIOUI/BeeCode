@@ -6,7 +6,7 @@
 //! The sampler prompts the user and replies with a matching `Vec<UserAnswer>` on the tool's bidi response sender.
 //!
 //! TODO(workspace): align with the canonical question/answer types in
-//! `wimo ai-wimo-tools` once the `ask_user_question` tool is extracted
+//! `wimoai-wimo-tools` once the `ask_user_question` tool is extracted
 //! into the workspace crate.
 
 use serde::{Deserialize, Serialize};

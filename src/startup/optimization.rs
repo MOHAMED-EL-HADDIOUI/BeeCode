@@ -1,5 +1,5 @@
 //! Startup optimization — REAL lazy-load framework (Section 35 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub struct StartupState {
     pub terminal_initialized: bool,

@@ -139,28 +139,28 @@ impl crate::types::tool_metadata::ToolMetadata for HashlineReadTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for HashlineReadTool {
+impl wimoai_tool_runtime::Tool for HashlineReadTool {
     type Args = ReadFileInput;
     type Output = ReadFileOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("hashline_read").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("hashline_read").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "hashline_read",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -172,9 +172,9 @@ impl wimo ai_tool_runtime::Tool for HashlineReadTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: ReadFileInput,
-    ) -> Result<ReadFileOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ReadFileOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -184,7 +184,7 @@ impl wimo ai_tool_runtime::Tool for HashlineReadTool {
         // tracking records the window, and reminders observe the window.
         let cwd_override = ctx
             .extensions
-            .get::<wimo ai_tool_runtime::Cwd>()
+            .get::<wimoai_tool_runtime::Cwd>()
             .map(|c| c.0.clone());
         // `None`: the hashline tool does not stream, so it needs no
         // text-path streamability signal (see `run_read_file`).
@@ -219,7 +219,7 @@ impl wimo ai_tool_runtime::Tool for HashlineReadTool {
                     let s = params
                         .0
                         .build_scheme()
-                        .map_err(wimo ai_tool_runtime::ToolError::invalid_arguments)?;
+                        .map_err(wimoai_tool_runtime::ToolError::invalid_arguments)?;
                     let fs = res.require::<FileSystem>()?.0.clone();
                     let content = match fs.read_file(&fc.absolute_path).await {
                         Ok(bytes) => String::from_utf8_lossy(&bytes).into_owned(),
@@ -362,9 +362,9 @@ mod tests {
     fn tool_metadata() {
         use crate::types::tool_metadata::ToolMetadata;
         let tool = HashlineReadTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "hashline_read");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "hashline_read");
         assert_eq!(ToolMetadata::kind(&tool), ToolKind::Read);
-        assert!(wimo ai_tool_runtime::Tool::capabilities(&tool).is_read_only);
+        assert!(wimoai_tool_runtime::Tool::capabilities(&tool).is_read_only);
         assert!(matches!(
             ToolMetadata::tool_namespace(&tool),
             ToolNamespace::WimoHashline
@@ -430,7 +430,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -473,7 +473,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -513,7 +513,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -536,7 +536,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -561,7 +561,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -597,7 +597,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -660,7 +660,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -711,7 +711,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -746,7 +746,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -781,7 +781,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -816,7 +816,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 
@@ -846,7 +846,7 @@ mod tests {
             format: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(resources.into_shared()), input)
             .await
             .unwrap();
 

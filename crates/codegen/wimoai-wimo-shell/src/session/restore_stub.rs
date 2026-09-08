@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use anyhow::{Result, bail};
-use wimo ai_file_utils::storage_client::StorageClient;
+use wimoai_file_utils::storage_client::StorageClient;
 
 use crate::agent::session_registry_client::{SessionRecord, SessionRegistryClient};
 

@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Result, bail};
 use clap::{Subcommand, ValueEnum};
-use wimo ai_wimo_shell::util::config::{McpServerConfig, McpServerTransportConfig};
+use wimoai_wimo_shell::util::config::{McpServerConfig, McpServerTransportConfig};
 
 use crate::util::display_user_wimo_path;
 
@@ -160,8 +160,8 @@ pub async fn run(mcp_args: McpArgs) -> Result<()> {
 fn run_list(json: bool) -> Result<()> {
     // Include project-scoped servers (nearest definition wins), matching what a session started in this directory would load from config.toml files
     let cwd = current_dir_or_exit();
-    let servers = wimo ai_wimo_shell::util::config::load_mcp_server_configs_with_project(&cwd);
-    let disabled = wimo ai_wimo_shell::util::config::disabled_mcp_server_names(&cwd);
+    let servers = wimoai_wimo_shell::util::config::load_mcp_server_configs_with_project(&cwd);
+    let disabled = wimoai_wimo_shell::util::config::disabled_mcp_server_names(&cwd);
 
     if json {
         let payload: serde_json::Value = servers
@@ -260,7 +260,7 @@ async fn run_add(args: AddArgs) -> Result<()> {
     };
 
     let path = scope_target(args.scope);
-    wimo ai_wimo_shell::util::config::save_mcp_server_config_at(&path, name, &config).await?;
+    wimoai_wimo_shell::util::config::save_mcp_server_config_at(&path, name, &config).await?;
     println!("Added {summary} to {} config", args.scope.label());
     println!("File modified: {}", scope_display(args.scope, &path));
     Ok(())
@@ -491,9 +491,9 @@ fn current_dir_or_exit() -> PathBuf {
 /// Resolve the config file path for a scope.
 fn scope_target(scope: McpScope) -> PathBuf {
     match scope {
-        McpScope::User => wimo ai_wimo_shell::util::config::user_config_path(),
+        McpScope::User => wimoai_wimo_shell::util::config::user_config_path(),
         McpScope::Project => {
-            wimo ai_wimo_shell::util::config::project_config_path(&current_dir_or_exit())
+            wimoai_wimo_shell::util::config::project_config_path(&current_dir_or_exit())
         }
     }
 }
@@ -501,7 +501,7 @@ fn scope_target(scope: McpScope) -> PathBuf {
 /// Display form of a scope's config file path.
 fn scope_display(scope: McpScope, path: &Path) -> String {
     match scope {
-        McpScope::User => display_user_wimo_path(wimo ai_wimo_config::USER_CONFIG_FILENAME),
+        McpScope::User => display_user_wimo_path(wimoai_wimo_config::USER_CONFIG_FILENAME),
         McpScope::Project => path.display().to_string(),
     }
 }
@@ -522,7 +522,7 @@ fn select_remove_site(
     project_site: Option<PathBuf>,
     scope: Option<McpScope>,
 ) -> Result<(McpScope, PathBuf), RemoveError> {
-    use wimo ai_wimo_shell::util::config::user_config_path;
+    use wimoai_wimo_shell::util::config::user_config_path;
 
     match scope {
         Some(McpScope::User) => user_defined
@@ -551,7 +551,7 @@ fn surviving_definition(
             user_defined.then(|| {
                 (
                     McpScope::User,
-                    wimo ai_wimo_shell::util::config::user_config_path(),
+                    wimoai_wimo_shell::util::config::user_config_path(),
                 )
             })
         })
@@ -560,7 +560,7 @@ fn surviving_definition(
 /// Known names come from TOML, the disabled list, compat JSON, and plugins.
 /// Gateway connectors are rejected earlier (colon names).
 fn mcp_server_is_known(name: &str, cwd: &Path) -> bool {
-    wimo ai_wimo_shell::util::config::cli_known_mcp_server_names(cwd).contains(name)
+    wimoai_wimo_shell::util::config::cli_known_mcp_server_names(cwd).contains(name)
 }
 
 fn is_gateway_cli_toggle_name(name: &str) -> bool {
@@ -568,7 +568,7 @@ fn is_gateway_cli_toggle_name(name: &str) -> bool {
 }
 
 fn available_mcp_server_names(cwd: &Path) -> Vec<String> {
-    let mut names: Vec<String> = wimo ai_wimo_shell::util::config::cli_known_mcp_server_names(cwd)
+    let mut names: Vec<String> = wimoai_wimo_shell::util::config::cli_known_mcp_server_names(cwd)
         .into_iter()
         .collect();
     names.sort();
@@ -600,12 +600,12 @@ async fn run_set_enabled(name: &str, enabled: bool) -> Result<()> {
         std::process::exit(1);
     }
 
-    let was_disabled = wimo ai_wimo_shell::util::config::disabled_mcp_server_names(&cwd).contains(name);
+    let was_disabled = wimoai_wimo_shell::util::config::disabled_mcp_server_names(&cwd).contains(name);
 
     let modified =
-        wimo ai_wimo_shell::util::config::save_mcp_server_enabled_in(name, enabled, &cwd).await?;
+        wimoai_wimo_shell::util::config::save_mcp_server_enabled_in(name, enabled, &cwd).await?;
 
-    let now_disabled = wimo ai_wimo_shell::util::config::disabled_mcp_server_names(&cwd).contains(name);
+    let now_disabled = wimoai_wimo_shell::util::config::disabled_mcp_server_names(&cwd).contains(name);
     let now_enabled = !now_disabled;
 
     if enabled && now_disabled {
@@ -628,12 +628,12 @@ async fn run_set_enabled(name: &str, enabled: bool) -> Result<()> {
         println!("Disabled MCP server '{name}'.");
     }
 
-    let user_config = wimo ai_wimo_shell::util::config::user_config_path();
+    let user_config = wimoai_wimo_shell::util::config::user_config_path();
     for path in &modified {
         if path == &user_config {
             println!(
                 "File modified: {}",
-                display_user_wimo_path(wimo ai_wimo_config::USER_CONFIG_FILENAME)
+                display_user_wimo_path(wimoai_wimo_config::USER_CONFIG_FILENAME)
             );
         } else {
             println!("File modified: {}", path.display());
@@ -643,7 +643,7 @@ async fn run_set_enabled(name: &str, enabled: bool) -> Result<()> {
 }
 
 async fn run_remove(name: &str, requested_scope: Option<McpScope>) -> Result<()> {
-    use wimo ai_wimo_shell::util::config::{
+    use wimoai_wimo_shell::util::config::{
         delete_mcp_server_config_at, mcp_server_defined_at, user_config_path,
     };
 
@@ -651,7 +651,7 @@ async fn run_remove(name: &str, requested_scope: Option<McpScope>) -> Result<()>
 
     // Project configs from cwd up to the repo root, nearest first.
     let find_project_site = || {
-        wimo ai_wimo_shell::config::find_project_configs(&cwd)
+        wimoai_wimo_shell::config::find_project_configs(&cwd)
             .into_iter()
             .rev()
             .find(|path| mcp_server_defined_at(path, name))
@@ -670,7 +670,7 @@ async fn run_remove(name: &str, requested_scope: Option<McpScope>) -> Result<()>
             eprintln!("MCP server '{name}' exists in multiple scopes:");
             eprintln!(
                 "  user: {}",
-                display_user_wimo_path(wimo ai_wimo_config::USER_CONFIG_FILENAME)
+                display_user_wimo_path(wimoai_wimo_config::USER_CONFIG_FILENAME)
             );
             eprintln!("  project: {}", project_path.display());
             eprintln!("Specify which one to remove, e.g.: wimo mcp remove {name} --scope project");
@@ -704,7 +704,7 @@ async fn run_remove(name: &str, requested_scope: Option<McpScope>) -> Result<()>
 
 async fn run_doctor(json: bool, name: Option<String>) -> Result<()> {
     let cwd = current_dir_or_exit();
-    let report = wimo ai_wimo_shell::mcp_doctor::run_doctor(&cwd, name.as_deref()).await;
+    let report = wimoai_wimo_shell::mcp_doctor::run_doctor(&cwd, name.as_deref()).await;
 
     if let Some(ref filter) = name
         && report.servers.is_empty()
@@ -722,7 +722,7 @@ async fn run_doctor(json: bool, name: Option<String>) -> Result<()> {
             serde_json::to_string_pretty(&report).unwrap_or_default()
         );
     } else {
-        wimo ai_wimo_shell::mcp_doctor::print_report(&report);
+        wimoai_wimo_shell::mcp_doctor::print_report(&report);
     }
 
     if report.failing_count > 0 {
@@ -1277,7 +1277,7 @@ mod tests {
             defined
                 .path()
                 .join(".wimo")
-                .join(wimo ai_wimo_config::USER_CONFIG_FILENAME),
+                .join(wimoai_wimo_config::USER_CONFIG_FILENAME),
             format!(
                 r#"
 [mcp_servers.{name}]
@@ -1327,7 +1327,7 @@ url = "https://mcp.example.test/sse"
 
     #[test]
     fn select_remove_site_covers_scope_presence_matrix() {
-        let user = wimo ai_wimo_shell::util::config::user_config_path();
+        let user = wimoai_wimo_shell::util::config::user_config_path();
         let project = PathBuf::from("/repo/.wimo/config.toml");
 
         // No scope: a single hit resolves, both scopes is ambiguous, neither is NotFound
@@ -1371,7 +1371,7 @@ url = "https://mcp.example.test/sse"
 
     #[test]
     fn surviving_definition_prefers_project_then_user() {
-        let user = wimo ai_wimo_shell::util::config::user_config_path();
+        let user = wimoai_wimo_shell::util::config::user_config_path();
         let project = PathBuf::from("/repo/.wimo/config.toml");
 
         // The mirror of the remove note: a user-scope delete with a project survivor (and vice versa) must still report the remaining site

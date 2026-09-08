@@ -4,13 +4,13 @@
 //! A rejected send therefore still shows the exact destination and text that was attempted.
 
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::implementations::wimo::send_subagent_message::{
+use wimoai_wimo_tools::implementations::wimo::send_subagent_message::{
     SEND_SUBAGENT_MESSAGE_TOOL_NAME, SendSubagentMessageDisposition, SendSubagentMessageInput,
     SendSubagentMessageOutput,
 };
-use wimo ai_wimo_tools::tool_taxonomy::{CanonicalToolMeta, TOOL_META_KEY, TOOL_META_VERSION};
-use wimo ai_wimo_tools::types::output::ToolOutput;
-use wimo ai_wimo_tools::types::tool::ToolKind;
+use wimoai_wimo_tools::tool_taxonomy::{CanonicalToolMeta, TOOL_META_KEY, TOOL_META_VERSION};
+use wimoai_wimo_tools::types::output::ToolOutput;
+use wimoai_wimo_tools::types::tool::ToolKind;
 
 use crate::scrollback::block::RenderBlock;
 use crate::scrollback::blocks::tool::{
@@ -35,8 +35,8 @@ pub(super) fn to_block(tool_call: &acp::ToolCall) -> RenderBlock {
         serde_json::from_value::<SendSubagentMessageInput>(input.clone())
             .ok()
             .or_else(|| {
-                match serde_json::from_value::<wimo ai_wimo_tools::types::ToolInput>(input).ok()? {
-                    wimo ai_wimo_tools::types::ToolInput::SendSubagentMessage(input) => Some(input),
+                match serde_json::from_value::<wimoai_wimo_tools::types::ToolInput>(input).ok()? {
+                    wimoai_wimo_tools::types::ToolInput::SendSubagentMessage(input) => Some(input),
                     _ => None,
                 }
             })

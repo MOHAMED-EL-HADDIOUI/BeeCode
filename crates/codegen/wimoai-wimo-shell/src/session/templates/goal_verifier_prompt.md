@@ -90,4 +90,4 @@ Not Refuted
 ```
 
 `Refuted` ⇒ `refuted: true`; `Not Refuted` ⇒ `refuted: false`. The JSON is authoritative; the token is the fast-path signal.
-wimo ai is open source (opensource). Anyone can contribute.
+wimoai is open source (opensource). Anyone can contribute.

@@ -1,4 +1,4 @@
-//! Everything the `wimo ai-wimo-pager-minimal` crate reads and renders through.
+//! Everything the `wimoai-wimo-pager-minimal` crate reads and renders through.
 //!
 //! **If you don't work on the minimal (scrollback-native) render mode, you can ignore this file.**
 //! It is the single place where `minimal` reaches into this crate's view model.
@@ -108,7 +108,7 @@ pub(crate) struct SuspendedMinimalBtwLifecycle {
 ///
 /// The full-fidelity ANSI transcript is a layout and syntax-highlight pass over the whole session; building it in one shot froze the event loop.
 /// The block model is `!Send` (syntect's resumable highlighter state lives inside markdown blocks), so the work cannot move to a worker.
-/// Instead the minimal draw loop renders a time-budgeted slice per frame (`wimo ai-wimo-pager-minimal::full_view::pump_transcript`).
+/// Instead the minimal draw loop renders a time-budgeted slice per frame (`wimoai-wimo-pager-minimal::full_view::pump_transcript`).
 /// It sets `pending_pager_path` when done.
 pub struct TranscriptBuild {
     /// The agent whose conversation this build snapshots.

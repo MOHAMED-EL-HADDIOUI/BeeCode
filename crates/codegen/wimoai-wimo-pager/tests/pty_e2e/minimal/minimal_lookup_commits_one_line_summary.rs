@@ -6,7 +6,7 @@ const BODY_SENTINEL: &str = "READBODYONLYSENTINEL";
 const DONE_SENTINEL: &str = "LOOKUP_TURN_DONE";
 
 /// This test uses `read_file` rather than `grep`: the grep tool shells out to `rg`, which the Bazel remote-exec sandbox lacks.
-/// Only wimo ai-wimo-tools' own test targets ship `@ripgrep_hermetic//:rg`.
+/// Only wimoai-wimo-tools' own test targets ship `@ripgrep_hermetic//:rg`.
 /// A failed `rg` spawn degrades to a zero-match result that vacuously passes the absence assert.
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 #[ignore]

@@ -834,7 +834,7 @@ mod tests {
 mod thread_exhaustion_tests {
     use super::*;
 
-    const CHILD_ENV: &str = "wimo ai_FUZZY_THREAD_EXHAUSTION_CHILD";
+    const CHILD_ENV: &str = "wimoai_FUZZY_THREAD_EXHAUSTION_CHILD";
     const PASS_MARK: &str = "fuzzy-contained:";
     const SKIP_MARK: &str = "skip-child:";
 
@@ -914,7 +914,7 @@ mod thread_exhaustion_tests {
             .arg("--test-threads=1")
             .env(CHILD_ENV, "1")
             .stdin(std::process::Stdio::null());
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         let out = cmd.output().expect("spawn child test process");
         let stdout = String::from_utf8_lossy(&out.stdout);
         let stderr = String::from_utf8_lossy(&out.stderr);

@@ -18,11 +18,11 @@ use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 use common::{FakeBinGuard, reset_home, set_test_version, test_home};
-use wimo ai_wimo_update::UpdateConfig;
-use wimo ai_wimo_update::auto_update::{
+use wimoai_wimo_update::UpdateConfig;
+use wimoai_wimo_update::auto_update::{
     auto_update_target, check_update_status, ensure_latest_on_disk, install_internal_from_base,
 };
-use wimo ai_wimo_update::version::installed_on_disk_version;
+use wimoai_wimo_update::version::installed_on_disk_version;
 
 fn host_platform() -> String {
     let os = if cfg!(target_os = "macos") {

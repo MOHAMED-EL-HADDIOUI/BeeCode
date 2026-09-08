@@ -748,8 +748,8 @@ async fn provider_helper_env_scrubs_first_party_credentials() {
     // The credentials a BYOK helper must never inherit
     // Editing this list is the audit checkpoint: it must equal the production scrub const
     const EXPECTED: &[&str] = &[
-        "wimo ai_API_KEY",
-        "wimo_CODE_wimo ai_API_KEY",
+        "wimoai_API_KEY",
+        "wimo_CODE_wimoai_API_KEY",
         "wimo_AUTH",
         "wimo_AUTH_PATH",
         "wimo_DEPLOYMENT_KEY",

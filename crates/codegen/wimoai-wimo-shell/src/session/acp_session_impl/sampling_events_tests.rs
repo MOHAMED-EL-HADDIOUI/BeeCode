@@ -3,7 +3,7 @@ use super::super::replay_buffer_send_update_tests::{
 };
 use super::*;
 
-fn own_request(actor: &SessionActor, request_id: &wimo ai_wimo_sampler::RequestId) {
+fn own_request(actor: &SessionActor, request_id: &wimoai_wimo_sampler::RequestId) {
     let (tx, _rx) = tokio::sync::oneshot::channel();
     actor
         .turn_stream_drained
@@ -21,7 +21,7 @@ fn own_request(actor: &SessionActor, request_id: &wimo ai_wimo_sampler::RequestI
 /// The trace upload can then serialize it even when the canonical `record_assistant_response` path is skipped (cancel / max tokens).
 #[tokio::test(flavor = "current_thread")]
 async fn channel_tokens_accumulate_into_streaming_capture() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -100,7 +100,7 @@ async fn channel_tokens_accumulate_into_streaming_capture() {
 /// This guards the `if cap.prompt_id != prompt_id` branch in the `StreamStarted` arm, which the pure-struct tests bypass.
 #[tokio::test(flavor = "current_thread")]
 async fn same_prompt_restart_accumulates_segments_via_handler() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -168,8 +168,8 @@ async fn same_prompt_restart_accumulates_segments_via_handler() {
 /// A completed turn therefore neither re-uploads its own reasoning nor erases earlier uncommitted partials.
 #[tokio::test(flavor = "current_thread")]
 async fn completed_event_clears_slot_keeps_prior_uncommitted_segments() {
-    use wimo ai_wimo_sampler::{InferenceLatencyStats, RequestId, SamplingChannel, SamplingEvent};
-    use wimo ai_wimo_sampling_types::{ConversationItem, ConversationResponse};
+    use wimoai_wimo_sampler::{InferenceLatencyStats, RequestId, SamplingChannel, SamplingEvent};
+    use wimoai_wimo_sampling_types::{ConversationItem, ConversationResponse};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -264,8 +264,8 @@ async fn completed_event_clears_slot_keeps_prior_uncommitted_segments() {
 /// That splits the assistant message around the tool call on every attached client: the multi-pane "out of order" bug.
 #[tokio::test(flavor = "current_thread")]
 async fn completed_event_releases_stream_drain_barrier_and_timeout_keeps_request_ownership() {
-    use wimo ai_wimo_sampler::{InferenceLatencyStats, RequestId, SamplingChannel, SamplingEvent};
-    use wimo ai_wimo_sampling_types::{ConversationItem, ConversationResponse};
+    use wimoai_wimo_sampler::{InferenceLatencyStats, RequestId, SamplingChannel, SamplingEvent};
+    use wimoai_wimo_sampling_types::{ConversationItem, ConversationResponse};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -413,7 +413,7 @@ async fn completed_event_releases_stream_drain_barrier_and_timeout_keeps_request
                     request_id: late_req.clone(),
                     attempt: 1,
                     max_retries: 2,
-                    kind: wimo ai_wimo_sampler::SamplingErrorKind::DoomLoopDetected,
+                    kind: wimoai_wimo_sampler::SamplingErrorKind::DoomLoopDetected,
                     reason: "queued retry after timeout".to_string(),
                     doom_loop_triggers: Some(vec!["tail_repetition:8@thinking".to_string()]),
                     doom_loop_aborted_at_chunk: Some(42),
@@ -504,7 +504,7 @@ async fn completed_event_releases_stream_drain_barrier_and_timeout_keeps_request
 
 #[tokio::test(flavor = "current_thread")]
 async fn unowned_stream_events_do_not_mutate_capture_or_notify_the_next_turn() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
 
     let local = tokio::task::LocalSet::new();
     local
@@ -550,7 +550,7 @@ async fn unowned_stream_events_do_not_mutate_capture_or_notify_the_next_turn() {
 
 #[tokio::test(flavor = "current_thread")]
 async fn unowned_backend_tool_completion_closes_visible_card() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingEvent};
 
     let local = tokio::task::LocalSet::new();
     local
@@ -593,7 +593,7 @@ async fn unowned_backend_tool_completion_closes_visible_card() {
 
 #[tokio::test(flavor = "current_thread")]
 async fn unowned_retry_does_not_notify_the_next_turn() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingErrorKind, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingErrorKind, SamplingEvent};
 
     let local = tokio::task::LocalSet::new();
     local
@@ -628,7 +628,7 @@ async fn unowned_retry_does_not_notify_the_next_turn() {
 /// The consumer needs to take it via `TakeStreamingCapture` and upload it as `streaming_partial.json`.
 #[tokio::test(flavor = "current_thread")]
 async fn failed_event_preserves_streaming_capture_for_takeout() {
-    use wimo ai_wimo_sampler::{
+    use wimoai_wimo_sampler::{
         RequestId, SamplingChannel, SamplingErrorInfo, SamplingErrorKind, SamplingEvent,
     };
     let local = tokio::task::LocalSet::new();
@@ -687,7 +687,7 @@ async fn failed_event_preserves_streaming_capture_for_takeout() {
                         empty_response_context: None,
                         doom_loop_triggers: None,
                         doom_loop_aborted_at_chunk: None,
-                        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+                        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
                     },
                 })
                 .await;
@@ -732,7 +732,7 @@ async fn failed_event_preserves_streaming_capture_for_takeout() {
                         empty_response_context: None,
                         doom_loop_triggers: None,
                         doom_loop_aborted_at_chunk: None,
-                        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+                        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
                     },
                 })
                 .await;
@@ -763,7 +763,7 @@ async fn failed_event_preserves_streaming_capture_for_takeout() {
                         empty_response_context: None,
                         doom_loop_triggers: None,
                         doom_loop_aborted_at_chunk: None,
-                        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+                        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
                     },
                 })
                 .await;
@@ -803,13 +803,13 @@ async fn failed_event_preserves_streaming_capture_for_takeout() {
 /// The signals only warn on the accepted response.
 #[tokio::test(flavor = "current_thread")]
 async fn observe_only_confident_completion_stays_warn_only() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let mut fixture = make_replay_send_update_fixture().await;
             fixture.actor.doom_loop_recovery =
-                Some(wimo ai_wimo_sampling_types::DoomLoopRecoveryPolicy {
+                Some(wimoai_wimo_sampling_types::DoomLoopRecoveryPolicy {
                     max_threshold: 8,
                     max_retries: 0,
                     ..Default::default()
@@ -841,15 +841,15 @@ async fn observe_only_confident_completion_stays_warn_only() {
                 })
                 .await;
             // The first completion carries confident signals with NO prior Retrying
-            let response = wimo ai_wimo_sampling_types::ConversationResponse {
-                items: vec![wimo ai_wimo_sampling_types::ConversationItem::assistant(
+            let response = wimoai_wimo_sampling_types::ConversationResponse {
+                items: vec![wimoai_wimo_sampling_types::ConversationItem::assistant(
                     "answer kept as-is",
                 )],
                 stop_reason: None,
                 usage: None,
                 cost_usd_ticks: None,
                 message_chunks_emitted: 1,
-                doom_loop_signals: vec![wimo ai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
+                doom_loop_signals: vec![wimoai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
                     "tail_repetition:8@thinking",
                 )],
                 stop_message: None,
@@ -899,21 +899,21 @@ async fn observe_only_confident_completion_stays_warn_only() {
 
 #[tokio::test(flavor = "current_thread")]
 async fn exact_repetition_completion_is_tracked_for_incidence_only() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingEvent};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let fixture = make_replay_send_update_fixture().await;
             let actor = Arc::new(fixture.actor);
-            let response = wimo ai_wimo_sampling_types::ConversationResponse {
-                items: vec![wimo ai_wimo_sampling_types::ConversationItem::assistant(
+            let response = wimoai_wimo_sampling_types::ConversationResponse {
+                items: vec![wimoai_wimo_sampling_types::ConversationItem::assistant(
                     "answer",
                 )],
                 stop_reason: None,
                 usage: None,
                 cost_usd_ticks: None,
                 message_chunks_emitted: 1,
-                doom_loop_signals: vec![wimo ai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
+                doom_loop_signals: vec![wimoai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
                     "exact_repetition:42x3@response",
                 )],
                 stop_message: None,
@@ -962,14 +962,14 @@ async fn exact_repetition_completion_is_tracked_for_incidence_only() {
 /// Session counters and the per-turn tally are updated along the way.
 #[tokio::test(flavor = "current_thread")]
 async fn doom_loop_recovery_stamps_capture_segments_and_counters() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingChannel, SamplingErrorKind, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingChannel, SamplingErrorKind, SamplingEvent};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
             let mut fixture = make_replay_send_update_fixture().await;
             // Set the policy so the Completed arm can classify an accept after budget
             fixture.actor.doom_loop_recovery =
-                Some(wimo ai_wimo_sampling_types::DoomLoopRecoveryPolicy::default());
+                Some(wimoai_wimo_sampling_types::DoomLoopRecoveryPolicy::default());
             let actor = Arc::new(fixture.actor);
 
             // The same prompt id makes the resample's StreamStarted fold the doomed slot instead of beginning a new turn
@@ -1050,15 +1050,15 @@ async fn doom_loop_recovery_stamps_capture_segments_and_counters() {
                 })
                 .await;
             // Budget spent: the accepted response keeps confident signals.
-            let response = wimo ai_wimo_sampling_types::ConversationResponse {
-                items: vec![wimo ai_wimo_sampling_types::ConversationItem::assistant(
+            let response = wimoai_wimo_sampling_types::ConversationResponse {
+                items: vec![wimoai_wimo_sampling_types::ConversationItem::assistant(
                     "still looping answer",
                 )],
                 stop_reason: None,
                 usage: None,
                 cost_usd_ticks: None,
                 message_chunks_emitted: 1,
-                doom_loop_signals: vec![wimo ai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
+                doom_loop_signals: vec![wimoai_wimo_sampling_types::doom_loop::DoomLoopSignal::parse(
                     "tail_repetition:4@thinking",
                 )],
                 stop_message: None,
@@ -1131,7 +1131,7 @@ async fn doom_loop_recovery_stamps_capture_segments_and_counters() {
 /// It must preserve the reasoning text already accumulated, so a partial taken then shows the model was cut off mid tool-call.
 #[tokio::test(flavor = "current_thread")]
 async fn tool_call_delta_marks_streaming_capture_phase() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingChannel, SamplingEvent};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -1188,7 +1188,7 @@ async fn tool_call_delta_marks_streaming_capture_phase() {
 /// `ToolCallDelta` on an idle (empty, never-begun) slot must not fabricate a phase; there is no partial to attribute it to.
 #[tokio::test(flavor = "current_thread")]
 async fn tool_call_delta_on_idle_slot_leaves_phase_pending() {
-    use wimo ai_wimo_sampler::{RequestId, SamplingEvent};
+    use wimoai_wimo_sampler::{RequestId, SamplingEvent};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -1260,10 +1260,10 @@ fn streaming_capture_appender_respects_byte_cap() {
 /// This simulates the events a reasoning-only doomloop produces; it does not drive the sampler classifier (the mock-HTTP test covers that).
 #[tokio::test(start_paused = true)]
 async fn reasoning_only_doomloop_turn_captures_every_generation_as_segments() {
-    use wimo ai_wimo_sampler::{
+    use wimoai_wimo_sampler::{
         RequestId, SamplingChannel, SamplingErrorInfo, SamplingErrorKind, SamplingEvent,
     };
-    use wimo ai_wimo_sampling_types::{EmptyReason, EmptyResponseContext};
+    use wimoai_wimo_sampling_types::{EmptyReason, EmptyResponseContext};
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -1339,7 +1339,7 @@ async fn reasoning_only_doomloop_turn_captures_every_generation_as_segments() {
                 }),
                 doom_loop_triggers: None,
                 doom_loop_aborted_at_chunk: None,
-                credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+                credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
             };
 
             // Drainer side: the terminal `Failed` is telemetry-only and must NOT collapse the accumulated doomloop segments
@@ -1373,9 +1373,9 @@ async fn reasoning_only_doomloop_turn_captures_every_generation_as_segments() {
             // Take the capture exactly as the trace upload does: through the real `TakeStreamingCapture` command
             // The command finalizes the uncommitted generations for upload
             let (cmd_tx, cmd_rx) = mpsc::unbounded_channel::<SessionCommand>();
-            let (_chat_tx, chat_rx) = mpsc::unbounded_channel::<wimo ai_chat_state::ChatStateEvent>();
+            let (_chat_tx, chat_rx) = mpsc::unbounded_channel::<wimoai_chat_state::ChatStateEvent>();
             let codebase_indexes = Arc::new(parking_lot::Mutex::new(
-                wimo ai_wimo_workspace::file_system::CodebaseIndexManager::new(),
+                wimoai_wimo_workspace::file_system::CodebaseIndexManager::new(),
             ));
             tokio::task::spawn_local(super::run_session(
                 actor.clone(),

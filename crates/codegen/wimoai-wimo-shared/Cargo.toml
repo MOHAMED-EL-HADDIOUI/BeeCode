@@ -1,13 +1,13 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-shared"
+name = "wimoai-wimo-shared"
 edition.workspace = true
 
 [dependencies]
 agent-client-protocol = { workspace = true }
 anyhow = { workspace = true }
 base64 = { workspace = true }
-wimo ai-dirs = { workspace = true }
+wimoai-dirs = { workspace = true }
 dunce = { workspace = true }
 image = { workspace = true, features = ["png", "jpeg", "gif", "webp"] }
 parking_lot = { workspace = true }
@@ -19,11 +19,11 @@ tempfile = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 urlencoding = { workspace = true }
-wimo ai-wimo-config-types = { workspace = true }
-wimo ai-wimo-models = { workspace = true }
-wimo ai-wimo-status-line = { workspace = true }
-wimo ai-wimo-tools = { workspace = true }
-wimo ai-tty-utils = { workspace = true }
+wimoai-wimo-config-types = { workspace = true }
+wimoai-wimo-models = { workspace = true }
+wimoai-wimo-status-line = { workspace = true }
+wimoai-wimo-tools = { workspace = true }
+wimoai-tty-utils = { workspace = true }
 
 [dev-dependencies]
 uuid = { workspace = true, features = ["v4"] }

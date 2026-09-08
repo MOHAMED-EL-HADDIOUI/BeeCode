@@ -9,8 +9,8 @@ use crate::scrollback::state::ScrollbackState;
 use crate::views::permission_view::SubagentInfo;
 use std::path::PathBuf;
 use std::time::Instant;
-use wimo ai_wimo_shell::extensions::notification::RetryState;
-use wimo ai_wimo_shell::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+use wimoai_wimo_shell::extensions::notification::RetryState;
+use wimoai_wimo_shell::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
 pub(super) fn make_session(session_id: Option<&str>) -> AgentSession {
     let (tx, _rx) = tokio::sync::mpsc::unbounded_channel();
     AgentSession {
@@ -159,8 +159,8 @@ fn workflow_catalog_projection_detects_same_name_metadata_changes() {
 }
 pub(super) fn compressed_entry(
     index: usize,
-) -> wimo ai_wimo_shell::extensions::notification::ImageCompressedEntry {
-    wimo ai_wimo_shell::extensions::notification::ImageCompressedEntry {
+) -> wimoai_wimo_shell::extensions::notification::ImageCompressedEntry {
+    wimoai_wimo_shell::extensions::notification::ImageCompressedEntry {
         index,
         original_bytes: 4_200_000,
         compressed_bytes: 780_000,
@@ -353,8 +353,8 @@ pub(super) fn subagent_ext_replay(
 pub(super) fn make_exit_plan_ext(
     plan_content: Option<&str>,
 ) -> (
-    wimo ai_acp_lib::AcpArgs<acp::ExtRequest>,
-    tokio::sync::oneshot::Receiver<wimo ai_acp_lib::AcpResult<acp::ExtResponse>>,
+    wimoai_acp_lib::AcpArgs<acp::ExtRequest>,
+    tokio::sync::oneshot::Receiver<wimoai_acp_lib::AcpResult<acp::ExtResponse>>,
 ) {
     make_exit_plan_ext_with_tool_call_id("call-plan", plan_content)
 }
@@ -362,8 +362,8 @@ pub(super) fn make_exit_plan_ext_with_tool_call_id(
     tool_call_id: &str,
     plan_content: Option<&str>,
 ) -> (
-    wimo ai_acp_lib::AcpArgs<acp::ExtRequest>,
-    tokio::sync::oneshot::Receiver<wimo ai_acp_lib::AcpResult<acp::ExtResponse>>,
+    wimoai_acp_lib::AcpArgs<acp::ExtRequest>,
+    tokio::sync::oneshot::Receiver<wimoai_acp_lib::AcpResult<acp::ExtResponse>>,
 ) {
     let raw = serde_json::value::to_raw_value(
             &serde_json::json!({
@@ -376,7 +376,7 @@ pub(super) fn make_exit_plan_ext_with_tool_call_id(
     let request = acp::ExtRequest::new("x.ai/exit_plan_mode", raw.into());
     let (tx, rx) = tokio::sync::oneshot::channel();
     (
-        wimo ai_acp_lib::AcpArgs {
+        wimoai_acp_lib::AcpArgs {
             request,
             response_tx: tx,
         },
@@ -503,7 +503,7 @@ pub(super) fn send_tool_call_update(
     }
     let (tx, _rx) = tokio::sync::oneshot::channel();
     handle(
-        AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+        AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
             request: acp::SessionNotification::new(
                     acp::SessionId::new("sess-1"),
                     acp::SessionUpdate::ToolCall(
@@ -565,7 +565,7 @@ pub(super) fn make_fired_notif(
 ) -> acp::ExtNotification {
     let notif = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::ScheduledTaskFired {
+        update: wimoaiSessionUpdate::ScheduledTaskFired {
             task_id: task_id.into(),
             prompt: prompt.into(),
             human_schedule: human_schedule.into(),
@@ -584,7 +584,7 @@ pub(super) fn make_fired_notif_with_subagent(
 ) -> acp::ExtNotification {
     let notif = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::ScheduledTaskFired {
+        update: wimoaiSessionUpdate::ScheduledTaskFired {
             task_id: task_id.into(),
             prompt: "p".into(),
             human_schedule: "every 1 minute".into(),
@@ -617,8 +617,8 @@ pub(super) fn make_app_two_agents() -> AppView {
 }
 pub(super) fn critical_announcement(
     id: &str,
-) -> wimo ai_wimo_announcements::RemoteAnnouncement {
-    wimo ai_wimo_announcements::RemoteAnnouncement {
+) -> wimoai_wimo_announcements::RemoteAnnouncement {
+    wimoai_wimo_announcements::RemoteAnnouncement {
         id: Some(id.into()),
         title: Some(format!("{id} title")),
         message: Some(format!("{id} message")),
@@ -628,7 +628,7 @@ pub(super) fn critical_announcement(
 }
 pub(super) fn announcements_update_notif(
     r#gen: u64,
-    announcements: &[wimo ai_wimo_announcements::RemoteAnnouncement],
+    announcements: &[wimoai_wimo_announcements::RemoteAnnouncement],
 ) -> acp::ExtNotification {
     acp::ExtNotification::new(
         "x.ai/announcements/update",
@@ -657,7 +657,7 @@ pub(super) fn make_created_ext_notif(
 ) -> acp::ExtNotification {
     let notif = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::ScheduledTaskCreated {
+        update: wimoaiSessionUpdate::ScheduledTaskCreated {
             task_id: task_id.into(),
             prompt: prompt.into(),
             human_schedule: human_schedule.into(),
@@ -675,19 +675,19 @@ pub(super) fn make_deleted_ext_notif(
     make_deleted_ext_notif_with_reason(
         session_id,
         task_id,
-        wimo ai_wimo_tools::notification::ScheduledTaskRemovedReason::Unknown,
+        wimoai_wimo_tools::notification::ScheduledTaskRemovedReason::Unknown,
         false,
     )
 }
 pub(super) fn make_deleted_ext_notif_with_reason(
     session_id: &str,
     task_id: &str,
-    reason: wimo ai_wimo_tools::notification::ScheduledTaskRemovedReason,
+    reason: wimoai_wimo_tools::notification::ScheduledTaskRemovedReason,
     is_replay: bool,
 ) -> acp::ExtNotification {
     let notif = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::ScheduledTaskDeleted {
+        update: wimoaiSessionUpdate::ScheduledTaskDeleted {
             task_id: task_id.into(),
             reason,
         },
@@ -712,7 +712,7 @@ pub(super) fn make_token_notification_message(
         .meta(serde_json::json!({
                 "totalTokens": total_tokens,
             }).as_object().cloned());
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -730,7 +730,7 @@ pub(super) fn make_agent_chunk_message(
             acp::ContentChunk::new(acp::ContentBlock::Text(acp::TextContent::new(text))),
         ),
     );
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -759,7 +759,7 @@ pub(super) fn make_agent_chunk_meta(
             ),
         )
         .meta(serde_json::Value::Object(meta).as_object().cloned());
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -819,7 +819,7 @@ pub(super) fn plan_update_msg(
         meta.insert("eventId".to_string(), serde_json::json!(eid));
     }
     let (tx, _rx) = tokio::sync::oneshot::channel();
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request: acp::SessionNotification::new(
                 acp::SessionId::new(session_id),
                 acp::SessionUpdate::Plan(acp::Plan::new(entries)),
@@ -831,13 +831,13 @@ pub(super) fn plan_update_msg(
 pub(super) fn todo_contents(app: &AppView, id: AgentId) -> Vec<String> {
     app.agents[&id].todo.todos().iter().map(|t| t.content.clone()).collect()
 }
-pub(super) fn wimo ai_model_switch_notif(
+pub(super) fn wimoai_model_switch_notif(
     session_id: &str,
     event_id: &str,
 ) -> acp::ExtNotification {
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::ModelAutoSwitched {
+        update: wimoaiSessionUpdate::ModelAutoSwitched {
             previous_model_id: "m-old".into(),
             new_model_id: "m-new".into(),
             reason: "gone".into(),
@@ -849,13 +849,13 @@ pub(super) fn wimo ai_model_switch_notif(
         std::sync::Arc::from(serde_json::value::to_raw_value(&payload).unwrap()),
     )
 }
-pub(super) fn wimo ai_unhandled_notif(
+pub(super) fn wimoai_unhandled_notif(
     session_id: &str,
     event_id: &str,
 ) -> acp::ExtNotification {
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::MemoryFlushStarted,
+        update: wimoaiSessionUpdate::MemoryFlushStarted,
         meta: Some(serde_json::json!({ "eventId": event_id })),
     };
     acp::ExtNotification::new(
@@ -886,7 +886,7 @@ pub(super) fn make_token_notification_with_event(
                 .as_object()
                 .cloned(),
         );
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -996,7 +996,7 @@ pub(super) fn make_viewer_chunk_with_turn_start(
                 .as_object()
                 .cloned(),
         );
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -1026,7 +1026,7 @@ pub(super) fn make_replay_chunk_with_turn_start(
                 .as_object()
                 .cloned(),
         );
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -1039,7 +1039,7 @@ pub(super) fn send_replay_suppressed_tool_call(
 ) {
     let (tx, _rx) = tokio::sync::oneshot::channel();
     handle(
-        AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+        AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
             request: acp::SessionNotification::new(
                     acp::SessionId::new(session_id),
                     acp::SessionUpdate::ToolCall(
@@ -1069,7 +1069,7 @@ pub(super) fn send_replay_bash_tool_call(
 ) {
     let (tx, _rx) = tokio::sync::oneshot::channel();
     handle(
-        AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+        AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
             request: acp::SessionNotification::new(
                     acp::SessionId::new(session_id),
                     acp::SessionUpdate::ToolCall(
@@ -1101,7 +1101,7 @@ pub(super) fn send_replay_bash_tool_call(
 }
 /// Build a durable `TurnCompleted` update on the `x.ai/session/update` rail, optionally stamped `isReplay`.
 /// Built through the typed `SessionNotification` so the wire shape can't drift from what the dispatch parses.
-pub(super) fn wimo ai_turn_completed_notif(
+pub(super) fn wimoai_turn_completed_notif(
     session_id: &str,
     prompt_id: &str,
     stop_reason: &str,
@@ -1109,7 +1109,7 @@ pub(super) fn wimo ai_turn_completed_notif(
 ) -> acp::ExtNotification {
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::TurnCompleted {
+        update: wimoaiSessionUpdate::TurnCompleted {
             prompt_id: prompt_id.into(),
             stop_reason: stop_reason.into(),
             agent_result: None,
@@ -1125,7 +1125,7 @@ pub(super) fn wimo ai_turn_completed_notif(
     )
 }
 /// Replay `TurnCompleted` with optional elapsed, agent_result, and extra `_meta`.
-pub(super) fn wimo ai_turn_completed_replay(
+pub(super) fn wimoai_turn_completed_replay(
     session_id: &str,
     prompt_id: &str,
     stop_reason: &str,
@@ -1141,7 +1141,7 @@ pub(super) fn wimo ai_turn_completed_replay(
     }
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::TurnCompleted {
+        update: wimoaiSessionUpdate::TurnCompleted {
             prompt_id: prompt_id.into(),
             stop_reason: stop_reason.into(),
             agent_result: agent_result.map(str::to_string),
@@ -1159,7 +1159,7 @@ pub(super) fn wimo ai_turn_completed_replay(
 /// Failed `TurnCompleted` carrying `agent_result` plus the typed `error_kind` field.
 /// Callers pass an `agent_result` with no canonical truncation text.
 /// A rail test therefore fails if its typed-kind read is deleted; the text fallback cannot mask it.
-pub(super) fn wimo ai_turn_completed_failed_with_error_kind(
+pub(super) fn wimoai_turn_completed_failed_with_error_kind(
     session_id: &str,
     prompt_id: &str,
     agent_result: &str,
@@ -1168,7 +1168,7 @@ pub(super) fn wimo ai_turn_completed_failed_with_error_kind(
 ) -> acp::ExtNotification {
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::TurnCompleted {
+        update: wimoaiSessionUpdate::TurnCompleted {
             prompt_id: prompt_id.into(),
             stop_reason: "error".into(),
             agent_result: Some(agent_result.to_string()),
@@ -1184,7 +1184,7 @@ pub(super) fn wimo ai_turn_completed_failed_with_error_kind(
     )
 }
 /// Live `TurnCompleted` stamped with `_meta.cancelTrigger` (send-now / ctrl_c).
-pub(super) fn wimo ai_turn_completed_notif_with_cancel_trigger(
+pub(super) fn wimoai_turn_completed_notif_with_cancel_trigger(
     session_id: &str,
     prompt_id: &str,
     stop_reason: &str,
@@ -1192,7 +1192,7 @@ pub(super) fn wimo ai_turn_completed_notif_with_cancel_trigger(
 ) -> acp::ExtNotification {
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::TurnCompleted {
+        update: wimoaiSessionUpdate::TurnCompleted {
             prompt_id: prompt_id.into(),
             stop_reason: stop_reason.into(),
             agent_result: None,
@@ -1213,7 +1213,7 @@ pub(super) fn wimo ai_turn_completed_notif_with_cancel_trigger(
     )
 }
 /// A live durable `TurnCompleted`, optionally stamped with the shell completion clock (`agentTimestampMs`) the wake marker's elapsed reads.
-pub(super) fn wimo ai_wake_turn_completed_notif(
+pub(super) fn wimoai_wake_turn_completed_notif(
     session_id: &str,
     prompt_id: &str,
     agent_timestamp_ms: Option<i64>,
@@ -1224,7 +1224,7 @@ pub(super) fn wimo ai_wake_turn_completed_notif(
     }
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::TurnCompleted {
+        update: wimoaiSessionUpdate::TurnCompleted {
             prompt_id: prompt_id.into(),
             stop_reason: "end_turn".into(),
             agent_result: None,
@@ -1241,14 +1241,14 @@ pub(super) fn wimo ai_wake_turn_completed_notif(
 }
 /// Build a `HookExecution` update (one successful run) on the `x.ai/session/update` rail, optionally stamped `isReplay`.
 /// `prompt_id == None` models pre-attribution shells.
-pub(super) fn wimo ai_hook_execution_notif_for_prompt(
+pub(super) fn wimoai_hook_execution_notif_for_prompt(
     session_id: &str,
     event_name: &str,
     prompt_id: Option<&str>,
     is_replay: bool,
 ) -> acp::ExtNotification {
-    use wimo ai_wimo_shell::extensions::notification::{HookRunEntryDto, HookRunStatusDto};
-    wimo ai_hook_execution_notif_with_runs(
+    use wimoai_wimo_shell::extensions::notification::{HookRunEntryDto, HookRunStatusDto};
+    wimoai_hook_execution_notif_with_runs(
         session_id,
         event_name,
         prompt_id,
@@ -1260,16 +1260,16 @@ pub(super) fn wimo ai_hook_execution_notif_for_prompt(
             }],
     )
 }
-pub(super) fn wimo ai_hook_execution_notif_with_runs(
+pub(super) fn wimoai_hook_execution_notif_with_runs(
     session_id: &str,
     event_name: &str,
     prompt_id: Option<&str>,
     is_replay: bool,
-    runs: Vec<wimo ai_wimo_shell::extensions::notification::HookRunEntryDto>,
+    runs: Vec<wimoai_wimo_shell::extensions::notification::HookRunEntryDto>,
 ) -> acp::ExtNotification {
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::HookExecution {
+        update: wimoaiSessionUpdate::HookExecution {
             event_name: event_name.into(),
             tool_name: None,
             prompt_id: prompt_id.map(str::to_string),
@@ -1282,12 +1282,12 @@ pub(super) fn wimo ai_hook_execution_notif_with_runs(
         serde_json::value::to_raw_value(&payload).unwrap().into(),
     )
 }
-pub(super) fn wimo ai_hook_execution_notif(
+pub(super) fn wimoai_hook_execution_notif(
     session_id: &str,
     event_name: &str,
     is_replay: bool,
 ) -> acp::ExtNotification {
-    wimo ai_hook_execution_notif_for_prompt(session_id, event_name, None, is_replay)
+    wimoai_hook_execution_notif_for_prompt(session_id, event_name, None, is_replay)
 }
 pub(super) fn count_lifecycle_blocks(
     sb: &crate::scrollback::state::ScrollbackState,
@@ -1401,7 +1401,7 @@ pub(super) fn make_plan_message(session_id: &str, entries: &[&str]) -> AcpClient
         acp::SessionId::new(session_id),
         acp::SessionUpdate::Plan(acp::Plan::new(plan_entries)),
     );
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -1422,7 +1422,7 @@ pub(super) fn make_commands_update_message(
             acp::AvailableCommandsUpdate::new(commands),
         ),
     );
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -1452,7 +1452,7 @@ pub(super) fn make_bash_stdout_message(
             ),
         ),
     );
-    AcpClientMessage::SessionNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::SessionNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -1460,7 +1460,7 @@ pub(super) fn make_bash_stdout_message(
 /// Build an `ExtNotification` envelope for `x.ai/session_notification`.
 pub(super) fn make_ext_session_notification(
     session_id: &str,
-    update: wimo aiSessionUpdate,
+    update: wimoaiSessionUpdate,
 ) -> AcpClientMessage {
     make_ext_session_notification_with_method(
         session_id,
@@ -1472,7 +1472,7 @@ pub(super) fn make_ext_session_notification(
 pub(super) fn make_ext_session_notification_with_method(
     session_id: &str,
     method: &str,
-    update: wimo aiSessionUpdate,
+    update: wimoaiSessionUpdate,
 ) -> AcpClientMessage {
     let (tx, _rx) = tokio::sync::oneshot::channel();
     let payload = SessionNotification {
@@ -1482,7 +1482,7 @@ pub(super) fn make_ext_session_notification_with_method(
     };
     let raw = serde_json::value::to_raw_value(&payload).unwrap();
     let request = acp::ExtNotification::new(method, raw.into());
-    AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+    AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     })
@@ -1491,15 +1491,15 @@ use crate::scrollback::blocks::SubagentBlockKind;
 pub(super) fn test_subagent_spawned(
     parent_sid: &str,
     child_sid: &str,
-) -> wimo aiSessionUpdate {
+) -> wimoaiSessionUpdate {
     test_subagent_spawned_for_workflow(parent_sid, child_sid, None)
 }
 pub(super) fn test_subagent_spawned_for_workflow(
     parent_sid: &str,
     child_sid: &str,
     workflow_run_id: Option<String>,
-) -> wimo aiSessionUpdate {
-    wimo aiSessionUpdate::SubagentSpawned {
+) -> wimoaiSessionUpdate {
+    wimoaiSessionUpdate::SubagentSpawned {
         subagent_id: child_sid.into(),
         parent_session_id: parent_sid.into(),
         parent_prompt_id: None,
@@ -1516,8 +1516,8 @@ pub(super) fn test_subagent_spawned_for_workflow(
         resumed_from: None,
     }
 }
-pub(super) fn test_subagent_finished(child_sid: &str) -> wimo aiSessionUpdate {
-    wimo aiSessionUpdate::SubagentFinished {
+pub(super) fn test_subagent_finished(child_sid: &str) -> wimoaiSessionUpdate {
+    wimoaiSessionUpdate::SubagentFinished {
         subagent_id: child_sid.into(),
         child_session_id: child_sid.into(),
         status: "completed".into(),
@@ -1533,8 +1533,8 @@ pub(super) fn test_subagent_finished(child_sid: &str) -> wimo aiSessionUpdate {
 pub(super) fn test_subagent_progress(
     parent_sid: &str,
     child_sid: &str,
-) -> wimo aiSessionUpdate {
-    wimo aiSessionUpdate::SubagentProgress {
+) -> wimoaiSessionUpdate {
+    wimoaiSessionUpdate::SubagentProgress {
         subagent_id: child_sid.into(),
         parent_session_id: parent_sid.into(),
         child_session_id: child_sid.into(),
@@ -1671,7 +1671,7 @@ pub(super) fn write_child_updates_jsonl_under_cwd(
 ) {
     let sessions_dir = wimo_home
         .join("sessions")
-        .join(wimo ai_wimo_config::encode_cwd_dirname(cwd))
+        .join(wimoai_wimo_config::encode_cwd_dirname(cwd))
         .join(child_sid);
     std::fs::create_dir_all(&sessions_dir).unwrap();
     std::fs::write(sessions_dir.join("summary.json"), "{}").unwrap();
@@ -1821,7 +1821,7 @@ pub(super) fn dispatch_goal_update(
     let raw = serde_json::value::to_raw_value(&raw_payload).unwrap();
     let (tx, _rx) = tokio::sync::oneshot::channel();
     handle(
-        AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+        AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
             request: acp::ExtNotification::new("x.ai/session_notification", raw.into()),
             response_tx: tx,
         }),
@@ -1858,7 +1858,7 @@ pub(super) fn make_permission_message(
                 acp::PermissionOptionKind::AllowOnce,
             )],
     );
-    let msg = AcpClientMessage::RequestPermission(wimo ai_acp_lib::AcpArgs {
+    let msg = AcpClientMessage::RequestPermission(wimoai_acp_lib::AcpArgs {
         request,
         response_tx: tx,
     });
@@ -1872,7 +1872,7 @@ pub(super) fn interaction_resolved_ext(
 ) -> acp::ExtNotification {
     let notif = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::InteractionResolved {
+        update: wimoaiSessionUpdate::InteractionResolved {
             tool_call_id: tool_call_id.into(),
         },
         meta: None,
@@ -1886,7 +1886,7 @@ pub(super) fn make_git_head_changed_notif(
     is_worktree: bool,
     main_repo: Option<&str>,
 ) -> acp::ExtNotification {
-    let payload = wimo ai_wimo_workspace::session::git::GitHeadChanged {
+    let payload = wimoai_wimo_workspace::session::git::GitHeadChanged {
         session_id: session_id.into(),
         branch: branch.map(str::to_string),
         is_worktree,
@@ -1903,7 +1903,7 @@ pub(super) fn make_task_backgrounded_notif(
 ) -> acp::ExtNotification {
     let notif = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::TaskBackgrounded {
+        update: wimoaiSessionUpdate::TaskBackgrounded {
             tool_call_id: tool_call_id.into(),
             task_id: task_id.into(),
             command: command.into(),
@@ -1927,7 +1927,7 @@ pub(super) fn make_replayed_task_backgrounded_notif(
 ) -> acp::ExtNotification {
     let notif = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::TaskBackgrounded {
+        update: wimoaiSessionUpdate::TaskBackgrounded {
             tool_call_id: tool_call_id.into(),
             task_id: task_id.into(),
             command: command.into(),
@@ -1969,7 +1969,7 @@ pub(super) fn setup_pending_execute_tool(app: &mut AppView, tc_id: &str) {
 /// Send a late InProgress update with is_background=true to trigger late bg detection.
 pub(super) fn send_late_bg_detection(app: &mut AppView, tc_id: &str) {
     use serde_json::json;
-    use wimo ai_wimo_tools::types::output::{BashOutput, ToolOutput};
+    use wimoai_wimo_tools::types::output::{BashOutput, ToolOutput};
     let agent = app.agents.get_mut(&AgentId(0)).unwrap();
     let meta = crate::acp::meta::NotificationMeta::default();
     let bash = BashOutput {
@@ -2042,10 +2042,10 @@ pub(super) fn task_completed_notif(
     signal: Option<&str>,
     will_wake: bool,
 ) -> acp::ExtNotification {
-    use wimo ai_wimo_tools::types::TaskSnapshot;
+    use wimoai_wimo_tools::types::TaskSnapshot;
     let notif = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::TaskCompleted {
+        update: wimoaiSessionUpdate::TaskCompleted {
             task_snapshot: TaskSnapshot {
                 task_id: task_id.into(),
                 command: command.into(),
@@ -2082,7 +2082,7 @@ pub(super) fn make_monitor_event_notif(
 ) -> acp::ExtNotification {
     let notif = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::MonitorEvent {
+        update: wimoaiSessionUpdate::MonitorEvent {
             task_id: task_id.into(),
             description: "test monitor".into(),
             event_text: event_text.into(),
@@ -2148,7 +2148,7 @@ pub(super) fn model_changed_ext(
 ) -> acp::ExtNotification {
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::ModelChanged {
+        update: wimoaiSessionUpdate::ModelChanged {
             model_id: model_id.to_string(),
             reasoning_effort: reasoning_effort.map(String::from),
         },
@@ -2164,7 +2164,7 @@ pub(super) fn model_changed_ext_with_event(
 ) -> acp::ExtNotification {
     let payload = SessionNotification {
         session_id: acp::SessionId::new(session_id),
-        update: wimo aiSessionUpdate::ModelChanged {
+        update: wimoaiSessionUpdate::ModelChanged {
             model_id: model_id.to_string(),
             reasoning_effort: None,
         },
@@ -2250,10 +2250,10 @@ pub(super) fn seed_owner_agent_with_open_modal(app: &mut AppView) {
 pub(super) fn make_server_status_notif(
     session_id: &str,
     name: &str,
-    status: wimo ai_wimo_shell::extensions::mcp::McpServerStatus,
+    status: wimoai_wimo_shell::extensions::mcp::McpServerStatus,
     tools: Option<serde_json::Value>,
 ) -> acp::ExtNotification {
-    use wimo ai_wimo_shell::extensions::mcp::{
+    use wimoai_wimo_shell::extensions::mcp::{
         McpServerSource, McpServerStatusPayload, McpServerStatusReason,
     };
     let payload = McpServerStatusPayload {
@@ -2279,7 +2279,7 @@ pub(super) fn make_servers_updated_notif() -> acp::ExtNotification {
 pub(super) fn make_tools_changed_notif_post_h2(
     session_id: &str,
 ) -> acp::ExtNotification {
-    let payload = wimo ai_wimo_shell::extensions::mcp::McpToolsChanged {
+    let payload = wimoai_wimo_shell::extensions::mcp::McpToolsChanged {
         session_id: session_id.to_string(),
         server_name: "wimo_com_linear".to_string(),
         tools: Vec::new(),

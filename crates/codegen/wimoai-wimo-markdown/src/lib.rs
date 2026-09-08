@@ -12,7 +12,7 @@
 //! # Example
 //!
 //! ```ignore
-//! use wimo ai_wimo_markdown::{StreamingMarkdownRenderer, MarkdownStyle, Syntect};
+//! use wimoai_wimo_markdown::{StreamingMarkdownRenderer, MarkdownStyle, Syntect};
 //!
 //! let syntect = Syntect::new(include_bytes!("theme.tmTheme"));
 //! let style = MarkdownStyle::default();

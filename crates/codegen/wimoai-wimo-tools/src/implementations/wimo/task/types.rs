@@ -23,7 +23,7 @@ use std::sync::Arc;
 use educe::Educe;
 use tokio::sync::{mpsc, oneshot};
 use tokio_util::sync::CancellationToken;
-use wimo ai_tool_types::{SubagentCapabilityMode, SubagentIsolationMode, WaitMode};
+use wimoai_tool_types::{SubagentCapabilityMode, SubagentIsolationMode, WaitMode};
 
 use crate::register_resource;
 
@@ -207,8 +207,8 @@ pub struct SubagentRuntimeOverrides {
     pub loop_task_id: Option<String>,
 }
 
-/// Re-export of [`wimo ai_tool_types::is_not_sentinel`] for existing call sites.
-pub use wimo ai_tool_types::is_not_sentinel;
+/// Re-export of [`wimoai_tool_types::is_not_sentinel`] for existing call sites.
+pub use wimoai_tool_types::is_not_sentinel;
 
 /// Sanitize a model-emitted `cwd` argument for the `task` tool.
 ///
@@ -218,7 +218,7 @@ pub use wimo ai_tool_types::is_not_sentinel;
 ///
 /// Returns `Some(cleaned)` for a usable path, `None` if the value should be
 /// treated as absent. Shared by the tool layer (`task::mod`) and the
-/// defense-in-depth check in `wimo ai-wimo-shell`'s subagent coordinator.
+/// defense-in-depth check in `wimoai-wimo-shell`'s subagent coordinator.
 pub fn sanitize_cwd_value(s: &str) -> Option<String> {
     let unquoted = s.trim().trim_matches(['"', '\'', '`']);
     // Re-trim after stripping quotes: this trim flows into the returned
@@ -1061,7 +1061,7 @@ register_resource!(
 
 /// Carries the current parent prompt/turn ID for TaskTool subagent scoping.
 ///
-/// Set by wimo ai-wimo-shell immediately before a prompt turn begins executing so
+/// Set by wimoai-wimo-shell immediately before a prompt turn begins executing so
 /// subagents launched during that turn can be cancelled together if the user
 /// aborts the turn.
 #[derive(Debug, Clone)]
@@ -1073,7 +1073,7 @@ register_resource!(
     CurrentPromptIdResource
 );
 
-/// True while a `/goal` loop is active. Set by wimo ai-wimo-shell at turn start.
+/// True while a `/goal` loop is active. Set by wimoai-wimo-shell at turn start.
 /// When true, `TaskCompletionReminder` suppresses bg-task completion
 /// reminders (marking them reported) so async "task completed" nudges don't
 /// pull a weak model off the goal continuation (e.g. relaunching a killed

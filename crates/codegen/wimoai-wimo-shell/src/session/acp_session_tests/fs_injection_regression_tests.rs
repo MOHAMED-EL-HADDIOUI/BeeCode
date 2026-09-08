@@ -1,7 +1,7 @@
-use wimo ai_wimo_tools::computer::local::{LocalTerminalBackend, MockFs};
-use wimo ai_wimo_tools::computer::types::{AsyncFileSystem, TerminalBackend};
-use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-use wimo ai_wimo_tools::registry::types::{SessionContext, ToolConfig, ToolServerConfig};
+use wimoai_wimo_tools::computer::local::{LocalTerminalBackend, MockFs};
+use wimoai_wimo_tools::computer::types::{AsyncFileSystem, TerminalBackend};
+use wimoai_wimo_tools::notification::ToolNotificationHandle;
+use wimoai_wimo_tools::registry::types::{SessionContext, ToolConfig, ToolServerConfig};
 
 /// A ToolBridge built with a custom FileSystem must route writes through it.
 #[tokio::test]
@@ -65,7 +65,7 @@ async fn tool_bridge_routes_writes_through_injected_fs() {
         api_key_provider: None,
         auth_provider: None,
         attribution_callback: None,
-        system_reminder_tag: wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
+        system_reminder_tag: wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
     };
     let bridge = crate::tools::bridge::ToolBridge::finalize_builder(builder, config, ctx)
         .await

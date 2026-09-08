@@ -4,12 +4,12 @@ use environment::WorkspaceIdentity;
 use prometheus::{IntCounterVec, IntGauge, register_int_counter_vec, register_int_gauge};
 use std::sync::Arc;
 use std::sync::LazyLock;
-use wimo ai_computer_hub_sdk::auth::{AuthCredential, AuthProvider};
-use wimo ai_file_utils::gcs::StorageConfig;
-use wimo ai_file_utils::queue::{EnqueueOutcome, TraceExportSource, UploadQueue};
-use wimo ai_file_utils::storage_client::Auth401AttributionCallback;
-use wimo ai_file_utils::{TraceExportConfig, UploadMethod};
-use wimo ai_wimo_auth::{AuthCredentialProvider, CredentialSnapshot};
+use wimoai_computer_hub_sdk::auth::{AuthCredential, AuthProvider};
+use wimoai_file_utils::gcs::StorageConfig;
+use wimoai_file_utils::queue::{EnqueueOutcome, TraceExportSource, UploadQueue};
+use wimoai_file_utils::storage_client::Auth401AttributionCallback;
+use wimoai_file_utils::{TraceExportConfig, UploadMethod};
+use wimoai_wimo_auth::{AuthCredentialProvider, CredentialSnapshot};
 /// `…_pending_bytes` is the series the mandatory queue-memory alert fires on.
 static UPLOAD_QUEUE_PENDING_BYTES: LazyLock<IntGauge> = LazyLock::new(|| {
     register_int_gauge!(
@@ -130,7 +130,7 @@ struct HubAuthCredentialProvider {
     /// Resolved workspace owner so `snapshot` can attribute uploads (and 401s) to the real `user_id`/`team_id`.
     identity: WorkspaceIdentity,
 }
-impl wimo ai_wimo_auth::visibility::HttpAuth for HubAuthCredentialProvider {
+impl wimoai_wimo_auth::visibility::HttpAuth for HubAuthCredentialProvider {
     fn apply(&self, builder: reqwest::RequestBuilder, _base_url: &str) -> reqwest::RequestBuilder {
         let cred = self.auth.current();
         match &cred {
@@ -313,7 +313,7 @@ pub(crate) async fn upload_tool_state_queued(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_computer_hub_sdk::auth::AuthCredential;
+    use wimoai_computer_hub_sdk::auth::AuthCredential;
     fn proxy_config() -> Arc<ProxyStorageConfig> {
         proxy_config_with_identity(WorkspaceIdentity::default())
     }
@@ -430,14 +430,14 @@ mod tests {
         Arc::new(UploadQueue::spawn(
             home,
             source,
-            wimo ai_file_utils::queue::UploadRetryPolicy::default(),
+            wimoai_file_utils::queue::UploadRetryPolicy::default(),
         ))
     }
     /// Pins the tool-state path contract: bytes enqueued at exactly `{session_id}/turn_{N}/tool_state.json`.
     /// The content-type is JSON and the artifact name is `tool_state` (asserted via queue stat and sidecar manifest).
     #[tokio::test]
     async fn tool_state_enqueues_at_session_turn_gcs_path() {
-        use wimo ai_file_utils::queue::{
+        use wimoai_file_utils::queue::{
             QueueItemSidecar, SIDECAR_SUFFIX, UploadQueue, UploadRetryPolicy,
         };
         let home = tempfile::TempDir::new().unwrap();

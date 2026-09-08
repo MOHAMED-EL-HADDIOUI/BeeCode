@@ -1,9 +1,9 @@
 //! Heap-leak test for the session lifecycle: create and remove many sessions, then fail if heap memory grows per session.
 //! Run:
-//!   cargo test -p wimo ai-wimo-shell --features dhat-heap \
+//!   cargo test -p wimoai-wimo-shell --features dhat-heap \
 //!     leader_session_lifecycle_heap_steady_state -- --ignored --nocapture
 use super::*;
-use wimo ai_wimo_workspace::permission::PermissionEvent;
+use wimoai_wimo_workspace::permission::PermissionEvent;
 
 // Chosen between a healthy build (about zero retained allocations per session) and the smallest deliberately introduced leak (one per session)
 // Re-tune if healthy runs drift toward the limits
@@ -21,12 +21,12 @@ fn populate_and_evict(agent: &MvpAgent, i: usize) {
         let ops = agent.workspace_ops.borrow();
         let ops = ops.as_ref().expect("test installs workspace ops");
         let toolset = std::sync::Arc::new(
-            wimo ai_wimo_tools::registry::types::FinalizedToolset::empty_for_test(),
+            wimoai_wimo_tools::registry::types::FinalizedToolset::empty_for_test(),
         );
         ops.bind_local_session(
             sid.0.as_ref(),
             std::env::temp_dir(),
-            wimo ai_hunk_tracker::HunkTrackerHandle::noop(),
+            wimoai_hunk_tracker::HunkTrackerHandle::noop(),
             toolset,
             None,
         )
@@ -63,7 +63,7 @@ async fn quiesce() {
 fn leader_session_lifecycle_heap_steady_state() {
     run_local_for_bridge_test(|| async {
         let agent = build_minimal_agent_for_tests();
-        *agent.workspace_ops.borrow_mut() = Some(wimo ai_wimo_workspace::WorkspaceOps::for_test());
+        *agent.workspace_ops.borrow_mut() = Some(wimoai_wimo_workspace::WorkspaceOps::for_test());
         let _profiler = dhat::Profiler::builder().testing().build();
 
         const WARMUP: usize = 16;

@@ -20,7 +20,7 @@ async fn bracketed_ime_paste_skips_clipboard_image_linux() {
     let bin_dir = tmp.path().join("bin");
     std::fs::create_dir_all(&bin_dir).expect("mkdir fake bin");
     let text_file = tmp.path().join("clipboard_text");
-    let png_file = wimo ai_wimo_pager_pty_harness::host_clipboard::write_fixture_png(tmp.path())
+    let png_file = wimoai_wimo_pager_pty_harness::host_clipboard::write_fixture_png(tmp.path())
         .expect("write clipboard png fixture");
 
     std::fs::write(&text_file, b"").expect("empty clipboard text");

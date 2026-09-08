@@ -4,9 +4,9 @@
 //! - Session start: inject relevant past context on the first turn
 //! - Post-compaction: recover relevant memory after context is lost
 
-use wimo ai_chat_state::{MEMORY_CONTEXT_CLOSE_TAG, MEMORY_CONTEXT_OPEN_TAG};
-use wimo ai_wimo_sampling_types::ConversationItem;
-use wimo ai_wimo_tools::types::memory_backend::{MemorySearchResult, format_staleness_note};
+use wimoai_chat_state::{MEMORY_CONTEXT_CLOSE_TAG, MEMORY_CONTEXT_OPEN_TAG};
+use wimoai_wimo_sampling_types::ConversationItem;
+use wimoai_wimo_tools::types::memory_backend::{MemorySearchResult, format_staleness_note};
 
 const SNIPPET_MAX_CHARS: usize = 500;
 
@@ -317,7 +317,7 @@ mod tests {
     /// Empty results must return `None`: `memory_injection_count` is only incremented when `memory_reminder.is_some()`.
     #[test]
     fn test_format_memory_reminder_empty_results_is_none() {
-        use wimo ai_wimo_tools::types::memory_backend::MemorySearchResult;
+        use wimoai_wimo_tools::types::memory_backend::MemorySearchResult;
         let results: Vec<MemorySearchResult> = vec![];
         let reminder = format_memory_reminder(&results);
         assert!(
@@ -329,7 +329,7 @@ mod tests {
     /// Confirms that `memory_injection_count` increments when there are actual results to inject.
     #[test]
     fn test_format_memory_reminder_with_results_is_some() {
-        use wimo ai_wimo_tools::types::memory_backend::MemorySearchResult;
+        use wimoai_wimo_tools::types::memory_backend::MemorySearchResult;
         let results = vec![MemorySearchResult {
             chunk_id: "test:0".into(),
             path: "/mem/MEMORY.md".into(),

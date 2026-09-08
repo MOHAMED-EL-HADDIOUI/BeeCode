@@ -18,10 +18,10 @@ use super::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
-use wimo ai_wimo_test_support::sse::{
+use wimoai_wimo_test_support::sse::{
     responses_api_reasoning_then_tool_call_events, responses_api_script_exact,
 };
-use wimo ai_wimo_test_support::{MockInferenceServer, ScriptedResponse};
+use wimoai_wimo_test_support::{MockInferenceServer, ScriptedResponse};
 
 /// Derived from the harness's own thresholds so retuning them retunes this suite instead of breaking it.
 /// The scripted tool is `todo_write`, which is in the problematically-repeating tier, so this tracks that tier's constants.
@@ -87,11 +87,11 @@ async fn mid_turn_user_injection_must_not_duplicate_tool_results_for_one_tool_us
                 ScriptedResponse::sse(responses_api_script_exact("done", "test")),
             );
 
-            let sampling_cfg = wimo ai_wimo_sampler::SamplerConfig {
+            let sampling_cfg = wimoai_wimo_sampler::SamplerConfig {
                 api_key: Some("test-key".to_string()),
                 base_url: server.url(),
                 model: "test".to_string(),
-                api_backend: wimo ai_wimo_sampler::ApiBackend::Responses,
+                api_backend: wimoai_wimo_sampler::ApiBackend::Responses,
                 context_window: 256_000,
                 max_retries: Some(0),
                 idle_timeout_secs: Some(30),
@@ -99,10 +99,10 @@ async fn mid_turn_user_injection_must_not_duplicate_tool_results_for_one_tool_us
             };
 
             let (sampler_event_tx, sampler_event_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_wimo_sampler::SamplingEvent>();
-            let sampler_handle = wimo ai_wimo_sampler::SamplerActor::spawn(
+                tokio::sync::mpsc::unbounded_channel::<wimoai_wimo_sampler::SamplingEvent>();
+            let sampler_handle = wimoai_wimo_sampler::SamplerActor::spawn(
                 sampling_cfg,
-                wimo ai_wimo_sampler::RetryPolicy {
+                wimoai_wimo_sampler::RetryPolicy {
                     max_retries: 0,
                     rate_limit_retry_threshold: 0,
                     ..Default::default()
@@ -111,7 +111,7 @@ async fn mid_turn_user_injection_must_not_duplicate_tool_results_for_one_tool_us
             );
 
             let (gateway_tx, gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             drain_gateway(gateway_rx);
             let (persistence_tx, persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
@@ -127,7 +127,7 @@ async fn mid_turn_user_injection_must_not_duplicate_tool_results_for_one_tool_us
                 .await
                 .expect("test actor has sampling config");
             cfg.base_url = server.url();
-            cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+            cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
             cfg.model = "test".to_string();
             actor.chat_state_handle.update_sampling_config(cfg);
             let mut creds = actor.chat_state_handle.get_credentials().await;

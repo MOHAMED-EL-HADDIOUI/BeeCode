@@ -120,7 +120,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_output_issuer_claim_enables_wimo ai_auth() {
+    fn parse_output_issuer_claim_enables_wimoai_auth() {
         let ok = |stdout: &str| std::process::Output {
             status: std::process::Command::new("true").status().unwrap(),
             stdout: stdout.as_bytes().to_vec(),
@@ -133,7 +133,7 @@ mod tests {
         ))
         .unwrap();
         assert_eq!(auth.oidc_issuer.as_deref(), Some("https://auth.x.ai"));
-        assert!(auth.is_wimo ai_auth());
+        assert!(auth.is_wimoai_auth());
 
         // Non-x.ai issuer is stored but stays third-party.
         let auth = parse_output(&ok(
@@ -144,19 +144,19 @@ mod tests {
             auth.oidc_issuer.as_deref(),
             Some("https://idp.acme.example")
         );
-        assert!(!auth.is_wimo ai_auth());
+        assert!(!auth.is_wimoai_auth());
 
         // A missing, empty, or whitespace issuer stores None
         let auth = parse_output(&ok(r#"{"access_token":"t"}"#)).unwrap();
         assert_eq!(auth.oidc_issuer, None);
-        assert!(!auth.is_wimo ai_auth());
+        assert!(!auth.is_wimoai_auth());
         let auth = parse_output(&ok(r#"{"access_token":"t","issuer":"  "}"#)).unwrap();
         assert_eq!(auth.oidc_issuer, None);
 
         // Bare-token output never carries an issuer.
         let auth = parse_output(&ok("bare-token")).unwrap();
         assert_eq!(auth.oidc_issuer, None);
-        assert!(!auth.is_wimo ai_auth());
+        assert!(!auth.is_wimoai_auth());
     }
 
     #[test]

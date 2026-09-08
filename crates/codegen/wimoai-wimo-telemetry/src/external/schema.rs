@@ -14,7 +14,7 @@ use crate::events;
 pub const SCHEMA_VERSION: &str = "v1";
 
 /// Meter/logger instrumentation scope name.
-pub const SCOPE_NAME: &str = "ai.wimo ai.wimo_code";
+pub const SCOPE_NAME: &str = "ai.wimoai.wimo_code";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Event names
@@ -638,7 +638,7 @@ pub(crate) fn sanitize_screen_mode(raw: &str) -> &'static str {
         .unwrap_or("other")
 }
 
-/// Built-in tool names (a closed enum in `wimo ai-wimo-tools`) that pass verbatim through `tool_name` sanitization.
+/// Built-in tool names (a closed enum in `wimoai-wimo-tools`) that pass verbatim through `tool_name` sanitization.
 /// Pinned by test; everything else collapses.
 pub(crate) const BUILTIN_TOOL_NAMES: &[&str] = &[
     "read_file",

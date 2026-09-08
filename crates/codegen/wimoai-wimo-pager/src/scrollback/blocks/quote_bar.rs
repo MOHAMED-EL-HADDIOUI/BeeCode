@@ -1,4 +1,4 @@
-//! The markdown renderer rewrites each `>` quote marker to a `│` bar styled `blockquote_outer` (wimo ai-wimo-markdown parse.rs).
+//! The markdown renderer rewrites each `>` quote marker to a `│` bar styled `blockquote_outer` (wimoai-wimo-markdown parse.rs).
 //! The bar is then ordinary span content and would leak into drag-select copies.
 //! The helpers here detect that prefix on a rendered row and exclude it from selection via [`Selectable::Spans`].
 //! Tool headers and diff gutters exclude their decorations the same way.

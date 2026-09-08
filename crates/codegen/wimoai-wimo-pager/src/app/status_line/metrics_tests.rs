@@ -1,4 +1,4 @@
-use wimo ai_wimo_status_line::test_support::StatusLineConfigFixture;
+use wimoai_wimo_status_line::test_support::StatusLineConfigFixture;
 
 use super::*;
 

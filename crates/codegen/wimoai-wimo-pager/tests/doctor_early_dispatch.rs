@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::process::{Command, Stdio};
 
 fn pager_binary() -> Result<std::path::PathBuf, String> {
-    for key in ["PAGER_BINARY", "CARGO_BIN_EXE_wimo ai-wimo-pager"] {
+    for key in ["PAGER_BINARY", "CARGO_BIN_EXE_wimoai-wimo-pager"] {
         if let Some(value) = std::env::var_os(key) {
             let path = std::path::PathBuf::from(value);
             if path.exists() {
@@ -10,7 +10,7 @@ fn pager_binary() -> Result<std::path::PathBuf, String> {
             }
         }
     }
-    Err("PAGER_BINARY/CARGO_BIN_EXE_wimo ai-wimo-pager not set".to_owned())
+    Err("PAGER_BINARY/CARGO_BIN_EXE_wimoai-wimo-pager not set".to_owned())
 }
 
 #[test]
@@ -654,8 +654,8 @@ fn base_pager_command(
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .envs(wimo ai_tty_utils::pager_env());
-    wimo ai_tty_utils::detach_std_command(&mut command);
+        .envs(wimoai_tty_utils::pager_env());
+    wimoai_tty_utils::detach_std_command(&mut command);
     command
 }
 

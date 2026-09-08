@@ -1,5 +1,5 @@
 //! Canonical wire types for hub-proxied `workspace.*` RPC methods.
-//! They are shared by the server (hub_server), the shell proxy client (`WorkspaceOps`), and clients that cannot depend on `wimo ai-wimo-workspace`.
+//! They are shared by the server (hub_server), the shell proxy client (`WorkspaceOps`), and clients that cannot depend on `wimoai-wimo-workspace`.
 //! Types not yet migrated here live next to their `WorkspaceOp` impls in that crate; each type has exactly one [`WorkspaceRpc`] impl.
 //! [`RpcError`]-code-to-error-enum mapping is deliberately not defined here.
 

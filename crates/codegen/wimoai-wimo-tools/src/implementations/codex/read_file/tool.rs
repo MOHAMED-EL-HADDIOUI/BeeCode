@@ -145,28 +145,28 @@ impl crate::types::tool_metadata::ToolMetadata for CodexReadFileTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for CodexReadFileTool {
+impl wimoai_tool_runtime::Tool for CodexReadFileTool {
     type Args = CodexReadFileInput;
     type Output = ReadFileOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("read_file").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("read_file").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "read_file",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -174,9 +174,9 @@ impl wimo ai_tool_runtime::Tool for CodexReadFileTool {
     #[tracing::instrument(name = "tool.codex_read_file", skip_all)]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: CodexReadFileInput,
-    ) -> Result<ReadFileOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ReadFileOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -310,7 +310,7 @@ mod tests {
             indentation: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -340,7 +340,7 @@ mod tests {
 
         // Out-of-range reads are surfaced as a structured `FileReadError` (a
         // model-facing error), not a hard `Err`.
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -371,7 +371,7 @@ mod tests {
             indentation: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -399,7 +399,7 @@ mod tests {
             indentation: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -427,7 +427,7 @@ mod tests {
             indentation: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -467,7 +467,7 @@ mod tests {
             }),
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -509,7 +509,7 @@ mod tests {
             }),
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -540,7 +540,7 @@ mod tests {
             indentation: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -571,7 +571,7 @@ mod tests {
             indentation: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -599,7 +599,7 @@ mod tests {
             indentation: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {
@@ -631,7 +631,7 @@ mod tests {
             indentation: None,
         };
 
-        let result = wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
+        let result = wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), input)
             .await
             .unwrap();
         match result {

@@ -6,7 +6,7 @@
 //! Skills (`SkillMeta::Skill`) are also passed through as `/name args` for the shell to expand, but marked `InjectSkill` for rendering.
 
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::implementations::skills::types::SkillScope;
+use wimoai_wimo_tools::implementations::skills::types::SkillScope;
 
 use super::command::{CommandExecCtx, CommandProvenance, CommandResult, SlashCommand};
 

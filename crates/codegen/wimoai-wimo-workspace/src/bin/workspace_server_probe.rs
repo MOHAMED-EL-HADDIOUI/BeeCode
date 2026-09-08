@@ -17,10 +17,10 @@ use clap::Parser;
 use serde_json::{Value, json};
 use url::Url;
 use uuid::Uuid;
-use wimo ai_computer_hub_sdk::pool::HubConnectionPool;
-use wimo ai_computer_hub_sdk::{AuthCredential, ToolHarnessBuilder};
-use wimo ai_tool_protocol::{SessionId, ToolId};
-use wimo ai_tool_runtime::{ToolCallContext, ToolStreamItem, TypedToolOutput};
+use wimoai_computer_hub_sdk::pool::HubConnectionPool;
+use wimoai_computer_hub_sdk::{AuthCredential, ToolHarnessBuilder};
+use wimoai_tool_protocol::{SessionId, ToolId};
+use wimoai_tool_runtime::{ToolCallContext, ToolStreamItem, TypedToolOutput};
 
 #[derive(Parser)]
 #[command(name = "workspace-server-probe")]
@@ -64,7 +64,7 @@ fn bearer(args: &Args) -> String {
 
 /// Drive a tool call to its terminal item, discarding progress.
 async fn call_tool(
-    harness: &wimo ai_computer_hub_sdk::ToolHarness,
+    harness: &wimoai_computer_hub_sdk::ToolHarness,
     name: &str,
     args: Value,
 ) -> anyhow::Result<Value> {
@@ -90,7 +90,7 @@ async fn call_tool(
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -121,7 +121,7 @@ async fn main() -> anyhow::Result<()> {
 async fn connect_and_bind(
     args: &Args,
     credential: &AuthCredential,
-) -> anyhow::Result<wimo ai_computer_hub_sdk::ToolHarness> {
+) -> anyhow::Result<wimoai_computer_hub_sdk::ToolHarness> {
     let harness_session = SessionId::new(format!("probe-{}", Uuid::new_v4()))
         .map_err(|e| anyhow::anyhow!("invalid harness session id: {e}"))?;
     let url = Url::parse(&format!("{}?role=harness", args.hub_url))
@@ -172,7 +172,7 @@ async fn connect_and_bind(
 
 /// Invoke real tools on the bound workspace-server and assert results.
 async fn run_checks(
-    harness: &wimo ai_computer_hub_sdk::ToolHarness,
+    harness: &wimoai_computer_hub_sdk::ToolHarness,
     _args: &Args,
 ) -> anyhow::Result<()> {
     // 1) run_terminal_command must echo our nonce back.

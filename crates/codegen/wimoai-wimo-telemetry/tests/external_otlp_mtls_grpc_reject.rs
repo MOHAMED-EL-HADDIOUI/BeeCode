@@ -19,7 +19,7 @@ fn external_stream_grpc_mtls_fails_without_client_identity() {
         tls.ca_cert_pem.clone(),
     );
 
-    let mut cfg = wimo ai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
+    let mut cfg = wimoai_wimo_telemetry::external::ExternalOtelConfig::resolve_with(
         |name| match name {
             "wimo_EXTERNAL_OTEL" => Some("1".into()),
             "OTEL_LOGS_EXPORTER" | "OTEL_METRICS_EXPORTER" => Some("otlp".into()),
@@ -34,25 +34,25 @@ fn external_stream_grpc_mtls_fails_without_client_identity() {
     )
     .expect("config must resolve without client identity");
     assert!(cfg.logs_client_certificate.is_none());
-    cfg.client = wimo ai_wimo_telemetry::external::config::ExternalClientInfo {
+    cfg.client = wimoai_wimo_telemetry::external::config::ExternalClientInfo {
         service_version: "0.0.0-test".into(),
         client_version: "0.0.0-test".into(),
         app_entrypoint: "cli".into(),
     };
 
-    wimo ai_wimo_telemetry::external::init(Some(cfg));
+    wimoai_wimo_telemetry::external::init(Some(cfg));
     assert!(
-        wimo ai_wimo_telemetry::external::is_active(),
+        wimoai_wimo_telemetry::external::is_active(),
         "stream must build and activate so zero collector records mean rejection, \
          not a construction failure"
     );
 
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::SessionHarness {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::SessionHarness {
         session_id: "sess-grpc-mtls-no-client".into(),
         client_identifier: Some("wimo-pager".into()),
         model_id: "wimo-4".into(),
         agent_name: "wimo-plan".into(),
-        permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+        permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
         mcp_server_names: vec![],
         plugin_names: vec![],
         skill_names: vec![],
@@ -60,14 +60,14 @@ fn external_stream_grpc_mtls_fails_without_client_identity() {
         hook_names: vec![],
         agents_md_dir_names: vec![],
         memory_enabled: false,
-        memory_retrieval_mode: wimo ai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
+        memory_retrieval_mode: wimoai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
         is_git_repo: true,
         auto_update: None,
     });
-    wimo ai_wimo_telemetry::external::flush();
+    wimoai_wimo_telemetry::external::flush();
 
     std::thread::sleep(std::time::Duration::from_millis(800));
-    let health = wimo ai_wimo_telemetry::external::export_health()
+    let health = wimoai_wimo_telemetry::external::export_health()
         .expect("active stream must expose export health");
     assert!(
         health.export_failures > 0,
@@ -79,5 +79,5 @@ fn external_stream_grpc_mtls_fails_without_client_identity() {
         "mTLS-required collector must reject clients without identity"
     );
 
-    wimo ai_wimo_telemetry::external::shutdown();
+    wimoai_wimo_telemetry::external::shutdown();
 }

@@ -4,17 +4,17 @@ use crate::extensions::prompt_meta::PromptBlockMeta;
 use crate::session::{InputAuthority, InputPolicy};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
-use wimo ai_wimo_test_support::sse::responses_api_script_exact;
-use wimo ai_wimo_test_support::{MockInferenceServer, ScriptedResponse};
+use wimoai_wimo_test_support::sse::responses_api_script_exact;
+use wimoai_wimo_test_support::{MockInferenceServer, ScriptedResponse};
 
 #[derive(Default)]
 struct PolicyRecorder(std::cell::Cell<Option<InputAuthority>>);
 
 #[async_trait::async_trait(?Send)]
-impl wimo ai_agent_lifecycle::LocalTurnLifecycleContributor for PolicyRecorder {
+impl wimoai_agent_lifecycle::LocalTurnLifecycleContributor for PolicyRecorder {
     async fn on_turn_start_with_policy(
         &self,
-        _input: &wimo ai_agent_lifecycle::TurnStartInput,
+        _input: &wimoai_agent_lifecycle::TurnStartInput,
         policy: InputPolicy,
     ) {
         self.0.set(Some(policy.authority));
@@ -91,16 +91,16 @@ fn parent_request(text: &str, prompt_blocks: Vec<acp::ContentBlock>) -> TurnInpu
 }
 
 fn spawn_gateway_drain(
-    mut gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    mut gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) -> tokio::sync::mpsc::UnboundedReceiver<()> {
     let (hook_tx, hook_rx) = tokio::sync::mpsc::unbounded_channel();
     tokio::task::spawn_local(async move {
         while let Some(message) = gateway_rx.recv().await {
             match message {
-                wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                     let _ = args.response_tx.send(Ok(()));
                 }
-                wimo ai_acp_lib::AcpClientMessage::ExtNotification(args)
+                wimoai_acp_lib::AcpClientMessage::ExtNotification(args)
                     if args.request.method.as_ref() == "x.ai/hooks/event" =>
                 {
                     let _ = hook_tx.send(());
@@ -143,20 +143,20 @@ async fn actor_with_sampler(
     tokio::sync::mpsc::UnboundedReceiver<()>,
     std::rc::Rc<PolicyRecorder>,
 ) {
-    let sampling_config = wimo ai_wimo_sampler::SamplerConfig {
+    let sampling_config = wimoai_wimo_sampler::SamplerConfig {
         api_key: Some("test-key".into()),
         base_url: server.url(),
         model: "test".into(),
-        api_backend: wimo ai_wimo_sampler::ApiBackend::Responses,
+        api_backend: wimoai_wimo_sampler::ApiBackend::Responses,
         context_window: 256_000,
         max_retries: Some(0),
         idle_timeout_secs: Some(30),
         ..Default::default()
     };
     let (sampler_event_tx, mut sampler_event_rx) = tokio::sync::mpsc::unbounded_channel();
-    let sampler_handle = wimo ai_wimo_sampler::SamplerActor::spawn(
+    let sampler_handle = wimoai_wimo_sampler::SamplerActor::spawn(
         sampling_config,
-        wimo ai_wimo_sampler::RetryPolicy {
+        wimoai_wimo_sampler::RetryPolicy {
             max_retries: 0,
             rate_limit_retry_threshold: 0,
             ..Default::default()
@@ -172,11 +172,11 @@ async fn actor_with_sampler(
     actor.sampler_handle = sampler_handle;
     actor.compaction.verbatim_input = false;
     let policy_recorder = std::rc::Rc::new(PolicyRecorder::default());
-    let mut extensions = wimo ai_agent_lifecycle::LocalExtensionRegistryBuilder::default();
+    let mut extensions = wimoai_agent_lifecycle::LocalExtensionRegistryBuilder::default();
     extensions.turn_lifecycle_contributor(policy_recorder.clone());
     actor.extension_registry = extensions.build();
     actor.client_hooks.borrow_mut().insert(
-        wimo ai_wimo_hooks::event::HookEventName::UserPromptSubmit,
+        wimoai_wimo_hooks::event::HookEventName::UserPromptSubmit,
         vec![crate::extensions::hooks::ClientHookGroup {
             matcher: None,
             callback_ids: vec!["human-hook".into()],
@@ -189,7 +189,7 @@ async fn actor_with_sampler(
         .await
         .expect("test actor sampling config");
     config.base_url = server.url();
-    config.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+    config.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
     actor.chat_state_handle.update_sampling_config(config);
     let mut credentials = actor.chat_state_handle.get_credentials().await;
     credentials.api_key = Some("test-key".into());
@@ -398,7 +398,7 @@ async fn parent_compact_and_available_skill_execute_but_other_slashes_stay_inert
                 .seed_skill_discovery(
                     None,
                     None,
-                    vec![wimo ai_wimo_tools::implementations::skills::types::SkillInfo {
+                    vec![wimoai_wimo_tools::implementations::skills::types::SkillInfo {
                         name: "dynamic-authority-skill".into(),
                         description: "available to the child".into(),
                         path: skill_path.display().to_string(),
@@ -447,8 +447,8 @@ async fn parent_compact_and_available_skill_execute_but_other_slashes_stay_inert
             assert!(!unavailable_request.contains("dynamic skill body for unavailable"));
 
             *actor.agent.borrow_mut() = test_agent_with_tools(vec![
-                wimo ai_wimo_tools::registry::types::ToolConfig::for_tool::<
-                    wimo ai_wimo_tools::implementations::wimo::ReadFileTool,
+                wimoai_wimo_tools::registry::types::ToolConfig::for_tool::<
+                    wimoai_wimo_tools::implementations::wimo::ReadFileTool,
                 >(),
             ])
             .await;
@@ -457,7 +457,7 @@ async fn parent_compact_and_available_skill_execute_but_other_slashes_stay_inert
                 .seed_skill_discovery(
                     None,
                     None,
-                    vec![wimo ai_wimo_tools::implementations::skills::types::SkillInfo {
+                    vec![wimoai_wimo_tools::implementations::skills::types::SkillInfo {
                         name: "dynamic-authority-skill".into(),
                         description: "available to the child".into(),
                         path: skill_path.display().to_string(),
@@ -500,7 +500,7 @@ async fn parent_compact_and_available_skill_execute_but_other_slashes_stay_inert
                 .to_string();
             assert!(skill_request.contains("dynamic skill body for preserve auth"));
             assert!(skill_request.contains(
-                wimo ai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL
+                wimoai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL
             ));
             assert_eq!(
                 actor.active_skill.lock().as_deref(),
@@ -519,11 +519,11 @@ async fn parent_compact_and_available_skill_execute_but_other_slashes_stay_inert
                             ConversationItem::User(user)
                                 if user.synthetic_reason
                                     == Some(
-                                        wimo ai_wimo_sampling_types::SyntheticReason::AgentMessage
+                                        wimoai_wimo_sampling_types::SyntheticReason::AgentMessage
                                     )
                                     && user.content.iter().any(|part| matches!(
                                         part,
-                                        wimo ai_wimo_sampling_types::ContentPart::Text { text }
+                                        wimoai_wimo_sampling_types::ContentPart::Text { text }
                                             if text.contains(
                                                 "dynamic skill body for preserve auth"
                                             )
@@ -605,7 +605,7 @@ async fn parent_compact_and_available_skill_execute_but_other_slashes_stay_inert
                         item,
                         ConversationItem::User(user)
                             if user.synthetic_reason
-                                == Some(wimo ai_wimo_sampling_types::SyntheticReason::AgentMessage)
+                                == Some(wimoai_wimo_sampling_types::SyntheticReason::AgentMessage)
                     )
                 })
                 .count();
@@ -647,8 +647,8 @@ async fn parent_skill_lookup_matches_advertised_gated_collision_and_skill_only_l
             let skill_path = skill_dir.path().join("SKILL.md");
             std::fs::write(&skill_path, "flush skill body for $ARGUMENTS").unwrap();
             *actor.agent.borrow_mut() = test_agent_with_tools(vec![
-                wimo ai_wimo_tools::registry::types::ToolConfig::for_tool::<
-                    wimo ai_wimo_tools::implementations::opencode::OpenCodeSkillTool,
+                wimoai_wimo_tools::registry::types::ToolConfig::for_tool::<
+                    wimoai_wimo_tools::implementations::opencode::OpenCodeSkillTool,
                 >(),
             ])
             .await;
@@ -657,7 +657,7 @@ async fn parent_skill_lookup_matches_advertised_gated_collision_and_skill_only_l
                 .seed_skill_discovery(
                     None,
                     None,
-                    vec![wimo ai_wimo_tools::implementations::skills::types::SkillInfo {
+                    vec![wimoai_wimo_tools::implementations::skills::types::SkillInfo {
                         name: "flush".into(),
                         description: "Skill colliding with gated memory builtin".into(),
                         path: skill_path.display().to_string(),

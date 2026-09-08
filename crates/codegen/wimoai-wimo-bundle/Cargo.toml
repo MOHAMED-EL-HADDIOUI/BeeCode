@@ -1,13 +1,13 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-bundle"
+name = "wimoai-wimo-bundle"
 version = "0.1.0"
 edition.workspace = true
 description = "Checksum-tracked on-disk cache for the published subagent bundle (personas, roles, agents, skills)"
 
 [features]
 # Exposes the archive/manifest fixtures (`test_helpers`) to downstream crates'
-# test targets. Inside wimo ai-wimo-shell these were plain `#[cfg(test)]` helpers
+# test targets. Inside wimoai-wimo-shell these were plain `#[cfg(test)]` helpers
 # shared across modules; across the crate boundary they need a feature.
 test-support = []
 # CI default set (preferred over cargo `default` for hermetic CI builds): the
@@ -27,7 +27,7 @@ serde_json = { workspace = true }
 sha2 = { workspace = true }
 tar = { workspace = true }
 # `wimo_home()` supplies the parent of the `bundled` cache directory.
-wimo ai-wimo-config = { workspace = true }
+wimoai-wimo-config = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

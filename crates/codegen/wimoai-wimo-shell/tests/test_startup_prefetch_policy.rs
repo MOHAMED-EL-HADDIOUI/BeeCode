@@ -2,8 +2,8 @@
 
 mod common;
 
-use wimo ai_wimo_shell::agent::models::startup_prefetch;
-use wimo ai_wimo_shell::util::config::RemoteSettings;
+use wimoai_wimo_shell::agent::models::startup_prefetch;
+use wimoai_wimo_shell::util::config::RemoteSettings;
 
 #[test]
 fn bootstrap_discards_prefetch_when_repair_disables_remote_fetch() {

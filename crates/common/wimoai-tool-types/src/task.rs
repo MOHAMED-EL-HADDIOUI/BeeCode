@@ -803,7 +803,7 @@ pub struct SubagentDescriptor {
     pub tools: Option<String>,
 }
 
-/// A built-in subagent type shared by the CLI (`wimo ai-wimo-agent`) and other
+/// A built-in subagent type shared by the CLI (`wimoai-wimo-agent`) and other
 /// agent hosts: its `subagent_type` name, canonical model-facing description,
 /// tool-access fragment, and type-specific prompt body.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

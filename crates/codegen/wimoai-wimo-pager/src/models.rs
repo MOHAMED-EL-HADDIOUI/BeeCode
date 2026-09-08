@@ -2,14 +2,14 @@
 
 use anyhow::Result;
 use tokio_util::sync::CancellationToken;
-use wimo ai_wimo_shell::agent::config::Config as AgentConfig;
-use wimo ai_wimo_shell::cli_models::{AuthStatus, list_models};
+use wimoai_wimo_shell::agent::config::Config as AgentConfig;
+use wimoai_wimo_shell::cli_models::{AuthStatus, list_models};
 
 use crate::client_identity::{PAGER_CLIENT_TYPE, PAGER_CLIENT_VERSION};
 
 pub async fn list_available_models(agent_config: &AgentConfig) -> Result<()> {
     match AuthStatus::resolve(agent_config) {
-        AuthStatus::ApiKey => println!("You are using wimo ai_API_KEY."),
+        AuthStatus::ApiKey => println!("You are using wimoai_API_KEY."),
         AuthStatus::LoggedIn(host) => println!("You are logged in with {}.", host),
         AuthStatus::ModelCredentials(model) => {
             println!("Model '{model}' is using its own API key.");
@@ -20,7 +20,7 @@ pub async fn list_available_models(agent_config: &AgentConfig) -> Result<()> {
     println!();
 
     let cancel = CancellationToken::new();
-    wimo ai_wimo_telemetry::startup::mark_utility_process();
+    wimoai_wimo_telemetry::startup::mark_utility_process();
     let spawned = crate::acp::spawn::spawn_wimo_shell(agent_config.clone(), &cancel, None).await?;
     // Cancel and join on every return path, including the `?` below
     let _agent_guard =

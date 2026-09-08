@@ -1,16 +1,16 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-sampler"
+name = "wimoai-wimo-sampler"
 version = "0.1.0"
 edition.workspace = true
 description = "Actor-based sampling/inference layer for wimo AI wimo (HTTP streaming + retry, no shell coupling)"
 
 [dependencies]
 # Internal
-wimo ai-wimo-auth = { workspace = true }
-wimo ai-wimo-extra-ca = { workspace = true }
-wimo ai-wimo-sampling-types = { path = "../wimo ai-wimo-sampling-types" }
-wimo ai-wimo-version = { workspace = true }
+wimoai-wimo-auth = { workspace = true }
+wimoai-wimo-extra-ca = { workspace = true }
+wimoai-wimo-sampling-types = { path = "../wimoai-wimo-sampling-types" }
+wimoai-wimo-version = { workspace = true }
 
 # External
 async-openai = { workspace = true }
@@ -33,7 +33,7 @@ uuid = { workspace = true, features = ["v4"] }
 axum = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["registry"] }
 # Shared SSE generators for the happy-path mock payloads.
-wimo ai-wimo-test-support = { workspace = true }
+wimoai-wimo-test-support = { workspace = true }
 # `start_paused = true` for deterministic timeout testing; `net` for
 # `TcpListener::bind` in the mock server harness.
 tokio = { workspace = true, features = [

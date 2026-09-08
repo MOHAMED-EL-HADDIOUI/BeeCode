@@ -1,5 +1,5 @@
-//! All tool execution goes through `wimo ai-wimo-tools` via the `ToolBridge`.
-//! Types (ToolOutput, ToolInput, TodoState, etc.) come from `wimo ai-wimo-tools` directly.
+//! All tool execution goes through `wimoai-wimo-tools` via the `ToolBridge`.
+//! Types (ToolOutput, ToolInput, TodoState, etc.) come from `wimoai-wimo-tools` directly.
 
 pub mod bridge;
 pub mod config;
@@ -15,7 +15,7 @@ pub use self::{
     tool_context::ToolContext,
 };
 
-// Re-export key types from wimo ai-wimo-tools for convenience
+// Re-export key types from wimoai-wimo-tools for convenience
 pub use self::todo::{TodoId, TodoItem, TodoPriority, TodoStatus};
-pub use wimo ai_wimo_tools::types::output::ToolOutput;
-pub use wimo ai_wimo_tools::types::{MCPToolInput, ToolInput};
+pub use wimoai_wimo_tools::types::output::ToolOutput;
+pub use wimoai_wimo_tools::types::{MCPToolInput, ToolInput};

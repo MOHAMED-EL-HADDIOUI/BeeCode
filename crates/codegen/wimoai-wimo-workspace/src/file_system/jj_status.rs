@@ -66,7 +66,7 @@ async fn run_jj(cwd: &Path, args: &[&str]) -> Option<String> {
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::null())
         .stdin(std::process::Stdio::null());
-    wimo ai_tty_utils::detach_std_command(&mut cmd);
+    wimoai_tty_utils::detach_std_command(&mut cmd);
     let output = super::process::output_killing_group_on_drop(cmd)
         .await
         .ok()?;

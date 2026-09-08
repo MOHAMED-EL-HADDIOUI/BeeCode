@@ -2,9 +2,9 @@ use super::support::*;
 use super::*;
 use crate::session::memory::MemorySearchSource;
 use tokio::sync::mpsc;
-use wimo ai_wimo_paths::AbsPathBuf;
-use wimo ai_wimo_workspace::file_system::MockFs;
-use wimo ai_wimo_workspace::permission::PermissionHandle;
+use wimoai_wimo_paths::AbsPathBuf;
+use wimoai_wimo_workspace::file_system::MockFs;
+use wimoai_wimo_workspace::permission::PermissionHandle;
 #[test]
 fn first_turn_memory_visibility_matches_displayed_score() {
     assert_eq!(
@@ -73,7 +73,7 @@ async fn create_test_actor_with_memory(
     total_tokens: u64,
     context_window: u64,
     threshold_percent: u8,
-    gateway_tx: mpsc::UnboundedSender<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_tx: mpsc::UnboundedSender<wimoai_acp_lib::AcpClientMessage>,
     persistence_tx: mpsc::UnboundedSender<PersistenceMsg>,
     memory_config: Option<crate::config::MemoryConfig>,
 ) -> SessionActor {
@@ -83,11 +83,11 @@ async fn create_test_actor_with_memory(
     let fs = Arc::new(MockFs::new(cwd.to_path_buf()));
     let terminal = Arc::new(DummyTerminal {});
     let (hunk_tx, _) = tokio::sync::mpsc::unbounded_channel();
-    let hunk_tracker_handle = wimo ai_hunk_tracker::HunkTrackerActor::spawn(
+    let hunk_tracker_handle = wimoai_hunk_tracker::HunkTrackerActor::spawn(
         "test-memory".to_string(),
         cwd.to_path_buf(),
         hunk_tx,
-        wimo ai_hunk_tracker::TrackingMode::AgentOnly,
+        wimoai_hunk_tracker::TrackingMode::AgentOnly,
         tokio_util::sync::CancellationToken::new(),
     );
     let tool_context = ToolContext::new(cwd.clone(), None, None, fs, terminal, hunk_tracker_handle);
@@ -110,9 +110,9 @@ async fn create_test_actor_with_memory(
     });
     let (chat_event_tx, _chat_event_rx) = tokio::sync::mpsc::unbounded_channel();
     let (event_tx, _event_rx) = tokio::sync::mpsc::unbounded_channel::<SessionEvent>();
-    let chat_state_handle = wimo ai_chat_state::ChatStateActor::spawn(
+    let chat_state_handle = wimoai_chat_state::ChatStateActor::spawn(
         vec![],
-        wimo ai_wimo_sampling_types::SamplingConfig {
+        wimoai_wimo_sampling_types::SamplingConfig {
             base_url: "http://localhost".to_string(),
             model: "test".to_string(),
             max_completion_tokens: None,
@@ -127,7 +127,7 @@ async fn create_test_actor_with_memory(
             reasoning_effort: None,
             stream_tool_calls: None,
         },
-        Box::new(wimo ai_chat_state::NullChatPersistence),
+        Box::new(wimoai_chat_state::NullChatPersistence),
         chat_event_tx,
         tokio_util::sync::CancellationToken::new(),
     );
@@ -192,7 +192,7 @@ async fn create_test_actor_with_memory(
             count: std::sync::atomic::AtomicU64::new(0),
             auto_compact_suppressed: std::sync::atomic::AtomicU8::new(0),
             previous_model: std::cell::Cell::new(None),
-            compaction_mode: wimo ai_chat_state::CompactionMode::Transcript,
+            compaction_mode: wimoai_chat_state::CompactionMode::Transcript,
             verbatim_input: true,
             tool_choice: crate::util::config::CompactionToolChoice::Auto,
             prefire: crate::session::compaction_config::PrefireState::default(),
@@ -307,7 +307,7 @@ async fn create_test_actor_with_memory(
         laziness_debug_log: None,
         last_live_orphan_reconcile: std::cell::Cell::new(None),
         deferred_prefix: TaskSlot::new(),
-        extension_registry: wimo ai_agent_lifecycle::LocalExtensionRegistry::default(),
+        extension_registry: wimoai_agent_lifecycle::LocalExtensionRegistry::default(),
         last_announced_local_date: std::cell::Cell::new(chrono::Local::now().date_naive()),
         prefix_carries_fallback_date: std::cell::Cell::new(false),
         last_search_prompt_index: std::sync::atomic::AtomicI64::new(-1),
@@ -318,7 +318,7 @@ async fn create_test_actor_with_memory(
         turn_end_tx: Default::default(),
         client_hooks: Default::default(),
         hook_resolved_workspace_root: String::new(),
-        vcs_kind: wimo ai_wimo_workspace::session::git::VcsKind::Git,
+        vcs_kind: wimoai_wimo_workspace::session::git::VcsKind::Git,
         hook_load_errors: std::cell::RefCell::new(Vec::new()),
         plugin_registry: std::cell::RefCell::new(None),
         plugin_registry_handle: None,
@@ -340,13 +340,13 @@ async fn create_test_actor_with_memory(
         turn_stream_drained: parking_lot::Mutex::new(std::collections::HashMap::new()),
         pending_image_strip: parking_lot::Mutex::new(std::collections::HashMap::new()),
         image_strip_rewrite_barrier: ImageStripRewriteBarrier::new(),
-        sampler_handle: wimo ai_wimo_sampler::SamplerHandle::noop(),
+        sampler_handle: wimoai_wimo_sampler::SamplerHandle::noop(),
         sampling_gate: None,
         rebuild_spec: crate::session::agent_rebuild::test_rebuild_spec_default(),
         image_description_model: crate::test_support::TEST_MODEL.to_owned(),
         image_describe_cache: Arc::new(crate::session::image_describe::ImageDescribeCache::new()),
         subagent_token_records: parking_lot::Mutex::new(HashMap::new()),
-        workspace_ops: wimo ai_wimo_workspace::WorkspaceOps::for_test(),
+        workspace_ops: wimoai_wimo_workspace::WorkspaceOps::for_test(),
         trace_config_template: std::cell::RefCell::new(None),
     }
 }
@@ -561,20 +561,20 @@ async fn test_session_close_does_not_run_dream() {
                 .unwrap();
             }
             actor.chat_state_handle.replace_conversation(vec![
-                wimo ai_wimo_sampling_types::ConversationItem::user(
+                wimoai_wimo_sampling_types::ConversationItem::user(
                     "help me fix the authentication bug in the login flow",
                 ),
-                wimo ai_wimo_sampling_types::ConversationItem::assistant("looking at auth.rs"),
-                wimo ai_wimo_sampling_types::ConversationItem::user(
+                wimoai_wimo_sampling_types::ConversationItem::assistant("looking at auth.rs"),
+                wimoai_wimo_sampling_types::ConversationItem::user(
                     "also add integration tests for the token refresh path",
                 ),
-                wimo ai_wimo_sampling_types::ConversationItem::assistant("found the issue"),
-                wimo ai_wimo_sampling_types::ConversationItem::user(
+                wimoai_wimo_sampling_types::ConversationItem::assistant("found the issue"),
+                wimoai_wimo_sampling_types::ConversationItem::user(
                     "great, can you patch the logout handler as well",
                 ),
-                wimo ai_wimo_sampling_types::ConversationItem::assistant("done"),
+                wimoai_wimo_sampling_types::ConversationItem::assistant("done"),
             ]);
-            let timer = wimo ai_wimo_telemetry::session_end::SessionEndTimer::new_shared();
+            let timer = wimoai_wimo_telemetry::session_end::SessionEndTimer::new_shared();
             actor.run_session_end_memory_pipeline("test", &timer).await;
             assert_eq!(
                 actor
@@ -633,7 +633,7 @@ async fn test_run_session_spawns_launch_dream() {
             let (_chat_tx, chat_rx) = mpsc::unbounded_channel();
             let (_event_tx, event_rx) = mpsc::unbounded_channel();
             let codebase_indexes = std::sync::Arc::new(parking_lot::Mutex::new(
-                wimo ai_wimo_workspace::file_system::CodebaseIndexManager::new(),
+                wimoai_wimo_workspace::file_system::CodebaseIndexManager::new(),
             ));
             tokio::task::spawn_local(super::run_session(
                 actor.clone(),
@@ -666,7 +666,7 @@ async fn test_run_session_spawns_launch_dream() {
 /// Tests can then prove the idempotency guard alone is what suppresses re-injection.
 #[allow(clippy::field_reassign_with_default)]
 async fn create_injection_ready_actor(
-    initial_conversation: Vec<wimo ai_wimo_sampling_types::ConversationItem>,
+    initial_conversation: Vec<wimoai_wimo_sampling_types::ConversationItem>,
 ) -> SessionActor {
     let (gateway_tx, _gateway_rx) = mpsc::unbounded_channel();
     let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel();
@@ -727,8 +727,8 @@ async fn test_first_turn_reminder_injects_without_persisted_block() {
     local
         .run_until(async {
             let actor = create_injection_ready_actor(vec![
-                wimo ai_wimo_sampling_types::ConversationItem::system("You are a helpful assistant."),
-                wimo ai_wimo_sampling_types::ConversationItem::user(
+                wimoai_wimo_sampling_types::ConversationItem::system("You are a helpful assistant."),
+                wimoai_wimo_sampling_types::ConversationItem::user(
                     "tell me about rust backend services conventions",
                 ),
             ])
@@ -736,7 +736,7 @@ async fn test_first_turn_reminder_injects_without_persisted_block() {
             let reminder = actor.first_turn_memory_reminder().await;
             let reminder = reminder.expect("first turn with matching index must inject");
             assert!(
-                reminder.contains(wimo ai_chat_state::MEMORY_CONTEXT_OPEN_TAG),
+                reminder.contains(wimoai_chat_state::MEMORY_CONTEXT_OPEN_TAG),
                 "reminder must be a tagged memory-context block, got: {reminder}"
             );
             assert!(
@@ -756,8 +756,8 @@ async fn test_first_turn_reminder_skips_all_displayed_zero_results() {
     local
         .run_until(async {
             let mut actor = create_injection_ready_actor(vec![
-                wimo ai_wimo_sampling_types::ConversationItem::system("You are a helpful assistant."),
-                wimo ai_wimo_sampling_types::ConversationItem::user(
+                wimoai_wimo_sampling_types::ConversationItem::system("You are a helpful assistant."),
+                wimoai_wimo_sampling_types::ConversationItem::user(
                     "tell me about rust backend services conventions",
                 ),
             ])
@@ -797,7 +797,7 @@ async fn test_first_turn_reminder_skips_when_block_persisted() {
         .run_until(async {
             let persisted_block =
                 crate::session::helpers::memory_context::format_memory_reminder(&[
-                    wimo ai_wimo_tools::types::memory_backend::MemorySearchResult {
+                    wimoai_wimo_tools::types::memory_backend::MemorySearchResult {
                         chunk_id: "prev:0".into(),
                         path: "MEMORY.md".into(),
                         start_line: 0,
@@ -810,10 +810,10 @@ async fn test_first_turn_reminder_skips_when_block_persisted() {
                 ])
                 .unwrap();
             let actor = create_injection_ready_actor(vec![
-                wimo ai_wimo_sampling_types::ConversationItem::system(format!(
+                wimoai_wimo_sampling_types::ConversationItem::system(format!(
                     "You are a helpful assistant.\n\n{persisted_block}"
                 )),
-                wimo ai_wimo_sampling_types::ConversationItem::user(
+                wimoai_wimo_sampling_types::ConversationItem::user(
                     "tell me about rust backend services conventions",
                 ),
             ])

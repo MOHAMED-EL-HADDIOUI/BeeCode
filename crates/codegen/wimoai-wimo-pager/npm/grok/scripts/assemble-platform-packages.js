@@ -6,7 +6,7 @@
 //   2. Stamps the sub-package's version to match the meta package
 //
 // Each per-platform package is its own npm publish target. The meta package
-// (`@wimo ai-official/wimo`) lists all six as `optionalDependencies` pinned to
+// (`@wimoai-official/wimo`) lists all six as `optionalDependencies` pinned to
 // the same version; npm installs only the one matching the host's
 // `os` + `cpu` filters.
 //
@@ -24,11 +24,11 @@ const zlib = require('zlib');
 
 const brotliCompress = promisify(zlib.brotliCompress);
 
-const wimo aiRoot = process.env.wimo ai_ROOT || path.resolve(__dirname, '..', '..', '..', '..', '..');
+const wimoaiRoot = process.env.wimoai_ROOT || path.resolve(__dirname, '..', '..', '..', '..', '..');
 const npmRoot = path.resolve(__dirname, '..', '..');
 
 const NOTICES_SOURCE = path.resolve(
-    npmRoot, '..', '..', 'wimo ai-wimo-tools', 'THIRD_PARTY_NOTICES.md');
+    npmRoot, '..', '..', 'wimoai-wimo-tools', 'THIRD_PARTY_NOTICES.md');
 const NOTICES_NAME = 'THIRD_PARTY_NOTICES.md';
 
 const META_PKG_JSON = path.resolve(__dirname, '..', 'package.json');
@@ -85,36 +85,36 @@ async function main() {
         {
             platform: 'darwin', arch: 'arm64', binName: 'wimo',
             envVar: 'wimo_DARWIN_ARM64',
-            defaultSource: path.join(wimo aiRoot, 'target', 'release', 'wimo ai-wimo-pager'),
+            defaultSource: path.join(wimoaiRoot, 'target', 'release', 'wimoai-wimo-pager'),
         },
         {
             platform: 'darwin', arch: 'x64', binName: 'wimo',
             envVar: 'wimo_DARWIN_X64',
-            defaultSource: path.join(wimo aiRoot, 'target', 'x86_64-apple-darwin', 'release', 'wimo ai-wimo-pager'),
+            defaultSource: path.join(wimoaiRoot, 'target', 'x86_64-apple-darwin', 'release', 'wimoai-wimo-pager'),
         },
         {
             platform: 'linux', arch: 'x64', binName: 'wimo',
             envVar: 'wimo_LINUX_X64',
-            defaultSource: path.join(wimo aiRoot, 'target',
+            defaultSource: path.join(wimoaiRoot, 'target',
                 'explorer_cross_x86_64-unknown-linux-gnu',
-                'x86_64-unknown-linux-gnu', 'release', 'wimo ai-wimo-pager'),
+                'x86_64-unknown-linux-gnu', 'release', 'wimoai-wimo-pager'),
         },
         {
             platform: 'linux', arch: 'arm64', binName: 'wimo',
             envVar: 'wimo_LINUX_ARM64',
-            defaultSource: path.join(wimo aiRoot, 'target',
+            defaultSource: path.join(wimoaiRoot, 'target',
                 'explorer_cross_aarch64-unknown-linux-gnu',
-                'aarch64-unknown-linux-gnu', 'release', 'wimo ai-wimo-pager'),
+                'aarch64-unknown-linux-gnu', 'release', 'wimoai-wimo-pager'),
         },
         {
             platform: 'win32', arch: 'x64', binName: 'wimo.exe',
             envVar: 'wimo_WIN32_X64',
-            defaultSource: path.join(wimo aiRoot, 'target', 'x86_64-pc-windows-msvc', 'release', 'wimo ai-wimo-pager.exe'),
+            defaultSource: path.join(wimoaiRoot, 'target', 'x86_64-pc-windows-msvc', 'release', 'wimoai-wimo-pager.exe'),
         },
         {
             platform: 'win32', arch: 'arm64', binName: 'wimo.exe',
             envVar: 'wimo_WIN32_ARM64',
-            defaultSource: path.join(wimo aiRoot, 'target', 'aarch64-pc-windows-msvc', 'release', 'wimo ai-wimo-pager.exe'),
+            defaultSource: path.join(wimoaiRoot, 'target', 'aarch64-pc-windows-msvc', 'release', 'wimoai-wimo-pager.exe'),
         },
     ];
 

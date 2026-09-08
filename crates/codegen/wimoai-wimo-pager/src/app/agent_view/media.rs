@@ -85,7 +85,7 @@ impl AgentView {
             KeyCode::Esc | KeyCode::Char('q') => {
                 // Clear the Kitty image before closing.
                 // Old code bypassed STDERR_OUTPUT_LOCK which could interleave mid-frame
-                wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+                wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                     let clear = PostFlush::from(overlay::clear_kitty());
                     let _ = clear.write_to(stderr);
                 });
@@ -524,7 +524,7 @@ impl AgentView {
         {
             let path = path.clone();
             std::thread::spawn(move || {
-                if let Err(e) = wimo ai_wimo_shell::util::clipboard::set_image_file(&path) {
+                if let Err(e) = wimoai_wimo_shell::util::clipboard::set_image_file(&path) {
                     tracing::debug!("copy image failed: {e}");
                 }
             });
@@ -610,7 +610,7 @@ impl AgentView {
         match key.code {
             KeyCode::Esc | KeyCode::Char('q') => {
                 // Clear the Kitty image before closing.
-                wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+                wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                     let clear = PostFlush::from(overlay::clear_kitty());
                     let _ = clear.write_to(stderr);
                 });
@@ -642,7 +642,7 @@ impl AgentView {
         match gboom.handle_key(key) {
             crate::gboom::GboomKeyOutcome::Close => {
                 // Clear the kitty image before closing (same as the video viewer) so no stale frame lingers in the cell grid
-                wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+                wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                     let clear = PostFlush::from(overlay::clear_kitty());
                     let _ = clear.write_to(stderr);
                 });

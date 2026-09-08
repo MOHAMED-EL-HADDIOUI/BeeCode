@@ -17,8 +17,8 @@
 //!
 //! ```rust
 //! use serde::Serialize;
-//! use wimo ai_tool_runtime::render::ToolOutput;
-//! use wimo ai_tool_runtime::ContentBlock;
+//! use wimoai_tool_runtime::render::ToolOutput;
+//! use wimoai_tool_runtime::ContentBlock;
 //!
 //! #[derive(Serialize)]
 //! struct BashOutput {
@@ -41,7 +41,7 @@
 //!
 //! ```rust
 //! use serde::Serialize;
-//! use wimo ai_tool_runtime::render::ToolOutput;
+//! use wimoai_tool_runtime::render::ToolOutput;
 //!
 //! #[derive(Serialize)]
 //! struct SimpleOutput { answer: String }
@@ -84,17 +84,17 @@ impl ToolOutput for Value {}
 /// `String` is a common output type for simple tools.
 impl ToolOutput for String {}
 
-/// Lets `wimo ai_tool_types::TaskOutputOutput` be used directly as a `Tool::Output`
+/// Lets `wimoai_tool_types::TaskOutputOutput` be used directly as a `Tool::Output`
 /// (handy for stub/test tools and pass-through proxies).
-impl ToolOutput for wimo ai_tool_types::TaskOutputOutput {}
+impl ToolOutput for wimoai_tool_types::TaskOutputOutput {}
 
-/// Lets `wimo ai_tool_types::SubagentCompletedOutput` be used directly as a
+/// Lets `wimoai_tool_types::SubagentCompletedOutput` be used directly as a
 /// `Tool::Output` (the `task` tool's structured completion output).
-impl ToolOutput for wimo ai_tool_types::SubagentCompletedOutput {}
+impl ToolOutput for wimoai_tool_types::SubagentCompletedOutput {}
 
-/// Lets `wimo ai_tool_types::KillTaskOutput` be used directly as a `Tool::Output`
+/// Lets `wimoai_tool_types::KillTaskOutput` be used directly as a `Tool::Output`
 /// (the `kill_task` tool's typed result / not-found output).
-impl ToolOutput for wimo ai_tool_types::KillTaskOutput {}
+impl ToolOutput for wimoai_tool_types::KillTaskOutput {}
 
 /// Delegate through `Box<T>` so boxed outputs (e.g. large response
 /// structs) work without a manual impl.

@@ -45,28 +45,28 @@ Set `persistent: true` for session-length watches (PR monitoring, log tails) -- 
     }
 }
 
-impl wimo ai_tool_runtime::Tool for MonitorTool {
+impl wimoai_tool_runtime::Tool for MonitorTool {
     type Args = MonitorInput;
     type Output = MonitorOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("monitor").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("monitor").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "monitor",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -74,15 +74,15 @@ impl wimo ai_tool_runtime::Tool for MonitorTool {
     #[tracing::instrument(name = "tool.monitor", skip_all)]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: MonitorInput,
-    ) -> Result<MonitorOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<MonitorOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
         input
             .validate()
-            .map_err(|e| wimo ai_tool_runtime::ToolError::invalid_arguments(e.to_string()))?;
+            .map_err(|e| wimoai_tool_runtime::ToolError::invalid_arguments(e.to_string()))?;
 
         let resolved_timeout = input.resolved_timeout_ms();
         let description = input.description;
@@ -137,7 +137,7 @@ impl wimo ai_tool_runtime::Tool for MonitorTool {
                 description: Some(description.clone()).filter(|d| !d.trim().is_empty()),
             })
             .await
-            .map_err(|e| wimo ai_tool_runtime::ToolError::custom("process_manager", e.to_string()))?;
+            .map_err(|e| wimoai_tool_runtime::ToolError::custom("process_manager", e.to_string()))?;
 
         let task_id = bg_handle.task_id.clone();
         let tray_description = Some(description.clone()).filter(|d| !d.trim().is_empty());

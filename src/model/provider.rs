@@ -1,5 +1,5 @@
 //! Multi-provider model abstraction — REAL framework (Section 8 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub trait ModelProvider {
     fn provider_name(&self) -> String;
@@ -16,7 +16,7 @@ impl ModelProvider for OpenAIProvider {
 
 pub struct WimoProvider;
 impl ModelProvider for WimoProvider {
-    fn provider_name(&self) -> String { "wimo ai".to_string() }
+    fn provider_name(&self) -> String { "wimoai".to_string() }
     fn stream_response(&self, prompt: &str) -> Vec<String> {
         vec![format!("Wimo AI response: {}", prompt)]
     }

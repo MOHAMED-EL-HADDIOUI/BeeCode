@@ -5,9 +5,9 @@ use crate::{
     embedding::EmbeddingProvider,
     text_utils::{has_markdown_headers, is_no_reply},
 };
-use wimo ai_wimo_config_types::MemoryFlushConfig;
+use wimoai_wimo_config_types::MemoryFlushConfig;
 
-const LOG: &str = "wimo ai_memory";
+const LOG: &str = "wimoai_memory";
 
 /// Check whether a memory flush should run before the next compaction.
 ///
@@ -30,7 +30,7 @@ pub fn should_flush(
             "MEMORY_FLUSH_CHECK: already flushed this cycle (cycle={current_compaction_count})");
         return false;
     }
-    let should = wimo ai_token_estimation::exceeds_threshold_with_headroom(
+    let should = wimoai_token_estimation::exceeds_threshold_with_headroom(
         total_tokens,
         context_window,
         compact_threshold_percent,

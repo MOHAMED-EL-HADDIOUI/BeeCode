@@ -1,12 +1,12 @@
 //! Fork-context normalization: summarizes parent conversation for child sessions.
 //!
-//! Extracted from `wimo ai-wimo-shell/src/agent/subagent/` `normalize_forked_context()`.
+//! Extracted from `wimoai-wimo-shell/src/agent/subagent/` `normalize_forked_context()`.
 
 use std::borrow::Cow;
 use std::collections::BTreeSet;
 use std::fmt::Write;
 
-use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+use wimoai_wimo_sampling_types::conversation::ConversationItem;
 
 /// Maximum number of complete turns to render verbatim in the background context.
 /// Turns beyond this threshold (counting from the end) are summarized as metadata (message counts and tools used).
@@ -15,7 +15,7 @@ const MAX_VERBATIM_TURNS: usize = 3;
 /// XML tags whose content is stripped from user messages during fork context normalization.
 /// The child session's system prompt builder re-injects these blocks, so keeping them in the background context duplicates them.
 ///
-/// See also: `wimo ai-chat-state::compaction_utils::strip_system_tags`, which strips a related (but different) tag set for compaction.
+/// See also: `wimoai-chat-state::compaction_utils::strip_system_tags`, which strips a related (but different) tag set for compaction.
 const FORK_NOISE_TAGS: &[&str] = &[
     "system-reminder",
     "system_reminder", // Cursor wire format uses underscore
@@ -95,7 +95,7 @@ pub fn normalize_forked_context(items: Vec<ConversationItem>) -> (Vec<Conversati
 /// Otherwise long forked histories would register zero turns and never summarize, blowing up token usage.
 ///
 /// NOTE: two scanners walk turn boundaries while skipping `Reasoning` items, and they must move together.
-/// The other is `fork_filter_chat` in `wimo ai-wimo-shell/src/session/storage/jsonl.rs`; it truncates to the last complete turn before this counts them.
+/// The other is `fork_filter_chat` in `wimoai-wimo-shell/src/session/storage/jsonl.rs`; it truncates to the last complete turn before this counts them.
 /// Keep their notions of a "complete turn" in sync if the set of items that makes up a turn changes.
 fn count_complete_turns(items: &[&ConversationItem]) -> Vec<usize> {
     let mut turn_ends = Vec::new();
@@ -172,7 +172,7 @@ fn strip_fork_noise(text: &str) -> String {
 /// Unclosed tags are left untouched; stripping to end-of-string would silently eat meaningful content on malformed input.
 /// Same-name nesting is not supported: matches the first closing tag.
 ///
-/// See also: `wimo ai-chat-state::compaction_utils::strip_system_tags`, which also leaves unclosed tags untouched for a different tag set.
+/// See also: `wimoai-chat-state::compaction_utils::strip_system_tags`, which also leaves unclosed tags untouched for a different tag set.
 fn strip_xml_block<'a>(text: &'a str, tag: &str) -> Cow<'a, str> {
     let open_prefix = format!("<{tag}");
     if !text.contains(&*open_prefix) {
@@ -267,7 +267,7 @@ fn render_item_to_background(out: &mut String, item: &ConversationItem) {
                 .content
                 .iter()
                 .filter_map(|p| match p {
-                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                    wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                         Some(text.as_ref())
                     }
                     _ => None,
@@ -358,7 +358,7 @@ fn truncate_str(s: &str, max_chars: usize) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_sampling_types::conversation::{ConversationItem, ToolCall, ToolResultItem};
+    use wimoai_wimo_sampling_types::conversation::{ConversationItem, ToolCall, ToolResultItem};
 
     fn user_item(text: &str) -> ConversationItem {
         ConversationItem::user(text)
@@ -396,7 +396,7 @@ mod tests {
     }
 
     fn reasoning_item(text: &str) -> ConversationItem {
-        ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item(text))
+        ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item(text))
     }
 
     fn extract_background_text(item: &ConversationItem) -> String {
@@ -405,7 +405,7 @@ mod tests {
                 .content
                 .iter()
                 .filter_map(|p| match p {
-                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                    wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                         Some(text.as_ref())
                     }
                     _ => None,
@@ -442,7 +442,7 @@ mod tests {
                 .content
                 .iter()
                 .filter_map(|p| match p {
-                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                    wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                         Some(text.as_ref())
                     }
                     _ => None,
@@ -478,7 +478,7 @@ mod tests {
                 .content
                 .iter()
                 .filter_map(|p| match p {
-                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                    wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                         Some(text.as_ref())
                     }
                     _ => None,
@@ -518,7 +518,7 @@ mod tests {
                 .content
                 .iter()
                 .filter_map(|p| match p {
-                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                    wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                         Some(text.as_ref())
                     }
                     _ => None,
@@ -607,7 +607,7 @@ mod tests {
                 .content
                 .iter()
                 .filter_map(|p| match p {
-                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                    wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                         Some(text.as_ref())
                     }
                     _ => None,
@@ -657,7 +657,7 @@ mod tests {
                 .content
                 .iter()
                 .filter_map(|p| match p {
-                    wimo ai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
+                    wimoai_wimo_sampling_types::conversation::ContentPart::Text { text } => {
                         Some(text.as_ref())
                     }
                     _ => None,

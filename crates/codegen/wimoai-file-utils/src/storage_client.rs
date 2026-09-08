@@ -26,8 +26,8 @@ use tokio::sync::Semaphore;
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_util::bytes::Bytes;
 use tokio_util::io::ReaderStream;
-use wimo ai_circuit_breaker::{BreakerConfig, BreakerOpen, CircuitBreaker, Outcome, RetryPolicy};
-use wimo ai_wimo_auth::AuthCredentialProvider;
+use wimoai_circuit_breaker::{BreakerConfig, BreakerOpen, CircuitBreaker, Outcome, RetryPolicy};
+use wimoai_wimo_auth::AuthCredentialProvider;
 
 use crate::circuit_breaker_observer::TracingObserver;
 
@@ -35,7 +35,7 @@ use crate::circuit_breaker_observer::TracingObserver;
 // Storage Circuit Breaker policy
 // ============================================================================
 // `StorageClient`'s session-wide breaker uses the shared
-// `wimo ai_circuit_breaker::BreakerConfig::client()` preset
+// `wimoai_circuit_breaker::BreakerConfig::client()` preset
 // (sliding-window-with-min-samples: 5 samples / 60s window / 60s open
 // duration / failure code = 401). The observer name "storage_breaker"
 // is surfaced as a structured field on every tracing event so existing
@@ -50,8 +50,8 @@ fn storage_breaker_config() -> BreakerConfig {
 /// Hook invoked by [`StorageClient`] at every 401 response site so that
 /// the embedding application can record auth-attribution telemetry.
 ///
-/// Mirrors the pattern in `wimo ai-wimo-sampler::Auth401AttributionCallback`
-/// and `wimo ai-wimo-tools::Auth401AttributionCallback`. The shell installs
+/// Mirrors the pattern in `wimoai-wimo-sampler::Auth401AttributionCallback`
+/// and `wimoai-wimo-tools::Auth401AttributionCallback`. The shell installs
 /// a bridge implementation that wires into
 /// `crate::auth::attribution::record_consumer_401`.
 ///
@@ -350,7 +350,7 @@ mod retry_status_tests {
     use super::is_retryable_status;
 
     /// Pins the upload path to the edge rule; the exhaustive per-status
-    /// matrix lives in `wimo ai-circuit-breaker`'s `edge_client` tests.
+    /// matrix lives in `wimoai-circuit-breaker`'s `edge_client` tests.
     #[test]
     fn uploads_use_the_edge_retry_rule() {
         assert!(is_retryable_status(522));
@@ -390,14 +390,14 @@ impl StaticwimoAuth {
     }
 }
 
-impl wimo ai_wimo_auth::HttpAuth for StaticwimoAuth {
+impl wimoai_wimo_auth::HttpAuth for StaticwimoAuth {
     fn apply(&self, builder: reqwest::RequestBuilder, _base_url: &str) -> reqwest::RequestBuilder {
         if let Some(ref key) = self.deployment_key {
             builder.header("Authorization", format!("Bearer {}", key))
         } else if let Some(ref token) = self.user_token {
             builder
                 .header("Authorization", format!("Bearer {}", token))
-                .header("X-wimo ai-Token-Auth", "wimo ai-wimo-cli")
+                .header("X-wimoai-Token-Auth", "wimoai-wimo-cli")
         } else {
             builder
         }
@@ -426,7 +426,7 @@ mod static_wimo_auth_tests {
 /// `crate::http::shared_upload_client()`) to `with_provider`.
 fn default_upload_client() -> Client {
     #[expect(clippy::expect_used)]
-    wimo ai_wimo_extra_ca::build_reqwest_client(|builder| builder)
+    wimoai_wimo_extra_ca::build_reqwest_client(|builder| builder)
         .expect("default reqwest client builds")
 }
 
@@ -476,7 +476,7 @@ impl StorageClient {
     pub fn new(proxy_base_url: &str, user_token: &str) -> Self {
         let creds = StaticwimoAuth::new(Some(user_token.to_owned()));
         let bearer = creds.wire_bearer();
-        let provider = Arc::new(wimo ai_wimo_auth::StaticAuthCredentialProvider::new(
+        let provider = Arc::new(wimoai_wimo_auth::StaticAuthCredentialProvider::new(
             Box::new(creds),
             bearer,
         ));
@@ -543,7 +543,7 @@ impl StorageClient {
     fn with_breaker_for_testing(
         mut self,
         open_duration: Duration,
-        observer: std::sync::Arc<dyn wimo ai_circuit_breaker::Observer>,
+        observer: std::sync::Arc<dyn wimoai_circuit_breaker::Observer>,
     ) -> Self {
         let mut config = storage_breaker_config();
         config.open_duration = open_duration;
@@ -572,7 +572,7 @@ impl StorageClient {
     ///
     /// Preferred way to construct the client from the wimo shell/pager:
     ///   `build_storage_client_for_proxy(..., client_identifier)`
-    /// (see `wimo ai-wimo-shell/src/auth/credential_provider.rs`).
+    /// (see `wimoai-wimo-shell/src/auth/credential_provider.rs`).
     ///
     /// Direct callers (tests, load-test binaries, etc.) can use:
     ///   `StorageClient::with_provider(...).with_client_identity(version, identifier)`
@@ -1120,7 +1120,7 @@ impl StorageClient {
         let version = self
             .client_version
             .as_deref()
-            .unwrap_or(wimo ai_wimo_version::VERSION);
+            .unwrap_or(wimoai_wimo_version::VERSION);
         let mut builder = builder.header("x-wimo-client-version", version);
 
         if let Some(id) = &self.client_identifier {
@@ -1996,7 +1996,7 @@ async fn upload_part_streaming(
         let mut request = client
             .post(&url)
             .header("Content-Type", "application/octet-stream")
-            .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+            .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
             .header("Content-Length", length.to_string());
         for (name, value) in crate::trace_context::trace_context_headers().iter() {
             request = request.header(name.clone(), value.clone());

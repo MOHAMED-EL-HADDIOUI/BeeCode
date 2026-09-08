@@ -2,8 +2,8 @@
 
 use std::sync::Arc;
 
-use wimo ai_tool_protocol::ToolCallId;
-use wimo ai_tool_runtime::{BehaviorVersion, Cwd, ToolCallContext, TraceContext};
+use wimoai_tool_protocol::ToolCallId;
+use wimoai_tool_runtime::{BehaviorVersion, Cwd, ToolCallContext, TraceContext};
 
 #[derive(Debug, PartialEq)]
 struct Config {

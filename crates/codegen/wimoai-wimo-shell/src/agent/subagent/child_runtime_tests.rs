@@ -1,11 +1,11 @@
 use super::*;
 use tokio_util::sync::CancellationToken;
-use wimo ai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
-use wimo ai_wimo_tools::implementations::wimo::task::coordinator::{
+use wimoai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
+use wimoai_wimo_tools::implementations::wimo::task::coordinator::{
     ActiveMessageAdmission, ChildCompletion, ChildControl, ChildRunOutput, ChildRunRequest,
     ChildRunner, CoordinatorConfig, LocalBoxFuture, SendBoxFuture, StartedChild, SubagentProgress,
 };
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     ActiveAgentMessageDelivery, ActiveAgentMessageOperation, ActiveAgentMessageOutcome,
     ActiveAgentMessageRequest, SubagentDescribeOutcome, SubagentOwner, SubagentRequest,
     SubagentValidateTypeOutcome,
@@ -148,7 +148,7 @@ async fn send_active_message_freezes_parent_turn_before_first_poll() {
     let local = tokio::task::LocalSet::new();
     await_with_timeout(local.run_until(async {
         let (coordinator_sender, receiver) =
-            wimo ai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinator::<
+            wimoai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinator::<
                 SnapshotProbeRunner,
             >::channel();
         let backend = ChannelBackend::for_coordinator_session(coordinator_sender, "parent");
@@ -171,7 +171,7 @@ async fn send_active_message_freezes_parent_turn_before_first_poll() {
             ..Default::default()
         };
         let coordinator =
-            wimo ai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinator::from_channel(
+            wimoai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinator::from_channel(
                 receiver,
                 runner,
                 config,
@@ -227,7 +227,7 @@ async fn rejected_delivery(
     let local = tokio::task::LocalSet::new();
     await_with_timeout(local.run_until(async {
         let (coordinator_sender, receiver) =
-            wimo ai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinator::<
+            wimoai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinator::<
                 SnapshotProbeRunner,
             >::channel();
         let backend = ChannelBackend::for_coordinator_session(coordinator_sender, "parent");
@@ -243,7 +243,7 @@ async fn rejected_delivery(
             live_prompt_index: std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0)),
             started: started_tx,
         };
-        let coordinator = wimo ai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinator::from_channel(
+        let coordinator = wimoai_wimo_tools::implementations::wimo::task::coordinator::SubagentCoordinator::from_channel(
             receiver,
             runner,
             CoordinatorConfig {

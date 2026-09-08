@@ -1,8 +1,8 @@
-//! The canonical implementation now lives in `wimo ai_wimo_tools::retry`.
+//! The canonical implementation now lives in `wimoai_wimo_tools::retry`.
 //! This module re-exports with backward-compatible aliases.
 
-pub use wimo ai_wimo_tools::retry::BackoffConfig as RetryConfig;
-pub use wimo ai_wimo_tools::retry::{BackoffConfig, execute_with_backoff};
+pub use wimoai_wimo_tools::retry::BackoffConfig as RetryConfig;
+pub use wimoai_wimo_tools::retry::{BackoffConfig, execute_with_backoff};
 
 use std::future::Future;
 use std::time::Duration;

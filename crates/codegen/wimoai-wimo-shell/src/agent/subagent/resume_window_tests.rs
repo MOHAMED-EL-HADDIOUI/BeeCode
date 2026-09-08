@@ -67,7 +67,7 @@ fn arm_force_compact_stores_only_when_needed() {
 
 #[test]
 fn resumed_prefix_keeps_only_the_system_head() {
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
 
     let conversation = vec![
         ConversationItem::system("system"),

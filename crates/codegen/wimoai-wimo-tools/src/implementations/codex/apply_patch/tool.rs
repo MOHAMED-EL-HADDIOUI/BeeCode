@@ -138,13 +138,13 @@ enum FileChange {
 // ─── Helpers ─────────────────────────────────────────────────────────
 
 /// Create parent directories for a file path if they don't exist.
-async fn ensure_parent_dirs(path: &std::path::Path) -> Result<(), wimo ai_tool_runtime::ToolError> {
+async fn ensure_parent_dirs(path: &std::path::Path) -> Result<(), wimoai_tool_runtime::ToolError> {
     if let Some(parent) = path.parent()
         && !parent.as_os_str().is_empty()
     {
         tokio::fs::create_dir_all(parent).await.map_err(|e| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
                 e.to_string(),
             )
         })?;
@@ -266,28 +266,28 @@ impl crate::types::tool_metadata::ToolMetadata for ApplyPatchTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for ApplyPatchTool {
+impl wimoai_tool_runtime::Tool for ApplyPatchTool {
     type Args = ApplyPatchInput;
     type Output = ApplyPatchOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("apply_patch").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("apply_patch").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "apply_patch",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -295,9 +295,9 @@ impl wimo ai_tool_runtime::Tool for ApplyPatchTool {
     #[tracing::instrument(name = "tool.apply_patch", skip_all)]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: ApplyPatchInput,
-    ) -> Result<ApplyPatchOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ApplyPatchOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -346,8 +346,8 @@ impl wimo ai_tool_runtime::Tool for ApplyPatchTool {
                     // Create parent directories if needed.
                     ensure_parent_dirs(path).await?;
                     fs.write_file(path, content.as_bytes()).await.map_err(|e| {
-                        wimo ai_tool_runtime::ToolError::execution(
-                            wimo ai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
+                        wimoai_tool_runtime::ToolError::execution(
+                            wimoai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
                             e.to_string(),
                         )
                     })?;
@@ -373,8 +373,8 @@ impl wimo ai_tool_runtime::Tool for ApplyPatchTool {
                     original_content,
                 } => {
                     fs.delete_file(path).await.map_err(|e| {
-                        wimo ai_tool_runtime::ToolError::execution(
-                            wimo ai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
+                        wimoai_tool_runtime::ToolError::execution(
+                            wimoai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
                             e.to_string(),
                         )
                     })?;
@@ -403,8 +403,8 @@ impl wimo ai_tool_runtime::Tool for ApplyPatchTool {
                     fs.write_file(path, new_content.as_bytes())
                         .await
                         .map_err(|e| {
-                            wimo ai_tool_runtime::ToolError::execution(
-                                wimo ai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
+                            wimoai_tool_runtime::ToolError::execution(
+                                wimoai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
                                 e.to_string(),
                             )
                         })?;
@@ -436,14 +436,14 @@ impl wimo ai_tool_runtime::Tool for ApplyPatchTool {
                     fs.write_file(dest_path, new_content.as_bytes())
                         .await
                         .map_err(|e| {
-                            wimo ai_tool_runtime::ToolError::execution(
-                                wimo ai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
+                            wimoai_tool_runtime::ToolError::execution(
+                                wimoai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
                                 e.to_string(),
                             )
                         })?;
                     fs.delete_file(source_path).await.map_err(|e| {
-                        wimo ai_tool_runtime::ToolError::execution(
-                            wimo ai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
+                        wimoai_tool_runtime::ToolError::execution(
+                            wimoai_tool_protocol::ToolId::new("apply_patch").expect("valid"),
                             e.to_string(),
                         )
                     })?;
@@ -526,7 +526,7 @@ mod tests {
 
         let patch = wrap_patch("*** Add File: new.txt\n+hello\n+world");
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
                 .await
                 .unwrap();
 
@@ -558,7 +558,7 @@ mod tests {
 
         let patch = wrap_patch("*** Delete File: del.txt");
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
                 .await
                 .unwrap();
 
@@ -589,7 +589,7 @@ mod tests {
 
         let patch = wrap_patch("*** Update File: update.txt\n@@\n foo\n-bar\n+baz");
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
                 .await
                 .unwrap();
 
@@ -621,7 +621,7 @@ mod tests {
 
         let patch = wrap_patch("*** Update File: src.txt\n*** Move to: dst.txt\n@@\n-line\n+line2");
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
                 .await
                 .unwrap();
 
@@ -654,7 +654,7 @@ mod tests {
              *** Add File: b.txt\n+bbb",
         );
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
                 .await
                 .unwrap();
 
@@ -687,7 +687,7 @@ mod tests {
         let resources = test_resources(tmp.path());
         let shared = resources.into_shared();
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(shared.clone()),
             make_input("not a valid patch"),
@@ -716,7 +716,7 @@ mod tests {
 
         let patch = wrap_patch("*** Update File: file.txt\n@@\n-nonexistent\n+replacement");
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(&patch))
                 .await
                 .unwrap();
 
@@ -739,7 +739,7 @@ mod tests {
 
         let patch = "*** Begin Patch\n*** End Patch";
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(patch))
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx(shared.clone()), make_input(patch))
                 .await
                 .unwrap();
 

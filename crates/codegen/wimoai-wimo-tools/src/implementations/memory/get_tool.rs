@@ -54,37 +54,37 @@ impl crate::types::tool_metadata::ToolMetadata for MemoryGetImpl {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for MemoryGetImpl {
+impl wimoai_tool_runtime::Tool for MemoryGetImpl {
     type Args = MemoryGetInput;
     type Output = ToolOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("memory_get").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("memory_get").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "memory_get",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
 
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: MemoryGetInput,
-    ) -> Result<ToolOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ToolOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
         let Some(memory) = resources
@@ -105,8 +105,8 @@ impl wimo ai_tool_runtime::Tool for MemoryGetImpl {
         let content = memory
             .get(&input.path, from_zero_based, input.lines)
             .map_err(|e| {
-                wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("memory_get").expect("valid"),
+                wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("memory_get").expect("valid"),
                     format!("memory get failed: {e}"),
                 )
             })?;

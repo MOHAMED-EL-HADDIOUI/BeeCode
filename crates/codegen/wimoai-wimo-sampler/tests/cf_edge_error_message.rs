@@ -5,12 +5,12 @@
 
 use std::sync::Arc;
 
-use wimo ai_wimo_sampler::{SamplerConfig, SamplingClient};
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampler::{SamplerConfig, SamplingClient};
+use wimoai_wimo_sampling_types::{
     ContentPart, ConversationItem, ConversationRequest, SamplingError, UserItem,
     status_user_message, user_facing_api_error_message,
 };
-use wimo ai_wimo_test_support::{MockInferenceServer, ScriptedResponse};
+use wimoai_wimo_test_support::{MockInferenceServer, ScriptedResponse};
 
 const CF_524_HTML: &str = r#"<!DOCTYPE html>
 <html lang="en-US">
@@ -51,7 +51,7 @@ fn user_request(text: &str) -> ConversationRequest {
     }
 }
 
-async fn stream_err(status: u16, body: &str) -> wimo ai_wimo_sampling_types::SamplingError {
+async fn stream_err(status: u16, body: &str) -> wimoai_wimo_sampling_types::SamplingError {
     let server = MockInferenceServer::start().await.expect("start mock");
     server.enqueue_response("/v1/chat/completions", ScriptedResponse::text(status, body));
     let mut cfg = test_config(&server.url(), "test-key");

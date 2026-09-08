@@ -37,10 +37,10 @@ use crate::implementations::search_tool::SearchToolInput;
 use crate::implementations::skills::skill::SkillInput;
 use crate::implementations::use_tool::UseToolInput;
 use serde::{Deserialize, Serialize};
-use wimo ai_tool_types::KillTaskToolInput;
-use wimo ai_tool_types::TaskOutputToolInput;
-use wimo ai_tool_types::TaskToolInput;
-use wimo ai_tool_types::WaitTasksToolInput;
+use wimoai_tool_types::KillTaskToolInput;
+use wimoai_tool_types::TaskOutputToolInput;
+use wimoai_tool_types::TaskToolInput;
+use wimoai_tool_types::WaitTasksToolInput;
 /// Raw input for an MCP (Model Context Protocol) tool call.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct MCPToolInput {

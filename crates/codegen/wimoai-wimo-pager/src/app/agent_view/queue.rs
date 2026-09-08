@@ -92,9 +92,9 @@ impl AgentView {
         if matches!(outcome, InputOutcome::Action(_))
             && self.ephemeral_tip.current_key() == Some(crate::tips::send_now::SEND_NOW_TIP_KEY)
         {
-            wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::ContextualTip {
-                tip: wimo ai_wimo_telemetry::events::ContextualTipKind::SendNow,
-                action: wimo ai_wimo_telemetry::events::ContextualTipAction::Accepted,
+            wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::ContextualTip {
+                tip: wimoai_wimo_telemetry::events::ContextualTipKind::SendNow,
+                action: wimoai_wimo_telemetry::events::ContextualTipAction::Accepted,
             });
             self.ephemeral_tip
                 .clear(crate::tips::send_now::SEND_NOW_TIP_KEY);

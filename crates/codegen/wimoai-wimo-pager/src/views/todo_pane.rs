@@ -1,10 +1,10 @@
-//! Renders `TodoItem`s from `wimo ai-wimo-tools` in a `ListPane`.
+//! Renders `TodoItem`s from `wimoai-wimo-tools` in a `ListPane`.
 //!
 //! Wraps the canonical `TodoItem` type with a `ListItem` implementation that provides status-icon prefixes and styled content.
 
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
-use wimo ai_wimo_shell::tools::{TodoItem, TodoStatus};
+use wimoai_wimo_shell::tools::{TodoItem, TodoStatus};
 
 use super::list_pane::ListItem;
 

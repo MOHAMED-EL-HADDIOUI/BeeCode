@@ -3,7 +3,7 @@ use super::hooks::RewriteProblem;
 use super::*;
 use futures::StreamExt;
 use tracing::Instrument;
-use wimo ai_wimo_hooks::result::HookDecision;
+use wimoai_wimo_hooks::result::HookDecision;
 #[path = "wait_interrupt.rs"]
 mod wait_interrupt;
 use wait_interrupt::{
@@ -14,7 +14,7 @@ use wait_interrupt::{
 struct PreToolUseGate {
     hook_ask: Option<HookAsk>,
     rewrite: Option<GateRewrite>,
-    additional_context: Vec<wimo ai_wimo_hooks::dispatcher::AdditionalContext>,
+    additional_context: Vec<wimoai_wimo_hooks::dispatcher::AdditionalContext>,
 }
 struct GateRewrite {
     tool_input: ToolInput,
@@ -70,7 +70,7 @@ fn tool_execution_span(
 /// Takes the span by value: these fields are recorded exactly once.
 fn record_tool_span_outcome(
     span: tracing::Span,
-    result: &Result<ToolRunResult, wimo ai_tool_runtime::ToolError>,
+    result: &Result<ToolRunResult, wimoai_tool_runtime::ToolError>,
 ) -> bool {
     let (success, result_size) = match result {
         Ok(tool_result) => (
@@ -87,9 +87,9 @@ fn record_tool_span_outcome(
 /// Maps a typed tool result onto the fixed span/log outcome set (`success` / `error` / `unconfirmed`).
 /// A delivery the tool could not confirm still dispatched successfully, so it reports `unconfirmed`, never `error`.
 pub(super) fn tool_output_span_outcome(
-    result: &Result<ToolRunResult, wimo ai_tool_runtime::ToolError>,
+    result: &Result<ToolRunResult, wimoai_tool_runtime::ToolError>,
 ) -> &'static str {
-    use wimo ai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageDisposition;
+    use wimoai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageDisposition;
     match result {
         Ok(tool_result) => match &tool_result.output {
             ToolsToolOutput::SendSubagentMessage(output) => match output.disposition() {
@@ -109,7 +109,7 @@ fn is_interruptible_wait_tool(tool_name: &str, args: &serde_json::Value) -> bool
         "get_task_output"
         | "get_command_or_subagent_output"
         | "get_task_or_subagent_output"
-        | "get_terminal_command_output" => wimo ai_tool_types::task_output_waits_from_json(args),
+        | "get_terminal_command_output" => wimoai_tool_types::task_output_waits_from_json(args),
         "wait_tasks" | "wait_commands_or_subagents" | "wait_tasks_or_subagents" => true,
         "Await" | "AwaitShell" => true,
         _ => false,
@@ -185,14 +185,14 @@ pub(super) fn is_file_backed_exit_plan_input(tool_input: &ToolInput) -> bool {
     false
 }
 pub(super) fn is_file_backed_exit_plan_kind(
-    kind: Option<wimo ai_wimo_tools::types::tool::ToolKind>,
+    kind: Option<wimoai_wimo_tools::types::tool::ToolKind>,
 ) -> bool {
-    matches!(kind, Some(wimo ai_wimo_tools::types::tool::ToolKind::ExitPlan))
+    matches!(kind, Some(wimoai_wimo_tools::types::tool::ToolKind::ExitPlan))
 }
 /// Split ExitPlan-kind calls into the tail so they run after the rest of the batch.
 fn split_exit_plan_tail(
     calls: Vec<crate::sampling::types::ToolCallResponse>,
-    kind_of: impl Fn(&str) -> Option<wimo ai_wimo_tools::types::tool::ToolKind>,
+    kind_of: impl Fn(&str) -> Option<wimoai_wimo_tools::types::tool::ToolKind>,
 ) -> (
     Vec<crate::sampling::types::ToolCallResponse>,
     Vec<crate::sampling::types::ToolCallResponse>,
@@ -256,7 +256,7 @@ pub(super) enum PlanApprovalOutcome {
 }
 impl PlanApprovalOutcome {
     fn from_response(
-        resp: &wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtResponse,
+        resp: &wimoai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtResponse,
     ) -> Self {
         match resp.outcome.as_str() {
             "approved" => Self::Approved,
@@ -271,41 +271,41 @@ impl PlanApprovalOutcome {
 /// Any other error (including a non-`acp_send` error) defaults to `false` so the approval is kept pending and never auto-approved.
 fn ext_method_no_client(err: &acp::Error) -> bool {
     matches!(
-        wimo ai_acp_lib::acp_channel_failure(err),
-        Some(wimo ai_acp_lib::AcpChannelFailure::SendFailed)
+        wimoai_acp_lib::acp_channel_failure(err),
+        Some(wimoai_acp_lib::AcpChannelFailure::SendFailed)
     )
 }
 /// CONTENT-gated tool bodies for the external stream. Capture-time cap so
 /// multi-MB bodies are not retained; emit still drops them when CONTENT is off.
 fn external_tool_bodies(
-    result: &Result<ToolRunResult, wimo ai_tool_runtime::ToolError>,
+    result: &Result<ToolRunResult, wimoai_tool_runtime::ToolError>,
 ) -> (Option<String>, Option<String>) {
     match result {
         Ok(tool_result) if tool_result.output.is_error() => {
             let body = tool_result.output.to_prompt_format();
             (
-                Some(wimo ai_wimo_telemetry::external::truncate::cap_bytes(
+                Some(wimoai_wimo_telemetry::external::truncate::cap_bytes(
                     &body,
-                    wimo ai_wimo_telemetry::external::truncate::MAX_CONTENT_BYTES,
+                    wimoai_wimo_telemetry::external::truncate::MAX_CONTENT_BYTES,
                 )),
-                Some(wimo ai_wimo_telemetry::external::truncate::cap_bytes(
+                Some(wimoai_wimo_telemetry::external::truncate::cap_bytes(
                     &body,
-                    wimo ai_wimo_telemetry::external::truncate::MAX_TOOL_INPUT_JSON_BYTES,
+                    wimoai_wimo_telemetry::external::truncate::MAX_TOOL_INPUT_JSON_BYTES,
                 )),
             )
         }
         Ok(tool_result) => (
-            Some(wimo ai_wimo_telemetry::external::truncate::cap_bytes(
+            Some(wimoai_wimo_telemetry::external::truncate::cap_bytes(
                 &tool_result.output.to_prompt_format(),
-                wimo ai_wimo_telemetry::external::truncate::MAX_CONTENT_BYTES,
+                wimoai_wimo_telemetry::external::truncate::MAX_CONTENT_BYTES,
             )),
             None,
         ),
         Err(e) => (
             None,
-            Some(wimo ai_wimo_telemetry::external::truncate::cap_bytes(
+            Some(wimoai_wimo_telemetry::external::truncate::cap_bytes(
                 &e.to_string(),
-                wimo ai_wimo_telemetry::external::truncate::MAX_TOOL_INPUT_JSON_BYTES,
+                wimoai_wimo_telemetry::external::truncate::MAX_TOOL_INPUT_JSON_BYTES,
             )),
         ),
     }
@@ -364,7 +364,7 @@ impl SessionActor {
         parsed: Option<&ToolInput>,
     ) -> Option<acp::Meta> {
         let toolset = self.agent.borrow().tool_bridge().toolset();
-        wimo ai_wimo_tools::normalization::merge_tool_meta(
+        wimoai_wimo_tools::normalization::merge_tool_meta(
             &toolset,
             existing.map(serde_json::Value::Object),
             wire_name,
@@ -438,10 +438,10 @@ impl SessionActor {
     /// Per-name media-gen counts that exceed this session's cap.
     pub(super) fn media_gen_over_cap(
         &self,
-        calls: &[wimo ai_wimo_sampling_types::ToolCall],
-    ) -> Vec<wimo ai_wimo_tools::media_gen_limits::MediaGenOverCap> {
+        calls: &[wimoai_wimo_sampling_types::ToolCall],
+    ) -> Vec<wimoai_wimo_tools::media_gen_limits::MediaGenOverCap> {
         let kind_of = |name: &str| self.agent.borrow().tool_bridge().tool_kind(name);
-        wimo ai_wimo_tools::media_gen_limits::over_cap_by_name(
+        wimoai_wimo_tools::media_gen_limits::over_cap_by_name(
             calls.iter().map(|c| (c.name.as_str(), kind_of(&c.name))),
             &self.rebuild_spec.media_gen_batch_limits,
         )
@@ -453,7 +453,7 @@ impl SessionActor {
         tool_calls: Vec<crate::sampling::types::ToolCallResponse>,
     ) -> Result<Vec<crate::sampling::types::ToolCallResponse>, acp::Error> {
         let kind_of = |name: &str| self.agent.borrow().tool_bridge().tool_kind(name);
-        let (allowed, rejected) = wimo ai_wimo_tools::media_gen_limits::partition_media_gen_batch(
+        let (allowed, rejected) = wimoai_wimo_tools::media_gen_limits::partition_media_gen_batch(
             tool_calls,
             |c| c.function.name.as_str(),
             |c| kind_of(&c.function.name),
@@ -493,10 +493,10 @@ impl SessionActor {
                 .borrow()
                 .tool_bridge()
                 .tool_kind(name)
-                .and_then(|k| wimo ai_wimo_tools::media_gen_limits::max_calls_per_batch(k, limits))
+                .and_then(|k| wimoai_wimo_tools::media_gen_limits::max_calls_per_batch(k, limits))
                 .unwrap_or(0);
             let admitted = allowed.iter().filter(|c| c.function.name == *name).count();
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "shell.media_gen.batch_rejected",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -570,7 +570,7 @@ impl SessionActor {
             });
             self.observability_bridge
                 .emit(
-                    wimo ai_tool_protocol::session_event::SessionEvent::ToolCallStarted {
+                    wimoai_tool_protocol::session_event::SessionEvent::ToolCallStarted {
                         tool_call_id: call.id.clone(),
                         tool_name: call.function.name.clone(),
                         turn_number: self.current_turn_number.get(),
@@ -594,7 +594,7 @@ impl SessionActor {
                             }
                             other => format!("{other:?}"),
                         };
-                        self.emit_event(wimo ai_wimo_session_events::Event::McpToolCallCompleted {
+                        self.emit_event(wimoai_wimo_session_events::Event::McpToolCallCompleted {
                             server_name: server.to_string(),
                             tool_name: tool.to_string(),
                             call_id: format!(
@@ -686,7 +686,7 @@ impl SessionActor {
             (
                 param_names.clone(),
                 toolset
-                    .tool_name_for_kind(wimo ai_wimo_tools::types::tool::ToolKind::Workflow)
+                    .tool_name_for_kind(wimoai_wimo_tools::types::tool::ToolKind::Workflow)
                     .unwrap_or_else(|| "workflow".to_owned()),
                 workflow_write_smoke_check::workflow_param_name("script_path", &param_names),
                 workflow_write_smoke_check::workflow_param_name("validate_only", &param_names),
@@ -916,7 +916,7 @@ impl SessionActor {
                     let duration_ms = exec_start.elapsed().as_millis() as u64;
                     let outcome = tool_output_span_outcome(&result);
                     let success = record_tool_span_outcome(tool_span_for_record, &result);
-                    wimo ai_wimo_telemetry::unified_log::info(
+                    wimoai_wimo_telemetry::unified_log::info(
                         "shell.tool.exec_done",
                         Some(session_id.as_ref()),
                         Some(serde_json::json!({
@@ -940,7 +940,7 @@ impl SessionActor {
             approved.into_iter().map(Some).collect();
         let (dispatch_tx, mut dispatch_rx) = tokio::sync::mpsc::unbounded_channel::<(
             usize,
-            Result<ToolRunResult, wimo ai_tool_runtime::ToolError>,
+            Result<ToolRunResult, wimoai_tool_runtime::ToolError>,
             u64,
         )>();
         let drainer = tokio::spawn(
@@ -976,7 +976,7 @@ impl SessionActor {
             );
             let mut post_tool_use_delivery: Option<PostToolUseDelivery> = None;
             let mut post_tool_use_failure_contexts: Vec<
-                wimo ai_wimo_hooks::dispatcher::AdditionalContext,
+                wimoai_wimo_hooks::dispatcher::AdditionalContext,
             > = Vec::new();
             let tool_result_size_bytes: Option<u64> = match &result {
                 Ok(tool_result) => Some(tool_result.prompt_text.len() as u64),
@@ -991,9 +991,9 @@ impl SessionActor {
                             .and_then(serde_json::Value::as_bool)
                             .unwrap_or(false)
                         {
-                            wimo ai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation::Queue
+                            wimoai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation::Queue
                         } else {
-                            wimo ai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation::Steer
+                            wimoai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation::Steer
                         };
                         crate::session::telemetry::record_completed_tool_output(
                             &tool_result.output,
@@ -1005,7 +1005,7 @@ impl SessionActor {
                 }
                 Err(_) => true,
             };
-            let (ext_tool_output, ext_error_message) = if wimo ai_wimo_telemetry::external::is_active()
+            let (ext_tool_output, ext_error_message) = if wimoai_wimo_telemetry::external::is_active()
             {
                 external_tool_bodies(&result)
             } else {
@@ -1098,7 +1098,7 @@ impl SessionActor {
             }
             for context in &prepared.additional_context {
                 deferred_followups.push(self.wrap_hook_note(
-                    wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
+                    wimoai_wimo_hooks::event::HookEventName::PreToolUse,
                     HookNoteKind::Context,
                     &context.hook_name,
                     &context.text,
@@ -1107,7 +1107,7 @@ impl SessionActor {
             if let Some(delivery) = post_tool_use_delivery {
                 for context in &delivery.additional_context {
                     deferred_followups.push(self.wrap_hook_note(
-                        wimo ai_wimo_hooks::event::HookEventName::PostToolUse,
+                        wimoai_wimo_hooks::event::HookEventName::PostToolUse,
                         HookNoteKind::Context,
                         &context.hook_name,
                         &context.text,
@@ -1115,7 +1115,7 @@ impl SessionActor {
                 }
                 for block in &delivery.blocks {
                     deferred_followups.push(self.wrap_hook_note(
-                        wimo ai_wimo_hooks::event::HookEventName::PostToolUse,
+                        wimoai_wimo_hooks::event::HookEventName::PostToolUse,
                         HookNoteKind::Feedback,
                         &block.hook_name,
                         &block.reason,
@@ -1124,7 +1124,7 @@ impl SessionActor {
             }
             for context in &post_tool_use_failure_contexts {
                 deferred_followups.push(self.wrap_hook_note(
-                    wimo ai_wimo_hooks::event::HookEventName::PostToolUseFailure,
+                    wimoai_wimo_hooks::event::HookEventName::PostToolUseFailure,
                     HookNoteKind::Context,
                     &context.hook_name,
                     &context.text,
@@ -1161,7 +1161,7 @@ impl SessionActor {
             });
             self.observability_bridge
                 .emit(
-                    wimo ai_tool_protocol::session_event::SessionEvent::ToolCallCompleted {
+                    wimoai_tool_protocol::session_event::SessionEvent::ToolCallCompleted {
                         tool_call_id: prepared.call_id.clone(),
                         tool_name: prepared.tool_name.clone(),
                         duration_ms,
@@ -1169,7 +1169,7 @@ impl SessionActor {
                     },
                 )
                 .await;
-            let (ext_file_path, ext_parameters) = if wimo ai_wimo_telemetry::external::is_active() {
+            let (ext_file_path, ext_parameters) = if wimoai_wimo_telemetry::external::is_active() {
                 let parsed: Option<serde_json::Value> =
                     serde_json::from_str(&prepared.raw_arguments).ok();
                 let file_path = parsed.as_ref().and_then(|v| {
@@ -1182,8 +1182,8 @@ impl SessionActor {
             } else {
                 (None, None)
             };
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::ToolCallCompleted {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::ToolCallCompleted {
                     tool_name: prepared.tool_name.clone(),
                     outcome: tool_outcome,
                     hook_rewrote,
@@ -1191,7 +1191,7 @@ impl SessionActor {
                     tool_result_size_bytes,
                     file_path: ext_file_path,
                     parameters: ext_parameters,
-                    tool_use_id: wimo ai_wimo_telemetry::external::is_active()
+                    tool_use_id: wimoai_wimo_telemetry::external::is_active()
                         .then(|| prepared.call_id.clone()),
                     tool_output: ext_tool_output,
                     error_message: ext_error_message,
@@ -1239,7 +1239,7 @@ impl SessionActor {
         if let Some(registry) = hook_registry_snapshot {
             let ctx = self.hook_run_ctx();
             let pre_result =
-                wimo ai_wimo_hooks::dispatcher::dispatch_pre_tool_use(&registry, &envelope, &ctx).await;
+                wimoai_wimo_hooks::dispatcher::dispatch_pre_tool_use(&registry, &envelope, &ctx).await;
             self.send_hook_execution(
                 "pre_tool_use",
                 Some(resolved_tool_name),
@@ -1319,7 +1319,7 @@ impl SessionActor {
         tool_call_id: &acp::ToolCallId,
         resolved_tool_name: &str,
         dispatch_target_name: &Option<String>,
-        rewrite: wimo ai_wimo_hooks::dispatcher::InputRewrite,
+        rewrite: wimoai_wimo_hooks::dispatcher::InputRewrite,
     ) -> Result<Result<ValidatedRewrite, ToolLoop>, acp::Error> {
         let updated_json = serde_json::Value::Object(rewrite.input);
         let rewritten = match self
@@ -1329,7 +1329,7 @@ impl SessionActor {
         {
             Ok(input) => input,
             Err(err) => {
-                let schema_error = wimo ai_wimo_hooks::event::clip_reason(&err.to_string());
+                let schema_error = wimoai_wimo_hooks::event::clip_reason(&err.to_string());
                 return Ok(Err(self
                     .block_unusable_rewrite(
                         &call.id,
@@ -1375,7 +1375,7 @@ impl SessionActor {
             let early_raw_input =
                 serde_json::from_str::<serde_json::Value>(&call.function.arguments).ok();
             let subagent_background =
-                wimo ai_wimo_tools::is_task_tool_id(&call.function.name).then(|| {
+                wimoai_wimo_tools::is_task_tool_id(&call.function.name).then(|| {
                     early_raw_input
                         .as_ref()
                         .and_then(|v| v.get("run_in_background").or_else(|| v.get("background")))
@@ -1513,7 +1513,7 @@ impl SessionActor {
         let mut rewriting_hook: Option<String> = None;
         let mut hook_ask: Option<HookAsk> = None;
         let mut hook_additional_context = Vec::new();
-        if self.may_have_hooks_for(wimo ai_wimo_hooks::event::HookEventName::PreToolUse) {
+        if self.may_have_hooks_for(wimoai_wimo_hooks::event::HookEventName::PreToolUse) {
             let gate = match self
                 .apply_pre_tool_use_gate(
                     &call,
@@ -1589,34 +1589,34 @@ impl SessionActor {
             )
             .meta(self.stamp_tool_meta(None, &call.function.name, Some(&tool_input)));
             let (telemetry_access_kind, _access_detail) = match &access_kind {
-                wimo ai_wimo_workspace::permission::AccessKind::Read(p) => (
-                    wimo ai_wimo_telemetry::events::AccessKind::Read,
+                wimoai_wimo_workspace::permission::AccessKind::Read(p) => (
+                    wimoai_wimo_telemetry::events::AccessKind::Read,
                     p.clone().unwrap_or_default(),
                 ),
-                wimo ai_wimo_workspace::permission::AccessKind::Edit(p) => {
-                    (wimo ai_wimo_telemetry::events::AccessKind::Edit, p.clone())
+                wimoai_wimo_workspace::permission::AccessKind::Edit(p) => {
+                    (wimoai_wimo_telemetry::events::AccessKind::Edit, p.clone())
                 }
-                wimo ai_wimo_workspace::permission::AccessKind::Bash(cmd) => {
-                    (wimo ai_wimo_telemetry::events::AccessKind::Bash, cmd.clone())
+                wimoai_wimo_workspace::permission::AccessKind::Bash(cmd) => {
+                    (wimoai_wimo_telemetry::events::AccessKind::Bash, cmd.clone())
                 }
-                wimo ai_wimo_workspace::permission::AccessKind::Grep { path, glob } => (
-                    wimo ai_wimo_telemetry::events::AccessKind::Grep,
+                wimoai_wimo_workspace::permission::AccessKind::Grep { path, glob } => (
+                    wimoai_wimo_telemetry::events::AccessKind::Grep,
                     path.clone().or_else(|| glob.clone()).unwrap_or_default(),
                 ),
-                wimo ai_wimo_workspace::permission::AccessKind::MCPTool { name, .. } => {
-                    (wimo ai_wimo_telemetry::events::AccessKind::Mcp, name.clone())
+                wimoai_wimo_workspace::permission::AccessKind::MCPTool { name, .. } => {
+                    (wimoai_wimo_telemetry::events::AccessKind::Mcp, name.clone())
                 }
-                wimo ai_wimo_workspace::permission::AccessKind::WebFetch(u) => {
-                    (wimo ai_wimo_telemetry::events::AccessKind::Web, u.clone())
+                wimoai_wimo_workspace::permission::AccessKind::WebFetch(u) => {
+                    (wimoai_wimo_telemetry::events::AccessKind::Web, u.clone())
                 }
-                wimo ai_wimo_workspace::permission::AccessKind::WebSearch(q) => {
-                    (wimo ai_wimo_telemetry::events::AccessKind::Web, q.clone())
+                wimoai_wimo_workspace::permission::AccessKind::WebSearch(q) => {
+                    (wimoai_wimo_telemetry::events::AccessKind::Web, q.clone())
                 }
-                wimo ai_wimo_workspace::permission::AccessKind::AgentMessage { subagent_id } => (
-                    wimo ai_wimo_telemetry::events::AccessKind::AgentMessage,
+                wimoai_wimo_workspace::permission::AccessKind::AgentMessage { subagent_id } => (
+                    wimoai_wimo_telemetry::events::AccessKind::AgentMessage,
                     subagent_id.clone(),
                 ),
-                _ => (wimo ai_wimo_telemetry::events::AccessKind::Other, String::new()),
+                _ => (wimoai_wimo_telemetry::events::AccessKind::Other, String::new()),
             };
             let canonical_permission_tool_name =
                 crate::session::telemetry::canonical_permission_tool_name(&access_kind);
@@ -1626,14 +1626,14 @@ impl SessionActor {
                 None
             };
             let perm_mode = if self.permissions.is_yolo_mode() {
-                wimo ai_wimo_telemetry::enums::PermissionMode::AlwaysApprove
+                wimoai_wimo_telemetry::enums::PermissionMode::AlwaysApprove
             } else if self.permissions.is_auto_mode() {
-                wimo ai_wimo_telemetry::enums::PermissionMode::Auto
+                wimoai_wimo_telemetry::enums::PermissionMode::Auto
             } else {
-                wimo ai_wimo_telemetry::enums::PermissionMode::Ask
+                wimoai_wimo_telemetry::enums::PermissionMode::Ask
             };
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::PermissionPrompted {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::PermissionPrompted {
                     tool_name: canonical_permission_tool_name.clone(),
                     access_kind: telemetry_access_kind,
                     permission_mode: perm_mode,
@@ -1646,7 +1646,7 @@ impl SessionActor {
                 !self.session_info.id.0.is_empty(),
                 "permission reverse-request must carry a non-empty sessionId (design §5.4)"
             );
-            let path_context = Some(wimo ai_wimo_workspace::permission::types::RequestPathContext {
+            let path_context = Some(wimoai_wimo_workspace::permission::types::RequestPathContext {
                 real_cwd: std::path::PathBuf::from(self.session_info.cwd.as_str()),
                 display_cwd: self
                     .display_cwd
@@ -1677,16 +1677,16 @@ impl SessionActor {
                 &call.function.name,
                 match &decision {
                     Decision::Allow | Decision::Ask => {
-                        wimo ai_wimo_session_events::types::PermissionDecision::Allow
+                        wimoai_wimo_session_events::types::PermissionDecision::Allow
                     }
                     Decision::Reject(_) | Decision::PolicyDeny(_) => {
-                        wimo ai_wimo_session_events::types::PermissionDecision::Deny
+                        wimoai_wimo_session_events::types::PermissionDecision::Deny
                     }
                     Decision::Cancelled => {
-                        wimo ai_wimo_session_events::types::PermissionDecision::Cancelled
+                        wimoai_wimo_session_events::types::PermissionDecision::Cancelled
                     }
                     Decision::FollowupMessage(_) => {
-                        wimo ai_wimo_session_events::types::PermissionDecision::Followup
+                        wimoai_wimo_session_events::types::PermissionDecision::Followup
                     }
                 },
                 perm_start,
@@ -1709,7 +1709,7 @@ impl SessionActor {
                 wait_ms = resolved.wait_ms as i64,
             )
             .in_scope(|| {});
-            wimo ai_wimo_telemetry::session_ctx::log_event({
+            wimoai_wimo_telemetry::session_ctx::log_event({
                 let payload = crate::session::telemetry::permission_decision_payload(
                     canonical_permission_tool_name,
                     telemetry_access_kind,
@@ -1718,15 +1718,15 @@ impl SessionActor {
                     manager_event.as_ref(),
                     resolved,
                 );
-                let tool_input = if wimo ai_wimo_telemetry::external::is_active() {
-                    wimo ai_wimo_telemetry::events::ExternalToolInput {
+                let tool_input = if wimoai_wimo_telemetry::external::is_active() {
+                    wimoai_wimo_telemetry::events::ExternalToolInput {
                         parameters: Some(raw_input.clone()),
                         tool_use_id: Some(call.id.clone()),
                     }
                 } else {
-                    wimo ai_wimo_telemetry::events::ExternalToolInput::default()
+                    wimoai_wimo_telemetry::events::ExternalToolInput::default()
                 };
-                wimo ai_wimo_telemetry::events::PermissionDecisionRecord {
+                wimoai_wimo_telemetry::events::PermissionDecisionRecord {
                     payload,
                     tool_input,
                 }
@@ -1742,10 +1742,10 @@ impl SessionActor {
                     self.handle_tool_not_executed(&call.id, &tool_call_id, message)
                         .await?;
                     let (tool_input_value, tool_input_truncated) =
-                        wimo ai_wimo_hooks::event::truncate_payload(raw_input.clone());
+                        wimoai_wimo_hooks::event::truncate_payload(raw_input.clone());
                     self.dispatch_hook(
-                        wimo ai_wimo_hooks::event::HookEventName::PermissionDenied,
-                        wimo ai_wimo_hooks::event::HookPayload::PermissionDenied {
+                        wimoai_wimo_hooks::event::HookEventName::PermissionDenied,
+                        wimoai_wimo_hooks::event::HookPayload::PermissionDenied {
                             tool_name: resolved_tool_name.clone(),
                             tool_use_id: tool_call_id.to_string(),
                             tool_input: tool_input_value,
@@ -1911,7 +1911,7 @@ impl SessionActor {
             .tool_bridge()
             .tool_kind(&call.function.name)
             .map(|k| {
-                use wimo ai_wimo_tools::types::tool::ToolKind;
+                use wimoai_wimo_tools::types::tool::ToolKind;
                 matches!(
                     k,
                     ToolKind::Read
@@ -1952,11 +1952,11 @@ impl SessionActor {
         tool_call_id: &acp::ToolCallId,
         plan_content: Option<String>,
     ) -> Result<
-        wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtResponse,
+        wimoai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtResponse,
         acp::Error,
     > {
         use agent_client_protocol::Client as _;
-        use wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::{
+        use wimoai_wimo_tools::implementations::wimo::exit_plan_mode::{
             ExitPlanModeExtRequest, ExitPlanModeExtResponse,
         };
         let ext_req = ExitPlanModeExtRequest {
@@ -2014,7 +2014,7 @@ impl SessionActor {
             *self.turn_prompt_mode.lock() = PromptMode::Agent;
             self.persist_plan_mode_state();
             self.enqueue_current_mode_update(acp::SessionModeId::new(
-                wimo ai_wimo_tools::types::SessionMode::Default.as_id(),
+                wimoai_wimo_tools::types::SessionMode::Default.as_id(),
             ));
         }
     }
@@ -2173,7 +2173,7 @@ impl SessionActor {
                         acp::ToolCallLocation::new(read_file.path)
                             // Same normalization as the canonical `_meta` input, so one event can't show two start lines
                             .line(
-                                wimo ai_wimo_tools::normalization::norm_offset_i64(read_file.offset)
+                                wimoai_wimo_tools::normalization::norm_offset_i64(read_file.offset)
                                     .map(|l| l as u32),
                             ),
                     ],
@@ -2240,8 +2240,8 @@ impl SessionActor {
                     "Wait tasks: {} ids, mode={}",
                     wait.task_ids.len(),
                     match wait.mode {
-                        wimo ai_tool_types::WaitMode::WaitAny => "wait_any",
-                        wimo ai_tool_types::WaitMode::WaitAll => "wait_all",
+                        wimoai_tool_types::WaitMode::WaitAny => "wait_any",
+                        wimoai_tool_types::WaitMode::WaitAll => "wait_all",
                     }
                 ),
                 acp::ToolKind::Other,
@@ -2255,11 +2255,11 @@ impl SessionActor {
                 vec![],
             ),
             ToolInput::Skill(skill) => {
-                wimo ai_wimo_telemetry::session_ctx::log_event(
-                    wimo ai_wimo_telemetry::events::SkillDispatched {
+                wimoai_wimo_telemetry::session_ctx::log_event(
+                    wimoai_wimo_telemetry::events::SkillDispatched {
                         skill_name: skill.skill.clone(),
                         plugin_source: None,
-                        trigger: wimo ai_wimo_telemetry::events::SkillTrigger::SkillTool,
+                        trigger: wimoai_wimo_telemetry::events::SkillTrigger::SkillTool,
                     },
                 );
                 tracing::info_span!(
@@ -2375,7 +2375,7 @@ impl SessionActor {
                     let rest = &rest[rest.find('"')? + 1..];
                     Some(rest[..rest.find('"')?].to_string())
                 };
-                use wimo ai_wimo_tools::implementations::wimo::workflow::WorkflowSource;
+                use wimoai_wimo_tools::implementations::wimo::workflow::WorkflowSource;
                 let inline_name = match &w.source {
                     WorkflowSource::Script { script } => script_name(script),
                     _ => None,
@@ -2475,11 +2475,11 @@ impl SessionActor {
     async fn skill_for_read_path(
         &self,
         path: &str,
-    ) -> Option<wimo ai_wimo_tools::implementations::skills::types::SkillInfo> {
+    ) -> Option<wimoai_wimo_tools::implementations::skills::types::SkillInfo> {
         if self.is_chat_kind {
             return None;
         }
-        let read_path = wimo ai_wimo_tools::types::resources::resolve_model_path(
+        let read_path = wimoai_wimo_tools::types::resources::resolve_model_path(
             self.tool_context.cwd.as_path(),
             self.display_cwd.get().map(Path::new),
             path,
@@ -2495,7 +2495,7 @@ impl SessionActor {
                 crate::session::telemetry::is_same_skill_file(Path::new(&skill.path), &read_path)
             })
     }
-    fn emit_skill_md_read(&self, skill: wimo ai_wimo_tools::implementations::skills::types::SkillInfo) {
+    fn emit_skill_md_read(&self, skill: wimoai_wimo_tools::implementations::skills::types::SkillInfo) {
         let skill_source = if skill.plugin_name.is_some() {
             "plugin"
         } else {
@@ -2511,10 +2511,10 @@ impl SessionActor {
             skill_source = skill_source,
         )
         .in_scope(|| {});
-        wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::SkillDispatched {
+        wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::SkillDispatched {
             skill_name: skill.name,
             plugin_source: skill.plugin_name,
-            trigger: wimo ai_wimo_telemetry::events::SkillTrigger::SkillMdRead,
+            trigger: wimoai_wimo_telemetry::events::SkillTrigger::SkillMdRead,
         });
     }
     fn make_pre_tool_use_envelope(
@@ -2522,13 +2522,13 @@ impl SessionActor {
         resolved_tool_name: &str,
         call_id: &str,
         input: &serde_json::Value,
-    ) -> wimo ai_wimo_hooks::event::HookEventEnvelope {
+    ) -> wimoai_wimo_hooks::event::HookEventEnvelope {
         let (tool_input, tool_input_truncated) =
-            wimo ai_wimo_hooks::event::truncate_payload(input.clone());
+            wimoai_wimo_hooks::event::truncate_payload(input.clone());
         self.make_hook_envelope(
-            wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
+            wimoai_wimo_hooks::event::HookEventName::PreToolUse,
             None,
-            wimo ai_wimo_hooks::event::HookPayload::PreToolUse {
+            wimoai_wimo_hooks::event::HookPayload::PreToolUse {
                 tool_name: resolved_tool_name.to_string(),
                 tool_use_id: call_id.to_string(),
                 tool_input,
@@ -2542,7 +2542,7 @@ impl SessionActor {
         tool_call_id: &acp::ToolCallId,
         call_id: &str,
         function_name: &str,
-        err: wimo ai_tool_runtime::ToolError,
+        err: wimoai_tool_runtime::ToolError,
         raw_arguments: &str,
         model_id: &str,
     ) -> Result<(), acp::Error> {
@@ -2556,7 +2556,7 @@ impl SessionActor {
         );
         self.signals_handle().record_tool_failure(function_name);
         let message = build_tool_parse_error_message(function_name, &err, raw_arguments);
-        let title = (err.kind == wimo ai_tool_runtime::ToolErrorKind::NotFound)
+        let title = (err.kind == wimoai_tool_runtime::ToolErrorKind::NotFound)
             .then(|| format!("Agent tried calling a tool that doesn't exist: {function_name}"));
         self.send_update(
             acp::SessionUpdate::ToolCallUpdate(acp::ToolCallUpdate::new(
@@ -2580,7 +2580,7 @@ impl SessionActor {
     /// Queued auto-wake synthetic prompts for a task/subagent the model already learned about are dropped before they get flushed to chat history.
     /// Flushed, they would appear as a trailing `<system-reminder>` with no assistant reply.
     ///
-    /// The ID list comes from `wimo ai_wimo_tools::reminders::task_completion::consumed_completion_ids`.
+    /// The ID list comes from `wimoai_wimo_tools::reminders::task_completion::consumed_completion_ids`.
     /// `TaskCompletionReminder` uses the same predicate; they cannot drift because they share the function.
     ///
     /// Reservations are deliberately not released here: the tool result that triggered this sweep is what consumed the completion.
@@ -2661,10 +2661,10 @@ impl SessionActor {
     /// It scans successful foreground bash commands, plus MCP `create_pull_request` results (url/number parsed from the result text).
     /// Backgrounded commands are not scanned.
     fn record_git_pr_signals(&self, effective_tool_name: &str, result: &ToolRunResult) {
-        use wimo ai_wimo_telemetry::enums::PrCreationSource;
-        use wimo ai_wimo_tools::util::git_detect;
+        use wimoai_wimo_telemetry::enums::PrCreationSource;
+        use wimoai_wimo_tools::util::git_detect;
         match &result.output {
-            wimo ai_wimo_tools::types::output::ToolOutput::Bash(b) if b.exit_code == 0 => {
+            wimoai_wimo_tools::types::output::ToolOutput::Bash(b) if b.exit_code == 0 => {
                 let Some(ops) = git_detect::detect_git_ops(&b.command, &b.output_for_prompt) else {
                     return;
                 };
@@ -2676,12 +2676,12 @@ impl SessionActor {
                 }
                 if ops.pr_merged {
                     self.signals_handle().record_pr_merged();
-                    wimo ai_wimo_telemetry::session_ctx::log_event(
-                        wimo ai_wimo_telemetry::events::PrMerged {},
+                    wimoai_wimo_telemetry::session_ctx::log_event(
+                        wimoai_wimo_telemetry::events::PrMerged {},
                     );
                 }
             }
-            wimo ai_wimo_tools::types::output::ToolOutput::MCP(m)
+            wimoai_wimo_tools::types::output::ToolOutput::MCP(m)
                 if !m.is_error && is_mcp_create_pull_request(effective_tool_name) =>
             {
                 let pr = git_detect::PrRef::find_in(&result.prompt_text).unwrap_or_default();
@@ -2700,8 +2700,8 @@ impl SessionActor {
     /// `finalize_turn_bookkeeping`.
     fn record_pr_created(
         &self,
-        pr: wimo ai_wimo_tools::util::git_detect::PrRef,
-        source: wimo ai_wimo_telemetry::enums::PrCreationSource,
+        pr: wimoai_wimo_tools::util::git_detect::PrRef,
+        source: wimoai_wimo_telemetry::enums::PrCreationSource,
     ) {
         self.signals_handle()
             .record_pr_created(crate::session::signals::PrCreatedSignal {
@@ -2729,7 +2729,7 @@ impl SessionActor {
         } = args;
         let (mut result, mut tool_layer_images) = drained.into_parts();
         let consumed_ids =
-            wimo ai_wimo_tools::reminders::task_completion::consumed_completion_ids(&result.output);
+            wimoai_wimo_tools::reminders::task_completion::consumed_completion_ids(&result.output);
         if !consumed_ids.is_empty() {
             self.drop_pending_items_for_consumed_completions(&consumed_ids)
                 .await;
@@ -2740,12 +2740,12 @@ impl SessionActor {
         if matches!(
             &result.output,
             ToolsToolOutput::SearchReplace(
-                wimo ai_wimo_tools::types::output::SearchReplaceOutput::EditsApplied(_)
+                wimoai_wimo_tools::types::output::SearchReplaceOutput::EditsApplied(_)
             ) | ToolsToolOutput::Bash(_)
         ) {
             self.maybe_notify_git_branch().await;
         }
-        if let wimo ai_wimo_tools::types::output::ToolOutput::Bash(ref b) = result.output
+        if let wimoai_wimo_tools::types::output::ToolOutput::Bash(ref b) = result.output
             && b.was_bare_echo
         {
             self.signals_handle().record_bare_echo();
@@ -2777,8 +2777,8 @@ impl SessionActor {
             }
             if matches!(
                 &result.output,
-                wimo ai_wimo_tools::types::output::ToolOutput::EnterPlanMode(_)
-                    | wimo ai_wimo_tools::types::output::ToolOutput::ExitPlanMode(_)
+                wimoai_wimo_tools::types::output::ToolOutput::EnterPlanMode(_)
+                    | wimoai_wimo_tools::types::output::ToolOutput::ExitPlanMode(_)
             ) {
                 let plan_path = self.plan_mode.lock().plan_file_path().display().to_string();
                 if let Some(ref mut content) = tool_update.fields.content {
@@ -2886,7 +2886,7 @@ impl SessionActor {
                 is_cursor_for_tool_result,
             ) {
                 deferred_followups.push(ConversationItem::system_reminder(notice));
-                self.send_wimo ai_notification(wimo aiSessionUpdate::ImageDropped { notes })
+                self.send_wimoai_notification(wimoaiSessionUpdate::ImageDropped { notes })
                     .await;
             }
             for norm in norm_result.images {
@@ -2907,11 +2907,11 @@ impl SessionActor {
         tool_parsed_args: &serde_json::Value,
         effective_tool_name: &str,
         requested_tool_name: &str,
-        tool_layer_images: Vec<wimo ai_wimo_tools::util::base64_images::ExtractedImage>,
+        tool_layer_images: Vec<wimoai_wimo_tools::util::base64_images::ExtractedImage>,
     ) -> (
         String,
         Vec<ContentPart>,
-        Vec<wimo ai_wimo_tools::util::base64_images::ExtractedImage>,
+        Vec<wimoai_wimo_tools::util::base64_images::ExtractedImage>,
     ) {
         use crate::session::acp_conversion::maybe_rewrite;
         let mut prompt_text = prompt_text;
@@ -2922,9 +2922,9 @@ impl SessionActor {
                 ToolsToolOutput::ReadFile(ReadFileOutput::ImageContent(_))
                     | ToolsToolOutput::ReadFile(ReadFileOutput::PdfPageImages(_))
             ) {
-            wimo ai_wimo_tools::util::base64_images::extract_base64_images(prompt_text)
+            wimoai_wimo_tools::util::base64_images::extract_base64_images(prompt_text)
         } else {
-            wimo ai_wimo_tools::util::base64_images::ExtractionResult {
+            wimoai_wimo_tools::util::base64_images::ExtractionResult {
                 text: prompt_text,
                 images: Vec::new(),
             }
@@ -3096,7 +3096,7 @@ fn execute_tool_call_parts(
     Vec<acp::ToolCallLocation>,
     Vec<acp::ToolCallContent>,
 ) {
-    let display = wimo ai_wimo_tools::util::strip_redundant_session_cd(command, cwd);
+    let display = wimoai_wimo_tools::util::strip_redundant_session_cd(command, cwd);
     (
         format!("Execute `{display}`"),
         acp::ToolKind::Execute,
@@ -3125,7 +3125,7 @@ mod execute_tool_call_parts_tests {
 #[cfg(test)]
 mod mcp_error_routing_tests {
     use super::is_mcp_error_result;
-    use wimo ai_wimo_tools::types::output::{MCPOutput, TodoWriteOutput, ToolOutput};
+    use wimoai_wimo_tools::types::output::{MCPOutput, TodoWriteOutput, ToolOutput};
     #[test]
     fn only_mcp_error_results_route_to_post_tool_use_failure() {
         let mcp_error = ToolOutput::MCP(MCPOutput::errored(
@@ -3162,8 +3162,8 @@ mod exit_plan_tail_predicate_tests {
     use super::{
         is_file_backed_exit_plan_input, is_file_backed_exit_plan_kind, split_exit_plan_tail,
     };
-    use wimo ai_wimo_tools::types::ToolInput;
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::ToolInput;
+    use wimoai_wimo_tools::types::tool::ToolKind;
     fn call(name: &str, args: &str) -> crate::sampling::types::ToolCallResponse {
         crate::sampling::types::ToolCallResponse {
             id: format!("call_{name}"),
@@ -3184,7 +3184,7 @@ mod exit_plan_tail_predicate_tests {
         assert!(!is_file_backed_exit_plan_kind(Some(ToolKind::Edit)));
         assert!(!is_file_backed_exit_plan_kind(None));
         assert!(is_file_backed_exit_plan_input(&ToolInput::ExitPlanMode(
-            wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeInput {}
+            wimoai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeInput {}
         )));
     }
     fn mixed(calls: Vec<crate::sampling::types::ToolCallResponse>) -> bool {
@@ -3305,8 +3305,8 @@ mod exit_plan_intercept_tests {
 mod plan_mode_edit_gate_tests {
     use super::{PlanEditGate, plan_mode_edit_gate};
     use crate::session::plan_mode::PlanModeTracker;
-    use wimo ai_wimo_tools::types::ToolInput;
-    use wimo ai_wimo_workspace::permission::AccessKind;
+    use wimoai_wimo_tools::types::ToolInput;
+    use wimoai_wimo_workspace::permission::AccessKind;
     /// Tracker with plan mode Active and plan file at `/tmp/gate-session/plan.md`.
     fn active_tracker() -> PlanModeTracker {
         let mut t = PlanModeTracker::new(std::path::PathBuf::from("/tmp/gate-session"));
@@ -3318,7 +3318,7 @@ mod plan_mode_edit_gate_tests {
         plan_mode_edit_gate(tracker, input, &AccessKind::from(input))
     }
     fn search_replace(path: &str) -> ToolInput {
-        use wimo ai_wimo_tools::implementations::wimo::search_replace::SearchReplaceInput;
+        use wimoai_wimo_tools::implementations::wimo::search_replace::SearchReplaceInput;
         ToolInput::SearchReplace(SearchReplaceInput {
             file_path: path.into(),
             old_string: "a".into(),
@@ -3327,7 +3327,7 @@ mod plan_mode_edit_gate_tests {
         })
     }
     fn write(path: &str) -> ToolInput {
-        use wimo ai_wimo_tools::implementations::opencode::write::WriteInput;
+        use wimoai_wimo_tools::implementations::opencode::write::WriteInput;
         ToolInput::Write(WriteInput {
             file_path: path.into(),
             content: "x".into(),
@@ -3363,7 +3363,7 @@ mod plan_mode_edit_gate_tests {
     /// `apply_patch` carries a placeholder access path, never the plan file: always rejected in plan mode (conservative).
     #[test]
     fn apply_patch_rejected_in_plan_mode() {
-        use wimo ai_wimo_tools::implementations::codex::apply_patch::ApplyPatchInput;
+        use wimoai_wimo_tools::implementations::codex::apply_patch::ApplyPatchInput;
         let t = active_tracker();
         assert_eq!(
             gate(
@@ -3377,7 +3377,7 @@ mod plan_mode_edit_gate_tests {
     }
     #[test]
     fn task_not_gated_in_plan_mode() {
-        use wimo ai_tool_types::TaskToolInput;
+        use wimoai_tool_types::TaskToolInput;
         let t = active_tracker();
         assert_eq!(
             gate(
@@ -3402,7 +3402,7 @@ mod plan_mode_edit_gate_tests {
     /// Plan mode blocks edits, not bash/reads.
     #[test]
     fn non_edit_tools_not_gated() {
-        use wimo ai_wimo_tools::implementations::BashToolInput;
+        use wimoai_wimo_tools::implementations::BashToolInput;
         let t = active_tracker();
         assert_eq!(
             gate(
@@ -3441,7 +3441,7 @@ mod plan_approval_helper_tests {
         PlanApprovalOutcome, ResumeAction, ext_method_no_client, resume_action_for,
         revise_plan_message,
     };
-    use wimo ai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtResponse;
+    use wimoai_wimo_tools::implementations::wimo::exit_plan_mode::ExitPlanModeExtResponse;
     fn resp(outcome: &str) -> ExitPlanModeExtResponse {
         ExitPlanModeExtResponse {
             outcome: outcome.into(),
@@ -3473,7 +3473,7 @@ mod plan_approval_helper_tests {
     }
     #[test]
     fn ext_method_no_client_defaults_false_for_untagged_error() {
-        assert!(!ext_method_no_client(&wimo ai_acp_lib::acp_internal_error(
+        assert!(!ext_method_no_client(&wimoai_acp_lib::acp_internal_error(
             "unrelated internal error"
         )));
     }
@@ -3508,7 +3508,7 @@ mod wait_interrupt_tests {
     #[tokio::test(start_paused = true)]
     async fn pending_interjection_aborts_in_flight_wait() {
         use super::InterjectionBuffer;
-        use wimo ai_interjection_core::PendingInterjection;
+        use wimoai_interjection_core::PendingInterjection;
         let buf: InterjectionBuffer<agent_client_protocol::ImageContent> =
             InterjectionBuffer::default();
         let out = tokio::select! {

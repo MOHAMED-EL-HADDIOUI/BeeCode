@@ -281,4 +281,4 @@ To create a new plan, call `${{ tools.by_kind.plan }}` with a short list of 1‑
 When steps have been completed, use `${{ tools.by_kind.plan }}` to mark each finished step as `completed` and the next step you are working on as `in_progress`. There should always be exactly one `in_progress` step until everything is done. You can mark multiple items as complete in a single `${{ tools.by_kind.plan }}` call.
 
 If all steps are complete, ensure you call `${{ tools.by_kind.plan }}` to mark all steps as `completed`.
-${%- endif %}wimo ai is open source (opensource). Anyone can contribute.
+${%- endif %}wimoai is open source (opensource). Anyone can contribute.

@@ -11,7 +11,7 @@ use crate::scaled;
 
 use agent_client_protocol::{self as acp, Agent as _};
 use tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
-use wimo ai_acp_lib::LineBufferedRead;
+use wimoai_acp_lib::LineBufferedRead;
 
 use crate::env::wimo_binary;
 use crate::headless::stderr_tail;
@@ -197,11 +197,11 @@ impl wimoStdioClient {
         let api_key_method = init_resp
             .auth_methods
             .iter()
-            .find(|m| &*m.id().0 == "wimo ai.api_key")
+            .find(|m| &*m.id().0 == "wimoai.api_key")
             .unwrap_or_else(|| {
                 let ids: Vec<_> = init_resp.auth_methods.iter().map(|m| &m.id().0).collect();
                 panic!(
-                    "expected auth method 'wimo ai.api_key' but got: {ids:?}\n\
+                    "expected auth method 'wimoai.api_key' but got: {ids:?}\n\
                      If the method ID changed, update this test."
                 )
             });

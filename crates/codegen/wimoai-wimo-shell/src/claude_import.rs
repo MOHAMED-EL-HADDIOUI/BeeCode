@@ -11,11 +11,11 @@ use toml::map::Map as TomlMap;
 use tracing::{debug, info, warn};
 
 use crate::util::config::McpServerConfig;
-use wimo ai_wimo_workspace::permission::claude_settings::{
+use wimoai_wimo_workspace::permission::claude_settings::{
     find_claude_settings_paths, load_claude_settings,
 };
-use wimo ai_wimo_workspace::permission::rules::parse_permission_rule;
-use wimo ai_wimo_workspace::permission::types::{PatternMode, PermissionRule, RuleAction, ToolFilter};
+use wimoai_wimo_workspace::permission::rules::parse_permission_rule;
+use wimoai_wimo_workspace::permission::types::{PatternMode, PermissionRule, RuleAction, ToolFilter};
 
 // Types
 
@@ -329,7 +329,7 @@ pub fn scan_importable_settings(cwd: &Path) -> ImportPlan {
 
     let all_paths = find_claude_settings_paths(cwd);
     // The home used for the is_global split must match the resolution in config.rs and claude_import_state.rs, or scan and hash tiers disagree
-    let home = wimo ai_dirs::home_dir();
+    let home = wimoai_dirs::home_dir();
 
     for path in &all_paths {
         let Some(settings) = load_claude_settings(path) else {
@@ -407,7 +407,7 @@ fn scan_claude_path_dirs(cwd: &Path, plan: &mut ImportPlan) {
     let mut global_added: std::collections::HashSet<std::path::PathBuf> =
         std::collections::HashSet::new();
 
-    if let Some(home) = wimo ai_dirs::home_dir() {
+    if let Some(home) = wimoai_dirs::home_dir() {
         for (kind, sub) in [(PathKind::Skill, "skills"), (PathKind::Rule, "rules")] {
             let dir = home.join(".claude").join(sub);
             if dir.is_dir() {
@@ -974,7 +974,7 @@ fn merge_paths(
 
 /// Merge `Hook` items into `<hooks_dir>/imported-from-claude.json`.
 ///
-/// The output JSON is the same shape that `wimo ai-wimo-hooks` natively understands (Claude-compatible).
+/// The output JSON is the same shape that `wimoai-wimo-hooks` natively understands (Claude-compatible).
 /// The native hooks loader scans `.wimo/hooks/*.json` directly, so no separate config-side parser is required.
 /// Existing entries with the same `(event, matcher, command)` triple are deduped.
 ///
@@ -1526,7 +1526,7 @@ mod tests {
         let _g = MarkerGuard;
         refresh_marker_cache(true);
         let dir = tempfile::tempdir().unwrap();
-        let compat = wimo ai_wimo_tools::types::compat::CompatConfig::default();
+        let compat = wimoai_wimo_tools::types::compat::CompatConfig::default();
         let paths = crate::util::hooks::discover_hook_source_paths(Some(dir.path()), &compat);
         let project_strs: Vec<String> = paths
             .project
@@ -1556,7 +1556,7 @@ mod tests {
         let _g = MarkerGuard;
         refresh_marker_cache(true);
         let dir = tempfile::tempdir().unwrap();
-        let env = wimo ai_wimo_workspace::permission::claude_settings::load_claude_env_with_project(
+        let env = wimoai_wimo_workspace::permission::claude_settings::load_claude_env_with_project(
             dir.path(),
             true,
         );
@@ -1572,7 +1572,7 @@ mod tests {
         let _g = MarkerGuard;
         refresh_marker_cache(false);
         let dir = tempfile::tempdir().unwrap();
-        let compat = wimo ai_wimo_tools::types::compat::CompatConfig::default();
+        let compat = wimoai_wimo_tools::types::compat::CompatConfig::default();
         let paths = crate::util::hooks::discover_hook_source_paths(Some(dir.path()), &compat);
         let project_strs: Vec<String> = paths
             .project
@@ -1592,7 +1592,7 @@ mod tests {
         let _g = MarkerGuard;
         refresh_marker_cache(false);
         let dir = tempfile::tempdir().unwrap();
-        let compat = wimo ai_wimo_tools::types::compat::CompatConfig::default();
+        let compat = wimoai_wimo_tools::types::compat::CompatConfig::default();
         let paths = crate::util::hooks::discover_hook_source_paths(Some(dir.path()), &compat);
         let global_strs: Vec<String> = paths
             .global
@@ -1626,7 +1626,7 @@ mod tests {
         let _g = MarkerGuard;
         refresh_marker_cache(false);
         let dir = tempfile::tempdir().unwrap();
-        let mut compat = wimo ai_wimo_tools::types::compat::CompatConfig::default();
+        let mut compat = wimoai_wimo_tools::types::compat::CompatConfig::default();
         compat.cursor.hooks = false;
         let paths = crate::util::hooks::discover_hook_source_paths(Some(dir.path()), &compat);
         let global_strs: Vec<String> = paths
@@ -1658,7 +1658,7 @@ mod tests {
         // Do NOT set the marker: test the compat gate in isolation
         refresh_marker_cache(false);
         let dir = tempfile::tempdir().unwrap();
-        let mut compat = wimo ai_wimo_tools::types::compat::CompatConfig::default();
+        let mut compat = wimoai_wimo_tools::types::compat::CompatConfig::default();
         compat.claude.hooks = false;
         let paths = crate::util::hooks::discover_hook_source_paths(Some(dir.path()), &compat);
         let global_strs: Vec<String> = paths
@@ -1691,7 +1691,7 @@ mod tests {
         let _g = MarkerGuard;
         refresh_marker_cache(false);
         let dir = tempfile::tempdir().unwrap();
-        let compat = wimo ai_wimo_tools::types::compat::CompatConfig::default();
+        let compat = wimoai_wimo_tools::types::compat::CompatConfig::default();
         let paths = crate::util::hooks::discover_hook_source_paths(Some(dir.path()), &compat);
         assert!(
             !paths.project.is_empty(),
@@ -1738,7 +1738,7 @@ mod tests {
 
         // Identify the probe by its unique raw command so real global hooks on the
         // test host (from the non-injectable ~/.claude, ~/.wimo) don't interfere.
-        let has_probe = |reg: &wimo ai_wimo_hooks::discovery::HookRegistry| {
+        let has_probe = |reg: &wimoai_wimo_hooks::discovery::HookRegistry| {
             reg.all_hooks().iter().any(|h| {
                 h.command_raw
                     .as_deref()
@@ -1748,7 +1748,7 @@ mod tests {
         };
 
         // Trusted so project sources are included; vary only the compat toggle.
-        let mut compat = wimo ai_wimo_tools::types::compat::CompatConfig::default();
+        let mut compat = wimoai_wimo_tools::types::compat::CompatConfig::default();
 
         compat.claude.hooks = false;
         let (reg, _errs) = crate::util::hooks::discover_hooks(Some(git_root.path()), &compat, true);
@@ -1984,7 +1984,7 @@ extra_rule_dirs = ["/c/rules"]
         std::fs::create_dir_all(home.join(".claude").join("skills")).unwrap();
 
         // Build a plan by directly invoking the scan with a synthetic plan and a cwd whose `find_project_root` returns the same `home`
-        // We can't easily mock `wimo ai_dirs::home_dir()`, so this test focuses on the dedup *logic*
+        // We can't easily mock `wimoai_dirs::home_dir()`, so this test focuses on the dedup *logic*
         // It manually populates `global_items` first, then asserts that the project-side branch with the same path would skip
         // Direct end-to-end coverage of the home-collision case requires `wimo_HOME` plumbing which is intentionally out of scope
         let global = dunce::canonicalize(home.join(".claude").join("skills")).unwrap();
@@ -2011,7 +2011,7 @@ extra_rule_dirs = ["/c/rules"]
         let _g = MarkerGuard;
         refresh_marker_cache(true);
         let dir = tempfile::tempdir().unwrap();
-        let compat = wimo ai_wimo_tools::types::compat::CompatConfig::default();
+        let compat = wimoai_wimo_tools::types::compat::CompatConfig::default();
         let servers = crate::util::config::load_claude_json_mcp_servers(dir.path(), &compat);
         assert!(
             servers.is_empty(),
@@ -2043,7 +2043,7 @@ extra_rule_dirs = ["/c/rules"]
         // our tempdir's `.claude/settings.json`. The dev's real ~/.wimo
         // config rules (if any) are out of scope for this test.
         let resolved =
-            wimo ai_wimo_workspace::permission::resolution::resolve_permissions_with_provenance(
+            wimoai_wimo_workspace::permission::resolution::resolve_permissions_with_provenance(
                 dir.path(),
                 true,
             )
@@ -2051,7 +2051,7 @@ extra_rule_dirs = ["/c/rules"]
             .resolved;
         if let Some(r) = resolved {
             let tempdir_claude = claude_dir.join("settings.json");
-            use wimo ai_wimo_workspace::permission::types::RequirementSource;
+            use wimoai_wimo_workspace::permission::types::RequirementSource;
             let leaked: Vec<&RequirementSource> = r
                 .sources
                 .iter()

@@ -21,7 +21,7 @@ use crate::paths::{DEVICE_DIRS, DEVICE_FILES};
 use crate::paths::{
     essential_writable_paths, essential_writable_paths_minimal, essential_writable_paths_strict,
 };
-use wimo ai_wimo_config::{GlobalHookSource, SANDBOX_CONFIG_FILENAME};
+use wimoai_wimo_config::{GlobalHookSource, SANDBOX_CONFIG_FILENAME};
 
 /// A resolved sandbox profile ready to be converted to a `CapabilitySet`.
 #[derive(Debug, Clone)]
@@ -241,7 +241,7 @@ impl ProfileName {
                     return Some(real);
                 }
                 let default_sessions =
-                    wimo ai_dirs::home_dir().map(|user_home| user_home.join(".wimo").join("sessions"));
+                    wimoai_dirs::home_dir().map(|user_home| user_home.join(".wimo").join("sessions"));
                 if path.file_name() == Some(std::ffi::OsStr::new("sessions"))
                     && default_sessions.as_ref() == Some(&real)
                 {
@@ -337,7 +337,7 @@ impl ProfileName {
             #[cfg(unix)]
             {
                 let files =
-                    wimo ai_wimo_config::validated_hook_json_files_for_sources(&profile.write_deny)
+                    wimoai_wimo_config::validated_hook_json_files_for_sources(&profile.write_deny)
                         .map_err(|e| anyhow::anyhow!("hook JSON alias validation failed: {e}"))?;
                 for f in files {
                     if !pairs.iter().any(|(p, _)| p == &f) {
@@ -459,7 +459,7 @@ impl ProfileName {
             }),
 
             Self::Strict => {
-                let home = wimo ai_dirs::home_dir().unwrap_or_else(|| PathBuf::from("/root"));
+                let home = wimoai_dirs::home_dir().unwrap_or_else(|| PathBuf::from("/root"));
                 let system_read: Vec<PathBuf> = [
                     "/usr", "/lib", "/lib64", "/bin", "/sbin", "/etc", "/dev", "/proc", "/sys",
                     "/tmp",

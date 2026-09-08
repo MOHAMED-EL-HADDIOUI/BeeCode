@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-test-support"
+name = "wimoai-wimo-test-support"
 version = "0.1.0"
 edition.workspace = true
 description = "Shared test-support for wimo crates: mock inference server, SSE generators, ACP stdio client, headless runner, env sandbox"
@@ -23,8 +23,8 @@ tokio-util = { workspace = true, features = ["compat"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["fmt"] }
 url = { workspace = true }
-wimo ai-acp-lib = { workspace = true }
-wimo ai-tty-utils = { workspace = true }
+wimoai-acp-lib = { workspace = true }
+wimoai-tty-utils = { workspace = true }
 
 [dev-dependencies]
 reqwest = { workspace = true }

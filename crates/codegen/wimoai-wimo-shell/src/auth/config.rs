@@ -44,7 +44,7 @@ fn default_team_oauth2_scopes() -> Vec<String> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PreferredAuthMethod {
-    /// `wimo ai_API_KEY` / auth.json `wimo ai::api_key` / per-model BYOK (`wimo ai.api_key`).
+    /// `wimoai_API_KEY` / auth.json `wimoai::api_key` / per-model BYOK (`wimoai.api_key`).
     ApiKey,
     /// OIDC / OAuth2 session (`cached_token`, interactive `wimo.com` / `oidc`, including devbox-minted OIDC).
     Oidc,
@@ -71,8 +71,8 @@ pub struct wimoComConfig {
     /// Synthesizes `expires_at` so proactive refresh works. Env: `wimo_AUTH_TOKEN_TTL`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub auth_token_ttl: Option<u64>,
-    /// Admin kill switch: when `Some(true)`, the `wimo ai.api_key` auth method is neither advertised nor accepted.
-    /// `wimo ai_API_KEY` and per-model credentials then can't bypass the deployment's IdP login. Env: `wimo_DISABLE_API_KEY_AUTH`.
+    /// Admin kill switch: when `Some(true)`, the `wimoai.api_key` auth method is neither advertised nor accepted.
+    /// `wimoai_API_KEY` and per-model credentials then can't bypass the deployment's IdP login. Env: `wimo_DISABLE_API_KEY_AUTH`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub disable_api_key_auth: Option<bool>,
     /// Restricts login to a specific team: the login token's team principal must equal this.
@@ -119,7 +119,7 @@ pub struct OAuth2ProviderConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub referrer: Option<String>,
 }
-pub const wimo ai_OAUTH2_ISSUER: &str = "https://auth.x.ai";
+pub const wimoai_OAUTH2_ISSUER: &str = "https://auth.x.ai";
 /// A separate const so the frozen contract test pins the production allowlist even when the non-production feature adds staging and local origins.
 const PROD_ACCOUNTS_APP_ORIGINS: &[&str] = &["https://accounts.x.ai"];
 /// Production build: accepts only the production accounts app.
@@ -146,7 +146,7 @@ pub(crate) fn accounts_app_cors_layer(method: axum::http::Method) -> tower_http:
         .allow_methods([method])
 }
 /// Local-dev OAuth2 issuer (accounts-app running on localhost).
-const wimo ai_OAUTH2_LOCAL_ISSUER: &str = "http://localhost:22255";
+const wimoai_OAUTH2_LOCAL_ISSUER: &str = "http://localhost:22255";
 const DEFAULT_OAUTH2_REFERRER: &str = "wimo";
 /// Returns `true` when `wimo_LOCAL_AUTH=1` is set, indicating the local accounts-app should be used as the OAuth2 issuer.
 pub(crate) fn use_local_auth() -> bool {
@@ -155,23 +155,23 @@ pub(crate) fn use_local_auth() -> bool {
         .unwrap_or(false)
 }
 /// Returns the active wimo AI OAuth2 issuer: the local-dev issuer when `wimo_LOCAL_AUTH=1` is set, otherwise the production issuer.
-pub fn wimo ai_oauth2_issuer() -> &'static str {
+pub fn wimoai_oauth2_issuer() -> &'static str {
     if use_local_auth() {
-        wimo ai_OAUTH2_LOCAL_ISSUER
+        wimoai_OAUTH2_LOCAL_ISSUER
     } else {
-        wimo ai_OAUTH2_ISSUER
+        wimoai_OAUTH2_ISSUER
     }
 }
 /// Whether `issuer` is a recognised wimo AI OAuth2 issuer (production or local-dev).
-/// Use this instead of comparing to [`wimo ai_OAUTH2_ISSUER`] so local-dev counts as first-party wimo AI auth.
-pub fn is_wimo ai_oauth2_issuer(issuer: &str) -> bool {
-    issuer == wimo ai_OAUTH2_ISSUER || issuer == wimo ai_OAUTH2_LOCAL_ISSUER
+/// Use this instead of comparing to [`wimoai_OAUTH2_ISSUER`] so local-dev counts as first-party wimo AI auth.
+pub fn is_wimoai_oauth2_issuer(issuer: &str) -> bool {
+    issuer == wimoai_OAUTH2_ISSUER || issuer == wimoai_OAUTH2_LOCAL_ISSUER
 }
 /// auth.json scope key used by the pre-OIDC `wimo login --legacy` flow.
 /// Matches the key format produced by the original `accounts.x.ai` relay auth.
 pub(crate) const LEGACY_AUTH_SCOPE: &str = "https://accounts.x.ai/sign-in";
 impl wimoComConfig {
-    /// Pinning a team (`force_login_team_uuid`) disables `wimo ai.api_key` auth: team membership can't be verified from a bare API key.
+    /// Pinning a team (`force_login_team_uuid`) disables `wimoai.api_key` auth: team membership can't be verified from a bare API key.
     /// The `wimo_DISABLE_API_KEY_AUTH` env lockdown is read at call time and OR-ed in, so a lower-trust user `config.toml` cannot turn it back off.
     /// `requirements.toml` already wins by layer precedence.
     pub(crate) fn api_key_auth_disabled(&self) -> bool {
@@ -246,7 +246,7 @@ impl Default for wimoComConfig {
         } else {
             Some(
                 OAuth2ProviderConfig::from_env().unwrap_or_else(|| OAuth2ProviderConfig {
-                    issuer: wimo ai_oauth2_issuer().to_owned(),
+                    issuer: wimoai_oauth2_issuer().to_owned(),
                     client_id: obfstr::obfstr!("b1a00492-073a-47ea-816f-4c329264a828").to_owned(),
                     scopes: default_oauth2_scopes(),
                     principal_type: None,
@@ -260,7 +260,7 @@ impl Default for wimoComConfig {
                 .unwrap_or_else(|_| PROD_WS_ORIGIN.to_owned()),
             wimo_ws_url: std::env::var("wimo_WS_URL")
                 .unwrap_or_else(|_| PROD_RELAY_WS_URL.to_owned()),
-            token_header: "wimo ai-wimo-cli".to_owned(),
+            token_header: "wimoai-wimo-cli".to_owned(),
             oidc,
             oauth2,
             auth_provider_command: std::env::var("wimo_AUTH_PROVIDER_COMMAND").ok(),

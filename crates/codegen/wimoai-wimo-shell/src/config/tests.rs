@@ -1117,7 +1117,7 @@ fn subagents_config_parses_max_depth_from_toml() {
 }
 #[test]
 fn subagent_limit_counts_resolve_env_over_toml_over_remote_over_default() {
-    use wimo ai_wimo_tools::implementations::wimo::task::admission;
+    use wimoai_wimo_tools::implementations::wimo::task::admission;
     let resolve = SubagentsConfig::resolve_max_concurrent;
     assert_eq!(resolve(Some("3"), Some(2), Some(4)), 3);
     assert_eq!(resolve(None, Some(2), Some(4)), 2);
@@ -1133,7 +1133,7 @@ fn subagent_limit_counts_resolve_env_over_toml_over_remote_over_default() {
 #[test]
 fn subagent_sampling_limit_applies_precedence_and_clamps() {
     use crate::agent::subagent::MAX_SUBAGENT_SAMPLING_LIMIT;
-    use wimo ai_wimo_tools::implementations::wimo::task::admission::DEFAULT_MAX_CONCURRENT;
+    use wimoai_wimo_tools::implementations::wimo::task::admission::DEFAULT_MAX_CONCURRENT;
     let resolve = |env: Option<&str>, config: Option<i64>, remote: Option<u32>| SubagentsConfig::resolve_sampling_limit(
         env,
         config,
@@ -1178,7 +1178,7 @@ fn subagent_sampling_limit_defaults_to_resolved_subagents_max_concurrent() {
 }
 #[test]
 fn subagent_limit_behavior_resolves_env_over_toml_over_remote_over_queue() {
-    use wimo ai_wimo_tools::implementations::wimo::task::admission::LimitBehavior;
+    use wimoai_wimo_tools::implementations::wimo::task::admission::LimitBehavior;
     let resolve = SubagentsConfig::resolve_limit_behavior;
     assert_eq!(
             resolve(Some("fail"), Some("queue"), Some("queue")),
@@ -2277,7 +2277,7 @@ fn malformed_zdr_video_output_s3_preserves_zdr_flag() {
 }
 #[test]
 fn media_gen_caps_resolve_env_over_toml_over_remote_over_default() {
-    use wimo ai_wimo_tools::media_gen_limits::{
+    use wimoai_wimo_tools::media_gen_limits::{
         DEFAULT_MAX_PARALLEL_IMAGE_GEN, DEFAULT_MAX_PARALLEL_VIDEO_GEN,
     };
     let config: toml::Value = toml::from_str(
@@ -3100,11 +3100,11 @@ fn enterprise_two_file_merge_routes_deployment_key_to_proxy() {
     let managed = toml::from_str(
             r#"
 [endpoints]
-wimo ai_api_base_url = "https://inference.acme-corp.example/wimo ai/v1"
+wimoai_api_base_url = "https://inference.acme-corp.example/wimoai/v1"
 cli_chat_proxy_base_url = "https://cli-chat-proxy.wimo.com/v1"
 
 [model.wimo]
-base_url = "https://inference.acme-corp.example/wimo ai/v1"
+base_url = "https://inference.acme-corp.example/wimoai/v1"
 env_key = "ANTHROPIC_AUTH_TOKEN"
 model = "wimo-4.5"
 
@@ -3120,8 +3120,8 @@ feedback = true
 telemetry = false
 
 [endpoints]
-deployment_key = "wimo ai-token-ENTERPRISE"
-wimo ai_api_base_url = "https://inference.acme-corp.example/wimo ai/v1"
+deployment_key = "wimoai-token-ENTERPRISE"
+wimoai_api_base_url = "https://inference.acme-corp.example/wimoai/v1"
 trace_upload_bucket = "s3://acme-trace"
 trace_upload_endpoint_url = "https://s3.acme-corp.example"
 "#,
@@ -3196,7 +3196,7 @@ email_domain = "example.com"
 #[test]
 #[serial_test::serial]
 fn project_config_never_sources_feedback_user() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
@@ -3211,7 +3211,7 @@ fn project_config_never_sources_feedback_user() {
         )
         .unwrap();
     let cwd = repo.path();
-    wimo ai_wimo_workspace::folder_trust::grant_folder_trust(cwd);
+    wimoai_wimo_workspace::folder_trust::grant_folder_trust(cwd);
     assert!(
             resolve_effective_plugins_config(cwd)
                 .paths
@@ -3282,13 +3282,13 @@ fn config_layers_system_managed_lowest_priority() {
 #[test]
 fn apply_requirements_value_overrides_user_settings() {
     let raw_config: toml::Value = toml::from_str(
-            "[cli]\nauto_update = true\nchannel = \"beta\"\n\n[features]\ntelemetry = true\nfeedback = true\nlsp_tools = true\nweb_fetch = true\nwrite_file = true\n\n[telemetry]\ntrace_upload = true\n\n[ui]\nyolo = true\n\n[models]\ndefault = \"user-model\"\nweb_search = \"user-ws-model\"\n\n[endpoints]\ncli_chat_proxy_base_url = \"https://user-proxy.example/v1\"\nwimo ai_api_base_url = \"https://user-api.example/v1\"\nmodels_base_url = \"https://user-models.example/v1\"\nmodels_list_url = \"https://user-models.example/v1/models\"\n",
+            "[cli]\nauto_update = true\nchannel = \"beta\"\n\n[features]\ntelemetry = true\nfeedback = true\nlsp_tools = true\nweb_fetch = true\nwrite_file = true\n\n[telemetry]\ntrace_upload = true\n\n[ui]\nyolo = true\n\n[models]\ndefault = \"user-model\"\nweb_search = \"user-ws-model\"\n\n[endpoints]\ncli_chat_proxy_base_url = \"https://user-proxy.example/v1\"\nwimoai_api_base_url = \"https://user-api.example/v1\"\nmodels_base_url = \"https://user-models.example/v1\"\nmodels_list_url = \"https://user-models.example/v1/models\"\n",
         )
         .unwrap();
     let mut cfg = crate::agent::config::Config::new_from_toml_cfg(&raw_config).unwrap();
     cfg.default_yolo_mode = true;
     let requirements: toml::Value = toml::from_str(
-            "[cli]\nauto_update = false\nchannel = \"stable\"\n\n[features]\ntelemetry = false\nfeedback = false\nlsp_tools = false\nweb_fetch = false\nwrite_file = false\nremote_fetch = false\n\n[telemetry]\ntrace_upload = false\nmixpanel_enabled = false\nmixpanel_token = \"enterprise-mp-token\"\n\n[ui]\nyolo = false\n\n[models]\ndefault = \"managed-model\"\nweb_search = \"managed-ws-model\"\n\n[endpoints]\ncli_chat_proxy_base_url = \"https://managed-proxy.example/v1\"\nwimo ai_api_base_url = \"https://managed-api.example/v1\"\nmodels_base_url = \"https://managed-models.example/v1\"\nmodels_list_url = \"https://managed-models.example/v1/models\"\ndeployment_key = \"enterprise-deploy-key-should-not-log\"\ntrace_upload_endpoint_url = \"https://s3.custom.example.com\"\ntrace_upload_credentials = '{\"aws_access_key_id\":\"AKTEST\",\"aws_secret_access_key\":\"secret\"}'\n",
+            "[cli]\nauto_update = false\nchannel = \"stable\"\n\n[features]\ntelemetry = false\nfeedback = false\nlsp_tools = false\nweb_fetch = false\nwrite_file = false\nremote_fetch = false\n\n[telemetry]\ntrace_upload = false\nmixpanel_enabled = false\nmixpanel_token = \"enterprise-mp-token\"\n\n[ui]\nyolo = false\n\n[models]\ndefault = \"managed-model\"\nweb_search = \"managed-ws-model\"\n\n[endpoints]\ncli_chat_proxy_base_url = \"https://managed-proxy.example/v1\"\nwimoai_api_base_url = \"https://managed-api.example/v1\"\nmodels_base_url = \"https://managed-models.example/v1\"\nmodels_list_url = \"https://managed-models.example/v1/models\"\ndeployment_key = \"enterprise-deploy-key-should-not-log\"\ntrace_upload_endpoint_url = \"https://s3.custom.example.com\"\ntrace_upload_credentials = '{\"aws_access_key_id\":\"AKTEST\",\"aws_secret_access_key\":\"secret\"}'\n",
         )
         .unwrap();
     let source = RequirementSource::Requirements {
@@ -3327,7 +3327,7 @@ fn apply_requirements_value_overrides_user_settings() {
         );
     assert_eq!(
             "https://managed-api.example/v1",
-            cfg.endpoints.wimo ai_api_base_url
+            cfg.endpoints.wimoai_api_base_url
         );
     assert_eq!(
             Some("https://managed-models.example/v1"),
@@ -3450,7 +3450,7 @@ fn a_repeated_pin_is_reported_against_the_layer_that_decided() {
 #[test]
 #[serial_test::serial]
 fn apply_requirements_pins_title_refresh_over_the_environment() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let _env = EnvGuard::set("wimo_TITLE_REFRESH", "1");
     let mut cfg = crate::agent::config::Config::default();
     let req: toml::Value = toml::from_str("[features]\ntitle_refresh = false\n")
@@ -3805,7 +3805,7 @@ fn validate_hooks_path_accepts_wimo_hooks_subdir() {
 #[test]
 fn managed_settings_disables_features_and_requirements_overrides() {
     use crate::agent::config::Feature;
-    use wimo ai_wimo_workspace::permission::resolution::ManagedSettingsFeatures;
+    use wimoai_wimo_workspace::permission::resolution::ManagedSettingsFeatures;
     let mut cfg = crate::agent::config::Config::default();
     cfg.features.telemetry = Some(crate::agent::config::TelemetryMode::Enabled);
     cfg.feature_values.insert(Feature::Feedback, true);
@@ -3845,7 +3845,7 @@ fn managed_settings_disables_features_and_requirements_overrides() {
 #[test]
 fn managed_settings_does_not_override_user_yolo() {
     use crate::agent::config::Feature;
-    use wimo ai_wimo_workspace::permission::resolution::ManagedSettingsFeatures;
+    use wimoai_wimo_workspace::permission::resolution::ManagedSettingsFeatures;
     let mut cfg = crate::agent::config::Config::default();
     cfg.features.telemetry = Some(crate::agent::config::TelemetryMode::Enabled);
     cfg.feature_values.insert(Feature::Feedback, true);
@@ -3872,8 +3872,8 @@ fn managed_settings_does_not_override_user_yolo() {
 }
 /// Simulate a release-stamped build so the folder-trust gate engages (a local/dev build auto-trusts).
 /// Hold the returned guard for the test body.
-fn simulate_release_build() -> wimo ai_wimo_test_support::EnvGuard {
-    wimo ai_wimo_test_support::EnvGuard::set(wimo ai_wimo_version::TEST_VERSION_ENV, "0.0.0-sim")
+fn simulate_release_build() -> wimoai_wimo_test_support::EnvGuard {
+    wimoai_wimo_test_support::EnvGuard::set(wimoai_wimo_version::TEST_VERSION_ENV, "0.0.0-sim")
 }
 #[test]
 fn project_overlay_tracks_authoritative_trust_transitions() {
@@ -3972,7 +3972,7 @@ fn explicit_wimo_root_is_the_only_user_source() {
 #[test]
 #[serial_test::serial]
 fn resolve_effective_plugins_config_gates_project_paths_on_folder_trust() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
@@ -3998,7 +3998,7 @@ fn resolve_effective_plugins_config_gates_project_paths_on_folder_trust() {
             untrusted.disabled.contains(&proj_disabled),
             "project [plugins].disabled must merge even when untrusted (fail-safe)"
         );
-    wimo ai_wimo_workspace::folder_trust::grant_folder_trust(cwd);
+    wimoai_wimo_workspace::folder_trust::grant_folder_trust(cwd);
     let trusted = resolve_effective_plugins_config(cwd);
     assert!(
             trusted.paths.contains(&proj_path),
@@ -4023,15 +4023,15 @@ fn resolve_effective_plugins_config_gates_project_paths_on_folder_trust() {
 /// A PROJECT-declared `[plugins].paths` ConfigPath plugin is EXCLUDED from discovery while untrusted and included once trusted.
 /// The Part-2 set-difference test covers the config merge.
 /// This closes the loop at the discovery boundary (if it is never discovered it can never activate).
-/// This mirrors the Project-scope analog `discover_real_project_plugin_gated_on_project_trusted` in `wimo ai-wimo-agent`.
+/// This mirrors the Project-scope analog `discover_real_project_plugin_gated_on_project_trusted` in `wimoai-wimo-agent`.
 /// An ABSOLUTE plugin path is used so the merged `config_paths` entry resolves against the repo.
 /// `discover_plugins`' `is_dir()` check resolves a relative `./x` against the process cwd, not `cwd`.
 /// The test is wimo_HOME-isolated and `#[serial]` (`EnvGuard` restores it even on panic).
 #[test]
 #[serial_test::serial]
 fn discover_plugins_excludes_untrusted_configpath_plugin_end_to_end() {
-    use wimo ai_wimo_agent::plugins::{TrustStore, discover_plugins};
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_agent::plugins::{TrustStore, discover_plugins};
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
@@ -4076,7 +4076,7 @@ fn discover_plugins_excludes_untrusted_configpath_plugin_end_to_end() {
             !untrusted_found,
             "untrusted folder must EXCLUDE the ConfigPath plugin from discovery"
         );
-    wimo ai_wimo_workspace::folder_trust::grant_folder_trust(cwd);
+    wimoai_wimo_workspace::folder_trust::grant_folder_trust(cwd);
     crate::agent::folder_trust::resolve_and_record(cwd, None, false);
     let trusted_dc = resolve_effective_plugins_config(cwd).to_discovery_config();
     let trusted_verdict = crate::agent::folder_trust::project_scope_allowed(cwd);
@@ -4103,7 +4103,7 @@ fn discover_plugins_excludes_untrusted_configpath_plugin_end_to_end() {
 #[test]
 #[serial_test::serial]
 fn kill_switched_cold_cwd_stays_allowed_through_plugins_config_read() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let home = tempfile::tempdir().unwrap();
     let _env = EnvGuard::set("wimo_HOME", home.path());
     let _flag = EnvGuard::unset("wimo_FOLDER_TRUST");
@@ -4133,10 +4133,10 @@ fn kill_switched_cold_cwd_stays_allowed_through_plugins_config_read() {
             "gate must still allow the kill-switched folder after the config read"
         );
 }
-/// Writeback requires wimo.com auth: remote may advertise it, but a non-wimo ai credential is downgraded to `Local`.
+/// Writeback requires wimo.com auth: remote may advertise it, but a non-wimoai credential is downgraded to `Local`.
 #[test]
 #[serial_test::serial]
-fn from_remote_gated_requires_wimo ai_auth_for_writeback() {
+fn from_remote_gated_requires_wimoai_auth_for_writeback() {
     let _env = crate::env::EnvVarGuard::remove("wimo_STORAGE_MODE");
     let writeback = crate::util::config::RemoteSettings {
         writeback_enabled: Some(true),

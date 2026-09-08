@@ -7,13 +7,13 @@
 
 use std::path::{Path, PathBuf};
 
-use wimo ai_wimo_agent::plugins::discovery::PluginScope;
-use wimo ai_wimo_agent::plugins::git_install::{self, UpdateStatus};
-use wimo ai_wimo_agent::plugins::install_registry::{
+use wimoai_wimo_agent::plugins::discovery::PluginScope;
+use wimoai_wimo_agent::plugins::git_install::{self, UpdateStatus};
+use wimoai_wimo_agent::plugins::install_registry::{
     InstallError, InstallKind, InstallRegistry, InstalledRepo, MarketplaceProvenance,
 };
-use wimo ai_wimo_plugin_marketplace::git::{self, SourceCacheLease};
-use wimo ai_wimo_plugin_marketplace::{
+use wimoai_wimo_plugin_marketplace::git::{self, SourceCacheLease};
+use wimoai_wimo_plugin_marketplace::{
     MarketplaceEntry, MarketplaceRelativePath, MarketplaceSource, SourceKind, install_resolve,
     installer, is_official_source_url, load_extra_sources_from_settings, load_sources,
     scan_marketplace,
@@ -157,7 +157,7 @@ pub fn uninstall_plugin(
 
     if !keep_data {
         // Plugins under $HOME are user-scope; everything else is config-path scope.
-        let scope = match wimo ai_dirs::home_dir() {
+        let scope = match wimoai_dirs::home_dir() {
             Some(home) if repo.path.starts_with(&home) => PluginScope::User,
             _ => PluginScope::ConfigPath,
         };
@@ -292,7 +292,7 @@ fn update_marketplace_repo(
 }
 
 fn marketplace_root_for_provenance(
-    provenance: &wimo ai_wimo_agent::plugins::install_registry::MarketplaceProvenance,
+    provenance: &wimoai_wimo_agent::plugins::install_registry::MarketplaceProvenance,
 ) -> Result<MarketplaceSourceRoot, InstallError> {
     let source = &provenance.source_url_or_path;
     if let Some((url, branch)) = configured_marketplace_git_source(source) {
@@ -500,7 +500,7 @@ pub fn classify_marketplace_add_input(input: &str, cwd: &Path) -> MarketplaceAdd
 /// Expand a leading `~` to the home directory, the same expansion the marketplace loader applies to `path =` config entries.
 fn expand_tilde(input: &str) -> PathBuf {
     match input.strip_prefix('~') {
-        Some(rest) => wimo ai_dirs::home_dir()
+        Some(rest) => wimoai_dirs::home_dir()
             .map(|h| h.join(rest.strip_prefix('/').unwrap_or(rest)))
             .unwrap_or_else(|| PathBuf::from(input)),
         None => PathBuf::from(input),
@@ -702,13 +702,13 @@ fn bullet_list(items: &[String]) -> String {
 /// Read from the overlay-free layer merge (the overlay-free contract in `ConfigLayers::env_overlay`).
 /// That way an overlay `require_sha = false` cannot defeat a disk-set `true`.
 pub(crate) fn marketplace_require_sha() -> bool {
-    wimo ai_wimo_config::ConfigLayers::load()
+    wimoai_wimo_config::ConfigLayers::load()
         .map(|layers| {
-            wimo ai_wimo_plugin_marketplace::load_require_sha(
+            wimoai_wimo_plugin_marketplace::load_require_sha(
                 &layers.effective_config_base_without_overlay(),
             )
         })
-        .unwrap_or_else(|_| wimo ai_wimo_plugin_marketplace::env_require_sha())
+        .unwrap_or_else(|_| wimoai_wimo_plugin_marketplace::env_require_sha())
 }
 
 /// Marketplace sources from config.toml and settings JSON, unfiltered.
@@ -725,13 +725,13 @@ pub(crate) fn load_marketplace_sources() -> Vec<MarketplaceSource> {
 /// Install paths must use this so policy cannot be bypassed.
 pub(crate) fn load_filtered_marketplace_sources() -> Vec<MarketplaceSource> {
     let allowlist =
-        &wimo ai_wimo_workspace::permission::resolution::managed_settings().marketplace_allowlist;
+        &wimoai_wimo_workspace::permission::resolution::managed_settings().marketplace_allowlist;
     filter_sources_by_allowlist(load_marketplace_sources(), allowlist)
 }
 
 fn filter_sources_by_allowlist(
     mut sources: Vec<MarketplaceSource>,
-    allowlist: &wimo ai_wimo_workspace::permission::resolution::MarketplaceAllowlist,
+    allowlist: &wimoai_wimo_workspace::permission::resolution::MarketplaceAllowlist,
 ) -> Vec<MarketplaceSource> {
     if allowlist.is_restricted() {
         sources.retain(|source| match &source.kind {
@@ -1125,7 +1125,7 @@ pub fn uninstall_marketplace_source_plugins(source_identity: &str) -> Vec<String
         if let Err(e) = git_install::remove_repo_path(path) {
             tracing::warn!("failed to remove plugin dir for {key}: {e}");
         }
-        let scope = match wimo ai_dirs::home_dir() {
+        let scope = match wimoai_dirs::home_dir() {
             Some(home) if path.starts_with(&home) => PluginScope::User,
             _ => PluginScope::ConfigPath,
         };
@@ -1189,8 +1189,8 @@ pub fn remove_toml_marketplace_block(content: &str, source_identity: &str) -> Op
 pub fn try_remove_source_from_json_files(source_url_or_path: &str) -> bool {
     // Resolve user wimo via user_wimo_home() (None when no home resolves) and home separately
     // Removal then still runs from $wimo_HOME when no home dir exists, and never touches a cwd-relative .wimo
-    let home = wimo ai_dirs::home_dir();
-    let wimo = wimo ai_wimo_config::user_wimo_home();
+    let home = wimoai_dirs::home_dir();
+    let wimo = wimoai_wimo_config::user_wimo_home();
 
     let mut settings_candidates: Vec<std::path::PathBuf> = Vec::new();
     if let Some(ref wimo) = wimo {
@@ -1376,7 +1376,7 @@ mod tests {
             MarketplaceAddInput::LocalPath(PathBuf::from("/work/../plugins"))
         );
         // Tilde expands to home.
-        if let Some(home) = wimo ai_dirs::home_dir() {
+        if let Some(home) = wimoai_dirs::home_dir() {
             assert_eq!(
                 classify_marketplace_add_input("~/plugins", cwd),
                 MarketplaceAddInput::LocalPath(home.join("plugins"))
@@ -1500,7 +1500,7 @@ mod tests {
     #[test]
     fn remove_toml_matches_tilde_path_entry_by_expanded_identity() {
         // Loaded sources carry expanded paths, so removal by identity must still find a hand-written `path = "~/x"` entry
-        let Some(home) = wimo ai_dirs::home_dir() else {
+        let Some(home) = wimoai_dirs::home_dir() else {
             return;
         };
         let content = "[[marketplace.sources]]\nname = \"dev\"\npath = \"~/dev/plugins\"\n";
@@ -1579,9 +1579,9 @@ mod tests {
         assert_eq!(
             registered_source_label(&git_source(
                 "wimo AI Official",
-                "https://github.com/wimo ai-org/plugin-marketplace.git"
+                "https://github.com/wimoai-org/plugin-marketplace.git"
             )),
-            "wimo AI Official (wimo ai-org/plugin-marketplace)"
+            "wimo AI Official (wimoai-org/plugin-marketplace)"
         );
         assert_eq!(
             registered_source_label(&local_source("Local Dev", "/tmp/p")),
@@ -1603,11 +1603,11 @@ mod tests {
             candidate_label(
                 &git_source(
                     "wimo AI Official",
-                    "https://github.com/wimo ai-org/plugin-marketplace.git"
+                    "https://github.com/wimoai-org/plugin-marketplace.git"
                 ),
                 "sentry"
             ),
-            "wimo AI Official (pin: sentry@wimo ai-org/plugin-marketplace)"
+            "wimo AI Official (pin: sentry@wimoai-org/plugin-marketplace)"
         );
         assert_eq!(
             candidate_label(&local_source("Local Dev", "/tmp/p"), "sentry"),
@@ -1620,14 +1620,14 @@ mod tests {
         let err = MarketplaceInstallError::UnknownQualifier {
             qualifier: "acme/repo".into(),
             registered: vec![
-                "wimo AI Official (wimo ai-org/plugin-marketplace)".into(),
+                "wimo AI Official (wimoai-org/plugin-marketplace)".into(),
                 "Local Dev (local/local-dev)".into(),
             ],
         };
         let msg = err.to_string();
         assert!(msg.contains("Unknown marketplace \"acme/repo\""), "{msg}");
         assert!(
-            msg.contains("  - wimo AI Official (wimo ai-org/plugin-marketplace)"),
+            msg.contains("  - wimo AI Official (wimoai-org/plugin-marketplace)"),
             "{msg}"
         );
         assert!(msg.contains("  - Local Dev (local/local-dev)"), "{msg}");
@@ -1636,7 +1636,7 @@ mod tests {
     #[test]
     fn ambiguous_qualifier_error_lists_source_names() {
         let err = MarketplaceInstallError::AmbiguousQualifier {
-            qualifier: "wimo ai-org/plugin-marketplace".into(),
+            qualifier: "wimoai-org/plugin-marketplace".into(),
             sources: vec!["Mirror A".into(), "Mirror B".into()],
         };
         let msg = err.to_string();
@@ -1678,7 +1678,7 @@ mod tests {
     fn name_ambiguous_error_lists_candidates_and_pin_hint() {
         let err = MarketplaceInstallError::NameAmbiguous {
             name: "sentry".into(),
-            candidates: vec!["wimo AI Official (pin: sentry@wimo ai-org/plugin-marketplace)".into()],
+            candidates: vec!["wimo AI Official (pin: sentry@wimoai-org/plugin-marketplace)".into()],
         };
         let msg = err.to_string();
         assert!(
@@ -1686,7 +1686,7 @@ mod tests {
             "{msg}"
         );
         assert!(
-            msg.contains("  - wimo AI Official (pin: sentry@wimo ai-org/plugin-marketplace)"),
+            msg.contains("  - wimo AI Official (pin: sentry@wimoai-org/plugin-marketplace)"),
             "{msg}"
         );
         assert!(
@@ -1784,7 +1784,7 @@ mod tests {
         }
     }
 
-    const OFFICIAL_URL: &str = "https://github.com/wimo ai-org/plugin-marketplace.git";
+    const OFFICIAL_URL: &str = "https://github.com/wimoai-org/plugin-marketplace.git";
 
     #[test]
     fn plan_install_qualifier_unknown_lists_registered_labels() {
@@ -1803,7 +1803,7 @@ mod tests {
                 assert_eq!(
                     registered,
                     vec![
-                        "wimo AI Official (wimo ai-org/plugin-marketplace)".to_string(),
+                        "wimo AI Official (wimoai-org/plugin-marketplace)".to_string(),
                         "Local Dev (local/local-dev)".to_string(),
                     ]
                 );
@@ -1816,18 +1816,18 @@ mod tests {
     fn plan_install_qualifier_ambiguous_lists_source_names() {
         let sources = [
             git_source("Mirror A", OFFICIAL_URL),
-            git_source("Mirror B", "git@github.com:wimo ai-org/plugin-marketplace.git"),
+            git_source("Mirror B", "git@github.com:wimoai-org/plugin-marketplace.git"),
         ];
         let err = plan_install(
             &sources,
             "sentry",
-            Some("wimo ai-org/plugin-marketplace"),
+            Some("wimoai-org/plugin-marketplace"),
             |_| Ok(Vec::new()),
         )
         .expect_err("two sources share the owner/repo");
         match err {
             MarketplaceInstallError::AmbiguousQualifier { qualifier, sources } => {
-                assert_eq!(qualifier, "wimo ai-org/plugin-marketplace");
+                assert_eq!(qualifier, "wimoai-org/plugin-marketplace");
                 assert_eq!(
                     sources,
                     vec!["Mirror A".to_string(), "Mirror B".to_string()]
@@ -1843,7 +1843,7 @@ mod tests {
         let err = plan_install(
             &sources,
             "sentry",
-            Some("wimo ai-org/plugin-marketplace"),
+            Some("wimoai-org/plugin-marketplace"),
             |_| Ok(vec![mp_entry("other")]),
         )
         .expect_err("source has no plugin named sentry");
@@ -1865,7 +1865,7 @@ mod tests {
         let err = plan_install(
             &sources,
             "sentry",
-            Some("wimo ai-org/plugin-marketplace"),
+            Some("wimoai-org/plugin-marketplace"),
             |_| Err("network down".to_string()),
         )
         .expect_err("sync failed");
@@ -1890,7 +1890,7 @@ mod tests {
         let plan = plan_install(
             &sources,
             "SeNtRy",
-            Some("wimo ai-org/plugin-marketplace"),
+            Some("wimoai-org/plugin-marketplace"),
             |_| Ok(vec![mp_entry("sentry")]),
         )
         .expect("resolves the official source");
@@ -2058,8 +2058,8 @@ mod tests {
 
     fn marketplace_allowlist(
         urls: &[&str],
-    ) -> wimo ai_wimo_workspace::permission::resolution::MarketplaceAllowlist {
-        wimo ai_wimo_workspace::permission::resolution::MarketplaceAllowlist {
+    ) -> wimoai_wimo_workspace::permission::resolution::MarketplaceAllowlist {
+        wimoai_wimo_workspace::permission::resolution::MarketplaceAllowlist {
             allowed_urls: urls.iter().map(|u| u.to_string()).collect(),
             source_path: None,
         }
@@ -2080,7 +2080,7 @@ mod tests {
 
     #[test]
     fn filter_sources_by_allowlist_unrestricted_passes_everything() {
-        let allowlist = wimo ai_wimo_workspace::permission::resolution::MarketplaceAllowlist::default();
+        let allowlist = wimoai_wimo_workspace::permission::resolution::MarketplaceAllowlist::default();
         let sources = vec![
             git_source("Any Git", "https://github.com/bad/repo.git"),
             local_source("Local", "/tmp/p"),
@@ -2189,14 +2189,14 @@ mod tests {
         let sources = vec![
             git_source(
                 "wimo AI Official",
-                "https://github.com/wimo ai-org/plugin-marketplace.git",
+                "https://github.com/wimoai-org/plugin-marketplace.git",
             ),
             git_source(
                 "Internal",
                 "https://github.com/example/plugin-marketplace-internal.git",
             ),
         ];
-        let name = resolve_qualified_source_name_with(&sources, "wimo ai-org/plugin-marketplace")
+        let name = resolve_qualified_source_name_with(&sources, "wimoai-org/plugin-marketplace")
             .expect("qualifier should match the official source");
         assert_eq!(name, "wimo AI Official");
     }
@@ -2216,7 +2216,7 @@ mod tests {
     fn resolve_qualified_source_name_with_unknown_qualifier_errors() {
         let sources = vec![git_source(
             "wimo AI Official",
-            "https://github.com/wimo ai-org/plugin-marketplace.git",
+            "https://github.com/wimoai-org/plugin-marketplace.git",
         )];
         let err = resolve_qualified_source_name_with(&sources, "bogus/repo")
             .expect_err("unknown qualifier should error");

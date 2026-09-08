@@ -12,10 +12,10 @@ const BASH_MODE_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(60
 ///
 /// Agent sessions always use local workspace ops (in-process toolset).
 pub(super) async fn dispatch_tool(
-    workspace_ops: &wimo ai_wimo_workspace::WorkspaceOps,
+    workspace_ops: &wimoai_wimo_workspace::WorkspaceOps,
     prepared: &PreparedToolCall,
     session_id: &str,
-) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolError> {
+) -> Result<ToolRunResult, wimoai_tool_runtime::ToolError> {
     tracing::debug!(
         tool = %prepared.tool_name,
         call_id = %prepared.tool_call_id.0,
@@ -87,15 +87,15 @@ fn canonicalize_existing_ancestor(path: &Path) -> Option<PathBuf> {
 
 /// Pull the path a read/list tool targets and classify it against the store.
 /// Keys span harnesses: `read_file` uses `target_file`, grep uses `path`, `list_dir` uses `target_directory`.
-/// The path grammar lives in `wimo ai_compaction_transcript`.
+/// The path grammar lives in `wimoai_compaction_transcript`.
 pub(super) fn compaction_artifact_read(
     args: &serde_json::Value,
-) -> Option<wimo ai_compaction_transcript::CompactionArtifact> {
+) -> Option<wimoai_compaction_transcript::CompactionArtifact> {
     let path = str_arg(
         args,
         &["target_file", "file_path", "path", "target_directory"],
     )?;
-    wimo ai_compaction_transcript::classify_compaction_path(path)
+    wimoai_compaction_transcript::classify_compaction_path(path)
 }
 
 /// Map a backend-hosted tool name to a user-facing title, ACP ToolKind, and `raw_input` JSON for display in the pager's tool call UI.
@@ -168,7 +168,7 @@ pub(super) fn resolve_session_shell() -> String {
 
     #[cfg(not(unix))]
     {
-        wimo ai_wimo_config::shell::detect_windows_shell()
+        wimoai_wimo_config::shell::detect_windows_shell()
             .name()
             .to_string()
     }
@@ -238,9 +238,9 @@ impl SessionActor {
 
         // Send initial ToolCall to register with TUI
 
-        use wimo ai_wimo_tools::types::ToolInput;
+        use wimoai_wimo_tools::types::ToolInput;
         // Use the stripped command as the description so the pager shows the real command (not a generic label) while satisfying the required field
-        let title_command = wimo ai_wimo_tools::util::strip_redundant_session_cd(
+        let title_command = wimoai_wimo_tools::util::strip_redundant_session_cd(
             &command,
             self.tool_context.cwd.as_path(),
         );
@@ -257,7 +257,7 @@ impl SessionActor {
             agent
                 .tool_bridge()
                 .toolset()
-                .tool_name_for_kind(wimo ai_wimo_tools::types::tool::ToolKind::Execute)
+                .tool_name_for_kind(wimoai_wimo_tools::types::tool::ToolKind::Execute)
         };
         let bash_meta = match exec_wire {
             Some(wire) => self.stamp_tool_meta(bash_marker.clone(), &wire, Some(&tool_input)),
@@ -387,7 +387,7 @@ impl SessionActor {
 
 // ── Tool argument error formatting ─────────────────────────────────────
 
-// `truncate_bytes` is the UTF-8-safe truncation helper from wimo ai-wimo-sampling-types
+// `truncate_bytes` is the UTF-8-safe truncation helper from wimoai-wimo-sampling-types
 
 /// Maximum bytes of `raw_arguments` echoed in a parse-error tool_result.
 ///
@@ -404,7 +404,7 @@ pub(crate) const MAX_ARGS_IN_ERROR: usize = 2_000;
 /// The JSON position (e.g. a missing `"` before a key name) lets the model fix a one-character typo rather than regenerating a thousand-line file.
 pub(super) fn build_tool_parse_error_message(
     function_name: &str,
-    err: &wimo ai_tool_runtime::ToolError,
+    err: &wimoai_tool_runtime::ToolError,
     raw_arguments: &str,
 ) -> String {
     let mut msg = format!("Failed to parse arguments for tool `{function_name}`: {err}");
@@ -437,7 +437,7 @@ pub(super) fn build_tool_parse_error_message(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_sampling_types::rs;
+    use wimoai_wimo_sampling_types::rs;
 
     fn web_search_payload(status: rs::WebSearchToolCallStatus) -> serde_json::Value {
         // The exact serialized `web_search_call` payload the sampler forwards on `BackendToolCallCompleted` (via `serde_json::to_value(ws)`)

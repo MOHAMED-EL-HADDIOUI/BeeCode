@@ -88,7 +88,7 @@ fn test_app() -> AppView {
         models: ModelState::default(),
         registry: crate::actions::ActionRegistry::defaults(),
         settings_registry: std::sync::Arc::new(crate::settings::SettingsRegistry::defaults()),
-        current_ui: wimo ai_wimo_shell::agent::config::UiConfig::default(),
+        current_ui: wimoai_wimo_shell::agent::config::UiConfig::default(),
         cwd: PathBuf::from("/tmp"),
         cwd_has_git_ancestor: false,
         acp_tx: tx,
@@ -318,7 +318,7 @@ fn test_app() -> AppView {
         has_claude_import: false,
         voice_mode_enabled: false,
         voice_ui_active: false,
-        voice_config: wimo ai_wimo_voice::VoiceConfig::default(),
+        voice_config: wimoai_wimo_voice::VoiceConfig::default(),
         voice_auth: None,
         voice_cmd_tx: None,
         voice_state: VoiceState::Idle,
@@ -439,8 +439,8 @@ fn make_test_subagent(child_sid: &str, sa_id: &str) -> crate::app::subagent::Sub
         transcript: Default::default(),
     }
 }
-fn cta_entry(name: &str, status: &str) -> wimo ai_hooks_plugins_types::MarketplacePluginEntry {
-    wimo ai_hooks_plugins_types::MarketplacePluginEntry {
+fn cta_entry(name: &str, status: &str) -> wimoai_hooks_plugins_types::MarketplacePluginEntry {
+    wimoai_hooks_plugins_types::MarketplacePluginEntry {
         name: name.into(),
         version: None,
         description: None,
@@ -465,10 +465,10 @@ fn cta_entry(name: &str, status: &str) -> wimo ai_hooks_plugins_types::Marketpla
     }
 }
 fn cta_outcome(
-    status: wimo ai_hooks_plugins_types::OutcomeStatus,
+    status: wimoai_hooks_plugins_types::OutcomeStatus,
     message: &str,
-) -> wimo ai_hooks_plugins_types::ActionOutcome {
-    wimo ai_hooks_plugins_types::ActionOutcome {
+) -> wimoai_hooks_plugins_types::ActionOutcome {
+    wimoai_hooks_plugins_types::ActionOutcome {
         status,
         message: message.into(),
         requires_reload: false,
@@ -554,8 +554,8 @@ pub(super) fn end_turn() -> Action {
 /// Plant a Build session under the process `wimo_home()` (OnceLock-cached; do not rely on setting `wimo_HOME` mid-process).
 /// Caller must remove `sess_dir`.
 fn plant_local_build_session(cwd: &std::path::Path, session_id: &str) -> std::path::PathBuf {
-    let home = wimo ai_wimo_shell::util::wimo_home::wimo_home();
-    let encoded = wimo ai_wimo_shell::util::wimo_home::encode_cwd_dirname(&cwd.to_string_lossy());
+    let home = wimoai_wimo_shell::util::wimo_home::wimo_home();
+    let encoded = wimoai_wimo_shell::util::wimo_home::encode_cwd_dirname(&cwd.to_string_lossy());
     let sess_dir = home.join("sessions").join(encoded).join(session_id);
     std::fs::create_dir_all(&sess_dir).expect("plant session dir");
     std::fs::write(sess_dir.join("summary.json"), b"{}").expect("plant summary");
@@ -677,16 +677,16 @@ fn fork_test_app() -> AppView {
 fn make_ask_user_question_args(
     tool_call_id: &str,
 ) -> (
-    wimo ai_acp_lib::AcpArgs<acp::ExtRequest>,
-    tokio::sync::oneshot::Receiver<wimo ai_acp_lib::AcpResult<acp::ExtResponse>>,
+    wimoai_acp_lib::AcpArgs<acp::ExtRequest>,
+    tokio::sync::oneshot::Receiver<wimoai_acp_lib::AcpResult<acp::ExtResponse>>,
 ) {
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         AskUserQuestionExtRequest, Question, QuestionOption,
     };
     let req = AskUserQuestionExtRequest {
         session_id: "test-session".into(),
         tool_call_id: tool_call_id.into(),
-        mode: wimo ai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionMode::Default,
+        mode: wimoai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionMode::Default,
         questions: vec![Question {
                 question: "ACP-driven question".into(),
                 options: vec![QuestionOption {
@@ -707,7 +707,7 @@ fn make_ask_user_question_args(
             .into(),
     );
     (
-        wimo ai_acp_lib::AcpArgs {
+        wimoai_acp_lib::AcpArgs {
             request: ext,
             response_tx: tx,
         },
@@ -918,7 +918,7 @@ fn enqueue_permission_with_enable_always_approve(
         vec![
             acp::PermissionOption::new(
                 acp::PermissionOptionId::new(Arc::from(
-                    wimo ai_wimo_workspace::permission::ENABLE_ALWAYS_APPROVE_OPTION_ID,
+                    wimoai_wimo_workspace::permission::ENABLE_ALWAYS_APPROVE_OPTION_ID,
                 )),
                 "Yes, and don't ask again for anything",
                 acp::PermissionOptionKind::AllowOnce,
@@ -937,7 +937,7 @@ fn enqueue_permission_with_enable_always_approve(
     );
     let options = request.options.clone();
     agent.permission_queue.push_back(PermissionViewState {
-        request: wimo ai_acp_lib::AcpArgs {
+        request: wimoai_acp_lib::AcpArgs {
             request,
             response_tx,
         },
@@ -961,7 +961,7 @@ fn enqueue_permission_with_enable_always_approve(
     response_rx
 }
 const POLICY_WARNING: &str =
-    wimo ai_wimo_workspace::permission::resolution::YoloPinReason::DisableBypassPermissionsMode
+    wimoai_wimo_workspace::permission::resolution::YoloPinReason::DisableBypassPermissionsMode
         .message();
 fn agent_toast(app: &AppView) -> Option<String> {
     app.agents[&AgentId(0)]
@@ -1046,7 +1046,7 @@ fn push_synthetic_permission(
     use crate::views::permission_view::{PermissionFocus, PermissionViewState};
     let (tx, rx) =
         tokio::sync::oneshot::channel::<Result<acp::RequestPermissionResponse, acp::Error>>();
-    let request = wimo ai_acp_lib::AcpArgs {
+    let request = wimoai_acp_lib::AcpArgs {
         request: acp::RequestPermissionRequest::new(
             acp::SessionId::new(std::sync::Arc::from("sess-1")),
             acp::ToolCallUpdate::new(

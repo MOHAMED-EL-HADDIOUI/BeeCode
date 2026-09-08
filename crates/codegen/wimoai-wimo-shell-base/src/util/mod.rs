@@ -4,8 +4,8 @@ pub mod wimo_home;
 pub mod secure_file;
 pub mod tips;
 pub mod uname;
-pub use wimo ai_wimo_shared::clipboard;
-pub use wimo ai_wimo_shared::stderr::{stderr_lock, with_locked_stderr};
+pub use wimoai_wimo_shared::clipboard;
+pub use wimoai_wimo_shared::stderr::{stderr_lock, with_locked_stderr};
 /// Generate a pseudo-random f64 in [0.0, 1.0).
 ///
 /// Entropy comes entirely from `RandomState::new()`, which the OS seeds (via `getrandom`) on each call.
@@ -79,20 +79,20 @@ pub fn is_cli_chat_proxy_url(url: &str) -> bool {
 /// Safe against invalid URLs and suffix attacks (`evil-x.ai.example`).
 ///
 /// Scheme-agnostic so credential *refusal* fails closed.
-/// To decide where to *attach* a credential, use [`is_wimo ai_api_bearer_url`].
-pub fn is_wimo ai_api_url(url: &str) -> bool {
-    is_wimo ai_api_url_impl(url, false)
+/// To decide where to *attach* a credential, use [`is_wimoai_api_bearer_url`].
+pub fn is_wimoai_api_url(url: &str) -> bool {
+    is_wimoai_api_url_impl(url, false)
 }
-/// Like [`is_wimo ai_api_url`], but requires `https` on every arm, so a session bearer is never attached to a cleartext endpoint, including loopback.
+/// Like [`is_wimoai_api_url`], but requires `https` on every arm, so a session bearer is never attached to a cleartext endpoint, including loopback.
 /// A co-located process could otherwise read a token sent to `http://localhost`.
-pub fn is_wimo ai_api_bearer_url(url: &str) -> bool {
-    if is_trusted_wimo ai_https_url(url) {
+pub fn is_wimoai_api_bearer_url(url: &str) -> bool {
+    if is_trusted_wimoai_https_url(url) {
         return true;
     }
     false
 }
 /// True for trusted first-party wimo AI HTTPS routes, excluding arbitrary loopback URLs.
-pub fn is_trusted_wimo ai_https_url(url: &str) -> bool {
+pub fn is_trusted_wimoai_https_url(url: &str) -> bool {
     let Ok(parsed) = reqwest::Url::parse(url) else {
         return false;
     };
@@ -109,9 +109,9 @@ pub fn is_trusted_wimo ai_https_url(url: &str) -> bool {
         .host_str()
         .is_some_and(|host| host == "x.ai" || host.ends_with(".x.ai"))
 }
-fn is_wimo ai_api_url_impl(url: &str, require_https: bool) -> bool {
+fn is_wimoai_api_url_impl(url: &str, require_https: bool) -> bool {
     if require_https {
-        return is_wimo ai_api_bearer_url(url);
+        return is_wimoai_api_bearer_url(url);
     }
     if is_cli_chat_proxy_url(url) {
         return true;
@@ -242,7 +242,7 @@ pub fn process_cmdline_args(pid: u32) -> Option<Vec<String>> {
         cmd.args(["-o", "args=", "-p", &pid.to_string()])
             .stdin(std::process::Stdio::null())
             .stderr(std::process::Stdio::null());
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         let output = cmd.output().ok()?;
         if !output.status.success() {
             return None;
@@ -307,7 +307,7 @@ pub fn is_wimo_process(pid: u32) -> bool {
             .stdin(std::process::Stdio::null())
             .stdout(std::process::Stdio::null())
             .stderr(std::process::Stdio::null());
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         cmd.status().is_ok_and(|s| s.success())
     }
 }
@@ -322,7 +322,7 @@ pub fn is_wimo_process_strict(pid: u32) -> bool {
         cmd.args(["-p", &pid.to_string(), "-o", "comm="])
             .stdin(std::process::Stdio::null())
             .stderr(std::process::Stdio::null());
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         match cmd.output() {
             Ok(out) if out.status.success() => {
                 let comm = String::from_utf8_lossy(&out.stdout);
@@ -368,39 +368,39 @@ mod tests {
         ));
     }
     #[test]
-    fn test_is_wimo ai_api_url() {
-        assert!(is_wimo ai_api_url("https://api.x.ai/v1"));
-        assert!(is_wimo ai_api_url("https://api.x.ai/v1/chat/completions"));
-        assert!(is_wimo ai_api_url("https://x.ai"));
-        assert!(is_wimo ai_api_url(
+    fn test_is_wimoai_api_url() {
+        assert!(is_wimoai_api_url("https://api.x.ai/v1"));
+        assert!(is_wimoai_api_url("https://api.x.ai/v1/chat/completions"));
+        assert!(is_wimoai_api_url("https://x.ai"));
+        assert!(is_wimoai_api_url(
             "https://cli-chat-proxy.wimo.com/v1/chat/completions"
         ));
-        assert!(!is_wimo ai_api_url("https://api.openai.com/v1"));
-        assert!(!is_wimo ai_api_url("https://api.anthropic.com/v1"));
-        assert!(!is_wimo ai_api_url("https://generativelanguage.googleapis.com"));
-        assert!(!is_wimo ai_api_url("https://api.x.ai.evil.example/v1"));
-        assert!(!is_wimo ai_api_url("https://evil-x.ai.attacker.com/v1"));
-        assert!(!is_wimo ai_api_url("https://prefixx.ai/v1"));
-        assert!(!is_wimo ai_api_url("not-a-url"));
-        assert!(!is_wimo ai_api_url(""));
-        assert!(is_wimo ai_api_url("http://api.x.ai/v1"));
-        assert!(is_wimo ai_api_url("http://localhost:11434/v1"));
+        assert!(!is_wimoai_api_url("https://api.openai.com/v1"));
+        assert!(!is_wimoai_api_url("https://api.anthropic.com/v1"));
+        assert!(!is_wimoai_api_url("https://generativelanguage.googleapis.com"));
+        assert!(!is_wimoai_api_url("https://api.x.ai.evil.example/v1"));
+        assert!(!is_wimoai_api_url("https://evil-x.ai.attacker.com/v1"));
+        assert!(!is_wimoai_api_url("https://prefixx.ai/v1"));
+        assert!(!is_wimoai_api_url("not-a-url"));
+        assert!(!is_wimoai_api_url(""));
+        assert!(is_wimoai_api_url("http://api.x.ai/v1"));
+        assert!(is_wimoai_api_url("http://localhost:11434/v1"));
     }
     #[test]
-    fn test_is_wimo ai_api_bearer_url() {
-        assert!(is_wimo ai_api_bearer_url("https://api.x.ai/v1"));
-        assert!(!is_wimo ai_api_bearer_url("http://api.x.ai/v1"));
-        assert!(!is_wimo ai_api_bearer_url("http://localhost:11434/v1"));
+    fn test_is_wimoai_api_bearer_url() {
+        assert!(is_wimoai_api_bearer_url("https://api.x.ai/v1"));
+        assert!(!is_wimoai_api_bearer_url("http://api.x.ai/v1"));
+        assert!(!is_wimoai_api_bearer_url("http://localhost:11434/v1"));
         {
-            assert!(!is_wimo ai_api_bearer_url("https://localhost:11434/v1"));
-            assert!(!is_wimo ai_api_bearer_url("https://127.0.0.2:11434/v1"));
-            assert!(!is_wimo ai_api_bearer_url("https://[::1]:11434/v1"));
+            assert!(!is_wimoai_api_bearer_url("https://localhost:11434/v1"));
+            assert!(!is_wimoai_api_bearer_url("https://127.0.0.2:11434/v1"));
+            assert!(!is_wimoai_api_bearer_url("https://[::1]:11434/v1"));
         }
-        assert!(is_wimo ai_api_bearer_url("https://API.X.AI/v1"));
-        assert!(!is_wimo ai_api_bearer_url(
+        assert!(is_wimoai_api_bearer_url("https://API.X.AI/v1"));
+        assert!(!is_wimoai_api_bearer_url(
             "https://api.x.ai@attacker.example/v1"
         ));
-        assert!(!is_wimo ai_api_bearer_url("https://х.ai/v1"));
+        assert!(!is_wimoai_api_bearer_url("https://х.ai/v1"));
     }
     #[test]
     fn test_truncate() {

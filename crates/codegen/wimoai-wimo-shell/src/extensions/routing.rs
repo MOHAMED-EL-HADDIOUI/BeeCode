@@ -1,9 +1,9 @@
 use agent_client_protocol as acp;
 use serde::{Deserialize, Serialize};
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
 
 // The workspace crate defines these for fuzzy search; this module only re-exports them
-pub use wimo ai_wimo_workspace::file_system::{ClientId, TargetClientId};
+pub use wimoai_wimo_workspace::file_system::{ClientId, TargetClientId};
 
 /// Metadata from the request, used for routing notifications back to the correct client.
 #[derive(Clone, Debug, Default, Deserialize)]

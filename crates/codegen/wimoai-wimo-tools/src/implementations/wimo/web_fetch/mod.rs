@@ -132,28 +132,28 @@ Usage notes:
     }
 }
 
-impl wimo ai_tool_runtime::Tool for WebFetchTool {
+impl wimoai_tool_runtime::Tool for WebFetchTool {
     type Args = WebFetchInput;
     type Output = WebFetchOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("web_fetch").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("web_fetch").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "web_fetch",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -161,9 +161,9 @@ impl wimo ai_tool_runtime::Tool for WebFetchTool {
     #[tracing::instrument(name = "tool.web_fetch", skip_all, fields(url = %input.url))]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: WebFetchInput,
-    ) -> Result<WebFetchOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<WebFetchOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -201,7 +201,7 @@ mod tests {
     #[test]
     fn tool_name_and_description() {
         let tool = WebFetchTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "web_fetch");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "web_fetch");
         assert_eq!(
             crate::types::tool_metadata::ToolMetadata::kind(&tool),
             ToolKind::WebFetch
@@ -212,7 +212,7 @@ mod tests {
     async fn errors_when_client_not_in_resources() {
         let resources = crate::types::resources::Resources::new();
         let tool = WebFetchTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx_with_call_id(resources.into_shared(), "test-call"),
             WebFetchInput {

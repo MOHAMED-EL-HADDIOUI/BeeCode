@@ -525,12 +525,12 @@ fn gc_counts_a_kept_worktree_apart_from_a_busy_one() {
 /// any work.
 #[test]
 fn gc_asks_the_source_repository_about_a_standalone_worktree() {
-    wimo ai_test_utils::require_git!();
+    wimoai_test_utils::require_git!();
     let tmp = tempfile::TempDir::new().unwrap();
     let db = db_at(&tmp);
     let (dir, source) = deletable_standalone_worktree(tmp.path(), "standalone-wt");
     std::fs::write(dir.join("tracked.txt"), b"work\n").unwrap();
-    wimo ai_test_utils::git::run_git(&dir, &["commit", "-am", "work no remote holds"]);
+    wimoai_test_utils::git::run_git(&dir, &["commit", "-am", "work no remote holds"]);
 
     db.register(&crate::db::WorktreeRecord {
         source_repo: source.clone(),
@@ -551,10 +551,10 @@ fn gc_asks_the_source_repository_about_a_standalone_worktree() {
         b"work\n"
     );
 
-    wimo ai_test_utils::git::run_git(&dir, &["push", "origin", "HEAD:refs/heads/main"]);
+    wimoai_test_utils::git::run_git(&dir, &["push", "origin", "HEAD:refs/heads/main"]);
     // The gate asks the source repository, not the remote, so the source
     // is what has to hold the commit.
-    wimo ai_test_utils::git::run_git(&source, &["fetch", "origin"]);
+    wimoai_test_utils::git::run_git(&source, &["fetch", "origin"]);
 
     let report = gc::gc_worktrees(&db, &opts).unwrap();
     assert_eq!(report.expired_removed, 1, "{report:?}");
@@ -619,8 +619,8 @@ fn db_record_removed_after_successful_removal() {
     // The success direction: a removable worktree must still be
     // unregistered from the DB (catches a regression dropping the
     // unregister).
-    wimo ai_test_utils::require_git!();
-    use wimo ai_test_utils::git::{git_commit_all, init_git_repo};
+    wimoai_test_utils::require_git!();
+    use wimoai_test_utils::git::{git_commit_all, init_git_repo};
 
     let fx = crate::db::wimoHomeFixture::new();
 

@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use serde::Serialize;
-use wimo ai_fast_worktree::{
+use wimoai_fast_worktree::{
     ListFilter, RegistryOpen, SqliteFailureKind, WORKTREE_POOL_DIR, WORKTREES_DIR, WorktreeDb,
     WorktreeKind, WorktreeRecord, WorktreeStatus, classify_sqlite_error, discover_worktrees,
     managed_worktree_roots, path_under_worktree_roots, resolve_wimo_home,
@@ -39,7 +39,7 @@ pub struct DiskUsageArgs {
 }
 
 pub fn run(args: DiskUsageArgs) -> Result<()> {
-    // resolve_wimo_home resolves the home the way the registry does, unlike wimo ai_wimo_config::wimo_home()
+    // resolve_wimo_home resolves the home the way the registry does, unlike wimoai_wimo_config::wimo_home()
     let wimo_home = resolve_wimo_home()?;
     let mut out = std::io::stdout().lock();
     let present = wimo_home

@@ -1,4 +1,4 @@
-//! The mechanism (OS watch, coalesce, refcount) lives in `wimo ai_fsnotify`.
+//! The mechanism (OS watch, coalesce, refcount) lives in `wimoai_fsnotify`.
 //! This module decides which consumers exist, fans events through three explicit phases, and owns one `select!` loop.
 //! The loop serves the event hot path and the debounced refresh.
 
@@ -11,10 +11,10 @@ use std::time::Duration;
 use agent_client_protocol as acp;
 use tokio::sync::mpsc;
 use tokio::time::sleep_until;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-use wimo ai_fsnotify::{FsEvent, FsEventKind};
-use wimo ai_wimo_workspace::file_system::{CodebaseIndexManager, FileIndex, WalkOptions};
-use wimo ai_hunk_tracker::HunkTrackerHandle;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_fsnotify::{FsEvent, FsEventKind};
+use wimoai_wimo_workspace::file_system::{CodebaseIndexManager, FileIndex, WalkOptions};
+use wimoai_hunk_tracker::HunkTrackerHandle;
 
 use crate::session::acp_session::SessionActor;
 use crate::session::persistence::PersistenceMsg;
@@ -91,8 +91,8 @@ pub(crate) fn git_head_dedup_key(
 fn fs_event_to_codebase_graph_event(
     paths: &[PathBuf],
     kind: FsEventKind,
-) -> wimo ai_codebase_graph::FileEvent {
-    use wimo ai_codebase_graph::{FileEvent, FileEventKind};
+) -> wimoai_codebase_graph::FileEvent {
+    use wimoai_codebase_graph::{FileEvent, FileEventKind};
     let kind = match kind {
         FsEventKind::Created => FileEventKind::Created,
         FsEventKind::Modified => FileEventKind::Modified,
@@ -108,8 +108,8 @@ fn fs_event_to_delta(
     paths: &[PathBuf],
     kind: FsEventKind,
     root: &Path,
-) -> wimo ai_wimo_workspace::file_system::FileIndexDelta {
-    use wimo ai_wimo_workspace::file_system::FileIndexDelta;
+) -> wimoai_wimo_workspace::file_system::FileIndexDelta {
+    use wimoai_wimo_workspace::file_system::FileIndexDelta;
     let stripped: Vec<String> = paths
         .iter()
         .filter_map(|p| {
@@ -155,22 +155,22 @@ const GIT_DIFF_REBUILD_THRESHOLD: usize = 500;
 fn parse_diff_name_status_line(
     line: &str,
     repo_root: &Path,
-) -> Option<wimo ai_codebase_graph::FileEvent> {
+) -> Option<wimoai_codebase_graph::FileEvent> {
     let mut parts = line.splitn(3, '\t');
     let status = parts.next()?.trim();
     let path = parts.next()?;
 
     match status.chars().next()? {
-        'A' => Some(wimo ai_codebase_graph::FileEvent::created(repo_root.join(path))),
-        'D' => Some(wimo ai_codebase_graph::FileEvent::removed(repo_root.join(path))),
+        'A' => Some(wimoai_codebase_graph::FileEvent::created(repo_root.join(path))),
+        'D' => Some(wimoai_codebase_graph::FileEvent::removed(repo_root.join(path))),
         'R' | 'C' => {
             let new_path = parts.next()?;
-            Some(wimo ai_codebase_graph::FileEvent::renamed(
+            Some(wimoai_codebase_graph::FileEvent::renamed(
                 repo_root.join(path),
                 repo_root.join(new_path),
             ))
         }
-        _ => Some(wimo ai_codebase_graph::FileEvent::modified(
+        _ => Some(wimoai_codebase_graph::FileEvent::modified(
             repo_root.join(path),
         )),
     }
@@ -179,15 +179,15 @@ fn parse_diff_name_status_line(
 /// After a HEAD change, diff ORIG_HEAD..HEAD and send targeted events to the codebase graph.
 /// Falls back to a full rebuild when too many files changed.
 async fn refresh_codebase_graph_after_head_change(
-    idx: &wimo ai_codebase_graph::IndexManagerHandle,
+    idx: &wimoai_codebase_graph::IndexManagerHandle,
     repo_root: &Path,
 ) {
     let mut cmd = tokio::process::Command::new("git");
     cmd.args(["diff", "--name-status", "ORIG_HEAD", "HEAD"])
         .current_dir(repo_root)
         .stdin(std::process::Stdio::null());
-    wimo ai_wimo_tools::util::detach_command(&mut cmd);
-    cmd.envs(wimo ai_wimo_tools::util::pager_env());
+    wimoai_wimo_tools::util::detach_command(&mut cmd);
+    cmd.envs(wimoai_wimo_tools::util::pager_env());
     let diff_output = cmd.output().await;
 
     match diff_output {
@@ -497,9 +497,9 @@ struct GitHead {
 impl GitHead {
     /// Notify the client on branch/worktree/repo change; also persist commit/branch.
     async fn emit(&self) {
-        let branch = wimo ai_wimo_workspace::session::git::get_branch(&self.cwd).await;
-        let commit = wimo ai_wimo_workspace::session::git::get_current_commit(&self.cwd).await;
-        let worktree = wimo ai_wimo_workspace::session::git::get_worktree_info(&self.cwd).await;
+        let branch = wimoai_wimo_workspace::session::git::get_branch(&self.cwd).await;
+        let commit = wimoai_wimo_workspace::session::git::get_current_commit(&self.cwd).await;
+        let worktree = wimoai_wimo_workspace::session::git::get_worktree_info(&self.cwd).await;
         let (is_worktree, main_repo) = worktree.unwrap_or((false, None));
 
         let dedup_key = git_head_dedup_key(
@@ -518,7 +518,7 @@ impl GitHead {
             }
         };
         if changed {
-            let params = wimo ai_wimo_workspace::session::git::GitHeadChanged {
+            let params = wimoai_wimo_workspace::session::git::GitHeadChanged {
                 session_id: self.session_id.clone(),
                 branch: branch.clone(),
                 is_worktree,
@@ -550,7 +550,7 @@ pub(crate) struct FsWatchPlan {
     hunk: Option<HunkTracking>,
     index: Option<CodebaseIndex>,
     git_head: Option<GitHead>,
-    fs_config: wimo ai_fsnotify::FsConfig,
+    fs_config: wimoai_fsnotify::FsConfig,
     cwd: PathBuf,
 }
 
@@ -569,7 +569,7 @@ impl FsWatchPlan {
 
         let hunk = (caps.hunk_tracking && deps.hunk_tracking_enabled).then(|| {
             let git_root =
-                wimo ai_wimo_workspace::session::git::find_git_root_from_path(&deps.cwd).ok();
+                wimoai_wimo_workspace::session::git::find_git_root_from_path(&deps.cwd).ok();
             HunkTracking {
                 handle: deps.hunk_tracker,
                 cwd: deps.cwd.clone(),
@@ -864,9 +864,9 @@ pub(crate) fn spawn(plan: FsWatchPlan) -> FsWatchHandle {
             timer.with_field("cwd", cwd.to_string_lossy().as_ref());
             let init_cwd = cwd.clone();
             let result =
-                tokio::task::spawn_blocking(move || wimo ai_fsnotify::shared(init_cwd, fs_config))
+                tokio::task::spawn_blocking(move || wimoai_fsnotify::shared(init_cwd, fs_config))
                     .await;
-            let ws = wimo ai_fsnotify::stats();
+            let ws = wimoai_fsnotify::stats();
             timer.with_field("live_watchers", ws.live_watchers as u64);
             timer.with_field("watchers_created_total", ws.created_total);
             timer.with_field("watchers_reused_total", ws.reused_total);
@@ -977,7 +977,7 @@ pub(crate) fn spawn(plan: FsWatchPlan) -> FsWatchHandle {
 mod tests {
     use super::*;
     use std::path::PathBuf;
-    use wimo ai_wimo_workspace::file_system::FileIndexDelta;
+    use wimoai_wimo_workspace::file_system::FileIndexDelta;
 
     #[test]
     fn fs_event_to_delta_create() {
@@ -1062,7 +1062,7 @@ mod tests {
 
     #[test]
     fn parse_diff_name_status() {
-        use wimo ai_codebase_graph::FileEventKind;
+        use wimoai_codebase_graph::FileEventKind;
         let root = Path::new("/repo");
 
         let ev = parse_diff_name_status_line("M\tsrc/main.rs", root).unwrap();
@@ -1378,7 +1378,7 @@ mod tests {
         pick_period: Duration,
         pick_duration: Duration,
     ) -> usize {
-        let settle = Duration::from_millis(wimo ai_fsnotify::SETTLE_MS);
+        let settle = Duration::from_millis(wimoai_fsnotify::SETTLE_MS);
         // Uniform cadence: either every re-lock lands inside the previous pick's settle window (one merged op) or none does (per-pick pairs)
         let merged = pick_period - pick_duration <= settle;
 
@@ -1578,7 +1578,7 @@ mod tests {
 
         match on_event(
             FsEvent::GitMetaChanged {
-                kind: wimo ai_fsnotify::GitMetaKind::RefsChanged,
+                kind: wimoai_fsnotify::GitMetaKind::RefsChanged,
             },
             &mut in_op,
             &mut op_buffer,

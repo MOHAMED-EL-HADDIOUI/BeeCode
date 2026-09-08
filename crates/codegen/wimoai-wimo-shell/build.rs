@@ -24,15 +24,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
 
-    // In Bazel builds, write into OUT_DIR; wimo ai_ROOT/target/tmp is read-only inside the sandbox
-    // Outside Bazel, prefer wimo ai_ROOT's shared cache dir and fall back to OUT_DIR for standalone checkouts where wimo ai_ROOT is unset
+    // In Bazel builds, write into OUT_DIR; wimoai_ROOT/target/tmp is read-only inside the sandbox
+    // Outside Bazel, prefer wimoai_ROOT's shared cache dir and fall back to OUT_DIR for standalone checkouts where wimoai_ROOT is unset
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR")?);
     let in_bazel = is_bazel_build(&manifest_dir);
     let gen_dir = if in_bazel {
         // OUT_DIR is always set by Cargo/Bazel for build scripts.
         PathBuf::from(env::var("OUT_DIR")?)
-    } else if let Ok(wimo ai_root) = env::var("wimo ai_ROOT") {
-        PathBuf::from(wimo ai_root).join("target/tmp/wimo-shell-bundle-rg")
+    } else if let Ok(wimoai_root) = env::var("wimoai_ROOT") {
+        PathBuf::from(wimoai_root).join("target/tmp/wimo-shell-bundle-rg")
     } else {
         PathBuf::from(env::var("OUT_DIR")?)
     };

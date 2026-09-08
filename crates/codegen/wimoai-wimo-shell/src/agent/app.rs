@@ -18,7 +18,7 @@ use tokio::sync::{Mutex as TokioMutex, mpsc};
 use tokio::time::Duration;
 use tokio_util::compat::{TokioAsyncReadCompatExt as _, TokioAsyncWriteCompatExt as _};
 use tracing::{debug, info, warn};
-use wimo ai_acp_lib::{
+use wimoai_acp_lib::{
     AcpAgentGatewayReceiver as GatewayReceiver, AcpAgentGatewaySender as GatewaySender,
     LineBufferedRead,
 };
@@ -158,7 +158,7 @@ fn spawn_agent_local(
     });
     tokio::task::spawn_local(
         GatewayReceiver::new(gw_rx, conn)
-            .with_on_meta(wimo ai_file_utils::trace_context::span_from_meta_traceparent)
+            .with_on_meta(wimoai_file_utils::trace_context::span_from_meta_traceparent)
             .run(),
     );
     handle_io
@@ -182,7 +182,7 @@ where
     W: tokio::io::AsyncWrite + Unpin + Send + 'static,
 {
     let cwd = std::env::current_dir().unwrap_or_default();
-    let workspace_user_dir = wimo ai_wimo_agent::prompt::workspace_user::optional_workspace_user_dir();
+    let workspace_user_dir = wimoai_wimo_agent::prompt::workspace_user::optional_workspace_user_dir();
     let (mut watcher, mut skills_rx) = crate::config::watcher::SkillsFileWatcher::start(
         Some(cwd.as_path()),
         workspace_user_dir.as_deref(),
@@ -220,11 +220,11 @@ where
     });
     Some(task)
 }
-/// Register the process-lifetime runtime for shared filesystem watchers ([`wimo ai_fsnotify::shared`]).
+/// Register the process-lifetime runtime for shared filesystem watchers ([`wimoai_fsnotify::shared`]).
 /// Their event loops then run on a runtime that outlives individual sessions (each session builds its own short-lived runtime).
 /// Idempotent; safe to call from every agent entrypoint.
 fn register_fs_watch_runtime() {
-    wimo ai_fsnotify::set_runtime_handle(tokio::runtime::Handle::current());
+    wimoai_fsnotify::set_runtime_handle(tokio::runtime::Handle::current());
 }
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn run_stdio_agent(
@@ -233,17 +233,17 @@ pub async fn run_stdio_agent(
     memory_config: Option<crate::config::MemoryConfig>,
 ) -> anyhow::Result<()> {
     register_fs_watch_runtime();
-    if let Err(error) = wimo ai_tty_utils::kill_current_process_on_parent_death() {
+    if let Err(error) = wimoai_tty_utils::kill_current_process_on_parent_death() {
         tracing::warn!(
             %error,
             "failed to bind to parent death; agent will not die with its \
              parent — stdin EOF remains the only cleanup"
         );
     }
-    wimo ai_wimo_telemetry::unified_log::set_version(wimo ai_wimo_version::VERSION);
-    wimo ai_file_utils::queue::cleanup_orphaned_uploads(
+    wimoai_wimo_telemetry::unified_log::set_version(wimoai_wimo_version::VERSION);
+    wimoai_file_utils::queue::cleanup_orphaned_uploads(
         &wimo_home::wimo_home(),
-        wimo ai_file_utils::queue::DEFAULT_MAX_AGE,
+        wimoai_file_utils::queue::DEFAULT_MAX_AGE,
     );
     if let Ok(version) = std::env::var("wimo_CLIENT_VERSION") {
         crate::unified_log::info(
@@ -260,7 +260,7 @@ pub async fn run_stdio_agent(
     let acp_incoming_tx = Arc::new(TokioMutex::new(acp_incoming_tx));
     let stdin_tx = acp_incoming_tx.clone();
     let (stdin_closed_tx, stdin_closed_rx) = tokio::sync::oneshot::channel();
-    let mut stdin_lines = wimo ai_acp_lib::spawn_stdin_line_reader();
+    let mut stdin_lines = wimoai_acp_lib::spawn_stdin_line_reader();
     tokio::spawn(async move {
         while let Some(line) = stdin_lines.recv().await {
             let mut tx = stdin_tx.lock().await;
@@ -303,7 +303,7 @@ pub async fn run_stdio_agent(
         .await;
     agent_cancel.cancel();
     crate::terminal::pty_session::close_all().await;
-    wimo ai_wimo_telemetry::session_ctx::drain_at_process_exit().await;
+    wimoai_wimo_telemetry::session_ctx::drain_at_process_exit().await;
     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
     result
 }
@@ -314,15 +314,15 @@ pub async fn run_headless(
     memory_config: Option<crate::config::MemoryConfig>,
 ) -> anyhow::Result<()> {
     register_fs_watch_runtime();
-    wimo ai_wimo_telemetry::unified_log::set_version(wimo ai_wimo_version::VERSION);
+    wimoai_wimo_telemetry::unified_log::set_version(wimoai_wimo_version::VERSION);
     crate::http::set_process_client_mode_headless();
     use crate::agent::relay::spawn_relay_connection_with_callback;
     use tokio_util::sync::CancellationToken;
     const HEADLESS_NO_SESSION: &str = "Headless mode requires a wimo.com session. \
         Run `wimo login` to sign in, or use `wimo agent stdio` for API-key access.";
-    wimo ai_file_utils::queue::cleanup_orphaned_uploads(
+    wimoai_file_utils::queue::cleanup_orphaned_uploads(
         &wimo_home::wimo_home(),
-        wimo ai_file_utils::queue::DEFAULT_MAX_AGE,
+        wimoai_file_utils::queue::DEFAULT_MAX_AGE,
     );
     let mut agent_config = agent_config.clone();
     agent_config.mode = crate::agent::config::AgentMode::Headless;
@@ -341,7 +341,7 @@ pub async fn run_headless(
         .await?
     } else {
         let auth_manager = Arc::new(AuthManager::new(&wimo_home::wimo_home(), ctx.clone()));
-        if crate::agent::auth_method::has_wimo ai_api_key_env()
+        if crate::agent::auth_method::has_wimoai_api_key_env()
             && ctx.auth_provider_command.is_none()
             && crate::auth::try_ensure_fresh_auth(ctx).await.is_none()
         {
@@ -449,7 +449,7 @@ pub async fn run_headless(
                 tokio::task::spawn_local(
                     GatewayReceiver::new(gw_rx, conn)
                         .with_on_meta(
-                            wimo ai_file_utils::trace_context::span_from_meta_traceparent,
+                            wimoai_file_utils::trace_context::span_from_meta_traceparent,
                         )
                         .run(),
                 );
@@ -715,11 +715,11 @@ pub async fn run_leader(
     use tokio::sync::watch;
     use tokio_util::sync::CancellationToken;
     register_fs_watch_runtime();
-    wimo ai_wimo_telemetry::unified_log::set_version(wimo ai_wimo_version::VERSION);
+    wimoai_wimo_telemetry::unified_log::set_version(wimoai_wimo_version::VERSION);
     tokio::task::spawn_blocking(|| {
-        wimo ai_file_utils::queue::cleanup_orphaned_uploads(
+        wimoai_file_utils::queue::cleanup_orphaned_uploads(
             &wimo_home::wimo_home(),
-            wimo ai_file_utils::queue::DEFAULT_MAX_AGE,
+            wimoai_file_utils::queue::DEFAULT_MAX_AGE,
         );
     });
     let mut agent_config = agent_config.clone();
@@ -790,7 +790,7 @@ pub async fn run_leader(
         socket_path: socket_path.clone(),
         lock_path: lock.lock_path().clone(),
         ws_url_suffix: compute_ws_url_suffix(ws_url),
-        leader_binary_version: wimo ai_wimo_version::VERSION.to_string(),
+        leader_binary_version: wimoai_wimo_version::VERSION.to_string(),
     })
     .with_default_hub_url(agent_config.hub.url.clone());
     let workspace_control = control_state.workspace.clone();
@@ -936,7 +936,7 @@ pub async fn run_leader(
                 tokio::task::spawn_local(
                     GatewayReceiver::new(gw_rx, conn)
                         .with_on_meta(
-                            wimo ai_file_utils::trace_context::span_from_meta_traceparent,
+                            wimoai_file_utils::trace_context::span_from_meta_traceparent,
                         )
                         .run(),
                 );
@@ -1008,7 +1008,7 @@ pub async fn run_leader(
                         minted = crate::auth::mint_session_noninteractive(&mint_auth_manager)
                             => match minted {
                             Some(session) => info!(
-                                is_wimo ai = session.is_wimo ai_auth(),
+                                is_wimoai = session.is_wimoai_auth(),
                                 "background cold-mint acquired a session post-readiness"
                             ),
                             None => warn!(
@@ -1068,11 +1068,11 @@ pub async fn run_leader(
             let mut watch_paths = crate::config::find_project_configs(&cwd_for_watcher);
             watch_paths
                 .extend(crate::util::config::mcp_json_candidate_paths(&cwd_for_watcher));
-            if let Some(home) = wimo ai_dirs::home_dir() {
+            if let Some(home) = wimoai_dirs::home_dir() {
                 watch_paths.push(home.join(".claude.json"));
             }
             let auth_scope = agent_config.wimo_com_config.auth_scope();
-            let initial_auth_key_hash = wimo ai_wimo_config::user_wimo_home()
+            let initial_auth_key_hash = wimoai_wimo_config::user_wimo_home()
                 .map(|g| g.join("auth.json"))
                 .and_then(|auth_path| crate::auth::read_auth_json(&auth_path).ok())
                 .and_then(|store| {
@@ -1141,7 +1141,7 @@ pub async fn run_leader(
                                 expires_at = ?auth.expires_at,
                                 "Auth token hot-reloaded from config watcher"
                             );
-                            wimo ai_wimo_telemetry::unified_log::info(
+                            wimoai_wimo_telemetry::unified_log::info(
                                 "auth hot-swapped from disk",
                                 None,
                                 Some(
@@ -1185,7 +1185,7 @@ pub async fn run_leader(
                                 warn!(error = %e, "failed to inject auth-cleared cleanup into ACP stream");
                             }
                             models_manager_for_config.on_auth_changed().await;
-                            wimo ai_wimo_telemetry::unified_log::warn(
+                            wimoai_wimo_telemetry::unified_log::warn(
                                 "auth cleared from disk",
                                 None,
                                 None,
@@ -1339,7 +1339,7 @@ mod tests {
         wimoAuth {
             key: key.into(),
             auth_mode: AuthMode::Oidc,
-            oidc_issuer: Some(crate::auth::wimo ai_OAUTH2_ISSUER.to_string()),
+            oidc_issuer: Some(crate::auth::wimoai_OAUTH2_ISSUER.to_string()),
             refresh_token: Some(format!("rt-{key}")),
             create_time,
             expires_at: Some(create_time + chrono::Duration::minutes(15)),
@@ -1403,7 +1403,7 @@ mod tests {
     fn test_relay_config(addr: std::net::SocketAddr) -> crate::agent::relay::RelayConfig {
         let auth = wimoAuth {
             auth_mode: AuthMode::Oidc,
-            oidc_issuer: Some(crate::auth::wimo ai_OAUTH2_ISSUER.to_string()),
+            oidc_issuer: Some(crate::auth::wimoai_OAUTH2_ISSUER.to_string()),
             ..wimoAuth::test_default()
         };
         let cfg = crate::auth::wimoComConfig {
@@ -1420,8 +1420,8 @@ mod tests {
     #[test]
     #[serial_test::serial]
     fn embedded_otel_gate_keeps_a_session_user_fail_closed() {
-        use crate::agent::auth_method::{LEGACY_wimo ai_API_KEY_ENV_VAR, wimo ai_API_KEY_ENV_VAR};
-        use wimo ai_wimo_telemetry::external::{
+        use crate::agent::auth_method::{LEGACY_wimoai_API_KEY_ENV_VAR, wimoai_API_KEY_ENV_VAR};
+        use wimoai_wimo_telemetry::external::{
             is_settings_gate_open, mark_external_otel_settings_resolved,
         };
         unsafe fn set_or_clear(key: &str, value: Option<std::ffi::OsString>) {
@@ -1439,8 +1439,8 @@ mod tests {
         impl Drop for Restore {
             fn drop(&mut self) {
                 unsafe {
-                    set_or_clear(wimo ai_API_KEY_ENV_VAR, self.key.take());
-                    set_or_clear(LEGACY_wimo ai_API_KEY_ENV_VAR, self.legacy.take());
+                    set_or_clear(wimoai_API_KEY_ENV_VAR, self.key.take());
+                    set_or_clear(LEGACY_wimoai_API_KEY_ENV_VAR, self.legacy.take());
                     set_or_clear(PROXY_ENV_VAR, self.proxy.take());
                 }
                 mark_external_otel_settings_resolved();
@@ -1448,20 +1448,20 @@ mod tests {
         }
         const PROXY_ENV_VAR: &str = "wimo_CLI_CHAT_PROXY_BASE_URL";
         let _restore = Restore {
-            key: std::env::var_os(wimo ai_API_KEY_ENV_VAR),
-            legacy: std::env::var_os(LEGACY_wimo ai_API_KEY_ENV_VAR),
+            key: std::env::var_os(wimoai_API_KEY_ENV_VAR),
+            legacy: std::env::var_os(LEGACY_wimoai_API_KEY_ENV_VAR),
             proxy: std::env::var_os(PROXY_ENV_VAR),
         };
         let cfg = wimoComConfig::default();
         unsafe {
-            std::env::set_var(wimo ai_API_KEY_ENV_VAR, "test-key");
-            std::env::remove_var(LEGACY_wimo ai_API_KEY_ENV_VAR);
+            std::env::set_var(wimoai_API_KEY_ENV_VAR, "test-key");
+            std::env::remove_var(LEGACY_wimoai_API_KEY_ENV_VAR);
             std::env::remove_var(PROXY_ENV_VAR);
         }
         let session = wimoAuth {
             expires_at: chrono::DateTime::from_timestamp(9_999_999_999, 0),
             auth_mode: AuthMode::Oidc,
-            oidc_issuer: Some(crate::auth::wimo ai_OAUTH2_ISSUER.to_string()),
+            oidc_issuer: Some(crate::auth::wimoai_OAUTH2_ISSUER.to_string()),
             ..wimoAuth::test_default()
         };
         let with_session = {
@@ -1612,7 +1612,7 @@ mod tests {
                 );
                 let eligible = wimoAuth {
                     auth_mode: AuthMode::Oidc,
-                    oidc_issuer: Some(crate::auth::wimo ai_OAUTH2_ISSUER.to_string()),
+                    oidc_issuer: Some(crate::auth::wimoai_OAUTH2_ISSUER.to_string()),
                     ..wimoAuth::test_default()
                 };
                 assert!(
@@ -1648,7 +1648,7 @@ mod tests {
         let scope = "https://test.example.com".to_string();
         let session = wimoAuth {
             auth_mode: AuthMode::Oidc,
-            oidc_issuer: Some(crate::auth::wimo ai_OAUTH2_ISSUER.to_string()),
+            oidc_issuer: Some(crate::auth::wimoai_OAUTH2_ISSUER.to_string()),
             ..wimoAuth::test_default()
         };
         let mut store = std::collections::BTreeMap::new();

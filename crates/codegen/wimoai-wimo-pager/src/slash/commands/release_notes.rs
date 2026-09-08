@@ -12,7 +12,7 @@ impl SlashCommand for ReleaseNotesCommand {
     }
 
     fn run(&self, _ctx: &mut CommandExecCtx, _args: &str) -> CommandResult {
-        let changelog = wimo ai_wimo_shell::util::changelog::ChangelogManager::new().fetch();
+        let changelog = wimoai_wimo_shell::util::changelog::ChangelogManager::new().fetch();
         match changelog.markdown {
             Some(content) => CommandResult::Action(Action::ShowReleaseNotes {
                 title: "Release Notes".to_string(),

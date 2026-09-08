@@ -174,7 +174,7 @@ pub(crate) mod hydrate {
             worktree_label: None,
             agent_name: None,
             // Hydrated locally: record the profile this process runs under
-            sandbox_profile: wimo ai_wimo_sandbox::configured_profile_name().map(String::from),
+            sandbox_profile: wimoai_wimo_sandbox::configured_profile_name().map(String::from),
             reasoning_effort: None,
             last_turn_summary: None,
             last_turn_summary_prompt_id: None,
@@ -273,8 +273,8 @@ mod tests {
     #[serial_test::serial]
     fn hydrated_summary_stamps_worktree_identity_for_worktree_cwd() {
         let home = tempfile::TempDir::new().unwrap();
-        let _env = wimo ai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path());
-        let cwd = home.path().join("worktrees").join("wimo ai").join("fix-bug");
+        let _env = wimoai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path());
+        let cwd = home.path().join("worktrees").join("wimoai").join("fix-bug");
         std::fs::create_dir_all(&cwd).unwrap();
 
         let data = crate::remote::client::LoadDataResponse {

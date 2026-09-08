@@ -1,6 +1,6 @@
 //! Counts the tokens each context category occupies when a session starts.
 //!
-//! Token counts come from `POST {wimo ai_api_base_url}/tokenize-text` (the model's tokenizer), not the bytes/4 `/context` heuristic.
+//! Token counts come from `POST {wimoai_api_base_url}/tokenize-text` (the model's tokenizer), not the bytes/4 `/context` heuristic.
 //! Category texts are sent in parallel; the session-metrics event only receives the resulting counts.
 
 use super::*;
@@ -9,7 +9,7 @@ impl SessionActor {
     /// Record itemized context occupancy for this session.
     /// No-op when session metrics are disabled or there is no credential for the tokenizer endpoint.
     pub(super) async fn emit_session_context_snapshot(&self) {
-        if !self.telemetry_enabled || !wimo ai_wimo_telemetry::is_session_metrics_enabled() {
+        if !self.telemetry_enabled || !wimoai_wimo_telemetry::is_session_metrics_enabled() {
             return;
         }
         let Some(api_key) = self.tokenize_api_key().await else {
@@ -25,7 +25,7 @@ impl SessionActor {
         let texts = self.snapshot_texts().await;
         let counts = texts.item_counts();
         let tokens = tokenize_texts_parallel(
-            &tokenize_text_url(&wimo ai_api_base_url()),
+            &tokenize_text_url(&wimoai_api_base_url()),
             &api_key,
             model,
             texts.jobs(),
@@ -42,13 +42,13 @@ impl SessionActor {
             skills_count = counts.skills_count,
             "session_context_snapshot: emitted"
         );
-        wimo ai_wimo_telemetry::session_ctx::log_session_event(session_context_snapshot(
+        wimoai_wimo_telemetry::session_ctx::log_session_event(session_context_snapshot(
             self.session_info.id.0.to_string(),
             &info,
             &counts,
             &tokens,
         ));
-        wimo ai_wimo_telemetry::session_ctx::drain_pending(wimo ai_wimo_telemetry::session_ctx::CLI_DRAIN)
+        wimoai_wimo_telemetry::session_ctx::drain_pending(wimoai_wimo_telemetry::session_ctx::CLI_DRAIN)
             .await;
     }
 
@@ -215,13 +215,13 @@ impl TokenCounts {
     }
 }
 
-fn wimo ai_api_base_url() -> String {
+fn wimoai_api_base_url() -> String {
     crate::config::load_effective_config()
         .ok()
         .and_then(|effective| crate::agent::config::Config::new_from_toml_cfg(&effective).ok())
-        .map(|cfg| cfg.endpoints.wimo ai_api_base_url)
+        .map(|cfg| cfg.endpoints.wimoai_api_base_url)
         .filter(|url| !url.is_empty())
-        .unwrap_or_else(|| crate::agent::config::EndpointsConfig::default().wimo ai_api_base_url)
+        .unwrap_or_else(|| crate::agent::config::EndpointsConfig::default().wimoai_api_base_url)
 }
 
 fn tokenize_text_url(base_url: &str) -> String {
@@ -286,7 +286,7 @@ async fn tokenize_one(
     let resp = client
         .post(url)
         .header(reqwest::header::AUTHORIZATION, auth)
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
         .json(&serde_json::json!({
             "text": text,
             "model": model,

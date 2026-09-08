@@ -44,10 +44,10 @@ async fn fetch_user_info(
         .timeout(Duration::from_secs(10))
         .header("Authorization", format!("Bearer {}", auth.key))
         .header(
-            "X-wimo ai-Token-Auth",
+            "X-wimoai-Token-Auth",
             auth_manager.wimo_com_config().token_header.as_str(),
         )
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
         .header(
             crate::http::CLIENT_MODE_HEADER,
             crate::http::process_client_mode(),
@@ -75,7 +75,7 @@ pub(crate) async fn single_check(
     user_id: &str,
 ) -> Option<UnblockResult> {
     use crate::auth::backend::{ActiveAuthBackend, AuthBackend};
-    if !ActiveAuthBackend::default().is_wimo ai_authority() {
+    if !ActiveAuthBackend::default().is_wimoai_authority() {
         return None;
     }
     let user_url = format!("{}/user?include=subscription", proxy_base_url);
@@ -92,7 +92,7 @@ pub(crate) async fn single_check(
     {
         Ok(ui) => ui,
         Err(kind) => {
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "paywall_check_error",
                 None,
                 Some(serde_json::json!({ "user_id": user_id, "kind": kind })),
@@ -100,7 +100,7 @@ pub(crate) async fn single_check(
             return None;
         }
     };
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "paywall_check_result",
         None,
         Some(serde_json::json!({
@@ -115,7 +115,7 @@ pub(crate) async fn single_check(
     if !is_qualifying_tier(&new_tier) {
         return None;
     }
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "paywall_check_subscription_detected",
         None,
         Some(serde_json::json!({
@@ -133,7 +133,7 @@ pub(crate) async fn single_check(
     {
         BoundedRefresh::Resolved(result) => {
             if let Err(e) = *result {
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "paywall_check_error",
                     None,
                     Some(serde_json::json!({
@@ -146,7 +146,7 @@ pub(crate) async fn single_check(
             false
         }
         BoundedRefresh::DeadlineElapsed => {
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "paywall_check_error",
                 None,
                 Some(serde_json::json!({
@@ -158,7 +158,7 @@ pub(crate) async fn single_check(
             true
         }
     };
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "paywall_check_unblocked",
         None,
         Some(serde_json::json!({ "user_id": user_id, "new_tier": new_tier })),

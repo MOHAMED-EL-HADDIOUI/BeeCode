@@ -42,7 +42,7 @@ async fn campaign_remote_settings_nudge_and_dismiss() {
     )
     .expect("write config.toml");
 
-    // Use session (OAuth) auth, not the harness's default wimo ai_API_KEY: the settings fetch requires `auth_manager.auth()`
+    // Use session (OAuth) auth, not the harness's default wimoai_API_KEY: the settings fetch requires `auth_manager.auth()`
     // In ApiKey/BYOK mode the pager never requests `/v1/settings`, so a remote campaign could never arrive (see `spawn_polling_session`'s doc)
     seed_fake_oauth(&content, "pty-campaign-remote");
     let binary = pager_binary().expect("resolve pager binary");

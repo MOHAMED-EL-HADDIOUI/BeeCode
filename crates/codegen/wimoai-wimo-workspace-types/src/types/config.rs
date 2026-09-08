@@ -1,7 +1,7 @@
 //! Configuration shapes referenced from session lifecycle requests and `OpsChunk::ProjectConfig` / `OpsChunk::Permissions`.
 //!
 //! TODO(workspace): align with the canonical project / permission /
-//! agent-session config types in `wimo ai-wimo-config` and friends.
+//! agent-session config types in `wimoai-wimo-config` and friends.
 
 use std::collections::BTreeMap;
 
@@ -42,7 +42,7 @@ pub enum CapabilityMode {
 /// Per-tool-server configuration knob.
 ///
 /// TODO(workspace): align with the actual MCP/tool-server config in
-/// `wimo ai-wimo-tools` once the wire surface is firm.
+/// `wimoai-wimo-tools` once the wire surface is firm.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ToolServerConfig {
     /// Tool server identifier.
@@ -88,7 +88,7 @@ pub struct AgentSessionConfig {
 
 /// Project configuration returned by `OpsChunk::ProjectConfig`.
 ///
-/// TODO(workspace): align with `wimo ai_wimo_config::ProjectConfig`.
+/// TODO(workspace): align with `wimoai_wimo_config::ProjectConfig`.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProjectConfig {
     /// Free-form key/value config (placeholder).

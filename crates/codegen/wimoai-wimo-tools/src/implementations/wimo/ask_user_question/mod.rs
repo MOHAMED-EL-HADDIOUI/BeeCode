@@ -226,7 +226,7 @@ pub struct AskUserQuestionInput {
 /// Blocks inside `run()` until the user responds or the configured wait
 /// budget elapses for the whole questionnaire (default [`RESPONSE_TIMEOUT`],
 /// 30 minutes). Sends a request over an in-process mpsc channel to a
-/// session-owned coordinator (in wimo ai-wimo-shell), which performs an ACP
+/// session-owned coordinator (in wimoai-wimo-shell), which performs an ACP
 /// `ext_method` round-trip to the client/pager. The response is sent back
 /// over a oneshot channel and formatted into the model-visible tool result.
 ///
@@ -273,9 +273,9 @@ impl AskUserQuestionTool {
     async fn fallback_fire_and_forget(
         &self,
         input: &AskUserQuestionInput,
-        ctx: &wimo ai_tool_runtime::ToolCallContext,
+        ctx: &wimoai_tool_runtime::ToolCallContext,
         resources: &SharedResources,
-    ) -> Result<AskUserQuestionOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<AskUserQuestionOutput, wimoai_tool_runtime::ToolError> {
         let question_count = input.questions.len();
 
         let questions_json = serde_json::to_value(&input.questions)
@@ -320,28 +320,28 @@ impl AskUserQuestionTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for AskUserQuestionTool {
+impl wimoai_tool_runtime::Tool for AskUserQuestionTool {
     type Args = AskUserQuestionInput;
     type Output = AskUserQuestionOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("ask_user_question").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("ask_user_question").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "ask_user_question",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -353,9 +353,9 @@ impl wimo ai_tool_runtime::Tool for AskUserQuestionTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: AskUserQuestionInput,
-    ) -> Result<AskUserQuestionOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<AskUserQuestionOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -373,7 +373,7 @@ impl wimo ai_tool_runtime::Tool for AskUserQuestionTool {
             let mut seen = std::collections::HashSet::new();
             for q in &input.questions {
                 if !seen.insert(&q.question) {
-                    return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(format!(
+                    return Err(wimoai_tool_runtime::ToolError::invalid_arguments(format!(
                         "Duplicate question text: \"{}\"",
                         q.question
                     )));
@@ -399,7 +399,7 @@ impl wimo ai_tool_runtime::Tool for AskUserQuestionTool {
                         .fallback_fire_and_forget(&input, &ctx, &resources)
                         .await;
                 }
-                return Err(wimo ai_tool_runtime::ToolError::custom(
+                return Err(wimoai_tool_runtime::ToolError::custom(
                     "missing_resource",
                     "UserQuestionSender".to_string(),
                 ));
@@ -417,8 +417,8 @@ impl wimo ai_tool_runtime::Tool for AskUserQuestionTool {
         };
 
         if sender.0.send(request).is_err() {
-            return Err(wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("ask_user_question").expect("valid"),
+            return Err(wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("ask_user_question").expect("valid"),
                 "User question session ended unexpectedly (coordinator channel closed)",
             ));
         }
@@ -461,8 +461,8 @@ impl wimo ai_tool_runtime::Tool for AskUserQuestionTool {
         let result = match outcome {
             Ok(Ok(r)) => r,
             Ok(Err(_recv_error)) => {
-                return Err(wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("ask_user_question").expect("valid"),
+                return Err(wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("ask_user_question").expect("valid"),
                     "User question session ended unexpectedly (client may have disconnected)",
                 ));
             }
@@ -517,14 +517,14 @@ impl wimo ai_tool_runtime::Tool for AskUserQuestionTool {
                 message: unanswered.to_string(),
             }),
             Err(UserQuestionError::TransportError(msg)) => {
-                Err(wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("ask_user_question").expect("valid"),
+                Err(wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("ask_user_question").expect("valid"),
                     format!("Failed to reach the client for user question: {msg}"),
                 ))
             }
             Err(UserQuestionError::MalformedResponse(msg)) => {
-                Err(wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("ask_user_question").expect("valid"),
+                Err(wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("ask_user_question").expect("valid"),
                     format!("Client returned an invalid response to user question: {msg}"),
                 ))
             }
@@ -589,14 +589,14 @@ mod tests {
     fn tool_name_and_description() {
         let tool = AskUserQuestionTool;
         assert_eq!(
-            wimo ai_tool_runtime::Tool::id(&tool).as_str(),
+            wimoai_tool_runtime::Tool::id(&tool).as_str(),
             "ask_user_question"
         );
     }
 
     #[test]
     fn tool_is_read_only() {
-        assert!(wimo ai_tool_runtime::Tool::capabilities(&AskUserQuestionTool).is_read_only);
+        assert!(wimoai_tool_runtime::Tool::capabilities(&AskUserQuestionTool).is_read_only);
     }
 
     #[test]
@@ -675,7 +675,7 @@ mod tests {
         };
 
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "test-call"), input)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "test-call"), input)
                 .await
                 .unwrap();
 
@@ -703,7 +703,7 @@ mod tests {
         };
 
         let result =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "test-call"), input)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "test-call"), input)
                 .await
                 .unwrap();
 
@@ -734,7 +734,7 @@ mod tests {
             use_id_keyed_format: false,
         };
 
-        wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "call-q"), input)
+        wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "call-q"), input)
             .await
             .unwrap();
 
@@ -764,7 +764,7 @@ mod tests {
         };
 
         let err =
-            wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "test-call"), input)
+            wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "test-call"), input)
                 .await
                 .unwrap_err();
 
@@ -788,7 +788,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-1"), input)
+                wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-1"), input)
                     .await
             }
         });
@@ -831,7 +831,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-4"), input)
+                wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-4"), input)
                     .await
             }
         });
@@ -869,7 +869,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-ni"), input)
+                wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-ni"), input)
                     .await
             }
         });
@@ -911,7 +911,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(
+                wimoai_tool_runtime::Tool::run(
                     &tool,
                     test_ctx_with_call_id(shared, "tc-ni-timeout"),
                     input,
@@ -954,7 +954,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(
+                wimoai_tool_runtime::Tool::run(
                     &tool,
                     test_ctx_with_call_id(shared, "tc-timeout"),
                     input,
@@ -994,7 +994,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-ok"), input)
+                wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-ok"), input)
                     .await
             }
         });
@@ -1081,7 +1081,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-short"), input)
+                wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-short"), input)
                     .await
             }
         });
@@ -1117,7 +1117,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(
+                wimoai_tool_runtime::Tool::run(
                     &tool,
                     test_ctx_with_call_id(shared, "tc-forever"),
                     input,
@@ -1164,7 +1164,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-5"), input)
+                wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-5"), input)
                     .await
             }
         });
@@ -1190,7 +1190,7 @@ mod tests {
         let handle = tokio::spawn({
             let shared = shared.clone();
             async move {
-                wimo ai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-6"), input)
+                wimoai_tool_runtime::Tool::run(&tool, test_ctx_with_call_id(shared, "tc-6"), input)
                     .await
             }
         });

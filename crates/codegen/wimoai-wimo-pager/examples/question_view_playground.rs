@@ -10,12 +10,12 @@ use ratatui::layout::{Constraint, Layout};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
-use wimo ai_wimo_pager::theme::Theme;
-use wimo ai_wimo_pager::views::prompt_widget::StashedPrompt;
-use wimo ai_wimo_pager::views::question_view::{
+use wimoai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::views::prompt_widget::StashedPrompt;
+use wimoai_wimo_pager::views::question_view::{
     QUESTION_VIEW_HPAD, QuestionViewState, question_view_height, render_question_view,
 };
-use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{Question, QuestionOption};
+use wimoai_wimo_tools::implementations::wimo::ask_user_question::{Question, QuestionOption};
 
 /// Hardcoded example question sets for UI playground scenarios.
 fn example_scenarios() -> Vec<(&'static str, Vec<Question>)> {

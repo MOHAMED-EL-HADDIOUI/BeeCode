@@ -16,7 +16,7 @@ use super::quote_bar::QuoteBarStrip;
 pub(crate) const MARKDOWN_BODY_RANGE: u16 = 0;
 use crate::syntax::get_syntect;
 use crate::theme::{ThemeKind, cache as theme_cache, md_style};
-use wimo ai_wimo_markdown::StreamingMarkdownRenderer;
+use wimoai_wimo_markdown::StreamingMarkdownRenderer;
 
 /// Mutable rendering state behind a single `RefCell`.
 ///
@@ -92,7 +92,7 @@ impl MarkdownContent {
         renderer.set_max_table_width(max_table_width);
         renderer.set_collapse_soft_breaks(collapse_soft_breaks);
         let text = text.into();
-        let expanded = wimo ai_wimo_pager_render::appearance::expand_tabs(&text);
+        let expanded = wimoai_wimo_pager_render::appearance::expand_tabs(&text);
         renderer.push(&expanded);
         // finish() (not render()) so the streaming LaTeX-delimiter normalizer flushes any trailing held-back delimiter bytes
         // This is a complete, one-shot document
@@ -133,7 +133,7 @@ impl MarkdownContent {
 
     /// Append a streaming chunk and re-render.
     pub fn push_chunk(&mut self, chunk: &str) {
-        let expanded = wimo ai_wimo_pager_render::appearance::expand_tabs(chunk);
+        let expanded = wimoai_wimo_pager_render::appearance::expand_tabs(chunk);
         self.state
             .get_mut()
             .renderer
@@ -145,7 +145,7 @@ impl MarkdownContent {
     ///
     /// Used for historical replay during `session/load` so the pager can batch markdown work and render once after replay completes.
     pub fn push_chunk_deferred(&mut self, chunk: &str) {
-        let expanded = wimo ai_wimo_pager_render::appearance::expand_tabs(chunk);
+        let expanded = wimoai_wimo_pager_render::appearance::expand_tabs(chunk);
         self.state.get_mut().renderer.push(&expanded);
         self.generation += 1;
     }
@@ -207,7 +207,7 @@ impl MarkdownContent {
     /// Access the pre-wrap hyperlink targets via a closure, avoiding allocation.
     pub fn with_hyperlinks<R>(
         &self,
-        f: impl FnOnce(&[wimo ai_wimo_markdown::HyperlinkTarget]) -> R,
+        f: impl FnOnce(&[wimoai_wimo_markdown::HyperlinkTarget]) -> R,
     ) -> R {
         let state = self.state.borrow();
         f(state.renderer.view().hyperlinks)
@@ -215,7 +215,7 @@ impl MarkdownContent {
 
     pub fn with_table_copy_meta<R>(
         &self,
-        f: impl FnOnce(&[wimo ai_wimo_markdown::TableCopyMeta]) -> R,
+        f: impl FnOnce(&[wimoai_wimo_markdown::TableCopyMeta]) -> R,
     ) -> R {
         let state = self.state.borrow();
         f(state.renderer.view().tables)

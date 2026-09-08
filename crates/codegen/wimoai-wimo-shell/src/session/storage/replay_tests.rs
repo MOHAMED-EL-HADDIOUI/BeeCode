@@ -22,7 +22,7 @@ fn acp_envelope(session_update_json: &str) -> String {
     )
 }
 
-fn wimo ai_envelope(session_update_json: &str) -> String {
+fn wimoai_envelope(session_update_json: &str) -> String {
     format!(
         r#"{{"timestamp":1,"method":"_x.ai/session/update","params":{{"sessionId":"s","update":{session_update_json}}}}}"#
     )
@@ -80,7 +80,7 @@ fn streaming_replay_applies_rewind_like_the_typed_path() {
         r#"{"sessionUpdate":"user_message_chunk","content":{"type":"text","text":"p2"}}"#,
     );
     // Rewind to prompt 1 drops p2.
-    let rw = wimo ai_envelope(
+    let rw = wimoai_envelope(
         r#"{"sessionUpdate":"rewind_marker","target_prompt_index":1,"created_at":"2024-01-01"}"#,
     );
     let u3 = acp_envelope(
@@ -105,7 +105,7 @@ fn streaming_replay_applies_rewind_like_the_typed_path() {
         .into_iter()
         .filter_map(|u| match u {
             SessionUpdate::Acp(notif) => Some(strip_context_wrappers(notif.update)),
-            SessionUpdate::wimo ai(_) => None,
+            SessionUpdate::wimoai(_) => None,
         })
         .collect();
 
@@ -162,8 +162,8 @@ fn prepare_replay_cursor_refused_when_tail_has_event_id_less_line() {
         r#"{"eventId":"ev1"}"#,
     );
     // wimo AI-style line persisted by an older binary: no _meta at all.
-    let old_wimo ai = r#"{"timestamp":2,"method":"_x.ai/session/update","params":{"sessionId":"s","update":{"sessionUpdate":"hook_annotation","message":"trailing"}}}"#;
-    let raw = format!("{a1}\n{old_wimo ai}\n");
+    let old_wimoai = r#"{"timestamp":2,"method":"_x.ai/session/update","params":{"sessionId":"s","update":{"sessionUpdate":"hook_annotation","message":"trailing"}}}"#;
+    let raw = format!("{a1}\n{old_wimoai}\n");
 
     let prepared = prepare_replay_lines(&raw, Some("ev1"));
     assert!(
@@ -173,8 +173,8 @@ fn prepare_replay_cursor_refused_when_tail_has_event_id_less_line() {
     assert_eq!(prepared.lines.len(), 2, "full history is replayed");
 
     // Same history with the trailing line stamped resolves incrementally.
-    let new_wimo ai = r#"{"timestamp":2,"method":"_x.ai/session/update","params":{"sessionId":"s","update":{"sessionUpdate":"hook_annotation","message":"trailing"},"_meta":{"eventId":"ev2"}}}"#;
-    let raw = format!("{a1}\n{new_wimo ai}\n");
+    let new_wimoai = r#"{"timestamp":2,"method":"_x.ai/session/update","params":{"sessionId":"s","update":{"sessionUpdate":"hook_annotation","message":"trailing"},"_meta":{"eventId":"ev2"}}}"#;
+    let raw = format!("{a1}\n{new_wimoai}\n");
     let prepared = prepare_replay_lines(&raw, Some("ev1"));
     assert!(!prepared.mark_replay);
     assert_eq!(prepared.lines.len(), 1);
@@ -354,7 +354,7 @@ fn prepare_replay_rewind_truncates_and_drops_acu() {
         r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"a0"}}"#,
         r#"{"totalTokens":7}"#,
     );
-    let rw = wimo ai_envelope(
+    let rw = wimoai_envelope(
         r#"{"sessionUpdate":"rewind_marker","target_prompt_index":0,"created_at":"2024-01-01"}"#,
     );
     let u1 = acp_envelope_with_meta(
@@ -433,7 +433,7 @@ fn fast_reject_rewind_marker_in_content() {
         PromptExtractEvent::NotUserMessage
     );
 
-    // (b) an ACP (non-wimo ai) update carrying rewind_marker in content is NOT a real wimo ai rewind_marker; it yields NotUserMessage (no RewindTo)
+    // (b) an ACP (non-wimoai) update carrying rewind_marker in content is NOT a real wimoai rewind_marker; it yields NotUserMessage (no RewindTo)
     let acp_rewindish = acp_envelope(
         r#"{"sessionUpdate":"agent_thought_chunk","content":{"type":"text","text":"rewind_marker"}}"#,
     );
@@ -506,7 +506,7 @@ fn prepare_replay_trailing_rewind_marker_empties() {
         r#"{"sessionUpdate":"user_message_chunk","content":{"type":"text","text":"p0"}}"#,
         r#"{"totalTokens":5}"#,
     );
-    let rw = wimo ai_envelope(
+    let rw = wimoai_envelope(
         r#"{"sessionUpdate":"rewind_marker","target_prompt_index":0,"created_at":"2024-01-01"}"#,
     );
     let raw = format!("{u0}\n{rw}\n");
@@ -546,7 +546,7 @@ fn prepare_replay_rewind_then_cursor_with_acu() {
     );
     let acu0 =
         acp_envelope(r#"{"sessionUpdate":"available_commands_update","availableCommands":[]}"#);
-    let rw = wimo ai_envelope(
+    let rw = wimoai_envelope(
         r#"{"sessionUpdate":"rewind_marker","target_prompt_index":0,"created_at":"2024-01-01"}"#,
     );
     let u1 = acp_envelope_with_meta(
@@ -589,7 +589,7 @@ fn filter_delta_replay_drops_blank_acu_and_rewinds() {
     let a2 = acp_envelope(
         r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"a2-dead"}}"#,
     );
-    let rw = wimo ai_envelope(
+    let rw = wimoai_envelope(
         r#"{"sessionUpdate":"rewind_marker","target_prompt_index":1,"created_at":"2024-01-01"}"#,
     );
     let raw = format!("{u1}\n\n{acu}\n{a1}\n{u2}\n{a2}\n{rw}\n");
@@ -685,14 +685,14 @@ fn persist_acp_update(update: acp::SessionUpdate) -> String {
     persist_acp_update_with_meta(update, None)
 }
 
-fn persist_wimo ai_update(update: crate::extensions::notification::SessionUpdate) -> String {
+fn persist_wimoai_update(update: crate::extensions::notification::SessionUpdate) -> String {
     let notif = crate::extensions::notification::SessionNotification {
         session_id: acp::SessionId::new("s"),
         update,
         meta: None,
     };
     let envelope =
-        SessionUpdateEnvelope::from_update(&SessionUpdate::wimo ai(Box::new(notif))).unwrap();
+        SessionUpdateEnvelope::from_update(&SessionUpdate::wimoai(Box::new(notif))).unwrap();
     serde_json::to_string(&envelope).unwrap()
 }
 
@@ -927,7 +927,7 @@ fn stream_replay_collapses_tool_call_and_skips_in_progress() {
 fn stream_replay_forwards_completed_tool_call_update_without_base() {
     let home = tempfile::tempdir().unwrap();
     let cwd = "/tmp/orphan-complete";
-    let encoded = wimo ai_wimo_config::encode_cwd_dirname(cwd);
+    let encoded = wimoai_wimo_config::encode_cwd_dirname(cwd);
     let sid = "child-orphan-complete";
     let dir = home.path().join("sessions").join(&encoded).join(sid);
     std::fs::create_dir_all(&dir).unwrap();
@@ -959,13 +959,13 @@ fn stream_replay_forwards_completed_tool_call_update_without_base() {
 /// Persisted wimo AI child events (compaction, retry) are forwarded in file order alongside the ACP stream.
 /// A rebuilt child view thus keeps its non-ACP markers, but they never count toward `Emitted`.
 #[test]
-fn stream_replay_forwards_wimo ai_updates_in_file_order() {
+fn stream_replay_forwards_wimoai_updates_in_file_order() {
     let home = tempfile::tempdir().unwrap();
-    let sid = "child-wimo ai";
+    let sid = "child-wimoai";
     let dir = home.path().join("sessions").join("cwd").join(sid);
     std::fs::create_dir_all(&dir).unwrap();
     std::fs::write(dir.join(SUMMARY_FILE), "{}").unwrap();
-    let compact = persist_wimo ai_update(
+    let compact = persist_wimoai_update(
         crate::extensions::notification::SessionUpdate::AutoCompactCompleted {
             tokens_before: Some(1_000),
             tokens_after: 100,
@@ -981,11 +981,11 @@ fn stream_replay_forwards_wimo ai_updates_in_file_order() {
     let mut kinds = Vec::new();
     let emission =
         stream_replay_updates_at_hinted(sid, home.path(), ReplayPathHint::default(), |u| {
-            kinds.push(matches!(u, ReplayedUpdate::wimo ai(_)));
+            kinds.push(matches!(u, ReplayedUpdate::wimoai(_)));
         })
         .unwrap();
     assert_eq!(emission, ReplayEmission::Emitted);
-    assert_eq!(kinds, vec![true, false], "wimo ai then acp, in file order");
+    assert_eq!(kinds, vec![true, false], "wimoai then acp, in file order");
 }
 
 /// The stream forwards each persisted line's `_meta` alongside the ACP update.
@@ -1025,13 +1025,13 @@ fn stream_replay_forwards_persisted_line_meta() {
 /// A transcript holding only wimo AI events replays them but stays `Empty`.
 /// Eviction decisions must not settle on a file the client cannot rebuild transcript content from.
 #[test]
-fn wimo ai_only_transcript_forwards_but_stays_empty() {
+fn wimoai_only_transcript_forwards_but_stays_empty() {
     let home = tempfile::tempdir().unwrap();
-    let sid = "child-wimo ai-only";
+    let sid = "child-wimoai-only";
     let dir = home.path().join("sessions").join("cwd").join(sid);
     std::fs::create_dir_all(&dir).unwrap();
     std::fs::write(dir.join(SUMMARY_FILE), "{}").unwrap();
-    let retry = persist_wimo ai_update(crate::extensions::notification::SessionUpdate::RetryState(
+    let retry = persist_wimoai_update(crate::extensions::notification::SessionUpdate::RetryState(
         crate::extensions::notification::RetryState::Retrying {
             attempt: 1,
             max_retries: 3,
@@ -1041,15 +1041,15 @@ fn wimo ai_only_transcript_forwards_but_stays_empty() {
     ));
     std::fs::write(dir.join(UPDATES_FILE), format!("{retry}\n")).unwrap();
 
-    let mut wimo ai = 0usize;
+    let mut wimoai = 0usize;
     let emission =
         stream_replay_updates_at_hinted(sid, home.path(), ReplayPathHint::default(), |u| {
-            if matches!(u, ReplayedUpdate::wimo ai(_)) {
-                wimo ai += 1;
+            if matches!(u, ReplayedUpdate::wimoai(_)) {
+                wimoai += 1;
             }
         })
         .unwrap();
-    assert_eq!(wimo ai, 1);
+    assert_eq!(wimoai, 1);
     assert_eq!(emission, ReplayEmission::Empty);
 }
 
@@ -1077,7 +1077,7 @@ fn replay_would_emit_requires_an_emitting_acp_line() {
         !probe(r#"{"method":"session/update","params":{"sessionId":"s","update":{"session"#),
         "torn line (crash mid-write)"
     );
-    let wimo ai_only = persist_wimo ai_update(
+    let wimoai_only = persist_wimoai_update(
         crate::extensions::notification::SessionUpdate::AutoCompactCompleted {
             tokens_before: Some(1_000),
             tokens_after: 100,
@@ -1086,7 +1086,7 @@ fn replay_would_emit_requires_an_emitting_acp_line() {
         },
     );
     assert!(
-        !probe(&format!("{wimo ai_only}\n")),
+        !probe(&format!("{wimoai_only}\n")),
         "wimo AI events alone never count as Emitted"
     );
     let acu =
@@ -1118,7 +1118,7 @@ fn replay_would_emit_requires_an_emitting_acp_line() {
         "a completed ToolCallUpdate emits even without its base"
     );
     assert!(
-        probe(&format!("{wimo ai_only}\n{msg}\n")),
+        probe(&format!("{wimoai_only}\n{msg}\n")),
         "an emitting line after non-emitting ones is found"
     );
 }
@@ -1127,7 +1127,7 @@ fn replay_would_emit_requires_an_emitting_acp_line() {
 fn child_fast_path_finds_updates_under_parent_encoded_cwd() {
     let home = tempfile::tempdir().unwrap();
     let cwd = "/work/proj";
-    let encoded = wimo ai_wimo_config::encode_cwd_dirname(cwd);
+    let encoded = wimoai_wimo_config::encode_cwd_dirname(cwd);
     let sid = "child-fast";
     let dir = home.path().join("sessions").join(&encoded).join(sid);
     std::fs::create_dir_all(&dir).unwrap();
@@ -1152,7 +1152,7 @@ fn child_fast_path_finds_updates_under_child_cwd() {
     let home = tempfile::tempdir().unwrap();
     let parent_cwd = "/work/parent";
     let child_cwd = "/work/wt";
-    let encoded = wimo ai_wimo_config::encode_cwd_dirname(child_cwd);
+    let encoded = wimoai_wimo_config::encode_cwd_dirname(child_cwd);
     let sid = "child-wt";
     let dir = home.path().join("sessions").join(&encoded).join(sid);
     std::fs::create_dir_all(&dir).unwrap();
@@ -1175,7 +1175,7 @@ fn child_fast_path_finds_updates_under_child_cwd() {
 #[test]
 fn child_lookup_falls_back_when_fast_path_misses() {
     let home = tempfile::tempdir().unwrap();
-    let other = wimo ai_wimo_config::encode_cwd_dirname("/other/cwd");
+    let other = wimoai_wimo_config::encode_cwd_dirname("/other/cwd");
     let sid = "relocated-child";
     let dir = home.path().join("sessions").join(&other).join(sid);
     std::fs::create_dir_all(&dir).unwrap();
@@ -1206,7 +1206,7 @@ fn child_lookup_falls_back_when_fast_path_misses() {
 #[test]
 fn child_lookup_hinted_only_skips_scan_when_fast_path_misses() {
     let home = tempfile::tempdir().unwrap();
-    let other = wimo ai_wimo_config::encode_cwd_dirname("/other/cwd");
+    let other = wimoai_wimo_config::encode_cwd_dirname("/other/cwd");
     let sid = "relocated-child-hinted";
     let dir = home.path().join("sessions").join(&other).join(sid);
     std::fs::create_dir_all(&dir).unwrap();

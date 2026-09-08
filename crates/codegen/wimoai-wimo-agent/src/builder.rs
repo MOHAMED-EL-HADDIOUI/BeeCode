@@ -9,15 +9,15 @@ use crate::system_reminder::ReminderPolicy;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
-use wimo ai_wimo_tools::bridge::ToolBridge;
-use wimo ai_wimo_tools::computer::types::{AsyncFileSystem, TerminalBackend};
-use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-use wimo ai_wimo_tools::registry::types::SessionContext;
-use wimo ai_wimo_tools::types::tool::ToolKind;
+use wimoai_wimo_tools::bridge::ToolBridge;
+use wimoai_wimo_tools::computer::types::{AsyncFileSystem, TerminalBackend};
+use wimoai_wimo_tools::notification::ToolNotificationHandle;
+use wimoai_wimo_tools::registry::types::SessionContext;
+use wimoai_wimo_tools::types::tool::ToolKind;
 /// The wimo [`ToolKind`] a vendor-compat `tools:` allowlist entry resolves to, so a plugin's upstream allowlist still binds.
-/// Backed by the shared vendor-to-wimo tool registry in `wimo ai-wimo-tools` (also used by the hook matcher).
+/// Backed by the shared vendor-to-wimo tool registry in `wimoai-wimo-tools` (also used by the hook matcher).
 fn claude_tool_kind(name: &str) -> Option<ToolKind> {
-    wimo ai_wimo_tools::types::kind_for(name)
+    wimoai_wimo_tools::types::kind_for(name)
 }
 /// Builds an Agent from an AgentDefinition and session context.
 ///
@@ -53,7 +53,7 @@ pub struct AgentBuilder {
     notification_handle: ToolNotificationHandle,
     owner_session_id: Option<String>,
     parent_scheduler_handle:
-        Option<wimo ai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle>,
+        Option<wimoai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle>,
     /// The agent definition, set via from_definition() or built up via individual with_*() calls.
     definition: Option<AgentDefinition>,
     /// Pre-rendered persona IO summaries for the task tool description.
@@ -82,16 +82,16 @@ pub struct AgentBuilder {
     system_prompt_label: String,
     session_env: Option<Arc<HashMap<String, String>>>,
     state_path: Option<PathBuf>,
-    memory_backend: Option<Arc<dyn wimo ai_wimo_tools::types::memory_backend::MemoryBackend>>,
-    web_search_config: wimo ai_wimo_tools::implementations::web_search::WebSearchConfig,
+    memory_backend: Option<Arc<dyn wimoai_wimo_tools::types::memory_backend::MemoryBackend>>,
+    web_search_config: wimoai_wimo_tools::implementations::web_search::WebSearchConfig,
     /// When true, web search and X search go to the agentic sampler as native server-side tools instead of registering as local Function tools.
     backend_search: bool,
-    web_fetch_config: wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig,
-    lsp: Option<std::sync::Arc<dyn wimo ai_wimo_tools::implementations::lsp::LspBackend>>,
-    image_gen_config: wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig,
-    video_gen_config: wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig,
+    web_fetch_config: wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig,
+    lsp: Option<std::sync::Arc<dyn wimoai_wimo_tools::implementations::lsp::LspBackend>>,
+    image_gen_config: wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig,
+    video_gen_config: wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig,
     app_builder_deployer_config:
-        wimo ai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig,
+        wimoai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig,
     write_file_enabled: bool,
     active_agent_messages_enabled: bool,
     subagents_enabled: bool,
@@ -102,18 +102,18 @@ pub struct AgentBuilder {
     skills_config: crate::prompt::skills::SkillsConfig,
     /// Resolved vendor-compat config governing which vendor (`.claude`/`.cursor`) dirs are scanned for skills / rules / AGENTS.md.
     /// Defaults to all-on, which reproduces the historical behavior.
-    compat: wimo ai_wimo_tools::types::compat::CompatConfig,
+    compat: wimoai_wimo_tools::types::compat::CompatConfig,
     bash_params_json: Option<serde_json::Map<String, serde_json::Value>>,
     ask_user_question_params_json: Option<serde_json::Map<String, serde_json::Value>>,
     plugin_registry: Option<std::sync::Arc<crate::plugins::PluginRegistry>>,
     context_window_tokens: Option<u64>,
-    api_key_provider: Option<wimo ai_wimo_tools::types::SharedApiKeyProvider>,
-    attribution_callback: Option<wimo ai_wimo_tools::SharedAttributionCallback>,
+    api_key_provider: Option<wimoai_wimo_tools::types::SharedApiKeyProvider>,
+    attribution_callback: Option<wimoai_wimo_tools::SharedAttributionCallback>,
     /// Session-scoped MCP tool-result inline cap (bytes).
     /// When `Some`, it is seeded into the toolset's `TruncationCfg` resource after finalize.
     /// The MCP truncation path consults that resource before the process-global cap.
     /// The shell passes the winning repo-level `[mcp] max_output_bytes` here only when that tier wins the precedence stack.
-    /// See `resolve_max_mcp_output_bytes_for_cwd` in wimo ai-wimo-shell.
+    /// See `resolve_max_mcp_output_bytes_for_cwd` in wimoai-wimo-shell.
     mcp_max_output_bytes: Option<usize>,
     /// System-reminder tag name for tool result text. Defaults to `"system-reminder"`.
     /// IDE-compat agent_type should set this to `"system_reminder"`.
@@ -124,11 +124,11 @@ pub struct AgentBuilder {
     persisted_announced_skill_names: Option<std::collections::HashSet<String>>,
     /// Pre-discovered skills inherited from a parent session.
     /// When set, `build()` uses these directly instead of running `list_skills_with_plugins()`.
-    preloaded_skills: Option<Vec<wimo ai_wimo_tools::implementations::skills::types::SkillInfo>>,
+    preloaded_skills: Option<Vec<wimoai_wimo_tools::implementations::skills::types::SkillInfo>>,
 }
 /// Ensure plan mode tools (`enter_plan_mode`, `exit_plan_mode`, `ask_user_question`) are present in the tool config.
-fn ensure_plan_mode_tools(tool_config: &mut wimo ai_wimo_tools::registry::types::ToolServerConfig) {
-    use wimo ai_wimo_tools::implementations::wimo;
+fn ensure_plan_mode_tools(tool_config: &mut wimoai_wimo_tools::registry::types::ToolServerConfig) {
+    use wimoai_wimo_tools::implementations::wimo;
     let existing: std::collections::HashSet<&str> =
         tool_config.tools.iter().map(|tc| tc.id.as_str()).collect();
     let missing_enter = !existing.contains("Wimo:enter_plan_mode");
@@ -153,7 +153,7 @@ fn ensure_plan_mode_tools(tool_config: &mut wimo ai_wimo_tools::registry::types:
 }
 /// Merge a shell-resolved params map into every matching tool's `ToolConfig.params` (single copy of the loop the per-tool injections share).
 fn merge_tool_params(
-    tool_config: &mut wimo ai_wimo_tools::registry::types::ToolServerConfig,
+    tool_config: &mut wimoai_wimo_tools::registry::types::ToolServerConfig,
     ids: &[&str],
     map: &serde_json::Map<String, serde_json::Value>,
 ) {
@@ -167,10 +167,10 @@ fn merge_tool_params(
     }
 }
 fn apply_workflow_tool_gates(
-    tool_config: &mut wimo ai_wimo_tools::registry::types::ToolServerConfig,
+    tool_config: &mut wimoai_wimo_tools::registry::types::ToolServerConfig,
     background_workflows_enabled: bool,
 ) {
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::tool::ToolKind;
     if background_workflows_enabled {
         tool_config
             .tools
@@ -191,7 +191,7 @@ impl AgentBuilder {
             working_directory,
             prompt_working_directory: None,
             terminal_backend,
-            fs_backend: Arc::new(wimo ai_wimo_tools::computer::local::LocalFs),
+            fs_backend: Arc::new(wimoai_wimo_tools::computer::local::LocalFs),
             notification_handle,
             owner_session_id: None,
             parent_scheduler_handle: None,
@@ -242,7 +242,7 @@ impl AgentBuilder {
             api_key_provider: None,
             attribution_callback: None,
             mcp_max_output_bytes: None,
-            system_reminder_tag: wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
+            system_reminder_tag: wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
             persisted_announced_skill_names: None,
             preloaded_skills: None,
         }
@@ -260,7 +260,7 @@ impl AgentBuilder {
     /// When set, `build()` skips `list_skills_with_plugins()` and uses the snapshot directly.
     pub fn with_preloaded_skills(
         mut self,
-        skills: Vec<wimo ai_wimo_tools::implementations::skills::types::SkillInfo>,
+        skills: Vec<wimoai_wimo_tools::implementations::skills::types::SkillInfo>,
     ) -> Self {
         self.preloaded_skills = Some(skills);
         self
@@ -380,7 +380,7 @@ impl AgentBuilder {
     /// When `None` (default), those tools return "Memory is not enabled".
     pub fn with_memory_backend(
         mut self,
-        backend: Arc<dyn wimo ai_wimo_tools::types::memory_backend::MemoryBackend>,
+        backend: Arc<dyn wimoai_wimo_tools::types::memory_backend::MemoryBackend>,
     ) -> Self {
         self.memory_backend = Some(backend);
         self
@@ -401,7 +401,7 @@ impl AgentBuilder {
     /// Share the parent's scheduler handle so scheduled tasks survive subagent exit.
     pub fn with_parent_scheduler_handle(
         mut self,
-        handle: wimo ai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle,
+        handle: wimoai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle,
     ) -> Self {
         self.parent_scheduler_handle = Some(handle);
         self
@@ -412,7 +412,7 @@ impl AgentBuilder {
     /// When `Disabled` (default), the tool returns a graceful error if invoked.
     pub fn with_web_search_config(
         mut self,
-        config: wimo ai_wimo_tools::implementations::web_search::WebSearchConfig,
+        config: wimoai_wimo_tools::implementations::web_search::WebSearchConfig,
     ) -> Self {
         self.web_search_config = config;
         self
@@ -430,14 +430,14 @@ impl AgentBuilder {
     /// Feature-flagged via remote settings `web_fetch_enabled` and `wimo_WEB_FETCH` env var.
     pub fn with_web_fetch_config(
         mut self,
-        config: wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig,
+        config: wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig,
     ) -> Self {
         self.web_fetch_config = config;
         self
     }
     pub fn with_lsp(
         mut self,
-        handle: std::sync::Arc<dyn wimo ai_wimo_tools::implementations::lsp::LspBackend>,
+        handle: std::sync::Arc<dyn wimoai_wimo_tools::implementations::lsp::LspBackend>,
     ) -> Self {
         self.lsp = Some(handle);
         self
@@ -449,7 +449,7 @@ impl AgentBuilder {
     /// When `Disabled` (default), the tool is not registered.
     pub fn with_image_gen_config(
         mut self,
-        config: wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig,
+        config: wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig,
     ) -> Self {
         self.image_gen_config = config;
         self
@@ -461,7 +461,7 @@ impl AgentBuilder {
     /// When `Disabled` (default), the tool is not registered.
     pub fn with_video_gen_config(
         mut self,
-        config: wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig,
+        config: wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig,
     ) -> Self {
         self.video_gen_config = config;
         self
@@ -469,7 +469,7 @@ impl AgentBuilder {
     /// Set the deploy service configuration.
     pub fn with_app_builder_deployer_config(
         mut self,
-        config: wimo ai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig,
+        config: wimoai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig,
     ) -> Self {
         self.app_builder_deployer_config = config;
         self
@@ -477,7 +477,7 @@ impl AgentBuilder {
     /// Set the dynamic API key provider for tool HTTP clients.
     pub fn with_api_key_provider(
         mut self,
-        provider: wimo ai_wimo_tools::types::SharedApiKeyProvider,
+        provider: wimoai_wimo_tools::types::SharedApiKeyProvider,
     ) -> Self {
         self.api_key_provider = Some(provider);
         self
@@ -488,12 +488,12 @@ impl AgentBuilder {
     /// event with `consumer` of `"ImageGen"` / `"VideoGen.start"` /
     /// `"VideoGen.poll"` / `"WebSearch"`. Callers should pass the
     /// same `ShellAttribution` instance they wire into
-    /// `wimo ai_wimo_sampler::SamplerConfig::attribution_callback` so
+    /// `wimoai_wimo_sampler::SamplerConfig::attribution_callback` so
     /// all 401s share the same `AuthManager` reference and land in
     /// the same Axiom dataset.
     pub fn with_attribution_callback(
         mut self,
-        callback: wimo ai_wimo_tools::SharedAttributionCallback,
+        callback: wimoai_wimo_tools::SharedAttributionCallback,
     ) -> Self {
         self.attribution_callback = Some(callback);
         self
@@ -557,7 +557,7 @@ impl AgentBuilder {
     /// Also threaded into the dynamic-discovery seeds (`SkillManager` / `AgentsMdTracker`).
     pub fn with_compat_config(
         mut self,
-        compat: wimo ai_wimo_tools::types::compat::CompatConfig,
+        compat: wimoai_wimo_tools::types::compat::CompatConfig,
     ) -> Self {
         self.compat = compat;
         self
@@ -676,7 +676,7 @@ impl AgentBuilder {
         }
         if definition.inject_default_tools {
             if self.memory_backend.is_some() {
-                use wimo ai_wimo_tools::implementations::memory;
+                use wimoai_wimo_tools::implementations::memory;
                 tool_config
                     .tools
                     .push((&memory::search_tool::MemorySearchImpl).into());
@@ -685,34 +685,34 @@ impl AgentBuilder {
                     .push((&memory::get_tool::MemoryGetImpl).into());
             }
             if self.web_search_config.is_enabled() {
-                use wimo ai_wimo_tools::implementations::wimo;
+                use wimoai_wimo_tools::implementations::wimo;
                 tool_config.tools.push((&wimo::WebSearchTool).into());
             }
             if self.web_fetch_config.is_enabled() {
-                use wimo ai_wimo_tools::implementations::wimo;
+                use wimoai_wimo_tools::implementations::wimo;
                 tool_config.tools.push((&wimo::WebFetchTool).into());
             }
             if self.lsp.is_some() {
                 tool_config
                     .tools
-                    .push((&wimo ai_wimo_tools::implementations::wimo::LspTool).into());
+                    .push((&wimoai_wimo_tools::implementations::wimo::LspTool).into());
             }
             if self.image_gen_config.image_gen_enabled() {
                 tool_config
                     .tools
-                    .push((&wimo ai_wimo_tools::implementations::wimo::ImageGenTool).into());
+                    .push((&wimoai_wimo_tools::implementations::wimo::ImageGenTool).into());
             }
             if self.image_gen_config.image_edit_enabled() {
                 tool_config
                     .tools
-                    .push((&wimo ai_wimo_tools::implementations::wimo::ImageEditTool).into());
+                    .push((&wimoai_wimo_tools::implementations::wimo::ImageEditTool).into());
             }
             if self.video_gen_config.is_enabled() {
                 tool_config
                     .tools
-                    .push((&wimo ai_wimo_tools::implementations::wimo::ImageToVideoTool).into());
+                    .push((&wimoai_wimo_tools::implementations::wimo::ImageToVideoTool).into());
                 tool_config.tools.push(
-                    (&wimo ai_wimo_tools::implementations::wimo::ReferenceToVideoTool).into(),
+                    (&wimoai_wimo_tools::implementations::wimo::ReferenceToVideoTool).into(),
                 );
             }
             let has_write_tool = tool_config
@@ -722,14 +722,14 @@ impl AgentBuilder {
             if self.write_file_enabled && !has_write_tool {
                 tool_config
                     .tools
-                    .push((&wimo ai_wimo_tools::implementations::opencode::OpenCodeWriteTool).into());
+                    .push((&wimoai_wimo_tools::implementations::opencode::OpenCodeWriteTool).into());
             }
             ensure_plan_mode_tools(&mut tool_config);
         }
-        let active_agent_message = wimo ai_wimo_tools::registry::types::ToolConfig::for_tool::<
-            wimo ai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
+        let active_agent_message = wimoai_wimo_tools::registry::types::ToolConfig::for_tool::<
+            wimoai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
         >();
-        let is_active_agent_message = |tool: &wimo ai_wimo_tools::registry::types::ToolConfig| {
+        let is_active_agent_message = |tool: &wimoai_wimo_tools::registry::types::ToolConfig| {
             tool.kind == Some(ToolKind::ActiveAgentMessage) || tool.id == active_agent_message.id
         };
         let can_inject_active_agent_message = self.active_agent_messages_enabled
@@ -747,14 +747,14 @@ impl AgentBuilder {
                 .retain(|tool| !is_active_agent_message(tool));
         }
         if self.memory_backend.is_none() {
-            let wimo_ns = wimo ai_wimo_tools::types::tool::ToolNamespace::Wimo.to_string();
+            let wimo_ns = wimoai_wimo_tools::types::tool::ToolNamespace::Wimo.to_string();
             let mem_search_id = format!(
                 "{wimo_ns}:{}",
-                wimo ai_wimo_tools::implementations::memory::MEMORY_SEARCH_TOOL_NAME
+                wimoai_wimo_tools::implementations::memory::MEMORY_SEARCH_TOOL_NAME
             );
             let mem_get_id = format!(
                 "{wimo_ns}:{}",
-                wimo ai_wimo_tools::implementations::memory::MEMORY_GET_TOOL_NAME
+                wimoai_wimo_tools::implementations::memory::MEMORY_GET_TOOL_NAME
             );
             tool_config
                 .tools
@@ -763,18 +763,18 @@ impl AgentBuilder {
         if self.prompt_audience == crate::prompt::context::PromptAudience::Subagent {
             tool_config
                 .tools
-                .retain(|tool| tool.kind != Some(wimo ai_wimo_tools::types::tool::ToolKind::AskUser));
+                .retain(|tool| tool.kind != Some(wimoai_wimo_tools::types::tool::ToolKind::AskUser));
         } else if !self.ask_user_question_enabled {
             let ask_user_id = format!(
                 "{}:ask_user_question",
-                wimo ai_wimo_tools::types::tool::ToolNamespace::Wimo,
+                wimoai_wimo_tools::types::tool::ToolNamespace::Wimo,
             );
             tool_config.tools.retain(|tool| tool.id != ask_user_id);
         }
         apply_workflow_tool_gates(&mut tool_config, self.background_workflows_enabled);
         let task_tool_id = format!(
             "{}:{}",
-            wimo ai_wimo_tools::types::tool::ToolNamespace::Wimo,
+            wimoai_wimo_tools::types::tool::ToolNamespace::Wimo,
             "task"
         );
         let mut task_stripped = false;
@@ -808,7 +808,7 @@ impl AgentBuilder {
             }
         }
         if task_stripped {
-            use wimo ai_wimo_tools::types::tool::ToolNamespace;
+            use wimoai_wimo_tools::types::tool::ToolNamespace;
             let has_satisfier = |ns: ToolNamespace, id: &str, needs_bg: bool| {
                 let fq = format!("{ns}:{id}");
                 tool_config.tools.iter().any(|tc| {
@@ -832,7 +832,7 @@ impl AgentBuilder {
                     .retain(|tc| !lifecycle.contains(&short_tool_name(&tc.id)));
             }
         }
-        if let wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig::Enabled {
+        if let wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig::Enabled {
             ref params,
         } = self.web_fetch_config
             && let Ok(params_value) = serde_json::to_value(params)
@@ -1013,7 +1013,7 @@ impl AgentBuilder {
         }
         if self.prompt_audience == crate::prompt::context::PromptAudience::Subagent {
             tool_config.tools.retain(|tool| {
-                !wimo ai_wimo_tools::implementations::wimo::is_workflow_tool(tool.kind, &tool.id)
+                !wimoai_wimo_tools::implementations::wimo::is_workflow_tool(tool.kind, &tool.id)
             });
         }
         let use_backend_search = self.backend_search;
@@ -1053,8 +1053,8 @@ impl AgentBuilder {
         .map_err(|e| AgentBuildError::ToolError(e.to_string()))?;
         if let Some(bytes) = self.mcp_max_output_bytes {
             tool_bridge.toolset().resources.lock().await.insert(
-                wimo ai_wimo_tools::types::resources::TruncationCfg(
-                    wimo ai_wimo_tools::types::context::TruncationConfig {
+                wimoai_wimo_tools::types::resources::TruncationCfg(
+                    wimoai_wimo_tools::types::context::TruncationConfig {
                         mcp_max_output_bytes: Some(bytes),
                         ..Default::default()
                     },
@@ -1187,12 +1187,12 @@ impl AgentBuilder {
         let mut hosted_tools = Vec::new();
         if use_backend_search {
             if web_search_enabled && definition.hosted_tool_allowed("web_search") {
-                hosted_tools.push(wimo ai_wimo_sampling_types::HostedTool::WebSearch { options: None });
+                hosted_tools.push(wimoai_wimo_sampling_types::HostedTool::WebSearch { options: None });
             }
             if definition.hosted_tool_allowed("x_search") {
-                hosted_tools.push(wimo ai_wimo_sampling_types::HostedTool::XSearch { options: None });
+                hosted_tools.push(wimoai_wimo_sampling_types::HostedTool::XSearch { options: None });
             }
-            wimo ai_wimo_sampling_types::apply_tool_overrides(
+            wimoai_wimo_sampling_types::apply_tool_overrides(
                 &mut hosted_tools,
                 definition.tool_overrides.as_ref(),
             );
@@ -1211,8 +1211,8 @@ impl AgentBuilder {
         ))
     }
 }
-/// CLI naming for the shared [`wimo ai_tool_types::build_task_description`] builder.
-const TASK_TOOL_NAMING: wimo ai_tool_types::TaskToolNaming<'static> = wimo ai_tool_types::TaskToolNaming {
+/// CLI naming for the shared [`wimoai_tool_types::build_task_description`] builder.
+const TASK_TOOL_NAMING: wimoai_tool_types::TaskToolNaming<'static> = wimoai_tool_types::TaskToolNaming {
     task_tool: "${{ tools.by_kind.task }}",
     subagent_type_param: "${{ params.task.subagent_type }}",
     run_in_background_param: "${{ params.task.run_in_background }}",
@@ -1235,10 +1235,10 @@ Prefer doing the work yourself unless delegation is clearly necessary.\n\
 Usage: specify ${{ params.task.subagent_type }} (\"general-purpose\", \"explore\", or \"plan\"), \n\
 a short ${{ params.task.description }}, and a detailed ${{ params.task.prompt }}.\n\
 ${{ params.task.run_in_background }}: Returns immediately with a subagent_id. Use the task output tool to retrieve results. This is set to true by default.";
-/// CLI [`wimo ai_tool_types::SubagentToolNaming`]: each kind maps to its `${{ tools.by_kind.* }}` template placeholder.
+/// CLI [`wimoai_tool_types::SubagentToolNaming`]: each kind maps to its `${{ tools.by_kind.* }}` template placeholder.
 /// Rendering a built-in's `tools_template` thus reproduces the placeholders for the CLI's `TemplateRenderer` to resolve at finalize time.
-const SUBAGENT_TOOL_NAMING: wimo ai_tool_types::SubagentToolNaming<'static> =
-    wimo ai_tool_types::SubagentToolNaming {
+const SUBAGENT_TOOL_NAMING: wimoai_tool_types::SubagentToolNaming<'static> =
+    wimoai_tool_types::SubagentToolNaming {
         execute: "${{ tools.by_kind.execute }}",
         read: "${{ tools.by_kind.read }}",
         edit: "${{ tools.by_kind.edit }}",
@@ -1247,13 +1247,13 @@ const SUBAGENT_TOOL_NAMING: wimo ai_tool_types::SubagentToolNaming<'static> =
         web_search: "${{ tools.by_kind.web_search }}",
         plan: "${{ tools.by_kind.plan }}",
     };
-/// Return the tool-access fragment for a built-in subagent type from the shared [`wimo ai_tool_types`] catalog.
+/// Return the tool-access fragment for a built-in subagent type from the shared [`wimoai_tool_types`] catalog.
 /// Rendering with [`SUBAGENT_TOOL_NAMING`] re-emits the `${{ tools.by_kind.* }}` placeholders for the CLI's `TemplateRenderer`.
 fn builtin_tools_fragment(name: BuiltinAgentName) -> String {
     let subagent = match name {
-        BuiltinAgentName::GeneralPurpose => wimo ai_tool_types::GENERAL_PURPOSE_SUBAGENT,
-        BuiltinAgentName::Explore => wimo ai_tool_types::EXPLORE_SUBAGENT,
-        BuiltinAgentName::Plan => wimo ai_tool_types::PLAN_SUBAGENT,
+        BuiltinAgentName::GeneralPurpose => wimoai_tool_types::GENERAL_PURPOSE_SUBAGENT,
+        BuiltinAgentName::Explore => wimoai_tool_types::EXPLORE_SUBAGENT,
+        BuiltinAgentName::Plan => wimoai_tool_types::PLAN_SUBAGENT,
         _ => return String::new(),
     };
     subagent.render_tools(&SUBAGENT_TOOL_NAMING)
@@ -1282,29 +1282,29 @@ fn task_model_guidance(model_slugs: &[String]) -> String {
 }
 /// Build the Task tool description with the effective subagent list.
 ///
-/// Maps each [`SubagentEntry`] to the shared [`wimo ai_tool_types::SubagentDescriptor`].
-/// Defers to [`wimo ai_tool_types::build_task_description`] so the CLI and the prod chat stack share one builder.
+/// Maps each [`SubagentEntry`] to the shared [`wimoai_tool_types::SubagentDescriptor`].
+/// Defers to [`wimoai_tool_types::build_task_description`] so the CLI and the prod chat stack share one builder.
 /// Built-in (unshadowed) entries carry the hardcoded tool-name fragment.
 /// User-defined entries carry `None` so their raw `description` is used verbatim (markdown is fine; it's model-facing text).
 pub(crate) fn build_task_description(
     subagents: &[SubagentEntry],
     model_slugs: &[String],
 ) -> String {
-    let descriptors: Vec<wimo ai_tool_types::SubagentDescriptor> = subagents
+    let descriptors: Vec<wimoai_tool_types::SubagentDescriptor> = subagents
         .iter()
         .map(|entry| {
             let tools = match &entry.source {
                 SubagentSource::Builtin(b) => Some(builtin_tools_fragment(*b)),
                 SubagentSource::UserDefined { .. } => None,
             };
-            wimo ai_tool_types::SubagentDescriptor {
+            wimoai_tool_types::SubagentDescriptor {
                 name: entry.name.clone(),
                 description: entry.description.clone(),
                 tools,
             }
         })
         .collect();
-    let mut description = wimo ai_tool_types::build_task_description(&descriptors, &TASK_TOOL_NAMING);
+    let mut description = wimoai_tool_types::build_task_description(&descriptors, &TASK_TOOL_NAMING);
     description.push_str(&task_model_guidance(model_slugs));
     description
 }
@@ -1319,7 +1319,7 @@ fn resolve_shell_for_prompt() -> String {
     }
     #[cfg(not(unix))]
     {
-        wimo ai_wimo_config::shell::detect_windows_shell()
+        wimoai_wimo_config::shell::detect_windows_shell()
             .name()
             .to_string()
     }
@@ -1329,12 +1329,12 @@ mod tests {
     use super::*;
     use crate::config::AgentScope;
     async fn active_agent_message_tool_count(enabled: Option<bool>, predeclared: bool) -> usize {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
         let mut definition = crate::config::AgentDefinition::default_wimo();
         if predeclared {
             definition.tool_config.tools.push(
-                wimo ai_wimo_tools::registry::types::ToolConfig::for_tool::<
-                    wimo ai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
+                wimoai_wimo_tools::registry::types::ToolConfig::for_tool::<
+                    wimoai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
                 >(),
             );
         }
@@ -1374,13 +1374,13 @@ mod tests {
     }
     #[tokio::test]
     async fn active_agent_messages_are_absent_from_child_toolsets() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
         let mut definition = crate::config::AgentDefinition::default_wimo();
         definition
             .tool_config
             .tools
-            .push(wimo ai_wimo_tools::registry::types::ToolConfig::for_tool::<
-                wimo ai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
+            .push(wimoai_wimo_tools::registry::types::ToolConfig::for_tool::<
+                wimoai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
             >());
         let definitions = AgentBuilder::new(
             std::env::temp_dir(),
@@ -1403,7 +1403,7 @@ mod tests {
     }
     #[tokio::test]
     async fn active_agent_messages_do_not_modify_curated_toolsets() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
         let mut definition = crate::config::AgentDefinition::default_wimo();
         definition.inject_default_tools = false;
         let build = |enabled| {
@@ -1446,7 +1446,7 @@ mod tests {
             description: desc.to_string(),
             source,
             shadows_builtin: None,
-            config_source: wimo ai_wimo_tools::types::config_source::ConfigSource::Builtin,
+            config_source: wimoai_wimo_tools::types::config_source::ConfigSource::Builtin,
         }
     }
     #[test]
@@ -1465,11 +1465,11 @@ mod tests {
         ];
         let desc = build_task_description(&subagents, &[]);
         assert!(
-            desc.contains(wimo ai_tool_types::GENERAL_PURPOSE_SUBAGENT.tools_template),
+            desc.contains(wimoai_tool_types::GENERAL_PURPOSE_SUBAGENT.tools_template),
             "should include general-purpose tool names"
         );
         assert!(
-            desc.contains(wimo ai_tool_types::EXPLORE_SUBAGENT.tools_template),
+            desc.contains(wimoai_tool_types::EXPLORE_SUBAGENT.tools_template),
             "should include explore tool names"
         );
         assert!(
@@ -1489,7 +1489,7 @@ mod tests {
         let desc = build_task_description(&subagents, &[]);
         assert!(desc.contains("- **code-reviewer**: Reviews code for bugs and style issues."));
         assert!(
-            !desc.contains(wimo ai_tool_types::GENERAL_PURPOSE_SUBAGENT.tools_template),
+            !desc.contains(wimoai_tool_types::GENERAL_PURPOSE_SUBAGENT.tools_template),
             "user-defined entries should not get built-in tool fragments"
         );
     }
@@ -1517,7 +1517,7 @@ mod tests {
                 scope: AgentScope::Project,
             },
             shadows_builtin: Some(BuiltinAgentName::Explore),
-            config_source: wimo ai_wimo_tools::types::config_source::ConfigSource::Project {
+            config_source: wimoai_wimo_tools::types::config_source::ConfigSource::Project {
                 path: std::path::PathBuf::new(),
             },
         }];
@@ -1527,7 +1527,7 @@ mod tests {
             "shadowed built-in should use user description"
         );
         assert!(
-            !desc.contains(wimo ai_tool_types::EXPLORE_SUBAGENT.tools_template),
+            !desc.contains(wimoai_tool_types::EXPLORE_SUBAGENT.tools_template),
             "shadowed built-in should NOT include built-in tool fragment"
         );
     }
@@ -1583,8 +1583,8 @@ mod tests {
     }
     #[test]
     fn task_model_guidance_resolves_model_param_override() {
-        use wimo ai_wimo_tools::types::template_renderer::TemplateRenderer;
-        use wimo ai_wimo_tools::types::tool::ToolKind;
+        use wimoai_wimo_tools::types::template_renderer::TemplateRenderer;
+        use wimoai_wimo_tools::types::tool::ToolKind;
         let renderer = TemplateRenderer::new(
             Default::default(),
             std::collections::HashMap::from([(
@@ -1631,8 +1631,8 @@ mod tests {
     /// Session-start telemetry reuses the snapshot instead of re-walking the disk.
     #[tokio::test]
     async fn discovery_snapshot_records_gated_and_preloaded_skills() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         let tmp = tempfile::tempdir().unwrap();
         let write_skill = |dir: &str, content: &str| {
             let d = tmp.path().join(".wimo/skills").join(dir);
@@ -1688,8 +1688,8 @@ mod tests {
         subagents_enabled: bool,
         ask_user_question_enabled: bool,
     ) -> crate::agent::Agent {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         AgentBuilder::new(
             std::env::temp_dir(),
             Arc::new(LocalTerminalBackend::new()),
@@ -1815,8 +1815,8 @@ mod tests {
     }
     #[tokio::test]
     async fn subagent_audience_never_receives_ask_user_question() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         let agent = AgentBuilder::new(
             std::env::temp_dir(),
             Arc::new(LocalTerminalBackend::new()),
@@ -1843,8 +1843,8 @@ mod tests {
         audience: crate::prompt::context::PromptAudience,
         definition: crate::config::AgentDefinition,
     ) -> Vec<String> {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         AgentBuilder::new(
             std::env::temp_dir(),
             Arc::new(LocalTerminalBackend::new()),
@@ -1900,13 +1900,13 @@ mod tests {
     }
     #[tokio::test]
     async fn custom_child_toolset_cannot_reintroduce_workflow() {
-        use wimo ai_wimo_tools::implementations::wimo::{ReadFileTool, WorkflowTool};
+        use wimoai_wimo_tools::implementations::wimo::{ReadFileTool, WorkflowTool};
         let mut definition = crate::config::AgentDefinition::general_purpose();
         definition.inject_default_tools = false;
         definition.tool_config.tools = vec![
             (&ReadFileTool).into(),
             (&WorkflowTool).into(),
-            wimo ai_wimo_tools::registry::types::ToolConfig::from_id("Wimo:workflow"),
+            wimoai_wimo_tools::registry::types::ToolConfig::from_id("Wimo:workflow"),
         ];
         let names =
             workflow_tool_names(crate::prompt::context::PromptAudience::Subagent, definition).await;
@@ -1957,8 +1957,8 @@ mod tests {
     }
     #[tokio::test]
     async fn curated_empty_toolset_fails_agent_build() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         let mut profile = crate::config::AgentDefinition::default_wimo();
         profile.tool_config = Default::default();
         profile.inject_default_tools = false;
@@ -1985,10 +1985,10 @@ mod tests {
     /// Fails if the merge is ever hoisted above the injection.
     #[tokio::test]
     async fn plan_mode_injected_ask_user_question_receives_params() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionParams;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-        use wimo ai_wimo_tools::types::resources::Params;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionParams;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::types::resources::Params;
         let profile = crate::config::AgentDefinition::default_wimo();
         assert!(
             !profile
@@ -2024,10 +2024,10 @@ mod tests {
     /// Cancel/timeout then return the no-operator text.
     #[tokio::test]
     async fn non_interactive_build_stamps_ask_user_question_params() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionParams;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-        use wimo ai_wimo_tools::types::resources::Params;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionParams;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::types::resources::Params;
         let agent = AgentBuilder::new(
             std::env::temp_dir(),
             Arc::new(LocalTerminalBackend::new()),
@@ -2046,8 +2046,8 @@ mod tests {
         assert_eq!(applied.0.non_interactive, Some(true));
     }
     async fn build_with_tools(tools: Vec<String>, disallowed: Vec<String>) -> crate::agent::Agent {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         let mut def = crate::config::AgentDefinition::default_wimo();
         def.tools = tools;
         def.disallowed_tools = disallowed;
@@ -2066,8 +2066,8 @@ mod tests {
         own_tools: Vec<String>,
         session_allow: Vec<String>,
     ) -> Vec<String> {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         let mut def = crate::config::AgentDefinition::default_wimo();
         def.tools = own_tools;
         def.session_tools_allowlist = Some(session_allow);
@@ -2198,8 +2198,8 @@ mod tests {
         assert_eq!(agent.definition().allowed_subagent_types, Some(vec![]));
         let agent = build_with_tools(vec![], vec![]).await;
         assert_eq!(agent.definition().allowed_subagent_types, None);
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         let mut def = crate::config::AgentDefinition::default_wimo();
         def.disallowed_tools = vec!["Agent".into()];
         let agent = AgentBuilder::new(
@@ -2215,10 +2215,10 @@ mod tests {
     }
     #[tokio::test]
     async fn spawning_blocked_disables_all_background_bash_modes() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::implementations::wimo::bash::BashParams;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-        use wimo ai_wimo_tools::types::resources::Params;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::implementations::wimo::bash::BashParams;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::types::resources::Params;
         let mut definition = crate::config::AgentDefinition::default_wimo();
         definition.tools = vec!["run_terminal_cmd".into()];
         let bash_params = serde_json::json!({
@@ -2344,8 +2344,8 @@ mod tests {
     /// An on-disk plugin agent parsed via `from_file_frontmatter_only` with a compat-style `tools:` allowlist gets the mapped toolset, not 0 tools.
     #[tokio::test]
     async fn plugin_style_agent_file_maps_claude_tools() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         const MD: &str = "---\n\
             name: test\n\
             description: test agent\n\
@@ -2445,10 +2445,10 @@ mod tests {
     }
     #[tokio::test]
     async fn requested_enabled_web_tools_survive_allowlist() {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig;
-        use wimo ai_wimo_tools::implementations::web_search::WebSearchConfig;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig;
+        use wimoai_wimo_tools::implementations::web_search::WebSearchConfig;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         let mut definition = crate::config::AgentDefinition::default_wimo();
         definition.tools = vec![
             "read_file".into(),
@@ -2582,11 +2582,11 @@ mod tests {
         web_search_enabled: bool,
         backend_search_enabled: bool,
         disallowed_tools: &[&str],
-        tool_overrides: Option<wimo ai_wimo_sampling_types::ToolOverrides>,
+        tool_overrides: Option<wimoai_wimo_sampling_types::ToolOverrides>,
     ) -> crate::agent::Agent {
-        use wimo ai_wimo_tools::computer::local::LocalTerminalBackend;
-        use wimo ai_wimo_tools::implementations::web_search::WebSearchConfig;
-        use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+        use wimoai_wimo_tools::computer::local::LocalTerminalBackend;
+        use wimoai_wimo_tools::implementations::web_search::WebSearchConfig;
+        use wimoai_wimo_tools::notification::ToolNotificationHandle;
         let web_search_config = if web_search_enabled {
             WebSearchConfig::Enabled {
                 api_key: "test-key".into(),
@@ -2622,13 +2622,13 @@ mod tests {
         assert!(
             !hosted
                 .iter()
-                .any(|t| matches!(t, wimo ai_wimo_sampling_types::HostedTool::WebSearch { .. })),
+                .any(|t| matches!(t, wimoai_wimo_sampling_types::HostedTool::WebSearch { .. })),
             "hosted WebSearch must be removed when web_search is disallowed, got: {hosted:?}"
         );
         assert!(
             hosted
                 .iter()
-                .any(|t| matches!(t, wimo ai_wimo_sampling_types::HostedTool::XSearch { .. })),
+                .any(|t| matches!(t, wimoai_wimo_sampling_types::HostedTool::XSearch { .. })),
             "XSearch must remain when only web_search is disallowed, got: {hosted:?}"
         );
         let has_web_search_fn = agent
@@ -2650,13 +2650,13 @@ mod tests {
         assert!(
             hosted
                 .iter()
-                .any(|t| matches!(t, wimo ai_wimo_sampling_types::HostedTool::WebSearch { .. })),
+                .any(|t| matches!(t, wimoai_wimo_sampling_types::HostedTool::WebSearch { .. })),
             "expected WebSearch hosted tool, got: {hosted:?}"
         );
         assert!(
             hosted
                 .iter()
-                .any(|t| matches!(t, wimo ai_wimo_sampling_types::HostedTool::XSearch { .. })),
+                .any(|t| matches!(t, wimoai_wimo_sampling_types::HostedTool::XSearch { .. })),
             "expected XSearch hosted tool, got: {hosted:?}"
         );
     }
@@ -2668,13 +2668,13 @@ mod tests {
         assert!(
             !hosted
                 .iter()
-                .any(|t| matches!(t, wimo ai_wimo_sampling_types::HostedTool::WebSearch { .. })),
+                .any(|t| matches!(t, wimoai_wimo_sampling_types::HostedTool::WebSearch { .. })),
             "WebSearch must NOT appear when web_search is disabled, got: {hosted:?}"
         );
         assert!(
             hosted
                 .iter()
-                .any(|t| matches!(t, wimo ai_wimo_sampling_types::HostedTool::XSearch { .. })),
+                .any(|t| matches!(t, wimoai_wimo_sampling_types::HostedTool::XSearch { .. })),
             "expected XSearch hosted tool, got: {hosted:?}"
         );
     }
@@ -2687,9 +2687,9 @@ mod tests {
     }
     #[tokio::test]
     async fn hosted_tools_bake_definition_tool_overrides_into_options() {
-        let x_search = wimo ai_wimo_sampling_types::XSearchOptions {
+        let x_search = wimoai_wimo_sampling_types::XSearchOptions {
             date_bound: Some(
-                wimo ai_wimo_sampling_types::SearchDateBound::new(None, Some("2024-03-15".into()))
+                wimoai_wimo_sampling_types::SearchDateBound::new(None, Some("2024-03-15".into()))
                     .unwrap(),
             ),
         };
@@ -2697,7 +2697,7 @@ mod tests {
             true,
             true,
             &[],
-            Some(wimo ai_wimo_sampling_types::ToolOverrides {
+            Some(wimoai_wimo_sampling_types::ToolOverrides {
                 x_search: Some(x_search.clone()),
                 web_search: None,
             }),
@@ -2706,7 +2706,7 @@ mod tests {
         assert!(
             agent
                 .hosted_tools()
-                .contains(&wimo ai_wimo_sampling_types::HostedTool::XSearch {
+                .contains(&wimoai_wimo_sampling_types::HostedTool::XSearch {
                     options: Some(x_search),
                 }),
             "definition tool_overrides must be applied to HostedTool options"

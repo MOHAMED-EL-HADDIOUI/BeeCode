@@ -1,4 +1,4 @@
-//! These tests must run serially: they touch `wimo_HOME` (a `OnceLock` in `wimo ai-wimo-config`), `wimo_TEST_VERSION`, and `NPM_TOKEN`.
+//! These tests must run serially: they touch `wimo_HOME` (a `OnceLock` in `wimoai-wimo-config`), `wimo_TEST_VERSION`, and `NPM_TOKEN`.
 //! Once `wimo_HOME` is initialized for a process, it can't be changed.
 //! We set it from a single shared `OnceLock` and reset the contents of the directory between tests.
 
@@ -10,7 +10,7 @@ use std::time::Duration;
 use serial_test::serial;
 
 use common::{reset_home, test_home};
-use wimo ai_wimo_update::write_version_cache;
+use wimoai_wimo_update::write_version_cache;
 
 fn version_cache_path() -> PathBuf {
     test_home().join("version.json")
@@ -155,7 +155,7 @@ async fn get_installed_version_falls_back_to_cargo_pkg_version_when_env_unset() 
     unsafe {
         std::env::remove_var("wimo_TEST_VERSION");
     }
-    let v = wimo ai_wimo_update::version::get_installed_wimo_version();
+    let v = wimoai_wimo_update::version::get_installed_wimo_version();
     let _: semver::Version = v
         .parse()
         .unwrap_or_else(|e| panic!("CARGO_PKG_VERSION is not a valid semver: '{v}': {e}"));
@@ -171,13 +171,13 @@ async fn get_installed_version_with_env_var_takes_precedence() {
         unsafe {
             std::env::remove_var("wimo_TEST_VERSION");
         }
-        wimo ai_wimo_update::version::get_installed_wimo_version()
+        wimoai_wimo_update::version::get_installed_wimo_version()
     };
 
     unsafe {
         std::env::set_var("wimo_TEST_VERSION", "0.0.0-test");
     }
-    let overridden = wimo ai_wimo_update::version::get_installed_wimo_version();
+    let overridden = wimoai_wimo_update::version::get_installed_wimo_version();
     assert_ne!(real, overridden);
     assert_eq!(overridden, "0.0.0-test");
 
@@ -196,7 +196,7 @@ async fn get_installed_version_does_not_validate_env_var_format() {
     unsafe {
         std::env::set_var("wimo_TEST_VERSION", "not-a-version");
     }
-    let v = wimo ai_wimo_update::version::get_installed_wimo_version();
+    let v = wimoai_wimo_update::version::get_installed_wimo_version();
     assert_eq!(v, "not-a-version");
     unsafe {
         std::env::remove_var("wimo_TEST_VERSION");

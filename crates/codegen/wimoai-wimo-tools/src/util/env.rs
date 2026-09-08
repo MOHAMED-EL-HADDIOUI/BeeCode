@@ -1,11 +1,11 @@
 //! Environment variable helpers and process isolation for terminal execution.
 //!
-//! All implementations now live in the lightweight [`wimo ai_tty_utils`] crate
+//! All implementations now live in the lightweight [`wimoai_tty_utils`] crate
 //! so that every crate in the workspace can use them without pulling in the
-//! heavyweight `wimo ai-wimo-tools` dependency. This module re-exports the public
+//! heavyweight `wimoai-wimo-tools` dependency. This module re-exports the public
 //! API for backward compatibility.
 
-pub use wimo ai_tty_utils::{detach_from_tty, pager_env};
+pub use wimoai_tty_utils::{detach_from_tty, pager_env};
 
 /// The positive-integer env contract shared by limits and timeouts: plain
 /// digits only; `None` for anything else, including zero.

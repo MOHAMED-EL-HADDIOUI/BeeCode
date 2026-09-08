@@ -1,6 +1,6 @@
 //! `x.ai/session/usage`: cumulative session token and cost totals as [`PromptUsage`].
 //!
-//! Reads the in-memory [`wimo ai_chat_state::UsageLedger`] (main-loop and folded subagent spend).
+//! Reads the in-memory [`wimoai_chat_state::UsageLedger`] (main-loop and folded subagent spend).
 //! Partial costs are scrubbed, since an absent cost does not mean free.
 //! Totals reset when a session is resumed in a new agent process.
 
@@ -59,8 +59,8 @@ async fn handle_session_usage(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtRe
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_chat_state::UsageLedger;
-    use wimo ai_wimo_sampling_types::TokenUsage;
+    use wimoai_chat_state::UsageLedger;
+    use wimoai_wimo_sampling_types::TokenUsage;
 
     fn usage(prompt: u32, completion: u32) -> TokenUsage {
         TokenUsage {

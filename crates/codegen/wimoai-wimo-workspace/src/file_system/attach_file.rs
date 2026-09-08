@@ -5,7 +5,7 @@ use regex::Regex;
 use sha2::{Digest, Sha256};
 use std::path::PathBuf;
 use tracing::warn;
-use wimo ai_wimo_tools::util::truncate::estimate_tokens;
+use wimoai_wimo_tools::util::truncate::estimate_tokens;
 #[cfg(test)]
 mod persistence {
     use std::path::PathBuf;

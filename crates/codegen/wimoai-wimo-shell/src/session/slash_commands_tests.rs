@@ -1,5 +1,5 @@
 use super::*;
-use wimo ai_wimo_tools::implementations::skills::types::SkillScope;
+use wimoai_wimo_tools::implementations::skills::types::SkillScope;
 
 /// Shadows [`super::resolve_human_intent`] for the cases that route something other than `/loop`.
 /// Those cases are indifferent to the fire mode, and pinning it here keeps a change to that argument out of every unrelated call site.
@@ -790,7 +790,7 @@ fn loop_instruction_derives_interval_without_default_or_inline_execute() {
 #[test]
 fn loop_prompt_matches_pager_wording() {
     // The shell and pager must stay textually identical so they don't drift.
-    use wimo ai_wimo_tools::implementations::wimo::{
+    use wimoai_wimo_tools::implementations::wimo::{
         loop_schedule_instruction, loop_usage_message,
     };
     assert_eq!(loop_text("", LoopFireMode::Detached), loop_usage_message());

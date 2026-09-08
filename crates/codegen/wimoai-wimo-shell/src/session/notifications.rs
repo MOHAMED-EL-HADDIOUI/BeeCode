@@ -3,7 +3,7 @@ use std::sync::atomic::AtomicBool;
 
 use tokio::sync::{mpsc, watch};
 
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
 
 use crate::session::persistence::PersistenceMsg;
 

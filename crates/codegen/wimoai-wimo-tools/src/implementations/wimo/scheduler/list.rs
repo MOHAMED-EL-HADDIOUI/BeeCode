@@ -24,7 +24,7 @@ pub struct SchedulerListOutput {
     pub tasks: Vec<ScheduledTaskSummary>,
 }
 
-impl wimo ai_tool_runtime::ToolOutput for SchedulerListOutput {}
+impl wimoai_tool_runtime::ToolOutput for SchedulerListOutput {}
 
 #[derive(Debug, Default)]
 pub struct SchedulerListTool;
@@ -47,34 +47,34 @@ impl crate::types::tool_metadata::ToolMetadata for SchedulerListTool {
         use crate::types::tool_metadata::ToolMetadata as TM;
         Expr::Value(ToolRequirement::Tool {
             namespace: TM::tool_namespace(&SchedulerCreateTool).to_string(),
-            id: wimo ai_tool_runtime::Tool::id(&SchedulerCreateTool).to_string(),
+            id: wimoai_tool_runtime::Tool::id(&SchedulerCreateTool).to_string(),
             if_params: None,
         })
     }
 }
 
-impl wimo ai_tool_runtime::Tool for SchedulerListTool {
+impl wimoai_tool_runtime::Tool for SchedulerListTool {
     type Args = SchedulerListInput;
     type Output = SchedulerListOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("scheduler_list").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("scheduler_list").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "scheduler_list",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -82,9 +82,9 @@ impl wimo ai_tool_runtime::Tool for SchedulerListTool {
     #[tracing::instrument(name = "tool.scheduler_list", skip_all)]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         _input: SchedulerListInput,
-    ) -> Result<SchedulerListOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<SchedulerListOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -92,7 +92,7 @@ impl wimo ai_tool_runtime::Tool for SchedulerListTool {
             let res = resources.lock().await;
             res.get::<SchedulerHandle>()
                 .ok_or_else(|| {
-                    wimo ai_tool_runtime::ToolError::custom(
+                    wimoai_tool_runtime::ToolError::custom(
                         "missing_dependency",
                         "missing dependency: SchedulerHandle",
                     )
@@ -105,15 +105,15 @@ impl wimo ai_tool_runtime::Tool for SchedulerListTool {
         sender
             .send(SchedulerCommand::List { reply: reply_tx })
             .map_err(|_| {
-                wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("scheduler_list").expect("valid"),
+                wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("scheduler_list").expect("valid"),
                     "Scheduler actor stopped",
                 )
             })?;
 
         let snapshot = reply_rx.await.map_err(|_| {
-            wimo ai_tool_runtime::ToolError::execution(
-                wimo ai_tool_protocol::ToolId::new("scheduler_list").expect("valid"),
+            wimoai_tool_runtime::ToolError::execution(
+                wimoai_tool_protocol::ToolId::new("scheduler_list").expect("valid"),
                 "Scheduler actor dropped reply",
             )
         })?;

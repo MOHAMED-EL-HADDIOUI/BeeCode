@@ -40,7 +40,7 @@ pub use index::{MemoryIndex, init_sqlite_vec};
 pub use observation::*;
 pub use storage::{MemoryScope, MemoryStorage};
 
-pub(crate) const MEMORY_LOG_TARGET: &str = "wimo ai_memory";
+pub(crate) const MEMORY_LOG_TARGET: &str = "wimoai_memory";
 
 /// Embed all chunks that don't have embeddings yet.
 ///

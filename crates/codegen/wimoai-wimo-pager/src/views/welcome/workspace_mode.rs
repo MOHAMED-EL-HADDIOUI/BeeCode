@@ -724,7 +724,7 @@ mod apply_tests {
     #[test]
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ACK)]
     fn welcome_local_one_shot_only_when_agents_alive() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::set(wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV, "1");
+        let _ack = wimoai_wimo_test_support::EnvGuard::set(wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV, "1");
         set_active_local_workspace(None).unwrap();
         let tmp = tempfile::tempdir().unwrap();
         let out = prepare_welcome_workspace_for_new_session(
@@ -753,7 +753,7 @@ mod apply_tests {
     #[test]
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ACK)]
     fn welcome_local_stamps_own_mode() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::set(wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV, "1");
+        let _ack = wimoai_wimo_test_support::EnvGuard::set(wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV, "1");
         set_active_local_workspace(None).unwrap();
         let tmp = tempfile::tempdir().unwrap();
         let out = prepare_welcome_workspace_for_new_session(
@@ -815,11 +815,11 @@ mod apply_tests {
     #[test]
     #[serial_test::serial(wimo_CHAT_LOCAL_WORKSPACE_ACK)]
     fn local_without_ack_awaits_confirm() {
-        let _ack = wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV);
+        let _ack = wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_LOCAL_WORKSPACE_ACK_ENV);
         // Isolate the ack file from the developer machine
         let home = tempfile::tempdir().unwrap();
         let _home =
-            wimo ai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path().to_str().unwrap());
+            wimoai_wimo_test_support::EnvGuard::set("wimo_HOME", home.path().to_str().unwrap());
         set_active_local_workspace(None).unwrap();
         let tmp = tempfile::tempdir().unwrap();
         let out = prepare_welcome_workspace_for_new_session(

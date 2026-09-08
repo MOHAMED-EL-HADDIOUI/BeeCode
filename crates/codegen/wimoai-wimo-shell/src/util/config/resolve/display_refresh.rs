@@ -3,7 +3,7 @@
 use crate::util::config::RemoteSettings;
 use serde::Deserialize;
 use toml::Value as TomlValue;
-use wimo ai_wimo_config_types::DisplayRefreshSettings;
+use wimoai_wimo_config_types::DisplayRefreshSettings;
 
 pub const ENV_DISPLAY_REFRESH_PROBE_ENABLED: &str = "wimo_DISPLAY_REFRESH_PROBE_ENABLED";
 pub const ENV_DISPLAY_REFRESH_AUTO_CADENCE: &str = "wimo_DISPLAY_REFRESH_AUTO_CADENCE";

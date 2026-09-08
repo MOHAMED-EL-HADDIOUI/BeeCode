@@ -6,16 +6,16 @@
 //! Both are **runtime concerns**, not wire concerns:
 //!
 //! - `tokio_util::sync::CancellationToken` is a tokio type.
-//!   Adding it here would force every consumer of `wimo ai-wimo-workspace-types` (including the eventual WASM browser SDK) to pull in tokio.
+//!   Adding it here would force every consumer of `wimoai-wimo-workspace-types` (including the eventual WASM browser SDK) to pull in tokio.
 //!   Cancellation is a transport mechanism: in-process, the receiver drop signal handles it; over gRPC, the client closing the stream handles it.
 //! - `Extensions` (a typed `HashMap<TypeId, Box<dyn Any + Send + Sync>>`) is in-process only and not serialized.
 //!   It carries tracing spans and telemetry context that have no wire representation, so it belongs with the runtime.
 //!
 //! So this crate exposes `RequestMessage<T>`: just the parts that need to survive a network hop.
 //! Those are the [`message`](RequestMessage::message), [`metadata`](RequestMessage::metadata), and optional [`deadline`](RequestMessage::deadline).
-//! The runtime crate (`wimo ai-wimo-workspace`) wraps this in its own `Request<T>` that adds the cancellation token and extensions map.
+//! The runtime crate (`wimoai-wimo-workspace`) wraps this in its own `Request<T>` that adds the cancellation token and extensions map.
 //!
-//! Splitting the envelope this way keeps `wimo ai-wimo-workspace-types` tokio-free.
+//! Splitting the envelope this way keeps `wimoai-wimo-workspace-types` tokio-free.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

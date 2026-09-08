@@ -1,6 +1,6 @@
 //! wimo tools library.
 
-pub use wimo ai_wimo_version::VERSION;
+pub use wimoai_wimo_version::VERSION;
 
 /// Default maximum output size (in bytes) for tool results sent to the model.
 /// 40 KB ≈ 10 000 tokens

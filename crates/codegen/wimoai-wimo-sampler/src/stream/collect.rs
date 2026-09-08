@@ -6,7 +6,7 @@
 use futures_util::StreamExt;
 use futures_util::stream::Stream;
 
-use wimo ai_wimo_sampling_types::ConversationResponse;
+use wimoai_wimo_sampling_types::ConversationResponse;
 
 use crate::events::{SamplingErrorInfo, SamplingErrorKind, SamplingEvent};
 use crate::metrics::InferenceLatencyStats;
@@ -47,7 +47,7 @@ pub async fn collect_response(
         empty_response_context: None,
         doom_loop_triggers: None,
         doom_loop_aborted_at_chunk: None,
-        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
     })
 }
 
@@ -55,13 +55,13 @@ pub async fn collect_response(
 mod tests {
     use super::*;
     use futures_util::stream;
-    use wimo ai_wimo_sampling_types::{ConversationItem, SamplingError, StopReason};
+    use wimoai_wimo_sampling_types::{ConversationItem, SamplingError, StopReason};
 
     use crate::events::SamplingChannel;
     use crate::stream::stream_chat_completions;
     use crate::types::RequestId;
     use std::time::Duration;
-    use wimo ai_wimo_sampling_types::{
+    use wimoai_wimo_sampling_types::{
         ChatChunkChoice, ChatChunkDelta, ChatCompletionChunk, FinishReason, Role,
     };
 

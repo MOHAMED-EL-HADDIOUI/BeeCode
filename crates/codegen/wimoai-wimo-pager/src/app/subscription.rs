@@ -128,7 +128,7 @@ impl AppView {
     /// A consumer session with access defers for live verification (the gate source may be stale).
     /// Anything else shows directly.
     #[must_use]
-    pub fn impose_gate(&mut self, gate: wimo ai_wimo_shell::auth::GateInfo) -> Vec<Effect> {
+    pub fn impose_gate(&mut self, gate: wimoai_wimo_shell::auth::GateInfo) -> Vec<Effect> {
         if self.gate.is_some() {
             self.gate = Some(gate);
             return vec![];
@@ -163,8 +163,8 @@ impl AppView {
             None,
             Some(serde_json::json!({ "tier": self.subscription_tier })),
         );
-        wimo ai_wimo_telemetry::session_ctx::log_event(
-            wimo ai_wimo_telemetry::events::SubscriptionActivated {
+        wimoai_wimo_telemetry::session_ctx::log_event(
+            wimoai_wimo_telemetry::events::SubscriptionActivated {
                 auth_method: self.login_method_id.as_ref().map(|id| id.0.to_string()),
                 upsell_shown_this_session: self.access_gate_shown_logged,
             },
@@ -176,7 +176,7 @@ impl AppView {
     /// Resolution: authoritative meta via `apply_auth_meta` drops the deferral.
     /// A same-generation check failure or timeout promotes it via [`Self::promote_deferred_gate`].
     #[must_use]
-    fn defer_gate_for_verification(&mut self, gate: wimo ai_wimo_shell::auth::GateInfo) -> Vec<Effect> {
+    fn defer_gate_for_verification(&mut self, gate: wimoai_wimo_shell::auth::GateInfo) -> Vec<Effect> {
         self.pending_gate_verification = Some(gate);
         self.gate_verify_gen = self.gate_verify_gen.wrapping_add(1);
         self.note_subscription_check();
@@ -226,8 +226,8 @@ mod tests {
     use super::*;
     use crate::app::app_view::tests::test_app;
 
-    fn watch_gate() -> wimo ai_wimo_shell::auth::GateInfo {
-        wimo ai_wimo_shell::auth::GateInfo {
+    fn watch_gate() -> wimoai_wimo_shell::auth::GateInfo {
+        wimoai_wimo_shell::auth::GateInfo {
             message: "Subscribe".into(),
             url: None,
             label: None,
@@ -391,7 +391,7 @@ mod tests {
         // Already gated: update the copy only.
         let mut gated = test_app();
         gated.gate = Some(watch_gate());
-        let new_copy = wimo ai_wimo_shell::auth::GateInfo {
+        let new_copy = wimoai_wimo_shell::auth::GateInfo {
             message: "New copy".into(),
             url: None,
             label: None,
@@ -469,7 +469,7 @@ mod tests {
         let mut app = test_app();
         let _effs = app.impose_gate(watch_gate());
 
-        app.apply_auth_meta(&wimo ai_wimo_shell::auth::AuthMeta::default());
+        app.apply_auth_meta(&wimoai_wimo_shell::auth::AuthMeta::default());
 
         assert!(app.pending_gate_verification.is_none());
         assert!(app.has_access());

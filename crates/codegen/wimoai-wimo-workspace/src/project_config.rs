@@ -4,7 +4,7 @@
 
 use std::path::{Path, PathBuf};
 
-use wimo ai_wimo_agent::repo::RepoDirChain;
+use wimoai_wimo_agent::repo::RepoDirChain;
 
 /// Filename of the project-local MCP server config.
 pub const MCP_JSON_FILENAME: &str = ".mcp.json";
@@ -40,7 +40,7 @@ pub(crate) fn find_mcp_json_files_in(chain_dirs: &[PathBuf]) -> Vec<PathBuf> {
 
 /// True when `config_path` is `$wimo_HOME/config.toml` (user tier, not project).
 fn is_user_wimo_config_file(config_path: &Path) -> bool {
-    let Some(user_home) = wimo ai_wimo_config::user_wimo_home() else {
+    let Some(user_home) = wimoai_wimo_config::user_wimo_home() else {
         return false;
     };
     let user_config = user_home.join("config.toml");
@@ -84,12 +84,12 @@ mod tests {
 
     #[test]
     fn find_project_configs_excludes_user_wimo_config_file() {
-        let Some(user_home) = wimo ai_wimo_config::user_wimo_home() else {
+        let Some(user_home) = wimoai_wimo_config::user_wimo_home() else {
             return;
         };
         let user_config = user_home.join("config.toml");
         if user_config.is_file() {
-            let home = wimo ai_dirs::home_dir().expect("home dir");
+            let home = wimoai_dirs::home_dir().expect("home dir");
             let from_home = find_project_configs(&home);
             assert!(
                 !from_home.iter().any(|p| is_user_wimo_config_file(p)),

@@ -430,11 +430,11 @@ impl SessionActor {
         let runtime_state = format_runtime_state_line(backing_task_count, turn_elapsed_seconds);
 
         let items = vec![
-            ConversationItem::System(wimo ai_wimo_sampling_types::SystemItem {
+            ConversationItem::System(wimoai_wimo_sampling_types::SystemItem {
                 content: std::sync::Arc::<str>::from(LAZINESS_CLASSIFIER_PROMPT),
             }),
-            ConversationItem::User(wimo ai_wimo_sampling_types::UserItem {
-                content: vec![wimo ai_wimo_sampling_types::ContentPart::Text {
+            ConversationItem::User(wimoai_wimo_sampling_types::UserItem {
+                content: vec![wimoai_wimo_sampling_types::ContentPart::Text {
                     text: std::sync::Arc::<str>::from(format!(
                         "{LAZINESS_USER_PREAMBLE}\
                          === BEGIN TRANSCRIPT ===\n\
@@ -465,7 +465,7 @@ impl SessionActor {
             x_wimo_conv_id: Some(format!("trace-classifier-{}", uuid::Uuid::new_v4())),
             x_wimo_req_id: Some(format!("{LAZINESS_REQ_ID_PREFIX}{}", uuid::Uuid::new_v4())),
             x_wimo_session_id: Some(session_id_str),
-            x_wimo_agent_id: Some(wimo ai_wimo_telemetry::id::agent_id()),
+            x_wimo_agent_id: Some(wimoai_wimo_telemetry::id::agent_id()),
             ..ConversationRequest::default()
         };
 
@@ -712,7 +712,7 @@ impl SessionActor {
 
     async fn snapshot_todos_for_debug_log(&self) -> Vec<DebugTodoSnapshot> {
         use crate::tools::todo::{TodoState, TodoStatus};
-        use wimo ai_wimo_tools::types::resources::State;
+        use wimoai_wimo_tools::types::resources::State;
         let bridge = self.tool_bridge_handle();
         bridge
             .read_resource::<State<TodoState>>()
@@ -744,7 +744,7 @@ impl SessionActor {
             .list_background_tasks()
             .await
             .into_iter()
-            .filter(wimo ai_wimo_tools::computer::types::TaskSnapshot::is_outstanding)
+            .filter(wimoai_wimo_tools::computer::types::TaskSnapshot::is_outstanding)
             .count()
     }
 }

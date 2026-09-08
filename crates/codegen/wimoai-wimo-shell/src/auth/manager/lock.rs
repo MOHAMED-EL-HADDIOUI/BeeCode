@@ -16,8 +16,8 @@ use std::time::Duration as StdDuration;
 
 use fs2::FileExt;
 
-use wimo ai_wimo_telemetry::events::{AuthLockTimeout, AuthLockWait};
-use wimo ai_wimo_telemetry::session_ctx::log_event;
+use wimoai_wimo_telemetry::events::{AuthLockTimeout, AuthLockWait};
+use wimoai_wimo_telemetry::session_ctx::log_event;
 
 use crate::auth::storage::AuthFileLock;
 use crate::unified_log;

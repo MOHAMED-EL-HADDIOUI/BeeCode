@@ -7,10 +7,10 @@
 //! - Scope: `chat_history.jsonl` only.
 //!   A rebuild replaying `updates.jsonl` (e.g. a remote pull) restores the image and pays one more strip cycle.
 
-use wimo ai_chat_state::StripOutcome;
-use wimo ai_wimo_sampler::{RequestId, StripReason};
+use wimoai_chat_state::StripOutcome;
+use wimoai_wimo_sampler::{RequestId, StripReason};
 
-use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
 use crate::session::acp_session::{PendingImageStrip, SessionActor};
 
 const MAX_PENDING_IMAGE_STRIPS: usize = 16;
@@ -176,7 +176,7 @@ impl SessionActor {
             );
             enforce_pending_image_strip_bound(&mut pending, Some(&request_id));
         }
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "shell.turn.images_stripped",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -188,7 +188,7 @@ impl SessionActor {
         );
         if !persist_deferred {
             // Request-local only: tell the user now, on the same channel as load-time image drops, rendered as a system scrollback note
-            self.send_wimo ai_notification(wimo aiSessionUpdate::ImageDropped {
+            self.send_wimoai_notification(wimoaiSessionUpdate::ImageDropped {
                 notes: vec![format!(
                     "This request failed over its images (or was too large); \
                      {stripped} image(s) were left out of the retry."
@@ -233,7 +233,7 @@ impl SessionActor {
             StripOutcome::WriteFailed { .. } => ("write_failed", 0),
             StripOutcome::ActorUnavailable => ("actor_unavailable", 0),
         };
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "shell.turn.images_strip_persisted",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -258,7 +258,7 @@ impl SessionActor {
                     .to_string(),
             ],
         };
-        self.send_wimo ai_notification(wimo aiSessionUpdate::ImageDropped { notes })
+        self.send_wimoai_notification(wimoaiSessionUpdate::ImageDropped { notes })
             .await;
     }
 

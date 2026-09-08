@@ -92,7 +92,7 @@ pub struct GlobOutput {
     pub cwd_for_display: String,
 }
 
-impl wimo ai_tool_runtime::ToolOutput for GlobOutput {}
+impl wimoai_tool_runtime::ToolOutput for GlobOutput {}
 
 impl From<GlobOutput> for ToolOutput {
     fn from(output: GlobOutput) -> Self {
@@ -120,28 +120,28 @@ impl crate::types::tool_metadata::ToolMetadata for GlobTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for GlobTool {
+impl wimoai_tool_runtime::Tool for GlobTool {
     type Args = GlobInput;
     type Output = GlobOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("glob").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("glob").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "glob",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -149,9 +149,9 @@ impl wimo ai_tool_runtime::Tool for GlobTool {
     #[tracing::instrument(name = "tool.glob", skip_all)]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: GlobInput,
-    ) -> Result<GlobOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<GlobOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -183,7 +183,7 @@ impl wimo ai_tool_runtime::Tool for GlobTool {
             // stderr is never read; a pipe would block rg once warnings fill it.
             // Cached descriptor, not `Stdio::null()`: an unlinked `/dev/null`
             // must not fail the spawn.
-            .stderr(wimo ai_tty_utils::null_stdio());
+            .stderr(wimoai_tty_utils::null_stdio());
         crate::util::detach_search_command(&mut cmd);
 
         #[allow(clippy::disallowed_methods)] // search helper, waited on below
@@ -371,7 +371,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -396,7 +396,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -431,7 +431,7 @@ mod tests {
 
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -462,7 +462,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -491,7 +491,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -525,7 +525,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -545,7 +545,7 @@ mod tests {
     fn tool_metadata() {
         use crate::types::tool_metadata::ToolMetadata;
         let tool = GlobTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "glob");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "glob");
         assert!(matches!(tool.kind(), ToolKind::List));
         assert!(matches!(tool.tool_namespace(), ToolNamespace::OpenCode));
     }
@@ -581,7 +581,7 @@ mod tests {
         // cwd is the tmp root, but we pass the absolute path to the sub dir
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -604,7 +604,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -628,7 +628,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -648,7 +648,7 @@ mod tests {
         let tool = GlobTool;
         let resources = Resources::new(); // No Cwd inserted
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -677,7 +677,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -706,7 +706,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -739,7 +739,7 @@ mod tests {
         let tmp = TempDir::new().unwrap();
 
         // Initialize a git repo so ripgrep respects .gitignore.
-        wimo ai_test_utils::git::ensure_hermetic_git_on_path();
+        wimoai_test_utils::git::ensure_hermetic_git_on_path();
         let status = std::process::Command::new("git")
             .args(["init"])
             .current_dir(tmp.path())
@@ -766,7 +766,7 @@ mod tests {
         // Pattern **/*.txt would match both files if .gitignore were not in
         // effect. Because ripgrep processes the ignore stack *before* applying
         // the glob whitelist for directory ignores, ignored_dir/ is pruned.
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {
@@ -797,7 +797,7 @@ mod tests {
         let tool = GlobTool;
         let resources = test_resources(tmp.path());
 
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             GlobInput {

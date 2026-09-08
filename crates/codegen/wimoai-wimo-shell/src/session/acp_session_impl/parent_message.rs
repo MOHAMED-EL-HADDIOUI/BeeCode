@@ -2,11 +2,11 @@
 
 use super::*;
 use std::sync::Arc;
-use wimo ai_wimo_tools::implementations::wimo::task::coordinator::ActiveMessageAdmission;
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_tools::implementations::wimo::task::coordinator::ActiveMessageAdmission;
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     ActiveAgentMessage, ActiveAgentMessageDelivery, ActiveAgentMessageOperation,
 };
-use wimo ai_message_delivery_core::{
+use wimoai_message_delivery_core::{
     DeliveryMessage, MessageDeliveryLifecycle, OwnedDelivery, TerminalCause, TerminalTarget,
     TurnBinding,
 };
@@ -63,7 +63,7 @@ impl MessageDeliveryState {
         &mut self,
         target: TerminalTarget<'_, String, TurnEpoch>,
         cause: TerminalCause,
-    ) -> wimo ai_message_delivery_core::TerminalTransition<
+    ) -> wimoai_message_delivery_core::TerminalTransition<
         String,
         ParentAgentSource,
         PendingParentAgentMessage,
@@ -160,7 +160,7 @@ impl SessionActor {
         self: &Arc<Self>,
         delivery: ActiveAgentMessageDelivery,
         receipt_sink: mpsc::Sender<crate::agent::subagent::PromptTurnReceipt>,
-        parent_telemetry_ctx: wimo ai_wimo_telemetry::TelemetryCtx,
+        parent_telemetry_ctx: wimoai_wimo_telemetry::TelemetryCtx,
         respond_to: oneshot::Sender<ActiveMessageAdmission>,
         completion_tx: mpsc::UnboundedSender<super::turn_task::TurnCompletionMsg>,
     ) {
@@ -184,7 +184,7 @@ impl SessionActor {
         message: ActiveAgentMessage,
         requested: ActiveAgentMessageOperation,
         receipt_sink: mpsc::Sender<crate::agent::subagent::PromptTurnReceipt>,
-        parent_telemetry_ctx: wimo ai_wimo_telemetry::TelemetryCtx,
+        parent_telemetry_ctx: wimoai_wimo_telemetry::TelemetryCtx,
         respond_to: oneshot::Sender<ActiveMessageAdmission>,
         completion_tx: mpsc::UnboundedSender<super::turn_task::TurnCompletionMsg>,
     ) {
@@ -461,7 +461,7 @@ impl SessionActor {
             message,
             operation,
             receipt_sink,
-            wimo ai_wimo_telemetry::TelemetryCtx::new(
+            wimoai_wimo_telemetry::TelemetryCtx::new(
                 "test-parent".to_owned(),
                 std::sync::Arc::new(tokio::sync::Mutex::new(0)),
             ),

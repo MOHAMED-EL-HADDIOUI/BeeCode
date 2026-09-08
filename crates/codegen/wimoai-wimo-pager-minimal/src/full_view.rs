@@ -13,13 +13,13 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier};
 
-use wimo ai_wimo_pager::app::app_view::AppView;
-use wimo ai_wimo_pager::minimal_api;
-use wimo ai_wimo_pager::render::Renderable;
-use wimo ai_wimo_pager::scrollback::entry::ScrollbackEntry;
-use wimo ai_wimo_pager::scrollback::types::DisplayMode;
-use wimo ai_wimo_pager::scrollback::wrappers::EntryRenderer;
-use wimo ai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::app::app_view::AppView;
+use wimoai_wimo_pager::minimal_api;
+use wimoai_wimo_pager::render::Renderable;
+use wimoai_wimo_pager::scrollback::entry::ScrollbackEntry;
+use wimoai_wimo_pager::scrollback::types::DisplayMode;
+use wimoai_wimo_pager::scrollback::wrappers::EntryRenderer;
+use wimoai_wimo_pager::theme::Theme;
 
 /// Fixed render width for the transcript, independent of the current terminal size.
 /// The pager wraps to the real terminal, and the committed and full-view wrapping need not match.
@@ -63,8 +63,8 @@ pub fn pump_transcript(app: &mut AppView) {
         // That is a deliberate, test-encoded memory tradeoff that predates minimal
         // Sessions run entirely with the toggle off have no thinking entries for any view to show
         // This override covers the sessions that do: toggle on at ingestion (the default), or toggled off mid-session
-        let prev_thinking = wimo ai_wimo_pager::appearance::cache::load_show_thinking_blocks();
-        wimo ai_wimo_pager::appearance::cache::set_show_thinking_blocks(true);
+        let prev_thinking = wimoai_wimo_pager::appearance::cache::load_show_thinking_blocks();
+        wimoai_wimo_pager::appearance::cache::set_show_thinking_blocks(true);
         let start = Instant::now();
         while build.next < build.ids.len() {
             let eid = build.ids[build.next];
@@ -83,7 +83,7 @@ pub fn pump_transcript(app: &mut AppView) {
                 break;
             }
         }
-        wimo ai_wimo_pager::appearance::cache::set_show_thinking_blocks(prev_thinking);
+        wimoai_wimo_pager::appearance::cache::set_show_thinking_blocks(prev_thinking);
     }
 
     if build.next < build.ids.len() {
@@ -98,12 +98,12 @@ pub fn pump_transcript(app: &mut AppView) {
 
 /// Write the finished transcript and set `pending_pager_path`; the ANSI flag makes the event loop add `-R` for `less`.
 /// Errors land as a system block on the build's owning agent, which may differ from the active view (the user can tab away while the build runs).
-fn finish_transcript(app: &mut AppView, id: wimo ai_wimo_pager::app::agent::AgentId, out: String) {
+fn finish_transcript(app: &mut AppView, id: wimoai_wimo_pager::app::agent::AgentId, out: String) {
     if out.is_empty() {
         if let Some(agent) = app.agents.get_mut(&id) {
             agent
                 .scrollback
-                .push_block(wimo ai_wimo_pager::scrollback::block::RenderBlock::system(
+                .push_block(wimoai_wimo_pager::scrollback::block::RenderBlock::system(
                     "No conversation transcript to view yet",
                 ));
         }
@@ -118,7 +118,7 @@ fn finish_transcript(app: &mut AppView, id: wimo ai_wimo_pager::app::agent::Agen
         Err(e) => {
             if let Some(agent) = app.agents.get_mut(&id) {
                 agent.scrollback.push_block(
-                    wimo ai_wimo_pager::scrollback::block::RenderBlock::system(format!(
+                    wimoai_wimo_pager::scrollback::block::RenderBlock::system(format!(
                         "Failed to write transcript: {e}"
                     )),
                 );
@@ -132,7 +132,7 @@ fn finish_transcript(app: &mut AppView, id: wimo ai_wimo_pager::app::agent::Agen
 fn render_entry_to_ansi(
     entry: &ScrollbackEntry,
     theme: &Theme,
-    appearance: &wimo ai_wimo_pager::appearance::AppearanceConfig,
+    appearance: &wimoai_wimo_pager::appearance::AppearanceConfig,
     cwd: &std::path::Path,
     out: &mut String,
 ) {
@@ -269,7 +269,7 @@ fn color_code(color: Color, bg: bool) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_pager::scrollback::block::RenderBlock;
+    use wimoai_wimo_pager::scrollback::block::RenderBlock;
 
     fn test_cwd() -> &'static std::path::Path {
         std::path::Path::new("/test/session")
@@ -282,13 +282,13 @@ mod tests {
     fn transcript_includes_thinking_when_pump_enables_toggle() {
         let theme = Theme::current();
         let appearance = super::super::commit::committed_appearance(
-            &wimo ai_wimo_pager::appearance::AppearanceConfig::default(),
+            &wimoai_wimo_pager::appearance::AppearanceConfig::default(),
         );
         let entry = ScrollbackEntry::new(RenderBlock::thinking(
             "deep reasoning about haikus and syllables",
         ));
 
-        wimo ai_wimo_pager::appearance::cache::set_show_thinking_blocks(false);
+        wimoai_wimo_pager::appearance::cache::set_show_thinking_blocks(false);
         let mut out = String::new();
         render_entry_to_ansi(&entry, &theme, &appearance, test_cwd(), &mut out);
         assert!(
@@ -297,10 +297,10 @@ mod tests {
         );
 
         // What `pump_transcript` sets for the duration of a slice.
-        wimo ai_wimo_pager::appearance::cache::set_show_thinking_blocks(true);
+        wimoai_wimo_pager::appearance::cache::set_show_thinking_blocks(true);
         let mut out = String::new();
         render_entry_to_ansi(&entry, &theme, &appearance, test_cwd(), &mut out);
-        wimo ai_wimo_pager::appearance::cache::set_show_thinking_blocks(false);
+        wimoai_wimo_pager::appearance::cache::set_show_thinking_blocks(false);
         assert!(
             out.contains("reasoning"),
             "thinking content included in the transcript: {out:?}"
@@ -311,14 +311,14 @@ mod tests {
     /// The collapsed "Thought for Xs" header alone is not enough.
     #[test]
     fn transcript_expands_streamed_thinking_body() {
-        use wimo ai_wimo_pager::scrollback::state::ScrollbackState;
+        use wimoai_wimo_pager::scrollback::state::ScrollbackState;
 
         let theme = Theme::current();
         let appearance = super::super::commit::committed_appearance(
-            &wimo ai_wimo_pager::appearance::AppearanceConfig::default(),
+            &wimoai_wimo_pager::appearance::AppearanceConfig::default(),
         );
 
-        wimo ai_wimo_pager::appearance::cache::set_show_thinking_blocks(true);
+        wimoai_wimo_pager::appearance::cache::set_show_thinking_blocks(true);
         let mut sb = ScrollbackState::new();
         let id = sb.push_block(RenderBlock::thinking_streaming());
         assert!(sb.push_chunk_to_thinking(id, "REASONINGBODY pondering "));
@@ -328,7 +328,7 @@ mod tests {
         let entry = sb.get_by_id(id).expect("thinking entry");
         let mut out = String::new();
         render_entry_to_ansi(entry, &theme, &appearance, test_cwd(), &mut out);
-        wimo ai_wimo_pager::appearance::cache::set_show_thinking_blocks(false);
+        wimoai_wimo_pager::appearance::cache::set_show_thinking_blocks(false);
 
         assert!(
             out.contains("REASONINGBODY"),
@@ -341,7 +341,7 @@ mod tests {
     fn transcript_expands_thinking_committed_collapsed() {
         let theme = Theme::current();
         let appearance = super::super::commit::committed_appearance(
-            &wimo ai_wimo_pager::appearance::AppearanceConfig {
+            &wimoai_wimo_pager::appearance::AppearanceConfig {
                 minimal_collapse_thinking: true,
                 ..Default::default()
             },
@@ -355,10 +355,10 @@ mod tests {
         ));
         assert_eq!(entry.display_mode(), DisplayMode::Collapsed);
 
-        wimo ai_wimo_pager::appearance::cache::set_show_thinking_blocks(true);
+        wimoai_wimo_pager::appearance::cache::set_show_thinking_blocks(true);
         let mut out = String::new();
         render_entry_to_ansi(&entry, &theme, &appearance, test_cwd(), &mut out);
-        wimo ai_wimo_pager::appearance::cache::set_show_thinking_blocks(false);
+        wimoai_wimo_pager::appearance::cache::set_show_thinking_blocks(false);
 
         assert!(
             out.contains("REASONINGBODY"),
@@ -374,7 +374,7 @@ mod tests {
     fn transcript_uses_owning_session_cwd_for_tool_paths() {
         let theme = Theme::current();
         let appearance = super::super::commit::committed_appearance(
-            &wimo ai_wimo_pager::appearance::AppearanceConfig::default(),
+            &wimoai_wimo_pager::appearance::AppearanceConfig::default(),
         );
         let entry =
             ScrollbackEntry::new(RenderBlock::edit("/alternate/worktree/src/main.rs", None));

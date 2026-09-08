@@ -6,10 +6,10 @@
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use wimo ai_wimo_telemetry::client;
-use wimo ai_wimo_telemetry::config::{TelemetryConfig, TelemetryMode};
-use wimo ai_wimo_telemetry::events::{AuthTokenKind, ManualAuth, ManualAuthReason, ManualAuthSurface};
-use wimo ai_wimo_telemetry::process_info::{
+use wimoai_wimo_telemetry::client;
+use wimoai_wimo_telemetry::config::{TelemetryConfig, TelemetryMode};
+use wimoai_wimo_telemetry::events::{AuthTokenKind, ManualAuth, ManualAuthReason, ManualAuthSurface};
+use wimoai_wimo_telemetry::process_info::{
     Entrypoint, Interactivity, LeaderMode, ProcessIdentity, ReleaseChannel, set_identity,
     set_release_channel,
 };
@@ -56,7 +56,7 @@ async fn manual_auth_posts_to_events_endpoint_as_wimo_shell_manual_auth() {
         reqwest::Client::new(),
     );
 
-    wimo ai_wimo_telemetry::log_event(ManualAuth {
+    wimoai_wimo_telemetry::log_event(ManualAuth {
         reason: ManualAuthReason::RefreshTokenRejected,
         trigger: ManualAuthSurface::Turn,
         token_kind: AuthTokenKind::OidcSession,
@@ -102,7 +102,7 @@ async fn manual_auth_posts_to_events_endpoint_as_wimo_shell_manual_auth() {
         ("release_channel", serde_json::json!("alpha")),
         (
             "dev_build",
-            serde_json::json!(wimo ai_wimo_version::IS_DEV_BUILD),
+            serde_json::json!(wimoai_wimo_version::IS_DEV_BUILD),
         ),
     ] {
         assert_eq!(
@@ -184,12 +184,12 @@ async fn manual_auth_posts_to_events_endpoint_as_wimo_shell_manual_auth() {
         "session_id",
         "turn_number",
         // Activity gauges register on first use, so a fresh process emits none.
-        wimo ai_wimo_telemetry::activity::SESSIONS_ACTIVE_KEY,
-        wimo ai_wimo_telemetry::activity::SUBAGENTS_ACTIVE_KEY,
-        wimo ai_wimo_telemetry::activity::COMPACTIONS_ACTIVE_KEY,
-        wimo ai_wimo_telemetry::activity::MCP_SERVERS_CONNECTED_KEY,
-        wimo ai_wimo_telemetry::activity::TURNS_ACTIVE_KEY,
-        wimo ai_wimo_telemetry::activity::WORKFLOW_RUNS_ACTIVE_KEY,
+        wimoai_wimo_telemetry::activity::SESSIONS_ACTIVE_KEY,
+        wimoai_wimo_telemetry::activity::SUBAGENTS_ACTIVE_KEY,
+        wimoai_wimo_telemetry::activity::COMPACTIONS_ACTIVE_KEY,
+        wimoai_wimo_telemetry::activity::MCP_SERVERS_CONNECTED_KEY,
+        wimoai_wimo_telemetry::activity::TURNS_ACTIVE_KEY,
+        wimoai_wimo_telemetry::activity::WORKFLOW_RUNS_ACTIVE_KEY,
         #[cfg(not(unix))]
         "cpu_time_ms",
         #[cfg(not(unix))]
@@ -201,7 +201,7 @@ async fn manual_auth_posts_to_events_endpoint_as_wimo_shell_manual_auth() {
         #[cfg(not(any(target_os = "linux", target_os = "macos")))]
         "rss_bytes",
     ];
-    for key in wimo ai_wimo_telemetry::client::RESERVED_EVENT_KEYS {
+    for key in wimoai_wimo_telemetry::client::RESERVED_EVENT_KEYS {
         assert!(
             meta.get(*key).is_some() || conditional.contains(key),
             "reserved key {key} neither present nor known-conditional",

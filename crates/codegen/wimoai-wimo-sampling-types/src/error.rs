@@ -1,11 +1,11 @@
-//! TODO: Move from wimo ai-wimo-shell/src/sampling/error.rs
+//! TODO: Move from wimoai-wimo-shell/src/sampling/error.rs
 
 use std::fmt;
 
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use wimo ai_circuit_breaker::RetryPolicy;
+use wimoai_circuit_breaker::RetryPolicy;
 
 use crate::provider_error::{parse_provider_error, parse_provider_error_str};
 
@@ -767,7 +767,7 @@ pub fn try_parse_stream_error(data: &str) -> Option<SamplingError> {
 }
 
 /// Shared size-overflow text detector: a single definition (in the compaction engine) so the turn path and compaction loops can't drift.
-pub use wimo ai_wimo_compaction::is_context_length_error;
+pub use wimoai_wimo_compaction::is_context_length_error;
 
 /// Whether an HTTP status is worth retrying: the rule CCP publishes in `x-should-retry` (429 and any 5xx), minus Cloudflare's origin-TLS 525/526.
 /// Requests reach CCP through the Cloudflare edge, which answers with its own 52x pages when the origin is unreachable.
@@ -987,7 +987,7 @@ mod tests {
         assert!(coded.is_retry_vetoed());
     }
 
-    // The canonical wording table lives beside the detector in wimo ai-wimo-compaction; tests here pin only crate-local couplings
+    // The canonical wording table lives beside the detector in wimoai-wimo-compaction; tests here pin only crate-local couplings
     #[test]
     fn context_length_error_method_delegates_to_shared_detector() {
         let api = SamplingError::Api {

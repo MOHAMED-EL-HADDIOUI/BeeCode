@@ -1,4 +1,4 @@
-//! Memory-system configuration value types, extracted from wimo ai-wimo-shell so crates the shell depends on can use them.
+//! Memory-system configuration value types, extracted from wimoai-wimo-shell so crates the shell depends on can use them.
 //!
 //! These are the raw optional settings and resolved leaf value types for `[memory.*]` and the memory-owned `[compaction.*]` tables.
 

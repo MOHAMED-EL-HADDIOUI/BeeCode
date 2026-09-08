@@ -1,5 +1,5 @@
 use crate::sampling::{ConversationItem, ConversationRequest};
-use wimo ai_wimo_sampling_types::SyntheticReason;
+use wimoai_wimo_sampling_types::SyntheticReason;
 
 const TRANSCRIPT_MAX_BYTES: usize = 32 * 1024;
 const ITEM_MAX_BYTES: usize = 4 * 1024;
@@ -124,7 +124,7 @@ pub(crate) fn bounded_goal_transcript(items: &[ConversationItem]) -> String {
             {
                 (
                     "agent_message",
-                    Some(wimo ai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL),
+                    Some(wimoai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL),
                 )
             }
             ConversationItem::User(_) => ("user", None),
@@ -142,7 +142,7 @@ pub(crate) fn bounded_goal_transcript(items: &[ConversationItem]) -> String {
         if trimmed.is_empty() {
             continue;
         }
-        let capped = wimo ai_wimo_tools::util::truncate_str(trimmed, ITEM_MAX_BYTES);
+        let capped = wimoai_wimo_tools::util::truncate_str(trimmed, ITEM_MAX_BYTES);
         let row = format!("[{role}] {capped}");
         let row_cost = row.len().saturating_add(2);
         if !selected.is_empty() && used.saturating_add(row_cost) > TRANSCRIPT_MAX_BYTES {
@@ -182,9 +182,9 @@ pub(crate) fn build_goal_evaluator_request(
         reasoning_effort: None,
         json_schema: Some(goal_evaluator_json_schema()),
         x_wimo_conv_id: Some(session_id.to_owned()),
-        x_wimo_req_id: Some(format!("wimo ai-goal-eval-{}", uuid::Uuid::new_v4())),
+        x_wimo_req_id: Some(format!("wimoai-goal-eval-{}", uuid::Uuid::new_v4())),
         x_wimo_session_id: Some(session_id.to_owned()),
-        x_wimo_agent_id: Some(wimo ai_wimo_telemetry::id::agent_id()),
+        x_wimo_agent_id: Some(wimoai_wimo_telemetry::id::agent_id()),
         ..ConversationRequest::default()
     }
 }
@@ -255,7 +255,7 @@ mod tests {
             transcript,
             format!(
                 "[agent_message] {} review this change",
-                wimo ai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL
+                wimoai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL
             )
         );
     }

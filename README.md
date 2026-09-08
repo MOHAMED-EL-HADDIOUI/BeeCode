@@ -40,8 +40,8 @@ Requirements: pinned Rust toolchain (`rust-toolchain.toml`, auto-installed by
 ```sh
 cargo install dotslash
 dotslash --help                                  # sanity check
-cargo run -p "wimo ai-wimo-pager-bin"            # build + launch the TUI
-cargo build -p "wimo ai-wimo-pager-bin" --release # binary: target/release/wimo ai-wimo-pager (ships as `wimo`)
+cargo run -p "wimoai-wimo-pager-bin"            # build + launch the TUI
+cargo build -p "wimoai-wimo-pager-bin" --release # binary: target/release/wimoai-wimo-pager (ships as `wimo`)
 ```
 
 > macOS and Linux are supported. Windows builds are best-effort.
@@ -50,7 +50,7 @@ cargo build -p "wimo ai-wimo-pager-bin" --release # binary: target/release/wimo 
 
 ```sh
 cargo check -p "<crate>"            # fast validation — always scope to one crate
-cargo test -p "wimo ai-wimo-config" # per-crate tests (never bare `cargo test`)
+cargo test -p "wimoai-wimo-config" # per-crate tests (never bare `cargo test`)
 cargo clippy -p "<crate>"           # lint rules: clippy.toml
 cargo fmt --all                     # format
 ```

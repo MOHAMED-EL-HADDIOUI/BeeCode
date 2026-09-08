@@ -16,7 +16,7 @@ pub fn render_top_bar(
     area: Rect,
     buf: &mut Buffer,
     theme: &Theme,
-    announcement: Option<&wimo ai_wimo_announcements::RemoteAnnouncement>,
+    announcement: Option<&wimoai_wimo_announcements::RemoteAnnouncement>,
 ) {
     let line = truncate_line(location_line(theme), area.width as usize);
     let line_width = line.width() as u16;
@@ -115,7 +115,7 @@ mod tests {
 
     #[test]
     fn format_cwd_plain_repo() {
-        assert_eq!(format_cwd_parts("~/wimo ai", None), "~/wimo ai");
+        assert_eq!(format_cwd_parts("~/wimoai", None), "~/wimoai");
     }
 
     /// A linked worktree shows the `(worktree of …)` suffix (matching the session status bar) regardless of the worktree's human label.
@@ -123,8 +123,8 @@ mod tests {
     #[test]
     fn format_cwd_worktree_shows_main_repo() {
         assert_eq!(
-            format_cwd_parts("~/wt/session-1", Some("~/wimo ai")),
-            "~/wt/session-1 (worktree of ~/wimo ai)"
+            format_cwd_parts("~/wt/session-1", Some("~/wimoai")),
+            "~/wt/session-1 (worktree of ~/wimoai)"
         );
     }
 
@@ -139,8 +139,8 @@ mod tests {
             worktree_label: None,
         };
         assert_eq!(
-            format_cwd_display(Path::new("/work/wimo ai/frontend/apps"), Some(&info)),
-            "/work/wimo ai/frontend/apps",
+            format_cwd_display(Path::new("/work/wimoai/frontend/apps"), Some(&info)),
+            "/work/wimoai/frontend/apps",
         );
     }
 
@@ -150,12 +150,12 @@ mod tests {
         let info = git_info::CwdGitInfo {
             branch: Some("kevin/x".into()),
             is_worktree: true,
-            main_repo: Some("~/wimo ai".into()),
+            main_repo: Some("~/wimoai".into()),
             worktree_label: Some("location-picker".into()),
         };
         assert_eq!(
             format_cwd_display(Path::new("/work/wt/location-picker/frontend"), Some(&info)),
-            "/work/wt/location-picker/frontend (worktree of ~/wimo ai)",
+            "/work/wt/location-picker/frontend (worktree of ~/wimoai)",
         );
     }
 
@@ -163,8 +163,8 @@ mod tests {
     #[test]
     fn format_cwd_display_cache_miss_shows_raw_cwd() {
         assert_eq!(
-            format_cwd_display(Path::new("/work/wimo ai/frontend/apps"), None),
-            "/work/wimo ai/frontend/apps",
+            format_cwd_display(Path::new("/work/wimoai/frontend/apps"), None),
+            "/work/wimoai/frontend/apps",
         );
     }
 

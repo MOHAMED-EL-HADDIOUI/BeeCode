@@ -1,5 +1,5 @@
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::implementations::wimo::{
+use wimoai_wimo_tools::implementations::wimo::{
     LoopFireMode, SCHEDULER_CREATE_TOOL_NAME, loop_schedule_instruction, loop_usage_message,
 };
 
@@ -8,7 +8,7 @@ use crate::slash::command::{
 };
 
 /// `LoopCommand::required_tools()` returns this; a module-level constant lets the trait method return a `'static` slice.
-/// The name comes from `wimo ai-wimo-tools`, so a tool rename shows up here as a compile error.
+/// The name comes from `wimoai-wimo-tools`, so a tool rename shows up here as a compile error.
 const LOOP_REQUIRED_TOOLS: &[&str] = &[SCHEDULER_CREATE_TOOL_NAME];
 
 pub struct LoopCommand;

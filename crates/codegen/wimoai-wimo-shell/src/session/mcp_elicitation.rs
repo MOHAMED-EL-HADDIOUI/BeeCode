@@ -4,12 +4,12 @@ use std::sync::Arc;
 
 use agent_client_protocol as acp;
 use agent_client_protocol::Client as _;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-use wimo ai_wimo_mcp::elicitation::{
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_wimo_mcp::elicitation::{
     ElicitationInbox, ElicitationJob, cancel_result, elicit_result_from_wire,
 };
-use wimo ai_wimo_mcp::wire::MCP_ELICIT;
-use wimo ai_wimo_tools::mcp_elicitation::{McpElicitExtRequest, McpElicitExtResponse};
+use wimoai_wimo_mcp::wire::MCP_ELICIT;
+use wimoai_wimo_tools::mcp_elicitation::{McpElicitExtRequest, McpElicitExtResponse};
 
 use crate::session::pending_interaction::{
     PendingInteractionGuard, PendingInteractions, PendingKind,
@@ -155,12 +155,12 @@ async fn handle_one_job(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_mcp::elicitation::wire_mode_and_fields;
-    use wimo ai_wimo_mcp::rmcp::model::{
+    use wimoai_wimo_mcp::elicitation::wire_mode_and_fields;
+    use wimoai_wimo_mcp::rmcp::model::{
         ElicitRequestParams, ElicitationAction, ElicitationSchema, PrimitiveSchemaDefinition,
         StringSchema,
     };
-    use wimo ai_wimo_tools::mcp_elicitation::McpElicitModeFields;
+    use wimoai_wimo_tools::mcp_elicitation::McpElicitModeFields;
 
     #[test]
     fn wire_fields_form() {

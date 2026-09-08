@@ -3,18 +3,18 @@
 
 use super::*;
 
-// Buffer, entry type, and formatting live in the shared wimo ai-interjection-core crate so the server-side agent loop can adopt the same behaviour
+// Buffer, entry type, and formatting live in the shared wimoai-interjection-core crate so the server-side agent loop can adopt the same behaviour
 // The shell keeps arrival (ACP ext methods), persistence, and pager echo
 //
 // Re-exported for `acp_session.rs`, which does `pub(crate) use interjection::*;`
 // Retained code and co-located tests keep resolving by `acp_session::` path
 #[allow(unused_imports)]
-pub(crate) use wimo ai_interjection_core::{
+pub(crate) use wimoai_interjection_core::{
     INTERRUPT_NOTE, InterjectionBuffer, drain_formatted, format_interjection, frame_user_turn,
 };
 
 /// Shell instantiation of the shared entry type: images are ACP content.
-pub(crate) type PendingInterjection = wimo ai_interjection_core::PendingInterjection<acp::ImageContent>;
+pub(crate) type PendingInterjection = wimoai_interjection_core::PendingInterjection<acp::ImageContent>;
 
 /// Prompt-id prefix for interjections that missed their turn and were converted into standalone prompt turns.
 /// They arrived while the session was idle, or after the running turn's final drain.
@@ -254,17 +254,17 @@ impl SessionActor {
         // Those attribute the turn, which this skill did not start
         // `SkillDispatched` still carries `plugin_source`, so dispatch counts stay complete
         for sk in &parsed {
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::SlashCommandUsed {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::SlashCommandUsed {
                     command: sk.name.clone(),
                     args_provided: !sk.args.is_empty(),
                 },
             );
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::SkillDispatched {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::SkillDispatched {
                     skill_name: sk.name.clone(),
                     plugin_source: sk.plugin_name.clone(),
-                    trigger: wimo ai_wimo_telemetry::events::SkillTrigger::SlashCommand,
+                    trigger: wimoai_wimo_telemetry::events::SkillTrigger::SlashCommand,
                 },
             );
         }

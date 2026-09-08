@@ -192,12 +192,12 @@ fn take_pending_feedback_trace_upload(
 }
 
 fn log_coding_data_consent_selected(
-    source: wimo ai_wimo_telemetry::events::CodingDataConsentSource,
+    source: wimoai_wimo_telemetry::events::CodingDataConsentSource,
     opted_in: bool,
     previous_opted_in: bool,
 ) {
-    use wimo ai_wimo_telemetry::events::{CodingDataConsentChoice, CodingDataConsentSelected};
-    wimo ai_wimo_telemetry::session_ctx::log_event(CodingDataConsentSelected {
+    use wimoai_wimo_telemetry::events::{CodingDataConsentChoice, CodingDataConsentSelected};
+    wimoai_wimo_telemetry::session_ctx::log_event(CodingDataConsentSelected {
         source,
         choice: CodingDataConsentChoice::from_opted_in(opted_in),
         previous_choice: CodingDataConsentChoice::from_opted_in(previous_opted_in),
@@ -222,7 +222,7 @@ pub(super) enum SharingWriteOutcome {
 pub(super) fn set_coding_data_sharing(
     app: &mut AppView,
     opted_in: bool,
-    source: wimo ai_wimo_telemetry::events::CodingDataConsentSource,
+    source: wimoai_wimo_telemetry::events::CodingDataConsentSource,
 ) -> Vec<Effect> {
     set_coding_data_sharing_tracked(app, opted_in, source).0
 }
@@ -230,7 +230,7 @@ pub(super) fn set_coding_data_sharing(
 pub(super) fn set_coding_data_sharing_tracked(
     app: &mut AppView,
     opted_in: bool,
-    source: wimo ai_wimo_telemetry::events::CodingDataConsentSource,
+    source: wimoai_wimo_telemetry::events::CodingDataConsentSource,
 ) -> (Vec<Effect>, SharingWriteOutcome) {
     // ── Guard 1: Enterprise ZDR ──────────────────────────────────────
     if app.is_zdr {
@@ -642,7 +642,7 @@ pub(in crate::app::dispatch) fn dispatch_privacy_banner_opt_in(app: &mut AppView
     set_coding_data_sharing(
         app,
         true,
-        wimo ai_wimo_telemetry::events::CodingDataConsentSource::PrivacyBanner,
+        wimoai_wimo_telemetry::events::CodingDataConsentSource::PrivacyBanner,
     )
 }
 
@@ -654,7 +654,7 @@ pub(in crate::app::dispatch) fn dispatch_privacy_banner_opt_out(app: &mut AppVie
     set_coding_data_sharing(
         app,
         false,
-        wimo ai_wimo_telemetry::events::CodingDataConsentSource::PrivacyBanner,
+        wimoai_wimo_telemetry::events::CodingDataConsentSource::PrivacyBanner,
     )
 }
 
@@ -662,7 +662,7 @@ pub(super) fn handle_context_info_complete(
     app: &mut AppView,
     agent_id: AgentId,
     session_id: &acp::SessionId,
-    info: Box<wimo ai_wimo_shell::session::SessionInfoResponse>,
+    info: Box<wimoai_wimo_shell::session::SessionInfoResponse>,
     nonce: u64,
 ) -> Vec<Effect> {
     let minimal = app.screen_mode.is_minimal();

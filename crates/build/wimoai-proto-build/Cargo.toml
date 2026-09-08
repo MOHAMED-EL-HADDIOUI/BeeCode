@@ -2,7 +2,7 @@
 license = "Apache-2.0"
 description = "Build protobuf"
 edition.workspace = true
-name = "wimo ai-proto-build"
+name = "wimoai-proto-build"
 version = "0.0.0"
 
 [lints]

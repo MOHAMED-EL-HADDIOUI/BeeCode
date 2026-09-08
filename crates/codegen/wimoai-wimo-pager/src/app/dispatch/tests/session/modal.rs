@@ -12,7 +12,7 @@ fn open_extensions_modal_no_session_sets_flag_no_fetches() {
     let effects = dispatch(
         Action::OpenExtensionsModal {
             tab: ExtensionsTab::Hooks,
-            trigger: wimo ai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
+            trigger: wimoai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
         },
         &mut app,
     );
@@ -35,7 +35,7 @@ fn open_extensions_modal_with_session_emits_fetches_no_flag() {
     let effects = dispatch(
         Action::OpenExtensionsModal {
             tab: ExtensionsTab::Hooks,
-            trigger: wimo ai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
+            trigger: wimoai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
         },
         &mut app,
     );
@@ -52,7 +52,7 @@ fn open_extensions_modal_with_session_resets_stale_flag() {
     let effects = dispatch(
         Action::OpenExtensionsModal {
             tab: ExtensionsTab::Hooks,
-            trigger: wimo ai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
+            trigger: wimoai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
         },
         &mut app,
     );
@@ -286,17 +286,17 @@ fn count_marketplace_fetches(effects: &[Effect]) -> usize {
         .count()
 }
 
-fn success_outcome() -> wimo ai_hooks_plugins_types::ActionOutcome {
-    wimo ai_hooks_plugins_types::ActionOutcome {
-        status: wimo ai_hooks_plugins_types::OutcomeStatus::Success,
+fn success_outcome() -> wimoai_hooks_plugins_types::ActionOutcome {
+    wimoai_hooks_plugins_types::ActionOutcome {
+        status: wimoai_hooks_plugins_types::OutcomeStatus::Success,
         message: "ok".into(),
         requires_reload: false,
         requires_restart: false,
     }
 }
 
-fn empty_marketplace_response() -> wimo ai_hooks_plugins_types::MarketplaceListResponse {
-    wimo ai_hooks_plugins_types::MarketplaceListResponse { sources: vec![] }
+fn empty_marketplace_response() -> wimoai_hooks_plugins_types::MarketplaceListResponse {
+    wimoai_hooks_plugins_types::MarketplaceListResponse { sources: vec![] }
 }
 
 #[test]
@@ -308,7 +308,7 @@ fn marketplace_fetch_coalesces_while_inflight() {
     let effects = dispatch(
         Action::OpenExtensionsModal {
             tab: ExtensionsTab::Marketplace,
-            trigger: wimo ai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
+            trigger: wimoai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
         },
         &mut app,
     );
@@ -360,7 +360,7 @@ fn marketplace_fetch_fires_immediately_when_idle() {
     dispatch(
         Action::OpenExtensionsModal {
             tab: ExtensionsTab::Marketplace,
-            trigger: wimo ai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
+            trigger: wimoai_wimo_telemetry::events::ExtensionsModalTrigger::SlashCommand,
         },
         &mut app,
     );

@@ -1,5 +1,5 @@
 //! Error handling framework — REAL graceful failure (Section 43 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub enum WimoError {
     ProviderError(String),

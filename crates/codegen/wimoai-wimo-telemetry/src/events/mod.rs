@@ -1,7 +1,7 @@
 //! Telemetry event structs. Every struct needs a `telemetry_event!` binding.
 //! `log_event` auto-injects `session_id`/`turn_number` and reserves every key in `client::RESERVED_EVENT_KEYS`.
 //!
-//! Extracted from `wimo ai-wimo-shell` so binaries (TUI, sampler) can reuse them without the shell's HTTP product-analytics client.
+//! Extracted from `wimoai-wimo-shell` so binaries (TUI, sampler) can reuse them without the shell's HTTP product-analytics client.
 
 use serde::Serialize;
 
@@ -393,7 +393,7 @@ pub struct LoginPickerShown {
 }
 
 /// A login method was chosen from the picker.
-/// `method` is "wimo ai" or "api_key"; `mode` is "device", "loopback", or "api_key".
+/// `method` is "wimoai" or "api_key"; `mode` is "device", "loopback", or "api_key".
 #[derive(Serialize)]
 pub struct LoginMethodChosen {
     pub method: String,
@@ -401,7 +401,7 @@ pub struct LoginMethodChosen {
 }
 
 /// A login flow completed successfully.
-/// `method` is "wimo ai" or "api_key"; `mode` is the resolved auth mode.
+/// `method` is "wimoai" or "api_key"; `mode` is the resolved auth mode.
 /// `mid_session` is true for `/login`/401 re-auth (as opposed to the startup/logout flow).
 #[derive(Serialize)]
 pub struct LoginCompleted {
@@ -631,7 +631,7 @@ impl CompactionScope {
             is_subagent,
         } = params;
         let compaction_id = uuid::Uuid::new_v4().to_string();
-        let percentage = wimo ai_token_estimation::usage_percentage_u8(tokens_used, context_window);
+        let percentage = wimoai_token_estimation::usage_percentage_u8(tokens_used, context_window);
         let active = crate::activity::COMPACTIONS_ACTIVE.enter();
         debug_assert!(
             crate::activity::COMPACTIONS_ACTIVE.get() >= 1,
@@ -1531,7 +1531,7 @@ pub struct ActionStationarityStop {
 #[derive(Serialize)]
 pub struct ToolCallCompleted {
     pub tool_name: String,
-    pub outcome: wimo ai_wimo_session_events::types::ToolOutcome,
+    pub outcome: wimoai_wimo_session_events::types::ToolOutcome,
     /// Content-free: the hook name is kept out of OTLP and product events and rides only the session-event row.
     pub hook_rewrote: bool,
     pub duration_ms: u64,
@@ -1693,7 +1693,7 @@ pub struct AuthLockReplacedOutFromUnder {
 }
 
 // ---------------------------------------------------------------------------
-// Pager events (called from wimo ai-wimo-pager via log_event)
+// Pager events (called from wimoai-wimo-pager via log_event)
 // ---------------------------------------------------------------------------
 
 /// Connect outcome: the `agent_connect` product event, plus OTEL metrics.
@@ -2913,7 +2913,7 @@ mod tests {
         assert_eq!(
             serde_json::to_value(ToolCallCompleted {
                 tool_name: "bash".into(),
-                outcome: wimo ai_wimo_session_events::types::ToolOutcome::Success,
+                outcome: wimoai_wimo_session_events::types::ToolOutcome::Success,
                 hook_rewrote: false,
                 duration_ms: 7,
                 tool_result_size_bytes: Some(2_048),
@@ -2935,7 +2935,7 @@ mod tests {
         assert_eq!(
             serde_json::to_value(ToolCallCompleted {
                 tool_name: "bash".into(),
-                outcome: wimo ai_wimo_session_events::types::ToolOutcome::Success,
+                outcome: wimoai_wimo_session_events::types::ToolOutcome::Success,
                 hook_rewrote: false,
                 duration_ms: 7,
                 tool_result_size_bytes: None,
@@ -3461,7 +3461,7 @@ mod tests {
     #[test]
     fn login_completed_serializes_all_fields() {
         let v = serde_json::to_value(LoginCompleted {
-            method: "wimo ai".into(),
+            method: "wimoai".into(),
             mode: "device".into(),
             duration_ms: 1234,
             mid_session: false,
@@ -3470,7 +3470,7 @@ mod tests {
         assert_eq!(
             v,
             serde_json::json!({
-                "method": "wimo ai",
+                "method": "wimoai",
                 "mode": "device",
                 "duration_ms": 1234,
                 "mid_session": false,

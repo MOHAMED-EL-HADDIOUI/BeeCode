@@ -1,7 +1,7 @@
 use agent_client_protocol as acp;
 use serial_test::serial;
 use tempfile::TempDir;
-use wimo ai_wimo_test_support::EnvGuard;
+use wimoai_wimo_test_support::EnvGuard;
 
 use crate::session::info::Info;
 use crate::session::persistence::{Summary, default_model_id};
@@ -10,7 +10,7 @@ use crate::session::storage::{JsonlStorageAdapter, StorageAdapter};
 fn worktree_cwd_under(home: &std::path::Path) -> String {
     let cwd = home
         .join("worktrees")
-        .join("wimo ai")
+        .join("wimoai")
         .join("fix-bug")
         .join("src");
     std::fs::create_dir_all(&cwd).unwrap();

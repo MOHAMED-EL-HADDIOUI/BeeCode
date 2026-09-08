@@ -19,13 +19,13 @@ use agent_client_protocol::{self as acp, Agent as _};
 use serde_json::json;
 use tempfile::TempDir;
 use tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
-use wimo ai_acp_lib::{
+use wimoai_acp_lib::{
     AcpAgentGatewayReceiver as GatewayReceiver, AcpAgentGatewaySender as GatewaySender,
     LineBufferedRead,
 };
-use wimo ai_wimo_shell::agent::config::Config as AgentConfig;
-use wimo ai_wimo_shell::agent::mvp_agent::MvpAgent;
-use wimo ai_wimo_test_support::{MockInferenceServer, MockModelEntry};
+use wimoai_wimo_shell::agent::config::Config as AgentConfig;
+use wimoai_wimo_shell::agent::mvp_agent::MvpAgent;
+use wimoai_wimo_test_support::{MockInferenceServer, MockModelEntry};
 
 const DUPLEX_BUFFER_BYTES: usize = 8 * 1024 * 1024;
 const RPC_TIMEOUT: Duration = Duration::from_secs(60);
@@ -174,7 +174,7 @@ async fn connect(
         });
     tokio::task::spawn_local(
         GatewayReceiver::new(gw_rx, agent_conn)
-            .with_on_meta(wimo ai_file_utils::trace_context::span_from_meta_traceparent)
+            .with_on_meta(wimoai_file_utils::trace_context::span_from_meta_traceparent)
             .run(),
     );
     tokio::task::spawn_local(agent_io);
@@ -255,7 +255,7 @@ fn ambient_mint_endpoints() -> Vec<String> {
 
 #[test]
 fn expired_external_credential_routes_to_the_provider_login_flow() {
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
 
     let mock_rt = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
@@ -282,13 +282,13 @@ fn expired_external_credential_routes_to_the_provider_login_flow() {
     unsafe {
         std::env::set_var("wimo_HOME", wimo_home.path());
         std::env::set_var("wimo_CLI_CHAT_PROXY_BASE_URL", server.url());
-        std::env::set_var("wimo_wimo ai_API_BASE_URL", server.url());
+        std::env::set_var("wimo_wimoai_API_BASE_URL", server.url());
         std::env::set_var("wimo_MODELS_BASE_URL", server.url());
         std::env::set_var("wimo_AUTH_PROVIDER_COMMAND", &provider);
         std::env::set_var("wimo_AUTH_PROVIDER_LABEL", PROVIDER_LABEL);
         // An API key would be advertised first and mask the session-auth path.
-        std::env::remove_var("wimo ai_API_KEY");
-        std::env::remove_var("wimo_CODE_wimo ai_API_KEY");
+        std::env::remove_var("wimoai_API_KEY");
+        std::env::remove_var("wimo_CODE_wimoai_API_KEY");
         // Last-resort 401 recovery can mint a credential from an endpoint named in the ambient environment
         // On a container-hosted runner that would rescue the session behind the test's back
         // Leave it nothing to mint from: the deployment under test is one where only the operator's binary can produce a credential

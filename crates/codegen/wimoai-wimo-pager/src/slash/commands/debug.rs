@@ -9,7 +9,7 @@
 //! - `/debug scroll`: the scroll-diagnostics HUD, the same [`Action::ToggleScrollDebugHud`] as `/scroll-debug`.
 //!   `/scroll-debug` stays registered as the hidden long-form alias.
 //! - `/debug fps`: the release-safe FPS HUD ([`crate::views::fps_hud`]).
-//! - `/debug log`: the scroll flight recorder (`input::scroll_log` in wimo ai-wimo-pager-render), constructed at runtime to a fresh timestamped path.
+//! - `/debug log`: the scroll flight recorder (`input::scroll_log` in wimoai-wimo-pager-render), constructed at runtime to a fresh timestamped path.
 
 use crate::app::actions::Action;
 use crate::slash::command::{

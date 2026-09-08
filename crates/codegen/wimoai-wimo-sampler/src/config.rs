@@ -1,10 +1,10 @@
 //! [`SamplerConfig`] is the per-request configuration handed to the sampler.
-//! It deliberately does **not** alias `wimo ai_wimo_sampling_types::SamplingConfig`.
-//! Aliasing would pull transitive dependencies on shell-specific types (`wimo ai-wimo-tools`, etc.) into the sampler crate.
+//! It deliberately does **not** alias `wimoai_wimo_sampling_types::SamplingConfig`.
+//! Aliasing would pull transitive dependencies on shell-specific types (`wimoai-wimo-tools`, etc.) into the sampler crate.
 
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     ApiBackend, CompactionAtTokens, CompactionsRemaining, DoomLoopRecoveryPolicy, ReasoningEffort,
 };
 
@@ -23,13 +23,13 @@ pub enum AuthScheme {
 ///
 /// The session typically owns one `SamplerConfig` per active model and passes it (or a per-request override) to the actor on every submit.
 ///
-/// # Construction in `wimo ai-wimo-shell`
+/// # Construction in `wimoai-wimo-shell`
 ///
 /// `SamplerConfig` is the single source of truth for sampler configuration.
-/// The shell builds it directly by composing chat-state's `wimo ai_wimo_sampling_types::SamplingConfig` with `Credentials` (api key, client version).
+/// The shell builds it directly by composing chat-state's `wimoai_wimo_sampling_types::SamplingConfig` with `Credentials` (api key, client version).
 /// See `agent::config::resolve_model_to_sampling_config` and `session::acp_session::SessionActor::reconstruct_full_config`.
 ///
-/// URL-derived request headers (e.g. `X-wimo ai-Token-Auth` for the cli-chat-proxy) land in [`Self::extra_headers`].
+/// URL-derived request headers (e.g. `X-wimoai-Token-Auth` for the cli-chat-proxy) land in [`Self::extra_headers`].
 /// `agent::config::inject_url_derived_headers` folds them in before the `SamplerConfig` is handed to the actor.
 /// Auth is selected separately via `auth_scheme`, while `api_backend` controls only the request/response protocol shape.
 #[derive(Debug, Clone, Serialize, Deserialize)]

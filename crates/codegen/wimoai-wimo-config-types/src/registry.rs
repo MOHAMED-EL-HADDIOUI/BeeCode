@@ -7,7 +7,7 @@ use crate::{
     RemoteSettings,
     flags::{BoolFlag, ConfigSource, Resolved},
 };
-use wimo ai_wimo_config::env_bool;
+use wimoai_wimo_config::env_bool;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, strum::EnumIter)]
 pub enum Feature {

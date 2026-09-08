@@ -1,6 +1,6 @@
 use super::*;
 use serial_test::serial;
-use wimo ai_wimo_test_support::EnvGuard;
+use wimoai_wimo_test_support::EnvGuard;
 #[test]
 fn main_cli_tools_override_preserves_profile_injection_policy() {
     let overrides = CliAgentOverrides {
@@ -19,7 +19,7 @@ fn main_cli_tools_override_preserves_profile_injection_policy() {
 /// The lean shape is all scalars/enums, so no custom tolerant deserializer is needed.
 #[test]
 fn auto_mode_config_parses_from_toml_and_json_equivalently() {
-    use wimo ai_wimo_workspace::permission::ClassifierPromptType;
+    use wimoai_wimo_workspace::permission::ClassifierPromptType;
     let toml_src = r#"
 enabled = true
 prompt_type = "no_user_tool_prefix"
@@ -56,7 +56,7 @@ reasoning_effort = "low"
 /// `prompt_type` wire values are the snake_case `ClassifierPromptType` names.
 #[test]
 fn auto_mode_prompt_type_parses_snake_case() {
-    use wimo ai_wimo_workspace::permission::ClassifierPromptType;
+    use wimoai_wimo_workspace::permission::ClassifierPromptType;
     for (s, variant) in [
         ("full", ClassifierPromptType::Full),
         (
@@ -168,8 +168,8 @@ fn inject_url_derived_headers_adds_proxy_headers_for_cli_chat_proxy_url() {
     let mut headers = IndexMap::new();
     inject_url_derived_headers(&mut headers, None, crate::env::PROD_CLI_CHAT_PROXY_BASE_URL);
     assert_eq!(
-        headers.get("X-wimo ai-Token-Auth").map(String::as_str),
-        Some("wimo ai-wimo-cli")
+        headers.get("X-wimoai-Token-Auth").map(String::as_str),
+        Some("wimoai-wimo-cli")
     );
     assert_eq!(
         headers.get("x-authenticateresponse").map(String::as_str),
@@ -186,7 +186,7 @@ fn inject_url_derived_headers_adds_proxy_headers_for_cli_chat_proxy_url() {
 fn inject_url_derived_headers_skips_proxy_headers_for_external_url() {
     let mut headers = IndexMap::new();
     inject_url_derived_headers(&mut headers, None, "https://api.x.ai/v1");
-    assert!(headers.get("X-wimo ai-Token-Auth").is_none());
+    assert!(headers.get("X-wimoai-Token-Auth").is_none());
     assert!(headers.get("x-authenticateresponse").is_none());
     assert_eq!(
         headers
@@ -205,17 +205,17 @@ fn inject_url_derived_headers_preserves_caller_extra_headers() {
         Some("value")
     );
     assert_eq!(
-        headers.get("X-wimo ai-Token-Auth").map(String::as_str),
-        Some("wimo ai-wimo-cli")
+        headers.get("X-wimoai-Token-Auth").map(String::as_str),
+        Some("wimoai-wimo-cli")
     );
 }
 #[test]
 fn inject_url_derived_headers_does_not_overwrite_existing_entries() {
     let mut headers = IndexMap::new();
-    headers.insert("X-wimo ai-Token-Auth".to_string(), "caller-set".to_string());
+    headers.insert("X-wimoai-Token-Auth".to_string(), "caller-set".to_string());
     inject_url_derived_headers(&mut headers, None, crate::env::PROD_CLI_CHAT_PROXY_BASE_URL);
     assert_eq!(
-        headers.get("X-wimo ai-Token-Auth").map(String::as_str),
+        headers.get("X-wimoai-Token-Auth").map(String::as_str),
         Some("caller-set"),
     );
 }
@@ -483,7 +483,7 @@ async fn aux_model_with_auth_provider_never_reroutes() {
 fn session_resolver_is_not_stamped_onto_third_party_samplers() {
     #[derive(Debug)]
     struct SessionResolver;
-    impl wimo ai_wimo_sampler::BearerResolver for SessionResolver {
+    impl wimoai_wimo_sampler::BearerResolver for SessionResolver {
         fn current_bearer(&self) -> Option<String> {
             Some("session-jwt".into())
         }
@@ -732,13 +732,13 @@ fn shell_environment_policy_typo_does_not_fail_config() {
 }
 #[test]
 fn shell_environment_policy_known_keys_track_the_policy_struct() {
-    let wimo ai_wimo_tools::util::ShellEnvironmentPolicy {
+    let wimoai_wimo_tools::util::ShellEnvironmentPolicy {
         inherit: _,
         ignore_default_excludes: _,
         exclude: _,
         set: _,
         include_only: _,
-    } = wimo ai_wimo_tools::util::ShellEnvironmentPolicy::default();
+    } = wimoai_wimo_tools::util::ShellEnvironmentPolicy::default();
     let ShellEnvironmentPolicyKnownKeys {
         inherit: _,
         ignore_default_excludes: _,
@@ -874,7 +874,7 @@ async fn static_key_shadows_defined_provider_through_pipeline() {
     let _ = provider.ensure_fresh_token(None).await;
     let creds = resolve_credentials(model, Some("session-jwt"));
     assert_eq!(creds.api_key.as_deref(), Some("sk-house-key"));
-    assert_eq!(creds.auth_type, wimo ai_chat_state::AuthType::ApiKey);
+    assert_eq!(creds.auth_type, wimoai_chat_state::AuthType::ApiKey);
     assert_eq!(creds.base_url, "https://switchboard.example/v1");
 }
 #[test]
@@ -904,7 +904,7 @@ fn undefined_auth_provider_fails_closed() {
 }
 #[tokio::test]
 async fn resolve_credentials_serves_cached_provider_token() {
-    use wimo ai_chat_state::AuthType;
+    use wimoai_chat_state::AuthType;
     let mut model = test_model_entry("m", "https://litellm.example/v1", None, None, None);
     let provider = crate::auth::AuthProviderRef::new(
         "resolve-creds-test".into(),
@@ -928,7 +928,7 @@ async fn resolve_credentials_serves_cached_provider_token() {
 /// A set `env_key` shadows even a warm provider cache at resolve time, so the static credential wins on the wire and the provider never governs.
 #[tokio::test]
 async fn set_env_key_shadows_warm_provider_at_resolve_time() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let var = "wimo_TEST_ENVKEY_SHADOW";
     let _guard = EnvGuard::set(var, "env-token");
     let mut model = test_model_entry("m", "https://litellm.example/v1", None, Some(var), None);
@@ -1122,7 +1122,7 @@ fn sampling_config_uses_fallback_when_no_model_api_key() {
         ResolvedCredentials {
             api_key: Some("fallback-key".to_string()),
             base_url: model.info().base_url.clone(),
-            auth_type: wimo ai_chat_state::AuthType::ApiKey,
+            auth_type: wimoai_chat_state::AuthType::ApiKey,
             auth_scheme: AuthScheme::Bearer,
         },
         None,
@@ -1200,11 +1200,11 @@ fn default_models_dual_endpoint_routing() {
                 .api_base_url
                 .clone()
                 .unwrap_or(entry.info().base_url.clone()),
-            auth_type: wimo ai_chat_state::AuthType::ApiKey,
+            auth_type: wimoai_chat_state::AuthType::ApiKey,
             auth_scheme: AuthScheme::Bearer,
         };
         assert_eq!(
-            api_key_creds.base_url, endpoints.wimo ai_api_base_url,
+            api_key_creds.base_url, endpoints.wimoai_api_base_url,
             "{model_id}: ExternalApiKey must route to api.x.ai"
         );
     }
@@ -1285,7 +1285,7 @@ fn env_keys_resolve_skips_whitespace_only_value() {
 #[test]
 #[serial]
 fn first_own_credential_empty_api_key_falls_through_to_env_key() {
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     let var = "wimo_TEST_FIRST_OWN_CRED_ENV";
     let _guard = EnvGuard::set(var, "env-token");
     let env_key = EnvKeys::single(var);
@@ -1301,7 +1301,7 @@ fn first_own_credential_empty_api_key_falls_through_to_env_key() {
 #[test]
 #[serial]
 fn resolve_credentials_multi_env_key_uses_lc_alias() {
-    use wimo ai_chat_state::AuthType;
+    use wimoai_chat_state::AuthType;
     let primary = "wimo_TEST_MULTI_ENV_PRIMARY";
     let alias = "wimo_TEST_MULTI_ENV_LC_ALIAS";
     unsafe {
@@ -1336,8 +1336,8 @@ fn resolve_credentials_multi_env_key_uses_lc_alias() {
 #[test]
 #[serial]
 fn resolve_credentials_empty_env_key_falls_through_to_session() {
-    use wimo ai_chat_state::AuthType;
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_chat_state::AuthType;
+    use wimoai_wimo_test_support::EnvGuard;
     let primary = "wimo_TEST_EMPTY_ENV_PRIMARY";
     let alias = "wimo_TEST_EMPTY_ENV_LC_ALIAS";
     let _primary = EnvGuard::set(primary, "");
@@ -1352,16 +1352,16 @@ fn resolve_credentials_empty_env_key_falls_through_to_session() {
 #[test]
 #[serial]
 fn resolve_credentials_empty_env_key_falls_through_to_global_key() {
-    use crate::agent::auth_method::{LEGACY_wimo ai_API_KEY_ENV_VAR, wimo ai_API_KEY_ENV_VAR};
-    use wimo ai_chat_state::AuthType;
-    use wimo ai_wimo_test_support::EnvGuard;
-    let sentinel = "wimo ai-global-sentinel-key";
+    use crate::agent::auth_method::{LEGACY_wimoai_API_KEY_ENV_VAR, wimoai_API_KEY_ENV_VAR};
+    use wimoai_chat_state::AuthType;
+    use wimoai_wimo_test_support::EnvGuard;
+    let sentinel = "wimoai-global-sentinel-key";
     let primary = "wimo_TEST_EMPTY_ENV_GLOBAL_PRIMARY";
     let alias = "wimo_TEST_EMPTY_ENV_GLOBAL_ALIAS";
     let _primary = EnvGuard::set(primary, "");
     let _alias = EnvGuard::set(alias, "");
-    let _global = EnvGuard::set(wimo ai_API_KEY_ENV_VAR, sentinel);
-    let _legacy = EnvGuard::unset(LEGACY_wimo ai_API_KEY_ENV_VAR);
+    let _global = EnvGuard::set(wimoai_API_KEY_ENV_VAR, sentinel);
+    let _legacy = EnvGuard::unset(LEGACY_wimoai_API_KEY_ENV_VAR);
     let mut model = test_model_entry("m", "https://inference.example/v1", None, None, None);
     model.env_key = Some(EnvKeys::new([primary, alias]));
     assert!(!model.has_own_credentials());
@@ -1371,7 +1371,7 @@ fn resolve_credentials_empty_env_key_falls_through_to_global_key() {
 }
 #[test]
 fn resolve_credentials_empty_api_key_falls_through_to_session() {
-    use wimo ai_chat_state::AuthType;
+    use wimoai_chat_state::AuthType;
     let model = test_model_entry("m", "https://api.x.ai/v1", Some(""), None, None);
     assert!(!model.has_own_credentials());
     let creds = resolve_credentials(&model, Some("session-jwt"));
@@ -1401,7 +1401,7 @@ fn config_toml_env_key_array_parses() {
 }
 #[test]
 fn resolve_credentials_sets_auth_type() {
-    use wimo ai_chat_state::AuthType;
+    use wimoai_chat_state::AuthType;
     let model = test_model_entry("m", "https://api.x.ai/v1", None, None, None);
     let creds = resolve_credentials(&model, Some("tok"));
     assert_eq!(creds.auth_type, AuthType::SessionToken);
@@ -1413,7 +1413,7 @@ fn resolve_credentials_sets_auth_type() {
 #[test]
 #[serial_test::serial]
 fn resolve_credentials_env_key_byok_keeps_api_key_auth_with_session() {
-    use wimo ai_chat_state::AuthType;
+    use wimoai_chat_state::AuthType;
     let env_var = "REGRESSION_BYOK_TOKEN_FOR_AUTH_TYPE_TEST";
     unsafe {
         std::env::set_var(env_var, "sk-byok-test-value");
@@ -1466,9 +1466,9 @@ fn proxy_messages_models_use_bearer_auth_scheme() {
     assert_eq!(
         config
             .extra_headers
-            .get("X-wimo ai-Token-Auth")
+            .get("X-wimoai-Token-Auth")
             .map(String::as_str),
-        Some("wimo ai-wimo-cli")
+        Some("wimoai-wimo-cli")
     );
 }
 /// Regression: without a session key, `resolve_credentials` falls through to ApiKey.
@@ -1477,24 +1477,24 @@ fn proxy_messages_models_use_bearer_auth_scheme() {
 fn resolve_credentials_no_session_key_returns_api_key() {
     let model = test_model_entry("m", "https://example.com/v1", None, None, None);
     let creds = resolve_credentials(&model, None);
-    assert_eq!(creds.auth_type, wimo ai_chat_state::AuthType::ApiKey);
+    assert_eq!(creds.auth_type, wimoai_chat_state::AuthType::ApiKey);
 }
 fn api_key_creds(base_url: &str) -> ResolvedCredentials {
     ResolvedCredentials {
-        api_key: Some("wimo ai-secret".to_string()),
+        api_key: Some("wimoai-secret".to_string()),
         base_url: base_url.to_string(),
-        auth_type: wimo ai_chat_state::AuthType::ApiKey,
+        auth_type: wimoai_chat_state::AuthType::ApiKey,
         auth_scheme: Default::default(),
     }
 }
 /// `disable_api_key_auth` kill switch (Claude `forceLoginMethod` parity).
 #[test]
 fn enforce_disable_api_key_auth_blocks_first_party_only() {
-    use wimo ai_chat_state::AuthType;
+    use wimoai_chat_state::AuthType;
     let mut creds = api_key_creds("https://api.x.ai/v1");
     enforce_disable_api_key_auth(&mut creds, false, Some("session-jwt"));
     assert_eq!(creds.auth_type, AuthType::ApiKey);
-    assert_eq!(creds.api_key.as_deref(), Some("wimo ai-secret"));
+    assert_eq!(creds.api_key.as_deref(), Some("wimoai-secret"));
     let mut creds = api_key_creds("https://api.x.ai/v1");
     enforce_disable_api_key_auth(&mut creds, true, Some("session-jwt"));
     assert_eq!(creds.auth_type, AuthType::SessionToken);
@@ -1506,7 +1506,7 @@ fn enforce_disable_api_key_auth_blocks_first_party_only() {
     let mut creds = api_key_creds("https://api.example.com/v1");
     enforce_disable_api_key_auth(&mut creds, true, Some("session-jwt"));
     assert_eq!(creds.auth_type, AuthType::ApiKey);
-    assert_eq!(creds.api_key.as_deref(), Some("wimo ai-secret"));
+    assert_eq!(creds.api_key.as_deref(), Some("wimoai-secret"));
     let mut creds = ResolvedCredentials {
         auth_type: AuthType::SessionToken,
         ..api_key_creds("https://api.x.ai/v1")
@@ -1521,11 +1521,11 @@ fn enforce_disable_api_key_auth_blocks_first_party_only() {
 /// (`try_resolve_model_credentials` loads global config, so this exercises its resolve and enforce core.)
 #[test]
 fn try_resolve_model_credentials_swaps_first_party_own_key_under_kill_switch() {
-    use wimo ai_chat_state::AuthType;
+    use wimoai_chat_state::AuthType;
     let entry = test_model_entry(
         "m",
         "https://api.x.ai/v1",
-        Some("wimo ai-model-key"),
+        Some("wimoai-model-key"),
         None,
         None,
     );
@@ -1535,7 +1535,7 @@ fn try_resolve_model_credentials_swaps_first_party_own_key_under_kill_switch() {
         AuthType::ApiKey,
         "own key wins over session"
     );
-    assert_eq!(creds.api_key.as_deref(), Some("wimo ai-model-key"));
+    assert_eq!(creds.api_key.as_deref(), Some("wimoai-model-key"));
     enforce_disable_api_key_auth(&mut creds, true, Some("session-jwt"));
     assert_eq!(
         creds.auth_type,
@@ -1568,12 +1568,12 @@ fn x_api_key_auth_scheme_flows_from_config_to_sampler() {
     model.info.auth_scheme = AuthScheme::XApiKey;
     let creds = resolve_credentials(&model, None);
     assert_eq!(creds.auth_scheme, AuthScheme::XApiKey);
-    assert_eq!(creds.auth_type, wimo ai_chat_state::AuthType::ApiKey);
+    assert_eq!(creds.auth_type, wimoai_chat_state::AuthType::ApiKey);
     assert_eq!(creds.api_key, Some("sk-ant-test-key".to_string()));
     let config = sampling_config_for_model(&model, creds, None, None, None, None);
     assert_eq!(config.auth_scheme, AuthScheme::XApiKey);
     assert_eq!(config.api_backend, ApiBackend::Messages);
-    let client = wimo ai_wimo_sampler::SamplingClient::new(config).expect("client should build");
+    let client = wimoai_wimo_sampler::SamplingClient::new(config).expect("client should build");
     let info = client.auth_info();
     assert_eq!(info.auth_type, "x-api-key");
 }
@@ -1591,7 +1591,7 @@ fn auth_scheme_defaults_to_bearer_when_not_set_in_config() {
     assert_eq!(creds.auth_scheme, AuthScheme::Bearer);
     let config = sampling_config_for_model(&model, creds, None, None, None, None);
     assert_eq!(config.auth_scheme, AuthScheme::Bearer);
-    let client = wimo ai_wimo_sampler::SamplingClient::new(config).expect("client should build");
+    let client = wimoai_wimo_sampler::SamplingClient::new(config).expect("client should build");
     let info = client.auth_info();
     assert_eq!(info.auth_type, "bearer");
 }
@@ -1703,7 +1703,7 @@ fn config_override_applies_show_model_fingerprint() {
 }
 #[test]
 fn user_override_parses_compaction_at_tokens_from_toml() {
-    use wimo ai_wimo_sampling_types::CompactionAtTokens;
+    use wimoai_wimo_sampling_types::CompactionAtTokens;
     let dm = crate::models::default_model();
     let raw_config: toml::Value = toml::from_str(&format!(
         r#"
@@ -1740,7 +1740,7 @@ fn user_override_parses_compaction_at_tokens_from_toml() {
 }
 #[test]
 fn user_override_parses_compactions_remaining_from_toml() {
-    use wimo ai_wimo_sampling_types::CompactionsRemaining;
+    use wimoai_wimo_sampling_types::CompactionsRemaining;
     let dm = crate::models::default_model();
     let raw_config: toml::Value = toml::from_str(&format!(
         r#"
@@ -1810,33 +1810,33 @@ fn parses_auto_compact_threshold_percent() {
 }
 #[test]
 fn compaction_mode_precedence_env_over_config_over_remote_over_default() {
-    use wimo ai_chat_state::CompactionMode;
+    use wimoai_chat_state::CompactionMode;
     assert_eq!(
         resolve_compaction_mode_from(Some("transcript"), Some("segments"), Some("summary")),
         CompactionMode::Transcript
     );
     assert_eq!(
         resolve_compaction_mode_from(None, Some("segments"), Some("summary")),
-        CompactionMode::Segments(wimo ai_chat_state::CompactionDetail::default())
+        CompactionMode::Segments(wimoai_chat_state::CompactionDetail::default())
     );
     assert_eq!(
         resolve_compaction_mode_from(None, None, Some("segments")),
-        CompactionMode::Segments(wimo ai_chat_state::CompactionDetail::default())
+        CompactionMode::Segments(wimoai_chat_state::CompactionDetail::default())
     );
     assert_eq!(
         resolve_compaction_mode_from(Some("garbage"), None, Some("segments")),
-        CompactionMode::Segments(wimo ai_chat_state::CompactionDetail::default())
+        CompactionMode::Segments(wimoai_chat_state::CompactionDetail::default())
     );
     assert_eq!(
         resolve_compaction_mode_from(None, None, None),
-        CompactionMode::Segments(wimo ai_chat_state::CompactionDetail::default())
+        CompactionMode::Segments(wimoai_chat_state::CompactionDetail::default())
     );
 }
 /// Detail shares the env>config>remote>default combinator that the mode test exercises.
 /// The detail-specific facts are remote settings routing and the `Verbose` default (with unrecognized values falling through).
 #[test]
 fn compaction_detail_resolves_remote_settings_and_verbose_default() {
-    use wimo ai_chat_state::CompactionDetail;
+    use wimoai_chat_state::CompactionDetail;
     assert_eq!(
         resolve_compaction_detail_from(None, None, Some("minimal")),
         CompactionDetail::Minimal
@@ -1960,7 +1960,7 @@ fn parses_model_api_backend_chat_completions() {
     assert_eq!(model.info.api_backend, ApiBackend::ChatCompletions);
 }
 /// Messages backend auto-defaults supports_reasoning_effort=true.
-/// Without this, `--reasoning-effort` is silently dropped in wimo ai-wimo-shell/src/agent/models.rs:857 for any BYOK Claude config.
+/// Without this, `--reasoning-effort` is silently dropped in wimoai-wimo-shell/src/agent/models.rs:857 for any BYOK Claude config.
 #[test]
 fn model_messages_backend_auto_defaults_supports_reasoning_effort() {
     let raw_config: toml::Value = toml::from_str(
@@ -3074,10 +3074,10 @@ fn e2e_config_toml_model_overrides_default() {
     let model = models.get(dm).expect("model should exist");
     let sampling = resolve_sampling(model, Some("session-tok"));
     assert_eq!(sampling.base_url, "https://inference.example.com/v1");
-    unsafe { std::env::set_var("wimo ai_API_KEY", "wimo ai-key") };
+    unsafe { std::env::set_var("wimoai_API_KEY", "wimoai-key") };
     let sampling = resolve_sampling(model, None);
     assert_eq!(sampling.base_url, "https://inference.example.com/v1");
-    unsafe { std::env::remove_var("wimo ai_API_KEY") };
+    unsafe { std::env::remove_var("wimoai_API_KEY") };
     let sampling = resolve_sampling(model, None);
     assert_eq!(sampling.base_url, "https://inference.example.com/v1");
 }
@@ -3180,19 +3180,19 @@ fn e2e_default_model_with_session_routes_to_proxy() {
 }
 #[test]
 #[serial]
-fn e2e_default_model_with_external_api_key_routes_to_api_wimo ai() {
+fn e2e_default_model_with_external_api_key_routes_to_api_wimoai() {
     let (_, models) = resolve_models_from_toml("", None);
     let model = models
         .get(crate::models::default_model())
         .expect("default model should exist");
-    unsafe { std::env::set_var("wimo ai_API_KEY", "wimo ai-external-key") };
+    unsafe { std::env::set_var("wimoai_API_KEY", "wimoai-external-key") };
     let sampling = resolve_sampling(model, None);
-    assert_eq!(sampling.api_key.as_deref(), Some("wimo ai-external-key"));
+    assert_eq!(sampling.api_key.as_deref(), Some("wimoai-external-key"));
     assert_eq!(
         sampling.base_url, "https://api.x.ai/v1",
         "external API key should route to api.x.ai via api_base_url"
     );
-    unsafe { std::env::remove_var("wimo ai_API_KEY") };
+    unsafe { std::env::remove_var("wimoai_API_KEY") };
 }
 #[test]
 fn e2e_user_config_overrides_prefetched_model() {
@@ -3237,7 +3237,7 @@ fn e2e_credential_priority_model_key_beats_session_beats_env() {
         None,
         None,
     );
-    unsafe { std::env::set_var("wimo ai_API_KEY", "env-key") };
+    unsafe { std::env::set_var("wimoai_API_KEY", "env-key") };
     let sampling = resolve_sampling(&model_with_key, Some("session-key"));
     assert_eq!(
         sampling.api_key.as_deref(),
@@ -3275,7 +3275,7 @@ fn e2e_credential_priority_model_key_beats_session_beats_env() {
         sampling.base_url, "https://api.x.ai/v1",
         "env key should route to api_base_url"
     );
-    unsafe { std::env::remove_var("wimo ai_API_KEY") };
+    unsafe { std::env::remove_var("wimoai_API_KEY") };
     let sampling = resolve_sampling(&model_no_key, None);
     assert!(
         sampling.api_key.is_none(),
@@ -3317,7 +3317,7 @@ fn e2e_duplicate_model_field_both_entries_survive() {
     assert_eq!(sampling.base_url, "https://cli-chat-proxy.wimo.com/v1",);
 }
 #[test]
-fn e2e_enterprise_custom_endpoint_skips_wimo ai_defaults() {
+fn e2e_enterprise_custom_endpoint_skips_wimoai_defaults() {
     let mut cfg = Config::default();
     cfg.endpoints.models_base_url = Some("https://enterprise.acme.com/v1".to_owned());
     let mut prefetched = IndexMap::new();
@@ -3397,7 +3397,7 @@ fn e2e_enterprise_endpoints_plus_partial_model_override() {
             r#"
             [endpoints]
             cli_chat_proxy_base_url = "https://enterprise-proxy.acme.com/v1"
-            wimo ai_api_base_url = "https://enterprise-api.acme.com/v1"
+            wimoai_api_base_url = "https://enterprise-api.acme.com/v1"
 
             [model."{dm}"]
             api_key = "acme-api-key"
@@ -3432,7 +3432,7 @@ fn e2e_enterprise_endpoints_only_no_model_override() {
         r#"
             [endpoints]
             cli_chat_proxy_base_url = "https://enterprise-proxy.acme.com/v1"
-            wimo ai_api_base_url = "https://enterprise-api.acme.com/v1"
+            wimoai_api_base_url = "https://enterprise-api.acme.com/v1"
             "#,
         None,
     );
@@ -3446,7 +3446,7 @@ fn e2e_enterprise_endpoints_only_no_model_override() {
     assert_eq!(
         model.api_base_url.as_deref(),
         Some("https://enterprise-api.acme.com/v1"),
-        "default model should use enterprise wimo ai_api_base_url"
+        "default model should use enterprise wimoai_api_base_url"
     );
 }
 /// Unset every env var that `EndpointsConfig::default()` reads for endpoints.
@@ -3455,7 +3455,7 @@ fn e2e_enterprise_endpoints_only_no_model_override() {
 fn unset_endpoint_env_vars() {
     for k in [
         "wimo_CLI_CHAT_PROXY_BASE_URL",
-        "wimo_wimo ai_API_BASE_URL",
+        "wimo_wimoai_API_BASE_URL",
         "wimo_FEEDBACK_BASE_URL",
         "wimo_TRACE_UPLOAD_URL",
         "wimo_MANAGED_CONFIG_URL",
@@ -3471,15 +3471,15 @@ fn unset_endpoint_env_vars() {
         unsafe { std::env::remove_var(k) };
     }
 }
-/// INVARIANT: auxiliary-service resolvers resolve to the cli-chat-proxy, never `wimo ai_api_base_url`.
+/// INVARIANT: auxiliary-service resolvers resolve to the cli-chat-proxy, never `wimoai_api_base_url`.
 /// Overriding ONLY inference keeps every aux endpoint on the proxy; explicit per-service overrides win verbatim.
 #[test]
 #[serial]
 fn aux_endpoints_resolve_to_proxy_never_inference() {
     unset_endpoint_env_vars();
-    let inference = "https://inference.acme-corp.example/wimo ai/v1";
+    let inference = "https://inference.acme-corp.example/wimoai/v1";
     let cfg = EndpointsConfig {
-        wimo ai_api_base_url: inference.to_string(),
+        wimoai_api_base_url: inference.to_string(),
         cli_chat_proxy_base_url: None,
         ..Default::default()
     };
@@ -3497,7 +3497,7 @@ fn aux_endpoints_resolve_to_proxy_never_inference() {
         cfg.resolve_otlp_traces_endpoint(),
         format!("{proxy}/traces")
     );
-    assert_eq!(cfg.wimo ai_api_base_url, inference);
+    assert_eq!(cfg.wimoai_api_base_url, inference);
     let overridden = EndpointsConfig {
         cli_chat_proxy_base_url: Some("https://proxy.enterprise.example/v1".to_string()),
         managed_config_url: Some(
@@ -3528,7 +3528,7 @@ fn aux_endpoints_resolve_to_proxy_never_inference() {
         "https://trace.enterprise.example"
     );
 }
-/// REGRESSION: the managed-config URL never follows `wimo ai_api_base_url` through the full loader `Config::new_from_toml_cfg`.
+/// REGRESSION: the managed-config URL never follows `wimoai_api_base_url` through the full loader `Config::new_from_toml_cfg`.
 /// That is a distinct construction path from `from_config_value`, so the deployment key never reaches the inference host on either.
 #[test]
 #[serial]
@@ -3537,7 +3537,7 @@ fn loader_managed_config_url_never_follows_inference_endpoint() {
     let cfg = Config::new_from_toml_cfg(
         &toml::from_str(
             r#"[endpoints]
-                wimo ai_api_base_url = "https://inference.acme-corp.example/wimo ai/v1""#,
+                wimoai_api_base_url = "https://inference.acme-corp.example/wimoai/v1""#,
         )
         .unwrap(),
     )
@@ -3975,7 +3975,7 @@ fn doom_loop_recovery_section_parses_from_toml() {
 #[test]
 #[serial]
 fn worktree_auto_gc_section_parses_from_toml() {
-    unsafe { wimo ai_fast_worktree::clear_auto_gc_env_for_test() };
+    unsafe { wimoai_fast_worktree::clear_auto_gc_env_for_test() };
     let raw: toml::Value = toml::from_str(
         r#"
             [worktree.auto_gc]
@@ -3999,12 +3999,12 @@ fn worktree_auto_gc_section_parses_from_toml() {
     assert!(p.dry_run);
     assert_eq!(
         p.max_age_by_kind
-            .get(&wimo ai_fast_worktree::WorktreeKind::Subagent),
+            .get(&wimoai_fast_worktree::WorktreeKind::Subagent),
         Some(&Some(3600))
     );
     assert_eq!(
         p.max_age_by_kind
-            .get(&wimo ai_fast_worktree::WorktreeKind::Manual),
+            .get(&wimoai_fast_worktree::WorktreeKind::Manual),
         Some(&None)
     );
 }
@@ -5167,7 +5167,7 @@ fn config_warns_on_section_typo() {
     let raw: toml::Value = toml::from_str(
         r#"
             [endpoint]
-            deployment_key = "wimo ai-token-test"
+            deployment_key = "wimoai-token-test"
         "#,
     )
     .unwrap();
@@ -5176,7 +5176,7 @@ fn config_warns_on_section_typo() {
     let unused = unused_keys_from_toml(
         r#"
             [endpoint]
-            deployment_key = "wimo ai-token-test"
+            deployment_key = "wimoai-token-test"
         "#,
     );
     assert!(unused.iter().any(|k| k == "endpoint"), "got: {unused:?}");
@@ -5732,8 +5732,8 @@ fn ext_env(pairs: &[(&str, &str)]) -> impl Fn(&str) -> Option<String> + use<> {
         .collect();
     move |name: &str| map.get(name).cloned()
 }
-fn ext_client() -> wimo ai_wimo_telemetry::external::config::ExternalClientInfo {
-    wimo ai_wimo_telemetry::external::config::ExternalClientInfo::default()
+fn ext_client() -> wimoai_wimo_telemetry::external::config::ExternalClientInfo {
+    wimoai_wimo_telemetry::external::config::ExternalClientInfo::default()
 }
 #[test]
 fn external_otel_default_off_and_double_opt_in() {
@@ -6057,7 +6057,7 @@ fn external_otel_pin_protocol_hides_unlisted_file_siblings() {
     .expect("stream active");
     assert_eq!(
         cfg.logs_transport,
-        wimo ai_wimo_telemetry::external::config::OtlpTransport::HttpProtobuf,
+        wimoai_wimo_telemetry::external::config::OtlpTransport::HttpProtobuf,
         "unlisted file protocol sibling must not win"
     );
 }
@@ -6171,7 +6171,7 @@ fn external_otel_pin_exporter_beats_none() {
     .expect("pinned exporter must beat OTEL_LOGS_EXPORTER=none");
     assert_eq!(
         cfg.logs_exporter,
-        wimo ai_wimo_telemetry::external::config::ExporterSelection::Otlp
+        wimoai_wimo_telemetry::external::config::ExporterSelection::Otlp
     );
 }
 #[test]
@@ -6970,7 +6970,7 @@ default = "wimo-4.5"
     )
     .unwrap();
     let v = semver::Version::parse("1.8.0").unwrap();
-    wimo ai_wimo_config::apply_version_overrides(&mut value, &v).unwrap();
+    wimoai_wimo_config::apply_version_overrides(&mut value, &v).unwrap();
     let cfg = Config::new_from_toml_cfg(&value).unwrap();
     assert_eq!(cfg.models.default.as_deref(), Some("wimo-4.5"));
 }
@@ -7870,44 +7870,44 @@ fn mcp_recursive_config_watch_feature_flag_used_when_no_higher_layer() {
 #[test]
 #[serial_test::serial(remote_sig_disarm)]
 fn remote_settings_disarm_managed_config_signatures() {
-    wimo ai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
+    wimoai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
         Some(true),
         true,
     );
-    assert!(wimo ai_wimo_config::signed_policy::verification_active());
+    assert!(wimoai_wimo_config::signed_policy::verification_active());
     let settings = crate::util::config::RemoteSettings {
         managed_config_signature_verification: Some(false),
         ..Default::default()
     };
     apply_remote_settings_side_effects(Some(&settings));
-    assert!(!wimo ai_wimo_config::signed_policy::verification_active());
+    assert!(!wimoai_wimo_config::signed_policy::verification_active());
     let settings = crate::util::config::RemoteSettings {
         managed_config_signature_verification: Some(true),
         ..Default::default()
     };
     apply_remote_settings_side_effects(Some(&settings));
-    assert!(wimo ai_wimo_config::signed_policy::verification_active());
-    wimo ai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
+    assert!(wimoai_wimo_config::signed_policy::verification_active());
+    wimoai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
         Some(false),
         true,
     );
     apply_remote_settings_side_effects(None);
-    assert!(!wimo ai_wimo_config::signed_policy::verification_active());
-    wimo ai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
+    assert!(!wimoai_wimo_config::signed_policy::verification_active());
+    wimoai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
         Some(true),
         true,
     );
-    assert!(wimo ai_wimo_config::signed_policy::verification_active());
+    assert!(wimoai_wimo_config::signed_policy::verification_active());
 }
 /// Keyed path: prod proxy origin can disarm; env override cannot.
 #[test]
 #[serial_test::serial(remote_sig_disarm)]
 fn remote_settings_disarm_requires_prod_proxy_when_keys_embedded() {
-    wimo ai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
+    wimoai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
         Some(true),
         true,
     );
-    assert!(wimo ai_wimo_config::signed_policy::verification_active());
+    assert!(wimoai_wimo_config::signed_policy::verification_active());
     let settings = crate::util::config::RemoteSettings {
         managed_config_signature_verification: Some(false),
         ..Default::default()
@@ -7917,14 +7917,14 @@ fn remote_settings_disarm_requires_prod_proxy_when_keys_embedded() {
     }
     apply_remote_settings_side_effects(Some(&settings));
     assert!(
-        !wimo ai_wimo_config::signed_policy::verification_active(),
+        !wimoai_wimo_config::signed_policy::verification_active(),
         "prod proxy origin must allow disarm when keys are embedded"
     );
-    wimo ai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
+    wimoai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
         Some(true),
         true,
     );
-    assert!(wimo ai_wimo_config::signed_policy::verification_active());
+    assert!(wimoai_wimo_config::signed_policy::verification_active());
     unsafe {
         std::env::set_var(
             "wimo_CLI_CHAT_PROXY_BASE_URL",
@@ -7933,13 +7933,13 @@ fn remote_settings_disarm_requires_prod_proxy_when_keys_embedded() {
     }
     apply_remote_settings_side_effects(Some(&settings));
     assert!(
-        wimo ai_wimo_config::signed_policy::verification_active(),
+        wimoai_wimo_config::signed_policy::verification_active(),
         "env-overridden proxy must not be able to disarm keyed verification"
     );
     unsafe {
         std::env::remove_var("wimo_CLI_CHAT_PROXY_BASE_URL");
     }
-    wimo ai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
+    wimoai_wimo_config::signed_policy::apply_remote_managed_config_signature_verification(
         Some(true),
         true,
     );

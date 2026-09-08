@@ -199,13 +199,13 @@ impl SessionActor {
                         )
                     };
                     let limit = limit.map_or_else(String::new, |l| format!("/{l}"));
-                    if used >= wimo ai_workflow::MAX_AGENT_BUDGET {
+                    if used >= wimoai_workflow::MAX_AGENT_BUDGET {
                         return format!(
                             "Run '{name}' exhausted the maximum agent budget ({used}{limit} agents) \
                              and cannot be resumed. Start a new run instead."
                         );
                     }
-                    let suggested = used.saturating_add(64).min(wimo ai_workflow::MAX_AGENT_BUDGET);
+                    let suggested = used.saturating_add(64).min(wimoai_workflow::MAX_AGENT_BUDGET);
                     return format!(
                         "Run '{name}' exhausted its agent budget ({used}{limit} agents). \
                          Resuming keeps all finished work but needs a higher absolute cap — \
@@ -363,7 +363,7 @@ fn format_workflow_runs_overview(
             let _ = write!(
                 out,
                 "\n  Objective: {}",
-                wimo ai_wimo_tools::util::truncate_str(
+                wimoai_wimo_tools::util::truncate_str(
                     &objective,
                     super::reminders::WORKFLOW_OBJECTIVE_REMINDER_CAP
                 )
@@ -656,11 +656,11 @@ mod overview_tests {
         let mut runs = tracked_runs(&["builder"]);
         runs[0].objective = "ship  the\tthing".into();
         runs[0].phases = vec![
-            wimo ai_workflow::PhaseMeta {
+            wimoai_workflow::PhaseMeta {
                 title: "plan".into(),
                 detail: None,
             },
-            wimo ai_workflow::PhaseMeta {
+            wimoai_workflow::PhaseMeta {
                 title: "build".into(),
                 detail: None,
             },

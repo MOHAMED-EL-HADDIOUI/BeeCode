@@ -1,7 +1,7 @@
 //! Key shortcut types and the `key!()` macro.
 //!
 //! ```
-//! use wimo ai_wimo_pager::input::key::key;
+//! use wimoai_wimo_pager::input::key::key;
 //!
 //! // Simple key
 //! let q = key!('q');
@@ -277,7 +277,7 @@ pub fn is_inline_paste_key(key: &KeyEvent) -> bool {
 /// Ctrl+Z / Cmd+Z, the textarea's undo binding.
 /// Delegates to the owning crate's predicate so the chord can never fall out of sync with what the key does.
 pub fn is_undo_key(key: &KeyEvent) -> bool {
-    wimo ai_ratatui_textarea::is_undo_input(key)
+    wimoai_ratatui_textarea::is_undo_input(key)
 }
 
 // On Windows, AltGr arrives as Ctrl+Alt; on other platforms it's composed before reaching us.

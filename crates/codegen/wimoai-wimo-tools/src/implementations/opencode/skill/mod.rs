@@ -210,28 +210,28 @@ impl crate::types::tool_metadata::ToolMetadata for SkillTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for SkillTool {
+impl wimoai_tool_runtime::Tool for SkillTool {
     type Args = SkillInput;
     type Output = SkillOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("skill").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("skill").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "skill",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -239,9 +239,9 @@ impl wimo ai_tool_runtime::Tool for SkillTool {
     #[tracing::instrument(name = "tool.opencode_skill", skip_all, fields(skill_name = %input.name))]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: SkillInput,
-    ) -> Result<SkillOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<SkillOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -370,7 +370,7 @@ mod tests {
     fn tool_metadata() {
         use crate::types::tool_metadata::ToolMetadata;
         let tool = SkillTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "skill");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "skill");
         assert!(matches!(tool.kind(), ToolKind::Skill));
         assert!(matches!(tool.tool_namespace(), ToolNamespace::OpenCode));
         let desc = tool.description_template();
@@ -458,7 +458,7 @@ mod tests {
         ]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -486,7 +486,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -508,7 +508,7 @@ mod tests {
         let resources = Resources::new();
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -541,7 +541,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -587,7 +587,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -622,7 +622,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -649,7 +649,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -678,7 +678,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -710,7 +710,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -745,7 +745,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput { name: "fmt".into() },
@@ -794,7 +794,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -831,7 +831,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -864,7 +864,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {
@@ -914,7 +914,7 @@ mod tests {
         )]));
 
         let tool = SkillTool;
-        let output = wimo ai_tool_runtime::Tool::run(
+        let output = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx(resources.into_shared()),
             SkillInput {

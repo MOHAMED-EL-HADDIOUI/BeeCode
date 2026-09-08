@@ -1,6 +1,6 @@
-use wimo ai_wimo_sampling_types::ToolSpec;
-use wimo ai_wimo_tools::implementations::wimo::SEND_SUBAGENT_MESSAGE_TOOL_NAME;
-use wimo ai_wimo_tools::types::tool::ToolKind;
+use wimoai_wimo_sampling_types::ToolSpec;
+use wimoai_wimo_tools::implementations::wimo::SEND_SUBAGENT_MESSAGE_TOOL_NAME;
+use wimoai_wimo_tools::types::tool::ToolKind;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) enum ChildToolProjection {

@@ -500,7 +500,7 @@ mod tests {
         // Regression: a single ratatui Line drops '\n' as zero-width
         // That smashed multi-line bg-task commands into one unreadable blob when expanded in the block viewer
         let block = BgTaskBlock::started(
-            "export wimo ai_ROOT=/tmp\ncd /tmp\necho start\nprod-run start backend",
+            "export wimoai_ROOT=/tmp\ncd /tmp\necho start\nprod-run start backend",
             "t1",
         )
         .with_description(Some("Start backend".into()));
@@ -510,7 +510,7 @@ mod tests {
             vec![
                 "Start backend",
                 "",
-                "$ export wimo ai_ROOT=/tmp",
+                "$ export wimoai_ROOT=/tmp",
                 "  cd /tmp",
                 "  echo start",
                 "  prod-run start backend",

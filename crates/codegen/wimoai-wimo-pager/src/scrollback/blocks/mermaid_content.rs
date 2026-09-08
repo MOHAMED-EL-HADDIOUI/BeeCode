@@ -1,7 +1,7 @@
 //! Mermaid diagram detection and the on-screen affordance row.
 //!
 //! The markdown renderer draws ` ```mermaid ` blocks inline as Unicode box-drawing art.
-//! This module detects those blocks in an agent message via the generic [`CodeBlockSpan`](wimo ai_wimo_markdown::CodeBlockSpan) API.
+//! This module detects those blocks in an agent message via the generic [`CodeBlockSpan`](wimoai_wimo_markdown::CodeBlockSpan) API.
 //! It exposes each diagram's clean source so a full-fidelity PNG can be rendered on demand.
 //! It never renders and tracks no per-diagram render state (rendering is lazy, driven by the affordance row on click).
 //! For `auto`/`on` a clickable affordance row (`◇ mermaid [Open Image] [Copy Image Path] [Copy Source]`) is placed beneath the inline art.
@@ -12,7 +12,7 @@ use std::ops::Range;
 
 use ratatui::text::Line;
 use unicode_width::UnicodeWidthStr;
-use wimo ai_wimo_markdown::MarkdownRenderView;
+use wimoai_wimo_markdown::MarkdownRenderView;
 
 use crate::appearance::RenderMermaid;
 use crate::scrollback::types::{BlockLine, BlockOutput};
@@ -75,11 +75,11 @@ pub(crate) fn hash_source(source: &str) -> [u8; 32] {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MermaidBlock {
     /// The clean diagram source: the fence body with container markers (blockquote `>`, list indentation) stripped and CRLF normalized.
-    /// Taken from [`CodeBlockSpan::body`](wimo ai_wimo_markdown::CodeBlockSpan::body).
+    /// Taken from [`CodeBlockSpan::body`](wimoai_wimo_markdown::CodeBlockSpan::body).
     /// For a blockquoted or list-nested diagram this is the de-prefixed code, not the raw source slice.
     pub source: String,
     /// Range of pre-wrap rendered body lines this diagram occupies, as indices into [`MarkdownRenderView::lines`].
-    /// Mirrors [`CodeBlockSpan::output_line_range`](wimo ai_wimo_markdown::CodeBlockSpan::output_line_range).
+    /// Mirrors [`CodeBlockSpan::output_line_range`](wimoai_wimo_markdown::CodeBlockSpan::output_line_range).
     pub prewrap_line_range: Range<usize>,
 }
 
@@ -94,7 +94,7 @@ fn is_mermaid_info(info: &str) -> bool {
 /// The view's code-block spans that are Mermaid fences, in document order.
 fn mermaid_spans<'a>(
     view: &'a MarkdownRenderView,
-) -> impl Iterator<Item = &'a wimo ai_wimo_markdown::CodeBlockSpan> {
+) -> impl Iterator<Item = &'a wimoai_wimo_markdown::CodeBlockSpan> {
     view.code_blocks
         .iter()
         .filter(|span| is_mermaid_info(&span.info))
@@ -126,7 +126,7 @@ pub fn mermaid_block_ranges(view: &MarkdownRenderView) -> Vec<Range<usize>> {
 ///
 /// `wimoDay` is the only light theme.
 /// Every other concrete theme (and the `wimoNight` default that `Auto` resolves to before it reaches the cache) is dark.
-/// The render worker maps this to `wimo ai_wimo_mermaid::MermaidTheme`.
+/// The render worker maps this to `wimoai_wimo_mermaid::MermaidTheme`.
 /// It lives here (not in the engine crate) so the always-compiled detection module stays independent of the optional `mermaid` feature.
 pub fn theme_is_dark(theme: ThemeKind) -> bool {
     !matches!(theme, ThemeKind::wimoDay)
@@ -426,7 +426,7 @@ mod tests {
     use crate::scrollback::types::Selectable;
     use crate::syntax::get_syntect;
     use crate::theme::md_style;
-    use wimo ai_wimo_markdown::StreamingMarkdownRenderer;
+    use wimoai_wimo_markdown::StreamingMarkdownRenderer;
 
     /// Render markdown to a view and collect the detected mermaid blocks.
     fn detect(src: &str, pretty: bool) -> Vec<MermaidBlock> {

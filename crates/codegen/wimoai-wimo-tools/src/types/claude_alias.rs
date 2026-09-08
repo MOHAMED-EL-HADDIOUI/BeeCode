@@ -1,9 +1,9 @@
 //! Canonical external-settings tool name ↔ wimo tool correspondence: one table
 //! replacing two that drifted apart.
 //!
-//! Two consumers read it independently. The hook matcher (`wimo ai-wimo-hooks`) needs the
+//! Two consumers read it independently. The hook matcher (`wimoai-wimo-hooks`) needs the
 //! wimo tool **names** an external settings term maps to (and the reverse, for regex
-//! matchers); the agent builder (`wimo ai-wimo-agent`) needs the [`ToolKind`] a `tools:`
+//! matchers); the agent builder (`wimoai-wimo-agent`) needs the [`ToolKind`] a `tools:`
 //! allowlist entry resolves to. A row may carry a kind without names (`PowerShell`
 //! shares `Execute`, with no distinct tool) or names without a kind (e.g.
 //! `Agent`/`ExitPlanMode`/`Cron*` are matchable but not allowlist-resolvable).
@@ -106,7 +106,7 @@ pub fn claude_names_for(wimo_name: &str) -> impl Iterator<Item = &'static str> +
         .map(|t| t.claude)
 }
 
-/// Every distinct wimo name the table references, for the `wimo ai-wimo-agent` drift-check
+/// Every distinct wimo name the table references, for the `wimoai-wimo-agent` drift-check
 /// test that asserts each is a real client tool name.
 pub fn wimo_names() -> impl Iterator<Item = &'static str> {
     let mut seen = std::collections::HashSet::new();

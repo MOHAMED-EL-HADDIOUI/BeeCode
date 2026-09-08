@@ -202,7 +202,7 @@ struct WelcomeLayoutInput<'a> {
     compact: bool,
     /// Horizontal-inset compaction (appearance setting) for the stacked slot.
     prompt_compact: bool,
-    announcement: Option<&'a wimo ai_wimo_announcements::RemoteAnnouncement>,
+    announcement: Option<&'a wimoai_wimo_announcements::RemoteAnnouncement>,
     /// Whether a long announcement is expanded inline (vs. collapsed to 2 lines).
     expanded: bool,
     /// Whether the info slot reserves a promo upgrade CTA (spacer and button).
@@ -474,7 +474,7 @@ pub(super) fn render_version_badge(
         spans.push(sep);
     }
 
-    let channel = wimo ai_wimo_update::channel_label();
+    let channel = wimoai_wimo_update::channel_label();
     match &mode {
         VersionBadgeMode::Full { .. } => {
             spans.push(Span::styled(
@@ -484,7 +484,7 @@ pub(super) fn render_version_badge(
                     .add_modifier(Modifier::BOLD),
             ));
             spans.push(Span::styled(
-                format!("{}{}", wimo ai_wimo_version::VERSION, channel),
+                format!("{}{}", wimoai_wimo_version::VERSION, channel),
                 Style::default().fg(theme.gray),
             ));
         }
@@ -504,7 +504,7 @@ pub(super) fn render_version_badge(
                     .add_modifier(Modifier::BOLD),
             ));
             spans.push(Span::styled(
-                wimo ai_wimo_version::VERSION,
+                wimoai_wimo_version::VERSION,
                 Style::default().fg(theme.gray),
             ));
         }
@@ -616,7 +616,7 @@ pub struct WelcomeRenderParams<'a> {
     pub auth_code_cursor_byte: usize,
     pub clipboard_delivery: Option<crate::clipboard::ClipboardDelivery>,
     pub show_raw_url: bool,
-    pub announcement: Option<&'a wimo ai_wimo_announcements::RemoteAnnouncement>,
+    pub announcement: Option<&'a wimoai_wimo_announcements::RemoteAnnouncement>,
     pub tip: Option<&'a str>,
     pub model_name: &'a str,
     pub flags: &'a [PromptFlag<'a>],
@@ -633,15 +633,15 @@ pub struct WelcomeRenderParams<'a> {
     pub startup_warnings: &'a [StartupWarning],
     pub pending_update_version: Option<&'a str>,
     /// Recent foreign session offered on ctrl+u, suppressed by a pending update.
-    pub foreign_resume_hint: Option<&'a wimo ai_wimo_foreign_sessions::RecentForeignSession>,
+    pub foreign_resume_hint: Option<&'a wimoai_wimo_foreign_sessions::RecentForeignSession>,
     pub is_api_key_auth: bool,
     pub session_picker_content_results:
-        Option<&'a [wimo ai_wimo_shell::extensions::session_search::SearchSessionHit]>,
+        Option<&'a [wimoai_wimo_shell::extensions::session_search::SearchSessionHit]>,
     pub session_picker_content_loading: bool,
     /// The query the picker entries were server-fetched with (see [`crate::views::session_picker::effective_filter_query`]).
     pub session_picker_entries_query: Option<&'a str>,
     pub welcome_tick: u64,
-    pub gate: Option<&'a wimo ai_wimo_shell::auth::GateInfo>,
+    pub gate: Option<&'a wimoai_wimo_shell::auth::GateInfo>,
     pub subscription_tier: Option<&'a str>,
     pub session_picker_grouped: bool,
     /// Source filter for the session picker.
@@ -1621,7 +1621,7 @@ fn render_announcement_section(
     area: Rect,
     buf: &mut Buffer,
     theme: &Theme,
-    announcement: &wimo ai_wimo_announcements::RemoteAnnouncement,
+    announcement: &wimoai_wimo_announcements::RemoteAnnouncement,
     min_width_hint: u16,
     content_height: u16,
     expanded: bool,
@@ -2247,7 +2247,7 @@ pub(crate) struct SessionPickerRenderCtx<'a> {
     pub(crate) pending_hint: Option<crate::views::shortcuts_bar::PendingHint>,
     pub(crate) shortcuts_area: Option<Rect>,
     pub(crate) content_results:
-        Option<&'a [wimo ai_wimo_shell::extensions::session_search::SearchSessionHit]>,
+        Option<&'a [wimoai_wimo_shell::extensions::session_search::SearchSessionHit]>,
     pub(crate) content_loading: bool,
     /// The query `sessions` were server-fetched with (see [`crate::views::session_picker::effective_filter_query`]).
     pub(crate) entries_query: Option<&'a str>,
@@ -2643,7 +2643,7 @@ fn masked_auth_token_view(input: &str, cursor_byte: usize, width: usize) -> (Str
     }
     let masked = build_masked_auth_token(input, cursor_byte);
     let buffer =
-        wimo ai_ratatui_textarea::EditBuffer::from_parts(masked.display.as_str(), masked.cursor_byte);
+        wimoai_ratatui_textarea::EditBuffer::from_parts(masked.display.as_str(), masked.cursor_byte);
     let viewport = buffer.single_line_viewport(width);
     (
         masked.display[viewport.visible_byte_range].to_owned(),
@@ -2886,7 +2886,7 @@ mod tests {
 
     #[test]
     fn foreign_resume_tip_names_each_tool_and_age() {
-        use wimo ai_wimo_foreign_sessions::ForeignSessionTool;
+        use wimoai_wimo_foreign_sessions::ForeignSessionTool;
 
         let auth = AuthState::Done;
         let trust = TrustState::Done;
@@ -2895,7 +2895,7 @@ mod tests {
             (ForeignSessionTool::Codex, "Codex"),
             (ForeignSessionTool::Cursor, "Cursor"),
         ] {
-            let hint = wimo ai_wimo_foreign_sessions::RecentForeignSession {
+            let hint = wimoai_wimo_foreign_sessions::RecentForeignSession {
                 tool,
                 native_id: "native-id".into(),
                 age: std::time::Duration::from_secs(125),
@@ -2913,8 +2913,8 @@ mod tests {
     fn pending_update_suppresses_foreign_resume_tip() {
         let auth = AuthState::Done;
         let trust = TrustState::Done;
-        let hint = wimo ai_wimo_foreign_sessions::RecentForeignSession {
-            tool: wimo ai_wimo_foreign_sessions::ForeignSessionTool::Cursor,
+        let hint = wimoai_wimo_foreign_sessions::RecentForeignSession {
+            tool: wimoai_wimo_foreign_sessions::ForeignSessionTool::Cursor,
             native_id: "native-id".into(),
             age: std::time::Duration::from_secs(30),
         };
@@ -3138,8 +3138,8 @@ mod tests {
     #[test]
     fn grouped_entries_insert_headers() {
         let entries = vec![
-            make_entry("s1", "Fix auth", "wimo ai"),
-            make_entry("s2", "Add streaming", "wimo ai"),
+            make_entry("s1", "Fix auth", "wimoai"),
+            make_entry("s2", "Add streaming", "wimoai"),
             make_entry("s3", "Nuke tables", "fw-1"),
         ];
         let indices: Vec<usize> = (0..entries.len()).collect();
@@ -3153,8 +3153,8 @@ mod tests {
 
         // Two headers and three rows make five entries
         assert_eq!(result.len(), 5);
-        // Groups are sorted alphabetically: fw-1 before wimo ai.
-        // Header positions: 0 (fw-1), 2 (wimo ai)
+        // Groups are sorted alphabetically: fw-1 before wimoai.
+        // Header positions: 0 (fw-1), 2 (wimoai)
         assert_eq!(non_sel.len(), 5);
         assert!(non_sel[0], "first entry should be header (non-selectable)");
         assert!(!non_sel[1], "second entry should be selectable row");
@@ -3167,7 +3167,7 @@ mod tests {
             matches!(&result[0], crate::views::picker::PickerEntry::Header { label } if label == &"fw-1")
         );
         assert!(
-            matches!(&result[2], crate::views::picker::PickerEntry::Header { label } if label == &"wimo ai")
+            matches!(&result[2], crate::views::picker::PickerEntry::Header { label } if label == &"wimoai")
         );
     }
 
@@ -3207,8 +3207,8 @@ mod tests {
     #[test]
     fn grouped_entries_single_group_has_one_header() {
         let entries = vec![
-            make_entry("s1", "Fix auth", "wimo ai"),
-            make_entry("s2", "Add streaming", "wimo ai"),
+            make_entry("s1", "Fix auth", "wimoai"),
+            make_entry("s2", "Add streaming", "wimoai"),
         ];
         let indices: Vec<usize> = (0..entries.len()).collect();
         let state = PickerState::default();
@@ -3242,7 +3242,7 @@ mod tests {
 
     #[test]
     fn grouped_entries_rows_are_indented() {
-        let entries = vec![make_entry("s1", "Fix auth", "wimo ai")];
+        let entries = vec![make_entry("s1", "Fix auth", "wimoai")];
         let indices: Vec<usize> = vec![0];
         let state = PickerState::default();
         let built = build_session_entry_data(&entries, &indices, &state, 80);
@@ -4005,8 +4005,8 @@ mod tests {
         );
     }
 
-    fn long_ann() -> wimo ai_wimo_announcements::RemoteAnnouncement {
-        wimo ai_wimo_announcements::RemoteAnnouncement {
+    fn long_ann() -> wimoai_wimo_announcements::RemoteAnnouncement {
+        wimoai_wimo_announcements::RemoteAnnouncement {
             title: Some("Security policy".into()),
             message: Some(
                 "Report security incidents to the security team promptly through \
@@ -4049,7 +4049,7 @@ the usual channels. "
     #[test]
     fn announcement_equal_for_short_message() {
         let area = Rect::new(0, 0, 120, 60);
-        let a = wimo ai_wimo_announcements::RemoteAnnouncement {
+        let a = wimoai_wimo_announcements::RemoteAnnouncement {
             title: Some("FYI".into()),
             message: Some("All good.".into()),
             ..Default::default()

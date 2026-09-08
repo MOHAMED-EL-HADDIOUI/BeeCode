@@ -9,23 +9,23 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use prometheus::{HistogramVec, IntCounterVec, register_histogram_vec, register_int_counter_vec};
 use serde_json::Value;
-use wimo ai_computer_hub_sdk::ToolServerHandler;
-use wimo ai_wimo_tools::computer::types::KillOutcome;
-use wimo ai_wimo_tools::computer::types::TaskKind;
-use wimo ai_wimo_tools::implementations::wimo::scheduler::interval::interval_to_human;
-use wimo ai_wimo_tools::implementations::wimo::scheduler::types::{
+use wimoai_computer_hub_sdk::ToolServerHandler;
+use wimoai_wimo_tools::computer::types::KillOutcome;
+use wimoai_wimo_tools::computer::types::TaskKind;
+use wimoai_wimo_tools::implementations::wimo::scheduler::interval::interval_to_human;
+use wimoai_wimo_tools::implementations::wimo::scheduler::types::{
     SchedulerCommand, SchedulerHandle,
 };
-use wimo ai_wimo_tools::registry::types::FinalizedToolset;
-use wimo ai_wimo_tools::types::resources::Terminal;
-use wimo ai_wimo_workspace_types::rpc::workspace::{
+use wimoai_wimo_tools::registry::types::FinalizedToolset;
+use wimoai_wimo_tools::types::resources::Terminal;
+use wimoai_wimo_workspace_types::rpc::workspace::{
     BackgroundTaskSnapshotWire, KillTaskOutcome, ScheduledTaskSnapshotWire, TasksSnapshotResponse,
 };
-use wimo ai_tool_protocol::{HookEvent, HookFrame, SessionId, ToolId, ToolServerEvictParams};
-use wimo ai_tool_runtime::{
+use wimoai_tool_protocol::{HookEvent, HookFrame, SessionId, ToolId, ToolServerEvictParams};
+use wimoai_tool_runtime::{
     ToolCallContext, ToolError, ToolErrorKind, ToolStream, TypedToolOutput, terminal_only,
 };
-use wimo ai_tool_types::ToolDescription;
+use wimoai_tool_types::ToolDescription;
 /// Deprecation monitor for the self-attested `caller_session_id` param.
 /// `kind="param_mismatch"` means the param disagreed with the server-bound envelope session and the envelope was trusted.
 /// `kind="envelope_absent"` means no envelope session existed and the param was used as a compat fallback.
@@ -205,12 +205,12 @@ async fn dispatch_op<Op: WorkspaceOp>(
 /// The list is empty when the session has no terminal backend.
 /// This backs the `workspace.list_background_tasks` RPC, which feeds the post-compaction system reminder.
 async fn list_outstanding_background_tasks(
-    toolset: &wimo ai_wimo_tools::registry::types::FinalizedToolset,
-) -> Vec<wimo ai_wimo_workspace_types::rpc::workspace::BackgroundTaskSummaryWire> {
-    use wimo ai_wimo_tools::computer::types::TaskKind;
-    use wimo ai_wimo_tools::types::resources::Terminal;
-    use wimo ai_wimo_tools::types::tool::ToolKind;
-    use wimo ai_wimo_workspace_types::rpc::workspace::BackgroundTaskSummaryWire;
+    toolset: &wimoai_wimo_tools::registry::types::FinalizedToolset,
+) -> Vec<wimoai_wimo_workspace_types::rpc::workspace::BackgroundTaskSummaryWire> {
+    use wimoai_wimo_tools::computer::types::TaskKind;
+    use wimoai_wimo_tools::types::resources::Terminal;
+    use wimoai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_workspace_types::rpc::workspace::BackgroundTaskSummaryWire;
     let terminal = {
         let res = toolset.resources.lock().await;
         res.get::<Terminal>().map(|t| t.0.clone())
@@ -354,11 +354,11 @@ async fn tasks_snapshot(toolset: &FinalizedToolset) -> TasksSnapshotResponse {
 /// The list is empty when the session has no todo state.
 /// This backs the `workspace.list_todos` RPC, which feeds the post-compaction system reminder.
 async fn list_session_todos(
-    toolset: &wimo ai_wimo_tools::registry::types::FinalizedToolset,
-) -> Vec<wimo ai_wimo_workspace_types::rpc::workspace::TodoSummaryWire> {
-    use wimo ai_wimo_tools::implementations::wimo::todo::{TodoState, TodoStatus};
-    use wimo ai_wimo_tools::types::resources::State;
-    use wimo ai_wimo_workspace_types::rpc::workspace::TodoSummaryWire;
+    toolset: &wimoai_wimo_tools::registry::types::FinalizedToolset,
+) -> Vec<wimoai_wimo_workspace_types::rpc::workspace::TodoSummaryWire> {
+    use wimoai_wimo_tools::implementations::wimo::todo::{TodoState, TodoStatus};
+    use wimoai_wimo_tools::types::resources::State;
+    use wimoai_wimo_workspace_types::rpc::workspace::TodoSummaryWire;
     let res = toolset.resources.lock().await;
     let Some(state) = res.get::<State<TodoState>>() else {
         return Vec::new();
@@ -403,18 +403,18 @@ impl WorkspaceRpcHandler {
         use crate::session::checkpoint::TurnBoundary;
         use crate::workspace_ops::*;
         use crate::worktree::{ApplyWorktreeRequest, CreateWorktreeRequest, RemoveWorktreeRequest};
-        use wimo ai_wimo_workspace_types::rpc::git::{GitBranchInfoReq, GitMetadataReq};
-        use wimo ai_wimo_workspace_types::rpc::presence::PresenceNoteReq;
-        use wimo ai_wimo_workspace_types::rpc::search::FuzzyStatusReq;
-        use wimo ai_wimo_workspace_types::rpc::skills::DiscoverPluginsReq;
-        use wimo ai_wimo_workspace_types::rpc::workspace::{
+        use wimoai_wimo_workspace_types::rpc::git::{GitBranchInfoReq, GitMetadataReq};
+        use wimoai_wimo_workspace_types::rpc::presence::PresenceNoteReq;
+        use wimoai_wimo_workspace_types::rpc::search::FuzzyStatusReq;
+        use wimoai_wimo_workspace_types::rpc::skills::DiscoverPluginsReq;
+        use wimoai_wimo_workspace_types::rpc::workspace::{
             ConfigureMcpReq, DeleteScheduledTaskReq, DeleteScheduledTaskResponse, DropSessionReq,
             InstallPluginReq, KillTaskReq, KillTaskResponse, ListBackgroundTasksReq,
             ListBackgroundTasksResponse, ListTodosReq, ListTodosResponse, LoadEnvrcReq,
             LoadPermissionsReq, LoadProjectConfigReq, RefreshPluginsReq, ResolveFileReferencesReq,
             TasksSnapshotReq, ToolDefinitionsReq, UpdateToolConfigReq, WorkspaceInfo,
         };
-        use wimo ai_wimo_workspace_types::rpc::worktree::WorktreeCreateSyncReq;
+        use wimoai_wimo_workspace_types::rpc::worktree::WorktreeCreateSyncReq;
         tracing::debug!(method, "workspace rpc dispatch");
         let params = if params.is_null() {
             serde_json::json!({})
@@ -436,7 +436,7 @@ impl WorkspaceRpcHandler {
                     os: std::env::consts::OS.to_owned(),
                     shell,
                     cwd: cwd.to_string_lossy().into_owned(),
-                    version: Some(wimo ai_wimo_version::VERSION.to_owned()),
+                    version: Some(wimoai_wimo_version::VERSION.to_owned()),
                 };
                 serde_json::to_value(info).map_err(|e| WorkspaceError::HubError(e.to_string()))
             }
@@ -1099,7 +1099,7 @@ impl ToolServerHandler for WorkspaceRpcHandler {
             .get("params")
             .cloned()
             .unwrap_or(Value::Object(Default::default()));
-        let bound_session = ctx.extensions.get::<wimo ai_tool_runtime::SessionContext>();
+        let bound_session = ctx.extensions.get::<wimoai_tool_runtime::SessionContext>();
         let session_id = bound_session.as_deref().map(|s| s.0.as_str());
         let start = std::time::Instant::now();
         let result = self.dispatch(method, params, session_id).await;
@@ -1155,7 +1155,7 @@ impl ToolServerHandler for WorkspaceRpcHandler {
                 self.workspace.on_session_ended(session_id.as_str());
             }
             HookEvent::Custom { kind, payload } => {
-                use wimo ai_tool_protocol::turn_hook::{
+                use wimoai_tool_protocol::turn_hook::{
                     AFTER_TURN_KIND, AfterTurnPayload, BEFORE_TURN_KIND, BeforeTurnPayload,
                 };
                 match kind.as_str() {
@@ -1211,7 +1211,7 @@ impl ToolServerHandler for WorkspaceRpcHandler {
         }
     }
     async fn handle_hook_request(&self, session_id: SessionId, frame: HookFrame) -> Option<Value> {
-        use wimo ai_tool_protocol::turn_hook::{self, TurnHookRequest};
+        use wimoai_tool_protocol::turn_hook::{self, TurnHookRequest};
         let HookEvent::Custom { kind, payload } = frame.event else {
             return None;
         };

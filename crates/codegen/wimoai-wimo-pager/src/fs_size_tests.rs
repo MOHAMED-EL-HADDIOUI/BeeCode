@@ -97,7 +97,7 @@ fn a_volume_holds_only_its_own_device() {
 fn a_root_off_the_anchor_is_measured_by_nobody() {
     let tmp = tempfile::TempDir::new().unwrap();
     let root = tmp.path().join("worktrees");
-    let worktree = root.join("wimo ai/wt-a");
+    let worktree = root.join("wimoai/wt-a");
     std::fs::create_dir_all(&worktree).unwrap();
     std::fs::write(worktree.join("payload.bin"), vec![b'x'; 65536]).unwrap();
     let elsewhere = Volume::of(tmp.path()).other_device_for_test();

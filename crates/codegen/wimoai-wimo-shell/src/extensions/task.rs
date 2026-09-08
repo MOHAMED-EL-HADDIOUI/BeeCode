@@ -1,8 +1,8 @@
 use agent_client_protocol as acp;
 use serde::{Deserialize, Serialize};
-use wimo ai_wimo_tools::types::{KillOutcome, KillSource, TaskSnapshot};
+use wimoai_wimo_tools::types::{KillOutcome, KillSource, TaskSnapshot};
 
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     SubagentCancelOutcome, SubagentInspection, SubagentProvenance, SubagentSnapshot,
     SubagentSnapshotStatus,
 };
@@ -14,7 +14,7 @@ type ExtResult = Result<acp::ExtResponse, acp::Error>;
 
 /// Wire DTO for the `x.ai/task/kill` ext request.
 ///
-/// `pub` (with both serde directions) so ACP clients (wimo ai-wimo-pager) build the request from the same type the agent parses.
+/// `pub` (with both serde directions) so ACP clients (wimoai-wimo-pager) build the request from the same type the agent parses.
 /// That keeps the wire contract typed end-to-end instead of duplicated `json!` literals.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -69,7 +69,7 @@ struct ListTasksResponse {
 
 /// Wire DTO for the `x.ai/subagent/cancel` ext request.
 ///
-/// `pub` (with both serde directions) so ACP clients (wimo ai-wimo-pager) build the request from the same type the agent parses.
+/// `pub` (with both serde directions) so ACP clients (wimoai-wimo-pager) build the request from the same type the agent parses.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CancelSubagentRequest {

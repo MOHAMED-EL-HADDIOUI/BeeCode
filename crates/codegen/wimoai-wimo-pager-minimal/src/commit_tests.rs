@@ -5,10 +5,10 @@
 
 use super::*;
 use ratatui::style::Color;
-use wimo ai_wimo_pager::scrollback::block::RenderBlock;
-use wimo ai_wimo_pager::scrollback::entry::ScrollbackEntry;
-use wimo ai_wimo_pager::scrollback::state::ScrollbackState;
-use wimo ai_wimo_pager_diff::DiffLine;
+use wimoai_wimo_pager::scrollback::block::RenderBlock;
+use wimoai_wimo_pager::scrollback::entry::ScrollbackEntry;
+use wimoai_wimo_pager::scrollback::state::ScrollbackState;
+use wimoai_wimo_pager_diff::DiffLine;
 
 fn test_cwd() -> &'static std::path::Path {
     std::path::Path::new("/test/session")
@@ -410,7 +410,7 @@ fn remove_from_below_frontier_then_push_still_commits() {
 fn btw_block_emits_once_across_repeated_frontier_passes() {
     let mut s = ScrollbackState::new();
     s.push(ScrollbackEntry::new(RenderBlock::Btw(
-        wimo ai_wimo_pager::scrollback::blocks::BtwBlock::new("original question", "original answer"),
+        wimoai_wimo_pager::scrollback::blocks::BtwBlock::new("original question", "original answer"),
     )));
 
     let mut emitted = Vec::new();
@@ -627,7 +627,7 @@ fn committed_blocks_fit_desired_height() {
 #[test]
 fn terminal_native_lock_paints_only_native_colors() {
     use ratatui::buffer::Buffer;
-    use wimo ai_wimo_pager::theme::cache as theme_cache;
+    use wimoai_wimo_pager::theme::cache as theme_cache;
 
     let _guard = theme_cache::test_lock()
         .lock()
@@ -635,7 +635,7 @@ fn terminal_native_lock_paints_only_native_colors() {
     struct LockReset;
     impl Drop for LockReset {
         fn drop(&mut self) {
-            wimo ai_wimo_pager::theme::cache::set_terminal_native_lock(false);
+            wimoai_wimo_pager::theme::cache::set_terminal_native_lock(false);
         }
     }
     let _reset = LockReset;
@@ -898,7 +898,7 @@ fn only_thinking_spends_the_accent_column() {
     // That is what a collapsed reasoning header did while `hide_accent` keyed off the block type alone
     use ratatui::buffer::Buffer;
     use ratatui::layout::Rect;
-    let rail = wimo ai_wimo_pager::glyphs::accent_bar();
+    let rail = wimoai_wimo_pager::glyphs::accent_bar();
     minimal_api::set_show_thinking_blocks(true);
     for mode in [
         DisplayMode::Collapsed,
@@ -939,7 +939,7 @@ fn committed_thinking_paints_a_dim_rail_in_column_zero() {
     use ratatui::buffer::Buffer;
     use ratatui::layout::Rect;
     use ratatui::style::Modifier;
-    use wimo ai_wimo_pager::theme::cache as theme_cache;
+    use wimoai_wimo_pager::theme::cache as theme_cache;
 
     let _guard = theme_cache::test_lock()
         .lock()
@@ -947,7 +947,7 @@ fn committed_thinking_paints_a_dim_rail_in_column_zero() {
     struct LockReset;
     impl Drop for LockReset {
         fn drop(&mut self) {
-            wimo ai_wimo_pager::theme::cache::set_terminal_native_lock(false);
+            wimoai_wimo_pager::theme::cache::set_terminal_native_lock(false);
         }
     }
     let _reset = LockReset;
@@ -975,7 +975,7 @@ fn committed_thinking_paints_a_dim_rail_in_column_zero() {
     let mut buf = Buffer::empty(area);
     renderer.render(area, &mut buf);
 
-    let rail = wimo ai_wimo_pager::glyphs::accent_bar();
+    let rail = wimoai_wimo_pager::glyphs::accent_bar();
     for y in 0..h {
         let cell = buf.cell((0, y)).expect("accent cell");
         assert_eq!(cell.symbol(), rail, "row {y} lost the rail");
@@ -1020,7 +1020,7 @@ fn commit_display_mode_policy() {
 
 #[test]
 fn commit_display_mode_lookups_collapse_on_success_only() {
-    use wimo ai_wimo_pager::scrollback::blocks::{
+    use wimoai_wimo_pager::scrollback::blocks::{
         ListDirToolCallBlock, ReadToolCallBlock, SearchToolCallBlock,
     };
 

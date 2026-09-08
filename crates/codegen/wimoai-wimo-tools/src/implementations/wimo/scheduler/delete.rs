@@ -21,7 +21,7 @@ pub struct SchedulerDeleteOutput {
     pub message: String,
 }
 
-impl wimo ai_tool_runtime::ToolOutput for SchedulerDeleteOutput {}
+impl wimoai_tool_runtime::ToolOutput for SchedulerDeleteOutput {}
 
 #[derive(Debug, Default)]
 pub struct SchedulerDeleteTool;
@@ -50,34 +50,34 @@ Returns success: true if the task was found and removed, false if no task with t
         use crate::types::tool_metadata::ToolMetadata as TM;
         Expr::Value(ToolRequirement::Tool {
             namespace: TM::tool_namespace(&SchedulerCreateTool).to_string(),
-            id: wimo ai_tool_runtime::Tool::id(&SchedulerCreateTool).to_string(),
+            id: wimoai_tool_runtime::Tool::id(&SchedulerCreateTool).to_string(),
             if_params: None,
         })
     }
 }
 
-impl wimo ai_tool_runtime::Tool for SchedulerDeleteTool {
+impl wimoai_tool_runtime::Tool for SchedulerDeleteTool {
     type Args = SchedulerDeleteInput;
     type Output = SchedulerDeleteOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("scheduler_delete").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("scheduler_delete").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "scheduler_delete",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: false,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Write),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Write),
             ..Default::default()
         }
     }
@@ -89,9 +89,9 @@ impl wimo ai_tool_runtime::Tool for SchedulerDeleteTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: SchedulerDeleteInput,
-    ) -> Result<SchedulerDeleteOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<SchedulerDeleteOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -99,7 +99,7 @@ impl wimo ai_tool_runtime::Tool for SchedulerDeleteTool {
             let res = resources.lock().await;
             res.get::<SchedulerHandle>()
                 .ok_or_else(|| {
-                    wimo ai_tool_runtime::ToolError::custom("missing_resource", "SchedulerHandle")
+                    wimoai_tool_runtime::ToolError::custom("missing_resource", "SchedulerHandle")
                 })?
                 .0
                 .clone()
@@ -112,13 +112,13 @@ impl wimo ai_tool_runtime::Tool for SchedulerDeleteTool {
                 reply: reply_tx,
             })
             .map_err(|_| {
-                wimo ai_tool_runtime::ToolError::custom("process_manager", "Scheduler actor stopped")
+                wimoai_tool_runtime::ToolError::custom("process_manager", "Scheduler actor stopped")
             })?;
 
         let removed = reply_rx
             .await
             .map_err(|_| {
-                wimo ai_tool_runtime::ToolError::custom(
+                wimoai_tool_runtime::ToolError::custom(
                     "process_manager",
                     "Scheduler actor dropped reply",
                 )

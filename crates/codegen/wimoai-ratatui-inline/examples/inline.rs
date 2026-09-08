@@ -17,7 +17,7 @@ use ratatui::{
     widgets::Block,
 };
 
-use wimo ai_ratatui_inline::{
+use wimoai_ratatui_inline::{
     Terminal, emit_to_scrollback, resize_purge_rerender, resize_viewport_height,
     with_synchronized_output,
 };

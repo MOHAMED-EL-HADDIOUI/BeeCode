@@ -9,7 +9,7 @@ use super::common::*;
 /// It must land clean: running, no panic, and not stranded on the active-turn "Waiting" spinner.
 /// A keep-alive viewer holds the leader up across A's exit (the leader stops with its last client).
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
-#[ignore = "PTY e2e; run with cargo test -p wimo ai-wimo-pager --test leader_pty_e2e -- --ignored --test-threads=1"]
+#[ignore = "PTY e2e; run with cargo test -p wimoai-wimo-pager --test leader_pty_e2e -- --ignored --test-threads=1"]
 async fn leader_reattach_completion_roundtrips_durable_log() {
     let cluster = LeaderCluster::start(DEFAULT_ROWS, DEFAULT_COLS)
         .await

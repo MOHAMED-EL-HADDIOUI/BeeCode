@@ -15,7 +15,7 @@ use anyhow::{Context, Result, bail, ensure};
 use clap::Parser;
 use serde::Serialize;
 use tempfile::NamedTempFile;
-use wimo ai_fast_worktree::{
+use wimoai_fast_worktree::{
     CreationMode, IgnoredFilesMode, NfsWorktreeClient, NfsWorktreeOpts, WorkingTreeMode,
     WorktreeBuilder, dest_is_known_unmounted, is_grove_strategy, remove_worktree,
 };
@@ -30,7 +30,7 @@ const REDACTED_PATH: &str = "<redacted-path>";
 
 #[derive(Debug, Parser)]
 #[command(name = "worktree-lifecycle-bench")]
-#[command(about = "Cross-transport wimo ai-fast-worktree/Grove lifecycle sampler")]
+#[command(about = "Cross-transport wimoai-fast-worktree/Grove lifecycle sampler")]
 struct Cli {
     /// Source repository whose HEAD and working-tree state are preserved.
     #[arg(long, default_value = ".")]
@@ -705,7 +705,7 @@ fn run_controller_inner(
         &fs::read(std::env::current_exe().context("resolve harness executable")?)
             .context("read harness executable")?,
     );
-    let tracked_files = wimo ai_fast_worktree::count_tracked_files(&source)?;
+    let tracked_files = wimoai_fast_worktree::count_tracked_files(&source)?;
     ensure!(tracked_files > 0, "source has no tracked files");
 
     let scratch = tempfile::Builder::new()
@@ -1073,7 +1073,7 @@ fn run_create_worker(
 ) -> Result<WorkerResult> {
     let executable = std::env::current_exe().context("resolve lifecycle worker executable")?;
     let mut command = std::process::Command::new(executable);
-    wimo ai_tty_utils::detach_std_command(&mut command);
+    wimoai_tty_utils::detach_std_command(&mut command);
     command
         .arg("--worker")
         .arg("--source")
@@ -1139,7 +1139,7 @@ fn run_worker(cli: &Cli) -> Result<()> {
     }
     if let Some(hook) = cli.worker_hook.as_deref() {
         let mut command = std::process::Command::new("sh");
-        wimo ai_tty_utils::detach_std_command(&mut command);
+        wimoai_tty_utils::detach_std_command(&mut command);
         command.args(["-c", hook]);
         #[allow(clippy::disallowed_methods)]
         // Test-only worker hook; controller owns this worker group.
@@ -1620,10 +1620,10 @@ fn median_phases(samples: &[Sample]) -> PhaseDurations {
 
 // Curated build identity inputs, not an exhaustive dependency manifest.
 const HARNESS_INPUT_PATHS: &[&str] = &[
-    "crates/codegen/wimo ai-fast-worktree/src/bin/worktree_lifecycle_bench.rs",
-    "crates/codegen/wimo ai-fast-worktree/src/bin/worktree_lifecycle_bench/runtime.rs",
-    "crates/codegen/wimo ai-fast-worktree/Cargo.toml",
-    "crates/codegen/wimo ai-fast-worktree/BUILD.bazel",
+    "crates/codegen/wimoai-fast-worktree/src/bin/worktree_lifecycle_bench.rs",
+    "crates/codegen/wimoai-fast-worktree/src/bin/worktree_lifecycle_bench/runtime.rs",
+    "crates/codegen/wimoai-fast-worktree/Cargo.toml",
+    "crates/codegen/wimoai-fast-worktree/BUILD.bazel",
     "Cargo.lock",
     "rust-toolchain.toml",
     ".bazelrc",

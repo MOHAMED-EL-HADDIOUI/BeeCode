@@ -7,7 +7,7 @@ use futures_util::Stream;
 use futures_util::stream::BoxStream;
 use tokio::time::Instant;
 
-use wimo ai_wimo_sampling_types::Result;
+use wimoai_wimo_sampling_types::Result;
 
 macro_rules! stream_span {
     ($name:expr $(, $($field:tt)+)?) => {
@@ -46,7 +46,7 @@ pub(crate) const TIMING_FIELDS: [&str; 5] = [
     TTFT_OUTCOME,
 ];
 
-/// Sampler cannot depend on `wimo ai-wimo-telemetry` (cycle); held, not entered.
+/// Sampler cannot depend on `wimoai-wimo-telemetry` (cycle); held, not entered.
 /// Never entered: safe across `.await`; close belongs to scope.
 #[must_use = "dropping a Region immediately closes its span as a zero-length frame"]
 pub(crate) struct Region(tracing::Span);

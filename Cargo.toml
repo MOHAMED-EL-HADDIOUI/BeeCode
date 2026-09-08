@@ -6,98 +6,98 @@ async-openai = { git = "https://github.com/our-forks/async-openai.git", rev = "9
 [workspace]
 resolver = "2"
 members = [
-    "crates/build/wimo ai-proto-build",
+    "crates/build/wimoai-proto-build",
     "crates/codegen/ptyctl",
     "crates/codegen/ptyctl-cli",
-    "crates/codegen/wimo ai-acp-lib",
-    "crates/codegen/wimo ai-agent-lifecycle",
-    "crates/codegen/wimo ai-chat-state",
-    "crates/codegen/wimo ai-codebase-graph",
-    "crates/codegen/wimo ai-compaction-transcript",
-    "crates/codegen/wimo ai-crash-handler",
-    "crates/codegen/wimo ai-dirs",
-    "crates/codegen/wimo ai-fast-worktree",
-    "crates/codegen/wimo ai-file-utils",
-    "crates/codegen/wimo ai-fsnotify",
-    "crates/codegen/wimo ai-fuzzy-file-search",
-    "crates/codegen/wimo ai-gix-status",
-    "crates/codegen/wimo ai-wimo-active-sessions",
-    "crates/codegen/wimo ai-wimo-agent",
-    "crates/codegen/wimo ai-wimo-announcements",
-    "crates/codegen/wimo ai-wimo-auth",
-    "crates/codegen/wimo ai-wimo-bundle",
-    "crates/codegen/wimo ai-wimo-config",
-    "crates/codegen/wimo ai-wimo-config-types",
-    "crates/codegen/wimo ai-wimo-dashboard-store",
-    "crates/codegen/wimo ai-wimo-diag-server",
-    "crates/codegen/wimo ai-wimo-env",
-    "crates/codegen/wimo ai-wimo-extra-ca",
-    "crates/codegen/wimo ai-wimo-foreign-sessions",
-    "crates/codegen/wimo ai-wimo-gboom",
-    "crates/codegen/wimo ai-wimo-hooks",
-    "crates/codegen/wimo ai-wimo-http",
-    "crates/codegen/wimo ai-wimo-markdown",
-    "crates/codegen/wimo ai-wimo-markdown-core",
-    "crates/codegen/wimo ai-wimo-mcp",
-    "crates/codegen/wimo ai-wimo-memory",
-    "crates/codegen/wimo ai-wimo-mermaid",
-    "crates/codegen/wimo ai-wimo-models",
-    "crates/codegen/wimo ai-wimo-pager",
-    "crates/codegen/wimo ai-wimo-pager-bin",
-    "crates/codegen/wimo ai-wimo-pager-diff",
-    "crates/codegen/wimo ai-wimo-pager-minimal",
-    "crates/codegen/wimo ai-wimo-pager-pty-harness",
-    "crates/codegen/wimo ai-wimo-pager-render",
-    "crates/codegen/wimo ai-wimo-paths",
-    "crates/codegen/wimo ai-wimo-plugin-marketplace",
-    "crates/codegen/wimo ai-wimo-sampler",
-    "crates/codegen/wimo ai-wimo-sampling-types",
-    "crates/codegen/wimo ai-wimo-sandbox",
-    "crates/codegen/wimo ai-wimo-secrets",
-    "crates/codegen/wimo ai-wimo-session-events",
-    "crates/codegen/wimo ai-wimo-session-search",
-    "crates/codegen/wimo ai-wimo-shared",
-    "crates/codegen/wimo ai-wimo-shell",
-    "crates/codegen/wimo ai-wimo-shell-base",
-    "crates/codegen/wimo ai-wimo-shell-session-support",
-    "crates/codegen/wimo ai-wimo-shell-terminal",
-    "crates/codegen/wimo ai-wimo-status-line",
-    "crates/codegen/wimo ai-wimo-subagent-resolution",
-    "crates/codegen/wimo ai-wimo-telemetry",
-    "crates/codegen/wimo ai-wimo-test-support",
-    "crates/codegen/wimo ai-wimo-tools",
-    "crates/codegen/wimo ai-wimo-tools-api",
-    "crates/codegen/wimo ai-wimo-update",
-    "crates/codegen/wimo ai-wimo-version",
-    "crates/codegen/wimo ai-wimo-voice",
-    "crates/codegen/wimo ai-wimo-workspace",
-    "crates/codegen/wimo ai-wimo-workspace-client",
-    "crates/codegen/wimo ai-wimo-workspace-daemon",
-    "crates/codegen/wimo ai-wimo-workspace-types",
-    "crates/codegen/wimo ai-hooks-plugins-types",
-    "crates/codegen/wimo ai-hunk-tracker",
-    "crates/codegen/wimo ai-mixpanel",
-    "crates/codegen/wimo ai-prompt-queue",
-    "crates/codegen/wimo ai-ratatui-inline",
-    "crates/codegen/wimo ai-ratatui-textarea",
-    "crates/codegen/wimo ai-sqlite-journal",
-    "crates/codegen/wimo ai-system-power",
-    "crates/codegen/wimo ai-token-estimation",
-    "crates/codegen/wimo ai-tracing-macros",
-    "crates/codegen/wimo ai-tty-utils",
-    "crates/codegen/wimo ai-workflow",
-    "crates/common/wimo ai-circuit-breaker",
-    "crates/common/wimo ai-computer-hub-core",
-    "crates/common/wimo ai-computer-hub-mcp-adapter",
-    "crates/common/wimo ai-computer-hub-sdk",
-    "crates/common/wimo ai-wimo-compaction",
-    "crates/common/wimo ai-interjection-core",
-    "crates/common/wimo ai-message-delivery-core",
-    "crates/common/wimo ai-test-utils",
-    "crates/common/wimo ai-tool-protocol",
-    "crates/common/wimo ai-tool-runtime",
-    "crates/common/wimo ai-tool-types",
-    "crates/common/wimo ai-tracing",
+    "crates/codegen/wimoai-acp-lib",
+    "crates/codegen/wimoai-agent-lifecycle",
+    "crates/codegen/wimoai-chat-state",
+    "crates/codegen/wimoai-codebase-graph",
+    "crates/codegen/wimoai-compaction-transcript",
+    "crates/codegen/wimoai-crash-handler",
+    "crates/codegen/wimoai-dirs",
+    "crates/codegen/wimoai-fast-worktree",
+    "crates/codegen/wimoai-file-utils",
+    "crates/codegen/wimoai-fsnotify",
+    "crates/codegen/wimoai-fuzzy-file-search",
+    "crates/codegen/wimoai-gix-status",
+    "crates/codegen/wimoai-wimo-active-sessions",
+    "crates/codegen/wimoai-wimo-agent",
+    "crates/codegen/wimoai-wimo-announcements",
+    "crates/codegen/wimoai-wimo-auth",
+    "crates/codegen/wimoai-wimo-bundle",
+    "crates/codegen/wimoai-wimo-config",
+    "crates/codegen/wimoai-wimo-config-types",
+    "crates/codegen/wimoai-wimo-dashboard-store",
+    "crates/codegen/wimoai-wimo-diag-server",
+    "crates/codegen/wimoai-wimo-env",
+    "crates/codegen/wimoai-wimo-extra-ca",
+    "crates/codegen/wimoai-wimo-foreign-sessions",
+    "crates/codegen/wimoai-wimo-gboom",
+    "crates/codegen/wimoai-wimo-hooks",
+    "crates/codegen/wimoai-wimo-http",
+    "crates/codegen/wimoai-wimo-markdown",
+    "crates/codegen/wimoai-wimo-markdown-core",
+    "crates/codegen/wimoai-wimo-mcp",
+    "crates/codegen/wimoai-wimo-memory",
+    "crates/codegen/wimoai-wimo-mermaid",
+    "crates/codegen/wimoai-wimo-models",
+    "crates/codegen/wimoai-wimo-pager",
+    "crates/codegen/wimoai-wimo-pager-bin",
+    "crates/codegen/wimoai-wimo-pager-diff",
+    "crates/codegen/wimoai-wimo-pager-minimal",
+    "crates/codegen/wimoai-wimo-pager-pty-harness",
+    "crates/codegen/wimoai-wimo-pager-render",
+    "crates/codegen/wimoai-wimo-paths",
+    "crates/codegen/wimoai-wimo-plugin-marketplace",
+    "crates/codegen/wimoai-wimo-sampler",
+    "crates/codegen/wimoai-wimo-sampling-types",
+    "crates/codegen/wimoai-wimo-sandbox",
+    "crates/codegen/wimoai-wimo-secrets",
+    "crates/codegen/wimoai-wimo-session-events",
+    "crates/codegen/wimoai-wimo-session-search",
+    "crates/codegen/wimoai-wimo-shared",
+    "crates/codegen/wimoai-wimo-shell",
+    "crates/codegen/wimoai-wimo-shell-base",
+    "crates/codegen/wimoai-wimo-shell-session-support",
+    "crates/codegen/wimoai-wimo-shell-terminal",
+    "crates/codegen/wimoai-wimo-status-line",
+    "crates/codegen/wimoai-wimo-subagent-resolution",
+    "crates/codegen/wimoai-wimo-telemetry",
+    "crates/codegen/wimoai-wimo-test-support",
+    "crates/codegen/wimoai-wimo-tools",
+    "crates/codegen/wimoai-wimo-tools-api",
+    "crates/codegen/wimoai-wimo-update",
+    "crates/codegen/wimoai-wimo-version",
+    "crates/codegen/wimoai-wimo-voice",
+    "crates/codegen/wimoai-wimo-workspace",
+    "crates/codegen/wimoai-wimo-workspace-client",
+    "crates/codegen/wimoai-wimo-workspace-daemon",
+    "crates/codegen/wimoai-wimo-workspace-types",
+    "crates/codegen/wimoai-hooks-plugins-types",
+    "crates/codegen/wimoai-hunk-tracker",
+    "crates/codegen/wimoai-mixpanel",
+    "crates/codegen/wimoai-prompt-queue",
+    "crates/codegen/wimoai-ratatui-inline",
+    "crates/codegen/wimoai-ratatui-textarea",
+    "crates/codegen/wimoai-sqlite-journal",
+    "crates/codegen/wimoai-system-power",
+    "crates/codegen/wimoai-token-estimation",
+    "crates/codegen/wimoai-tracing-macros",
+    "crates/codegen/wimoai-tty-utils",
+    "crates/codegen/wimoai-workflow",
+    "crates/common/wimoai-circuit-breaker",
+    "crates/common/wimoai-computer-hub-core",
+    "crates/common/wimoai-computer-hub-mcp-adapter",
+    "crates/common/wimoai-computer-hub-sdk",
+    "crates/common/wimoai-wimo-compaction",
+    "crates/common/wimoai-interjection-core",
+    "crates/common/wimoai-message-delivery-core",
+    "crates/common/wimoai-test-utils",
+    "crates/common/wimoai-tool-protocol",
+    "crates/common/wimoai-tool-runtime",
+    "crates/common/wimoai-tool-types",
+    "crates/common/wimoai-tracing",
     "prod/mc/cli-chat-proxy-types",
     "third_party/dagre_rust",
     "third_party/graphlib_rust",
@@ -308,68 +308,68 @@ wildmatch = "2"
 windows = { version = "0.61", features = ["Win32_Security", "Win32_Security_Authorization", "Win32_Foundation", "Win32_System_Threading", "Win32_System_JobObjects", "Win32_System_Console", "Win32_System_Pipes"] }
 wiremock = "0.6"
 wl-clipboard-rs = "0.9"
-wimo ai-acp-lib = { path = "crates/codegen/wimo ai-acp-lib" }
-wimo ai-agent-lifecycle = { path = "crates/codegen/wimo ai-agent-lifecycle" }
-wimo ai-circuit-breaker = { path = "crates/common/wimo ai-circuit-breaker" }
-wimo ai-compaction-transcript = { path = "crates/codegen/wimo ai-compaction-transcript" }
-wimo ai-computer-hub-core = { path = "crates/common/wimo ai-computer-hub-core" }
-wimo ai-computer-hub-sdk = { path = "crates/common/wimo ai-computer-hub-sdk" }
-wimo ai-dirs = { path = "crates/codegen/wimo ai-dirs" }
-wimo ai-fuzzy-file-search = { path = "crates/codegen/wimo ai-fuzzy-file-search" }
-wimo ai-gix-status = { path = "crates/codegen/wimo ai-gix-status" }
-wimo ai-wimo-active-sessions = { path = "crates/codegen/wimo ai-wimo-active-sessions" }
-wimo ai-wimo-agent = { path = "crates/codegen/wimo ai-wimo-agent" }
-wimo ai-wimo-announcements = { path = "crates/codegen/wimo ai-wimo-announcements" }
-wimo ai-wimo-auth = { path = "crates/codegen/wimo ai-wimo-auth" }
-wimo ai-wimo-bundle = { path = "crates/codegen/wimo ai-wimo-bundle" }
-wimo ai-wimo-config = { path = "crates/codegen/wimo ai-wimo-config" }
-wimo ai-wimo-config-types = { path = "crates/codegen/wimo ai-wimo-config-types" }
-wimo ai-wimo-dashboard-store = { path = "crates/codegen/wimo ai-wimo-dashboard-store" }
-wimo ai-wimo-diag-server = { path = "crates/codegen/wimo ai-wimo-diag-server" }
-wimo ai-wimo-env = { path = "crates/codegen/wimo ai-wimo-env" }
-wimo ai-wimo-extra-ca = { path = "crates/codegen/wimo ai-wimo-extra-ca" }
-wimo ai-wimo-foreign-sessions = { path = "crates/codegen/wimo ai-wimo-foreign-sessions" }
-wimo ai-wimo-http = { path = "crates/codegen/wimo ai-wimo-http" }
-wimo ai-wimo-markdown = { path = "crates/codegen/wimo ai-wimo-markdown" }
-wimo ai-wimo-markdown-core = { path = "crates/codegen/wimo ai-wimo-markdown-core" }
-wimo ai-wimo-mcp = { path = "crates/codegen/wimo ai-wimo-mcp" }
-wimo ai-wimo-memory = { path = "crates/codegen/wimo ai-wimo-memory" }
-wimo ai-wimo-mermaid = { path = "crates/codegen/wimo ai-wimo-mermaid" }
-wimo ai-wimo-models = { path = "crates/codegen/wimo ai-wimo-models" }
-wimo ai-wimo-sampler = { path = "crates/codegen/wimo ai-wimo-sampler" }
-wimo ai-wimo-secrets = { path = "crates/codegen/wimo ai-wimo-secrets" }
-wimo ai-wimo-session-events = { path = "crates/codegen/wimo ai-wimo-session-events" }
-wimo ai-wimo-session-search = { path = "crates/codegen/wimo ai-wimo-session-search" }
-wimo ai-wimo-shared = { path = "crates/codegen/wimo ai-wimo-shared" }
-wimo ai-wimo-shell = { path = "crates/codegen/wimo ai-wimo-shell" }
-wimo ai-wimo-shell-base = { path = "crates/codegen/wimo ai-wimo-shell-base" }
-wimo ai-wimo-shell-session-support = { path = "crates/codegen/wimo ai-wimo-shell-session-support" }
-wimo ai-wimo-shell-terminal = { path = "crates/codegen/wimo ai-wimo-shell-terminal" }
-wimo ai-wimo-status-line = { path = "crates/codegen/wimo ai-wimo-status-line" }
-wimo ai-wimo-telemetry = { path = "crates/codegen/wimo ai-wimo-telemetry" }
-wimo ai-wimo-test-support = { path = "crates/codegen/wimo ai-wimo-test-support" }
-wimo ai-wimo-tools = { path = "crates/codegen/wimo ai-wimo-tools" }
-wimo ai-wimo-tools-api = { path = "crates/codegen/wimo ai-wimo-tools-api" }
-wimo ai-wimo-version = { path = "crates/codegen/wimo ai-wimo-version" }
-wimo ai-wimo-workspace = { path = "crates/codegen/wimo ai-wimo-workspace", default-features = false }
-wimo ai-wimo-workspace-types = { path = "crates/codegen/wimo ai-wimo-workspace-types" }
-wimo ai-hooks-plugins-types = { path = "crates/codegen/wimo ai-hooks-plugins-types" }
-wimo ai-interjection-core = { path = "crates/common/wimo ai-interjection-core" }
-wimo ai-message-delivery-core = { path = "crates/common/wimo ai-message-delivery-core" }
-wimo ai-mixpanel = { path = "crates/codegen/wimo ai-mixpanel" }
-wimo ai-prompt-queue = { path = "crates/codegen/wimo ai-prompt-queue" }
-wimo ai-proto-build = { path = "crates/build/wimo ai-proto-build" }
-wimo ai-ratatui-inline = { path = "crates/codegen/wimo ai-ratatui-inline" }
-wimo ai-ratatui-textarea = { path = "crates/codegen/wimo ai-ratatui-textarea" }
-wimo ai-sqlite-journal = { path = "crates/codegen/wimo ai-sqlite-journal" }
-wimo ai-system-power = { path = "crates/codegen/wimo ai-system-power" }
-wimo ai-test-utils = { path = "crates/common/wimo ai-test-utils" }
-wimo ai-token-estimation = { path = "crates/codegen/wimo ai-token-estimation" }
-wimo ai-tool-protocol = { path = "crates/common/wimo ai-tool-protocol" }
-wimo ai-tool-runtime = { path = "crates/common/wimo ai-tool-runtime" }
-wimo ai-tool-types = { path = "crates/common/wimo ai-tool-types" }
-wimo ai-tracing = { path = "crates/common/wimo ai-tracing" }
-wimo ai-tty-utils = { path = "crates/codegen/wimo ai-tty-utils" }
+wimoai-acp-lib = { path = "crates/codegen/wimoai-acp-lib" }
+wimoai-agent-lifecycle = { path = "crates/codegen/wimoai-agent-lifecycle" }
+wimoai-circuit-breaker = { path = "crates/common/wimoai-circuit-breaker" }
+wimoai-compaction-transcript = { path = "crates/codegen/wimoai-compaction-transcript" }
+wimoai-computer-hub-core = { path = "crates/common/wimoai-computer-hub-core" }
+wimoai-computer-hub-sdk = { path = "crates/common/wimoai-computer-hub-sdk" }
+wimoai-dirs = { path = "crates/codegen/wimoai-dirs" }
+wimoai-fuzzy-file-search = { path = "crates/codegen/wimoai-fuzzy-file-search" }
+wimoai-gix-status = { path = "crates/codegen/wimoai-gix-status" }
+wimoai-wimo-active-sessions = { path = "crates/codegen/wimoai-wimo-active-sessions" }
+wimoai-wimo-agent = { path = "crates/codegen/wimoai-wimo-agent" }
+wimoai-wimo-announcements = { path = "crates/codegen/wimoai-wimo-announcements" }
+wimoai-wimo-auth = { path = "crates/codegen/wimoai-wimo-auth" }
+wimoai-wimo-bundle = { path = "crates/codegen/wimoai-wimo-bundle" }
+wimoai-wimo-config = { path = "crates/codegen/wimoai-wimo-config" }
+wimoai-wimo-config-types = { path = "crates/codegen/wimoai-wimo-config-types" }
+wimoai-wimo-dashboard-store = { path = "crates/codegen/wimoai-wimo-dashboard-store" }
+wimoai-wimo-diag-server = { path = "crates/codegen/wimoai-wimo-diag-server" }
+wimoai-wimo-env = { path = "crates/codegen/wimoai-wimo-env" }
+wimoai-wimo-extra-ca = { path = "crates/codegen/wimoai-wimo-extra-ca" }
+wimoai-wimo-foreign-sessions = { path = "crates/codegen/wimoai-wimo-foreign-sessions" }
+wimoai-wimo-http = { path = "crates/codegen/wimoai-wimo-http" }
+wimoai-wimo-markdown = { path = "crates/codegen/wimoai-wimo-markdown" }
+wimoai-wimo-markdown-core = { path = "crates/codegen/wimoai-wimo-markdown-core" }
+wimoai-wimo-mcp = { path = "crates/codegen/wimoai-wimo-mcp" }
+wimoai-wimo-memory = { path = "crates/codegen/wimoai-wimo-memory" }
+wimoai-wimo-mermaid = { path = "crates/codegen/wimoai-wimo-mermaid" }
+wimoai-wimo-models = { path = "crates/codegen/wimoai-wimo-models" }
+wimoai-wimo-sampler = { path = "crates/codegen/wimoai-wimo-sampler" }
+wimoai-wimo-secrets = { path = "crates/codegen/wimoai-wimo-secrets" }
+wimoai-wimo-session-events = { path = "crates/codegen/wimoai-wimo-session-events" }
+wimoai-wimo-session-search = { path = "crates/codegen/wimoai-wimo-session-search" }
+wimoai-wimo-shared = { path = "crates/codegen/wimoai-wimo-shared" }
+wimoai-wimo-shell = { path = "crates/codegen/wimoai-wimo-shell" }
+wimoai-wimo-shell-base = { path = "crates/codegen/wimoai-wimo-shell-base" }
+wimoai-wimo-shell-session-support = { path = "crates/codegen/wimoai-wimo-shell-session-support" }
+wimoai-wimo-shell-terminal = { path = "crates/codegen/wimoai-wimo-shell-terminal" }
+wimoai-wimo-status-line = { path = "crates/codegen/wimoai-wimo-status-line" }
+wimoai-wimo-telemetry = { path = "crates/codegen/wimoai-wimo-telemetry" }
+wimoai-wimo-test-support = { path = "crates/codegen/wimoai-wimo-test-support" }
+wimoai-wimo-tools = { path = "crates/codegen/wimoai-wimo-tools" }
+wimoai-wimo-tools-api = { path = "crates/codegen/wimoai-wimo-tools-api" }
+wimoai-wimo-version = { path = "crates/codegen/wimoai-wimo-version" }
+wimoai-wimo-workspace = { path = "crates/codegen/wimoai-wimo-workspace", default-features = false }
+wimoai-wimo-workspace-types = { path = "crates/codegen/wimoai-wimo-workspace-types" }
+wimoai-hooks-plugins-types = { path = "crates/codegen/wimoai-hooks-plugins-types" }
+wimoai-interjection-core = { path = "crates/common/wimoai-interjection-core" }
+wimoai-message-delivery-core = { path = "crates/common/wimoai-message-delivery-core" }
+wimoai-mixpanel = { path = "crates/codegen/wimoai-mixpanel" }
+wimoai-prompt-queue = { path = "crates/codegen/wimoai-prompt-queue" }
+wimoai-proto-build = { path = "crates/build/wimoai-proto-build" }
+wimoai-ratatui-inline = { path = "crates/codegen/wimoai-ratatui-inline" }
+wimoai-ratatui-textarea = { path = "crates/codegen/wimoai-ratatui-textarea" }
+wimoai-sqlite-journal = { path = "crates/codegen/wimoai-sqlite-journal" }
+wimoai-system-power = { path = "crates/codegen/wimoai-system-power" }
+wimoai-test-utils = { path = "crates/common/wimoai-test-utils" }
+wimoai-token-estimation = { path = "crates/codegen/wimoai-token-estimation" }
+wimoai-tool-protocol = { path = "crates/common/wimoai-tool-protocol" }
+wimoai-tool-runtime = { path = "crates/common/wimoai-tool-runtime" }
+wimoai-tool-types = { path = "crates/common/wimoai-tool-types" }
+wimoai-tracing = { path = "crates/common/wimoai-tracing" }
+wimoai-tty-utils = { path = "crates/codegen/wimoai-tty-utils" }
 zbus = { version = "5" }
 zip = "3"
 zstd = "0.13"

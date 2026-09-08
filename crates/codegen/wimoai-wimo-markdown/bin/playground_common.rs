@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use wimo ai_wimo_markdown::{MarkdownStyle, Syntect};
+use wimoai_wimo_markdown::{MarkdownStyle, Syntect};
 
 pub const fn rgb_color(r: u8, g: u8, b: u8) -> anstyle::Color {
     anstyle::Color::Rgb(anstyle::RgbColor(r, g, b))

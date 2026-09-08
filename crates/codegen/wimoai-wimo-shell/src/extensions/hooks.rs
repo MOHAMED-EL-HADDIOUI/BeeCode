@@ -2,9 +2,9 @@ use std::collections::{HashMap, HashSet};
 
 use agent_client_protocol as acp;
 use serde::Deserialize;
-use wimo ai_wimo_hooks::event::{HookEventEnvelope, HookEventName};
-use wimo ai_wimo_hooks::matcher::HookMatcher;
-use wimo ai_hooks_plugins_types::{HookEvent, HookHandlerType, HookInfo};
+use wimoai_wimo_hooks::event::{HookEventEnvelope, HookEventName};
+use wimoai_wimo_hooks::matcher::HookMatcher;
+use wimoai_hooks_plugins_types::{HookEvent, HookHandlerType, HookInfo};
 
 use crate::agent::MvpAgent;
 
@@ -20,12 +20,12 @@ struct ListRequest {
 /// payloads. Reads the disabled set and registered dirs fresh from disk so
 /// every producer converts with the same inputs.
 pub(crate) fn current_hook_infos(
-    registry: Option<&wimo ai_wimo_hooks::discovery::HookRegistry>,
+    registry: Option<&wimoai_wimo_hooks::discovery::HookRegistry>,
 ) -> Vec<HookInfo> {
     let Some(registry) = registry else {
         return Vec::new();
     };
-    let disabled = wimo ai_wimo_hooks::trust::DisabledHooks::load();
+    let disabled = wimoai_wimo_hooks::trust::DisabledHooks::load();
     let registered = crate::config::registered_hook_paths();
     hook_specs_to_infos(&registry.all_hooks(), &disabled, &registered)
 }
@@ -35,8 +35,8 @@ pub(crate) fn current_hook_infos(
 /// managed-policy member pins the directory (removal is refused), so no
 /// hook in such a source is removable.
 fn hook_specs_to_infos(
-    specs: &[&wimo ai_wimo_hooks::config::HookSpec],
-    disabled: &wimo ai_wimo_hooks::trust::DisabledHooks,
+    specs: &[&wimoai_wimo_hooks::config::HookSpec],
+    disabled: &wimoai_wimo_hooks::trust::DisabledHooks,
     registered_dirs: &HashSet<String>,
 ) -> Vec<HookInfo> {
     let pinned_dirs: HashSet<String> = specs
@@ -51,12 +51,12 @@ fn hook_specs_to_infos(
 }
 
 fn hook_spec_to_info_with(
-    spec: &wimo ai_wimo_hooks::config::HookSpec,
-    disabled: &wimo ai_wimo_hooks::trust::DisabledHooks,
+    spec: &wimoai_wimo_hooks::config::HookSpec,
+    disabled: &wimoai_wimo_hooks::trust::DisabledHooks,
     registered_dirs: &HashSet<String>,
     pinned_source_dirs: &HashSet<String>,
 ) -> HookInfo {
-    use wimo ai_wimo_hooks::event::HookEventName;
+    use wimoai_wimo_hooks::event::HookEventName;
 
     let event = match spec.event {
         HookEventName::SessionStart => HookEvent::SessionStart,
@@ -100,7 +100,7 @@ fn hook_spec_to_info_with(
         url: url_display,
         timeout_ms: spec.timeout_ms,
         source_dir,
-        disabled: wimo ai_wimo_hooks::trust::hook_disabled_for_display_with(spec, disabled),
+        disabled: wimoai_wimo_hooks::trust::hook_disabled_for_display_with(spec, disabled),
         pinned: spec.is_managed_policy(),
         removable,
     }
@@ -123,10 +123,10 @@ pub(crate) struct ClientHookDispatch<'a> {
     pub envelope: &'a HookEventEnvelope,
 }
 
-pub(crate) const ADVERTISED_BLOCKING_EVENTS: &[wimo ai_wimo_hooks::event::HookEventName] = &[
-    wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
-    wimo ai_wimo_hooks::event::HookEventName::Stop,
-    wimo ai_wimo_hooks::event::HookEventName::SubagentStop,
+pub(crate) const ADVERTISED_BLOCKING_EVENTS: &[wimoai_wimo_hooks::event::HookEventName] = &[
+    wimoai_wimo_hooks::event::HookEventName::PreToolUse,
+    wimoai_wimo_hooks::event::HookEventName::Stop,
+    wimoai_wimo_hooks::event::HookEventName::SubagentStop,
 ];
 
 pub(crate) const ADVERTISED_DECISIONS: &[&str] = &["deny", "block"];
@@ -222,7 +222,7 @@ fn parse_hook_group(event: HookEventName, value: &serde_json::Value) -> Option<C
     let matcher = match group.matcher.as_deref() {
         None | Some("") | Some("*") => None,
         Some(pattern)
-            if event.traits().matcher == wimo ai_wimo_hooks::event::MatcherPolicy::Ignored =>
+            if event.traits().matcher == wimoai_wimo_hooks::event::MatcherPolicy::Ignored =>
         {
             tracing::warn!(%event, pattern, "matcher on a {event} hook group is ignored (this event always fires)");
             None
@@ -255,7 +255,7 @@ pub async fn handle(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
             super::to_ext_response(result)
         }
         "x.ai/hooks/action" => {
-            let req: wimo ai_hooks_plugins_types::HooksActionRequest = super::parse_params(args)?;
+            let req: wimoai_hooks_plugins_types::HooksActionRequest = super::parse_params(args)?;
             let sid = acp::SessionId::new(req.session_id);
 
             let result = agent
@@ -272,8 +272,8 @@ pub async fn handle(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
 mod tests {
     use super::*;
     use std::path::PathBuf;
-    use wimo ai_wimo_hooks::config::HookSpec;
-    use wimo ai_wimo_hooks::event::HookEventName;
+    use wimoai_wimo_hooks::config::HookSpec;
+    use wimoai_wimo_hooks::event::HookEventName;
 
     fn make_spec(
         command_raw: Option<&str>,
@@ -284,7 +284,7 @@ mod tests {
         HookSpec {
             name: "test:pre_tool_use[0].hooks[0]".to_string(),
             event: HookEventName::PreToolUse,
-            handler_type: wimo ai_wimo_hooks::config::HandlerType::Command,
+            handler_type: wimoai_wimo_hooks::config::HandlerType::Command,
             configured_matcher: None,
             matcher: None,
             enabled: true,
@@ -295,13 +295,13 @@ mod tests {
             timeout_ms: 5000,
             source_dir: PathBuf::from("/tmp"),
             extra_env: HashMap::new(),
-            layer: wimo ai_wimo_hooks::config::HookProvenance::File,
+            layer: wimoai_wimo_hooks::config::HookProvenance::File,
         }
     }
 
     #[test]
     fn hook_spec_to_info_raw_display_wins_so_secrets_never_reach_dto() {
-        let no_disabled = wimo ai_wimo_hooks::trust::DisabledHooks::from_names([]);
+        let no_disabled = wimoai_wimo_hooks::trust::DisabledHooks::from_names([]);
         let no_dirs = HashSet::new();
         let command = |raw, resolved| {
             hook_specs_to_infos(
@@ -352,7 +352,7 @@ mod tests {
     /// Both managed tiers (`SystemManaged` and `Requirements`) pin identically.
     #[test]
     fn hook_specs_to_infos_pins_removable_at_source_level() {
-        let no_disabled = wimo ai_wimo_hooks::trust::DisabledHooks::from_names([]);
+        let no_disabled = wimoai_wimo_hooks::trust::DisabledHooks::from_names([]);
         let registered: HashSet<String> = [
             "/reg/policy".to_string(),
             "/reg/req".to_string(),
@@ -362,12 +362,12 @@ mod tests {
 
         let mut policy = make_spec(Some("a"), None, None, None);
         policy.source_dir = PathBuf::from("/reg/policy");
-        policy.layer = wimo ai_wimo_hooks::config::HookProvenance::SystemManaged;
+        policy.layer = wimoai_wimo_hooks::config::HookProvenance::SystemManaged;
         let mut sibling = make_spec(Some("b"), None, None, None);
         sibling.source_dir = PathBuf::from("/reg/policy");
         let mut req = make_spec(Some("r"), None, None, None);
         req.source_dir = PathBuf::from("/reg/req");
-        req.layer = wimo ai_wimo_hooks::config::HookProvenance::Requirements;
+        req.layer = wimoai_wimo_hooks::config::HookProvenance::Requirements;
         let mut req_sibling = make_spec(Some("s"), None, None, None);
         req_sibling.source_dir = PathBuf::from("/reg/req");
         let mut user = make_spec(Some("c"), None, None, None);
@@ -526,7 +526,7 @@ mod tests {
 
     #[test]
     fn advertised_blocking_events_are_gates() {
-        use wimo ai_wimo_hooks::event::GateKind;
+        use wimoai_wimo_hooks::event::GateKind;
         for event in ADVERTISED_BLOCKING_EVENTS {
             assert_ne!(
                 event.traits().gate,
@@ -570,7 +570,7 @@ mod tests {
 
     #[test]
     fn client_hook_dispatch_serializes_envelope() {
-        use wimo ai_wimo_hooks::event::{HookEventEnvelope, HookPayload};
+        use wimoai_wimo_hooks::event::{HookEventEnvelope, HookPayload};
 
         let envelope = HookEventEnvelope {
             hook_event_name: HookEventName::PreToolUse,

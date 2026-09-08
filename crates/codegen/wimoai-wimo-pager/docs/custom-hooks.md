@@ -272,12 +272,12 @@ The full event envelope is POSTed as JSON. Useful for webhooks, analytics, or se
 
 ## More Examples
 
-See the built-in examples in the `wimo ai-wimo-hooks` crate:
+See the built-in examples in the `wimoai-wimo-hooks` crate:
 
-- [Safe Shell Guard](../../../wimo ai-wimo-hooks/examples/hooks/safe-shell.json)
-- [No Recursive Grep](../../../wimo ai-wimo-hooks/examples/hooks/no-recursive-grep.json): hard-blocks `grep -r`/`grep -R`/`rgrep` (OOM guard)
-- [Session Audit Log](../../../wimo ai-wimo-hooks/examples/hooks/session-log.json)
-- [Tool Activity Logger](../../../wimo ai-wimo-hooks/examples/hooks/tool-logger.json)
+- [Safe Shell Guard](../../../wimoai-wimo-hooks/examples/hooks/safe-shell.json)
+- [No Recursive Grep](../../../wimoai-wimo-hooks/examples/hooks/no-recursive-grep.json): hard-blocks `grep -r`/`grep -R`/`rgrep` (OOM guard)
+- [Session Audit Log](../../../wimoai-wimo-hooks/examples/hooks/session-log.json)
+- [Tool Activity Logger](../../../wimoai-wimo-hooks/examples/hooks/tool-logger.json)
 
 Copy them to `~/.wimo/hooks/` and customize.
 

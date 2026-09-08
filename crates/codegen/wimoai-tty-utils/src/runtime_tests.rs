@@ -78,7 +78,7 @@ fn thread_count() -> Option<u64> {
 }
 
 #[cfg(target_os = "linux")]
-const BEHAVIOR_CHILD_ENV: &str = "wimo ai_TTY_UTILS_BLOCKING_POOL_CHILD";
+const BEHAVIOR_CHILD_ENV: &str = "wimoai_TTY_UTILS_BLOCKING_POOL_CHILD";
 #[cfg(target_os = "linux")]
 const BEHAVIOR_PASS_MARK: &str = "blocking-pool-behavior:";
 

@@ -10,12 +10,12 @@
 //! `wimo_home()` is process-cached (OnceLock), so disk assertions always go through [`effective_wimo_home`] rather than assuming the temp dir won.
 //!
 //! The scenarios are `#[ignore]`d in the shared lib test binary.
-//! The harness mutates process-global env (proxy URLs, `wimo ai_API_KEY`, `wimo_LEADER_SOCKET`, `wimo_HOME`) for a real agent's whole lifetime.
+//! The harness mutates process-global env (proxy URLs, `wimoai_API_KEY`, `wimo_LEADER_SOCKET`, `wimo_HOME`) for a real agent's whole lifetime.
 //! In a several-thousand-test process that mutation poisons concurrently-running tests; `wimo_home()`'s OnceLock is usually already pinned too.
 //! Run on demand:
 //!
 //! ```bash
-//! cargo test -p wimo ai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1
+//! cargo test -p wimoai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1
 //! ```
 //!
 //! To un-ignore them, move the scenarios to a dedicated test binary where env is set before any process-global's first touch.
@@ -32,13 +32,13 @@ use agent_client_protocol as acp;
 use tempfile::TempDir;
 use tokio::task::JoinSet;
 use tokio_util::sync::CancellationToken;
-use wimo ai_acp_lib::{AcpClientRx, acp_send};
-use wimo ai_wimo_shell::leader::{
+use wimoai_acp_lib::{AcpClientRx, acp_send};
+use wimoai_wimo_shell::leader::{
     ClientCapabilities as LeaderClientCapabilities, ClientMode, ConnectionStatus,
     LEADER_SOCKET_ENV, LeaderClient, LeaderEnvUrls, LeaderLock, LeaderReconnector,
     LeaderServerControlState, LeaderServerMetadata, ReconnectPolicy, run_leader_server,
 };
-use wimo ai_wimo_test_support::MockInferenceServer;
+use wimoai_wimo_test_support::MockInferenceServer;
 
 use super::actions::{Action, TaskResult};
 use super::agent::AgentState;
@@ -61,7 +61,7 @@ async fn bounded<T>(what: &str, fut: impl std::future::Future<Output = T>) -> T 
 
 /// The wimo home the agent actually persisted under: `wimo_home()` is process-cached, so an earlier test in this binary may have pinned it.
 fn effective_wimo_home() -> PathBuf {
-    wimo ai_wimo_config::wimo_home()
+    wimoai_wimo_config::wimo_home()
 }
 
 /// Concatenated agent-message text across a view's scrollback (copy of the acp_handler tests' helper; that one is test-mod private).
@@ -267,7 +267,7 @@ impl PagerLeaderCluster {
     /// Stand up the cluster.
     /// Callers MUST be `#[serial_test::serial(wimo_HOME)]` (env mutation) and run inside a current-thread `LocalSet`.
     async fn start() -> Self {
-        wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+        wimoai_wimo_extra_ca::ensure_default_crypto_provider();
 
         let server = MockInferenceServer::start().await.expect("mock server");
         let wimo_home = TempDir::new().unwrap();
@@ -277,8 +277,8 @@ impl PagerLeaderCluster {
         let env = vec![
             crate::test_util::EnvVarGuard::set("wimo_HOME", wimo_home.path()),
             crate::test_util::EnvVarGuard::set("wimo_CLI_CHAT_PROXY_BASE_URL", server.url()),
-            crate::test_util::EnvVarGuard::set("wimo_wimo ai_API_BASE_URL", server.url()),
-            crate::test_util::EnvVarGuard::set("wimo ai_API_KEY", "test-key-for-ci"),
+            crate::test_util::EnvVarGuard::set("wimo_wimoai_API_BASE_URL", server.url()),
+            crate::test_util::EnvVarGuard::set("wimoai_API_KEY", "test-key-for-ci"),
             crate::test_util::EnvVarGuard::set("wimo_TELEMETRY_ENABLED", "false"),
             crate::test_util::EnvVarGuard::set("wimo_FEEDBACK_ENABLED", "false"),
             crate::test_util::EnvVarGuard::set("wimo_TRACE_UPLOAD", "false"),
@@ -324,9 +324,9 @@ impl PagerLeaderCluster {
             socket_path: self.sock_path.clone(),
             lock_path: self.sock_path.with_extension("lock"),
             ws_url_suffix: String::new(),
-            // MUST be the client-side comparison source (wimo ai_wimo_version), not this crate's version
+            // MUST be the client-side comparison source (wimoai_wimo_version), not this crate's version
             // A reconnecting client evicts strictly-older leaders, and "evict" here would signal THIS test process
-            leader_binary_version: wimo ai_wimo_version::VERSION.to_string(),
+            leader_binary_version: wimoai_wimo_version::VERSION.to_string(),
         });
         let sock_for_server = self.sock_path.clone();
         let cancel_for_server = cancel.clone();
@@ -341,17 +341,17 @@ impl PagerLeaderCluster {
                 true,
                 client_count_for_server,
                 Arc::new(AtomicBool::new(false)),
-                wimo ai_wimo_shell::agent::activity::AgentActivity::default(),
+                wimoai_wimo_shell::agent::activity::AgentActivity::default(),
                 tokio::sync::watch::channel(true).1,
                 tokio::sync::watch::channel(false).0,
-                tokio::sync::watch::channel(wimo ai_wimo_shell::leader::ShutdownReason::Manual).0,
+                tokio::sync::watch::channel(wimoai_wimo_shell::leader::ShutdownReason::Manual).0,
                 None,
                 control_state,
             )
             .await;
         }));
 
-        generation_tasks.extend(wimo ai_wimo_shell::leader::in_process::spawn_agent(
+        generation_tasks.extend(wimoai_wimo_shell::leader::in_process::spawn_agent(
             acp_rx,
             response_tx,
         ));
@@ -478,7 +478,7 @@ impl PagerLeaderCluster {
             let _: acp::AuthenticateResponse = bounded(
                 "authenticate",
                 acp_send(
-                    acp::AuthenticateRequest::new(acp::AuthMethodId::new("wimo ai.api_key"))
+                    acp::AuthenticateRequest::new(acp::AuthMethodId::new("wimoai.api_key"))
                         .meta(serde_json::json!({ "headless": true }).as_object().cloned()),
                     &tx,
                 ),

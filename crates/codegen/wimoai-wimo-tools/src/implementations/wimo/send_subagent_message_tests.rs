@@ -78,7 +78,7 @@ async fn run_with_queue(
     text: String,
     queue: bool,
 ) -> SendSubagentMessageOutput {
-    completes(wimo ai_tool_runtime::Tool::run(
+    completes(wimoai_tool_runtime::Tool::run(
         &SendSubagentMessageTool,
         test_ctx(resources),
         SendSubagentMessageInput {
@@ -131,11 +131,11 @@ fn required_input_keys_are_semantically_pinned() {
 
 #[test]
 fn tool_capabilities_are_write_scoped() {
-    let capabilities = wimo ai_tool_runtime::Tool::capabilities(&SendSubagentMessageTool);
+    let capabilities = wimoai_tool_runtime::Tool::capabilities(&SendSubagentMessageTool);
     assert!(!capabilities.is_read_only);
     assert_eq!(
         capabilities.tool_scope,
-        Some(wimo ai_tool_protocol::ToolScope::Write)
+        Some(wimoai_tool_protocol::ToolScope::Write)
     );
 }
 

@@ -1,4 +1,4 @@
-//! Binds the `wimo ai-wimo-session-search` index to this crate's JSONL session store.
+//! Binds the `wimoai-wimo-session-search` index to this crate's JSONL session store.
 //! A process that keeps no index holds no manager, so these entry points take the handle rather than reach for a global.
 
 use std::io;
@@ -11,9 +11,9 @@ use super::StorageAdapter;
 use super::jsonl::JsonlStorageAdapter;
 use crate::session::info::Info;
 use crate::session::persistence::Summary;
-use wimo ai_wimo_session_search::{IndexableSession, SessionSource};
+use wimoai_wimo_session_search::{IndexableSession, SessionSource};
 
-pub use wimo ai_wimo_session_search::{
+pub use wimoai_wimo_session_search::{
     SearchIndexManager, SearchIndexStatus, SessionSearchRequest, SessionSearchResponse,
 };
 
@@ -186,7 +186,7 @@ pub fn notify_session_updated(index: Option<&SearchIndexManager>, session_id: &s
 
 /// Remove one session from an index built earlier, whether or not this process still indexes.
 pub(crate) async fn evict_session(root_dir: &Path, session_id: &str) {
-    wimo ai_wimo_session_search::evict_session(root_dir, session_id).await;
+    wimoai_wimo_session_search::evict_session(root_dir, session_id).await;
 }
 
 pub async fn execute_search(
@@ -199,7 +199,7 @@ pub async fn execute_search(
         IndexDecision::Off => None,
         IndexDecision::On(index) => Some(index),
     };
-    wimo ai_wimo_session_search::execute_search(index, root_dir, req).await
+    wimoai_wimo_session_search::execute_search(index, root_dir, req).await
 }
 
 #[cfg(test)]

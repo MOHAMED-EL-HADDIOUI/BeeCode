@@ -3,7 +3,7 @@
 use std::io::Write;
 
 use anyhow::{Context, Result};
-use wimo ai_wimo_shell::session::usage_file::{SessionUsageFile, UsageLoad};
+use wimoai_wimo_shell::session::usage_file::{SessionUsageFile, UsageLoad};
 
 #[derive(Debug, clap::Args, Clone)]
 pub struct UsageArgs {
@@ -58,7 +58,7 @@ fn select_payload(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_wimo_shell::session::usage_file::UsageSummary;
+    use wimoai_wimo_shell::session::usage_file::UsageSummary;
 
     fn file_with_turns() -> SessionUsageFile {
         let mut file = SessionUsageFile::new("sess-1");

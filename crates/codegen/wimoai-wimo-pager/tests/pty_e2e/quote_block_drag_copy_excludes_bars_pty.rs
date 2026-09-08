@@ -1,7 +1,7 @@
 // Per-test-case module for the `pty_e2e` integration test crate.
 #[allow(unused_imports)]
 use super::common::*;
-use wimo ai_wimo_pager_pty_harness::StyledLine;
+use wimoai_wimo_pager_pty_harness::StyledLine;
 
 /// Greppable tokens on the two rendered quote rows, plus the sentinel that marks the turn settled.
 const QUOTE_ALPHA: &str = "QUOTE_ALPHA";

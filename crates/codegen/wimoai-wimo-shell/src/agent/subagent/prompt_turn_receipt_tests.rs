@@ -24,12 +24,12 @@ fn receipt_for_turn(
             result,
             telemetry: crate::session::telemetry::ActiveAgentMessageAdmissionTelemetry::new(
                 std::time::Instant::now(),
-                wimo ai_wimo_telemetry::TelemetryCtx::new(
+                wimoai_wimo_telemetry::TelemetryCtx::new(
                     "parent".to_owned(),
                     std::sync::Arc::new(tokio::sync::Mutex::new(turn)),
                 ),
-                wimo ai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation::Queue,
-                wimo ai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation::Queue,
+                wimoai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation::Queue,
+                wimoai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation::Queue,
                 None,
             ),
         },

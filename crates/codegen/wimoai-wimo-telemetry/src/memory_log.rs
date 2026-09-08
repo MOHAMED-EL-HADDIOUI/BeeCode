@@ -1,4 +1,4 @@
-//! Provides a dedicated tracing target (`wimo ai_memory`) with an optional
+//! Provides a dedicated tracing target (`wimoai_memory`) with an optional
 //! file logger that writes to `~/.wimo/logs/memory.log`.
 //!
 //! ## When to use
@@ -15,7 +15,7 @@
 //! ```
 
 /// Tracing target for all memory system operations.
-pub const TARGET: &str = "wimo ai_memory";
+pub const TARGET: &str = "wimoai_memory";
 
 #[cfg(feature = "memory-log")]
 mod inner {
@@ -32,7 +32,7 @@ mod inner {
     use tracing_subscriber::registry::LookupSpan;
 
     use super::TARGET;
-    use wimo ai_wimo_config::wimo_home;
+    use wimoai_wimo_config::wimo_home;
 
     const ENV_MEMORY_LOG: &str = "wimo_MEMORY_LOG";
 
@@ -60,7 +60,7 @@ mod inner {
         }
     }
 
-    /// Writes to `~/.wimo/logs/memory.log`. Filters to `wimo ai_memory=trace`.
+    /// Writes to `~/.wimo/logs/memory.log`. Filters to `wimoai_memory=trace`.
     /// Set `wimo_MEMORY_LOG=0` to disable, `wimo_MEMORY_LOG=/path` to redirect.
     pub fn layer<S>() -> Option<impl Layer<S>>
     where

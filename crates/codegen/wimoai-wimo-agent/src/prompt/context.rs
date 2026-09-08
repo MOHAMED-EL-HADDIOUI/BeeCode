@@ -1,7 +1,7 @@
 //! `PromptContext` captures the agent-specific inputs to prompt rendering as a serializable struct.
 //! Users can dump it as JSON and inspect individual sections.
 //!
-//! Rendering is done by `ToolBridge::render_prompt()` which delegates to `TemplateRenderer` in `wimo ai-wimo-tools`.
+//! Rendering is done by `ToolBridge::render_prompt()` which delegates to `TemplateRenderer` in `wimoai-wimo-tools`.
 //! This struct does NOT own a render engine; it provides placeholders and discovered sections.
 use crate::config::PromptMode;
 use crate::prompt::agents_md::{self, AgentConfigFile};
@@ -69,8 +69,8 @@ pub enum PromptAudience {
     /// Child/subagent session. Compact base template, no persona/subagent catalogs.
     Subagent,
 }
-use wimo ai_wimo_tools::bridge::ToolBridge;
-use wimo ai_wimo_tools::types::template_renderer::TemplateRenderer;
+use wimoai_wimo_tools::bridge::ToolBridge;
+use wimoai_wimo_tools::types::template_renderer::TemplateRenderer;
 /// Agent-specific inputs for system prompt rendering.
 ///
 /// Serializable (JSON/YAML) so users can dump it and inspect fields.

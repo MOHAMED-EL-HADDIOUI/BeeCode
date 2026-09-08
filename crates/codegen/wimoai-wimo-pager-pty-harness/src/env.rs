@@ -24,7 +24,7 @@ fn target_dir() -> Result<PathBuf> {
 fn local_pager_binary_path() -> Result<PathBuf> {
     Ok(target_dir()?
         .join("debug")
-        .join(format!("wimo ai-wimo-pager{}", std::env::consts::EXE_SUFFIX)))
+        .join(format!("wimoai-wimo-pager{}", std::env::consts::EXE_SUFFIX)))
 }
 
 fn ensure_local_pager_binary(binary: &std::path::Path) -> Result<()> {
@@ -34,20 +34,20 @@ fn ensure_local_pager_binary(binary: &std::path::Path) -> Result<()> {
         .args([
             "build",
             "-p",
-            "wimo ai-wimo-pager-bin",
+            "wimoai-wimo-pager-bin",
             "--bin",
-            "wimo ai-wimo-pager",
+            "wimoai-wimo-pager",
         ])
         .stdin(Stdio::null())
-        .envs(wimo ai_tty_utils::pager_env());
-    wimo ai_tty_utils::detach_std_command(&mut cmd);
+        .envs(wimoai_tty_utils::pager_env());
+    wimoai_tty_utils::detach_std_command(&mut cmd);
     let output = cmd
         .output()
-        .with_context(|| format!("failed to spawn {cargo} to build wimo ai-wimo-pager"))?;
+        .with_context(|| format!("failed to spawn {cargo} to build wimoai-wimo-pager"))?;
 
     if !output.status.success() {
         bail!(
-            "failed to build wimo ai-wimo-pager (exit {:?})\nstdout:\n{}\nstderr:\n{}",
+            "failed to build wimoai-wimo-pager (exit {:?})\nstdout:\n{}\nstderr:\n{}",
             output.status.code(),
             String::from_utf8_lossy(&output.stdout),
             String::from_utf8_lossy(&output.stderr),
@@ -55,7 +55,7 @@ fn ensure_local_pager_binary(binary: &std::path::Path) -> Result<()> {
     }
     if !binary.exists() {
         bail!(
-            "wimo ai-wimo-pager build completed but binary missing at {}",
+            "wimoai-wimo-pager build completed but binary missing at {}",
             binary.display()
         );
     }
@@ -66,8 +66,8 @@ fn ensure_local_pager_binary(binary: &std::path::Path) -> Result<()> {
 ///
 /// Resolution order:
 /// 1. `PAGER_BINARY` env var (for CI / explicit override)
-/// 2. `CARGO_BIN_EXE_wimo ai-wimo-pager` (set by `cargo test`)
-/// 3. Build locally via `cargo build -p wimo ai-wimo-pager-bin` (the composition-root package that owns the `wimo ai-wimo-pager` binary)
+/// 2. `CARGO_BIN_EXE_wimoai-wimo-pager` (set by `cargo test`)
+/// 3. Build locally via `cargo build -p wimoai-wimo-pager-bin` (the composition-root package that owns the `wimoai-wimo-pager` binary)
 pub fn pager_binary() -> Result<PathBuf> {
     if let Ok(path) = std::env::var("PAGER_BINARY") {
         let p = PathBuf::from(path);
@@ -79,7 +79,7 @@ pub fn pager_binary() -> Result<PathBuf> {
             .with_context(|| format!("failed to absolutize PAGER_BINARY: {}", p.display()));
     }
 
-    if let Ok(path) = std::env::var("CARGO_BIN_EXE_wimo ai-wimo-pager") {
+    if let Ok(path) = std::env::var("CARGO_BIN_EXE_wimoai-wimo-pager") {
         let p = PathBuf::from(path);
         if p.exists() {
             return Ok(p);

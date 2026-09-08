@@ -7,7 +7,7 @@ use parking_lot::Mutex;
 use agent_client_protocol as acp;
 use chrono::Utc;
 use tokio::sync::{mpsc, oneshot};
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
 
 use crate::permission::auto_mode::{
     BashSecurityAssessment, ClassifierSecurityFinding, ClassifierVerdict, EnvRisk,
@@ -33,12 +33,12 @@ use crate::permission::types::{
     AccessKind, ClientType, Decision, EditPolicy, PermissionCommand, PermissionEvent,
     PermissionRequest, PermissionResolution, PromptPolicy,
 };
-use wimo ai_wimo_mcp::servers::parse_mcp_qualified_name;
-use wimo ai_wimo_paths::AbsPathBuf;
-use wimo ai_wimo_tools::implementations::wimo::web_fetch::{
+use wimoai_wimo_mcp::servers::parse_mcp_qualified_name;
+use wimoai_wimo_paths::AbsPathBuf;
+use wimoai_wimo_tools::implementations::wimo::web_fetch::{
     DomainMatcher, config::DEFAULT_ALLOWED_DOMAINS, domain::normalize_domain,
 };
-use wimo ai_wimo_tools::types::resources::resolve_model_path;
+use wimoai_wimo_tools::types::resources::resolve_model_path;
 
 mod bash_grants;
 pub mod reasons;
@@ -1534,11 +1534,11 @@ pub fn spawn_permission_manager_with_pin(
                         .map(|context| context.real_cwd.as_path())
                         .unwrap_or_else(|| cwd.as_path());
                     let permission_mode = if yolo_mode {
-                        wimo ai_wimo_telemetry::enums::PermissionMode::AlwaysApprove
+                        wimoai_wimo_telemetry::enums::PermissionMode::AlwaysApprove
                     } else if auto_mode {
-                        wimo ai_wimo_telemetry::enums::PermissionMode::Auto
+                        wimoai_wimo_telemetry::enums::PermissionMode::Auto
                     } else {
-                        wimo ai_wimo_telemetry::enums::PermissionMode::Ask
+                        wimoai_wimo_telemetry::enums::PermissionMode::Ask
                     };
                     let tool_id = tool_call_update.tool_call_id.to_string();
                     let tool_name = crate::permission::prompter::tool_name_for_access(&access);
@@ -2054,7 +2054,7 @@ pub fn spawn_permission_manager_with_pin(
                     if matches!(&access, AccessKind::Bash(_))
                         && sandbox_may_auto_allow_bash(
                             bash_evaluation.as_ref(),
-                            wimo ai_wimo_sandbox::should_auto_allow_bash(),
+                            wimoai_wimo_sandbox::should_auto_allow_bash(),
                         )
                         && !policy_forced_prompt
                         && !auto_forced_prompt
@@ -3725,7 +3725,7 @@ mod tests {
         client_type: ClientType,
         remember_tool_approvals: bool,
     ) -> (PermissionHandle, mpsc::UnboundedReceiver<PermissionEvent>) {
-        let (gateway, receiver) = wimo ai_acp_lib::acp_gateway::<acp::AgentSide, _>(client);
+        let (gateway, receiver) = wimoai_acp_lib::acp_gateway::<acp::AgentSide, _>(client);
         tokio::task::spawn_local(receiver.run());
         spawn_permission_manager_with_pin(
             acp::SessionId::new(Arc::from("test-session")),
@@ -4618,7 +4618,7 @@ mod tests {
             client: RecordingClient,
             web_fetch_allowed_domains: Vec<String>,
         ) -> (PermissionHandle, mpsc::UnboundedReceiver<PermissionEvent>) {
-            let (gateway, receiver) = wimo ai_acp_lib::acp_gateway::<acp::AgentSide, _>(client);
+            let (gateway, receiver) = wimoai_acp_lib::acp_gateway::<acp::AgentSide, _>(client);
             tokio::task::spawn_local(receiver.run());
             spawn_permission_manager_with_pin(
                 acp::SessionId::new(Arc::from("test-session")),
@@ -6459,7 +6459,7 @@ mod tests {
                 let client = HangingFirstPromptClient {
                     prompts: prompts.clone(),
                 };
-                let (gateway, receiver) = wimo ai_acp_lib::acp_gateway::<acp::AgentSide, _>(client);
+                let (gateway, receiver) = wimoai_acp_lib::acp_gateway::<acp::AgentSide, _>(client);
                 tokio::task::spawn_local(receiver.run());
                 let (mgr, _events) = spawn_permission_manager_with_pin(
                     acp::SessionId::new(Arc::from("test-session")),
@@ -6627,7 +6627,7 @@ mod tests {
                     seen: seen.clone(),
                     gate: gate.clone(),
                 };
-                let (gateway, receiver) = wimo ai_acp_lib::acp_gateway::<acp::AgentSide, _>(client);
+                let (gateway, receiver) = wimoai_acp_lib::acp_gateway::<acp::AgentSide, _>(client);
                 tokio::task::spawn_local(receiver.run());
                 let (mgr, mut events) = spawn_permission_manager_with_pin(
                     acp::SessionId::new(Arc::from("test-session")),

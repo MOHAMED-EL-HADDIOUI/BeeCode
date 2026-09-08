@@ -6,7 +6,7 @@ use std::path::Path;
 use std::time::SystemTime;
 
 use super::dream_lock::DreamLock;
-use wimo ai_wimo_config_types::MemoryDreamConfig;
+use wimoai_wimo_config_types::MemoryDreamConfig;
 
 /// Result of the dream gate check.
 #[derive(Debug, PartialEq, Eq)]
@@ -74,7 +74,7 @@ pub fn check_dream_gates(
 
 use super::text_utils::{has_markdown_headers, is_no_reply};
 
-const LOG: &str = "wimo ai_memory";
+const LOG: &str = "wimoai_memory";
 
 pub const DREAM_SYSTEM_PROMPT: &str = "\
 You are performing a dream \u{2014} a reflective pass over memory files. \

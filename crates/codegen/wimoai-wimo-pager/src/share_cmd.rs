@@ -1,5 +1,5 @@
 use anyhow::Result;
-use wimo ai_wimo_shell::agent::config::Config as AgentConfig;
+use wimoai_wimo_shell::agent::config::Config as AgentConfig;
 
 #[derive(Debug, clap::Args, Clone)]
 pub struct ShareArgs {

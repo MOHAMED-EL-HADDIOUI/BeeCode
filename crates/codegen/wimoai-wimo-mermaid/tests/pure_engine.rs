@@ -2,7 +2,7 @@
 //!
 //! These use only the public API (`default_engine` and `render_checked`) so they exercise the real, always-compiled dagre-based engine end to end.
 
-use wimo ai_wimo_mermaid::{
+use wimoai_wimo_mermaid::{
     MermaidError, MermaidTheme, RenderLimits, RenderParams, default_engine, render_checked,
 };
 

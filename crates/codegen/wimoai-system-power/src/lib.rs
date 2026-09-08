@@ -5,7 +5,7 @@
 //! the request, rotates/revokes the old refresh token, and the response is
 //! lost across the suspend). On wake the client is holding a dead refresh
 //! token and the user is forced to re-login. See
-//! `wimo ai-wimo-shell`'s `AuthManager` sleep gate, which consumes these events to
+//! `wimoai-wimo-shell`'s `AuthManager` sleep gate, which consumes these events to
 //! avoid *starting* a refresh just before sleep. An in-flight refresh is
 //! deliberately left to finish, never aborted (dropping it could discard a
 //! rotated-token response and cause the very revocation this guards against);
@@ -206,7 +206,7 @@ mod assertion_tests {
     /// protect nothing.
     #[test]
     fn hold_awake_registers_and_releases_a_real_assertion() {
-        let name = format!("wimo ai-system-power selftest {}", std::process::id());
+        let name = format!("wimoai-system-power selftest {}", std::process::id());
         let listed = || -> String {
             std::process::Command::new("/usr/bin/pmset")
                 .args(["-g", "assertions"])

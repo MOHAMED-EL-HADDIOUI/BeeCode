@@ -1,7 +1,7 @@
 //! Interactive markdown table rendering playground.
 //!
 //! Run with:
-//!   cargo run -p wimo ai-wimo-markdown --features playground --bin md-table-test
+//!   cargo run -p wimoai-wimo-markdown --features playground --bin md-table-test
 //!
 //! Controls:
 //!   Space        — toggle textarea focus
@@ -25,13 +25,13 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, StatefulWidgetRef, Wrap};
 
-use wimo ai_wimo_markdown::{
+use wimoai_wimo_markdown::{
     MarkdownBuffers, MarkdownStyle, StreamingMarkdownRenderer,
     render_markdown_ratatui_with_buffers_width,
 };
-use wimo ai_ratatui_textarea::{TextArea, TextAreaState};
+use wimoai_ratatui_textarea::{TextArea, TextAreaState};
 
-// ── Tokyo Night Storm palette (matches wimo ai-wimo-pager) ──────────────────────
+// ── Tokyo Night Storm palette (matches wimoai-wimo-pager) ──────────────────────
 
 #[path = "playground_common.rs"]
 mod playground_common;

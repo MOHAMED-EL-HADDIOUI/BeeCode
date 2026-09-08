@@ -1,5 +1,5 @@
 use super::*;
-use wimo ai_test_utils::git::reflog_only_commit;
+use wimoai_test_utils::git::reflog_only_commit;
 
 #[test]
 fn commit_no_remote_holds_keeps_the_worktree() {

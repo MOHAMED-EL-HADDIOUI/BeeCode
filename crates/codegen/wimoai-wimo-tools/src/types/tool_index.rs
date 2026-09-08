@@ -1,7 +1,7 @@
 //! Backend-agnostic trait for tool search/discovery.
 //!
-//! `ToolSearchIndex` is defined in `wimo ai-wimo-tools` to keep the tool crate
-//! backend-agnostic. The concrete implementation lives in `wimo ai-wimo-shell`
+//! `ToolSearchIndex` is defined in `wimoai-wimo-tools` to keep the tool crate
+//! backend-agnostic. The concrete implementation lives in `wimoai-wimo-shell`
 //! (which has access to `McpState` and `FinalizedToolset`).
 //!
 //! Same pattern as `MemoryBackend` for `memory_search`.
@@ -54,7 +54,7 @@ pub struct ServerSummary {
 ///
 /// Implementations must be `Send + Sync` to be stored as `Arc<dyn ToolSearchIndex>`
 /// in `Resources`. No MCP-specific concepts — the concrete implementation
-/// in `wimo ai-wimo-shell` maps `mcp_initialized` to `is_ready`.
+/// in `wimoai-wimo-shell` maps `mcp_initialized` to `is_ready`.
 pub trait ToolSearchIndex: Send + Sync {
     /// Search and return results + metadata from a single consistent snapshot.
     fn search_snapshot(&self, query: &str, limit: usize) -> SearchSnapshot;
@@ -69,7 +69,7 @@ pub trait ToolSearchIndex: Send + Sync {
 /// Resource wrapper for injecting a `ToolSearchIndex` into `Resources`.
 ///
 /// Same pattern as `MemoryBackend` — stored as an ephemeral resource (not
-/// serialized), injected by `wimo ai-wimo-shell` after MCP initialization.
+/// serialized), injected by `wimoai-wimo-shell` after MCP initialization.
 #[derive(Clone)]
 pub struct ToolIndex(pub Arc<dyn ToolSearchIndex>);
 

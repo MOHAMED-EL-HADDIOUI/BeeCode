@@ -117,7 +117,7 @@ pub enum SessionEvent {
         elapsed: Duration,
     },
     /// Hook annotation, displayed inline after a tool call.
-    /// The message comes from the agent via `wimo aiSessionUpdate::HookAnnotation`.
+    /// The message comes from the agent via `wimoaiSessionUpdate::HookAnnotation`.
     HookAnnotation { message: String },
     /// The session's persisted model is no longer available after re-auth.
     /// Both IDs are empty when re-shown on blocked prompt attempts.
@@ -246,7 +246,7 @@ impl SessionEvent {
                     .to_string()
             }
             SessionEvent::DiskFull => {
-                wimo ai_wimo_shell::extensions::notification::DISK_FULL_USER_MESSAGE.to_string()
+                wimoai_wimo_shell::extensions::notification::DISK_FULL_USER_MESSAGE.to_string()
             }
             // No "Context N% full." prefix; that phrasing is the auto marker's
             SessionEvent::CompactStarted => "Compacting conversation…".to_string(),

@@ -307,7 +307,7 @@ impl PrivacyBannerState {
 pub struct BannerSlotParams<'a> {
     /// Reserved slot height (0 = no slot this frame).
     pub(crate) height: u16,
-    pub(crate) announcements: &'a [wimo ai_wimo_announcements::RemoteAnnouncement],
+    pub(crate) announcements: &'a [wimoai_wimo_announcements::RemoteAnnouncement],
     pub(crate) hidden_ids: &'a std::collections::BTreeSet<String>,
     /// Privacy upsell banner owns the slot (highest banner precedence
     /// below critical announcements; gated by the caller).
@@ -647,7 +647,7 @@ pub(crate) struct PendingForkBanner {
 /// A finish held until its spawn arrives. Output is stripped at insert.
 #[derive(Debug, Clone)]
 pub(crate) struct DeferredSubagentFinish {
-    pub notification: wimo ai_wimo_shell::extensions::notification::SessionNotification,
+    pub notification: wimoai_wimo_shell::extensions::notification::SessionNotification,
     pub inserted_at: std::time::Instant,
 }
 /// In-flight reconnect session reload.
@@ -684,7 +684,7 @@ pub(crate) struct SessionReload {
     /// Live dedup highwaters (ACP and wimo AI) as of window open (same restore
     /// rationale).
     last_applied_event_seq: Option<u64>,
-    last_applied_wimo ai_event_seq: Option<u64>,
+    last_applied_wimoai_event_seq: Option<u64>,
     /// Whether any `isReplay` update applied during this window. False means
     /// the agent resolved the cursor and sent only a live post-cursor tail.
     saw_replay: bool,
@@ -755,7 +755,7 @@ impl CtaPhase {
 pub struct PluginCtaState {
     /// Not-installed candidate plugins for CTA matching, from the CTA source
     /// (wimo AI Official, or the configured `plugin_cta_marketplace` override).
-    pub candidates: Vec<wimo ai_hooks_plugins_types::MarketplacePluginEntry>,
+    pub candidates: Vec<wimoai_hooks_plugins_types::MarketplacePluginEntry>,
     /// URL/path of the CTA source the candidates came from: the install
     /// target (the shell resolves marketplace sources by URL/path identity).
     /// `None` means no CTA source (official by default, the
@@ -864,7 +864,7 @@ pub struct AgentView {
     /// `eventId`-bearing update.
     ///
     /// ACP stream only; the wimo AI stream keeps its own highwater
-    /// ([`Self::last_applied_wimo ai_event_seq`]) because the two streams are not
+    /// ([`Self::last_applied_wimoai_event_seq`]) because the two streams are not
     /// delivered in one id order: ACP lines ride the agent's FIFO event
     /// pipeline while wimo AI lines are emitted direct-to-gateway, so a fresh wimo AI
     /// id arriving ahead of queued lower-id ACP chunks must not make the
@@ -875,7 +875,7 @@ pub struct AgentView {
     /// subagent lifecycle events bypass that drop check but still lift this
     /// highwater via `max` so later ordinary updates on the cursor tail stay
     /// deduped.
-    pub last_applied_wimo ai_event_seq: Option<u64>,
+    pub last_applied_wimoai_event_seq: Option<u64>,
     /// Raw `eventId` of the most recent update APPLIED to this root session,
     /// replay or live, on both the ACP and wimo AI paths; dropped updates (dedup,
     /// promptId gate, unexpected replay) don't move it. Sent as `_meta.cursor`
@@ -991,8 +991,8 @@ pub struct AgentView {
     /// Currently hovered modal button key (for highlight).
     pub(crate) modal_hovered_key: Option<char>,
     /// Cached server-reported context state.
-    pub context_state: Option<wimo ai_wimo_shell::session::ContextInfo>,
-    pub status_context: Option<wimo ai_wimo_status_line::StatusLineContext>,
+    pub context_state: Option<wimoai_wimo_shell::session::ContextInfo>,
+    pub status_context: Option<wimoai_wimo_status_line::StatusLineContext>,
     /// Held across a frame that clamps the row away, so a script keeps the size
     /// it last painted at.
     pub last_status_line_size: Option<crate::views::status_line::RowSize>,
@@ -1406,8 +1406,8 @@ pub struct AgentView {
     pub(crate) question_view: Option<QuestionViewState>,
     pub(crate) elicitation_view: Option<ElicitationViewState>,
     pub(crate) pending_elicitation: Option<(
-        wimo ai_wimo_tools::mcp_elicitation::McpElicitExtRequest,
-        tokio::sync::oneshot::Sender<wimo ai_acp_lib::AcpResult<agent_client_protocol::ExtResponse>>,
+        wimoai_wimo_tools::mcp_elicitation::McpElicitExtRequest,
+        tokio::sync::oneshot::Sender<wimoai_acp_lib::AcpResult<agent_client_protocol::ExtResponse>>,
     )>,
     pub(crate) elicit_hits: Vec<(
         crate::views::elicitation_view::ElicitHit,
@@ -1446,7 +1446,7 @@ pub struct AgentView {
     /// session does not exist yet, so the mode can't be sent immediately).
     /// Consumed in the `SessionCreated` / `WorktreeSessionCreated` handlers,
     /// mirroring `AgentSession.deferred_model_switch`.
-    pub(crate) deferred_session_mode: Option<wimo ai_wimo_tools::types::SessionMode>,
+    pub(crate) deferred_session_mode: Option<wimoai_wimo_tools::types::SessionMode>,
     pub(crate) pending_extensions_fetch: bool,
     /// Whether this view was last rendered inside the dashboard's session
     /// overlay. Updated every frame by `draw`; read when building the
@@ -1892,11 +1892,11 @@ fn translate_local_submit(
             let option = qv.questions.first().and_then(|q| q.options.get(*idx));
             let id = option.and_then(|o| o.id.as_deref());
             if id == Some(super::dispatch::CREDIT_LIMIT_RETRY_OPTION_ID) {
-                wimo ai_wimo_telemetry::session_ctx::log_event(
-                    wimo ai_wimo_telemetry::events::CreditLimitUpsellClicked {
+                wimoai_wimo_telemetry::session_ctx::log_event(
+                    wimoai_wimo_telemetry::events::CreditLimitUpsellClicked {
                         surface:
-                            wimo ai_wimo_telemetry::events::CreditLimitUpsellSurface::QuestionModal,
-                        choice: wimo ai_wimo_telemetry::events::CreditLimitChoice::RetryLastPrompt,
+                            wimoai_wimo_telemetry::events::CreditLimitUpsellSurface::QuestionModal,
+                        choice: wimoai_wimo_telemetry::events::CreditLimitChoice::RetryLastPrompt,
                     },
                 );
                 return InputOutcome::Action(Action::RetryCreditLimitPrompt);
@@ -1905,10 +1905,10 @@ fn translate_local_submit(
             let choice = choices
                 .get(*idx)
                 .copied()
-                .unwrap_or(wimo ai_wimo_telemetry::events::CreditLimitChoice::PayAsYouGo);
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::CreditLimitUpsellClicked {
-                    surface: wimo ai_wimo_telemetry::events::CreditLimitUpsellSurface::QuestionModal,
+                .unwrap_or(wimoai_wimo_telemetry::events::CreditLimitChoice::PayAsYouGo);
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::CreditLimitUpsellClicked {
+                    surface: wimoai_wimo_telemetry::events::CreditLimitUpsellSurface::QuestionModal,
                     choice,
                 },
             );
@@ -1921,8 +1921,8 @@ fn translate_local_submit(
                 .and_then(|q| q.options.get(*idx))
                 .and_then(|o| o.id.as_deref())
                 .unwrap_or(super::dispatch::UPSELL_URL_UPGRADE);
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::SuperwimoUpsellClicked {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::SuperwimoUpsellClicked {
                     source,
                     auth_method: None,
                 },
@@ -2200,7 +2200,7 @@ fn is_hash_key(key: &KeyEvent) -> bool {
 /// Check `[features] remember_mode` in config.toml. Defaults to `false`.
 fn remember_mode_enabled() -> bool {
     let path =
-        wimo ai_wimo_tools::util::wimo_home::wimo_home().join(wimo ai_wimo_config::USER_CONFIG_FILENAME);
+        wimoai_wimo_tools::util::wimo_home::wimo_home().join(wimoai_wimo_config::USER_CONFIG_FILENAME);
     let Some(doc) = crate::config_toml_edit::read_config_document_for_edit(&path) else {
         return false;
     };
@@ -2314,7 +2314,7 @@ fn resolve_action(action_id: Option<ActionId>) -> Option<InputOutcome> {
 fn question_visible_h(
     scroll_region: Option<(u16, u16)>,
     prompt_height: u16,
-    question: &wimo ai_wimo_tools::implementations::wimo::ask_user_question::Question,
+    question: &wimoai_wimo_tools::implementations::wimo::ask_user_question::Question,
     content_w: usize,
     preview: Option<&str>,
     fullscreen: bool,
@@ -2403,7 +2403,7 @@ pub(crate) mod test_fixtures {
             ),
             vec![],
         );
-        let perm = wimo ai_acp_lib::AcpArgs {
+        let perm = wimoai_acp_lib::AcpArgs {
             request,
             response_tx,
         };

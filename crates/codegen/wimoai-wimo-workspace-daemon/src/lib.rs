@@ -1,6 +1,6 @@
 //! How the workspace-server daemonizes itself and supervises its preview-proxy child.
 //!
-//! Two halves of one concern, both used only by the `wimo ai-workspace-server` binary and never by the `wimo ai-wimo-workspace` library:
+//! Two halves of one concern, both used only by the `wimoai-workspace-server` binary and never by the `wimoai-wimo-workspace` library:
 //!
 //! - [`daemonize`] takes the process into its own session (double-fork and `setsid()` on Unix, stdio redirection on Windows).
 //!   It also holds the single-instance pidfile lock.
@@ -8,7 +8,7 @@
 //!
 //! Both open every daemon-owned file the same way (`O_NOFOLLOW` and mode `0600`), which is why they live together here.
 //!
-//! This crate deliberately does not depend on `wimo ai-wimo-workspace`.
+//! This crate deliberately does not depend on `wimoai-wimo-workspace`.
 //! The activity scraper reports through the [`preview_supervisor::PreviewActivitySink`] trait.
 //! The binary implements that trait over the workspace `ActivityTracker`.
 

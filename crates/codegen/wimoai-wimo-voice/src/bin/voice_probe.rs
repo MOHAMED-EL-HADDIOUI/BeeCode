@@ -1,20 +1,20 @@
 //! Standalone voice debug harness: capture the mic, stream to STT, print the transcript.
 //!
 //! ```bash
-//! export wimo ai_API_KEY=...
-//! cargo run -p wimo ai-wimo-voice --bin voice-probe -- --seconds 5
+//! export wimoai_API_KEY=...
+//! cargo run -p wimoai-wimo-voice --bin voice-probe -- --seconds 5
 //! ```
 
 use std::path::PathBuf;
 
-use wimo ai_wimo_voice::{
+use wimoai_wimo_voice::{
     StaticVoiceAuth, VoiceConfig, VoiceProbeOptions, format_probe_report, run_streaming_probe,
 };
 
 fn main() -> anyhow::Result<()> {
     // Hidden mic-capture helper intercept (macOS): the capture backend re-execs the current binary, here voice-probe itself
     // It runs before any runtime/TLS init so the capture child stays minimal
-    if let Some(code) = wimo ai_wimo_voice::maybe_run_capture_subprocess() {
+    if let Some(code) = wimoai_wimo_voice::maybe_run_capture_subprocess() {
         std::process::exit(code);
     }
     tokio::runtime::Builder::new_multi_thread()
@@ -24,22 +24,22 @@ fn main() -> anyhow::Result<()> {
 }
 
 async fn run() -> anyhow::Result<()> {
-    wimo ai_wimo_extra_ca::ensure_default_crypto_provider();
+    wimoai_wimo_extra_ca::ensure_default_crypto_provider();
 
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info,wimo ai_wimo_voice=debug".into()),
+                .unwrap_or_else(|_| "info,wimoai_wimo_voice=debug".into()),
         )
         .init();
 
     let args = parse_args(std::env::args().skip(1).collect());
 
-    let auth = std::env::var("wimo ai_API_KEY")
+    let auth = std::env::var("wimoai_API_KEY")
         .ok()
         .and_then(StaticVoiceAuth::shared)
         .ok_or_else(|| {
-            anyhow::anyhow!("set wimo ai_API_KEY (standalone probe has no login session)")
+            anyhow::anyhow!("set wimoai_API_KEY (standalone probe has no login session)")
         })?;
 
     let config = load_config(args.config_path.as_deref());
@@ -54,7 +54,7 @@ async fn run() -> anyhow::Result<()> {
         #[cfg(feature = "audio")]
         {
             let (bytes, chunks) =
-                wimo ai_wimo_voice::run_mic_only_probe(config.sample_rate, args.seconds)?;
+                wimoai_wimo_voice::run_mic_only_probe(config.sample_rate, args.seconds)?;
             println!("Mic-only OK: {bytes} bytes in {chunks} chunks");
             if bytes == 0 {
                 println!("WARNING: no audio — grant mic access to the terminal");
@@ -125,14 +125,14 @@ fn parse_args(argv: Vec<String>) -> Args {
 
 fn load_config(path: Option<&std::path::Path>) -> VoiceConfig {
     // The probe has no shell config stack; env is the resolved fallback (config table still beats it, matching the pager's precedence)
-    let env_base = std::env::var("wimo_wimo ai_API_BASE_URL").ok();
+    let env_base = std::env::var("wimo_wimoai_API_BASE_URL").ok();
     if let Some(path) = path
         && let Ok(raw) = std::fs::read_to_string(path)
         && let Ok(table) = toml::from_str::<toml::Table>(&raw)
     {
         return VoiceConfig::from_config_table(&table, env_base.as_deref());
     }
-    if let Some(home) = wimo ai_dirs::resolve_wimo_home()
+    if let Some(home) = wimoai_dirs::resolve_wimo_home()
         && let Ok(raw) = std::fs::read_to_string(home.join("config.toml"))
         && let Ok(table) = toml::from_str::<toml::Table>(&raw)
     {
@@ -149,8 +149,8 @@ Usage:
   voice-probe [--seconds 5] [--mic-only]
 
 Environment:
-  wimo ai_API_KEY     required
-  RUST_LOG        optional (default info,wimo ai_wimo_voice=debug)
+  wimoai_API_KEY     required
+  RUST_LOG        optional (default info,wimoai_wimo_voice=debug)
 
 Reads [voice] from ~/.wimo/config.toml unless --config PATH is set.
 "#

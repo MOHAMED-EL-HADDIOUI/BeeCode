@@ -24,12 +24,12 @@ pub use types::*;
 pub const OFFICIAL_SOURCE_NAME: &str = "wimo AI Official";
 
 /// Git URL of the official wimo AI marketplace source, auto-registered on first run.
-pub const OFFICIAL_SOURCE_GIT_URL: &str = "https://github.com/wimo ai-org/plugin-marketplace.git";
+pub const OFFICIAL_SOURCE_GIT_URL: &str = "https://github.com/wimoai-org/plugin-marketplace.git";
 
 /// Whether `url` is the official wimo AI marketplace source.
 /// Case, a `www.` prefix, a trailing `/` or `.git`, and HTTPS/SSH forms are normalized before comparing.
 pub fn is_official_source_url(url: &str) -> bool {
-    canonical_github_owner_repo(url).as_deref() == Some("wimo ai-org/plugin-marketplace")
+    canonical_github_owner_repo(url).as_deref() == Some("wimoai-org/plugin-marketplace")
 }
 
 /// Normalized lowercase `owner/repo` from a GitHub URL (HTTPS/http/ssh/scp, `www.`, trailing `.git`/`/`), or `None` if not a GitHub URL.
@@ -63,23 +63,23 @@ mod tests {
     fn is_official_matches_canonical_https() {
         assert!(is_official_source_url(OFFICIAL_SOURCE_GIT_URL));
         assert!(is_official_source_url(
-            "https://github.com/wimo ai-org/plugin-marketplace"
+            "https://github.com/wimoai-org/plugin-marketplace"
         ));
     }
 
     #[test]
     fn is_official_matches_ssh_form() {
         assert!(is_official_source_url(
-            "git@github.com:wimo ai-org/plugin-marketplace.git"
+            "git@github.com:wimoai-org/plugin-marketplace.git"
         ));
         assert!(is_official_source_url(
-            "git@github.com:wimo ai-org/plugin-marketplace"
+            "git@github.com:wimoai-org/plugin-marketplace"
         ));
         assert!(is_official_source_url(
-            "ssh://git@github.com/wimo ai-org/plugin-marketplace.git"
+            "ssh://git@github.com/wimoai-org/plugin-marketplace.git"
         ));
         assert!(is_official_source_url(
-            "ssh://git@github.com/wimo ai-org/plugin-marketplace"
+            "ssh://git@github.com/wimoai-org/plugin-marketplace"
         ));
     }
 
@@ -89,7 +89,7 @@ mod tests {
             "https://github.com/anthropics/claude-plugins-official.git"
         ));
         assert!(!is_official_source_url(
-            "https://github.com/wimo ai-org/some-other-repo.git"
+            "https://github.com/wimoai-org/some-other-repo.git"
         ));
         assert!(!is_official_source_url(""));
     }
@@ -97,22 +97,22 @@ mod tests {
     #[test]
     fn is_official_matches_noncanonical_forms() {
         assert!(is_official_source_url(
-            "https://GitHub.com/wimo ai-org/Plugin-Marketplace"
+            "https://GitHub.com/wimoai-org/Plugin-Marketplace"
         ));
         assert!(is_official_source_url(
-            "https://github.com/wimo ai-org/plugin-marketplace/"
+            "https://github.com/wimoai-org/plugin-marketplace/"
         ));
         assert!(is_official_source_url(
-            "https://github.com/wimo ai-org/plugin-marketplace.git/"
+            "https://github.com/wimoai-org/plugin-marketplace.git/"
         ));
         assert!(is_official_source_url(
-            "http://github.com/wimo ai-org/plugin-marketplace"
+            "http://github.com/wimoai-org/plugin-marketplace"
         ));
         assert!(is_official_source_url(
-            "https://www.github.com/wimo ai-org/plugin-marketplace.git"
+            "https://www.github.com/wimoai-org/plugin-marketplace.git"
         ));
         assert!(is_official_source_url(
-            "git@github.com:wimo ai-org/plugin-marketplace.git"
+            "git@github.com:wimoai-org/plugin-marketplace.git"
         ));
     }
 }

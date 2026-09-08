@@ -1,6 +1,6 @@
 use super::*;
-use wimo ai_wimo_tools::computer::types::TaskKind;
-use wimo ai_wimo_tools::types::TaskSnapshot;
+use wimoai_wimo_tools::computer::types::TaskKind;
+use wimoai_wimo_tools::types::TaskSnapshot;
 
 /// Drive the admission handshake inline so receiver assertions observe the bridge's command order without racing a detached proxy task.
 async fn handle_notification_with_admission(
@@ -44,7 +44,7 @@ fn make_test_config() -> (
 #[allow(clippy::type_complexity)]
 fn make_test_config_full() -> (
     NotificationBridgeConfig,
-    mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
     mpsc::UnboundedReceiver<PersistenceMsg>,
     mpsc::UnboundedReceiver<SessionCommand>,
 ) {
@@ -54,12 +54,12 @@ fn make_test_config_full() -> (
 #[allow(clippy::type_complexity)]
 fn make_test_config_full_raw() -> (
     NotificationBridgeConfig,
-    mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
     mpsc::UnboundedReceiver<PersistenceMsg>,
     mpsc::UnboundedReceiver<SessionCommand>,
 ) {
     let (gateway_tx, gateway_rx) = mpsc::unbounded_channel();
-    let gateway = wimo ai_acp_lib::AcpAgentGatewaySender::new(gateway_tx);
+    let gateway = wimoai_acp_lib::AcpAgentGatewaySender::new(gateway_tx);
     let (session_cmd_tx, session_cmd_rx) = mpsc::unbounded_channel();
     let (persistence_tx, persistence_rx) = mpsc::unbounded_channel();
     let config = NotificationBridgeConfig {
@@ -83,9 +83,9 @@ fn make_test_config_full_raw() -> (
         )),
         session_cmd_tx,
         task_completion_reservations:
-            wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default(),
+            wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations::default(),
         task_wake_suppressed:
-            wimo ai_wimo_tools::reminders::task_completion::TaskWakeSuppressed::default(),
+            wimoai_wimo_tools::reminders::task_completion::TaskWakeSuppressed::default(),
         synthetic_trace_tx: Arc::new(std::sync::Mutex::new(None)),
         task_output_tool_name: Arc::new(std::sync::OnceLock::new()),
         read_tool_name: Arc::new(std::sync::OnceLock::new()),
@@ -222,7 +222,7 @@ async fn bash_task_completed_suppresses_auto_wake_during_goal_loop() {
     // The pager UI notification must still be emitted.
     let mut found_ext = false;
     while let Ok(msg) = gateway_rx.try_recv() {
-        if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
+        if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
             && args.request.method.as_ref() == "x.ai/task_completed"
         {
             found_ext = true;
@@ -270,10 +270,10 @@ async fn bash_task_completed_auto_wakes_and_reserves_without_goal_loop() {
 }
 
 fn task_completed_will_wake(
-    gateway_rx: &mut mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_rx: &mut mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
 ) -> Option<bool> {
     while let Ok(msg) = gateway_rx.try_recv() {
-        if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
+        if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
             && args.request.method.as_ref() == "x.ai/task_completed"
         {
             let v: serde_json::Value = serde_json::from_str(args.request.params.get()).ok()?;
@@ -362,7 +362,7 @@ async fn task_completed_notification_stamps_will_wake() {
     ));
     let mut persisted = false;
     while let Ok(message) = persistence_rx.try_recv() {
-        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(update)) = message
+        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(update)) = message
             && matches!(
                 &update.update,
                 crate::extensions::notification::SessionUpdate::TaskCompleted { .. }
@@ -407,7 +407,7 @@ async fn stalled_admission_is_bounded_and_task_completion_still_emits() {
     );
     let mut persisted_completion = false;
     while let Ok(message) = persistence_rx.try_recv() {
-        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(update)) = message
+        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(update)) = message
             && matches!(
                 &update.update,
                 crate::extensions::notification::SessionUpdate::TaskCompleted { .. }
@@ -642,7 +642,7 @@ async fn declined_quiet_monitor_wake_queues_canonical_deferred_completion() {
     assert!(cmd_rx.try_recv().is_err());
     let mut persisted_completion = false;
     while let Ok(message) = persistence_rx.try_recv() {
-        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(update)) = message
+        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(update)) = message
             && matches!(
                 &update.update,
                 crate::extensions::notification::SessionUpdate::TaskCompleted { .. }
@@ -669,7 +669,7 @@ async fn monitor_event_skipped_after_task_completed_auto_wake() {
 
     handle_notification(
         &config,
-        ToolNotification::MonitorEvent(wimo ai_wimo_tools::notification::types::MonitorEvent {
+        ToolNotification::MonitorEvent(wimoai_wimo_tools::notification::types::MonitorEvent {
             task_id: "mon-done".into(),
             description: "short exit".into(),
             event_text: "<monitor-event>done</monitor-event>".into(),
@@ -805,7 +805,7 @@ async fn scheduled_task_created_is_persisted() {
     // Otherwise it stays invisible until the loop next fires
     let (config, _gateway_rx, mut persistence_rx, _cmd_rx) = make_test_config_full();
     let notification = ToolNotification::ScheduledTaskCreated(
-        wimo ai_wimo_tools::notification::types::ScheduledTaskCreated {
+        wimoai_wimo_tools::notification::types::ScheduledTaskCreated {
             task_id: "loop-1".into(),
             prompt: "check deploy".into(),
             human_schedule: "every 5 minutes".into(),
@@ -822,7 +822,7 @@ async fn scheduled_task_created_is_persisted() {
         .try_recv()
         .expect("scheduled_task_created must be persisted");
     match msg {
-        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(notif)) => {
+        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(notif)) => {
             assert!(matches!(
                 &notif.update,
                 crate::extensions::notification::SessionUpdate::ScheduledTaskCreated { .. }
@@ -840,7 +840,7 @@ async fn scheduled_task_created_is_persisted() {
                 "persisted wimo AI bridge lines must carry an eventId"
             );
         }
-        _ => panic!("expected PersistenceMsg::Update(wimo ai(ScheduledTaskCreated))"),
+        _ => panic!("expected PersistenceMsg::Update(wimoai(ScheduledTaskCreated))"),
     }
 }
 
@@ -850,8 +850,8 @@ async fn scheduled_task_created_is_persisted() {
 async fn bash_output_chunk_forwards_live_without_persisting() {
     let (config, mut gateway_rx, mut persistence_rx, _cmd_rx) = make_test_config_full();
     let notification =
-        ToolNotification::BashOutputChunk(wimo ai_wimo_tools::notification::types::BashOutputChunk {
-            base: wimo ai_wimo_tools::notification::types::BashNotificationBase {
+        ToolNotification::BashOutputChunk(wimoai_wimo_tools::notification::types::BashOutputChunk {
+            base: wimoai_wimo_tools::notification::types::BashNotificationBase {
                 tool_call_id: "call-1".into(),
                 command: "echo hi".into(),
                 output: b"hi\n".to_vec(),
@@ -870,7 +870,7 @@ async fn bash_output_chunk_forwards_live_without_persisting() {
     );
 
     match gateway_rx.try_recv().expect("chunk must be broadcast") {
-        wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+        wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
             assert!(
                 args.request
                     .meta
@@ -895,8 +895,8 @@ async fn live_in_progress_event_id_is_not_a_prepare_replay_cursor() {
     let (config, mut gateway_rx, mut persistence_rx, _cmd_rx) = make_test_config_full();
     handle_notification(
         &config,
-        ToolNotification::BashOutputChunk(wimo ai_wimo_tools::notification::types::BashOutputChunk {
-            base: wimo ai_wimo_tools::notification::types::BashNotificationBase {
+        ToolNotification::BashOutputChunk(wimoai_wimo_tools::notification::types::BashOutputChunk {
+            base: wimoai_wimo_tools::notification::types::BashNotificationBase {
                 tool_call_id: "call-cursor".into(),
                 command: "echo hi".into(),
                 output: b"hi\n".to_vec(),
@@ -910,7 +910,7 @@ async fn live_in_progress_event_id_is_not_a_prepare_replay_cursor() {
     .await;
     assert!(persistence_rx.try_recv().is_err());
     let live_id = match gateway_rx.try_recv().unwrap() {
-        wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => args
+        wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => args
             .request
             .meta
             .as_ref()
@@ -937,8 +937,8 @@ async fn bash_output_chunk_skips_persist_when_gateway_closed() {
         .gateway_enabled
         .store(false, std::sync::atomic::Ordering::Relaxed);
     let notification =
-        ToolNotification::BashOutputChunk(wimo ai_wimo_tools::notification::types::BashOutputChunk {
-            base: wimo ai_wimo_tools::notification::types::BashNotificationBase {
+        ToolNotification::BashOutputChunk(wimoai_wimo_tools::notification::types::BashOutputChunk {
+            base: wimoai_wimo_tools::notification::types::BashNotificationBase {
                 tool_call_id: "call-closed".into(),
                 command: "echo hi".into(),
                 output: b"hi\n".to_vec(),
@@ -963,9 +963,9 @@ async fn bash_output_chunk_skips_persist_when_gateway_closed() {
 async fn scheduled_task_removed_is_persisted() {
     // The deletion must also persist so replay nets out a removed loop instead of resurrecting it from a persisted `created` line
     let (config, _gateway_rx, mut persistence_rx, _cmd_rx) = make_test_config_full();
-    let removed = wimo ai_wimo_tools::notification::ScheduledTaskRemoved::new(
+    let removed = wimoai_wimo_tools::notification::ScheduledTaskRemoved::new(
         "loop-1".into(),
-        wimo ai_wimo_tools::notification::ScheduledTaskRemovedReason::Expired,
+        wimoai_wimo_tools::notification::ScheduledTaskRemovedReason::Expired,
         "generation-a".into(),
         2,
     );
@@ -978,39 +978,39 @@ async fn scheduled_task_removed_is_persisted() {
         .try_recv()
         .expect("scheduled_task_removed must be persisted");
     match msg {
-        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(notif)) => {
+        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(notif)) => {
             assert!(matches!(
                 &notif.update,
                 crate::extensions::notification::SessionUpdate::ScheduledTaskDeleted {
-                    reason: wimo ai_wimo_tools::notification::ScheduledTaskRemovedReason::Expired,
+                    reason: wimoai_wimo_tools::notification::ScheduledTaskRemovedReason::Expired,
                     ..
                 }
             ));
             assert!(
-                wimo ai_persisted_event_id(&notif).is_some(),
+                wimoai_persisted_event_id(&notif).is_some(),
                 "the persisted deletion line must be stamped"
             );
             let meta = notif.meta.as_ref().expect("scheduler metadata");
             assert_eq!(meta["x.ai/schedulerGeneration"], "generation-a");
             assert_eq!(meta["x.ai/schedulerRevision"], 2);
         }
-        _ => panic!("expected PersistenceMsg::Update(wimo ai(ScheduledTaskDeleted))"),
+        _ => panic!("expected PersistenceMsg::Update(wimoai(ScheduledTaskDeleted))"),
     }
 }
 
 #[tokio::test]
 async fn acknowledged_scheduler_removal_appends_before_ack_and_broadcast() {
     let (config, mut gateway_rx, mut persistence_rx, _cmd_rx) = make_test_config_full();
-    let removed = wimo ai_wimo_tools::notification::ScheduledTaskRemoved::new(
+    let removed = wimoai_wimo_tools::notification::ScheduledTaskRemoved::new(
         "loop-ack".into(),
-        wimo ai_wimo_tools::notification::ScheduledTaskRemovedReason::Deleted,
+        wimoai_wimo_tools::notification::ScheduledTaskRemovedReason::Deleted,
         "generation-a".into(),
         17,
     );
     let (acknowledgement, mut receipt) = tokio::sync::oneshot::channel::<Result<(), String>>();
     let persistence = async {
         let PersistenceMsg::AppendUpdateDurablyAndAck {
-            update: crate::session::storage::SessionUpdate::wimo ai(notification),
+            update: crate::session::storage::SessionUpdate::wimoai(notification),
             respond_to,
         } = persistence_rx.recv().await.expect("durable append")
         else {
@@ -1033,11 +1033,11 @@ async fn acknowledged_scheduler_removal_appends_before_ack_and_broadcast() {
     result.unwrap();
     assert!(matches!(
         gateway_rx.try_recv(),
-        Ok(wimo ai_acp_lib::AcpClientMessage::ExtNotification(_))
+        Ok(wimoai_acp_lib::AcpClientMessage::ExtNotification(_))
     ));
 }
 
-fn wimo ai_persisted_event_id(
+fn wimoai_persisted_event_id(
     notif: &crate::extensions::notification::SessionNotification,
 ) -> Option<String> {
     notif
@@ -1054,8 +1054,8 @@ fn wimo ai_persisted_event_id(
 async fn task_backgrounded_persisted_line_is_stamped() {
     let (config, _gateway_rx, mut persistence_rx, _cmd_rx) = make_test_config_full();
     let notification = ToolNotification::BashExecutionBackgrounded(
-        wimo ai_wimo_tools::notification::types::BashExecutionBackgrounded {
-            base: wimo ai_wimo_tools::notification::types::BashNotificationBase {
+        wimoai_wimo_tools::notification::types::BashExecutionBackgrounded {
+            base: wimoai_wimo_tools::notification::types::BashNotificationBase {
                 tool_call_id: "call-bg".into(),
                 command: "sleep 100".into(),
                 output: Vec::new(),
@@ -1074,10 +1074,10 @@ async fn task_backgrounded_persisted_line_is_stamped() {
     handle_notification(&config, notification, &mut offsets).await;
 
     match persistence_rx.try_recv().expect("must persist") {
-        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(notif)) => {
-            assert!(wimo ai_persisted_event_id(&notif).is_some());
+        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(notif)) => {
+            assert!(wimoai_persisted_event_id(&notif).is_some());
         }
-        _ => panic!("expected wimo ai update"),
+        _ => panic!("expected wimoai update"),
     }
 }
 
@@ -1096,10 +1096,10 @@ async fn task_completed_persisted_line_is_stamped() {
     .await;
 
     match persistence_rx.try_recv().expect("must persist") {
-        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(notif)) => {
-            assert!(wimo ai_persisted_event_id(&notif).is_some());
+        PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(notif)) => {
+            assert!(wimoai_persisted_event_id(&notif).is_some());
         }
-        _ => panic!("expected wimo ai update"),
+        _ => panic!("expected wimoai update"),
     }
 }
 
@@ -1107,7 +1107,7 @@ async fn task_completed_persisted_line_is_stamped() {
 async fn current_mode_update_persisted_line_is_stamped() {
     let (config, _gateway_rx, mut persistence_rx, _cmd_rx) = make_test_config_full();
 
-    emit_current_mode_update(&config, wimo ai_wimo_tools::types::SessionMode::Plan).await;
+    emit_current_mode_update(&config, wimoai_wimo_tools::types::SessionMode::Plan).await;
 
     match persistence_rx.try_recv().expect("must persist") {
         PersistenceMsg::Update(crate::session::storage::SessionUpdate::Acp(notif)) => {
@@ -1151,7 +1151,7 @@ async fn scheduled_task_fired_is_not_persisted() {
     // Loops are restored from create/delete, so the fire stays gateway-only (the pager self-heals the entry on a live fire if needed)
     let (config, mut gateway_rx, mut persistence_rx, _cmd_rx) = make_test_config_full();
     let notification = ToolNotification::ScheduledTaskFired(
-        wimo ai_wimo_tools::notification::types::ScheduledTaskFired {
+        wimoai_wimo_tools::notification::types::ScheduledTaskFired {
             task_id: "loop-1".into(),
             prompt: "check deploy".into(),
             human_schedule: "every 5 minutes".into(),
@@ -1172,7 +1172,7 @@ async fn scheduled_task_fired_is_not_persisted() {
     let fired = gateway_rx
         .try_recv()
         .expect("scheduled fire must be broadcast");
-    let wimo ai_acp_lib::AcpClientMessage::ExtNotification(fired) = fired else {
+    let wimoai_acp_lib::AcpClientMessage::ExtNotification(fired) = fired else {
         panic!("expected scheduler fire notification");
     };
     let value: serde_json::Value = serde_json::from_str(fired.request.params.get()).unwrap();
@@ -1181,7 +1181,7 @@ async fn scheduled_task_fired_is_not_persisted() {
 }
 
 fn make_monitor_event_notification(task_id: &str, owner: Option<&str>) -> ToolNotification {
-    ToolNotification::MonitorEvent(wimo ai_wimo_tools::notification::types::MonitorEvent {
+    ToolNotification::MonitorEvent(wimoai_wimo_tools::notification::types::MonitorEvent {
         task_id: task_id.into(),
         description: "errors in deploy.log".into(),
         event_text: format!("<monitor-event task_id=\"{task_id}\">boom</monitor-event>"),
@@ -1206,7 +1206,7 @@ async fn cross_session_monitor_event_is_dropped() {
         "cross-session monitor event must not be injected into this session"
     );
     while let Ok(msg) = gateway_rx.try_recv() {
-        if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg {
+        if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg {
             assert_ne!(
                 args.request.method.as_ref(),
                 "x.ai/monitor_event",
@@ -1288,7 +1288,7 @@ async fn block_waited_task_skips_auto_wake_prompt() {
     // The x.ai/task_completed ExtNotification for UI updates must still be sent.
     let mut found_ext = false;
     while let Ok(msg) = gateway_rx.try_recv() {
-        if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
+        if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
             && args.request.method.as_ref() == "x.ai/task_completed"
         {
             found_ext = true;
@@ -1544,7 +1544,7 @@ async fn plan_mode_exited_emits_current_mode_update_default() {
     *config.turn_prompt_mode.lock() = crate::session::plan_mode::PromptMode::Plan;
 
     let notification =
-        ToolNotification::PlanModeExited(wimo ai_wimo_tools::notification::types::PlanModeExited {
+        ToolNotification::PlanModeExited(wimoai_wimo_tools::notification::types::PlanModeExited {
             tool_call_id: "tc-exit-1".into(),
             plan_content: Some("- step 1".into()),
             plan_file_path: "/tmp/test-session/plan.md".into(),
@@ -1556,7 +1556,7 @@ async fn plan_mode_exited_emits_current_mode_update_default() {
     // Gateway: one CurrentModeUpdate("default").
     let mut gateway_modes = Vec::new();
     while let Ok(msg) = gateway_rx.try_recv() {
-        if let wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) = msg
+        if let wimoai_acp_lib::AcpClientMessage::SessionNotification(args) = msg
             && let Some(id) = extract_current_mode_id(&args.request)
         {
             gateway_modes.push(id.to_string());
@@ -1603,7 +1603,7 @@ async fn plan_mode_exited_does_not_arm_exit_reminder_by_default() {
     }
 
     let notification =
-        ToolNotification::PlanModeExited(wimo ai_wimo_tools::notification::types::PlanModeExited {
+        ToolNotification::PlanModeExited(wimoai_wimo_tools::notification::types::PlanModeExited {
             tool_call_id: "tc-exit-wimo".into(),
             plan_content: Some("- step 1".into()),
             plan_file_path: "/tmp/test-session/plan.md".into(),
@@ -1646,7 +1646,7 @@ async fn plan_mode_exited_arms_exit_reminder_when_gated() {
     }
 
     let notification =
-        ToolNotification::PlanModeExited(wimo ai_wimo_tools::notification::types::PlanModeExited {
+        ToolNotification::PlanModeExited(wimoai_wimo_tools::notification::types::PlanModeExited {
             tool_call_id: "tc-exit-gated".into(),
             plan_content: Some("- step 1".into()),
             plan_file_path: "/tmp/test-session/plan.md".into(),
@@ -1680,7 +1680,7 @@ async fn plan_mode_entered_emits_current_mode_update_plan() {
     let (config, mut gateway_rx, mut persistence_rx, _cmd_rx) = make_test_config_full();
 
     let notification =
-        ToolNotification::PlanModeEntered(wimo ai_wimo_tools::notification::types::PlanModeEntered {
+        ToolNotification::PlanModeEntered(wimoai_wimo_tools::notification::types::PlanModeEntered {
             tool_call_id: "tc-enter-1".into(),
         });
 
@@ -1689,7 +1689,7 @@ async fn plan_mode_entered_emits_current_mode_update_plan() {
 
     let mut gateway_modes = Vec::new();
     while let Ok(msg) = gateway_rx.try_recv() {
-        if let wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) = msg
+        if let wimoai_acp_lib::AcpClientMessage::SessionNotification(args) = msg
             && let Some(id) = extract_current_mode_id(&args.request)
         {
             gateway_modes.push(id.to_string());
@@ -1854,7 +1854,7 @@ async fn task_completed_notification_is_frame_bounded() {
 
     let mut params = None;
     while let Ok(msg) = gateway_rx.try_recv() {
-        if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
+        if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
             && args.request.method.as_ref() == "x.ai/task_completed"
         {
             params = Some(args.request.params.get().to_string());
@@ -1870,7 +1870,7 @@ async fn task_completed_notification_is_frame_bounded() {
 
     let mut persisted = None;
     while let Ok(msg) = persistence_rx.try_recv() {
-        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(saved)) = msg {
+        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(saved)) = msg {
             persisted = Some(serde_json::to_value(&*saved).unwrap());
         }
     }

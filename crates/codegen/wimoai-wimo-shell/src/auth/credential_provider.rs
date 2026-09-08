@@ -3,22 +3,22 @@ use crate::auth::backend::{ActiveAuthBackend, AuthBackend};
 use crate::util::wimo_auth_credentials::wimoAuthCredentials;
 use reqwest::RequestBuilder;
 use std::sync::Arc;
-use wimo ai_wimo_auth::{
+use wimoai_wimo_auth::{
     AuthCredentialProvider, CredentialSnapshot, HttpAuth, StaticAuthCredentialProvider,
 };
 /// `api_key.id` for the active credential: hash the stable API key, never the OIDC bearer (which rotates).
 /// `None` for non-API-key auth.
 fn api_key_id_for(auth: Option<&crate::auth::wimoAuth>) -> Option<String> {
     auth.filter(|a| matches!(a.auth_mode, crate::auth::AuthMode::ApiKey))
-        .map(|a| wimo ai_wimo_telemetry::config::deployment_id_from_key(&a.key))
+        .map(|a| wimoai_wimo_telemetry::config::deployment_id_from_key(&a.key))
 }
-/// Sampler [`BearerResolver`](wimo ai_wimo_sampler::BearerResolver) over a live [`AuthManager`].
+/// Sampler [`BearerResolver`](wimoai_wimo_sampler::BearerResolver) over a live [`AuthManager`].
 /// Wire-valid only: it never stamps a hard-expired access token (the client auth contract).
 /// Shared by the session sampler and subagent configs so the contract can't drift between them.
 pub(crate) struct WireValidBearerResolver(pub(crate) Arc<AuthManager>);
 impl WireValidBearerResolver {
     /// The one constructor both the session sampler and subagent configs use, so the wire-valid contract cannot drift between the call sites.
-    pub(crate) fn shared(auth_manager: Arc<AuthManager>) -> wimo ai_wimo_sampler::SharedBearerResolver {
+    pub(crate) fn shared(auth_manager: Arc<AuthManager>) -> wimoai_wimo_sampler::SharedBearerResolver {
         Arc::new(Self(auth_manager))
     }
 }
@@ -27,9 +27,9 @@ impl std::fmt::Debug for WireValidBearerResolver {
         f.debug_struct("WireValidBearerResolver").finish()
     }
 }
-impl wimo ai_wimo_sampler::BearerResolver for WireValidBearerResolver {
+impl wimoai_wimo_sampler::BearerResolver for WireValidBearerResolver {
     fn current_bearer(&self) -> Option<String> {
-        if !ActiveAuthBackend::default().is_wimo ai_authority() {
+        if !ActiveAuthBackend::default().is_wimoai_authority() {
             return None;
         }
         self.0.current_wire_valid().map(|a| a.key)
@@ -67,7 +67,7 @@ impl HttpAuth for ShellAuthCredentialProvider {
     fn apply(&self, builder: RequestBuilder, base_url: &str) -> RequestBuilder {
         let mut creds = self.static_credentials.clone();
         if creds.deployment_key.is_none()
-            && ActiveAuthBackend::default().is_wimo ai_authority()
+            && ActiveAuthBackend::default().is_wimoai_authority()
             && let Some(auth) = self.auth_manager.current_wire_valid()
         {
             creds.user_token = Some(auth.key);
@@ -91,7 +91,7 @@ impl AuthCredentialProvider for ShellAuthCredentialProvider {
         let organization_id = identity.as_ref().and_then(|a| a.organization_id.clone());
         let api_key_id = api_key_id_for(identity.as_ref());
         let token = ActiveAuthBackend::default()
-            .is_wimo ai_authority()
+            .is_wimoai_authority()
             .then(|| self.auth_manager.current_wire_valid().map(|a| a.key))
             .flatten();
         CredentialSnapshot {
@@ -119,15 +119,15 @@ impl AuthCredentialProvider for ShellAuthCredentialProvider {
 pub(crate) fn embedding_session_credentials(
     embed_base_url: &str,
     auth_manager: Option<&Arc<AuthManager>>,
-    api_key_provider: Option<wimo ai_wimo_tools::types::SharedApiKeyProvider>,
-) -> wimo ai_wimo_memory::EndpointScopedCredentials {
+    api_key_provider: Option<wimoai_wimo_tools::types::SharedApiKeyProvider>,
+) -> wimoai_wimo_memory::EndpointScopedCredentials {
     let auth_credentials = auth_manager.map(|am| {
         Arc::new(ShellAuthCredentialProvider::new(am.clone(), None, None))
             as Arc<dyn AuthCredentialProvider>
     });
-    wimo ai_wimo_memory::EndpointScopedCredentials::for_endpoint(
+    wimoai_wimo_memory::EndpointScopedCredentials::for_endpoint(
         embed_base_url,
-        crate::util::is_wimo ai_api_bearer_url,
+        crate::util::is_wimoai_api_bearer_url,
         auth_credentials,
         api_key_provider,
     )
@@ -136,17 +136,17 @@ pub(crate) fn embedding_session_credentials(
 ///
 /// Every call site must pass the correct `client_identifier` so the API proxy and the telemetry and metrics backends can attribute requests:
 ///
-/// - `"wimo-shell"`: classic wimo CLI / TUI (wimo ai-wimo-shell)
-/// - `"wimo-pager"`: new wimo Pager / TUI (wimo ai-wimo-pager)
+/// - `"wimo-shell"`: classic wimo CLI / TUI (wimoai-wimo-shell)
+/// - `"wimo-pager"`: new wimo Pager / TUI (wimoai-wimo-pager)
 /// - `"wimo-desktop"`: wimo Desktop app
 /// - `"wimo-extension"`: VS Code / browser extension
 ///
 /// The factory forwards both `x-wimo-client-version` (e.g. "0.1.210-alpha.5 (279ffacddb)") and `x-wimo-client-identifier`.
-/// They reach the underlying `wimo ai-file-utils::StorageClient` via `.with_client_identity(...)` and attribute requests in error logs.
+/// They reach the underlying `wimoai-file-utils::StorageClient` via `.with_client_identity(...)` and attribute requests in error logs.
 ///
 /// - When `auth_manager` is `Some`, uses the live `ShellAuthCredentialProvider` (OIDC refresh, proactive refresh, 401 recovery).
 /// - When `auth_manager` is `None`, falls back to a static token:
-///   - `user_token` (normal OIDC users via com scope) sends Bearer plus `X-wimo ai-Token-Auth`
+///   - `user_token` (normal OIDC users via com scope) sends Bearer plus `X-wimoai-Token-Auth`
 ///   - `deployment_key` (enterprise) sends a bare Bearer
 ///   - the optional extra access key is added only for matching hosts when the non-production feature is enabled.
 ///
@@ -159,7 +159,7 @@ pub fn build_storage_client_for_proxy(
     user_token: Option<String>,
     session_id: Option<String>,
     client_identifier: &str,
-) -> wimo ai_file_utils::storage_client::StorageClient {
+) -> wimoai_file_utils::storage_client::StorageClient {
     let http_client = crate::http::shared_upload_client();
     if let Some(am) = auth_manager {
         let provider: Arc<dyn AuthCredentialProvider> = Arc::new(ShellAuthCredentialProvider::new(
@@ -167,14 +167,14 @@ pub fn build_storage_client_for_proxy(
             deployment_key,
             alpha_test_key,
         ));
-        let bridge: Arc<dyn wimo ai_file_utils::storage_client::Auth401AttributionCallback> =
+        let bridge: Arc<dyn wimoai_file_utils::storage_client::Auth401AttributionCallback> =
             Arc::new(StorageClientAttributionBridge::new(am, session_id));
-        wimo ai_file_utils::storage_client::StorageClient::with_provider(
+        wimoai_file_utils::storage_client::StorageClient::with_provider(
             proxy_base_url,
             http_client,
             provider,
         )
-        .with_client_identity(wimo ai_wimo_version::VERSION, client_identifier)
+        .with_client_identity(wimoai_wimo_version::VERSION, client_identifier)
         .with_client_mode(crate::http::process_client_mode())
         .with_attribution(bridge)
     } else {
@@ -188,16 +188,16 @@ pub fn build_storage_client_for_proxy(
         let provider: Arc<dyn AuthCredentialProvider> = Arc::new(
             StaticAuthCredentialProvider::new(Box::new(creds), wire_bearer),
         );
-        wimo ai_file_utils::storage_client::StorageClient::with_provider(
+        wimoai_file_utils::storage_client::StorageClient::with_provider(
             proxy_base_url,
             http_client,
             provider,
         )
-        .with_client_identity(wimo ai_wimo_version::VERSION, client_identifier)
+        .with_client_identity(wimoai_wimo_version::VERSION, client_identifier)
         .with_client_mode(crate::http::process_client_mode())
     }
 }
-/// Lets `StorageClient` (in wimo ai-file-utils) emit shell's 401-attribution event without wimo ai-file-utils depending on shell.
+/// Lets `StorageClient` (in wimoai-file-utils) emit shell's 401-attribution event without wimoai-file-utils depending on shell.
 /// Holds the live `AuthManager` so attribution events carry the correct user_id.
 pub(crate) struct StorageClientAttributionBridge {
     auth_manager: Arc<AuthManager>,
@@ -217,7 +217,7 @@ impl StorageClientAttributionBridge {
         }
     }
 }
-impl wimo ai_file_utils::storage_client::Auth401AttributionCallback for StorageClientAttributionBridge {
+impl wimoai_file_utils::storage_client::Auth401AttributionCallback for StorageClientAttributionBridge {
     fn record_401(&self, operation: &str, sent_bearer_prefix: Option<&str>) {
         crate::auth::attribution::record_consumer_401(
             self.auth_manager.as_ref(),
@@ -292,7 +292,7 @@ impl std::fmt::Debug for OtelAuthCredentialProvider {
 }
 impl HttpAuth for OtelAuthCredentialProvider {
     fn apply(&self, builder: RequestBuilder, base_url: &str) -> RequestBuilder {
-        if self.deployment_key.load().is_none() && !ActiveAuthBackend::default().is_wimo ai_authority()
+        if self.deployment_key.load().is_none() && !ActiveAuthBackend::default().is_wimoai_authority()
         {
             return builder;
         }
@@ -338,7 +338,7 @@ impl OtelAuthCredentialProvider {
 #[async_trait::async_trait]
 impl AuthCredentialProvider for OtelAuthCredentialProvider {
     fn snapshot(&self) -> CredentialSnapshot {
-        if self.deployment_key.load().is_none() && !ActiveAuthBackend::default().is_wimo ai_authority()
+        if self.deployment_key.load().is_none() && !ActiveAuthBackend::default().is_wimoai_authority()
         {
             return CredentialSnapshot::default();
         }
@@ -348,7 +348,7 @@ impl AuthCredentialProvider for OtelAuthCredentialProvider {
         if self.deployment_key.load().is_some() {
             return true;
         }
-        if !ActiveAuthBackend::default().is_wimo ai_authority() {
+        if !ActiveAuthBackend::default().is_wimoai_authority() {
             return false;
         }
         self.load_state().0.has_usable_token()
@@ -404,9 +404,9 @@ pub(crate) fn oauth_gateway_email_from_auth(auth: &crate::auth::wimoAuth) -> Opt
 pub(crate) fn sync_external_otel_identity() {
     if let Some(provider) = OTEL_PROVIDER.get() {
         let snapshot = provider.snapshot();
-        let mut attrs = wimo ai_wimo_telemetry::external::IdentityAttrs::from_snapshot(&snapshot);
+        let mut attrs = wimoai_wimo_telemetry::external::IdentityAttrs::from_snapshot(&snapshot);
         attrs.email = provider.oauth_gateway_email();
-        wimo ai_wimo_telemetry::external::set_identity(attrs);
+        wimoai_wimo_telemetry::external::set_identity(attrs);
     }
 }
 /// No-ops if the OTel layer was never initialized.
@@ -417,14 +417,14 @@ pub(crate) fn wire_otel_deployment_key(key: String) {
         sync_external_otel_identity();
     }
 }
-/// Bootstrap helper: build the full [`OtelLayerConfig`] that both `wimo ai-wimo-pager` and `wimo ai-wimo-tui` need at tracing init time.
+/// Bootstrap helper: build the full [`OtelLayerConfig`] that both `wimoai-wimo-pager` and `wimoai-wimo-tui` need at tracing init time.
 ///
 /// The credential provider starts in bootstrap mode (disk-read-only).
 /// Call [`wire_otel_auth_manager`] after agent init to upgrade to the live `AuthManager` with active refresh.
-pub fn build_default_otel_layer_config() -> wimo ai_wimo_telemetry::otel_layer::OtelLayerConfig {
+pub fn build_default_otel_layer_config() -> wimoai_wimo_telemetry::otel_layer::OtelLayerConfig {
     let endpoints = crate::agent::config::EndpointsConfig::default();
     let wimo_com_config = crate::auth::wimoComConfig::default();
-    let exporter = wimo ai_wimo_telemetry::otel_layer::OtelExporterConfig {
+    let exporter = wimoai_wimo_telemetry::otel_layer::OtelExporterConfig {
         traces_url: endpoints.resolve_otlp_traces_endpoint(),
         extra_headers: endpoints.resolve_otlp_headers(),
         export_interval: endpoints.resolve_otlp_export_interval(),
@@ -437,7 +437,7 @@ pub fn build_default_otel_layer_config() -> wimo ai_wimo_telemetry::otel_layer::
     let bootstrap = Arc::new(AuthManager::new(&wimo_home, wimo_com_config));
     let provider = Arc::new(OtelAuthCredentialProvider::new(bootstrap));
     let _ = OTEL_PROVIDER.set(provider.clone());
-    wimo ai_wimo_telemetry::otel_layer::OtelLayerConfig {
+    wimoai_wimo_telemetry::otel_layer::OtelLayerConfig {
         credentials: provider as Arc<dyn AuthCredentialProvider>,
         token_header_value,
         alpha_test_key: None,
@@ -452,7 +452,7 @@ mod tests {
     use crate::auth::manager::AuthManager;
     use chrono::{Duration as ChronoDuration, Utc};
     use std::sync::Mutex;
-    use wimo ai_wimo_auth::AuthCredentialProvider;
+    use wimoai_wimo_auth::AuthCredentialProvider;
     /// Serializes tests that pin `wimo_AUTH_EARLY_INVALIDATION_SECS`, since env vars are process-global and parallel tests would race.
     static EARLY_INVALIDATION_LOCK: Mutex<()> = Mutex::new(());
     /// RAII guard: pins `wimo_AUTH_EARLY_INVALIDATION_SECS` to the production default (300s) while held, restoring the previous value on drop.
@@ -502,13 +502,13 @@ mod tests {
         }
         Arc::new(mgr)
     }
-    /// The shell half of the subagent-401 contract; the sampler half is pinned in wimo ai-wimo-sampler's resolver tests.
+    /// The shell half of the subagent-401 contract; the sampler half is pinned in wimoai-wimo-sampler's resolver tests.
     /// Over a real `AuthManager` the resolver returns `None` when hard-expired (fail-closed).
     /// It returns the token inside the early-invalidation buffer (still proxy-accepted), and the fresh token after a rotation.
     /// The same resolver serves all three states without a client rebuild.
     #[test]
     fn wire_valid_resolver_tracks_manager_across_expiry_and_refresh() {
-        use wimo ai_wimo_sampler::BearerResolver;
+        use wimoai_wimo_sampler::BearerResolver;
         let _guard = EarlyInvalidationGuard::pin_to_default();
         let dir = tempfile::tempdir().unwrap();
         let mgr = make_manager(
@@ -645,9 +645,9 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let mgr = make_manager(
             &dir,
-            Some(make_auth("wimo ai-session-token", ChronoDuration::hours(1))),
+            Some(make_auth("wimoai-session-token", ChronoDuration::hours(1))),
         );
-        let api_key_provider: wimo ai_wimo_tools::types::SharedApiKeyProvider =
+        let api_key_provider: wimoai_wimo_tools::types::SharedApiKeyProvider =
             Arc::new(crate::auth::manager::SharedAuthKeyProvider(mgr.clone()));
         for denied in ["https://byok.attacker.example/v1", "http://api.x.ai/v1"] {
             let resolved =
@@ -676,18 +676,18 @@ mod tests {
     }
     #[test]
     fn snapshot_populates_tenant_id_per_auth_mode() {
-        use wimo ai_wimo_telemetry::config::deployment_id_from_key;
+        use wimoai_wimo_telemetry::config::deployment_id_from_key;
         let _guard = EarlyInvalidationGuard::pin_to_default();
         let dir = tempfile::tempdir().unwrap();
         let dep = ShellAuthCredentialProvider::new(
             make_manager(&dir, None),
-            Some("wimo ai-token-EX".into()),
+            Some("wimoai-token-EX".into()),
             None,
         )
         .snapshot();
         assert_eq!(
             dep.deployment_id.as_deref(),
-            Some(deployment_id_from_key("wimo ai-token-EX").as_str())
+            Some(deployment_id_from_key("wimoai-token-EX").as_str())
         );
         assert!(dep.api_key_id.is_none());
         let api_auth = wimoAuth {

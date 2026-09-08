@@ -49,9 +49,9 @@ impl HostOs {
 }
 
 /// WSL detection.
-/// The implementation lives in `wimo ai-tty-utils` (the shared low-level crate) so crates that must not depend on this UI crate can reuse it.
+/// The implementation lives in `wimoai-tty-utils` (the shared low-level crate) so crates that must not depend on this UI crate can reuse it.
 /// The re-export keeps existing `host::is_wsl()` callers unchanged.
-pub use wimo ai_tty_utils::is_wsl;
+pub use wimoai_tty_utils::is_wsl;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, strum::Display)]
 #[strum(serialize_all = "snake_case")]
@@ -126,7 +126,7 @@ mod unicode_env_tests {
     }
 }
 
-// All remaining tests here are Linux-only DisplayServer tests; WSL detection tests live with the implementation in `wimo ai-tty-utils`
+// All remaining tests here are Linux-only DisplayServer tests; WSL detection tests live with the implementation in `wimoai-tty-utils`
 #[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::*;

@@ -10,7 +10,7 @@
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use wimo ai_wimo_tools::types::memory_backend::{MemoryBackend, MemorySearchResult};
+use wimoai_wimo_tools::types::memory_backend::{MemoryBackend, MemorySearchResult};
 
 use super::embedding::EmbeddingProvider as _;
 use super::observation::{
@@ -51,8 +51,8 @@ fn select_search_error_class(
 #[derive(Clone, Default)]
 pub struct EndpointScopedCredentials {
     endpoint: Option<reqwest::Url>,
-    auth_credentials: Option<Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider>>,
-    api_key_provider: Option<wimo ai_wimo_tools::types::SharedApiKeyProvider>,
+    auth_credentials: Option<Arc<dyn wimoai_wimo_auth::AuthCredentialProvider>>,
+    api_key_provider: Option<wimoai_wimo_tools::types::SharedApiKeyProvider>,
 }
 
 // Manual Debug that redacts the credential handles; only their presence shows.
@@ -79,8 +79,8 @@ impl EndpointScopedCredentials {
     pub fn for_endpoint(
         endpoint: &str,
         is_trusted: impl FnOnce(&str) -> bool,
-        auth_credentials: Option<Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider>>,
-        api_key_provider: Option<wimo ai_wimo_tools::types::SharedApiKeyProvider>,
+        auth_credentials: Option<Arc<dyn wimoai_wimo_auth::AuthCredentialProvider>>,
+        api_key_provider: Option<wimoai_wimo_tools::types::SharedApiKeyProvider>,
     ) -> Self {
         if is_trusted(endpoint)
             && let Ok(url) = reqwest::Url::parse(endpoint)
@@ -101,11 +101,11 @@ impl EndpointScopedCredentials {
         Self::none()
     }
 
-    fn auth_credentials(&self) -> Option<&Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider>> {
+    fn auth_credentials(&self) -> Option<&Arc<dyn wimoai_wimo_auth::AuthCredentialProvider>> {
         self.auth_credentials.as_ref()
     }
 
-    fn api_key_provider(&self) -> Option<&wimo ai_wimo_tools::types::SharedApiKeyProvider> {
+    fn api_key_provider(&self) -> Option<&wimoai_wimo_tools::types::SharedApiKeyProvider> {
         self.api_key_provider.as_ref()
     }
 
@@ -125,14 +125,14 @@ impl EndpointScopedCredentials {
 pub struct MemoryBackendParams {
     pub session_id: String,
     /// Embedding provider config; `None` forces FTS-only fallback everywhere.
-    pub embed_config: Option<wimo ai_wimo_config_types::MemoryEmbeddingConfig>,
+    pub embed_config: Option<wimoai_wimo_config_types::MemoryEmbeddingConfig>,
     /// Base URL for embedding API calls (CLI proxy).
     /// It must match the endpoint `embedding_credentials` was scoped to; a mismatch fails closed.
     pub embed_base_url: String,
     /// API key for embedding API calls.
     pub embed_api_key: Option<String>,
     /// Hybrid search scoring config (weights, thresholds, decay, MMR).
-    pub search_config: wimo ai_wimo_config_types::MemorySearchConfig,
+    pub search_config: wimoai_wimo_config_types::MemorySearchConfig,
     /// File watcher for sync-on-search; `None` disables external-edit detection.
     pub watcher: Option<Arc<MemoryFileWatcher>>,
     /// Seconds before a stale reindex claim is forcibly released.
@@ -156,7 +156,7 @@ impl MemoryBackendParams {
 }
 
 async fn build_embedding_provider(
-    config: Option<&wimo ai_wimo_config_types::MemoryEmbeddingConfig>,
+    config: Option<&wimoai_wimo_config_types::MemoryEmbeddingConfig>,
     credentials: &EndpointScopedCredentials,
     static_api_key: Option<&str>,
     base_url: &str,
@@ -203,13 +203,13 @@ pub struct MemoryBackendImpl {
     db_path: PathBuf,
     storage: MemoryStorage,
     /// Embedding config; `None` disables vector search (FTS-only fallback).
-    embed_config: Option<wimo ai_wimo_config_types::MemoryEmbeddingConfig>,
+    embed_config: Option<wimoai_wimo_config_types::MemoryEmbeddingConfig>,
     /// API base URL for embedding requests (cli-chat-proxy).
     embed_base_url: String,
     /// API key for embedding requests.
     embed_api_key: Option<String>,
     /// Search scoring config (weights, min_score, max_results).
-    search_config: wimo ai_wimo_config_types::MemorySearchConfig,
+    search_config: wimoai_wimo_config_types::MemorySearchConfig,
     /// File watcher for detecting external memory edits.
     watcher: Option<Arc<MemoryFileWatcher>>,
     /// Stale claim threshold for reindex coordination.
@@ -232,7 +232,7 @@ impl MemoryBackendImpl {
             embed_config: None,
             embed_base_url: String::new(),
             embed_api_key: None,
-            search_config: wimo ai_wimo_config_types::MemorySearchConfig::default(),
+            search_config: wimoai_wimo_config_types::MemorySearchConfig::default(),
             watcher: None,
             stale_claim_secs: 60,
             session_id: String::new(),
@@ -252,7 +252,7 @@ impl MemoryBackendImpl {
     /// Without this, `search()` falls back to FTS-only.
     pub fn with_embedding(
         mut self,
-        config: wimo ai_wimo_config_types::MemoryEmbeddingConfig,
+        config: wimoai_wimo_config_types::MemoryEmbeddingConfig,
         base_url: String,
         api_key: Option<String>,
     ) -> Self {
@@ -263,7 +263,7 @@ impl MemoryBackendImpl {
     }
 
     /// Override the search scoring config (weights, limits, etc.).
-    pub fn with_search_config(mut self, config: wimo ai_wimo_config_types::MemorySearchConfig) -> Self {
+    pub fn with_search_config(mut self, config: wimoai_wimo_config_types::MemorySearchConfig) -> Self {
         self.search_config = config;
         self
     }
@@ -278,7 +278,7 @@ impl MemoryBackendImpl {
     /// Open a read-only connection for simple queries (`total_chunks`, `get`).
     fn open_readonly(&self) -> Result<rusqlite::Connection, rusqlite::Error> {
         // Journal-mode-aware open (busy_timeout included): never mmap a legacy WAL -shm on network mounts (SIGBUS); see JournalMode::open_readonly
-        wimo ai_sqlite_journal::JournalMode::for_db_path(&self.db_path).open_readonly(&self.db_path)
+        wimoai_sqlite_journal::JournalMode::for_db_path(&self.db_path).open_readonly(&self.db_path)
     }
 
     async fn make_embedding_provider(&self) -> Option<super::embedding::ApiEmbeddingProvider> {
@@ -316,7 +316,7 @@ impl MemoryBackendImpl {
 
 #[cfg(test)]
 impl MemoryBackendImpl {
-    pub fn search_config_for_test(&self) -> &wimo ai_wimo_config_types::MemorySearchConfig {
+    pub fn search_config_for_test(&self) -> &wimoai_wimo_config_types::MemorySearchConfig {
         &self.search_config
     }
 }
@@ -340,7 +340,7 @@ impl MemoryBackend for MemoryBackendImpl {
         let mut index = match super::index::MemoryIndex::open_or_create(
             &self.db_path,
             self.storage.clone(),
-            wimo ai_wimo_config_types::MemoryIndexConfig::default(),
+            wimoai_wimo_config_types::MemoryIndexConfig::default(),
             embed_dims,
         ) {
             Ok(index) => index,
@@ -589,7 +589,7 @@ mod factory_tests {
     use crate::index::{MemoryIndex, init_sqlite_vec};
     use crate::storage::MemoryStorage;
     use tempfile::TempDir;
-    use wimo ai_wimo_config_types::{MemoryEmbeddingConfig, MemorySearchConfig};
+    use wimoai_wimo_config_types::{MemoryEmbeddingConfig, MemorySearchConfig};
 
     fn make_storage(tmp: &TempDir) -> MemoryStorage {
         let global = tmp.path().join("memory");
@@ -621,7 +621,7 @@ mod factory_tests {
         let mut idx = MemoryIndex::open_or_create(
             &db_path,
             storage.clone(),
-            wimo ai_wimo_config_types::MemoryIndexConfig::default(),
+            wimoai_wimo_config_types::MemoryIndexConfig::default(),
             4,
         )
         .unwrap();
@@ -659,7 +659,7 @@ mod factory_tests {
         let mut idx = MemoryIndex::open_or_create(
             &db_path,
             storage.clone(),
-            wimo ai_wimo_config_types::MemoryIndexConfig::default(),
+            wimoai_wimo_config_types::MemoryIndexConfig::default(),
             4,
         )
         .unwrap();
@@ -694,11 +694,11 @@ mod factory_tests {
 
         let custom_search = MemorySearchConfig {
             max_results: 7,
-            mmr: wimo ai_wimo_config_types::MmrConfig {
+            mmr: wimoai_wimo_config_types::MmrConfig {
                 enabled: true,
                 lambda: 0.42,
             },
-            temporal_decay: wimo ai_wimo_config_types::TemporalDecayConfig {
+            temporal_decay: wimoai_wimo_config_types::TemporalDecayConfig {
                 enabled: true,
                 half_life_days: 14.0,
             },
@@ -856,7 +856,7 @@ mod factory_tests {
         let mut idx = MemoryIndex::open_or_create(
             &db_path,
             storage.clone(),
-            wimo ai_wimo_config_types::MemoryIndexConfig::default(),
+            wimoai_wimo_config_types::MemoryIndexConfig::default(),
             4,
         )
         .unwrap();
@@ -889,7 +889,7 @@ mod factory_tests {
         let mut idx = MemoryIndex::open_or_create(
             &db_path,
             storage.clone(),
-            wimo ai_wimo_config_types::MemoryIndexConfig::default(),
+            wimoai_wimo_config_types::MemoryIndexConfig::default(),
             4,
         )
         .unwrap();
@@ -929,7 +929,7 @@ mod factory_tests {
         let mut idx = MemoryIndex::open_or_create(
             &db_path,
             storage.clone(),
-            wimo ai_wimo_config_types::MemoryIndexConfig::default(),
+            wimoai_wimo_config_types::MemoryIndexConfig::default(),
             4,
         )
         .unwrap();
@@ -1050,7 +1050,7 @@ mod factory_tests {
             let mut idx = MemoryIndex::open_or_create(
                 &db_path,
                 storage.clone(),
-                wimo ai_wimo_config_types::MemoryIndexConfig::default(),
+                wimoai_wimo_config_types::MemoryIndexConfig::default(),
                 4,
             )
             .unwrap();
@@ -1120,7 +1120,7 @@ mod factory_tests {
     #[tokio::test]
     async fn make_embedding_provider_uses_async_api_key_resolution() {
         use std::sync::atomic::{AtomicU32, Ordering};
-        use wimo ai_wimo_tools::types::ApiKeyProvider;
+        use wimoai_wimo_tools::types::ApiKeyProvider;
 
         struct AsyncProbe {
             sync_calls: Arc<AtomicU32>,
@@ -1145,7 +1145,7 @@ mod factory_tests {
 
         let sync_calls = Arc::new(AtomicU32::new(0));
         let async_calls = Arc::new(AtomicU32::new(0));
-        let probe: wimo ai_wimo_tools::types::SharedApiKeyProvider = Arc::new(AsyncProbe {
+        let probe: wimoai_wimo_tools::types::SharedApiKeyProvider = Arc::new(AsyncProbe {
             sync_calls: sync_calls.clone(),
             async_calls: async_calls.clone(),
         });
@@ -1195,11 +1195,11 @@ mod tests {
     use super::*;
     use crate::index::{MemoryIndex, init_sqlite_vec};
     use tempfile::TempDir;
-    use wimo ai_wimo_config_types::MemoryIndexConfig;
+    use wimoai_wimo_config_types::MemoryIndexConfig;
 
     /// An api-key provider that fails the test if its key is ever resolved, proving a scoped-away credential is never consulted.
     struct PanicKey;
-    impl wimo ai_wimo_tools::types::ApiKeyProvider for PanicKey {
+    impl wimoai_wimo_tools::types::ApiKeyProvider for PanicKey {
         fn current_api_key(&self) -> Option<String> {
             panic!("scoped-away credential must not be resolved");
         }
@@ -1254,7 +1254,7 @@ mod tests {
     /// The session provider would panic if resolved.
     #[tokio::test]
     async fn test_build_drops_credentials_when_request_url_differs() {
-        let session: wimo ai_wimo_tools::types::SharedApiKeyProvider = Arc::new(PanicKey);
+        let session: wimoai_wimo_tools::types::SharedApiKeyProvider = Arc::new(PanicKey);
 
         let scoped = EndpointScopedCredentials::for_endpoint(
             "https://api.x.ai/v1",
@@ -1264,7 +1264,7 @@ mod tests {
         );
         assert!(!scoped.is_empty(), "trusted endpoint keeps the credential");
 
-        let config = wimo ai_wimo_config_types::MemoryEmbeddingConfig {
+        let config = wimoai_wimo_config_types::MemoryEmbeddingConfig {
             model: Some("test-embedding-model".to_string()),
             ..Default::default()
         };
@@ -1286,7 +1286,7 @@ mod tests {
     #[tokio::test]
     async fn test_trusted_endpoint_prefers_session_credential() {
         struct StubAuth;
-        impl wimo ai_wimo_auth::HttpAuth for StubAuth {
+        impl wimoai_wimo_auth::HttpAuth for StubAuth {
             fn apply(
                 &self,
                 builder: reqwest::RequestBuilder,
@@ -1296,17 +1296,17 @@ mod tests {
             }
         }
         #[async_trait::async_trait]
-        impl wimo ai_wimo_auth::AuthCredentialProvider for StubAuth {
-            fn snapshot(&self) -> wimo ai_wimo_auth::CredentialSnapshot {
-                wimo ai_wimo_auth::CredentialSnapshot::default()
+        impl wimoai_wimo_auth::AuthCredentialProvider for StubAuth {
+            fn snapshot(&self) -> wimoai_wimo_auth::CredentialSnapshot {
+                wimoai_wimo_auth::CredentialSnapshot::default()
             }
             async fn refresh_after_unauthorized(&self) -> bool {
                 false
             }
         }
 
-        let auth: Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider> = Arc::new(StubAuth);
-        let api_key: wimo ai_wimo_tools::types::SharedApiKeyProvider = Arc::new(PanicKey);
+        let auth: Arc<dyn wimoai_wimo_auth::AuthCredentialProvider> = Arc::new(StubAuth);
+        let api_key: wimoai_wimo_tools::types::SharedApiKeyProvider = Arc::new(PanicKey);
         let scoped = EndpointScopedCredentials::for_endpoint(
             "https://api.x.ai/v1",
             |_| true,
@@ -1315,7 +1315,7 @@ mod tests {
         );
         assert!(!scoped.is_empty(), "trusted endpoint keeps the credential");
 
-        let config = wimo ai_wimo_config_types::MemoryEmbeddingConfig {
+        let config = wimoai_wimo_config_types::MemoryEmbeddingConfig {
             model: Some("test-embedding-model".to_string()),
             ..Default::default()
         };
@@ -1330,12 +1330,12 @@ mod tests {
     #[test]
     fn endpoint_scoped_credentials_trust_gate_and_url_match() {
         struct AnyKey;
-        impl wimo ai_wimo_tools::types::ApiKeyProvider for AnyKey {
+        impl wimoai_wimo_tools::types::ApiKeyProvider for AnyKey {
             fn current_api_key(&self) -> Option<String> {
                 None
             }
         }
-        let key = || Arc::new(AnyKey) as wimo ai_wimo_tools::types::SharedApiKeyProvider;
+        let key = || Arc::new(AnyKey) as wimoai_wimo_tools::types::SharedApiKeyProvider;
 
         let denied = EndpointScopedCredentials::for_endpoint(
             "https://byok.example/v1",
@@ -1517,7 +1517,7 @@ mod index_embedding_tests {
         let mut idx = MemoryIndex::open_or_create(
             &db_path,
             storage,
-            wimo ai_wimo_config_types::MemoryIndexConfig::default(),
+            wimoai_wimo_config_types::MemoryIndexConfig::default(),
             4,
         )
         .unwrap();

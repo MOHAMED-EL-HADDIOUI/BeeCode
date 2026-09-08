@@ -4,11 +4,11 @@ use futures::StreamExt;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use wimo ai_tool_protocol::ToolId;
-use wimo ai_tool_runtime::{
+use wimoai_tool_protocol::ToolId;
+use wimoai_tool_runtime::{
     Tool, ToolCallContext, ToolError, ToolErrorKind, ToolOutput, ToolStreamItem,
 };
-use wimo ai_tool_types::ToolDescription;
+use wimoai_tool_types::ToolDescription;
 
 #[derive(Debug, Deserialize, Serialize, JsonSchema)]
 struct EchoArgs {
@@ -31,7 +31,7 @@ impl Tool for BlockingOk {
         ToolId::new("blocking_ok").unwrap()
     }
 
-    fn description(&self, _ctx: &::wimo ai_tool_runtime::ListToolsContext) -> ToolDescription {
+    fn description(&self, _ctx: &::wimoai_tool_runtime::ListToolsContext) -> ToolDescription {
         ToolDescription::new("blocking_ok", "ok")
     }
 
@@ -54,7 +54,7 @@ impl Tool for BlockingErr {
         ToolId::new("blocking_err").unwrap()
     }
 
-    fn description(&self, _ctx: &::wimo ai_tool_runtime::ListToolsContext) -> ToolDescription {
+    fn description(&self, _ctx: &::wimoai_tool_runtime::ListToolsContext) -> ToolDescription {
         ToolDescription::new("blocking_err", "err")
     }
 
@@ -80,7 +80,7 @@ impl Tool for UnimplementedTool {
         ToolId::new("unimplemented_tool").unwrap()
     }
 
-    fn description(&self, _ctx: &::wimo ai_tool_runtime::ListToolsContext) -> ToolDescription {
+    fn description(&self, _ctx: &::wimoai_tool_runtime::ListToolsContext) -> ToolDescription {
         ToolDescription::new("unimplemented_tool", "neither")
     }
 }
@@ -137,7 +137,7 @@ async fn unimplemented_tool_returns_not_implemented_terminal() {
         .unwrap();
     match item {
         ToolStreamItem::Terminal(Err(ref err))
-            if err.kind == wimo ai_tool_runtime::error::ToolErrorKind::NotImplemented =>
+            if err.kind == wimoai_tool_runtime::error::ToolErrorKind::NotImplemented =>
         {
             assert!(
                 err.detail.contains("run") && err.detail.contains("execute"),

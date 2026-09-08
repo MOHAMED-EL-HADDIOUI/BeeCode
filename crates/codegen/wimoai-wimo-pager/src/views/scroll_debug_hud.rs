@@ -4,7 +4,7 @@
 //! It also shows the active scrollback's viewport facts, inside a REAL session with the REAL event loop.
 //! Recipe: `wimo_FPS=1 wimo_SCROLL_DEBUG=1 wimo --resume <session>`.
 //! Then flip `scroll_mode`, `scroll_lines`, `invert_scroll`, or `scroll_speed` in `/settings` to compare variants live.
-//! This HUD samples once per frame; `wimo_SCROLL_LOG=1` additionally records every event as JSONL (`input::scroll_log` in wimo ai-wimo-pager-render).
+//! This HUD samples once per frame; `wimo_SCROLL_LOG=1` additionally records every event as JSONL (`input::scroll_log` in wimoai-wimo-pager-render).
 //!
 //! Invariant: the HUD must never affect scroll behavior. The snapshot is read-only (`&self`, caller-supplied `now`).
 //! It is taken in the draw path after all input/tick state updates for the frame, and rendering only paints buffer cells.

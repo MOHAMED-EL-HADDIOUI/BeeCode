@@ -1,10 +1,10 @@
-//! Plugin hooks adapter: pre-filter plugin hook JSON, then feed it to `wimo ai-wimo-hooks`' parser and inject plugin env vars.
+//! Plugin hooks adapter: pre-filter plugin hook JSON, then feed it to `wimoai-wimo-hooks`' parser and inject plugin env vars.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-use wimo ai_wimo_hooks::config::{HookSpec, parse_hook_file};
-use wimo ai_wimo_hooks::event::HookEventName;
+use wimoai_wimo_hooks::config::{HookSpec, parse_hook_file};
+use wimoai_wimo_hooks::event::HookEventName;
 
 use super::manifest::substitute_env_vars;
 
@@ -110,10 +110,10 @@ fn process_hooks_content(
         for (k, v) in &plugin_env {
             spec.extra_env.insert(k.clone(), v.clone());
         }
-        spec.layer = wimo ai_wimo_hooks::config::HookProvenance::Plugin;
+        spec.layer = wimoai_wimo_hooks::config::HookProvenance::Plugin;
         spec.name = format!(
             "{}{}/{}",
-            wimo ai_wimo_hooks::config::PLUGIN_HOOK_PREFIX,
+            wimoai_wimo_hooks::config::PLUGIN_HOOK_PREFIX,
             plugin_name,
             spec.name
         );
@@ -121,7 +121,7 @@ fn process_hooks_content(
         if let Some(cmd) = &spec.command {
             let cmd_str = cmd.to_string_lossy();
             let substituted = substitute_env_vars(&cmd_str, plugin_root, plugin_data);
-            let expanded = wimo ai_wimo_hooks::config::expand_env_skipping_runner_vars(&substituted);
+            let expanded = wimoai_wimo_hooks::config::expand_env_skipping_runner_vars(&substituted);
             if expanded != cmd_str {
                 spec.command = Some(PathBuf::from(expanded));
             }

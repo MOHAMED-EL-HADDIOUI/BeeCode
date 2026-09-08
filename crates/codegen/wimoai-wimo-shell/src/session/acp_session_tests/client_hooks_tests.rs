@@ -3,7 +3,7 @@ use super::*;
 
 fn install_client_hook(
     actor: &SessionActor,
-    event: wimo ai_wimo_hooks::event::HookEventName,
+    event: wimoai_wimo_hooks::event::HookEventName,
     callback_ids: &[&str],
 ) {
     let mut client_hooks = crate::extensions::hooks::ClientHooks::new();
@@ -20,21 +20,21 @@ fn install_client_hook(
 
 async fn test_actor() -> (
     SessionActor,
-    tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
     tokio::sync::mpsc::UnboundedReceiver<PersistenceMsg>,
 ) {
     let (gateway_tx, gateway_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+        tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
     let (persistence_tx, persistence_rx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
     let actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
     (actor, gateway_rx, persistence_rx)
 }
 
-fn post_tool_use_envelope(actor: &SessionActor) -> wimo ai_wimo_hooks::event::HookEventEnvelope {
+fn post_tool_use_envelope(actor: &SessionActor) -> wimoai_wimo_hooks::event::HookEventEnvelope {
     actor.make_hook_envelope(
-        wimo ai_wimo_hooks::event::HookEventName::PostToolUse,
+        wimoai_wimo_hooks::event::HookEventName::PostToolUse,
         None,
-        wimo ai_wimo_hooks::event::HookPayload::PostToolUse {
+        wimoai_wimo_hooks::event::HookPayload::PostToolUse {
             tool_name: "run_terminal_command".to_string(),
             tool_use_id: "call_1".to_string(),
             tool_input: serde_json::json!({}),
@@ -49,13 +49,13 @@ fn post_tool_use_envelope(actor: &SessionActor) -> wimo ai_wimo_hooks::event::Ho
 }
 
 fn spawn_run_responder(
-    mut gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    mut gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
     reply: impl Fn(&serde_json::Value) -> serde_json::Value + 'static,
 ) {
     tokio::task::spawn_local(async move {
         while let Some(msg) = gateway_rx.recv().await {
             match msg {
-                wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) => {
+                wimoai_acp_lib::AcpClientMessage::ExtMethod(args) => {
                     let params: serde_json::Value =
                         serde_json::from_str(args.request.params.get()).unwrap();
                     let body: Arc<serde_json::value::RawValue> =
@@ -64,7 +64,7 @@ fn spawn_run_responder(
                             .into();
                     let _ = args.response_tx.send(Ok(acp::ExtResponse::new(body)));
                 }
-                wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                     let _ = args.response_tx.send(Ok(()));
                 }
                 _ => {}
@@ -74,7 +74,7 @@ fn spawn_run_responder(
 }
 
 fn spawn_deny_responder(
-    gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_rx: tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
     reason: &'static str,
 ) {
     spawn_run_responder(
@@ -96,14 +96,14 @@ async fn client_hooks_fire_without_file_registry() {
             );
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 &["cb_0"],
             );
 
             actor.fire_hook(
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 None,
-                wimo ai_wimo_hooks::event::HookPayload::Stop {
+                wimoai_wimo_hooks::event::HookPayload::Stop {
                     reason: "end_turn".to_string(),
                     stop_hook_active: false,
                     last_assistant_message: None,
@@ -115,7 +115,7 @@ async fn client_hooks_fire_without_file_registry() {
             let msg = gateway_rx
                 .try_recv()
                 .expect("client hook must fire with no file registry");
-            let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
+            let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg else {
                 panic!("expected an x.ai/hooks/event ext notification");
             };
             assert_eq!(args.request.method.as_ref(), "x.ai/hooks/event");
@@ -134,18 +134,18 @@ async fn pre_tool_use_resolves_meta_dispatch_tool_name_end_to_end() {
         .run_until(async {
             let (actor, gateway_rx, _persistence_rx) = test_actor().await;
             *actor.agent.borrow_mut() = test_agent_with_tools(vec![
-                wimo ai_wimo_tools::registry::types::ToolConfig::for_tool::<
-                    wimo ai_wimo_tools::implementations::use_tool::UseTool,
+                wimoai_wimo_tools::registry::types::ToolConfig::for_tool::<
+                    wimoai_wimo_tools::implementations::use_tool::UseTool,
                 >(),
             ])
             .await;
 
             let mut client_hooks = crate::extensions::hooks::ClientHooks::new();
             client_hooks.insert(
-                wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PreToolUse,
                 vec![crate::extensions::hooks::ClientHookGroup {
                     matcher: Some(
-                        wimo ai_wimo_hooks::matcher::HookMatcher::new("linear__save_issue").unwrap(),
+                        wimoai_wimo_hooks::matcher::HookMatcher::new("linear__save_issue").unwrap(),
                     ),
                     callback_ids: vec!["cb_0".to_string()],
                     timeout: None,
@@ -189,7 +189,7 @@ async fn subagent_inherits_parent_pre_tool_use_client_hook() {
 
             install_client_hook(
                 &parent,
-                wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PreToolUse,
                 &["cb_0"],
             );
 
@@ -206,7 +206,7 @@ async fn subagent_inherits_parent_pre_tool_use_client_hook() {
             tokio::task::spawn_local(async move {
                 while let Some(msg) = child_gateway_rx.recv().await {
                     match msg {
-                        wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtMethod(args) => {
                             let params: serde_json::Value =
                                 serde_json::from_str(args.request.params.get()).unwrap();
                             *seen.lock().unwrap() =
@@ -219,7 +219,7 @@ async fn subagent_inherits_parent_pre_tool_use_client_hook() {
                                 .into();
                             let _ = args.response_tx.send(Ok(acp::ExtResponse::new(deny)));
                         }
-                        wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                             let _ = args.response_tx.send(Ok(()));
                         }
                         _ => {}
@@ -237,9 +237,9 @@ async fn subagent_inherits_parent_pre_tool_use_client_hook() {
             };
             let tool_call_id = acp::ToolCallId::new("call_1");
             let envelope = subagent.make_hook_envelope(
-                wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PreToolUse,
                 None,
-                wimo ai_wimo_hooks::event::HookPayload::PreToolUse {
+                wimoai_wimo_hooks::event::HookPayload::PreToolUse {
                     tool_name: call.function.name.clone(),
                     tool_use_id: call.id.clone(),
                     tool_input: serde_json::json!({}),
@@ -278,7 +278,7 @@ async fn pre_tool_use_slow_callback_does_not_starve_a_deny() {
 
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PreToolUse,
                 &["slow_cb", "deny_cb"],
             );
 
@@ -286,7 +286,7 @@ async fn pre_tool_use_slow_callback_does_not_starve_a_deny() {
                 let mut held = Vec::new();
                 while let Some(msg) = gateway_rx.recv().await {
                     match msg {
-                        wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtMethod(args) => {
                             let params: serde_json::Value =
                                 serde_json::from_str(args.request.params.get()).unwrap();
                             if params["hookCallbackId"] == "deny_cb" {
@@ -301,7 +301,7 @@ async fn pre_tool_use_slow_callback_does_not_starve_a_deny() {
                                 held.push(args.response_tx);
                             }
                         }
-                        wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                             let _ = args.response_tx.send(Ok(()));
                         }
                         _ => {}
@@ -319,9 +319,9 @@ async fn pre_tool_use_slow_callback_does_not_starve_a_deny() {
             };
             let tool_call_id = acp::ToolCallId::new("call_1");
             let envelope = actor.make_hook_envelope(
-                wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PreToolUse,
                 None,
-                wimo ai_wimo_hooks::event::HookPayload::PreToolUse {
+                wimoai_wimo_hooks::event::HookPayload::PreToolUse {
                     tool_name: call.function.name.clone(),
                     tool_use_id: call.id.clone(),
                     tool_input: serde_json::json!({}),
@@ -352,8 +352,8 @@ async fn post_tool_use_and_failure_never_double_fire() {
 
             let mut client_hooks = crate::extensions::hooks::ClientHooks::new();
             for event in [
-                wimo ai_wimo_hooks::event::HookEventName::PostToolUse,
-                wimo ai_wimo_hooks::event::HookEventName::PostToolUseFailure,
+                wimoai_wimo_hooks::event::HookEventName::PostToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PostToolUseFailure,
             ] {
                 client_hooks.insert(
                     event,
@@ -381,7 +381,7 @@ async fn post_tool_use_and_failure_never_double_fire() {
                 .expect("execute_tool_calls must not error");
             let mut failure_events = Vec::new();
             while let Ok(msg) = gateway_rx.try_recv() {
-                if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
+                if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
                     && args.request.method.as_ref() == "x.ai/hooks/event"
                 {
                     let params: serde_json::Value =
@@ -402,7 +402,7 @@ async fn post_tool_use_and_failure_never_double_fire() {
             tokio::task::spawn_local(async move {
                 while let Some(msg) = gateway_rx.recv().await {
                     match msg {
-                        wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtMethod(args) => {
                             if args.request.method.as_ref() == "x.ai/hooks/run" {
                                 let params: serde_json::Value =
                                     serde_json::from_str(args.request.params.get()).unwrap();
@@ -416,7 +416,7 @@ async fn post_tool_use_and_failure_never_double_fire() {
                                     .into();
                             let _ = args.response_tx.send(Ok(acp::ExtResponse::new(empty)));
                         }
-                        wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtNotification(args) => {
                             if args.request.method.as_ref() == "x.ai/hooks/event" {
                                 let params: serde_json::Value =
                                     serde_json::from_str(args.request.params.get()).unwrap();
@@ -425,7 +425,7 @@ async fn post_tool_use_and_failure_never_double_fire() {
                                 }
                             }
                         }
-                        wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                             let _ = args.response_tx.send(Ok(()));
                         }
                         _ => {}
@@ -461,40 +461,40 @@ async fn post_tool_use_and_failure_never_double_fire() {
 #[derive(Debug)]
 struct McpErrorResultTool;
 
-impl wimo ai_wimo_tools::types::tool_metadata::ToolMetadata for McpErrorResultTool {
-    fn kind(&self) -> wimo ai_wimo_tools::types::tool::ToolKind {
-        wimo ai_wimo_tools::types::tool::ToolKind::Other
+impl wimoai_wimo_tools::types::tool_metadata::ToolMetadata for McpErrorResultTool {
+    fn kind(&self) -> wimoai_wimo_tools::types::tool::ToolKind {
+        wimoai_wimo_tools::types::tool::ToolKind::Other
     }
-    fn tool_namespace(&self) -> wimo ai_wimo_tools::types::tool::ToolNamespace {
-        wimo ai_wimo_tools::types::tool::ToolNamespace::MCP
+    fn tool_namespace(&self) -> wimoai_wimo_tools::types::tool::ToolNamespace {
+        wimoai_wimo_tools::types::tool::ToolNamespace::MCP
     }
     fn description_template(&self) -> &str {
         "stub MCP tool that returns an error result"
     }
 }
 
-impl wimo ai_tool_runtime::Tool for McpErrorResultTool {
+impl wimoai_tool_runtime::Tool for McpErrorResultTool {
     type Args = serde_json::Value;
-    type Output = wimo ai_wimo_tools::types::output::ToolOutput;
+    type Output = wimoai_wimo_tools::types::output::ToolOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("mock_error_tool").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("mock_error_tool").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new("mock_error_tool", "stub MCP error tool")
+        _ctx: &wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new("mock_error_tool", "stub MCP error tool")
     }
 
     async fn run(
         &self,
-        _ctx: wimo ai_tool_runtime::ToolCallContext,
+        _ctx: wimoai_tool_runtime::ToolCallContext,
         _args: serde_json::Value,
-    ) -> Result<Self::Output, wimo ai_tool_runtime::ToolError> {
-        Ok(wimo ai_wimo_tools::types::output::ToolOutput::MCP(
-            wimo ai_wimo_tools::types::output::MCPOutput::errored(
+    ) -> Result<Self::Output, wimoai_tool_runtime::ToolError> {
+        Ok(wimoai_wimo_tools::types::output::ToolOutput::MCP(
+            wimoai_wimo_tools::types::output::MCPOutput::errored(
                 "mock_error_tool".into(),
                 "mock".into(),
                 "upstream exploded".into(),
@@ -522,8 +522,8 @@ async fn mcp_error_result_fires_only_failure_and_delivers_original_output() {
 
             let mut client_hooks = crate::extensions::hooks::ClientHooks::new();
             for event in [
-                wimo ai_wimo_hooks::event::HookEventName::PostToolUse,
-                wimo ai_wimo_hooks::event::HookEventName::PostToolUseFailure,
+                wimoai_wimo_hooks::event::HookEventName::PostToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PostToolUseFailure,
             ] {
                 client_hooks.insert(
                     event,
@@ -541,7 +541,7 @@ async fn mcp_error_result_fires_only_failure_and_delivers_original_output() {
             tokio::task::spawn_local(async move {
                 while let Some(msg) = gateway_rx.recv().await {
                     match msg {
-                        wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtMethod(args) => {
                             if args.request.method.as_ref() == "x.ai/hooks/run" {
                                 let params: serde_json::Value =
                                     serde_json::from_str(args.request.params.get()).unwrap();
@@ -555,7 +555,7 @@ async fn mcp_error_result_fires_only_failure_and_delivers_original_output() {
                                     .into();
                             let _ = args.response_tx.send(Ok(acp::ExtResponse::new(empty)));
                         }
-                        wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtNotification(args) => {
                             if args.request.method.as_ref() == "x.ai/hooks/event" {
                                 let params: serde_json::Value =
                                     serde_json::from_str(args.request.params.get()).unwrap();
@@ -564,7 +564,7 @@ async fn mcp_error_result_fires_only_failure_and_delivers_original_output() {
                                 }
                             }
                         }
-                        wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                             let _ = args.response_tx.send(Ok(()));
                         }
                         _ => {}
@@ -680,7 +680,7 @@ async fn pre_tool_use_deny_feeds_reason_back_and_continues_turn() {
 
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::PreToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PreToolUse,
                 &["cb_0"],
             );
             spawn_deny_responder(gateway_rx, "use read_file instead");
@@ -726,7 +726,7 @@ async fn stop_client_gate_maps_deny_continue_false_and_context() {
 
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 &["cb_block", "cb_stop", "cb_ctx"],
             );
 
@@ -744,9 +744,9 @@ async fn stop_client_gate_maps_deny_continue_false_and_context() {
             });
 
             let envelope = actor.make_hook_envelope(
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 Some("prompt-1".to_string()),
-                wimo ai_wimo_hooks::event::HookPayload::Stop {
+                wimoai_wimo_hooks::event::HookPayload::Stop {
                     reason: "end_turn".to_string(),
                     stop_hook_active: false,
                     last_assistant_message: None,
@@ -783,7 +783,7 @@ async fn post_tool_use_client_gate_contributes_block_and_context() {
 
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::PostToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PostToolUse,
                 &["cb_block", "cb_ctx"],
             );
 
@@ -815,7 +815,7 @@ async fn post_tool_use_client_gate_contributes_block_and_context() {
 
 #[tokio::test(flavor = "current_thread")]
 async fn post_tool_use_client_gate_records_failure_and_orders_contributions() {
-    use wimo ai_wimo_hooks::result::HookRunResult;
+    use wimoai_wimo_hooks::result::HookRunResult;
 
     let local = tokio::task::LocalSet::new();
     local
@@ -824,7 +824,7 @@ async fn post_tool_use_client_gate_records_failure_and_orders_contributions() {
 
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::PostToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PostToolUse,
                 &["cb_ctx_a", "cb_fail", "cb_ctx_b"],
             );
 
@@ -832,7 +832,7 @@ async fn post_tool_use_client_gate_records_failure_and_orders_contributions() {
                 let mut buffered = Vec::new();
                 while let Some(msg) = gateway_rx.recv().await {
                     match msg {
-                        wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtMethod(args) => {
                             buffered.push(args);
                             if buffered.len() == 3 {
                                 while let Some(args) = buffered.pop() {
@@ -857,7 +857,7 @@ async fn post_tool_use_client_gate_records_failure_and_orders_contributions() {
                                 }
                             }
                         }
-                        wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                             let _ = args.response_tx.send(Ok(()));
                         }
                         _ => {}
@@ -906,7 +906,7 @@ async fn post_tool_use_client_gate_records_failure_and_orders_contributions() {
 
 #[tokio::test(flavor = "current_thread")]
 async fn post_tool_use_dispatch_merges_file_then_client_contributions() {
-    use wimo ai_wimo_tools::types::output::{MCPOutput, ToolOutput, ToolRunResult};
+    use wimoai_wimo_tools::types::output::{MCPOutput, ToolOutput, ToolRunResult};
 
     let local = tokio::task::LocalSet::new();
     local
@@ -923,7 +923,7 @@ async fn post_tool_use_dispatch_merges_file_then_client_contributions() {
             );
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::PostToolUse,
+                wimoai_wimo_hooks::event::HookEventName::PostToolUse,
                 &["cb_client"],
             );
 
@@ -1009,7 +1009,7 @@ async fn run_stop_gate_keep_working_and_cap() {
 
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 &["cb_0"],
             );
 
@@ -1044,22 +1044,22 @@ async fn run_stop_gate_keep_working_and_cap() {
 }
 
 pub(super) fn file_registry_with_spec(
-    event: wimo ai_wimo_hooks::event::HookEventName,
+    event: wimoai_wimo_hooks::event::HookEventName,
     script: &str,
-) -> wimo ai_wimo_hooks::discovery::HookRegistry {
+) -> wimoai_wimo_hooks::discovery::HookRegistry {
     file_registry(event, script, true)
 }
 
 fn file_registry(
-    event: wimo ai_wimo_hooks::event::HookEventName,
+    event: wimoai_wimo_hooks::event::HookEventName,
     script: &str,
     enabled: bool,
-) -> wimo ai_wimo_hooks::discovery::HookRegistry {
-    let (mut registry, _) = wimo ai_wimo_hooks::discovery::load_hooks(None, None);
-    registry.append_specs(vec![wimo ai_wimo_hooks::config::HookSpec {
+) -> wimoai_wimo_hooks::discovery::HookRegistry {
+    let (mut registry, _) = wimoai_wimo_hooks::discovery::load_hooks(None, None);
+    registry.append_specs(vec![wimoai_wimo_hooks::config::HookSpec {
         name: "test/stop-hook".into(),
         event,
-        handler_type: wimo ai_wimo_hooks::config::HandlerType::Command,
+        handler_type: wimoai_wimo_hooks::config::HandlerType::Command,
         configured_matcher: None,
         matcher: None,
         enabled,
@@ -1070,7 +1070,7 @@ fn file_registry(
         timeout_ms: 5000,
         source_dir: std::path::PathBuf::from("/tmp"),
         extra_env: std::collections::HashMap::new(),
-        layer: wimo ai_wimo_hooks::config::HookProvenance::File,
+        layer: wimoai_wimo_hooks::config::HookProvenance::File,
     }]);
     registry
 }
@@ -1084,12 +1084,12 @@ async fn file_force_stop_skips_client_gate_but_notifies() {
             actor.hook_resolved_workspace_root = "/tmp".to_string();
 
             *actor.hook_registry.borrow_mut() = Some(std::sync::Arc::new(file_registry_with_spec(
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 r#"echo '{"continue":false,"stopReason":"budget exhausted"}'"#,
             )));
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 &["cb_observer"],
             );
 
@@ -1099,7 +1099,7 @@ async fn file_force_stop_skips_client_gate_but_notifies() {
             tokio::task::spawn_local(async move {
                 while let Some(msg) = gateway_rx.recv().await {
                     match msg {
-                        wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtMethod(args) => {
                             if args.request.method.as_ref() == "x.ai/hooks/run" {
                                 runs.set(runs.get() + 1);
                             }
@@ -1109,12 +1109,12 @@ async fn file_force_stop_skips_client_gate_but_notifies() {
                                     .into();
                             let _ = args.response_tx.send(Ok(acp::ExtResponse::new(empty)));
                         }
-                        wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtNotification(args) => {
                             if args.request.method.as_ref() == "x.ai/hooks/event" {
                                 observes.set(observes.get() + 1);
                             }
                         }
-                        wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                             let _ = args.response_tx.send(Ok(()));
                         }
                         _ => {}
@@ -1153,14 +1153,14 @@ async fn client_force_stop_attribution_is_registration_ordered() {
 
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 &["cb_first", "cb_second"],
             );
 
             tokio::task::spawn_local(async move {
                 while let Some(msg) = gateway_rx.recv().await {
                     match msg {
-                        wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) => {
+                        wimoai_acp_lib::AcpClientMessage::ExtMethod(args) => {
                             let params: serde_json::Value =
                                 serde_json::from_str(args.request.params.get()).unwrap();
                             let is_first = params["hookCallbackId"] == "cb_first";
@@ -1183,7 +1183,7 @@ async fn client_force_stop_attribution_is_registration_ordered() {
                                 let _ = args.response_tx.send(Ok(acp::ExtResponse::new(body)));
                             });
                         }
-                        wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                        wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                             let _ = args.response_tx.send(Ok(()));
                         }
                         _ => {}
@@ -1192,9 +1192,9 @@ async fn client_force_stop_attribution_is_registration_ordered() {
             });
 
             let envelope = actor.make_hook_envelope(
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 Some("prompt-1".to_string()),
-                wimo ai_wimo_hooks::event::HookPayload::Stop {
+                wimoai_wimo_hooks::event::HookPayload::Stop {
                     reason: "end_turn".to_string(),
                     stop_hook_active: false,
                     last_assistant_message: None,
@@ -1229,13 +1229,13 @@ async fn subagent_session_gates_on_subagent_stop() {
             actor.hook_resolved_workspace_root = "/tmp".to_string();
 
             *actor.hook_registry.borrow_mut() = Some(std::sync::Arc::new(file_registry_with_spec(
-                wimo ai_wimo_hooks::event::HookEventName::SubagentStop,
+                wimoai_wimo_hooks::event::HookEventName::SubagentStop,
                 r#"echo '{"decision":"block","reason":"verify the summary"}'"#,
             )));
 
             tokio::task::spawn_local(async move {
                 while let Some(msg) = gateway_rx.recv().await {
-                    if let wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) = msg {
+                    if let wimoai_acp_lib::AcpClientMessage::SessionNotification(args) = msg {
                         let _ = args.response_tx.send(Ok(()));
                     }
                 }
@@ -1270,10 +1270,10 @@ async fn alias_envelope_serializes_canonical_event_name() {
             let (actor, _gateway_rx, _persistence_rx) = test_actor().await;
 
             let envelope = actor.make_hook_envelope(
-                wimo ai_wimo_hooks::event::HookEventName::SubagentEnd,
+                wimoai_wimo_hooks::event::HookEventName::SubagentEnd,
                 None,
-                wimo ai_wimo_hooks::event::HookPayload::SubagentStop {
-                    phase: wimo ai_wimo_hooks::event::SubagentStopPhase::Observe,
+                wimoai_wimo_hooks::event::HookPayload::SubagentStop {
+                    phase: wimoai_wimo_hooks::event::SubagentStopPhase::Observe,
                     subagent_id: "sub-1".into(),
                     subagent_type: "explore".into(),
                     stop_hook_active: None,
@@ -1295,7 +1295,7 @@ async fn client_force_stop_reports_the_turn() {
             let (actor, gateway_rx, _persistence_rx) = test_actor().await;
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 &["cb_stop"],
             );
 
@@ -1324,13 +1324,13 @@ async fn an_unanswered_client_gate_leaves_the_report_unspent() {
             let (actor, mut gateway_rx, _persistence_rx) = test_actor().await;
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 &["cb_stop"],
             );
 
             tokio::task::spawn_local(async move {
                 while let Some(msg) = gateway_rx.recv().await {
-                    if let wimo ai_acp_lib::AcpClientMessage::ExtMethod(args) = msg {
+                    if let wimoai_acp_lib::AcpClientMessage::ExtMethod(args) = msg {
                         drop(args.response_tx);
                     }
                 }
@@ -1360,7 +1360,7 @@ async fn a_reported_turn_skips_the_gate_entirely() {
             let (mut actor, _gateway_rx, _persistence_rx) = test_actor().await;
             actor.hook_resolved_workspace_root = "/tmp".to_string();
             *actor.hook_registry.borrow_mut() = Some(std::sync::Arc::new(file_registry_with_spec(
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 "exit 2",
             )));
 
@@ -1394,11 +1394,11 @@ async fn only_a_completed_stop_hook_is_the_turns_report() {
             let _queue = super::turn_end_hooks::TurnEndQueue::spawn(actor.clone());
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::StopFailure,
+                wimoai_wimo_hooks::event::HookEventName::StopFailure,
                 &["cb_fail"],
             );
             actor.client_hooks.borrow_mut().insert(
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 vec![crate::extensions::hooks::ClientHookGroup {
                     matcher: None,
                     callback_ids: vec![],
@@ -1419,7 +1419,7 @@ async fn only_a_completed_stop_hook_is_the_turns_report() {
             ] {
                 actor.turn_report.start_next_turn();
                 *actor.hook_registry.borrow_mut() = Some(std::sync::Arc::new(file_registry(
-                    wimo ai_wimo_hooks::event::HookEventName::Stop,
+                    wimoai_wimo_hooks::event::HookEventName::Stop,
                     script,
                     enabled,
                 )));
@@ -1430,7 +1430,7 @@ async fn only_a_completed_stop_hook_is_the_turns_report() {
                     case,
                     actor.turn_report.epoch(),
                     super::turn_end_hooks::TurnEnd::Failed {
-                        error: wimo ai_wimo_hooks::event::StopFailureKind::Unknown,
+                        error: wimoai_wimo_hooks::event::StopFailureKind::Unknown,
                         error_details: None,
                         last_assistant_message: None,
                     },
@@ -1449,7 +1449,7 @@ async fn a_gate_that_keeps_working_releases_the_report() {
             let (actor, gateway_rx, _persistence_rx) = test_actor().await;
             install_client_hook(
                 &actor,
-                wimo ai_wimo_hooks::event::HookEventName::Stop,
+                wimoai_wimo_hooks::event::HookEventName::Stop,
                 &["cb_block"],
             );
             spawn_deny_responder(gateway_rx, "keep working");

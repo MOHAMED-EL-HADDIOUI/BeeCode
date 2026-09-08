@@ -10,8 +10,8 @@ use crate::session::signals::SessionSignals;
 use crate::session::wire_tags::{REWIND_MARKER, USER_MESSAGE_CHUNK};
 use crate::tools::todo::TodoState;
 use agent_client_protocol as acp;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
-use wimo ai_wimo_workspace::session::file_state::RewindPoint;
+use wimoai_wimo_sampling_types::ReasoningEffort;
+use wimoai_wimo_workspace::session::file_state::RewindPoint;
 
 pub mod jsonl;
 pub(crate) mod relocation;
@@ -23,7 +23,7 @@ mod search_content;
 pub(crate) mod summary_write;
 
 /// The session search index moved to its own crate; re-exported here so `session::storage::search_fts::…` keeps resolving for its consumers.
-pub use wimo ai_wimo_session_search::fts as search_fts;
+pub use wimoai_wimo_session_search::fts as search_fts;
 
 /// On-disk file names, relative to a session directory.
 /// Single source of truth for the storage adapter and the session/state and session/import extensions.
@@ -357,7 +357,7 @@ pub(crate) mod chat_rebuild {
         fn process(&mut self, update: &SessionUpdate) -> Vec<ConversationItem> {
             match update {
                 SessionUpdate::Acp(n) => self.handle_acp(&n.update),
-                SessionUpdate::wimo ai(n) => self.handle_wimo ai(&n.update),
+                SessionUpdate::wimoai(n) => self.handle_wimoai(&n.update),
             }
         }
 
@@ -371,14 +371,14 @@ pub(crate) mod chat_rebuild {
             }
         }
 
-        fn handle_wimo ai(
+        fn handle_wimoai(
             &mut self,
             update: &crate::extensions::notification::SessionUpdate,
         ) -> Vec<ConversationItem> {
-            use crate::extensions::notification::SessionUpdate as wimo aiUpdate;
+            use crate::extensions::notification::SessionUpdate as wimoaiUpdate;
 
             match update {
-                wimo aiUpdate::CompactionCheckpoint(_) => {
+                wimoaiUpdate::CompactionCheckpoint(_) => {
                     self.reset();
                     self.needs_truncate = true;
                     Vec::new()
@@ -646,7 +646,7 @@ impl Iterator for UpdatesIterator {
 
 const ACP_SESSION_UPDATE_METHOD: &str = "session/update";
 
-pub(crate) const wimo ai_SESSION_UPDATE_METHOD: &str = "_x.ai/session/update";
+pub(crate) const wimoai_SESSION_UPDATE_METHOD: &str = "_x.ai/session/update";
 
 /// One type for both notification kinds, so all session updates can be stored in chronological order.
 /// The `Serialize` implementation produces a format without timestamp (for GCS uploads, etc.).
@@ -656,7 +656,7 @@ pub enum SessionUpdate {
     /// Standard ACP session/update notification (boxed due to large size)
     Acp(Box<acp::SessionNotification>),
     /// wimo AI extension session notification (e.g., diff_review)
-    wimo ai(Box<SessionNotification>),
+    wimoai(Box<SessionNotification>),
 }
 
 impl serde::Serialize for SessionUpdate {
@@ -672,8 +672,8 @@ impl serde::Serialize for SessionUpdate {
                 map.serialize_entry("method", ACP_SESSION_UPDATE_METHOD)?;
                 map.serialize_entry("params", notification)?;
             }
-            SessionUpdate::wimo ai(notification) => {
-                map.serialize_entry("method", wimo ai_SESSION_UPDATE_METHOD)?;
+            SessionUpdate::wimoai(notification) => {
+                map.serialize_entry("method", wimoai_SESSION_UPDATE_METHOD)?;
                 map.serialize_entry("params", notification)?;
             }
         }
@@ -719,18 +719,18 @@ impl SessionUpdateEnvelope {
                 method: ACP_SESSION_UPDATE_METHOD.to_string(),
                 params: serde_json::to_value(notification)?,
             }),
-            SessionUpdate::wimo ai(notification) => Ok(Self {
+            SessionUpdate::wimoai(notification) => Ok(Self {
                 timestamp,
-                method: wimo ai_SESSION_UPDATE_METHOD.to_string(),
+                method: wimoai_SESSION_UPDATE_METHOD.to_string(),
                 params: serde_json::to_value(notification)?,
             }),
         }
     }
 
     pub(crate) fn into_update(self) -> Result<SessionUpdate, serde_json::Error> {
-        if self.method == wimo ai_SESSION_UPDATE_METHOD {
+        if self.method == wimoai_SESSION_UPDATE_METHOD {
             let notification: SessionNotification = serde_json::from_value(self.params)?;
-            Ok(SessionUpdate::wimo ai(Box::new(notification)))
+            Ok(SessionUpdate::wimoai(Box::new(notification)))
         } else {
             // ACP notification (method == "session/update" or unknown)
             let notification: acp::SessionNotification = serde_json::from_value(self.params)?;
@@ -762,9 +762,9 @@ impl SessionUpdateEnvelope {
 
         if let Ok(envelope) = serde_json::from_str::<BorrowedEnvelope<'_>>(line) {
             let raw_params = envelope.params.get();
-            return if envelope.method == Some(wimo ai_SESSION_UPDATE_METHOD) {
+            return if envelope.method == Some(wimoai_SESSION_UPDATE_METHOD) {
                 let notification: SessionNotification = serde_json::from_str(raw_params)?;
-                Ok(SessionUpdate::wimo ai(Box::new(notification)))
+                Ok(SessionUpdate::wimoai(Box::new(notification)))
             } else {
                 let notification: acp::SessionNotification = serde_json::from_str(raw_params)?;
                 Ok(SessionUpdate::Acp(Box::new(notification)))
@@ -1061,7 +1061,7 @@ pub enum AppendChatError {
 pub enum AppendCwdSwitchError {
     NotCommitted(io::Error),
     Committed {
-        acknowledgement: wimo ai_chat_state::StrictAppendAck,
+        acknowledgement: wimoai_chat_state::StrictAppendAck,
         source: io::Error,
     },
 }
@@ -1220,7 +1220,7 @@ pub trait StorageAdapter: Send + Sync {
         &self,
         _info: &Info,
         _message: &ConversationItem,
-    ) -> Result<wimo ai_chat_state::StrictAppendAck, AppendCwdSwitchError> {
+    ) -> Result<wimoai_chat_state::StrictAppendAck, AppendCwdSwitchError> {
         Err(AppendCwdSwitchError::NotCommitted(io::Error::new(
             io::ErrorKind::Unsupported,
             "working-directory switch append is unsupported",
@@ -1545,9 +1545,9 @@ fn filter_rewind_by<T>(items: Vec<T>, classify: impl Fn(&T) -> RewindStep) -> Ve
 
 /// Classify a raw JSONL line by peeking at its tag and `_meta` without fully deserializing the payload.
 fn rewind_step_for_line(line: &str) -> RewindStep {
-    let (raw_params, is_wimo ai) = if let Ok(env) = serde_json::from_str::<RawLinePeek<'_>>(line) {
+    let (raw_params, is_wimoai) = if let Ok(env) = serde_json::from_str::<RawLinePeek<'_>>(line) {
         let raw = env.params.map(|p| p.get()).unwrap_or(line);
-        (raw, env.method == Some(wimo ai_SESSION_UPDATE_METHOD))
+        (raw, env.method == Some(wimoai_SESSION_UPDATE_METHOD))
     } else {
         (line, false)
     };
@@ -1559,7 +1559,7 @@ fn rewind_step_for_line(line: &str) -> RewindStep {
         return RewindStep::Other;
     };
 
-    if is_wimo ai
+    if is_wimoai
         && u.session_update == *REWIND_MARKER
         && let Some(target) = u.target_prompt_index
     {
@@ -1567,7 +1567,7 @@ fn rewind_step_for_line(line: &str) -> RewindStep {
     }
 
     let is_host_turn = u.meta.as_ref().and_then(|m| m.host_turn).unwrap_or(false);
-    if !is_wimo ai && !is_host_turn && u.session_update == *USER_MESSAGE_CHUNK {
+    if !is_wimoai && !is_host_turn && u.session_update == *USER_MESSAGE_CHUNK {
         let prompt_index = u
             .meta
             .as_ref()
@@ -1579,7 +1579,7 @@ fn rewind_step_for_line(line: &str) -> RewindStep {
 }
 
 fn rewind_step_for_update(update: &SessionUpdate) -> RewindStep {
-    if let SessionUpdate::wimo ai(n) = update
+    if let SessionUpdate::wimoai(n) = update
         && let crate::extensions::notification::SessionUpdate::RewindMarker {
             target_prompt_index,
             ..
@@ -1611,7 +1611,7 @@ pub fn filter_rewind_updates(updates: Vec<SessionUpdate>) -> Vec<SessionUpdate> 
     let has_rewinds = updates.iter().any(|u| {
         matches!(
             u,
-            SessionUpdate::wimo ai(n) if matches!(
+            SessionUpdate::wimoai(n) if matches!(
                 n.update,
                 crate::extensions::notification::SessionUpdate::RewindMarker { .. }
             )
@@ -1927,7 +1927,7 @@ pub fn collect_assistant_text(
                     }
                 }
             }
-            SessionUpdate::wimo ai(_) => {
+            SessionUpdate::wimoai(_) => {
                 if !current.is_empty() {
                     let t = current.trim().to_string();
                     if !t.is_empty() {
@@ -2015,7 +2015,7 @@ pub fn collect_tool_metadata(iter: impl Iterator<Item = io::Result<SessionUpdate
                     _ => {}
                 }
             }
-            SessionUpdate::wimo ai(_) => {}
+            SessionUpdate::wimoai(_) => {}
         }
     }
     meta
@@ -2083,10 +2083,10 @@ pub(crate) fn parse_prompt_extract_event(line: &str) -> PromptExtractEvent {
     }
 
     // Step 1: try to extract the envelope (method and raw params)
-    let (raw_params, is_wimo ai) = if let Ok(env) = serde_json::from_str::<RawLinePeek<'_>>(line) {
+    let (raw_params, is_wimoai) = if let Ok(env) = serde_json::from_str::<RawLinePeek<'_>>(line) {
         let raw = env.params.map(|p| p.get()).unwrap_or(line);
-        let wimo ai = env.method == Some(wimo ai_SESSION_UPDATE_METHOD);
-        (raw, wimo ai)
+        let wimoai = env.method == Some(wimoai_SESSION_UPDATE_METHOD);
+        (raw, wimoai)
     } else {
         // Not a valid envelope, so try legacy format: the line IS the params
         (line, false)
@@ -2100,7 +2100,7 @@ pub(crate) fn parse_prompt_extract_event(line: &str) -> PromptExtractEvent {
 
     let tag = peek.update.session_update;
 
-    if !is_wimo ai && tag == *USER_MESSAGE_CHUNK {
+    if !is_wimoai && tag == *USER_MESSAGE_CHUNK {
         if let Some(content) = peek.update.content
             && content.content_type == Some("text")
             && let Some(text) = content.text
@@ -2134,7 +2134,7 @@ pub(crate) fn parse_prompt_extract_event(line: &str) -> PromptExtractEvent {
         return PromptExtractEvent::NotUserMessage;
     }
 
-    if is_wimo ai && tag == *REWIND_MARKER {
+    if is_wimoai && tag == *REWIND_MARKER {
         if let Some(idx) = peek.update.target_prompt_index {
             return PromptExtractEvent::RewindTo(idx);
         }
@@ -2476,7 +2476,7 @@ mod tests {
     }
 
     /// Wrap a wimo AI notification as the envelope stored in updates.jsonl.
-    fn wimo ai_envelope(session_update_json: &str) -> String {
+    fn wimoai_envelope(session_update_json: &str) -> String {
         format!(
             r#"{{"timestamp":1,"method":"_x.ai/session/update","params":{{"sessionId":"s","update":{session_update_json}}}}}"#
         )
@@ -2538,8 +2538,8 @@ mod tests {
     }
 
     #[test]
-    fn wimo ai_rewind_marker_yields_rewind_to() {
-        let line = wimo ai_envelope(
+    fn wimoai_rewind_marker_yields_rewind_to() {
+        let line = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":3,"created_at":"2024-01-01"}"#,
         );
         assert_eq!(
@@ -2549,8 +2549,8 @@ mod tests {
     }
 
     #[test]
-    fn wimo ai_rewind_to_zero_yields_rewind_to_zero() {
-        let line = wimo ai_envelope(
+    fn wimoai_rewind_to_zero_yields_rewind_to_zero() {
+        let line = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":0,"created_at":"2024-01-01"}"#,
         );
         assert_eq!(
@@ -2560,8 +2560,8 @@ mod tests {
     }
 
     #[test]
-    fn wimo ai_diff_review_yields_not_user() {
-        let line = wimo ai_envelope(r#"{"sessionUpdate":"diff_review","content":[]}"#);
+    fn wimoai_diff_review_yields_not_user() {
+        let line = wimoai_envelope(r#"{"sessionUpdate":"diff_review","content":[]}"#);
         assert_eq!(
             parse_prompt_extract_event(&line),
             PromptExtractEvent::NotUserMessage
@@ -2682,7 +2682,7 @@ mod tests {
         let end = acp_envelope(
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"a1"}}"#,
         );
-        let rewind = wimo ai_envelope(
+        let rewind = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":0,"created_at":"2024-01-01"}"#,
         );
         let f = write_updates_file(&[&chunk, &end, &rewind]);
@@ -2748,7 +2748,7 @@ mod tests {
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"answer2"}}"#,
         );
         // Rewind to before turn 2 (keep 1 prompt)
-        let rw = wimo ai_envelope(
+        let rw = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":1,"created_at":"2024-01-01"}"#,
         );
         // Turn 2 (after rewind): "new second prompt"
@@ -2844,7 +2844,7 @@ mod tests {
     /// A divergence between the two classifiers would silently shift fork truncation boundaries.
     #[test]
     fn rewind_step_classifiers_agree_on_serialized_updates() {
-        let rewind = SessionUpdate::wimo ai(Box::new(
+        let rewind = SessionUpdate::wimoai(Box::new(
             crate::extensions::notification::SessionNotification {
                 session_id: acp::SessionId::new("s"),
                 update: crate::extensions::notification::SessionUpdate::RewindMarker {
@@ -2981,7 +2981,7 @@ mod tests {
             r#"{"sessionUpdate":"user_message_chunk","content":{"type":"text","text":"new3"},"_meta":{"promptIndex":3}}"#,
         );
         // Rewind to target 2: keep turns 0,1 (old0, old1); drop new2 and everything after
-        let rw = wimo ai_envelope(
+        let rw = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":2,"created_at":"2024-01-01"}"#,
         );
         let after = acp_envelope(
@@ -3040,7 +3040,7 @@ mod tests {
         let p2 = acp_envelope(
             r#"{"sessionUpdate":"user_message_chunk","content":{"type":"text","text":"P2"},"_meta":{"promptIndex":2}}"#,
         );
-        let rw = wimo ai_envelope(
+        let rw = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":2,"created_at":"2024-01-01"}"#,
         );
         let after = acp_envelope(
@@ -3095,7 +3095,7 @@ mod tests {
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"resp2"}}"#,
         );
         // Rewind to prompt 1 kills u2, a2
-        let rw = wimo ai_envelope(
+        let rw = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":1,"created_at":"2024-01-01"}"#,
         );
         let u3 = acp_envelope(
@@ -3137,7 +3137,7 @@ mod tests {
         let agent_message_2 = acp_envelope(
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"resp2"}}"#,
         );
-        let rewind_to_1 = wimo ai_envelope(
+        let rewind_to_1 = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":1,"created_at":"2024-01-01"}"#,
         );
         let torn = "{ torn, unparseable jsonl line";
@@ -3166,7 +3166,7 @@ mod tests {
         let a1 = acp_envelope(
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"resp"}}"#,
         );
-        let rw = wimo ai_envelope(
+        let rw = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":0,"created_at":"2024-01-01"}"#,
         );
         let u2 = acp_envelope(
@@ -3201,7 +3201,7 @@ mod tests {
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"r3"}}"#,
         );
         // Rewind to prompt 2 kills p3/r3
-        let rw1 = wimo ai_envelope(
+        let rw1 = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":2,"created_at":"2024-01-01"}"#,
         );
         let u4 = acp_envelope(
@@ -3211,7 +3211,7 @@ mod tests {
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"r4"}}"#,
         );
         // Rewind to prompt 1 kills p2/r2/p4/r4
-        let rw2 = wimo ai_envelope(
+        let rw2 = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":1,"created_at":"2024-01-01"}"#,
         );
         let u5 = acp_envelope(
@@ -3254,7 +3254,7 @@ mod tests {
         let a2 = acp_envelope(
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"r2"}}"#,
         );
-        let rw1 = wimo ai_envelope(
+        let rw1 = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":2,"created_at":"2024-01-01"}"#,
         );
         let u3 = acp_envelope(
@@ -3263,7 +3263,7 @@ mod tests {
         let a3 = acp_envelope(
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"r3"}}"#,
         );
-        let rw2 = wimo ai_envelope(
+        let rw2 = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":1,"created_at":"2024-01-01"}"#,
         );
         let u4 = acp_envelope(
@@ -3307,7 +3307,7 @@ mod tests {
             r#"{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"r1"}}"#,
         );
         // Only prompt index 0 exists; target 5 is out of range.
-        let rw = wimo ai_envelope(
+        let rw = wimoai_envelope(
             r#"{"sessionUpdate":"rewind_marker","target_prompt_index":5,"created_at":"2024-01-01"}"#,
         );
         let u2 = acp_envelope(
@@ -3399,34 +3399,34 @@ mod tests {
     }
 
     #[test]
-    fn from_str_unknown_wimo ai_variant_deserializes_via_envelope() {
+    fn from_str_unknown_wimoai_variant_deserializes_via_envelope() {
         // Simulates an updates.jsonl line containing a removed variant (e.g. git_branch_update).
         // SessionUpdateEnvelope::from_str must not error; the Unknown catch-all absorbs it
-        let line = wimo ai_envelope(r#"{"sessionUpdate":"git_branch_update","branch":"main"}"#);
+        let line = wimoai_envelope(r#"{"sessionUpdate":"git_branch_update","branch":"main"}"#);
         let update = SessionUpdateEnvelope::from_str(&line).unwrap();
         match update {
-            SessionUpdate::wimo ai(notif) => {
+            SessionUpdate::wimoai(notif) => {
                 assert_eq!(
                     notif.update,
                     crate::extensions::notification::SessionUpdate::Unknown
                 );
             }
-            SessionUpdate::Acp(_) => panic!("expected wimo ai variant"),
+            SessionUpdate::Acp(_) => panic!("expected wimoai variant"),
         }
     }
 
     #[test]
-    fn from_str_known_wimo ai_variant_still_works() {
-        let line = wimo ai_envelope(r#"{"sessionUpdate":"memory_flush_started"}"#);
+    fn from_str_known_wimoai_variant_still_works() {
+        let line = wimoai_envelope(r#"{"sessionUpdate":"memory_flush_started"}"#);
         let update = SessionUpdateEnvelope::from_str(&line).unwrap();
         match update {
-            SessionUpdate::wimo ai(notif) => {
+            SessionUpdate::wimoai(notif) => {
                 assert_eq!(
                     notif.update,
                     crate::extensions::notification::SessionUpdate::MemoryFlushStarted
                 );
             }
-            SessionUpdate::Acp(_) => panic!("expected wimo ai variant"),
+            SessionUpdate::Acp(_) => panic!("expected wimoai variant"),
         }
     }
 }

@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-fuzzy-file-search"
+name = "wimoai-fuzzy-file-search"
 version = "0.1.0"
 edition.workspace = true
 description = "Fuzzy file search over a directory tree: an ignore-aware walker feeding a nucleo matcher, plus a background daemon"
@@ -21,7 +21,7 @@ tempfile = { workspace = true }
 # child, so it is Unix only.
 [target.'cfg(unix)'.dev-dependencies]
 libc = { workspace = true }
-wimo ai-tty-utils = { workspace = true }
+wimoai-tty-utils = { workspace = true }
 
 [lints]
 workspace = true

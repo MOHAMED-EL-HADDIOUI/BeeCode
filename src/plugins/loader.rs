@@ -1,5 +1,5 @@
 //! Plugin loader — REAL plugin architecture (Section 24 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub struct Plugin {
     pub name: String,

@@ -1,7 +1,7 @@
 //! Layer 3: Content controller.
 //!
 //! An idle pager only renders a splash screen, which is useless for scroll, stream, or resize scenarios.
-//! [`ContentController`] wraps the shared [`MockInferenceServer`] from `wimo ai-wimo-test-support`.
+//! [`ContentController`] wraps the shared [`MockInferenceServer`] from `wimoai-wimo-test-support`.
 //! It provides the env vars that point the bundled shell agent at the mock, so the pager ends up rendering real agent output.
 //!
 //! The caller controls the response text via [`ContentController::set_response`].
@@ -10,13 +10,13 @@
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use wimo ai_wimo_test_support::{MockInferenceServer, TestSandbox};
+use wimoai_wimo_test_support::{MockInferenceServer, TestSandbox};
 
-pub use wimo ai_wimo_test_support::mock_server::LogEntry;
-pub use wimo ai_wimo_test_support::mock_server::MockModelEntry as MockModel;
-pub use wimo ai_wimo_test_support::mock_server::StorageUpload;
-pub use wimo ai_wimo_test_support::sse;
-pub use wimo ai_wimo_test_support::{
+pub use wimoai_wimo_test_support::mock_server::LogEntry;
+pub use wimoai_wimo_test_support::mock_server::MockModelEntry as MockModel;
+pub use wimoai_wimo_test_support::mock_server::StorageUpload;
+pub use wimoai_wimo_test_support::sse;
+pub use wimoai_wimo_test_support::{
     InferenceEndpoint, InferenceExpectation, InferenceRequestMatcher, ScriptedResponse, SseEvent,
 };
 

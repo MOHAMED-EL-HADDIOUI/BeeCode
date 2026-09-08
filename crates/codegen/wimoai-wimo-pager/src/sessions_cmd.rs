@@ -1,9 +1,9 @@
 use anyhow::Result;
 use clap::Subcommand;
-use wimo ai_wimo_shell::agent::config::Config as AgentConfig;
-use wimo ai_wimo_shell::auth::{AuthManager, try_ensure_fresh_auth};
-use wimo ai_wimo_shell::session::merge::MergedSession;
-use wimo ai_wimo_shell::util::wimo_home::wimo_home;
+use wimoai_wimo_shell::agent::config::Config as AgentConfig;
+use wimoai_wimo_shell::auth::{AuthManager, try_ensure_fresh_auth};
+use wimoai_wimo_shell::session::merge::MergedSession;
+use wimoai_wimo_shell::util::wimo_home::wimo_home;
 #[derive(Debug, clap::Args, Clone)]
 pub struct SessionsArgs {
     #[command(subcommand)]
@@ -35,7 +35,7 @@ enum SessionsCommand {
 
 pub async fn run(args: SessionsArgs, agent_config: &AgentConfig) -> Result<()> {
     // Best-effort only: never force an interactive public login here
-    // Enterprise deployments may configure only a deployment_key and a custom wimo ai_api_base_url
+    // Enterprise deployments may configure only a deployment_key and a custom wimoai_api_base_url
     // If the user has previously run the interactive `wimo` TUI (which succeeds for these setups), any cached credential is used
     // Otherwise we still proceed so the SessionRegistryClient can use the deployment_key when talking to the custom proxy
     let auth = try_ensure_fresh_auth(&agent_config.wimo_com_config).await;
@@ -45,7 +45,7 @@ pub async fn run(args: SessionsArgs, agent_config: &AgentConfig) -> Result<()> {
         agent_config.wimo_com_config.clone(),
     ));
 
-    let client = wimo ai_wimo_shell::agent::session_registry_client::SessionRegistryClient::new(
+    let client = wimoai_wimo_shell::agent::session_registry_client::SessionRegistryClient::new(
         agent_config.endpoints.proxy_url(),
         String::new(),
     )
@@ -57,27 +57,27 @@ pub async fn run(args: SessionsArgs, agent_config: &AgentConfig) -> Result<()> {
 
     match args.command {
         SessionsCommand::List { limit } => {
-            let sessions = wimo ai_wimo_shell::session::merge::fetch_merged(
+            let sessions = wimoai_wimo_shell::session::merge::fetch_merged(
                 Some(&client),
                 cwd.to_str(),
-                wimo ai_wimo_shell::session::merge::CwdScope::WithSiblings,
+                wimoai_wimo_shell::session::merge::CwdScope::WithSiblings,
                 None,
                 limit,
                 // The CLI listing is an inventory, not the resume picker.
-                wimo ai_wimo_shell::session::visibility::HeadlessPolicy::Include,
+                wimoai_wimo_shell::session::visibility::HeadlessPolicy::Include,
             )
             .await;
             print_sessions_grouped(&sessions);
         }
         SessionsCommand::Search { query, limit } => {
             use std::collections::HashSet;
-            use wimo ai_wimo_shell::session::merge::REMOTE_TIMEOUT;
-            use wimo ai_wimo_shell::session::storage::search::{
+            use wimoai_wimo_shell::session::merge::REMOTE_TIMEOUT;
+            use wimoai_wimo_shell::session::storage::search::{
                 IndexDecision, SessionSearchRequest, execute_search,
             };
 
             // Search is the only subcommand that reads the index, so it is the only one to start one
-            let search = wimo ai_wimo_shell::session::storage::search::start_if_enabled(agent_config);
+            let search = wimoai_wimo_shell::session::storage::search::start_if_enabled(agent_config);
 
             let req = SessionSearchRequest {
                 query,
@@ -187,7 +187,7 @@ pub async fn run(args: SessionsArgs, agent_config: &AgentConfig) -> Result<()> {
             // Pass `cwd = None` so the session is found by id regardless of which workspace it was created in
             // The local delete still uses the resolved per-session cwd
             // No search handle: the eviction inside prunes the row from another process's index, so a delete never needs one of its own
-            let deletion = wimo ai_wimo_shell::session::persistence::delete_session_history(
+            let deletion = wimoai_wimo_shell::session::persistence::delete_session_history(
                 &id,
                 None,
                 needs_remote,

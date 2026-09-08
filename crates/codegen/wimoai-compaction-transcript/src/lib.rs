@@ -9,7 +9,7 @@
 use std::sync::OnceLock;
 
 use regex::Regex;
-use wimo ai_wimo_sampling_types::ConversationItem;
+use wimoai_wimo_sampling_types::ConversationItem;
 
 /// Layout of the per-session segment store — single source of the path
 /// convention (writer, index parser, and transcript-hint builder all use these).
@@ -433,7 +433,7 @@ fn render_turn_signature(item: &ConversationItem, index: usize) -> String {
 /// `detail == None`) verbatim turns truncated at a whole-turn boundary before
 /// [`SEGMENT_MAX_BYTES`]. `summary` must already be cleaned of analysis tags;
 /// `items` is the segment view — tool calls + results kept, images/reasoning
-/// stripped (see `wimo ai_chat_state::compaction_utils::prepare_conversation_for_segment`).
+/// stripped (see `wimoai_chat_state::compaction_utils::prepare_conversation_for_segment`).
 pub fn render_segment_md(
     items: &[ConversationItem],
     summary: &str,
@@ -761,7 +761,7 @@ mod tests {
     /// role/tool/file/error stats (roles mapped User→Human, ToolResult→Function).
     #[test]
     fn parity_turn_stats_matches_basic_counts() {
-        use wimo ai_wimo_sampling_types::{AssistantItem, ToolCall};
+        use wimoai_wimo_sampling_types::{AssistantItem, ToolCall};
         let tc = |name: &str, args: &str| ToolCall {
             id: "t".into(),
             name: name.to_string(),

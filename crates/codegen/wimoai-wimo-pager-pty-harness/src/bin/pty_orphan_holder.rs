@@ -12,8 +12,8 @@ use std::path::Path;
 use std::time::Duration;
 
 use portable_pty::PtySize;
-use wimo ai_wimo_pager_pty_harness::PtyController;
-use wimo ai_wimo_test_support::TestSandbox;
+use wimoai_wimo_pager_pty_harness::PtyController;
+use wimoai_wimo_test_support::TestSandbox;
 
 fn main() -> anyhow::Result<()> {
     let sandbox = TestSandbox::new();

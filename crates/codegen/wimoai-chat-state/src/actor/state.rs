@@ -2,7 +2,7 @@
 
 use std::collections::BTreeSet;
 
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     ConversationItem, DanglingToolCallReason, SamplingConfig, TokenUsage, ToolSpec,
     dedup_duplicate_tool_results, repair_dangling_tool_calls,
 };
@@ -15,7 +15,7 @@ use crate::usage::UsageLedger;
 /// have without unwrapping.
 pub fn estimate_system_message_tokens(item: &ConversationItem) -> u64 {
     match item {
-        ConversationItem::System(s) => wimo ai_token_estimation::estimate_tokens(&s.content),
+        ConversationItem::System(s) => wimoai_token_estimation::estimate_tokens(&s.content),
         _ => 0,
     }
 }
@@ -27,12 +27,12 @@ fn estimate_tool_tokens(
 ) -> u64 {
     let desc_len = description.map_or(0, str::len);
     let params_len = parameters.to_string().len();
-    ((name.len() + desc_len + params_len) as u64) / wimo ai_token_estimation::BYTES_PER_TOKEN
+    ((name.len() + desc_len + params_len) as u64) / wimoai_token_estimation::BYTES_PER_TOKEN
 }
 
 /// Bytes/4 estimate of one tool definition (name + description + the
 /// JSON-serialized parameters).
-pub fn estimate_tool_definition_tokens(td: &wimo ai_wimo_sampling_types::ToolDefinition) -> u64 {
+pub fn estimate_tool_definition_tokens(td: &wimoai_wimo_sampling_types::ToolDefinition) -> u64 {
     estimate_tool_tokens(
         &td.function.name,
         td.function.description.as_deref(),
@@ -41,7 +41,7 @@ pub fn estimate_tool_definition_tokens(td: &wimo ai_wimo_sampling_types::ToolDef
 }
 
 /// Sum [`estimate_tool_definition_tokens`] across a slice.
-pub fn estimate_tool_definitions_tokens(tds: &[wimo ai_wimo_sampling_types::ToolDefinition]) -> u64 {
+pub fn estimate_tool_definitions_tokens(tds: &[wimoai_wimo_sampling_types::ToolDefinition]) -> u64 {
     tds.iter().map(estimate_tool_definition_tokens).sum()
 }
 
@@ -55,13 +55,13 @@ pub fn estimate_tool_specs_tokens(tools: &[ToolSpec]) -> u64 {
 
 /// Bytes/4 estimate for a single [`ConversationItem`].
 ///
-/// Images are counted at [`wimo ai_token_estimation::IMAGE_TOKEN_ESTIMATE`] each.
+/// Images are counted at [`wimoai_token_estimation::IMAGE_TOKEN_ESTIMATE`] each.
 /// Shared by [`estimate_conversation_tokens`] and [`estimate_messages_tokens`]
 /// so the per-variant arithmetic stays in one place.
 pub fn estimate_item_tokens(item: &ConversationItem) -> u64 {
-    use wimo ai_wimo_sampling_types::ContentPart;
+    use wimoai_wimo_sampling_types::ContentPart;
     match item {
-        ConversationItem::System(s) => wimo ai_token_estimation::estimate_tokens(&s.content),
+        ConversationItem::System(s) => wimoai_token_estimation::estimate_tokens(&s.content),
         ConversationItem::User(u) => {
             let mut bytes: usize = 0;
             let mut images: u64 = 0;
@@ -71,8 +71,8 @@ pub fn estimate_item_tokens(item: &ConversationItem) -> u64 {
                     ContentPart::Image { .. } => images += 1,
                 }
             }
-            (bytes as u64) / wimo ai_token_estimation::BYTES_PER_TOKEN
-                + wimo ai_token_estimation::estimate_image_tokens(images)
+            (bytes as u64) / wimoai_token_estimation::BYTES_PER_TOKEN
+                + wimoai_token_estimation::estimate_image_tokens(images)
         }
         ConversationItem::Assistant(a) => {
             let bytes = a.content.len()
@@ -80,29 +80,29 @@ pub fn estimate_item_tokens(item: &ConversationItem) -> u64 {
                     .iter()
                     .map(|tc| tc.arguments.len())
                     .sum::<usize>();
-            (bytes as u64) / wimo ai_token_estimation::BYTES_PER_TOKEN
+            (bytes as u64) / wimoai_token_estimation::BYTES_PER_TOKEN
         }
-        ConversationItem::ToolResult(tr) => wimo ai_token_estimation::estimate_tokens(&tr.content),
+        ConversationItem::ToolResult(tr) => wimoai_token_estimation::estimate_tokens(&tr.content),
         ConversationItem::BackendToolCall(b) => {
-            wimo ai_token_estimation::estimate_tokens(&b.text_summary())
+            wimoai_token_estimation::estimate_tokens(&b.text_summary())
         }
         ConversationItem::Reasoning(r) => {
             // Text and encrypted blob are the same reasoning twice: take the
             // larger, not the sum. The ciphertext is base64, ~4/3 over raw bytes.
-            let text_bytes = wimo ai_wimo_sampling_types::reasoning_item_text(r).len();
+            let text_bytes = wimoai_wimo_sampling_types::reasoning_item_text(r).len();
             let enc_bytes = r.encrypted_content.as_deref().map(str::len).unwrap_or(0);
-            (text_bytes.max(enc_bytes * 3 / 4) as u64) / wimo ai_token_estimation::BYTES_PER_TOKEN
+            (text_bytes.max(enc_bytes * 3 / 4) as u64) / wimoai_token_estimation::BYTES_PER_TOKEN
         }
     }
 }
 
 /// Estimate token footprint: text bytes / 4, images at the per-image
-/// constant defined by [`wimo ai_token_estimation::IMAGE_TOKEN_ESTIMATE`].
+/// constant defined by [`wimoai_token_estimation::IMAGE_TOKEN_ESTIMATE`].
 pub fn estimate_conversation_tokens(items: &[ConversationItem]) -> u64 {
     items.iter().map(estimate_item_tokens).sum()
 }
 
-/// wimo's [`ItemTokenCounter`](wimo ai_wimo_compaction::ItemTokenCounter)
+/// wimo's [`ItemTokenCounter`](wimoai_wimo_compaction::ItemTokenCounter)
 /// for the shared compaction engine: the bytes/4 estimate wimo already
 /// uses to drive its compaction triggers, exposed through the seam so the
 /// shared budgeting math gets the *same* trusted count.
@@ -113,7 +113,7 @@ pub fn estimate_conversation_tokens(items: &[ConversationItem]) -> u64 {
 /// one place.
 pub struct EstimatedItemTokenCounter;
 
-impl wimo ai_wimo_compaction::ItemTokenCounter<ConversationItem> for EstimatedItemTokenCounter {
+impl wimoai_wimo_compaction::ItemTokenCounter<ConversationItem> for EstimatedItemTokenCounter {
     fn count_item_tokens(&self, item: &ConversationItem) -> u32 {
         // The estimate is a `u64`; a single item never approaches `u32::MAX`
         // tokens, but saturate rather than wrap if one somehow does.
@@ -301,7 +301,7 @@ mod tests {
 
     #[test]
     fn estimated_item_token_counter_matches_estimate_item_tokens() {
-        use wimo ai_wimo_compaction::ItemTokenCounter;
+        use wimoai_wimo_compaction::ItemTokenCounter;
 
         let counter = EstimatedItemTokenCounter;
         let items = vec![
@@ -322,7 +322,7 @@ mod tests {
     #[test]
     fn reasoning_estimate_takes_max_of_text_and_encrypted_not_sum() {
         // max(4000, 4000*3/4)/4 = 1000, not the (4000+4000)/4 = 2000 double-count.
-        let mut r = wimo ai_wimo_sampling_types::synthesized_reasoning_item("x".repeat(4000));
+        let mut r = wimoai_wimo_sampling_types::synthesized_reasoning_item("x".repeat(4000));
         r.encrypted_content = Some("e".repeat(4000));
         assert_eq!(estimate_item_tokens(&ConversationItem::Reasoning(r)), 1000);
     }
@@ -330,7 +330,7 @@ mod tests {
     #[test]
     fn reasoning_estimate_encrypted_only_scales_base64_down() {
         // No visible text: base64-corrected size, 4000*3/4/4 = 750.
-        let mut r = wimo ai_wimo_sampling_types::synthesized_reasoning_item("");
+        let mut r = wimoai_wimo_sampling_types::synthesized_reasoning_item("");
         r.summary.clear();
         r.encrypted_content = Some("e".repeat(4000));
         assert_eq!(estimate_item_tokens(&ConversationItem::Reasoning(r)), 750);
@@ -338,7 +338,7 @@ mod tests {
 
     #[test]
     fn reasoning_estimate_text_only_is_plain_bytes_per_token() {
-        let r = wimo ai_wimo_sampling_types::synthesized_reasoning_item("x".repeat(4000));
+        let r = wimoai_wimo_sampling_types::synthesized_reasoning_item("x".repeat(4000));
         assert_eq!(estimate_item_tokens(&ConversationItem::Reasoning(r)), 1000);
     }
 
@@ -393,7 +393,7 @@ mod tests {
     #[test]
     fn estimate_tool_definition_tokens_counts_name_desc_params() {
         // Empty parameters serialize to "null" (4 bytes) in the JSON-string len
-        let td = wimo ai_wimo_sampling_types::ToolDefinition::function(
+        let td = wimoai_wimo_sampling_types::ToolDefinition::function(
             "search",
             Some("find a file"),
             serde_json::json!({}),
@@ -404,12 +404,12 @@ mod tests {
 
     #[test]
     fn estimate_tool_specs_tokens_counts_only_provided_specs() {
-        let kept = wimo ai_wimo_sampling_types::ToolDefinition::function(
+        let kept = wimoai_wimo_sampling_types::ToolDefinition::function(
             "search",
             Some("find a file"),
             serde_json::json!({"type": "object"}),
         );
-        let dropped = wimo ai_wimo_sampling_types::ToolDefinition::function(
+        let dropped = wimoai_wimo_sampling_types::ToolDefinition::function(
             "web_search",
             Some("search the web"),
             serde_json::json!({"type": "object"}),
@@ -445,12 +445,12 @@ mod tests {
 
     #[test]
     fn estimate_tool_definitions_tokens_sums_across_slice() {
-        let a = wimo ai_wimo_sampling_types::ToolDefinition::function(
+        let a = wimoai_wimo_sampling_types::ToolDefinition::function(
             "a",
             None::<&str>,
             serde_json::json!({}),
         );
-        let b = wimo ai_wimo_sampling_types::ToolDefinition::function(
+        let b = wimoai_wimo_sampling_types::ToolDefinition::function(
             "b",
             None::<&str>,
             serde_json::json!({}),

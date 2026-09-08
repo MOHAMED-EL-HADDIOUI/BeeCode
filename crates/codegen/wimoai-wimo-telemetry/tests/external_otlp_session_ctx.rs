@@ -8,7 +8,7 @@ mod otlp_collector;
 use std::sync::Arc;
 
 use otlp_collector as col;
-use wimo ai_wimo_telemetry::external;
+use wimoai_wimo_telemetry::external;
 
 #[test]
 fn ambient_ctx_injects_session_turn_and_prompt_id() {
@@ -37,16 +37,16 @@ fn ambient_ctx_injects_session_turn_and_prompt_id() {
 
     // Emit inside a session ctx (turn_number = 3) so the ambient snapshot is populated
     // `log_event` is synchronous and runs within the task-local scope of `with_session_ctx`
-    let ctx = wimo ai_wimo_telemetry::TelemetryCtx::new(
+    let ctx = wimoai_wimo_telemetry::TelemetryCtx::new(
         "sess-ctx".to_owned(),
         Arc::new(tokio::sync::Mutex::new(3usize)),
     );
     let rt = tokio::runtime::Builder::new_current_thread()
         .build()
         .expect("current-thread runtime");
-    rt.block_on(wimo ai_wimo_telemetry::with_session_ctx(ctx, async {
-        wimo ai_wimo_telemetry::session_ctx::begin_prompt_id();
-        wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::PromptSubmitted {
+    rt.block_on(wimoai_wimo_telemetry::with_session_ctx(ctx, async {
+        wimoai_wimo_telemetry::session_ctx::begin_prompt_id();
+        wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::PromptSubmitted {
             prompt_length: 42,
             model_id: "wimo-4".into(),
             client_identifier: None,
@@ -54,7 +54,7 @@ fn ambient_ctx_injects_session_turn_and_prompt_id() {
             prompt_text: None,
             command_name: None,
         });
-        wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::ModelResponseReceived {
+        wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::ModelResponseReceived {
             model_id: "wimo-4".into(),
             duration_ms: 5,
             stop_reason: Some("stop".into()),

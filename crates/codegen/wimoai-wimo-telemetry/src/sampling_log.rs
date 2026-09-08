@@ -8,7 +8,7 @@ use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::layer::Layer;
 use tracing_subscriber::registry::LookupSpan;
 
-use wimo ai_wimo_config::wimo_home;
+use wimoai_wimo_config::wimo_home;
 
 use crate::instrumentation::{NoOpLayer, TargetFilterLayer};
 

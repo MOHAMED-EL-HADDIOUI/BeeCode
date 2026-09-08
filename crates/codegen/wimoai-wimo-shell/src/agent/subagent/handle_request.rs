@@ -10,14 +10,14 @@ use super::prompt_turn_receipt::{
 };
 use super::*;
 use crate::upload::trace::PromptMetadataParams;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
-use wimo ai_wimo_telemetry::region::Parent;
-use wimo ai_wimo_telemetry::subagent_spawn::{SubagentSpawnPhase, phase_region};
-use wimo ai_wimo_telemetry::{instrument_task, region};
-use wimo ai_wimo_tools::implementations::{wimo, opencode};
-static SUBAGENTS_ACTIVE: wimo ai_wimo_telemetry::activity::ActivityGauge =
-    wimo ai_wimo_telemetry::activity::ActivityGauge::work(
-        wimo ai_wimo_telemetry::activity::SUBAGENTS_ACTIVE_KEY,
+use wimoai_wimo_sampling_types::ReasoningEffort;
+use wimoai_wimo_telemetry::region::Parent;
+use wimoai_wimo_telemetry::subagent_spawn::{SubagentSpawnPhase, phase_region};
+use wimoai_wimo_telemetry::{instrument_task, region};
+use wimoai_wimo_tools::implementations::{wimo, opencode};
+static SUBAGENTS_ACTIVE: wimoai_wimo_telemetry::activity::ActivityGauge =
+    wimoai_wimo_telemetry::activity::ActivityGauge::work(
+        wimoai_wimo_telemetry::activity::SUBAGENTS_ACTIVE_KEY,
     );
 /// Bounds each parent-side await in the child completion path. The parent's
 /// biased select polls its event channels ahead of `cmd_rx`, so a busy turn
@@ -194,8 +194,8 @@ pub(super) async fn resolve_child_model(
 /// channel and are bounded so the child Shutdown stays reachable behind a
 /// starved actor.
 pub(super) async fn reparent_surviving_child_tasks(
-    parent_tb: &std::sync::Arc<dyn wimo ai_wimo_tools::computer::types::TerminalBackend>,
-    parent_notif_handle: &wimo ai_wimo_tools::notification::types::ToolNotificationHandle,
+    parent_tb: &std::sync::Arc<dyn wimoai_wimo_tools::computer::types::TerminalBackend>,
+    parent_notif_handle: &wimoai_wimo_tools::notification::types::ToolNotificationHandle,
     parent_cmd_tx: Option<&mpsc::UnboundedSender<SessionCommand>>,
     child_session_id: &str,
     parent_session_id: &str,
@@ -285,7 +285,7 @@ pub(crate) async fn run_shell_child(
         session_running,
     } = run;
     let start = std::time::Instant::now();
-    let spawn_timer = wimo ai_wimo_telemetry::subagent_spawn::SubagentSpawnTimer::new_shared();
+    let spawn_timer = wimoai_wimo_telemetry::subagent_spawn::SubagentSpawnTimer::new_shared();
     if let Some(queued) = queued_for {
         spawn_timer.record(SubagentSpawnPhase::QueueWait, queued);
     }
@@ -335,7 +335,7 @@ pub(crate) async fn run_shell_child(
         .parent_session_info
         .as_ref()
         .map(|i| std::path::Path::new(&i.cwd));
-    let mut effective_runtime = wimo ai_wimo_subagent_resolution::resolve_runtime_config(
+    let mut effective_runtime = wimoai_wimo_subagent_resolution::resolve_runtime_config(
         &request.subagent_type,
         &request.runtime_overrides,
         &ctx.subagent_roles,
@@ -414,7 +414,7 @@ pub(crate) async fn run_shell_child(
             );
         }
         effective_runtime.model = None;
-        if let Err(e) = wimo ai_wimo_subagent_resolution::validate_resume_identity(
+        if let Err(e) = wimoai_wimo_subagent_resolution::validate_resume_identity(
             &request.subagent_type,
             request.runtime_overrides.persona.as_deref(),
             source,
@@ -438,7 +438,7 @@ pub(crate) async fn run_shell_child(
         return child_run_output(failure_result(&request, &error), completion_data, None);
     }
     let worktree_path = if let Some(ref source) = resume_source {
-        if effective_runtime.isolation != wimo ai_tool_types::SubagentIsolationMode::None
+        if effective_runtime.isolation != wimoai_tool_types::SubagentIsolationMode::None
             && source.worktree_path.is_none()
         {
             tracing::info!(
@@ -492,7 +492,7 @@ pub(crate) async fn run_shell_child(
                 }
             }
         }
-    } else if effective_runtime.isolation != wimo ai_tool_types::SubagentIsolationMode::None {
+    } else if effective_runtime.isolation != wimoai_tool_types::SubagentIsolationMode::None {
         let source_cwd = parent_source_cwd(&ctx);
         let dest = match crate::session::worktree::worktree_base_dir_for_source(&source_cwd) {
             Ok(base) => base.join(format!("subagent-{}", request.id)),
@@ -509,17 +509,17 @@ pub(crate) async fn run_shell_child(
         };
         let source_clone = source_cwd;
         let subagent_id = request.id.clone();
-        let creation_mode: wimo ai_fast_worktree::CreationMode = ctx.worktree_type.into();
+        let creation_mode: wimoai_fast_worktree::CreationMode = ctx.worktree_type.into();
         let btrfs_delegate = crate::session::worktree::btrfs_delegate_from_env();
         let worktree_create_span = region!(
             "subagent_spawn.worktree_create",
             Parent::Explicit(spawn_prepare_span.span())
         );
         let created = match tokio::task::spawn_blocking(move || {
-            let mut builder = wimo ai_fast_worktree::WorktreeBuilder::new(&source_clone, &dest)
-                .working_tree_mode(wimo ai_fast_worktree::WorkingTreeMode::PreserveWorkingTree)
+            let mut builder = wimoai_fast_worktree::WorktreeBuilder::new(&source_clone, &dest)
+                .working_tree_mode(wimoai_fast_worktree::WorkingTreeMode::PreserveWorkingTree)
                 .creation_mode(creation_mode)
-                .worktree_kind(wimo ai_fast_worktree::WorktreeKind::Subagent)
+                .worktree_kind(wimoai_fast_worktree::WorktreeKind::Subagent)
                 .session_id(subagent_id);
             if let Some(delegate) = btrfs_delegate {
                 builder = builder.btrfs_delegate(delegate);
@@ -591,7 +591,7 @@ pub(crate) async fn run_shell_child(
             "Resolved runtime overrides for subagent"
         );
     }
-    effective_runtime.capability_mode = wimo ai_wimo_subagent_resolution::intersect_capability_modes(
+    effective_runtime.capability_mode = wimoai_wimo_subagent_resolution::intersect_capability_modes(
         effective_runtime.capability_mode,
         definition.capability_mode,
     );
@@ -601,7 +601,7 @@ pub(crate) async fn run_shell_child(
         .unwrap_or(ctx.parent_depth + 1);
     let tools_before_policy = definition.tool_config.tools.len();
     let allow_nested_subagents = child_depth < ctx.subagents_max_depth;
-    wimo ai_wimo_subagent_resolution::apply_child_tool_policy(
+    wimoai_wimo_subagent_resolution::apply_child_tool_policy(
         &mut definition,
         effective_runtime.capability_mode,
         allow_nested_subagents,
@@ -767,7 +767,7 @@ pub(crate) async fn run_shell_child(
         && !verbatim_mirror_fork
         && let Some(ref pi) = effective_runtime.persona_instructions
     {
-        let reminder = wimo ai_wimo_sampling_types::conversation::ConversationItem::system_reminder(
+        let reminder = wimoai_wimo_sampling_types::conversation::ConversationItem::system_reminder(
             format!("<system-reminder>\n{pi}\n</system-reminder>"),
         );
         let insert_at = inherited_prefix_len.min(forked_conversation.len());
@@ -924,13 +924,13 @@ pub(crate) async fn run_shell_child(
         }
     };
     let child_cwd = resolve_child_cwd(worktree_path.as_deref(), override_cwd, &ctx.parent_cwd);
-    let covered_by_parent = wimo ai_fsnotify::watch_root_covers(&ctx.parent_cwd, &child_cwd);
+    let covered_by_parent = wimoai_fsnotify::watch_root_covers(&ctx.parent_cwd, &child_cwd);
     let subagent_fs_watch = FsWatchCapabilities {
         hunk_tracking: ctx.hunk_tracking_enabled && !covered_by_parent,
         ..FsWatchCapabilities::none()
     };
-    let child_cwd_abs = wimo ai_wimo_paths::AbsPathBuf::new(child_cwd).unwrap_or_else(|_| {
-        wimo ai_wimo_paths::AbsPathBuf::new(std::env::current_dir().unwrap_or_default())
+    let child_cwd_abs = wimoai_wimo_paths::AbsPathBuf::new(child_cwd).unwrap_or_else(|_| {
+        wimoai_wimo_paths::AbsPathBuf::new(std::env::current_dir().unwrap_or_default())
             .expect("current_dir should be absolute")
     });
     let mut tool_ctx = ToolContext::with_preloaded_env(
@@ -954,23 +954,23 @@ pub(crate) async fn run_shell_child(
     tool_ctx.subagent_depth = child_depth;
     tool_ctx.lsp = ctx.lsp.clone();
     tool_ctx.process_scope = ctx.process_scope.clone();
-    let parent_traceparent = wimo ai_file_utils::trace_context::current_traceparent();
+    let parent_traceparent = wimoai_file_utils::trace_context::current_traceparent();
     let tracker_child_cwd = child_session_info.cwd.clone();
     let tracker_model_id = effective_model_id.0.to_string();
-    let initial_child_tokens = wimo ai_chat_state::estimate_conversation_tokens(&forked_conversation);
+    let initial_child_tokens = wimoai_chat_state::estimate_conversation_tokens(&forked_conversation);
     let model_entry = crate::agent::config::find_model_by_id(
         &ctx.available_models,
         effective_model_id.0.as_ref(),
     );
     let model_has_own_creds = model_entry.is_some_and(|entry| entry.has_own_credentials());
     let inherited_auth_type = subagent_auth_type(model_entry, &ctx.auth_method_id);
-    let credentials = wimo ai_chat_state::Credentials {
+    let credentials = wimoai_chat_state::Credentials {
         api_key: effective_sampling_config.api_key.clone(),
         auth_type: inherited_auth_type,
         alpha_test_key: ctx.alpha_test_key.clone(),
         client_version: effective_sampling_config.client_version.clone(),
     };
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "subagent spawn credentials",
         None,
         Some(serde_json::json!({
@@ -988,12 +988,12 @@ pub(crate) async fn run_shell_child(
             "context_window": effective_sampling_config.context_window,
         })),
     );
-    let attribution_callback: Option<wimo ai_wimo_sampler::SharedAttributionCallback> =
+    let attribution_callback: Option<wimoai_wimo_sampler::SharedAttributionCallback> =
         effective_sampling_config.attribution_callback.clone();
     let agent_memory_scope = definition.memory;
     let agent_name_for_memory = definition.name.clone();
     let is_plugin_agent = definition.plugin_name.is_some();
-    let yolo_policy_block = wimo ai_wimo_workspace::permission::resolution::yolo_disabled_by_policy();
+    let yolo_policy_block = wimoai_wimo_workspace::permission::resolution::yolo_disabled_by_policy();
     let agent_permission_mode = resolve_subagent_permission_mode(
         definition.permission_mode.clone(),
         is_plugin_agent,
@@ -1014,7 +1014,7 @@ pub(crate) async fn run_shell_child(
         }
     }
     if let Some(scope) = agent_memory_scope {
-        let memory_tools: Vec<wimo ai_wimo_tools::registry::types::ToolConfig> = vec![
+        let memory_tools: Vec<wimoai_wimo_tools::registry::types::ToolConfig> = vec![
             (&wimo::ReadFileTool).into(),
             (&wimo::SearchReplaceTool).into(),
             (&opencode::OpenCodeWriteTool).into(),
@@ -1038,7 +1038,7 @@ pub(crate) async fn run_shell_child(
                 .collect::<Vec<_>>()
                 .join("\n");
             let truncated =
-                wimo ai_wimo_tools::util::truncate::truncate_str(&truncated, MAX_BYTES).to_string();
+                wimoai_wimo_tools::util::truncate::truncate_str(&truncated, MAX_BYTES).to_string();
             if !truncated.is_empty() {
                 let injection = format!(
                     "\n\n<agent-memory>\nMemory directory: {}\n\n{truncated}\n</agent-memory>",
@@ -1066,11 +1066,11 @@ pub(crate) async fn run_shell_child(
             );
         } else {
             let hooks_val = hooks_config.as_value();
-            let (specs, errors) = wimo ai_wimo_hooks::config::parse_hooks_from_value_with_dir(
+            let (specs, errors) = wimoai_wimo_hooks::config::parse_hooks_from_value_with_dir(
                 &hooks_val,
                 &format!(
                     "{}{}",
-                    wimo ai_wimo_hooks::config::AGENT_HOOK_PREFIX,
+                    wimoai_wimo_hooks::config::AGENT_HOOK_PREFIX,
                     definition.name
                 ),
                 &ctx.parent_cwd,
@@ -1082,8 +1082,8 @@ pub(crate) async fn run_shell_child(
                 let specs: Vec<_> = specs
                     .into_iter()
                     .map(|mut s| {
-                        if s.event == wimo ai_wimo_hooks::event::HookEventName::Stop {
-                            s.event = wimo ai_wimo_hooks::event::HookEventName::SubagentStop;
+                        if s.event == wimoai_wimo_hooks::event::HookEventName::Stop {
+                            s.event = wimoai_wimo_hooks::event::HookEventName::SubagentStop;
                         }
                         s
                     })
@@ -1120,7 +1120,7 @@ pub(crate) async fn run_shell_child(
                 .mcp_servers
                 .iter()
                 .filter_map(|entry| match entry {
-                    wimo ai_wimo_agent::config::McpServerRef::Named(name) => {
+                    wimoai_wimo_agent::config::McpServerRef::Named(name) => {
                         ctx.parent_mcp_configs
                             .iter()
                             .find(|s| {
@@ -1132,7 +1132,7 @@ pub(crate) async fn run_shell_child(
                                 None
                             })
                     }
-                    wimo ai_wimo_agent::config::McpServerRef::Inline { name, config } => {
+                    wimoai_wimo_agent::config::McpServerRef::Inline { name, config } => {
                         if let serde_json::Value::Object(obj) = config
                             && obj.contains_key("type")
                         {
@@ -1184,7 +1184,7 @@ pub(crate) async fn run_shell_child(
     if inherit_skills && ctx.parent_skills.is_none() {
         let parent_cwd_str = ctx.parent_cwd.to_string_lossy().to_string();
         ctx.parent_skills = Some(
-            wimo ai_wimo_agent::prompt::skills::list_skills_with_plugins(
+            wimoai_wimo_agent::prompt::skills::list_skills_with_plugins(
                 Some(&parent_cwd_str),
                 &ctx.parent_skills_config,
                 ctx.plugin_registry.as_deref(),
@@ -1214,7 +1214,7 @@ pub(crate) async fn run_shell_child(
         SUBAGENTS_ACTIVE.get() >= 1,
         "SubagentLaunched must stamp a self-inclusive count"
     );
-    wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::SubagentLaunched {
+    wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::SubagentLaunched {
         subagent_id: request.id.clone(),
         parent_session_id: request.parent_session_id.clone(),
         subagent_type: request.subagent_type.clone(),
@@ -1276,9 +1276,9 @@ pub(crate) async fn run_shell_child(
             preserve_inherited_system: verbatim_mirror_fork,
             ..Default::default()
         },
-        wimo ai_wimo_workspace::permission::ClientType::Generic,
+        wimoai_wimo_workspace::permission::ClientType::Generic,
         auto_compact_threshold_percent,
-        wimo ai_wimo_agent::DEFAULT_SYSTEM_PROMPT_LABEL.to_string(),
+        wimoai_wimo_agent::DEFAULT_SYSTEM_PROMPT_LABEL.to_string(),
         pins.mode,
         ctx.resolve_compaction_verbatim_input(),
         ctx.resolve_compaction_tool_choice(),
@@ -1286,7 +1286,7 @@ pub(crate) async fn run_shell_child(
         None,
         None,
         std::sync::Arc::new(parking_lot::Mutex::new(
-            wimo ai_wimo_workspace::file_system::CodebaseIndexManager::new(),
+            wimoai_wimo_workspace::file_system::CodebaseIndexManager::new(),
         )),
         false,
         subagent_fs_watch,
@@ -1303,7 +1303,7 @@ pub(crate) async fn run_shell_child(
         if inherit_skills {
             ctx.parent_skills_config.clone()
         } else {
-            wimo ai_wimo_agent::prompt::skills::SkillsConfig::default()
+            wimoai_wimo_agent::prompt::skills::SkillsConfig::default()
         },
         if inherit_skills {
             ctx.parent_skills.take()
@@ -1339,7 +1339,7 @@ pub(crate) async fn run_shell_child(
         ctx.yolo_mode
             || matches!(
                 agent_permission_mode,
-                wimo ai_wimo_agent::config::PermissionMode::BypassPermissions
+                wimoai_wimo_agent::config::PermissionMode::BypassPermissions
             ),
         false,
         None,
@@ -1364,7 +1364,7 @@ pub(crate) async fn run_shell_child(
         None,
         std::collections::HashMap::new(),
         Vec::new(),
-        wimo ai_wimo_agent::prompt::context::PromptAudience::Subagent,
+        wimoai_wimo_agent::prompt::context::PromptAudience::Subagent,
         effective_runtime.role_prompt.clone(),
         None,
         ctx.disable_web_search,
@@ -1398,7 +1398,7 @@ pub(crate) async fn run_shell_child(
             None
         },
         false,
-        Some(wimo ai_wimo_telemetry::subagent_spawn::SpawnPhaseContext {
+        Some(wimoai_wimo_telemetry::subagent_spawn::SpawnPhaseContext {
             timer: spawn_timer.clone(),
             parent: spawn_phase_parent,
         }),
@@ -1627,7 +1627,7 @@ pub(crate) async fn run_shell_child(
     .map(|usage| usage.totals);
     result.tokens_used = trace_token_totals
         .as_ref()
-        .map(wimo ai_chat_state::UsageTotals::total_tokens)
+        .map(wimoai_chat_state::UsageTotals::total_tokens)
         .unwrap_or(0);
     let (tool_calls, turns) = signals_snapshot_counts(&child_handle)
         .await
@@ -1738,7 +1738,7 @@ pub(crate) async fn run_shell_child(
             prompt_verbatim: Some(true),
             cwd: Some(child_handle.info.cwd.clone()),
             agent_type: Some(request.subagent_type.clone()),
-            shell_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+            shell_version: Some(wimoai_wimo_version::VERSION.to_string()),
             sandbox: local_sandbox_telemetry(),
             ..Default::default()
         });
@@ -1756,7 +1756,7 @@ pub(crate) async fn run_shell_child(
             stop_reason: child_stop_reason.map(|sr| format!("{sr:?}")),
             total_tokens: trace_token_totals
                 .as_ref()
-                .map(wimo ai_chat_state::UsageTotals::total_tokens),
+                .map(wimoai_chat_state::UsageTotals::total_tokens),
             input_tokens: final_turn_tokens.map(|tokens| tokens.0),
             cached_input_tokens: final_turn_tokens.map(|tokens| tokens.1),
             output_tokens: final_turn_tokens.map(|tokens| tokens.2),
@@ -1837,13 +1837,13 @@ pub(crate) async fn run_shell_child(
         .await;
     }
     let outcome = if result.success {
-        wimo ai_wimo_telemetry::events::Outcome::Completed
+        wimoai_wimo_telemetry::events::Outcome::Completed
     } else if result.cancelled {
-        wimo ai_wimo_telemetry::events::Outcome::Cancelled
+        wimoai_wimo_telemetry::events::Outcome::Cancelled
     } else {
-        wimo ai_wimo_telemetry::events::Outcome::Error
+        wimoai_wimo_telemetry::events::Outcome::Error
     };
-    let mut completed = wimo ai_wimo_telemetry::events::SubagentCompleted {
+    let mut completed = wimoai_wimo_telemetry::events::SubagentCompleted {
         subagent_id: request.id.clone(),
         parent_session_id: request.parent_session_id.clone(),
         owner: telemetry_owner_kind(&request),
@@ -1864,7 +1864,7 @@ pub(crate) async fn run_shell_child(
         ready_to_first_turn_ms: None,
     };
     spawn_timer.write_event_phases(&mut completed);
-    wimo ai_wimo_telemetry::session_ctx::log_event(completed);
+    wimoai_wimo_telemetry::session_ctx::log_event(completed);
     match (
         &ctx.parent_terminal_backend,
         &ctx.parent_notification_handle,
@@ -1957,9 +1957,9 @@ pub(crate) async fn run_shell_child(
     let success = result.success && !result.cancelled;
     let preview = crate::util::truncate(&result.output, 200);
     let level_fn = if success {
-        wimo ai_wimo_telemetry::unified_log::info
+        wimoai_wimo_telemetry::unified_log::info
     } else {
-        wimo ai_wimo_telemetry::unified_log::error
+        wimoai_wimo_telemetry::unified_log::error
     };
     level_fn(
         if success {
@@ -2040,7 +2040,7 @@ pub(crate) async fn dispose_worktree_after_completion(
     let checked_snapshot = snapshot_ref.clone();
     let reclaim_span = region!("worktree.reclaim_check", Parent::Inherit);
     let reclaim = tokio::task::spawn_blocking(move || {
-        wimo ai_fast_worktree::reclaimable_after_snapshot(
+        wimoai_fast_worktree::reclaimable_after_snapshot(
             &checked_path,
             Some(&checked_source_repo),
             &checked_snapshot,
@@ -2049,8 +2049,8 @@ pub(crate) async fn dispose_worktree_after_completion(
     .await;
     reclaim_span.close();
     match reclaim {
-        Ok(wimo ai_fast_worktree::Reclaim::Now { .. }) => {}
-        Ok(wimo ai_fast_worktree::Reclaim::Keep(reason)) => {
+        Ok(wimoai_fast_worktree::Reclaim::Now { .. }) => {}
+        Ok(wimoai_fast_worktree::Reclaim::Keep(reason)) => {
             tracing::info!(
                 subagent_id = %subagent_id,
                 worktree_path = %worktree.display(),
@@ -2059,7 +2059,7 @@ pub(crate) async fn dispose_worktree_after_completion(
             );
             return Disposal::Kept;
         }
-        Ok(wimo ai_fast_worktree::Reclaim::Unnamed(error)) => {
+        Ok(wimoai_fast_worktree::Reclaim::Unnamed(error)) => {
             tracing::warn!(
                 subagent_id = %subagent_id,
                 worktree_path = %worktree.display(),

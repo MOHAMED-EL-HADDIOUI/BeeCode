@@ -1,5 +1,5 @@
 //! Telemetry payload structs in this crate reference these enums, so they live here.
-//! `wimo ai-wimo-shell` re-exports them from their original paths (`session::mcp_servers`, `util::config`) to keep callers unchanged.
+//! `wimoai-wimo-shell` re-exports them from their original paths (`session::mcp_servers`, `util::config`) to keep callers unchanged.
 
 #[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, Default)]
 #[serde(rename_all = "snake_case")]

@@ -315,8 +315,8 @@ Disk usage for ~/.wimo
 
 Worktrees
         SIZE  TYPE                AGE        LABEL  PATH
-    380.0 GB  session             12d ago    my-fix ~/.wimo/worktrees/wimo ai/worktree-abc
-     32.3 GB  untracked (session) 40d ago           ~/.wimo/worktrees/wimo ai/worktree-old
+    380.0 GB  session             12d ago    my-fix ~/.wimo/worktrees/wimoai/worktree-abc
+     32.3 GB  untracked (session) 40d ago           ~/.wimo/worktrees/wimoai/worktree-old
 
 To reclaim space, run `wimo worktree gc --max-age 7d --dry-run`, then the same command without `--dry-run`. Without `--max-age`, gc expires nothing, and it keeps a worktree whose work it cannot find elsewhere, naming each one.
 Untracked rows are not in the registry, so gc never visits them. Remove one with `wimo worktree rm --dry-run <path>`, then without `--dry-run`.

@@ -30,11 +30,11 @@ To switch accounts or resolve an authentication problem, run:
 wimo login
 ```
 
-Running `wimo login` starts the sign-in flow again, replacing your cached session. By default, it opens your browser and signs in through Spacewimo ai OAuth at `auth.x.ai`. Pass a flag to select a different flow:
+Running `wimo login` starts the sign-in flow again, replacing your cached session. By default, it opens your browser and signs in through Spacewimoai OAuth at `auth.x.ai`. Pass a flag to select a different flow:
 
 | Flag | Description |
 |------|-------------|
-| `--oauth` | Sign in through Spacewimo ai OAuth at `auth.x.ai`. This is the default, so the flag is optional. |
+| `--oauth` | Sign in through Spacewimoai OAuth at `auth.x.ai`. This is the default, so the flag is optional. |
 | `--device-auth` (alias `--device-code`) | Sign in with the device-code flow for headless or remote environments. |
 
 To sign out, run `wimo logout`. It takes no flags and clears your cached credentials.
@@ -46,7 +46,7 @@ To sign out, run `wimo logout`. It takes no flags and clears your cached credent
 For CI/CD, automation, or environments without browser access, use an API key from [console.x.ai](https://console.x.ai):
 
 ```bash
-export wimo ai_API_KEY="wimo ai-..."
+export wimoai_API_KEY="wimoai-..."
 wimo
 ```
 
@@ -288,13 +288,13 @@ wimo resolves credentials for each request in this order, highest to lowest:
 
 1. **Per-model `api_key` or `env_key`** -- set under `[model.<name>]` in `config.toml`. Wins whenever present.
 2. **Active session token** -- obtained through browser, OIDC/OAuth2, or external-provider login and stored in `~/.wimo/auth.json`.
-3. **`wimo ai_API_KEY`** -- fallback when no session token is active.
+3. **`wimoai_API_KEY`** -- fallback when no session token is active.
 
 When more than one login flow is configured, wimo populates the session token from the first available source, highest to lowest:
 
 1. **External auth provider** (`auth_provider_command`)
 2. **Enterprise OIDC** -- when OIDC is configured, through `[wimo_com_config.oidc]` in `config.toml` or the `wimo_OIDC_ISSUER` and `wimo_OIDC_CLIENT_ID` environment variables
-3. **Spacewimo ai OAuth2 browser login** -- the default
+3. **Spacewimoai OAuth2 browser login** -- the default
 
 During a session, the active method handles all mid-session refreshes.
 

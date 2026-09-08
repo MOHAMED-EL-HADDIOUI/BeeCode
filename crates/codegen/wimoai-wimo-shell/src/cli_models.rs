@@ -2,7 +2,7 @@
 use crate::agent::config::Config as AgentConfig;
 use agent_client_protocol as acp;
 use anyhow::Result;
-use wimo ai_acp_lib::{AcpAgentTx, acp_send};
+use wimoai_acp_lib::{AcpAgentTx, acp_send};
 /// Status for the `wimo models` banner (the display order is not the sampling priority; see [`AuthStatus::resolve`]).
 #[derive(Debug, PartialEq, Eq)]
 pub enum AuthStatus {
@@ -18,9 +18,9 @@ impl AuthStatus {
     /// Banner status precedence: env key, then session, then BYOK, then deployment, then none.
     ///
     /// Differs from sampling (`resolve_credentials`: BYOK, then session, then env) so a logged-in user sees the login host.
-    /// BYOK uses [`crate::agent::auth_method::should_advertise_wimo ai_api_key`] so `disable_api_key_auth` is honored.
+    /// BYOK uses [`crate::agent::auth_method::should_advertise_wimoai_api_key`] so `disable_api_key_auth` is honored.
     pub fn resolve(agent_config: &AgentConfig) -> Self {
-        if crate::agent::auth_method::has_wimo ai_api_key_env() {
+        if crate::agent::auth_method::has_wimoai_api_key_env() {
             return Self::ApiKey;
         }
         if agent_config.create_auth_manager().current().is_some() {
@@ -31,7 +31,7 @@ impl AuthStatus {
             ));
         }
         let models = crate::agent::config::resolve_model_list(agent_config, None);
-        if crate::agent::auth_method::should_advertise_wimo ai_api_key(
+        if crate::agent::auth_method::should_advertise_wimoai_api_key(
             agent_config.wimo_com_config.api_key_auth_disabled(),
             models.values(),
         ) && let Some(name) = models
@@ -96,11 +96,11 @@ fn parse_models_list_response(raw: &str) -> Result<acp::SessionModelState> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::agent::auth_method::{LEGACY_wimo ai_API_KEY_ENV_VAR, wimo ai_API_KEY_ENV_VAR};
+    use crate::agent::auth_method::{LEGACY_wimoai_API_KEY_ENV_VAR, wimoai_API_KEY_ENV_VAR};
     use crate::agent::config::Config;
     use crate::auth::{AuthMode, wimoAuth};
     use serial_test::serial;
-    use wimo ai_wimo_test_support::EnvGuard;
+    use wimoai_wimo_test_support::EnvGuard;
     const EXPECTED_LOGIN_HOST: &str = "wimo.com";
     /// A session the compiled-in backend recognises as its own, which `AuthBackend::owns` requires.
     fn session_credential() -> wimoAuth {
@@ -116,8 +116,8 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let auth_path = dir.path().join("no-auth.json");
         let guards = [
-            EnvGuard::unset(wimo ai_API_KEY_ENV_VAR),
-            EnvGuard::unset(LEGACY_wimo ai_API_KEY_ENV_VAR),
+            EnvGuard::unset(wimoai_API_KEY_ENV_VAR),
+            EnvGuard::unset(LEGACY_wimoai_API_KEY_ENV_VAR),
             EnvGuard::unset("wimo_AUTH"),
             EnvGuard::set("wimo_AUTH_PATH", auth_path.to_str().unwrap()),
             EnvGuard::unset("wimo_DEPLOYMENT_KEY"),
@@ -146,14 +146,14 @@ mod tests {
     #[serial]
     fn resolve_api_key_env() {
         let (_dir, _g) = isolate_auth_sources();
-        let _key = EnvGuard::set(wimo ai_API_KEY_ENV_VAR, "wimo ai-test-key");
+        let _key = EnvGuard::set(wimoai_API_KEY_ENV_VAR, "wimoai-test-key");
         assert_eq!(AuthStatus::resolve(&Config::default()), AuthStatus::ApiKey);
     }
     #[test]
     #[serial]
     fn resolve_legacy_api_key_env() {
         let (_dir, _g) = isolate_auth_sources();
-        let _key = EnvGuard::set(LEGACY_wimo ai_API_KEY_ENV_VAR, "legacy-key");
+        let _key = EnvGuard::set(LEGACY_wimoai_API_KEY_ENV_VAR, "legacy-key");
         assert_eq!(AuthStatus::resolve(&Config::default()), AuthStatus::ApiKey);
     }
     #[test]
@@ -250,7 +250,7 @@ mod tests {
     #[serial]
     fn resolve_priority_api_key_over_byok_and_deployment() {
         let (_dir, _g) = isolate_auth_sources();
-        let _key = EnvGuard::set(wimo ai_API_KEY_ENV_VAR, "wimo ai-test-key");
+        let _key = EnvGuard::set(wimoai_API_KEY_ENV_VAR, "wimoai-test-key");
         let dm = crate::models::default_model();
         let cfg = config_from_toml(&byok_and_deployment_toml(dm));
         assert_eq!(AuthStatus::resolve(&cfg), AuthStatus::ApiKey);

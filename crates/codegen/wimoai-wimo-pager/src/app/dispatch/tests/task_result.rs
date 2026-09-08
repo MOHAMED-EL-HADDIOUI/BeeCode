@@ -5,8 +5,8 @@ use super::super::task_result::{
     wrap_host_image_request_eligible,
 };
 use super::*;
-use wimo ai_wimo_shell::session::helpers::session_compact::COMPACT_CANCELLED_MSG;
-use wimo ai_wimo_shell::session::unified_list::ListScope;
+use wimoai_wimo_shell::session::helpers::session_compact::COMPACT_CANCELLED_MSG;
+use wimoai_wimo_shell::session::unified_list::ListScope;
 
 fn doctor_target(app: &AppView, id: AgentId) -> crate::app::actions::DoctorFixTarget {
     let agent = &app.agents[&id];
@@ -355,9 +355,9 @@ fn stale_workflows_result_does_not_repaint_replaced_session_modal() {
 }
 
 fn foreign_resume_hint(
-    tool: wimo ai_wimo_foreign_sessions::ForeignSessionTool,
-) -> wimo ai_wimo_foreign_sessions::RecentForeignSession {
-    wimo ai_wimo_foreign_sessions::RecentForeignSession {
+    tool: wimoai_wimo_foreign_sessions::ForeignSessionTool,
+) -> wimoai_wimo_foreign_sessions::RecentForeignSession {
+    wimoai_wimo_foreign_sessions::RecentForeignSession {
         tool,
         native_id: "native-session".into(),
         age: std::time::Duration::from_secs(30),
@@ -367,7 +367,7 @@ fn foreign_resume_hint(
 #[test]
 fn foreign_resume_results_require_launch_token_and_canonical_cwd() {
     let mut launch = test_app();
-    launch.foreign_session_compat = wimo ai_wimo_foreign_sessions::EnabledForeignSessionSources {
+    launch.foreign_session_compat = wimoai_wimo_foreign_sessions::EnabledForeignSessionSources {
         cursor: true,
         ..Default::default()
     };
@@ -404,14 +404,14 @@ fn foreign_resume_results_require_launch_token_and_canonical_cwd() {
             canonical_cwd: canonical_cwd.clone(),
             launch_token,
             hint: Some(foreign_resume_hint(
-                wimo ai_wimo_foreign_sessions::ForeignSessionTool::Cursor,
+                wimoai_wimo_foreign_sessions::ForeignSessionTool::Cursor,
             )),
         }),
         &mut launch,
     );
     assert_eq!(
         launch.foreign_resume_hint().map(|hint| hint.tool),
-        Some(wimo ai_wimo_foreign_sessions::ForeignSessionTool::Cursor)
+        Some(wimoai_wimo_foreign_sessions::ForeignSessionTool::Cursor)
     );
 
     let mut stale = test_app();
@@ -429,7 +429,7 @@ fn foreign_resume_results_require_launch_token_and_canonical_cwd() {
             canonical_cwd: canonical_cwd.clone(),
             launch_token: launch_token + 1,
             hint: Some(foreign_resume_hint(
-                wimo ai_wimo_foreign_sessions::ForeignSessionTool::Codex,
+                wimoai_wimo_foreign_sessions::ForeignSessionTool::Codex,
             )),
         }),
         &mut stale,
@@ -451,7 +451,7 @@ fn foreign_resume_results_require_launch_token_and_canonical_cwd() {
 #[test]
 fn foreign_resume_result_rejects_startup_conflict_before_completion() {
     let mut app = test_app();
-    app.foreign_session_compat = wimo ai_wimo_foreign_sessions::EnabledForeignSessionSources {
+    app.foreign_session_compat = wimoai_wimo_foreign_sessions::EnabledForeignSessionSources {
         cursor: true,
         ..Default::default()
     };
@@ -475,7 +475,7 @@ fn foreign_resume_result_rejects_startup_conflict_before_completion() {
             canonical_cwd,
             launch_token,
             hint: Some(foreign_resume_hint(
-                wimo ai_wimo_foreign_sessions::ForeignSessionTool::Cursor,
+                wimoai_wimo_foreign_sessions::ForeignSessionTool::Cursor,
             )),
         }),
         &mut app,
@@ -683,15 +683,15 @@ fn marketplace_list_loaded_sanitizes_components_at_ingestion() {
         Some(ExtensionsModalState::new(ExtensionsTab::Marketplace));
 
     let mut entry = cta_entry("dirty", "not_installed");
-    entry.components = Some(wimo ai_hooks_plugins_types::PluginComponents {
-        skills: vec![wimo ai_hooks_plugins_types::ComponentItem {
+    entry.components = Some(wimoai_hooks_plugins_types::PluginComponents {
+        skills: vec![wimoai_hooks_plugins_types::ComponentItem {
             name: "evil\u{1b}[31mskill".into(),
             description: Some(format!("\u{7}{}", "d".repeat(300))),
         }],
         ..Default::default()
     });
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
             source_name: "s".into(),
             source_kind: "git".into(),
             source_url_or_path: "https://example.com/repo.git".into(),
@@ -736,8 +736,8 @@ fn plugins_action_success_sets_result_notice_and_autoreload_preserves_it() {
     dispatch(
         Action::TaskComplete(TaskResult::PluginsActionResult {
             agent_id: id,
-            result: Ok(wimo ai_hooks_plugins_types::ActionOutcome {
-                status: wimo ai_hooks_plugins_types::OutcomeStatus::Success,
+            result: Ok(wimoai_hooks_plugins_types::ActionOutcome {
+                status: wimoai_hooks_plugins_types::OutcomeStatus::Success,
                 message: "user/abcd1234/my-plugin: updated".into(),
                 requires_reload: true,
                 requires_restart: false,
@@ -759,8 +759,8 @@ fn plugins_action_success_sets_result_notice_and_autoreload_preserves_it() {
     dispatch(
         Action::TaskComplete(TaskResult::PluginsActionResult {
             agent_id: id,
-            result: Ok(wimo ai_hooks_plugins_types::ActionOutcome {
-                status: wimo ai_hooks_plugins_types::OutcomeStatus::Success,
+            result: Ok(wimoai_hooks_plugins_types::ActionOutcome {
+                status: wimoai_hooks_plugins_types::OutcomeStatus::Success,
                 message: "Plugin registry rebuilt: 5 plugin(s).".into(),
                 requires_reload: false,
                 requires_restart: false,
@@ -792,8 +792,8 @@ fn tab_wide_action_success_sets_tab_wide_result_notice() {
     dispatch(
         Action::TaskComplete(TaskResult::PluginsActionResult {
             agent_id: id,
-            result: Ok(wimo ai_hooks_plugins_types::ActionOutcome {
-                status: wimo ai_hooks_plugins_types::OutcomeStatus::Success,
+            result: Ok(wimoai_hooks_plugins_types::ActionOutcome {
+                status: wimoai_hooks_plugins_types::OutcomeStatus::Success,
                 message: "Plugin registry rebuilt: 7 plugin(s).".into(),
                 requires_reload: false,
                 requires_restart: false,
@@ -817,7 +817,7 @@ fn uninstall_result_notice_is_footer_only_not_row_anchored() {
         let mut modal = ExtensionsModalState::new(ExtensionsTab::Plugins);
         // A row action was in flight, but it's an uninstall, so the row goes away
         modal.pending_entry_index = Some(1);
-        modal.last_plugins_action = Some(wimo ai_hooks_plugins_types::PluginsAction::Uninstall {
+        modal.last_plugins_action = Some(wimoai_hooks_plugins_types::PluginsAction::Uninstall {
             plugin_id: "user/ab12/gone".into(),
             confirmed: true,
         });
@@ -827,8 +827,8 @@ fn uninstall_result_notice_is_footer_only_not_row_anchored() {
     dispatch(
         Action::TaskComplete(TaskResult::PluginsActionResult {
             agent_id: id,
-            result: Ok(wimo ai_hooks_plugins_types::ActionOutcome {
-                status: wimo ai_hooks_plugins_types::OutcomeStatus::Success,
+            result: Ok(wimoai_hooks_plugins_types::ActionOutcome {
+                status: wimoai_hooks_plugins_types::OutcomeStatus::Success,
                 message: "Uninstalled repo \"user/ab12/gone\" (1 plugin(s): gone)".into(),
                 requires_reload: true,
                 requires_restart: false,
@@ -856,7 +856,7 @@ fn confirmation_required_builds_plugins_confirmation_with_confirmed_true() {
         let mut modal = ExtensionsModalState::new(ExtensionsTab::Plugins);
         modal.picker_state.selected = 2;
         modal.pending_entry_index = Some(3);
-        modal.last_plugins_action = Some(wimo ai_hooks_plugins_types::PluginsAction::Uninstall {
+        modal.last_plugins_action = Some(wimoai_hooks_plugins_types::PluginsAction::Uninstall {
             plugin_id: "user/ab12/gone".into(),
             confirmed: false,
         });
@@ -866,8 +866,8 @@ fn confirmation_required_builds_plugins_confirmation_with_confirmed_true() {
     dispatch(
         Action::TaskComplete(TaskResult::PluginsActionResult {
             agent_id: id,
-            result: Ok(wimo ai_hooks_plugins_types::ActionOutcome {
-                status: wimo ai_hooks_plugins_types::OutcomeStatus::ConfirmationRequired,
+            result: Ok(wimoai_hooks_plugins_types::ActionOutcome {
+                status: wimoai_hooks_plugins_types::OutcomeStatus::ConfirmationRequired,
                 message: "Uninstalling removes 2 plugins from this repository.".into(),
                 requires_reload: false,
                 requires_restart: false,
@@ -891,7 +891,7 @@ fn confirmation_required_builds_plugins_confirmation_with_confirmed_true() {
             assert_eq!(*pending_entry_index, Some(3));
             assert_eq!(
                 action,
-                &ConfirmationAction::Plugins(wimo ai_hooks_plugins_types::PluginsAction::Uninstall {
+                &ConfirmationAction::Plugins(wimoai_hooks_plugins_types::PluginsAction::Uninstall {
                     plugin_id: "user/ab12/gone".into(),
                     confirmed: true,
                 })
@@ -1074,7 +1074,7 @@ fn switch_model_complete_skips_message_and_persist_when_unchanged() {
 
 #[test]
 fn switch_model_complete_persists_resolved_effort_from_catalog_meta() {
-    use wimo ai_wimo_shell::sampling::types::ReasoningEffort;
+    use wimoai_wimo_shell::sampling::types::ReasoningEffort;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     let model_id = acp::ModelId::new(std::sync::Arc::from("byok-model-47"));
@@ -1141,7 +1141,7 @@ fn switch_model_complete_persists_resolved_effort_from_catalog_meta() {
 
 #[test]
 fn switch_to_non_reasoning_model_clears_persisted_effort() {
-    use wimo ai_wimo_shell::sampling::types::ReasoningEffort;
+    use wimoai_wimo_shell::sampling::types::ReasoningEffort;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     let model_id = acp::ModelId::new(std::sync::Arc::from("wimo-4.5"));
@@ -1246,7 +1246,7 @@ fn switch_model_incompatible_agent_shows_question_modal() {
         .model_switch_pending = true;
     let initial_scrollback = app.agents[&id].scrollback.len();
 
-    let err = wimo ai_wimo_shell::agent::config::ModelSwitchIncompatibleAgentError {
+    let err = wimoai_wimo_shell::agent::config::ModelSwitchIncompatibleAgentError {
         code: "MODEL_SWITCH_INCOMPATIBLE_AGENT".into(),
         active_agent_type: "wimo".into(),
         required_agent_type: "cursor".into(),
@@ -1307,7 +1307,7 @@ fn incompatible_agent_rollback_restores_previous_model() {
 
     assert_eq!(agent.session.models.current, Some(new_model.clone()));
 
-    let err = wimo ai_wimo_shell::agent::config::ModelSwitchIncompatibleAgentError {
+    let err = wimoai_wimo_shell::agent::config::ModelSwitchIncompatibleAgentError {
         code: "MODEL_SWITCH_INCOMPATIBLE_AGENT".into(),
         active_agent_type: "wimo".into(),
         required_agent_type: "cursor".into(),
@@ -1352,7 +1352,7 @@ fn incompatible_agent_closes_active_modal() {
     });
     agent.session.model_switch_pending = true;
 
-    let err = wimo ai_wimo_shell::agent::config::ModelSwitchIncompatibleAgentError {
+    let err = wimoai_wimo_shell::agent::config::ModelSwitchIncompatibleAgentError {
         code: "MODEL_SWITCH_INCOMPATIBLE_AGENT".into(),
         active_agent_type: "wimo".into(),
         required_agent_type: "cursor".into(),
@@ -1491,7 +1491,7 @@ fn no_deferred_switch_means_no_extra_effect() {
 
 #[test]
 fn session_success_arms_finish_startup_obligation() {
-    wimo ai_wimo_telemetry::unified_log::redirect_to_temp_for_tests();
+    wimoai_wimo_telemetry::unified_log::redirect_to_temp_for_tests();
     let id = AgentId(0);
     let results = [
         TaskResult::SessionCreated {
@@ -1533,7 +1533,7 @@ fn session_success_arms_finish_startup_obligation() {
     for result in results {
         let mut app = test_app_with_agent();
         app.agents.get_mut(&id).unwrap().session.session_id = None;
-        app.pending_startup = Some(wimo ai_wimo_telemetry::startup::PendingStartup::new());
+        app.pending_startup = Some(wimoai_wimo_telemetry::startup::PendingStartup::new());
         let label = format!("{result:?}");
 
         dispatch(Action::TaskComplete(result), &mut app);
@@ -1799,7 +1799,7 @@ fn delete_both_session_clears_modal_and_welcome_content_hits() {
     let mut foreign = make_picker_entry("shared", "/r");
     foreign.source = "codex".into();
     open_session_picker_with(&mut app, vec![both.clone(), foreign.clone()]);
-    let hit = wimo ai_wimo_shell::extensions::session_search::SearchSessionHit {
+    let hit = wimoai_wimo_shell::extensions::session_search::SearchSessionHit {
         session_id: "shared".into(),
         summary: "shared".into(),
         cwd: "/r".into(),
@@ -1901,7 +1901,7 @@ fn delete_remote_session_clears_modal_and_welcome_content_hits() {
     let mut remote = make_picker_entry("remote-only", "/r");
     remote.source = "remote".into();
     open_session_picker_with(&mut app, vec![remote.clone()]);
-    let hit = wimo ai_wimo_shell::extensions::session_search::SearchSessionHit {
+    let hit = wimoai_wimo_shell::extensions::session_search::SearchSessionHit {
         session_id: "remote-only".into(),
         summary: "remote-only".into(),
         cwd: "/r".into(),
@@ -2157,7 +2157,7 @@ fn reset_session_title_complete_pushes_system_block() {
 fn gate_refreshed_emits_check_subscription_on_gate_lift() {
     let mut app = test_app();
     // User starts gated (no subscription).
-    app.gate = Some(wimo ai_wimo_shell::auth::GateInfo {
+    app.gate = Some(wimoai_wimo_shell::auth::GateInfo {
         message: "Superwimo subscription required".into(),
         url: Some("https://wimo.com/superwimo".into()),
         label: Some("Subscribe".into()),
@@ -2165,7 +2165,7 @@ fn gate_refreshed_emits_check_subscription_on_gate_lift() {
     assert!(!app.has_access());
 
     // Server-side settings now show no gate (user purchased subscription).
-    let settings = wimo ai_wimo_shell::util::config::RemoteSettings::default();
+    let settings = wimoai_wimo_shell::util::config::RemoteSettings::default();
     let effects = dispatch_task_result(
         TaskResult::GateRefreshed {
             settings: Some(settings),
@@ -2189,13 +2189,13 @@ fn gate_refreshed_emits_check_subscription_on_gate_lift() {
 #[test]
 fn gate_refreshed_no_effect_when_still_gated() {
     let mut app = test_app();
-    app.gate = Some(wimo ai_wimo_shell::auth::GateInfo {
+    app.gate = Some(wimoai_wimo_shell::auth::GateInfo {
         message: "Subscribe".into(),
         url: None,
         label: None,
     });
 
-    let settings = wimo ai_wimo_shell::util::config::RemoteSettings {
+    let settings = wimoai_wimo_shell::util::config::RemoteSettings {
         gate_message: Some("Subscribe".into()),
         ..Default::default()
     };
@@ -2216,7 +2216,7 @@ fn gate_refreshed_no_effect_when_already_unblocked() {
     let mut app = test_app();
     assert!(app.has_access()); // no gate
 
-    let settings = wimo ai_wimo_shell::util::config::RemoteSettings::default();
+    let settings = wimoai_wimo_shell::util::config::RemoteSettings::default();
     let effects = dispatch_task_result(
         TaskResult::GateRefreshed {
             settings: Some(settings),
@@ -2234,7 +2234,7 @@ fn gate_refreshed_newly_blocked_defers_gate_for_verification() {
     let mut app = test_app();
     assert!(app.has_access()); // ungated
 
-    let settings = wimo ai_wimo_shell::util::config::RemoteSettings {
+    let settings = wimoai_wimo_shell::util::config::RemoteSettings {
         gate_message: Some("Subscribe".into()),
         ..Default::default()
     };
@@ -2266,8 +2266,8 @@ fn gate_refreshed_newly_blocked_defers_gate_for_verification() {
 
 // ── Stale-gate verification resolution ──────────────────────────
 
-fn test_gate() -> wimo ai_wimo_shell::auth::GateInfo {
-    wimo ai_wimo_shell::auth::GateInfo {
+fn test_gate() -> wimoai_wimo_shell::auth::GateInfo {
+    wimoai_wimo_shell::auth::GateInfo {
         message: "Subscribe".into(),
         url: None,
         label: None,
@@ -2281,7 +2281,7 @@ fn verify_check_with_meta_resolves_pending_gate() {
     let _effs = app.impose_gate(test_gate());
     assert!(app.has_access());
 
-    let meta = serde_json::to_value(wimo ai_wimo_shell::auth::AuthMeta::default()).unwrap();
+    let meta = serde_json::to_value(wimoai_wimo_shell::auth::AuthMeta::default()).unwrap();
     dispatch_task_result(
         TaskResult::CheckSubscriptionComplete {
             verify: Some(app.gate_verify_gen),
@@ -2300,7 +2300,7 @@ fn verify_check_with_gated_meta_shows_gate() {
     let mut app = test_app();
     let _effs = app.impose_gate(test_gate());
 
-    let meta = serde_json::to_value(wimo ai_wimo_shell::auth::AuthMeta {
+    let meta = serde_json::to_value(wimoai_wimo_shell::auth::AuthMeta {
         gate: Some(test_gate()),
         ..Default::default()
     })
@@ -2443,7 +2443,7 @@ fn gate_verify_timeout_noop_when_already_resolved() {
     let _effs = app.impose_gate(test_gate());
     let generation = app.gate_verify_gen;
     // Live check resolved first (access confirmed).
-    let meta = serde_json::to_value(wimo ai_wimo_shell::auth::AuthMeta::default()).unwrap();
+    let meta = serde_json::to_value(wimoai_wimo_shell::auth::AuthMeta::default()).unwrap();
     dispatch_task_result(
         TaskResult::CheckSubscriptionComplete {
             verify: None,
@@ -2466,7 +2466,7 @@ fn gate_verify_timeout_stale_generation_is_ignored() {
     // First deferral resolves (access confirmed)
     let _effs = app.impose_gate(test_gate());
     let stale_gen = app.gate_verify_gen;
-    let meta = serde_json::to_value(wimo ai_wimo_shell::auth::AuthMeta::default()).unwrap();
+    let meta = serde_json::to_value(wimoai_wimo_shell::auth::AuthMeta::default()).unwrap();
     dispatch_task_result(
         TaskResult::CheckSubscriptionComplete {
             verify: None,
@@ -2504,7 +2504,7 @@ fn verified_gate_via_check_complete_starts_paywall_chain() {
     let mut app = test_app();
     let _effs = app.impose_gate(test_gate());
 
-    let meta = serde_json::to_value(wimo ai_wimo_shell::auth::AuthMeta {
+    let meta = serde_json::to_value(wimoai_wimo_shell::auth::AuthMeta {
         gate: Some(test_gate()),
         ..Default::default()
     })
@@ -2530,7 +2530,7 @@ fn verified_gate_via_check_complete_starts_paywall_chain() {
     );
 
     // Steady-state paywall-poller responses (already gated) must NOT fan out extra timers
-    let meta = serde_json::to_value(wimo ai_wimo_shell::auth::AuthMeta {
+    let meta = serde_json::to_value(wimoai_wimo_shell::auth::AuthMeta {
         gate: Some(test_gate()),
         ..Default::default()
     })
@@ -2558,7 +2558,7 @@ fn gate_refreshed_without_gate_clears_pending_verification() {
     let _effs = app.impose_gate(test_gate());
     let generation = app.gate_verify_gen;
 
-    let settings = wimo ai_wimo_shell::util::config::RemoteSettings::default();
+    let settings = wimoai_wimo_shell::util::config::RemoteSettings::default();
     let effects = dispatch_task_result(
         TaskResult::GateRefreshed {
             settings: Some(settings),
@@ -3026,7 +3026,7 @@ fn routed_to_cancelled(events: &[SessionEvent]) -> bool {
 
 #[test]
 fn compact_complete_error_surfaces_real_error_in_scrollback() {
-    use wimo ai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
+    use wimoai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
     // Real wire shape: typed data carrying the shell-normalized detail.
     let events =
         compact_complete_events_for(acp::Error::internal_error().data(compact_error_data(
@@ -3050,7 +3050,7 @@ fn compact_complete_error_surfaces_real_error_in_scrollback() {
 
 #[test]
 fn compact_complete_typed_detail_between_the_two_caps_is_not_retruncated() {
-    use wimo ai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
+    use wimoai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
     // 250 chars: over the pager sanitize cap, under the shell's 300-byte cap
     // It must reach scrollback byte-identical, exactly as the auto path renders it
     let detail = format!(
@@ -3070,7 +3070,7 @@ fn compact_complete_typed_detail_between_the_two_caps_is_not_retruncated() {
 
 #[test]
 fn compact_complete_typed_cancellation_routes_to_cancelled() {
-    use wimo ai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
+    use wimoai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
     let events = compact_complete_events_for(acp::Error::internal_error().data(
         compact_error_data(CompactErrorKind::Cancelled, COMPACT_CANCELLED_MSG),
     ));
@@ -3093,7 +3093,7 @@ fn compact_complete_old_shell_string_cancel_still_routes_to_cancelled() {
 
 #[test]
 fn compact_complete_typed_failure_echoing_cancel_phrase_stays_a_failure() {
-    use wimo ai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
+    use wimoai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
     // An upstream echo of the cancel phrase must not reroute a typed failure.
     let echoing = format!("upstream rejected input containing '{COMPACT_CANCELLED_MSG}' marker");
     let events = compact_complete_events_for(
@@ -3114,7 +3114,7 @@ fn compact_complete_typed_failure_echoing_cancel_phrase_stays_a_failure() {
 
 #[test]
 fn compact_complete_renders_one_failure_line_per_completion() {
-    use wimo ai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
+    use wimoai_wimo_shell::session::helpers::session_compact::{CompactErrorKind, compact_error_data};
     // One /compact failure must paint exactly one line: `finish_command()` exits the compact state on the first completion
     // A stray duplicate completion is dropped by the state guard instead of double-rendering
     let mut app = test_app_with_agent();

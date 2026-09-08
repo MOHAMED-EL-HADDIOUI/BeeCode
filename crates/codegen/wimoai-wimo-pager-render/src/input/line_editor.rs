@@ -1,5 +1,5 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use wimo ai_ratatui_textarea::{
+use wimoai_ratatui_textarea::{
     EditBuffer, EditCommand, EditOutcome, SingleLineViewport, classify_key_event,
 };
 

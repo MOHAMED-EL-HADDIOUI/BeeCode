@@ -3,18 +3,18 @@
 //!
 //! Despite the name, no channel type lives here; sessions call the server harness directly through `ToolContext`.
 
-use wimo ai_wimo_tools::notification::types::ToolNotification;
-use wimo ai_wimo_workspace_types::WorkspaceEvent;
+use wimoai_wimo_tools::notification::types::ToolNotification;
+use wimoai_wimo_workspace_types::WorkspaceEvent;
 
 pub use crate::hub_ids::WORKSPACE_RPC_TOOL_ID;
 // Canonical in the client crate; re-exported for existing importers.
-pub use wimo ai_wimo_workspace_client::consume_stream_terminal;
+pub use wimoai_wimo_workspace_client::consume_stream_terminal;
 
 /// Extract a `WorkspaceEvent` from a custom `ToolNotificationFrame`.
 pub fn extract_workspace_event(
-    frame: &wimo ai_tool_protocol::ToolNotificationFrame,
+    frame: &wimoai_tool_protocol::ToolNotificationFrame,
 ) -> Option<WorkspaceEvent> {
-    use wimo ai_tool_protocol::WireToolNotification;
+    use wimoai_tool_protocol::WireToolNotification;
     match &frame.notification {
         WireToolNotification::Custom(c) => serde_json::from_value(c.payload.clone()).ok(),
         _ => None,
@@ -25,9 +25,9 @@ pub fn extract_workspace_event(
 ///
 /// Currently has no producer; kept for a future per-session `tool.notify` path.
 pub fn extract_tool_notification(
-    frame: &wimo ai_tool_protocol::ToolNotificationFrame,
+    frame: &wimoai_tool_protocol::ToolNotificationFrame,
 ) -> Option<ToolNotification> {
-    use wimo ai_tool_protocol::WireToolNotification;
+    use wimoai_tool_protocol::WireToolNotification;
     match &frame.notification {
         WireToolNotification::Custom(c) => {
             serde_json::from_value::<ToolNotification>(c.payload.clone()).ok()
@@ -43,7 +43,7 @@ pub fn extract_tool_notification(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wimo ai_tool_protocol::{ToolId, ToolNotificationFrame, WireToolNotification};
+    use wimoai_tool_protocol::{ToolId, ToolNotificationFrame, WireToolNotification};
 
     #[test]
     fn extract_workspace_event_custom_valid() {
@@ -118,5 +118,5 @@ mod tests {
         );
     }
 
-    // consume_stream_terminal tests live in wimo ai-wimo-workspace-client.
+    // consume_stream_terminal tests live in wimoai-wimo-workspace-client.
 }

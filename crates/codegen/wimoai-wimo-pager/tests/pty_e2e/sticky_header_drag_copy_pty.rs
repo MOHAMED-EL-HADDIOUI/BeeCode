@@ -3,7 +3,7 @@
 // Drag-select and copy out of a prompt pinned as a sticky header (painted outside the content renderer's selection bookkeeping).
 #[allow(unused_imports)]
 use super::common::*;
-use wimo ai_wimo_pager_pty_harness::StyledLine;
+use wimoai_wimo_pager_pty_harness::StyledLine;
 
 /// 60 answer lines over a 50-row terminal overflow the viewport, so the prompt pins to the top.
 const LAST_LINE: &str = "ANSWERLINE060";

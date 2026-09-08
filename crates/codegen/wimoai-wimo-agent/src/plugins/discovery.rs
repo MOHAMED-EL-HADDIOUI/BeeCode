@@ -325,8 +325,8 @@ pub fn discover_plugins(
 
     // 4-5. User plugins: $wimo_HOME/plugins, legacy ~/.wimo/plugins, ~/.claude/plugins.
     // Gate the wimo plugins dir on user_wimo_home() so a project's .wimo/plugins is never scanned as user-global when no home resolves
-    let wimo = wimo ai_wimo_config::user_wimo_home();
-    let plugin_dirs = user_plugin_dirs(wimo ai_dirs::home_dir().as_deref(), wimo.as_deref());
+    let wimo = wimoai_wimo_config::user_wimo_home();
+    let plugin_dirs = user_plugin_dirs(wimoai_dirs::home_dir().as_deref(), wimo.as_deref());
     for (plugins_dir, origin) in plugin_dirs {
         if plugins_dir.is_dir() {
             scan_plugin_dir(
@@ -378,7 +378,7 @@ pub fn discover_plugins(
     // 5c. Installed plugins (~/.claude/plugins/installed_plugins.json).
     // Entries carry explicit installPath dirs (nested under cache/<marketplace>/<plugin>/<version>/)
     // The plugin name is extracted from the JSON key ("name@marketplace").
-    if let Some(home) = wimo ai_dirs::home_dir() {
+    if let Some(home) = wimoai_dirs::home_dir() {
         let installed_json = home
             .join(".claude")
             .join("plugins")

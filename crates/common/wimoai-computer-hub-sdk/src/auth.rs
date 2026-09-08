@@ -40,7 +40,7 @@ use crate::error::ClientError;
 ///
 /// Clones are cheap (the secret material is at most a small number of
 /// owned strings). The server derives `user_id` from the credential at
-/// upgrade time and returns it in the [`wimo ai_tool_protocol::HelloAckMsg`].
+/// upgrade time and returns it in the [`wimoai_tool_protocol::HelloAckMsg`].
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum AuthCredential {
     /// Bearer token attached as the `Authorization: Bearer …` header.

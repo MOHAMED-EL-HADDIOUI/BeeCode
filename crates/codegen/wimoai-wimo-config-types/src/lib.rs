@@ -16,7 +16,7 @@ pub use mcp::*;
 mod permission;
 pub use permission::*;
 use serde::{Deserialize, Serialize};
-use wimo ai_wimo_announcements::RemoteAnnouncement;
+use wimoai_wimo_announcements::RemoteAnnouncement;
 /// A remote `campaigns[]` entry: an `id` gate plus a flattened patch that can set any config key.
 /// It is the JSON sibling of a `[[campaigns]]` TOML override.
 #[derive(Debug, Clone, Default, Deserialize, Serialize, PartialEq, Eq)]

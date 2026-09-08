@@ -7,10 +7,10 @@ use acp_harness::{AutoApproveClient, RPC_TIMEOUT, connect_and_auth, prompt_turn,
 use agent_client_protocol::{self as acp, Agent as _};
 use base64::Engine as _;
 use serde_json::json;
-use wimo ai_wimo_shell::sampling::{ContentPart, ConversationItem};
-use wimo ai_wimo_shell::session::info::Info;
-use wimo ai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
-use wimo ai_wimo_test_support::ScriptedResponse;
+use wimoai_wimo_shell::sampling::{ContentPart, ConversationItem};
+use wimoai_wimo_shell::session::info::Info;
+use wimoai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
+use wimoai_wimo_test_support::ScriptedResponse;
 
 const SESSION_ID: &str = "poisoned-image-session";
 
@@ -59,14 +59,14 @@ async fn seed_poisoned_session(cwd: &std::path::Path, image_url: &str) -> Info {
 }
 
 /// `/v1/chat/completions` bodies from the main turn, excluding the turn-summary requests.
-fn chat_completion_bodies(server: &wimo ai_wimo_test_support::MockInferenceServer) -> Vec<String> {
+fn chat_completion_bodies(server: &wimoai_wimo_test_support::MockInferenceServer) -> Vec<String> {
     server
         .requests()
         .into_iter()
         .filter(|r| r.path == "/v1/chat/completions")
         .filter(|r| {
             !r.header("x-wimo-req-id")
-                .is_some_and(|id| id.starts_with("wimo ai-turn-summary-"))
+                .is_some_and(|id| id.starts_with("wimoai-turn-summary-"))
         })
         .map(|r| r.body.map(|b| b.to_string()).unwrap_or_default())
         .collect()

@@ -1,7 +1,7 @@
 //! Actor-based sampling layer for wimo AI wimo.
 //!
-//! This crate holds the HTTP streaming and retry logic extracted from `wimo ai-wimo-shell`'s session actor.
-//! It is built on the same actor pattern as `wimo ai-hunk-tracker`.
+//! This crate holds the HTTP streaming and retry logic extracted from `wimoai-wimo-shell`'s session actor.
+//! It is built on the same actor pattern as `wimoai-hunk-tracker`.
 //!
 //! ## Layered API
 //!

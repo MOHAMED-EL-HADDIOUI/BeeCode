@@ -4,8 +4,8 @@
 use std::time::Duration;
 
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-use wimo ai_wimo_tools::notification::types::ToolNotificationHandle;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_wimo_tools::notification::types::ToolNotificationHandle;
 
 use super::adapter::{SnapshotOutput, TaskMap, parse_exit};
 use super::output_recorder::OutputRecorder;

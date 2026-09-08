@@ -3,7 +3,7 @@
 //! The shared compaction algorithms operate over a sequence of *items*
 //! (turns/messages) without knowing the concrete harness type. The chat
 //! harness implements [`CompactionItem`] for its `wimoTurn`;
-//! wimo implements it for `wimo ai_wimo_sampling_types::ConversationItem`.
+//! wimo implements it for `wimoai_wimo_sampling_types::ConversationItem`.
 //!
 //! Keeping the contract minimal is deliberate: the algorithms only need
 //! enough structure to (a) classify roles, (b) read text, and (c) preserve

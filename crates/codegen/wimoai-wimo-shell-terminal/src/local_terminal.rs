@@ -6,7 +6,7 @@ use tokio::process::Command;
 use tokio::time;
 
 use crate::runner::{AsyncTerminalRunner, TerminalError, TerminalRunRequest, TerminalRunResult};
-use wimo ai_tty_utils::KILL_REAP_TIMEOUT;
+use wimoai_tty_utils::KILL_REAP_TIMEOUT;
 
 pub struct LocalTerminalRunner;
 
@@ -93,7 +93,7 @@ impl AsyncTerminalRunner for LocalTerminalRunner {
         };
         #[cfg(not(unix))]
         let mut cmd = {
-            let inv = wimo ai_wimo_config::shell::shell_command_argv(&request.command);
+            let inv = wimoai_wimo_config::shell::shell_command_argv(&request.command);
             let mut c = Command::new(inv.program);
             c.args(&inv.args).envs(inv.env);
             c
@@ -107,8 +107,8 @@ impl AsyncTerminalRunner for LocalTerminalRunner {
 
         // Detach from the controlling terminal so child processes (e.g. GPG pinentry) cannot open /dev/tty and corrupt the TUI.
         // (This also makes the child its own session/group leader, which the ProcessGroup attach below relies on.)
-        wimo ai_wimo_tools::util::detach_command(&mut cmd);
-        wimo ai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
+        wimoai_wimo_tools::util::detach_command(&mut cmd);
+        wimoai_wimo_sandbox::child_net::restrict_child_network(&mut cmd);
 
         #[allow(clippy::disallowed_methods)]
         // The child is killed via its process group on timeout; an unreapable (D-state) child is abandoned to the runtime's orphan reaper
@@ -120,7 +120,7 @@ impl AsyncTerminalRunner for LocalTerminalRunner {
         // On timeout the group is killed so grandchildren can't keep running (and can't hold the output pipes open past the kill)
         // This is the same pattern as `gateway_bridge::local_workspace_supervisor`
         // The group kill is extra on top of the direct kill, so a failure to create or attach the group only logs and the shell keeps running
-        let process_group = match wimo ai_tty_utils::ProcessGroup::new() {
+        let process_group = match wimoai_tty_utils::ProcessGroup::new() {
             Ok(mut group) => {
                 if let Err(e) = group.attach(&child) {
                     // e.g. the child already exited.
@@ -203,7 +203,7 @@ mod tests {
     use crate::DEFAULT_OUTPUT_BYTE_LIMIT;
     use crate::runner::TerminalRunRequest;
     use std::collections::HashMap;
-    use wimo ai_wimo_paths::AbsPathBuf;
+    use wimoai_wimo_paths::AbsPathBuf;
 
     fn make_request(command: &str) -> TerminalRunRequest {
         TerminalRunRequest {

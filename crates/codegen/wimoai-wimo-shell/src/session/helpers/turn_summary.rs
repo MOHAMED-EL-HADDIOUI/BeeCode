@@ -97,7 +97,7 @@ mod tests {
     }
 
     fn synthetic_user(text: &str) -> ConversationItem {
-        use wimo ai_wimo_sampling_types::{ContentPart, SyntheticReason, UserItem};
+        use wimoai_wimo_sampling_types::{ContentPart, SyntheticReason, UserItem};
         ConversationItem::User(UserItem {
             content: vec![ContentPart::Text {
                 text: std::sync::Arc::from(text),

@@ -589,18 +589,18 @@ mod tests {
             first_prompt: Some("first prompt".into()),
             updated_at: updated_at.into(),
             created_at: "2026-01-01T00:00:00Z".into(),
-            cwd: "/Users/me/wimo ai".into(),
+            cwd: "/Users/me/wimoai".into(),
             hostname: Some("devbox".into()),
             source: "local".into(),
             model_id: Some("wimo".into()),
             num_messages: 7,
             last_active_at: Some(updated_at.into()),
             branch: Some("main".into()),
-            repo_name: Some("wimo ai".into()),
+            repo_name: Some("wimoai".into()),
             worktree_label: Some("wt".into()),
-            git_root_dir: Some("/Users/me/wimo ai".into()),
+            git_root_dir: Some("/Users/me/wimoai".into()),
             git_remotes: vec!["git@github.com:example/repo.git".into()],
-            source_workspace_dir: Some("/Users/me/wimo ai-src".into()),
+            source_workspace_dir: Some("/Users/me/wimoai-src".into()),
             last_turn_summary: None,
             last_recap: None,
             session_kind: Some("worktree".into()),
@@ -636,9 +636,9 @@ mod tests {
         assert_eq!(value["numMessages"], 7);
         assert_eq!(value["title"], "a summary");
         assert_eq!(value["_meta"]["x.ai/session"]["kind"], "build");
-        assert_eq!(value["gitRootDir"], "/Users/me/wimo ai");
+        assert_eq!(value["gitRootDir"], "/Users/me/wimoai");
         assert_eq!(value["gitRemotes"][0], "git@github.com:example/repo.git");
-        assert_eq!(value["sourceWorkspaceDir"], "/Users/me/wimo ai-src");
+        assert_eq!(value["sourceWorkspaceDir"], "/Users/me/wimoai-src");
         assert_eq!(value["sessionKind"], "worktree");
     }
     #[test]
@@ -650,7 +650,7 @@ mod tests {
         ));
         assert!(matches!(
             r.facets.get(CWD_FACET_KEY),
-            Some(FacetValue::One(serde_json::Value::String(c))) if c == "/Users/me/wimo ai"
+            Some(FacetValue::One(serde_json::Value::String(c))) if c == "/Users/me/wimoai"
         ));
     }
     #[test]
@@ -658,7 +658,7 @@ mod tests {
         let value =
             serde_json::to_value(row("s1", "2026-06-18T20:10:00Z").into_session_info()).unwrap();
         assert_eq!(value["sessionId"], "s1");
-        assert_eq!(value["cwd"], "/Users/me/wimo ai");
+        assert_eq!(value["cwd"], "/Users/me/wimoai");
         assert_eq!(value["title"], "a summary");
         assert_eq!(value["_meta"]["x.ai/session"]["kind"], "build");
         assert!(value.get("summary").is_none());
@@ -834,14 +834,14 @@ mod tests {
             Some(&vec![serde_json::json!("chat")])
         );
     }
-    fn wimo ai_auth_manager(dir: &std::path::Path) -> std::sync::Arc<crate::auth::AuthManager> {
+    fn wimoai_auth_manager(dir: &std::path::Path) -> std::sync::Arc<crate::auth::AuthManager> {
         let am = std::sync::Arc::new(crate::auth::AuthManager::new(
             dir,
             crate::auth::wimoComConfig::default(),
         ));
         am.hot_swap(crate::auth::wimoAuth {
             auth_mode: crate::auth::AuthMode::Oidc,
-            oidc_issuer: Some(crate::auth::wimo ai_oauth2_issuer().to_owned()),
+            oidc_issuer: Some(crate::auth::wimoai_oauth2_issuer().to_owned()),
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
             ..crate::auth::wimoAuth::test_default()
         });
@@ -885,12 +885,12 @@ mod tests {
                     .to_string(),
             )
             .await;
-        let _env = wimo ai_wimo_test_support::EnvGuard::set(
+        let _env = wimoai_wimo_test_support::EnvGuard::set(
             "wimo_CONVERSATIONS_BASE_URL",
             format!("http://{addr}"),
         );
         let home = tempfile::tempdir().expect("tempdir");
-        let client = ConversationsClient::new(wimo ai_auth_manager(home.path()));
+        let client = ConversationsClient::new(wimoai_auth_manager(home.path()));
         let mut req = ListReq {
             meta: Some(serde_json::json!({
                 "x.ai/facetFilters": { "kind": ["build"] },
@@ -950,15 +950,15 @@ mod tests {
     #[serial_test::serial]
     fn conversations_lane_env_gating_matrix() {
         {
-            let _off = wimo ai_wimo_test_support::EnvGuard::unset("wimo_SESSION_LIST_CONVERSATIONS");
+            let _off = wimoai_wimo_test_support::EnvGuard::unset("wimo_SESSION_LIST_CONVERSATIONS");
             assert!(!conversations_lane_enabled());
         }
         {
-            let _on = wimo ai_wimo_test_support::EnvGuard::set("wimo_SESSION_LIST_CONVERSATIONS", "1");
+            let _on = wimoai_wimo_test_support::EnvGuard::set("wimo_SESSION_LIST_CONVERSATIONS", "1");
             assert_eq!(conversations_lane_enabled(), false);
         }
         {
-            let _off = wimo ai_wimo_test_support::EnvGuard::set("wimo_SESSION_LIST_CONVERSATIONS", "0");
+            let _off = wimoai_wimo_test_support::EnvGuard::set("wimo_SESSION_LIST_CONVERSATIONS", "0");
             assert!(!conversations_lane_enabled());
         }
     }
@@ -967,20 +967,20 @@ mod tests {
     #[serial_test::serial]
     fn conversations_lane_active_truth_table() {
         use crate::agent::chat_modes::wimo_CHAT_MODE_ENV;
-        let _chat_off = wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_MODE_ENV);
+        let _chat_off = wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_MODE_ENV);
         let _desktop_off =
-            wimo ai_wimo_test_support::EnvGuard::unset("wimo_SESSION_LIST_CONVERSATIONS");
+            wimoai_wimo_test_support::EnvGuard::unset("wimo_SESSION_LIST_CONVERSATIONS");
         assert!(
             !conversations_lane_active(),
             "no env ⇒ lane off (Build-mode default)"
         );
         {
             let _desktop =
-                wimo ai_wimo_test_support::EnvGuard::set("wimo_SESSION_LIST_CONVERSATIONS", "1");
+                wimoai_wimo_test_support::EnvGuard::set("wimo_SESSION_LIST_CONVERSATIONS", "1");
             assert_eq!(conversations_lane_active(), false);
         }
         {
-            let _chat = wimo ai_wimo_test_support::EnvGuard::set(wimo_CHAT_MODE_ENV, "1");
+            let _chat = wimoai_wimo_test_support::EnvGuard::set(wimo_CHAT_MODE_ENV, "1");
             assert_eq!(
                 conversations_lane_active(),
                 false,
@@ -998,7 +998,7 @@ mod tests {
         })
         .to_string();
         {
-            let _off = wimo ai_wimo_test_support::EnvGuard::unset(wimo_CHAT_MODE_ENV);
+            let _off = wimoai_wimo_test_support::EnvGuard::unset(wimo_CHAT_MODE_ENV);
             let req = parse_list_req(&raw).expect("parse");
             let parsed = ParsedMeta::parse(req.meta.as_ref());
             assert_eq!(
@@ -1008,7 +1008,7 @@ mod tests {
             );
         }
         {
-            let _on = wimo ai_wimo_test_support::EnvGuard::set(wimo_CHAT_MODE_ENV, "1");
+            let _on = wimoai_wimo_test_support::EnvGuard::set(wimo_CHAT_MODE_ENV, "1");
             let req = parse_list_req(&raw).expect("parse");
             let parsed = ParsedMeta::parse(req.meta.as_ref());
             let expected_build = if cfg!(feature = "local-workspace") {
@@ -1109,7 +1109,7 @@ mod tests {
     fn relax_rows_scopes_to_repo_and_requires_messages() {
         use crate::session::persistence::Summary;
         let this_repo = "git@github.com:example/app.git";
-        let repo_url = wimo ai_wimo_workspace::session::git::normalize_repo_url(this_repo).unwrap();
+        let repo_url = wimoai_wimo_workspace::session::git::normalize_repo_url(this_repo).unwrap();
         let summary = |id: &str, remote: Option<&str>, num_messages: usize| {
             let mut s = Summary::new(
                 &crate::session::info::Info {
@@ -1132,7 +1132,7 @@ mod tests {
             relax(),
             vec![
                 summary("mine", Some(this_repo), 4),
-                summary("theirs", Some("git@github.com:wimo ai-org/other.git"), 9),
+                summary("theirs", Some("git@github.com:wimoai-org/other.git"), 9),
             ],
             30,
             facet_registry(),

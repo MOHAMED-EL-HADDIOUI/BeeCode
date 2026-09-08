@@ -1,5 +1,5 @@
 //! Process manager — REAL subprocess streaming (Section 12 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 use std::process::{Command, Stdio};
 
 pub struct ProcessResult {

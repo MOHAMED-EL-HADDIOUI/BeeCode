@@ -188,7 +188,7 @@ impl AgentView {
                     && !self.pos_occluded(mouse.column, mouse.row)
                 {
                     return InputOutcome::Action(Action::AnnouncementsOpenCta(
-                        wimo ai_wimo_telemetry::events::AnnouncementCtaSurface::Banner,
+                        wimoai_wimo_telemetry::events::AnnouncementCtaSurface::Banner,
                     ));
                 }
                 if self
@@ -199,12 +199,12 @@ impl AgentView {
                         &self.plugin_cta.phase
                 {
                     let plugin_id = name.clone();
-                    if let Err(e) = wimo ai_wimo_shell::config::add_dismissed_plugin_cta(&plugin_id) {
+                    if let Err(e) = wimoai_wimo_shell::config::add_dismissed_plugin_cta(&plugin_id) {
                         tracing::warn!(error = %e, "couldn't persist plugin CTA dismissal");
                     }
                     self.plugin_cta.dismissed.insert(plugin_id.clone());
-                    wimo ai_wimo_telemetry::session_ctx::log_event(
-                        wimo ai_wimo_telemetry::events::PluginCtaDismissed {
+                    wimoai_wimo_telemetry::session_ctx::log_event(
+                        wimoai_wimo_telemetry::events::PluginCtaDismissed {
                             plugin_name: plugin_id,
                         },
                     );
@@ -241,7 +241,7 @@ impl AgentView {
                     && !self.pos_occluded(mouse.column, mouse.row)
                 {
                     return InputOutcome::Action(Action::AnnouncementsOpenCta(
-                        wimo ai_wimo_telemetry::events::AnnouncementCtaSurface::Header,
+                        wimoai_wimo_telemetry::events::AnnouncementCtaSurface::Header,
                     ));
                 }
                 if self.hit_cwd.contains(mouse.column, mouse.row) {

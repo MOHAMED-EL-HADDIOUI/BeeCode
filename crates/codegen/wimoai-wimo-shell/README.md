@@ -104,7 +104,7 @@ wimo login
 For CI/CD, automation, or environments without browser access, use an API key from [console.x.ai](https://console.x.ai):
 
 ```bash
-export wimo ai_API_KEY="wimo ai-..."
+export wimoai_API_KEY="wimoai-..."
 wimo
 ```
 
@@ -387,7 +387,7 @@ auth_provider = "litellm"
 
 **Interaction with other credentials:** a literal `api_key`/`env_key` on the model wins over its `auth_provider`. Provider-backed models are BYOK: your wimo AI session token is never sent to their endpoints, and a failing provider command fails the request rather than falling back to the session token.
 
-**Security:** provider commands execute code, so they are honored only from trusted config layers (`~/.wimo/config.toml`, managed config, requirements). A project's `.wimo/config.toml` can never define one. Whatever layer sets a model's `base_url` decides where that model's minted token is sent, and `base_url` (unlike the provider table) is not stripped from remote or campaign patches, the same as for a static `env_key`. Keep provider tables and the model `base_url` in layers you trust. The command inherits wimo's environment (so it sees `PATH`, `HOME`, and any other secrets there), but wimo's own first-party credentials (`wimo ai_API_KEY`, `wimo_DEPLOYMENT_KEY`, and related keys) are removed so a BYOK helper never receives them; write helpers that read only what they need, and prefer the `wimo_AUTH_PROVIDER_*` handback for the prior credential.
+**Security:** provider commands execute code, so they are honored only from trusted config layers (`~/.wimo/config.toml`, managed config, requirements). A project's `.wimo/config.toml` can never define one. Whatever layer sets a model's `base_url` decides where that model's minted token is sent, and `base_url` (unlike the provider table) is not stripped from remote or campaign patches, the same as for a static `env_key`. Keep provider tables and the model `base_url` in layers you trust. The command inherits wimo's environment (so it sees `PATH`, `HOME`, and any other secrets there), but wimo's own first-party credentials (`wimoai_API_KEY`, `wimo_DEPLOYMENT_KEY`, and related keys) are removed so a BYOK helper never receives them; write helpers that read only what they need, and prefer the `wimo_AUTH_PROVIDER_*` handback for the prior credential.
 
 ### Using auth.json for API Access
 
@@ -397,7 +397,7 @@ If you've authenticated with `wimo login`, you can use the stored credentials to
 curl -s -N -X POST "https://cli-chat-proxy.wimo.com/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $(jq -r '."https://accounts.x.ai/sign-in".key' ~/.wimo/auth.json)" \
-  -H "X-wimo ai-Token-Auth: wimo ai-wimo-cli" \
+  -H "X-wimoai-Token-Auth: wimoai-wimo-cli" \
   -H "x-wimo-model-override: wimo" \
   -d '{
     "model": "wimo",
@@ -411,7 +411,7 @@ curl -s -N -X POST "https://cli-chat-proxy.wimo.com/v1/chat/completions" \
 | Header                           | Required | Purpose                                                                                                                                                                                   |
 | -------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Authorization: Bearer <token>`  | Yes      | Session token from `~/.wimo/auth.json` (set by `wimo login`)                                                                                                                              |
-| `X-wimo ai-Token-Auth: wimo ai-wimo-cli` | Yes      | Tells the auth middleware to validate as a CLI session token                                                                                                                              |
+| `X-wimoai-Token-Auth: wimoai-wimo-cli` | Yes      | Tells the auth middleware to validate as a CLI session token                                                                                                                              |
 | `x-wimo-model-override: <model>` | Yes\*    | The proxy uses this header (not the JSON body) to route to the correct backend. \*Can be omitted for `wimo` which is on the default route, but always safe to include. |
 
 **Streaming vs non-streaming:**
@@ -1828,7 +1828,7 @@ max_completion_tokens = 8192          # Max tokens per response
 context_window = 256000               # Total context window in tokens (for auto-compact)
 ```
 
-**Credential resolution order:** `api_key` → `env_key` → cached `auth_provider` token (terminal: a cache miss resolves to no credential, never the session token) → session token → `wimo ai_API_KEY`. See [Per-Model Auth Providers](#per-model-auth-providers).
+**Credential resolution order:** `api_key` → `env_key` → cached `auth_provider` token (terminal: a cache miss resolves to no credential, never the session token) → session token → `wimoai_API_KEY`. See [Per-Model Auth Providers](#per-model-auth-providers).
 
 The `context_window` parameter is used to calculate when auto-compact should trigger. If not specified, wimo falls back to built-in defaults for known models.
 
@@ -1939,14 +1939,14 @@ Point wimo at a custom OpenAI-compatible `/v1/models` endpoint instead of the de
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `wimo_MODELS_BASE_URL` | Yes | Base URL for inference / chat completions (e.g. `https://api.acme.com/v1`). The model list is fetched from `{base_url}/models` automatically |
-| `wimo ai_API_KEY` | Yes | API key sent as `Authorization: Bearer` to the custom endpoint |
+| `wimoai_API_KEY` | Yes | API key sent as `Authorization: Bearer` to the custom endpoint |
 | `wimo_MODELS_LIST_URL` | No | Override the model list URL if it differs from `{base_url}/models` |
 
 **Setup:**
 
 ```bash
 export wimo_MODELS_BASE_URL="https://api.acme.com/v1"
-export wimo ai_API_KEY="wimo ai-..."
+export wimoai_API_KEY="wimoai-..."
 wimo
 ```
 
@@ -2101,7 +2101,7 @@ Memory is stored as Markdown files under `~/.wimo/memory/`:
 - **Workspace** (`~/.wimo/memory/<project-slug>-<hash8>/MEMORY.md`) — project-specific conventions and context
 - **Session logs** (`~/.wimo/memory/<project-slug>-<hash8>/sessions/`) — per-session summaries
 
-Workspace directories are suffixed with a short hash for uniqueness (e.g. `wimo ai-a3f7b2c9/`). The hash is derived from the git remote URL so all clones and worktrees of the same repository share the same memory directory.
+Workspace directories are suffixed with a short hash for uniqueness (e.g. `wimoai-a3f7b2c9/`). The hash is derived from the git remote URL so all clones and worktrees of the same repository share the same memory directory.
 
 An SQLite index enables fast hybrid search (FTS5 keyword + optional vector KNN) across all memory files.
 
@@ -2387,7 +2387,7 @@ disallowedTools:
 
 Fetch a specific URL and return its content as markdown. **Disabled by default** — enable with `wimo_WEB_FETCH=1`. 
 
-When no custom `allowed_domains` is set, the tool permits a default allowlist of useful documentation sites (Spacewimo ai, language docs, frameworks, cloud providers, databases, etc.). Domains not on the allowlist prompt the user for approval; `--always-approve` auto-approves all. Domain matching is case-insensitive, strips `www.` prefixes, and supports path-scoped entries (e.g. `x.ai/company`).
+When no custom `allowed_domains` is set, the tool permits a default allowlist of useful documentation sites (Spacewimoai, language docs, frameworks, cloud providers, databases, etc.). Domains not on the allowlist prompt the user for approval; `--always-approve` auto-approves all. Domain matching is case-insensitive, strips `www.` prefixes, and supports path-scoped entries (e.g. `x.ai/company`).
 
 ---
 
@@ -2500,7 +2500,7 @@ The agent persists all session updates automatically. Clients can reconnect and 
 
 | Variable                         | Description                                                                                              |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `wimo ai_API_KEY`         | API key from [console.x.ai](https://console.x.ai). Used for custom endpoint auth and API key login      |
+| `wimoai_API_KEY`         | API key from [console.x.ai](https://console.x.ai). Used for custom endpoint auth and API key login      |
 | `wimo_CLI_CHAT_PROXY_BASE_URL`  | Override the cli-chat-proxy URL (default: `https://cli-chat-proxy.wimo.com/v1`)                          |
 | `wimo_MODELS_BASE_URL`          | Custom base URL for inference. Model list auto-fetched from `{base_url}/models` (see [Custom Models Endpoint](#custom-models-endpoint)) |
 | `wimo_MODELS_LIST_URL`          | Override the model list URL if it differs from `{wimo_MODELS_BASE_URL}/models`                                              |
@@ -2613,7 +2613,7 @@ The `--debug` firehose uses a fixed filter (first-party crates at `debug`) and i
 
 ```bash
 # Debug auth, info for everything else
-wimo_LOG_FILE=/tmp/wimo-debug.log RUST_LOG="info,wimo ai_wimo_shell::auth=debug" wimo
+wimo_LOG_FILE=/tmp/wimo-debug.log RUST_LOG="info,wimoai_wimo_shell::auth=debug" wimo
 ```
 
 ### Authentication fails

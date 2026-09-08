@@ -10,7 +10,7 @@ pub(crate) struct ExternalAuthOutput {
     pub refresh_token: Option<String>,
     #[serde(default)]
     pub expires_in: Option<u64>,
-    /// An wimo AI issuer marks the credential as first-party (see [`crate::auth::wimoAuth::is_wimo ai_auth`]).
+    /// An wimo AI issuer marks the credential as first-party (see [`crate::auth::wimoAuth::is_wimoai_auth`]).
     #[serde(default)]
     pub issuer: Option<String>,
 }

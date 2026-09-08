@@ -2,8 +2,8 @@
 
 use serde_json::json;
 
-use wimo ai_tool_protocol::{ToolErrorWire, ToolId};
-use wimo ai_tool_runtime::error::{ToolError, ToolErrorKind};
+use wimoai_tool_protocol::{ToolErrorWire, ToolId};
+use wimoai_tool_runtime::error::{ToolError, ToolErrorKind};
 
 fn tid(name: &str) -> ToolId {
     ToolId::new(name).unwrap()

@@ -56,8 +56,8 @@ pub const COMPACT_SYSTEM_PROMPT: &str = "You are an AI coding agent. You operate
 mod tests {
     use super::*;
     use std::collections::HashMap;
-    use wimo ai_wimo_tools::types::template_renderer::TemplateRenderer;
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::template_renderer::TemplateRenderer;
+    use wimoai_wimo_tools::types::tool::ToolKind;
 
     /// Verify the pre-generated encrypted file matches the current template sources.
     /// If this fails, run: `python3 scripts/encrypt_templates.py`

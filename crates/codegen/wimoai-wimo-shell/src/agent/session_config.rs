@@ -1,6 +1,6 @@
 use agent_client_protocol as acp;
 use serde::Serialize;
-use wimo ai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
+use wimoai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
 
 use crate::session::unified_list::SessionKind;
 
@@ -278,14 +278,14 @@ mod tests {
     fn wimo_session_detail_serializes_camel_case() {
         let detail = wimoSessionDetail::build(
             "sess-1".to_string(),
-            "/Users/me/wimo ai".to_string(),
+            "/Users/me/wimoai".to_string(),
             "wimo".to_string(),
             None,
         );
         let v = serde_json::to_value(&detail).expect("serialize");
         assert_eq!(v["sessionId"], "sess-1");
         assert_eq!(v["kind"], "build");
-        assert_eq!(v["cwd"], "/Users/me/wimo ai");
+        assert_eq!(v["cwd"], "/Users/me/wimoai");
         assert_eq!(v["currentModelId"], "wimo");
         assert!(v.get("title").is_none());
     }

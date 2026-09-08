@@ -73,7 +73,7 @@ impl LazinessAbortReason {
 }
 
 /// Prefix on `x_wimo_req_id` for laziness-classifier sampler calls, used by the production producer (`maybe_fire_laziness_check`).
-pub(crate) const LAZINESS_REQ_ID_PREFIX: &str = "wimo ai-laziness-";
+pub(crate) const LAZINESS_REQ_ID_PREFIX: &str = "wimoai-laziness-";
 
 /// Preamble on the User-item text of the classifier request.
 /// The User content is `format!("{LAZINESS_USER_PREAMBLE}=== BEGIN TRANSCRIPT ===\n{runtime_state}{transcript}=== END TRANSCRIPT ===\n")`.
@@ -287,7 +287,7 @@ pub(crate) fn flatten_transcript_for_classifier(
             ConversationItem::User(user) => {
                 let mut text = String::new();
                 for part in &user.content {
-                    if let wimo ai_wimo_sampling_types::ContentPart::Text { text: t } = part {
+                    if let wimoai_wimo_sampling_types::ContentPart::Text { text: t } = part {
                         if !text.is_empty() {
                             text.push(' ');
                         }
@@ -298,7 +298,7 @@ pub(crate) fn flatten_transcript_for_classifier(
                     let _ = writeln!(
                         out,
                         "[agent_message] {} {}",
-                        wimo ai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL,
+                        wimoai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL,
                         truncate(&text)
                     );
                 } else {
@@ -331,7 +331,7 @@ pub(crate) fn flatten_transcript_for_classifier(
             }
             ConversationItem::Reasoning(r) => {
                 if include_reasoning {
-                    let text = wimo ai_wimo_sampling_types::reasoning_item_text(r);
+                    let text = wimoai_wimo_sampling_types::reasoning_item_text(r);
                     if !text.trim().is_empty() {
                         let _ = writeln!(
                             out,
@@ -392,15 +392,15 @@ pub(crate) fn neutralize_transcript_user_text(s: &str) -> String {
     out
 }
 
-const CLASSIFIER_TURN_MAX_LEN: usize = wimo ai_wimo_workspace::permission::CLASSIFIER_TURN_MAX_LEN;
+const CLASSIFIER_TURN_MAX_LEN: usize = wimoai_wimo_workspace::permission::CLASSIFIER_TURN_MAX_LEN;
 const LEGACY_TOOL_IMAGE_FOLLOWUP: &str = "[Image extracted from tool result above]";
 
 /// Project the complete resident conversation, retaining only trusted user intent and assistant tool calls.
 /// Every projected field is neutralized and capped.
 pub(crate) fn build_classifier_turns(
     items: &[ConversationItem],
-) -> Vec<wimo ai_wimo_workspace::permission::ClassifierTurn> {
-    use wimo ai_wimo_workspace::permission::ClassifierTurn;
+) -> Vec<wimoai_wimo_workspace::permission::ClassifierTurn> {
+    use wimoai_wimo_workspace::permission::ClassifierTurn;
     let mut turns = Vec::new();
     for item in items {
         match item {
@@ -414,17 +414,17 @@ pub(crate) fn build_classifier_turns(
                         .any(|part| matches!(part, ContentPart::Image { .. }));
                 let text = if user.synthetic_reason == Some(SyntheticReason::Interjection) {
                     item_text
-                } else if wimo ai_chat_state::compaction_utils::is_real_user_turn(item)
+                } else if wimoai_chat_state::compaction_utils::is_real_user_turn(item)
                     && !is_project_instructions(item)
                     && !is_legacy_tool_image
                 {
-                    wimo ai_chat_state::compaction_utils::extract_user_query(&item_text)
+                    wimoai_chat_state::compaction_utils::extract_user_query(&item_text)
                 } else {
                     continue;
                 };
                 if !text.is_empty() {
                     let text = neutralize_transcript_user_text(&text);
-                    let text = wimo ai_wimo_tools::util::truncate_str_with_marker(
+                    let text = wimoai_wimo_tools::util::truncate_str_with_marker(
                         &text,
                         CLASSIFIER_TURN_MAX_LEN,
                     )
@@ -438,13 +438,13 @@ pub(crate) fn build_classifier_turns(
                         .map(|v| v.to_string())
                         .unwrap_or_else(|_| tc.arguments.to_string());
                     let args = neutralize_transcript_user_text(&args);
-                    let args = wimo ai_wimo_tools::util::truncate_str_with_marker(
+                    let args = wimoai_wimo_tools::util::truncate_str_with_marker(
                         &args,
                         CLASSIFIER_TURN_MAX_LEN,
                     )
                     .into_owned();
                     let tool = neutralize_transcript_user_text(&tc.name);
-                    let tool = wimo ai_wimo_tools::util::truncate_str_with_marker(
+                    let tool = wimoai_wimo_tools::util::truncate_str_with_marker(
                         &tool,
                         CLASSIFIER_TURN_MAX_LEN,
                     )

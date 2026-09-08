@@ -1,5 +1,5 @@
 use agent_client_protocol as acp;
-use wimo ai_wimo_tools::implementations::wimo::{
+use wimoai_wimo_tools::implementations::wimo::{
     IMAGE_TO_VIDEO_TOOL_NAME, IMAGINE_VIDEO_COMMAND_NAME, imagine_video_instruction,
     imagine_video_usage_message,
 };

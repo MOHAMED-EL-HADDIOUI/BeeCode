@@ -5,10 +5,10 @@ use std::sync::LazyLock;
 const REDACTED: &str = "[REDACTED_SECRET]";
 const REDACTED_URL_VALUE: &str = "redacted";
 
-/// Vendor API keys with `sk-`/`sk_` prefixes and wimo AI (`wimo ai-`) keys.
+/// Vendor API keys with `sk-`/`sk_` prefixes and wimo AI (`wimoai-`) keys.
 /// The `\b` anchor keeps the `sk-` inside `task-`/`disk-`/`risk-` from matching.
 static API_KEY_PREFIX_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| compile(r"\b(?:sk[-_]|wimo ai-)[A-Za-z0-9_-]{20,}"));
+    LazyLock::new(|| compile(r"\b(?:sk[-_]|wimoai-)[A-Za-z0-9_-]{20,}"));
 /// AWS long-term (`AKIA`) and temporary (`ASIA`) access-key IDs.
 static AWS_ACCESS_KEY_REGEX: LazyLock<Regex> =
     LazyLock::new(|| compile(r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b"));
@@ -341,8 +341,8 @@ mod tests {
     fn redacts_known_secret_shapes() {
         let cases = [
             (
-                fixture(&["key: wimo ai-", "abc123XYZdef456GHIjkl789"]),
-                "wimo ai api key",
+                fixture(&["key: wimoai-", "abc123XYZdef456GHIjkl789"]),
+                "wimoai api key",
             ),
             (
                 fixture(&["aws AKIA", "ABCDEFGHIJKLMNOP key"]),

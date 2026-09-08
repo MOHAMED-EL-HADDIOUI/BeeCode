@@ -3,13 +3,13 @@
 //! Legacy terminals send Alt+S as `ESC s`, next to the double-Esc clear: a split decode would turn on "press again to clear" and type a literal `s`.
 //!
 //! ```bash
-//! cargo test -p wimo ai-wimo-pager-pty-harness --test prompt_stash -- --ignored --nocapture
+//! cargo test -p wimoai-wimo-pager-pty-harness --test prompt_stash -- --ignored --nocapture
 //! ```
 
 use std::time::Duration;
 
 use anyhow::{Context, Result};
-use wimo ai_wimo_pager_pty_harness::{ContentController, PtyHarness, pager_binary};
+use wimoai_wimo_pager_pty_harness::{ContentController, PtyHarness, pager_binary};
 
 const ROWS: u16 = 50;
 const COLS: u16 = 120;

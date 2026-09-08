@@ -154,7 +154,7 @@ impl LockResult {
 /// # Example
 ///
 /// ```ignore
-/// use wimo ai_codebase_graph::manager::lock::{try_lock, IndexOperation, LockResult};
+/// use wimoai_codebase_graph::manager::lock::{try_lock, IndexOperation, LockResult};
 ///
 /// let workspace = Path::new("/path/to/workspace");
 /// match try_lock(workspace, IndexOperation::Build) {

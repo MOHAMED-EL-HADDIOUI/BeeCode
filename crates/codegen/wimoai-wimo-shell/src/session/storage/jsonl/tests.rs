@@ -37,13 +37,13 @@ fn create_test_plan_state() -> TodoState {
 #[tokio::test]
 async fn write_compaction_segment_numbers_and_indexes_resume_safely() {
     use crate::extensions::notification::CompactionSegmentFile;
-    use wimo ai_wimo_sampling_types::ConversationItem;
+    use wimoai_wimo_sampling_types::ConversationItem;
     let temp_dir = TempDir::new().unwrap();
     let info = create_test_info();
     let seg = |summary: &str| CompactionSegmentFile {
         items: vec![ConversationItem::user("a"), ConversationItem::user("b")],
         summary: summary.to_string(),
-        detail: wimo ai_chat_state::CompactionDetail::Verbose,
+        detail: wimoai_chat_state::CompactionDetail::Verbose,
         timestamp: "2026-01-01T00:00:00Z".to_string(),
     };
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
@@ -51,7 +51,7 @@ async fn write_compaction_segment_numbers_and_indexes_resume_safely() {
     adapter.write_compaction_segment(&info, &seg("second")).await.unwrap();
     let base = adapter
         .session_dir(&info)
-        .join(wimo ai_compaction_transcript::COMPACTION_DIR);
+        .join(wimoai_compaction_transcript::COMPACTION_DIR);
     let read = |p: &str| std::fs::read_to_string(base.join(p)).unwrap();
     assert!(read("segment_000.md").contains("# HISTORICAL -- DO NOT EDIT"));
     assert!(read("segment_001.md").contains("second"));
@@ -73,7 +73,7 @@ async fn write_compaction_segment_numbers_and_indexes_resume_safely() {
 }
 #[tokio::test]
 async fn update_current_model_persists_leaves_and_clears_reasoning_effort() {
-    use wimo ai_wimo_sampling_types::ReasoningEffort;
+    use wimoai_wimo_sampling_types::ReasoningEffort;
     let temp_dir = TempDir::new().unwrap();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
     let info = create_test_info();
@@ -211,7 +211,7 @@ async fn workflow_run_manifest_round_trips_and_clear_tombstone_wins() {
     std::fs::write(&effort_path, "high").unwrap();
     let loaded_with_effort = adapter.load_session_without_updates(&info).await.unwrap();
     assert_eq!(loaded_with_effort.workflow_runs[0].effort,
-            Some(wimo ai_wimo_sampling_types::ReasoningEffort::High));
+            Some(wimoai_wimo_sampling_types::ReasoningEffort::High));
     for invalid in ["XHIGH", "turbo"] {
         std::fs::write(&effort_path, invalid).unwrap();
         assert!(
@@ -319,7 +319,7 @@ async fn workflow_restore_rejects_symlinks_and_caps_run_count() {
 /// `load_session_without_updates` always defers rewind points while the full `load_session` / `load_rewind_points` still return them.
 #[tokio::test]
 async fn load_session_without_updates_defers_rewind_points() {
-    use wimo ai_wimo_workspace::session::file_state::RewindPoint;
+    use wimoai_wimo_workspace::session::file_state::RewindPoint;
     let temp_dir = TempDir::new().unwrap();
     let info = create_test_info();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
@@ -336,7 +336,7 @@ async fn load_session_without_updates_defers_rewind_points() {
 /// The disk-authoritative ConversationOnly merge persists the correct merged/truncated set.
 #[tokio::test]
 async fn merge_rewind_points_from_persists_merged_set() {
-    use wimo ai_wimo_workspace::session::file_state::RewindPoint;
+    use wimoai_wimo_workspace::session::file_state::RewindPoint;
     let temp_dir = TempDir::new().unwrap();
     let info = create_test_info();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
@@ -370,8 +370,8 @@ async fn merge_rewind_points_from_aborts_on_malformed_without_writing() {
 /// File-content `file_snapshots` must round-trip through the on-disk read-modify-write merge (not just index/count).
 #[tokio::test]
 async fn merge_rewind_points_from_round_trips_file_snapshots() {
-    use wimo ai_wimo_paths::RelPathBuf;
-    use wimo ai_wimo_workspace::session::file_state::{FileSnapshot, RewindPoint};
+    use wimoai_wimo_paths::RelPathBuf;
+    use wimoai_wimo_workspace::session::file_state::{FileSnapshot, RewindPoint};
     let temp_dir = TempDir::new().unwrap();
     let info = create_test_info();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
@@ -407,7 +407,7 @@ async fn merge_rewind_points_from_round_trips_file_snapshots() {
 /// A `write_jsonl`-backed rewrite (here `truncate_rewind_points_from`) renames the target into place and leaves NO `*.jsonl.tmp` behind.
 #[tokio::test]
 async fn write_jsonl_leaves_no_temp_and_renames_target() {
-    use wimo ai_wimo_workspace::session::file_state::RewindPoint;
+    use wimoai_wimo_workspace::session::file_state::RewindPoint;
     let temp_dir = TempDir::new().unwrap();
     let info = create_test_info();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
@@ -436,7 +436,7 @@ async fn write_jsonl_leaves_no_temp_and_renames_target() {
 /// The resume/read paths must not mutate the on-disk `updates.jsonl` or `rewind_points.jsonl`, and ACU lines stay on disk.
 #[tokio::test]
 async fn reads_never_modify_rewind_or_updates_files() {
-    use wimo ai_wimo_workspace::session::file_state::{FileStateTracker, RewindPoint};
+    use wimoai_wimo_workspace::session::file_state::{FileStateTracker, RewindPoint};
     let temp_dir = TempDir::new().unwrap();
     let info = create_test_info();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
@@ -485,18 +485,18 @@ async fn delete_session_removes_dir_and_is_idempotent() {
     adapter.delete_session(&info).await.expect("second delete must succeed");
 }
 #[tokio::test]
-async fn test_wimo ai_session_update_round_trip() {
+async fn test_wimoai_session_update_round_trip() {
     use crate::extensions::notification::{
-        DiffContent, SessionNotification as wimo aiSessionNotification,
-        SessionUpdate as wimo aiSessionUpdateType,
+        DiffContent, SessionNotification as wimoaiSessionNotification,
+        SessionUpdate as wimoaiSessionUpdateType,
     };
     let temp_dir = TempDir::new().unwrap();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
     let info = create_test_info();
     adapter.init_session(&info, default_model_id()).await.unwrap();
-    let wimo ai_notification = wimo aiSessionNotification {
+    let wimoai_notification = wimoaiSessionNotification {
         session_id: acp::SessionId::new("test-session-123"),
-        update: wimo aiSessionUpdateType::DiffReview {
+        update: wimoaiSessionUpdateType::DiffReview {
             content: vec![DiffContent {
                     diff: acp::Diff::new(
                         std::path::PathBuf::from("/test/file.rs"),
@@ -508,7 +508,7 @@ async fn test_wimo ai_session_update_round_trip() {
         meta: None,
     };
     adapter
-        .append_update(&info, &SessionUpdate::wimo ai(Box::new(wimo ai_notification.clone())))
+        .append_update(&info, &SessionUpdate::wimoai(Box::new(wimoai_notification.clone())))
         .await
         .unwrap();
     let acp_notification = create_test_notification();
@@ -523,10 +523,10 @@ async fn test_wimo ai_session_update_round_trip() {
             "Should have 2 updates (1 wimo AI + 1 ACP)"
         );
     match &loaded.updates[0] {
-        SessionUpdate::wimo ai(notification) => {
+        SessionUpdate::wimoai(notification) => {
             assert_eq!(notification.session_id.0.as_ref(), "test-session-123");
             match &notification.update {
-                wimo aiSessionUpdateType::DiffReview { content } => {
+                wimoaiSessionUpdateType::DiffReview { content } => {
                     assert_eq!(content.len(), 1);
                     assert_eq!(
                             content[0].diff.path,
@@ -549,16 +549,16 @@ async fn test_wimo ai_session_update_round_trip() {
 #[tokio::test]
 async fn test_subagent_notifications_round_trip() {
     use crate::extensions::notification::{
-        SessionNotification as wimo aiSessionNotification,
-        SessionUpdate as wimo aiSessionUpdateType,
+        SessionNotification as wimoaiSessionNotification,
+        SessionUpdate as wimoaiSessionUpdateType,
     };
     let temp_dir = TempDir::new().unwrap();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
     let info = create_test_info();
     adapter.init_session(&info, default_model_id()).await.unwrap();
-    let spawned = wimo aiSessionNotification {
+    let spawned = wimoaiSessionNotification {
         session_id: acp::SessionId::new("parent-session"),
-        update: wimo aiSessionUpdateType::SubagentSpawned {
+        update: wimoaiSessionUpdateType::SubagentSpawned {
             subagent_id: "child-001".to_string(),
             parent_session_id: "parent-session".to_string(),
             parent_prompt_id: Some("turn-123".to_string()),
@@ -576,10 +576,10 @@ async fn test_subagent_notifications_round_trip() {
         },
         meta: None,
     };
-    adapter.append_update(&info, &SessionUpdate::wimo ai(Box::new(spawned))).await.unwrap();
-    let finished = wimo aiSessionNotification {
+    adapter.append_update(&info, &SessionUpdate::wimoai(Box::new(spawned))).await.unwrap();
+    let finished = wimoaiSessionNotification {
         session_id: acp::SessionId::new("parent-session"),
-        update: wimo aiSessionUpdateType::SubagentFinished {
+        update: wimoaiSessionUpdateType::SubagentFinished {
             subagent_id: "child-001".to_string(),
             child_session_id: "child-001".to_string(),
             status: "completed".to_string(),
@@ -593,13 +593,13 @@ async fn test_subagent_notifications_round_trip() {
         },
         meta: None,
     };
-    adapter.append_update(&info, &SessionUpdate::wimo ai(Box::new(finished))).await.unwrap();
+    adapter.append_update(&info, &SessionUpdate::wimoai(Box::new(finished))).await.unwrap();
     let loaded = adapter.load_session(&info).await.unwrap();
     assert_eq!(loaded.updates.len(), 2);
     match &loaded.updates[0] {
-        SessionUpdate::wimo ai(notification) => {
+        SessionUpdate::wimoai(notification) => {
             match &notification.update {
-                wimo aiSessionUpdateType::SubagentSpawned {
+                wimoaiSessionUpdateType::SubagentSpawned {
                     subagent_id,
                     child_session_id,
                     description,
@@ -614,12 +614,12 @@ async fn test_subagent_notifications_round_trip() {
                 other => panic!("Expected SubagentSpawned, got {other:?}"),
             }
         }
-        other => panic!("Expected wimo ai update, got {other:?}"),
+        other => panic!("Expected wimoai update, got {other:?}"),
     }
     match &loaded.updates[1] {
-        SessionUpdate::wimo ai(notification) => {
+        SessionUpdate::wimoai(notification) => {
             match &notification.update {
-                wimo aiSessionUpdateType::SubagentFinished {
+                wimoaiSessionUpdateType::SubagentFinished {
                     subagent_id,
                     status,
                     tool_calls,
@@ -638,7 +638,7 @@ async fn test_subagent_notifications_round_trip() {
                 other => panic!("Expected SubagentFinished, got {other:?}"),
             }
         }
-        other => panic!("Expected wimo ai update, got {other:?}"),
+        other => panic!("Expected wimoai update, got {other:?}"),
     }
     let raw_jsonl = tokio::fs::read_to_string(
             adapter.session_dir(&info).join("updates.jsonl"),
@@ -667,16 +667,16 @@ async fn test_subagent_notifications_round_trip() {
 #[tokio::test]
 async fn test_subagent_spawned_resumed_roundtrip() {
     use crate::extensions::notification::{
-        SessionNotification as wimo aiSessionNotification,
-        SessionUpdate as wimo aiSessionUpdateType,
+        SessionNotification as wimoaiSessionNotification,
+        SessionUpdate as wimoaiSessionUpdateType,
     };
     let temp_dir = TempDir::new().unwrap();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
     let info = create_test_info();
     adapter.init_session(&info, default_model_id()).await.unwrap();
-    let spawned = wimo aiSessionNotification {
+    let spawned = wimoaiSessionNotification {
         session_id: acp::SessionId::new("resume-parent"),
-        update: wimo aiSessionUpdateType::SubagentSpawned {
+        update: wimoaiSessionUpdateType::SubagentSpawned {
             subagent_id: "child-resumed".to_string(),
             parent_session_id: "resume-parent".to_string(),
             parent_prompt_id: Some("turn-5".to_string()),
@@ -694,13 +694,13 @@ async fn test_subagent_spawned_resumed_roundtrip() {
         },
         meta: None,
     };
-    adapter.append_update(&info, &SessionUpdate::wimo ai(Box::new(spawned))).await.unwrap();
+    adapter.append_update(&info, &SessionUpdate::wimoai(Box::new(spawned))).await.unwrap();
     let loaded = adapter.load_session(&info).await.unwrap();
     assert_eq!(loaded.updates.len(), 1);
     match &loaded.updates[0] {
-        SessionUpdate::wimo ai(notification) => {
+        SessionUpdate::wimoai(notification) => {
             match &notification.update {
-                wimo aiSessionUpdateType::SubagentSpawned {
+                wimoaiSessionUpdateType::SubagentSpawned {
                     subagent_id,
                     effective_context_source,
                     persona,
@@ -719,7 +719,7 @@ async fn test_subagent_spawned_resumed_roundtrip() {
                 other => panic!("Expected SubagentSpawned, got {other:?}"),
             }
         }
-        other => panic!("Expected wimo ai update, got {other:?}"),
+        other => panic!("Expected wimoai update, got {other:?}"),
     }
 }
 #[tokio::test]
@@ -847,7 +847,7 @@ async fn test_load_prompts_only_merges_multi_chunk_prompt() {
 #[tokio::test]
 async fn test_load_prompts_only_applies_rewind_truncation() {
     use crate::extensions::notification::{
-        SessionNotification as wimo aiNotification, SessionUpdate as wimo aiSessionUpdate,
+        SessionNotification as wimoaiNotification, SessionUpdate as wimoaiSessionUpdate,
     };
     let temp_dir = TempDir::new().unwrap();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
@@ -890,9 +890,9 @@ async fn test_load_prompts_only_applies_rewind_truncation() {
             ),
         ),
     );
-    let rewind = wimo aiNotification {
+    let rewind = wimoaiNotification {
         session_id: info.id.clone(),
-        update: wimo aiSessionUpdate::RewindMarker {
+        update: wimoaiSessionUpdate::RewindMarker {
             target_prompt_index: 1,
             created_at: "2024-01-01T00:00:00Z".to_string(),
         },
@@ -921,7 +921,7 @@ async fn test_load_prompts_only_applies_rewind_truncation() {
         SessionUpdate::Acp(Box::new(agent1)),
         SessionUpdate::Acp(Box::new(user2)),
         SessionUpdate::Acp(Box::new(agent2)),
-        SessionUpdate::wimo ai(Box::new(rewind)),
+        SessionUpdate::wimoai(Box::new(rewind)),
         SessionUpdate::Acp(Box::new(user3)),
         SessionUpdate::Acp(Box::new(agent3)),
     ] {
@@ -1154,8 +1154,8 @@ async fn summary_provenance_defaults_to_none() {
 async fn init_session_stamps_configured_profile_on_new_session() {
     let tmp = TempDir::new().unwrap();
     let adapter = JsonlStorageAdapter::with_root(tmp.path().to_path_buf());
-    wimo ai_wimo_sandbox::set_configured_profile("workspace");
-    let expected = wimo ai_wimo_sandbox::configured_profile_name().map(String::from);
+    wimoai_wimo_sandbox::set_configured_profile("workspace");
+    let expected = wimoai_wimo_sandbox::configured_profile_name().map(String::from);
     let info = Info {
         id: acp::SessionId::new("new-sb"),
         cwd: "/new".to_string(),
@@ -1731,7 +1731,7 @@ fn strip_invalid_images_below_pixel_floor_stripped() {
 }
 /// Write a chat_history.jsonl with the given lines into a fresh session dir.
 /// Then call `read_chat_history_sync` and return the resulting `ConversationItem`s.
-/// Exercises the real on-read upgrade path end-to-end (loader, serde, and wimo ai_wimo_sampling_types::upgrade_legacy_reasoning).
+/// Exercises the real on-read upgrade path end-to-end (loader, serde, and wimoai_wimo_sampling_types::upgrade_legacy_reasoning).
 fn load_lines(lines: &[&str]) -> Vec<ConversationItem> {
     let temp_dir = TempDir::new().unwrap();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());
@@ -1763,7 +1763,7 @@ fn read_chat_history_upgrades_legacy_singular_reasoning_to_sibling() {
         ConversationItem::Reasoning(r) => {
             assert_eq!(r.id, "rs_legacy");
             assert_eq!(r.encrypted_content.as_deref(), Some("enc-blob"));
-            let wimo ai_wimo_sampling_types::rs::SummaryPart::SummaryText(s) = &r.summary[0];
+            let wimoai_wimo_sampling_types::rs::SummaryPart::SummaryText(s) = &r.summary[0];
             assert_eq!(s.text, "the results are about cats");
         }
         other => panic!("expected reconstructed Reasoning at index 3, got {other:?}"),
@@ -1898,7 +1898,7 @@ fn read_chat_history_handles_hybrid_legacy_and_post_pr_lines() {
     };
     assert_eq!(reconstructed.id, "rs_legacy");
     assert_eq!(reconstructed.encrypted_content.as_deref(), Some("enc"));
-    let wimo ai_wimo_sampling_types::rs::SummaryPart::SummaryText(s) = &reconstructed
+    let wimoai_wimo_sampling_types::rs::SummaryPart::SummaryText(s) = &reconstructed
         .summary[0];
     assert_eq!(s.text, "legacy thinking");
 }
@@ -2275,12 +2275,12 @@ async fn retry_after_lost_ack_converges_memory_and_disk_to_authoritative_item() 
                 .map_err(|error| match error {
                     crate::session::storage::AppendCwdSwitchError::NotCommitted(
                         error,
-                    ) => wimo ai_chat_state::StrictAppendError::NotCommitted(error),
+                    ) => wimoai_chat_state::StrictAppendError::NotCommitted(error),
                     crate::session::storage::AppendCwdSwitchError::Committed {
                         acknowledgement,
                         source,
                     } => {
-                        wimo ai_chat_state::StrictAppendError::Committed {
+                        wimoai_chat_state::StrictAppendError::Committed {
                             acknowledgement,
                             source,
                         }
@@ -2295,9 +2295,9 @@ async fn retry_after_lost_ack_converges_memory_and_disk_to_authoritative_item() 
     });
     let persistence = crate::session::chat_persistence::ChannelChatPersistence::new(tx);
     let (event_tx, _event_rx) = tokio::sync::mpsc::unbounded_channel();
-    let chat = wimo ai_chat_state::ChatStateActor::spawn(
+    let chat = wimoai_chat_state::ChatStateActor::spawn(
         vec![],
-        wimo ai_wimo_sampling_types::SamplingConfig {
+        wimoai_wimo_sampling_types::SamplingConfig {
             base_url: String::new(),
             model: String::new(),
             max_completion_tokens: None,
@@ -2321,7 +2321,7 @@ async fn retry_after_lost_ack_converges_memory_and_disk_to_authoritative_item() 
                 std::num::NonZeroU64::new(5).unwrap(),
             )
             .await,
-            Err(wimo ai_chat_state::StrictAppendError::Indeterminate(_))
+            Err(wimoai_chat_state::StrictAppendError::Indeterminate(_))
         ));
     assert!(chat.get_conversation().await.is_empty());
     assert!(matches!(
@@ -2331,7 +2331,7 @@ async fn retry_after_lost_ack_converges_memory_and_disk_to_authoritative_item() 
             )
             .await
             .unwrap(),
-            wimo ai_chat_state::StrictAppendAck::AlreadyPresent(item)
+            wimoai_chat_state::StrictAppendAck::AlreadyPresent(item)
                 if item.text_content() == "authoritative A"
         ));
     let memory = chat.get_conversation().await;
@@ -2361,7 +2361,7 @@ async fn acknowledged_chat_append_preserves_existing_file_bytes_and_appends_once
                 .append_cwd_switch_commit_aware(&info, &switch)
                 .await
                 .unwrap(),
-            wimo ai_chat_state::StrictAppendAck::Appended
+            wimoai_chat_state::StrictAppendAck::Appended
         ));
     let after = std::fs::read(&path).unwrap();
     assert!(after.starts_with(&prefix));
@@ -2533,8 +2533,8 @@ async fn explicit_session_dir_does_not_tighten_parent() {
 #[tokio::test]
 async fn usage_json_rewrites_session_and_appends_turns() {
     use crate::session::usage_file::{SessionUsageFile, UsageSummary};
-    use wimo ai_chat_state::UsageLedger;
-    use wimo ai_wimo_sampling_types::TokenUsage;
+    use wimoai_chat_state::UsageLedger;
+    use wimoai_wimo_sampling_types::TokenUsage;
     let temp_dir = TempDir::new().unwrap();
     let info = create_test_info();
     let adapter = JsonlStorageAdapter::with_root(temp_dir.path().to_path_buf());

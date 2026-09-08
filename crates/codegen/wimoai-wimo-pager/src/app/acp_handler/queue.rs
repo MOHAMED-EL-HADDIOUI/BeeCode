@@ -434,7 +434,7 @@ pub(super) fn handle_queue_changed(notif: &acp::ExtNotification, app: &mut AppVi
 /// `prompt_complete` carries `sessionId`, `stopReason`, `agentResult`, `turnId`, and (on shells with the lost-response fix) `promptId`.
 /// For viewers, turns are serialized per session, so "finish the running viewer turn for this session" is unambiguous even without the prompt id.
 ///
-/// This is the one-release compat rail, kept until every leader emits the durable [`wimo aiSessionUpdate::TurnCompleted`].
+/// This is the one-release compat rail, kept until every leader emits the durable [`wimoaiSessionUpdate::TurnCompleted`].
 /// It parses the payload and delegates finalization to [`finalize_turn_from_terminal`](super::super::turn_completion::finalize_turn_from_terminal).
 /// That function carries the driver-arm and viewer-finish behavior verbatim.
 ///

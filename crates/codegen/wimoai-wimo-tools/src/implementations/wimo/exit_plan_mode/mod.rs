@@ -77,34 +77,34 @@ Use this after you have finished writing your plan to the plan file in plan mode
                 &EnterPlanModeTool,
             )
             .to_string(),
-            id: wimo ai_tool_runtime::Tool::id(&EnterPlanModeTool).to_string(),
+            id: wimoai_tool_runtime::Tool::id(&EnterPlanModeTool).to_string(),
             if_params: None,
         })
     }
 }
 
-impl wimo ai_tool_runtime::Tool for ExitPlanModeTool {
+impl wimoai_tool_runtime::Tool for ExitPlanModeTool {
     type Args = ExitPlanModeInput;
     type Output = ExitPlanModeOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("exit_plan_mode").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("exit_plan_mode").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "exit_plan_mode",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -112,9 +112,9 @@ impl wimo ai_tool_runtime::Tool for ExitPlanModeTool {
     #[tracing::instrument(name = "tool.exit_plan_mode", skip_all)]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         _input: ExitPlanModeInput,
-    ) -> Result<ExitPlanModeOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ExitPlanModeOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -208,12 +208,12 @@ mod tests {
     #[test]
     fn tool_name_and_description() {
         let tool = ExitPlanModeTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "exit_plan_mode");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "exit_plan_mode");
     }
 
     #[test]
     fn tool_is_read_only() {
-        assert!(wimo ai_tool_runtime::Tool::capabilities(&ExitPlanModeTool).is_read_only);
+        assert!(wimoai_tool_runtime::Tool::capabilities(&ExitPlanModeTool).is_read_only);
     }
 
     #[test]
@@ -239,7 +239,7 @@ mod tests {
         let shared = resources.into_shared();
         let tool = ExitPlanModeTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx_with_call_id(shared, "test-call"),
             ExitPlanModeInput {},
@@ -273,7 +273,7 @@ mod tests {
         let shared = resources.into_shared();
         let tool = ExitPlanModeTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx_with_call_id(shared, "test-call"),
             ExitPlanModeInput {},
@@ -292,7 +292,7 @@ mod tests {
         let shared = resources.into_shared();
         let tool = ExitPlanModeTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx_with_call_id(shared, "test-call"),
             ExitPlanModeInput {},
@@ -318,7 +318,7 @@ mod tests {
         let shared = resources.into_shared();
         let tool = ExitPlanModeTool;
 
-        wimo ai_tool_runtime::Tool::run(
+        wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx_with_call_id(shared, "call-99"),
             ExitPlanModeInput {},
@@ -344,7 +344,7 @@ mod tests {
         let shared = resources.into_shared();
         let tool = ExitPlanModeTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx_with_call_id(shared, "test-call"),
             ExitPlanModeInput {},
@@ -365,7 +365,7 @@ mod tests {
         let shared = resources.into_shared();
         let tool = ExitPlanModeTool;
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &tool,
             test_ctx_with_call_id(shared, "test-call"),
             ExitPlanModeInput {},
@@ -394,7 +394,7 @@ mod tests {
         resources.insert(PlanFilePath(plan_file.clone()));
         let shared = resources.into_shared();
 
-        let result = wimo ai_tool_runtime::Tool::run(
+        let result = wimoai_tool_runtime::Tool::run(
             &ExitPlanModeTool,
             test_ctx_with_call_id(shared, "t1"),
             ExitPlanModeInput {},

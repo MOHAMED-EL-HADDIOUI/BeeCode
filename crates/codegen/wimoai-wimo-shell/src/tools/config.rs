@@ -1,8 +1,8 @@
 use crate::models;
 use serde::{Deserialize, Serialize};
-use wimo ai_wimo_sampler::SamplerConfig;
-use wimo ai_wimo_tools::implementations::wimo;
-use wimo ai_wimo_tools::registry::types::ToolConfig;
+use wimoai_wimo_sampler::SamplerConfig;
+use wimoai_wimo_tools::implementations::wimo;
+use wimoai_wimo_tools::registry::types::ToolConfig;
 
 /// The tool-server binary defaults to a 5-minute foreground ceiling (`DEFAULT_MAX_TIMEOUT_MS`).
 /// Production opts *up* to 10h by sending this explicitly, overridable via config.toml.
@@ -111,7 +111,7 @@ impl WebFetchToolConfig {
         remote_proxy: Option<&str>,
         remote_domains: Option<&[String]>,
         context_window_tokens: Option<u64>,
-    ) -> wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchParams {
+    ) -> wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchParams {
         use crate::agent::config::env_string;
 
         let proxy_endpoint = self
@@ -129,9 +129,9 @@ impl WebFetchToolConfig {
 
         let allow_local = self
             .allow_local
-            .or_else(|| wimo ai_wimo_config::env_bool("wimo_WEB_FETCH_ALLOW_LOCAL"));
+            .or_else(|| wimoai_wimo_config::env_bool("wimo_WEB_FETCH_ALLOW_LOCAL"));
 
-        wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchParams {
+        wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchParams {
             proxy_endpoint,
             allowed_domains,
             context_window_tokens,
@@ -142,7 +142,7 @@ impl WebFetchToolConfig {
 }
 
 /// This is the *shell-side* config that holds sampling-level settings (e.g., web search API key from the sampling client).
-/// It is distinct from `wimo ai_wimo_tools::registry::types::ToolsetConfig` which holds tool-implementation-level config (bash limits, web search mode).
+/// It is distinct from `wimoai_wimo_tools::registry::types::ToolsetConfig` which holds tool-implementation-level config (bash limits, web search mode).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct ShellToolsetConfig {
@@ -418,8 +418,8 @@ mod tests {
             .unwrap();
 
         for mut def in [
-            wimo ai_wimo_agent::config::AgentDefinition::plan(),
-            wimo ai_wimo_agent::config::AgentDefinition::explore(),
+            wimoai_wimo_agent::config::AgentDefinition::plan(),
+            wimoai_wimo_agent::config::AgentDefinition::explore(),
         ] {
             let name = def.name.clone();
             assert!(

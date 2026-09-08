@@ -2,7 +2,7 @@
 
 mod common;
 
-use wimo ai_wimo_shell::agent::models::startup_prefetch;
+use wimoai_wimo_shell::agent::models::startup_prefetch;
 
 #[test]
 fn prefetch_never_starts_while_policy_repair_is_pending() {
@@ -11,12 +11,12 @@ fn prefetch_never_starts_while_policy_repair_is_pending() {
         let server = common::start_seeded_mock(home.path()).await;
         // A team principal with no serving managed policy: `ensure_managed_policy_present`
         // will run a session-start repair, so no prefetch may egress before it.
-        let scope = wimo ai_wimo_shell::auth::wimoComConfig::default().auth_scope();
+        let scope = wimoai_wimo_shell::auth::wimoComConfig::default().auth_scope();
         let auth = serde_json::json!({
             scope: {
                 "key": "team-session-token",
                 "auth_mode": "oidc",
-                "oidc_issuer": wimo ai_wimo_shell::auth::wimo ai_oauth2_issuer(),
+                "oidc_issuer": wimoai_wimo_shell::auth::wimoai_oauth2_issuer(),
                 "create_time": "2026-01-01T00:00:00Z",
                 "expires_at": "2099-01-01T00:00:00Z",
                 "user_id": "test-user",
@@ -28,7 +28,7 @@ fn prefetch_never_starts_while_policy_repair_is_pending() {
             .expect("write team auth.json");
 
         startup_prefetch::begin_before_policy_gate(
-            &wimo ai_wimo_shell::agent::config::Config::default(),
+            &wimoai_wimo_shell::agent::config::Config::default(),
         );
 
         assert!(

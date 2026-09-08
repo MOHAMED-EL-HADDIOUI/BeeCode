@@ -9,7 +9,7 @@ use std::time::Duration;
 
 use criterion::{Criterion, criterion_group, criterion_main};
 
-use wimo ai_wimo_pager::scrollback::{RenderBlock, ScrollbackState};
+use wimoai_wimo_pager::scrollback::{RenderBlock, ScrollbackState};
 
 /// Roughly a VS Code editor pane maximized on a laptop screen.
 const VIEWPORT_WIDTH: u16 = 120;
@@ -72,7 +72,7 @@ fn edit_texts(i: usize) -> (String, String) {
 
 fn bash_output(i: usize) -> String {
     (0..40)
-        .map(|l| format!("crates/codegen/wimo ai-wimo-pager/src/file_{i}_{l}.rs:{l}: match found"))
+        .map(|l| format!("crates/codegen/wimoai-wimo-pager/src/file_{i}_{l}.rs:{l}: match found"))
         .collect::<Vec<_>>()
         .join("\n")
 }
@@ -103,7 +103,7 @@ fn build_session() -> (ScrollbackState, usize) {
         push(
             &mut state,
             RenderBlock::read(
-                format!("crates/codegen/wimo ai-wimo-pager/src/mod_{i}.rs"),
+                format!("crates/codegen/wimoai-wimo-pager/src/mod_{i}.rs"),
                 None,
             ),
             64,
@@ -112,8 +112,8 @@ fn build_session() -> (ScrollbackState, usize) {
         push(
             &mut state,
             RenderBlock::edit_with_hunks(
-                format!("crates/codegen/wimo ai-wimo-pager/src/mod_{i}.rs"),
-                wimo ai_wimo_pager_diff::diff_hunks_from_strings(&old, &new, 1),
+                format!("crates/codegen/wimoai-wimo-pager/src/mod_{i}.rs"),
+                wimoai_wimo_pager_diff::diff_hunks_from_strings(&old, &new, 1),
             ),
             old.len() + new.len(),
         );

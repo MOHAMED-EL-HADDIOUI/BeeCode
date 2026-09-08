@@ -7,7 +7,7 @@ const BUILTIN_FILES: &[(&str, &str)] = &[("README.md", include_str!("../README.m
 /// User skills under `~/.wimo/skills/` are never managed here. Platform skills
 /// are delivered separately through the bundled skill cache.
 pub fn extract_builtin_files(wimo_home: &std::path::Path) {
-    let version = wimo ai_wimo_version::VERSION;
+    let version = wimoai_wimo_version::VERSION;
     let marker = wimo_home.join(".metadata_version");
 
     if let Ok(existing) = std::fs::read_to_string(&marker)
@@ -226,7 +226,7 @@ mod tests {
         let home = tmp.path();
         std::fs::create_dir_all(home.join("skills/check")).unwrap();
         std::fs::write(home.join("skills/check/SKILL.md"), "custom check").unwrap();
-        std::fs::write(home.join(".metadata_version"), wimo ai_wimo_version::VERSION).unwrap();
+        std::fs::write(home.join(".metadata_version"), wimoai_wimo_version::VERSION).unwrap();
 
         extract_builtin_files(home);
 

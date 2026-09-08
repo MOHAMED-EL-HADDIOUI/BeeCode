@@ -1,10 +1,10 @@
 //! The turn-end `Stop`/`SubagentStop` gate for `SessionActor`.
 
 use super::*;
-use wimo ai_wimo_hooks::event::{
+use wimoai_wimo_hooks::event::{
     self, BackgroundTaskType, StopBackgroundTask, StopSessionCron, clip_stop_entry_text,
 };
-use wimo ai_wimo_hooks::{dispatcher, result};
+use wimoai_wimo_hooks::{dispatcher, result};
 
 pub const MAX_STOP_HOOK_CONTINUATIONS_PER_TURN: u32 = 8;
 
@@ -17,14 +17,14 @@ fn commit_stop_report(claim: TurnReportClaim<'_>, prompt_id: &str) {
 }
 
 /// `command` is a shell-only field, so a monitor's watch command is carried in `description` instead.
-fn stop_entry_from_task(task: &wimo ai_wimo_tools::types::TaskSnapshot) -> StopBackgroundTask {
+fn stop_entry_from_task(task: &wimoai_wimo_tools::types::TaskSnapshot) -> StopBackgroundTask {
     let command_text =
         clip_stop_entry_text(task.display_command.as_deref().unwrap_or(&task.command));
     let (kind, command, description) = match task.kind {
-        wimo ai_wimo_tools::computer::types::TaskKind::Bash => {
+        wimoai_wimo_tools::computer::types::TaskKind::Bash => {
             (BackgroundTaskType::Shell, Some(command_text), None)
         }
-        wimo ai_wimo_tools::computer::types::TaskKind::Monitor => {
+        wimoai_wimo_tools::computer::types::TaskKind::Monitor => {
             (BackgroundTaskType::Monitor, None, Some(command_text))
         }
     };
@@ -39,7 +39,7 @@ fn stop_entry_from_task(task: &wimo ai_wimo_tools::types::TaskSnapshot) -> StopB
 }
 
 fn stop_entry_from_subagent(
-    summary: &wimo ai_wimo_tools::implementations::wimo::task::types::ActiveSubagentSummary,
+    summary: &wimoai_wimo_tools::implementations::wimo::task::types::ActiveSubagentSummary,
 ) -> StopBackgroundTask {
     StopBackgroundTask {
         id: summary.subagent_id.clone(),
@@ -52,12 +52,12 @@ fn stop_entry_from_subagent(
 }
 
 fn stop_cron_from_scheduled(
-    task: &wimo ai_wimo_tools::implementations::wimo::scheduler::types::ScheduledTask,
+    task: &wimoai_wimo_tools::implementations::wimo::scheduler::types::ScheduledTask,
 ) -> StopSessionCron {
     StopSessionCron {
         id: task.id.clone(),
         schedule:
-            wimo ai_wimo_tools::implementations::wimo::scheduler::interval::interval_to_human(
+            wimoai_wimo_tools::implementations::wimo::scheduler::interval::interval_to_human(
                 task.interval_secs,
             ),
         recurring: task.recurring,
@@ -89,7 +89,7 @@ fn format_stop_feedback(blocks: &[dispatcher::StopBlock], additional_context: &[
 pub(super) fn demote_ignored_blocks(
     results: Vec<result::HookRunResult>,
 ) -> Vec<result::HookRunResult> {
-    use wimo ai_wimo_hooks::result::HookRunResult;
+    use wimoai_wimo_hooks::result::HookRunResult;
     results
         .into_iter()
         .map(|result| match result {
@@ -147,8 +147,8 @@ impl SessionActor {
 
     pub(crate) async fn list_active_subagents(
         &self,
-    ) -> Vec<wimo ai_wimo_tools::implementations::wimo::task::types::ActiveSubagentSummary> {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+    ) -> Vec<wimoai_wimo_tools::implementations::wimo::task::types::ActiveSubagentSummary> {
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentListActiveRequest,
         };
         let Some(ref event_tx) = self.tool_context.subagent_event_tx else {
@@ -369,9 +369,9 @@ impl SessionActor {
                 block.hook_name, block.reason
             ))
             .await;
-            wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::HookBlocked {
+            wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::HookBlocked {
                 hook_name: block.hook_name.clone(),
-                cause: wimo ai_wimo_telemetry::events::HookBlockCause::StopBlocked,
+                cause: wimoai_wimo_telemetry::events::HookBlockCause::StopBlocked,
             });
         }
         if blocks.is_empty() {
@@ -390,9 +390,9 @@ mod stop_gate_snapshot_tests {
     use super::*;
 
     fn task_snapshot(
-        kind: wimo ai_wimo_tools::computer::types::TaskKind,
-    ) -> wimo ai_wimo_tools::types::TaskSnapshot {
-        wimo ai_wimo_tools::types::TaskSnapshot {
+        kind: wimoai_wimo_tools::computer::types::TaskKind,
+    ) -> wimoai_wimo_tools::types::TaskSnapshot {
+        wimoai_wimo_tools::types::TaskSnapshot {
             task_id: "task-1".into(),
             command: "sandbox-exec tail -f /var/log/syslog".into(),
             display_command: Some("tail -f /var/log/syslog".into()),
@@ -419,7 +419,7 @@ mod stop_gate_snapshot_tests {
     #[test]
     fn task_snapshot_maps_to_stop_entry() {
         let shell = stop_entry_from_task(&task_snapshot(
-            wimo ai_wimo_tools::computer::types::TaskKind::Bash,
+            wimoai_wimo_tools::computer::types::TaskKind::Bash,
         ));
         assert_eq!(shell.r#type, BackgroundTaskType::Shell);
         assert_eq!(shell.command.as_deref(), Some("tail -f /var/log/syslog"));
@@ -428,7 +428,7 @@ mod stop_gate_snapshot_tests {
         assert!(shell.agent_type.is_none());
 
         let monitor = stop_entry_from_task(&task_snapshot(
-            wimo ai_wimo_tools::computer::types::TaskKind::Monitor,
+            wimoai_wimo_tools::computer::types::TaskKind::Monitor,
         ));
         assert_eq!(monitor.r#type, BackgroundTaskType::Monitor);
         assert!(monitor.command.is_none());
@@ -441,7 +441,7 @@ mod stop_gate_snapshot_tests {
     #[test]
     fn subagent_summary_maps_to_stop_entry() {
         let summary =
-            wimo ai_wimo_tools::implementations::wimo::task::types::ActiveSubagentSummary {
+            wimoai_wimo_tools::implementations::wimo::task::types::ActiveSubagentSummary {
                 subagent_id: "sub-1".into(),
                 subagent_type: "explore".into(),
                 description: "d".repeat(2000),
@@ -478,7 +478,7 @@ mod stop_gate_snapshot_tests {
     #[test]
     fn scheduled_task_maps_to_stop_cron() {
         let task =
-            wimo ai_wimo_tools::implementations::wimo::scheduler::types::ScheduledTask::new(
+            wimoai_wimo_tools::implementations::wimo::scheduler::types::ScheduledTask::new(
                 300,
                 "check the build".into(),
                 true,
@@ -492,7 +492,7 @@ mod stop_gate_snapshot_tests {
 
     #[test]
     fn demote_ignored_blocks_downgrades_only_blocked() {
-        use wimo ai_wimo_hooks::result::HookRunResult;
+        use wimoai_wimo_hooks::result::HookRunResult;
 
         let results = demote_ignored_blocks(vec![
             HookRunResult::Blocked {

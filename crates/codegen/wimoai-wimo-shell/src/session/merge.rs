@@ -13,7 +13,7 @@ use serde::Serialize;
 
 use crate::agent::session_registry_client::{SessionRecord, SessionRegistryClient};
 use crate::session::persistence::{Summary, list_summaries};
-use wimo ai_wimo_workspace::session::git::normalize_repo_url;
+use wimoai_wimo_workspace::session::git::normalize_repo_url;
 
 pub const REMOTE_TIMEOUT: Duration = Duration::from_secs(5);
 
@@ -212,7 +212,7 @@ pub(crate) async fn fetch_lanes(
             return Vec::new();
         }
         cwd.map(|c| {
-            wimo ai_wimo_workspace::session::git::resolve_normalized_remote_urls(std::path::Path::new(
+            wimoai_wimo_workspace::session::git::resolve_normalized_remote_urls(std::path::Path::new(
                 c,
             ))
         })
@@ -497,14 +497,14 @@ mod tests {
 
     #[test]
     fn cwd_keys_ignore_a_trailing_separator() {
-        assert_eq!(cwd_match_keys("/Users/me/wimo ai/"), ["/Users/me/wimo ai"]);
+        assert_eq!(cwd_match_keys("/Users/me/wimoai/"), ["/Users/me/wimoai"]);
     }
 
     #[test]
     fn retain_matching_cwd_keeps_only_the_requested_directory() {
         let mut remote = vec![
             SessionRecord {
-                cwd: "/Users/me/wimo ai/".into(),
+                cwd: "/Users/me/wimoai/".into(),
                 ..make_remote("a", "a", "2026-03-01T00:00:00Z")
             },
             SessionRecord {
@@ -516,7 +516,7 @@ mod tests {
                 ..make_remote("c", "c", "2026-03-01T00:00:00Z")
             },
         ];
-        retain_matching_cwd(&mut remote, &["/Users/me/wimo ai".to_owned()]);
+        retain_matching_cwd(&mut remote, &["/Users/me/wimoai".to_owned()]);
         let ids: Vec<&str> = remote.iter().map(|r| r.session_id.as_str()).collect();
         assert_eq!(ids, ["a"]);
     }
@@ -1262,13 +1262,13 @@ mod tests {
             "2026-03-01T00:00:00Z",
             Some("Implement retry logic"),
             Some("feature/retry"),
-            Some("/home/dev/wimo ai"),
+            Some("/home/dev/wimoai"),
             Some("retry-feature"),
         )];
         let merged = merge(Vec::new(), local, None, &[], 20);
         assert_eq!(merged[0].summary, "Implement retry logic");
         assert_eq!(merged[0].branch.as_deref(), Some("feature/retry"));
-        assert_eq!(merged[0].repo_name.as_deref(), Some("wimo ai"));
+        assert_eq!(merged[0].repo_name.as_deref(), Some("wimoai"));
         assert_eq!(merged[0].worktree_label.as_deref(), Some("retry-feature"));
     }
 

@@ -191,7 +191,7 @@ fn validate_requirements_value(
         return Ok(());
     }
     let fail_closed = resolve_fail_closed_mode(&v);
-    let Ok(version) = wimo ai_wimo_version::installed_semver() else {
+    let Ok(version) = wimoai_wimo_version::installed_semver() else {
         return Ok(());
     };
     if let Err(e) = apply_version_overrides(&mut v, &version)

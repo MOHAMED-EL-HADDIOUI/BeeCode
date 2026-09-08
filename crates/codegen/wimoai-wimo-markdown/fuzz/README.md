@@ -1,4 +1,4 @@
-# Fuzzing wimo ai-wimo-markdown
+# Fuzzing wimoai-wimo-markdown
 
 Coverage-guided fuzzing for the markdown renderer using [cargo-fuzz](https://rust-fuzz.github.io/book/cargo-fuzz.html) (libFuzzer).
 
@@ -21,7 +21,7 @@ Each iteration runs:
 
 ## Running
 
-From `crates/codegen/wimo ai-wimo-markdown`:
+From `crates/codegen/wimoai-wimo-markdown`:
 
 ```bash
 # Run indefinitely (Ctrl-C to stop):

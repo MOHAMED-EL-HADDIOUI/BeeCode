@@ -7,7 +7,7 @@
 //! # Examples
 //!
 //! ```ignore
-//! use wimo ai_tracing_macros::{tprintln, teprintln, timed};
+//! use wimoai_tracing_macros::{tprintln, teprintln, timed};
 //!
 //! // Timestamped logging
 //! tprintln!("Hello, world!");

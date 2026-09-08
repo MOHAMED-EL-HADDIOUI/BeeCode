@@ -3,14 +3,14 @@
 //! An observer can then split "sent a stale snapshot" from "sent the live token and was still rejected".
 //! `None` (the default) makes the 401 sites silent.
 //!
-//! This crate stays decoupled from `wimo ai-wimo-shell`: no shell types, no auth-manager dependency.
+//! This crate stays decoupled from `wimoai-wimo-shell`: no shell types, no auth-manager dependency.
 
 use std::sync::Arc;
 
-pub use wimo ai_wimo_auth::bearer_fragment::BEARER_SUFFIX_LEN;
+pub use wimoai_wimo_auth::bearer_fragment::BEARER_SUFFIX_LEN;
 
 /// A 401-emitting site in [`crate::SamplingClient`]; its string identifier becomes the `consumer` field so queries can break 401s down by API path.
-/// This covers sampler endpoints only; tool clients use `wimo ai_wimo_tools::ToolConsumer`.
+/// This covers sampler endpoints only; tool clients use `wimoai_wimo_tools::ToolConsumer`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SamplingConsumer {
     /// `chat_completion_stream`: OpenAI-compatible streaming OpenAI Chat Completions API.

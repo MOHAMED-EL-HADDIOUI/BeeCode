@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use rusqlite::ErrorCode;
-use wimo ai_sqlite_journal::JournalMode;
+use wimoai_sqlite_journal::JournalMode;
 
 static HEAL_LOCK: Mutex<()> = Mutex::new(());
 

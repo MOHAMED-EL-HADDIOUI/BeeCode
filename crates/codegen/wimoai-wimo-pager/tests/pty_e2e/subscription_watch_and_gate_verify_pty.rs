@@ -135,7 +135,7 @@ fn pump_until(
 }
 
 /// Like [`seed_fake_oauth`], but under the `wimo_LOCAL_AUTH` dev issuer (`http://localhost:22255`). Two reasons:
-/// `is_wimo ai_oauth2_issuer()` accepts the local issuer, so the subscription gate applies (an enterprise/unknown issuer bypasses it).
+/// `is_wimoai_oauth2_issuer()` accepts the local issuer, so the subscription gate applies (an enterprise/unknown issuer bypasses it).
 /// The qualifying-tier JWT refresh then hits `localhost:22255`: instant connection-refused instead of a real network call to auth.x.ai.
 /// That keeps the test hermetic, with no CI-network flake.
 /// Pair with `wimo_LOCAL_AUTH=1` in the spawn env so the shell's scope-key lookup resolves this entry.

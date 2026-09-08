@@ -1,21 +1,21 @@
 //! Skill, plugin, project-config, and permissions discovery.
 //!
-//! Delegates to the existing discovery implementations in `wimo ai-wimo-agent` and `wimo ai-wimo-tools` rather than duplicating them.
+//! Delegates to the existing discovery implementations in `wimoai-wimo-agent` and `wimoai-wimo-tools` rather than duplicating them.
 //! The workspace stores configuration on [`WorkspaceShared`] and the [`MpscChannel`] methods call these helpers.
 //!
-//! Re-exports [`AgentsMdTracker`] from `wimo ai-wimo-tools` for external consumers that need per-session project-instruction tracking.
+//! Re-exports [`AgentsMdTracker`] from `wimoai-wimo-tools` for external consumers that need per-session project-instruction tracking.
 
 use std::path::Path;
 
 use serde_json::Value;
 
-// Re-export AgentsMdTracker so consumers can reference it via the workspace crate without a direct wimo ai-wimo-tools dependency
-pub use wimo ai_wimo_tools::types::agents_md_tracker::AgentsMdTracker;
+// Re-export AgentsMdTracker so consumers can reference it via the workspace crate without a direct wimoai-wimo-tools dependency
+pub use wimoai_wimo_tools::types::agents_md_tracker::AgentsMdTracker;
 
 // Re-export the config types that callers pass into WorkspaceConfig.
-pub use wimo ai_wimo_agent::plugins::discovery::DiscoveryConfig as PluginDiscoveryConfig;
-pub use wimo ai_wimo_agent::plugins::trust::TrustStore as PluginTrustStore;
-pub use wimo ai_wimo_agent::prompt::skills::SkillsConfig;
+pub use wimoai_wimo_agent::plugins::discovery::DiscoveryConfig as PluginDiscoveryConfig;
+pub use wimoai_wimo_agent::plugins::trust::TrustStore as PluginTrustStore;
+pub use wimoai_wimo_agent::prompt::skills::SkillsConfig;
 
 // ---------------------------------------------------------------------------
 // Skill discovery
@@ -23,16 +23,16 @@ pub use wimo ai_wimo_agent::prompt::skills::SkillsConfig;
 
 /// Discover skills visible from the workspace root.
 ///
-/// Delegates to [`wimo ai_wimo_agent::prompt::skills::list_skills`] with the workspace's `root_cwd` and the caller-supplied `SkillsConfig`.
+/// Delegates to [`wimoai_wimo_agent::prompt::skills::list_skills`] with the workspace's `root_cwd` and the caller-supplied `SkillsConfig`.
 /// Returns each [`SkillInfo`] serialized to a `serde_json::Value`.
 /// `list_skills` stats and reads each SKILL.md but holds no async locks across `.await` points, so contention is not a concern.
 pub async fn discover_skills(root_cwd: &Path, config: &SkillsConfig) -> Vec<Value> {
     let cwd_str = root_cwd.to_string_lossy();
     // Workspace discovery does no per-vendor compat gating; pass the all-on default
-    let skills = wimo ai_wimo_agent::prompt::skills::list_skills(
+    let skills = wimoai_wimo_agent::prompt::skills::list_skills(
         Some(&cwd_str),
         config,
-        wimo ai_wimo_agent::prompt::skills::CompatConfig::default(),
+        wimoai_wimo_agent::prompt::skills::CompatConfig::default(),
     )
     .await;
 
@@ -59,9 +59,9 @@ pub async fn discover_skills(root_cwd: &Path, config: &SkillsConfig) -> Vec<Valu
 /// Discover project-instruction files (AGENTS.md, Claude.md, rules) from the workspace root up to the git root.
 pub async fn discover_agents_md(root_cwd: &Path) -> Vec<Value> {
     let cwd_str = root_cwd.to_string_lossy();
-    let files = wimo ai_wimo_agent::prompt::agents_md::read_agents_config_with_paths(
+    let files = wimoai_wimo_agent::prompt::agents_md::read_agents_config_with_paths(
         &cwd_str,
-        wimo ai_wimo_tools::types::compat::CompatConfig::default(),
+        wimoai_wimo_tools::types::compat::CompatConfig::default(),
     )
     .await;
 
@@ -87,7 +87,7 @@ pub async fn discover_agents_md(root_cwd: &Path) -> Vec<Value> {
 
 /// Discover plugins visible from the workspace root.
 ///
-/// Delegates to [`wimo ai_wimo_agent::plugins::discover_plugins`].
+/// Delegates to [`wimoai_wimo_agent::plugins::discover_plugins`].
 /// [`DiscoveredPlugin`] does not derive `Serialize`, so each plugin is converted to a JSON object with the fields downstream consumers need.
 /// `project_trusted` is the folder-trust verdict for `root_cwd`, threaded into discovery to gate Project-scope plugins.
 pub fn discover_plugins(
@@ -96,7 +96,7 @@ pub fn discover_plugins(
     trust_store: &PluginTrustStore,
     project_trusted: bool,
 ) -> Vec<Value> {
-    let discovered = wimo ai_wimo_agent::plugins::discover_plugins(
+    let discovered = wimoai_wimo_agent::plugins::discover_plugins(
         Some(root_cwd),
         config,
         trust_store,
@@ -135,7 +135,7 @@ pub fn discover_plugins(
 /// Non-fatal errors are logged.
 pub fn load_project_config(root_cwd: &Path) -> Value {
     let config_path = root_cwd.join(".wimo").join("config.toml");
-    match wimo ai_wimo_config::load_config_file(&config_path) {
+    match wimoai_wimo_config::load_config_file(&config_path) {
         Ok(toml::Value::Table(ref t)) if t.is_empty() => {
             // The config loader returns an empty table when the file does not exist
             // Normalize to Null for callers
@@ -307,13 +307,13 @@ mod tests {
     fn agent_config_file_wire_matches_workspace_types_mirror() {
         // The RPC serializes wimo's AgentConfigFile and the remote consumer deserializes the workspace-types mirror
         // Pin the cross-crate serde shape so a rename/attr drift on either side can't silently break discovery
-        let src = wimo ai_wimo_agent::prompt::agents_md::AgentConfigFile {
+        let src = wimoai_wimo_agent::prompt::agents_md::AgentConfigFile {
             file_name: "AGENTS.md".to_string(),
             file_path: "/repo/AGENTS.md".to_string(),
             content: "# Instructions\n".to_string(),
         };
         let json = serde_json::to_value(&src).unwrap();
-        let mirror: wimo ai_wimo_workspace_types::rpc::agents_md::AgentConfigFile =
+        let mirror: wimoai_wimo_workspace_types::rpc::agents_md::AgentConfigFile =
             serde_json::from_value(json.clone())
                 .expect("server shape must deserialize into mirror");
         assert_eq!(mirror.file_name, src.file_name);

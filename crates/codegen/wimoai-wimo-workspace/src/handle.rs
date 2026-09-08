@@ -8,9 +8,9 @@ use prometheus::{
 use std::collections::HashSet;
 use std::path::PathBuf;
 use std::sync::Arc;
-use wimo ai_hunk_tracker::{HunkTrackerActor, HunkTrackerHandle, TrackingMode};
-use wimo ai_tool_protocol::turn_hook::TurnHookOutcome;
-use wimo ai_tool_protocol::{SessionId, ToolId, ToolServerStatusPayload};
+use wimoai_hunk_tracker::{HunkTrackerActor, HunkTrackerHandle, TrackingMode};
+use wimoai_tool_protocol::turn_hook::TurnHookOutcome;
+use wimoai_tool_protocol::{SessionId, ToolId, ToolServerStatusPayload};
 /// Default SIGTERM drain budget (ms); override via `wimo_WORKSPACE_TERMINATION_GRACE_MS`.
 /// 45s fits under the K8s grace period.
 const DEFAULT_TERMINATION_GRACE_MS: u64 = 45_000;
@@ -202,11 +202,11 @@ use crate::telemetry::dc_log;
 use crate::workspace_ops::{
     GetFileEntry, GetFileResult, GetFilesRes, PutFileEntry, PutFileResult, PutFilesRes,
 };
-use wimo ai_file_utils::queue::EnqueueOutcome;
-use wimo ai_wimo_diag_server::DiagHandle;
-use wimo ai_wimo_session_events::types::CancellationCategory;
-use wimo ai_wimo_session_events::{Event, SessionRelationship, TurnOutcomeLabel};
-use wimo ai_tool_protocol::turn_hook::{AfterTurnAckPayload, AfterTurnAckStatus};
+use wimoai_file_utils::queue::EnqueueOutcome;
+use wimoai_wimo_diag_server::DiagHandle;
+use wimoai_wimo_session_events::types::CancellationCategory;
+use wimoai_wimo_session_events::{Event, SessionRelationship, TurnOutcomeLabel};
+use wimoai_tool_protocol::turn_hook::{AfterTurnAckPayload, AfterTurnAckStatus};
 /// Per-domain checkpoint captures, by domain and turn outcome.
 pub(crate) static REWIND_CHECKPOINT_CAPTURE_TOTAL: std::sync::LazyLock<IntCounterVec> =
     std::sync::LazyLock::new(|| {
@@ -435,9 +435,9 @@ pub struct WorkspaceHandle {
     pub(crate) shared: Arc<WorkspaceShared>,
 }
 type AcknowledgedNotifyChannel = (
-    wimo ai_wimo_tools::notification::types::ToolNotificationHandle,
+    wimoai_wimo_tools::notification::types::ToolNotificationHandle,
     tokio::sync::mpsc::UnboundedReceiver<
-        wimo ai_wimo_tools::notification::AcknowledgedToolNotification,
+        wimoai_wimo_tools::notification::AcknowledgedToolNotification,
     >,
 );
 /// Builds with no forwarder. They must not open the channel, because an unread one blocks every delete.
@@ -456,8 +456,8 @@ impl WorkspaceHandle {
         &self,
         service_name: &str,
     ) -> Option<(
-        wimo ai_computer_hub_sdk::HubDonatingReporter,
-        wimo ai_computer_hub_sdk::TraceDonationPump,
+        wimoai_computer_hub_sdk::HubDonatingReporter,
+        wimoai_computer_hub_sdk::TraceDonationPump,
     )> {
         self.shared
             .hub_handle
@@ -471,13 +471,13 @@ impl WorkspaceHandle {
     /// On `Some`, yields a [`LogDonationSender`] to swap into the already-installed inert `DonatingLogLayer` plus a drain handle.
     /// Never hands out an owned `ToolServer`: dropping a clone starts server teardown.
     ///
-    /// [`LogDonationSender`]: wimo ai_computer_hub_sdk::LogDonationSender
+    /// [`LogDonationSender`]: wimoai_computer_hub_sdk::LogDonationSender
     pub async fn log_donation_layer(
         &self,
         service_name: &str,
     ) -> Option<(
-        wimo ai_computer_hub_sdk::LogDonationSender,
-        wimo ai_computer_hub_sdk::LogDonationPump,
+        wimoai_computer_hub_sdk::LogDonationSender,
+        wimoai_computer_hub_sdk::LogDonationPump,
     )> {
         self.shared
             .hub_handle
@@ -493,7 +493,7 @@ impl WorkspaceHandle {
     pub async fn metric_donation_reporter(
         &self,
         service_name: &str,
-    ) -> Option<wimo ai_computer_hub_sdk::MetricDonationPump> {
+    ) -> Option<wimoai_computer_hub_sdk::MetricDonationPump> {
         self.shared
             .hub_handle
             .lock()
@@ -521,7 +521,7 @@ impl WorkspaceHandle {
             crate::upload::environment::WorkspaceIdentity::default(),
         )
     }
-    /// Construct a handle with an explicit `$wimo_WORKSPACE_HOME` and a pre-spawned [`UploadQueue`](wimo ai_file_utils::queue::UploadQueue).
+    /// Construct a handle with an explicit `$wimo_WORKSPACE_HOME` and a pre-spawned [`UploadQueue`](wimoai_file_utils::queue::UploadQueue).
     ///
     /// [`connect_local_workspace`] calls this so the queue is backed by the proxy storage config.
     /// [`Self::new`] takes the queue-less path for tests and local mode.
@@ -531,7 +531,7 @@ impl WorkspaceHandle {
     pub(crate) fn new_with_data_collection(
         config: WorkspaceConfig,
         workspace_home: std::path::PathBuf,
-        upload_queue: Arc<wimo ai_file_utils::queue::UploadQueue>,
+        upload_queue: Arc<wimoai_file_utils::queue::UploadQueue>,
         upload_queue_enabled: bool,
         data_collection_disabled: bool,
         identity: crate::upload::environment::WorkspaceIdentity,
@@ -551,7 +551,7 @@ impl WorkspaceHandle {
     fn build(
         config: WorkspaceConfig,
         workspace_home: std::path::PathBuf,
-        upload_queue: Option<Arc<wimo ai_file_utils::queue::UploadQueue>>,
+        upload_queue: Option<Arc<wimoai_file_utils::queue::UploadQueue>>,
         _upload_queue_enabled: bool,
         data_collection_disabled: bool,
         events_enabled: bool,
@@ -560,7 +560,7 @@ impl WorkspaceHandle {
         identity: crate::upload::environment::WorkspaceIdentity,
     ) -> WorkspaceResult<Self> {
         let sessions = std::collections::HashMap::new();
-        let local_registry = wimo ai_computer_hub_sdk::LocalRegistry::new();
+        let local_registry = wimoai_computer_hub_sdk::LocalRegistry::new();
         let capacity = if config.event_buffer_capacity == 0 {
             DEFAULT_EVENT_BUFFER_CAPACITY
         } else {
@@ -568,7 +568,7 @@ impl WorkspaceHandle {
         };
         let (events, _drop_rx) = tokio::sync::broadcast::channel(capacity);
         let (hook_registry, hook_load_errors) = {
-            use wimo ai_wimo_hooks::discovery::{HookSource, load_hooks_from_sources};
+            use wimoai_wimo_hooks::discovery::{HookSource, load_hooks_from_sources};
             fn to_hook_source(s: &HookSourceConfig) -> HookSource<'_> {
                 match s {
                     HookSourceConfig::SettingsFile(p) => HookSource::SettingsFile(p.as_path()),
@@ -596,9 +596,9 @@ impl WorkspaceHandle {
             );
             (registry, errors)
         };
-        let lsp: Option<Arc<dyn wimo ai_wimo_tools::implementations::lsp::LspBackend>> = {
+        let lsp: Option<Arc<dyn wimoai_wimo_tools::implementations::lsp::LspBackend>> = {
             let sourced =
-                wimo ai_wimo_tools::implementations::lsp::config::load_servers_with_plugins_sourced(
+                wimoai_wimo_tools::implementations::lsp::config::load_servers_with_plugins_sourced(
                     &config.root_cwd,
                     &[],
                     &[],
@@ -606,21 +606,21 @@ impl WorkspaceHandle {
                     &[],
                 );
             let servers =
-                wimo ai_wimo_tools::implementations::lsp::config::filter_project_lsp_when_untrusted(
+                wimoai_wimo_tools::implementations::lsp::config::filter_project_lsp_when_untrusted(
                     sourced,
                     config.project_lsp_trusted,
                 );
             if servers.is_empty() {
                 None
             } else {
-                use wimo ai_wimo_tools::implementations::lsp::{
+                use wimoai_wimo_tools::implementations::lsp::{
                     LspBackend, LspBackendAdapter, LspManager,
                 };
                 let mgr = Arc::new(tokio::sync::Mutex::new(LspManager::new(
                     servers,
                     config.root_cwd.clone(),
                     true,
-                    wimo ai_wimo_tools::notification::ToolNotificationHandle::noop(),
+                    wimoai_wimo_tools::notification::ToolNotificationHandle::noop(),
                 )));
                 let adapter = Arc::new(LspBackendAdapter::new(mgr));
                 adapter.ensure_started_background();
@@ -628,7 +628,7 @@ impl WorkspaceHandle {
             }
         };
         let session_event_writers: Arc<
-            dashmap::DashMap<String, wimo ai_wimo_session_events::EventWriter>,
+            dashmap::DashMap<String, wimoai_wimo_session_events::EventWriter>,
         > = Arc::new(dashmap::DashMap::new());
         let activity_tracker =
             Arc::new(
@@ -724,17 +724,17 @@ impl WorkspaceHandle {
     pub fn activity_tracker(&self) -> &std::sync::Arc<crate::activity::ActivityTracker> {
         &self.shared.activity_tracker
     }
-    /// The [`ToolServer`](wimo ai_computer_hub_sdk::ToolServer) for this workspace, if a server connection is active.
+    /// The [`ToolServer`](wimoai_computer_hub_sdk::ToolServer) for this workspace, if a server connection is active.
     ///
     /// Non-blocking: returns `None` both when no server is connected and when the handle is momentarily locked (e.g. a concurrent connect).
     /// Callers must treat `None` as "no server available right now" and degrade gracefully.
-    pub fn hub_server(&self) -> Option<wimo ai_computer_hub_sdk::ToolServer> {
+    pub fn hub_server(&self) -> Option<wimoai_computer_hub_sdk::ToolServer> {
         self.shared.hub_server()
     }
     /// Like [`Self::hub_server`] but awaits the connection lock instead of returning `None` on contention.
     /// A transient `connect_hub` lock is not mistaken for "no server"; `None` means no server is connected.
     /// Use from async callers.
-    pub async fn hub_server_blocking(&self) -> Option<wimo ai_computer_hub_sdk::ToolServer> {
+    pub async fn hub_server_blocking(&self) -> Option<wimoai_computer_hub_sdk::ToolServer> {
         self.shared.hub_server_blocking().await
     }
     pub(crate) fn root_cwd(&self) -> crate::error::WorkspaceResult<PathBuf> {
@@ -768,9 +768,9 @@ impl WorkspaceHandle {
         &self,
         session_id: impl Into<String>,
         cwd: Option<std::path::PathBuf>,
-        tool_config: Option<wimo ai_wimo_tools::registry::types::ToolServerConfig>,
+        tool_config: Option<wimoai_wimo_tools::registry::types::ToolServerConfig>,
         capability: CapabilityMode,
-        viewer_ctx: Option<wimo ai_tool_runtime::WorkspaceViewerContext>,
+        viewer_ctx: Option<wimoai_tool_runtime::WorkspaceViewerContext>,
         system_notifications: bool,
     ) -> WorkspaceResult<Arc<WorkspaceSession>> {
         let session_id = session_id.into();
@@ -806,7 +806,7 @@ impl WorkspaceHandle {
         session_id: impl Into<String>,
         cwd: std::path::PathBuf,
         hunk_tracker: HunkTrackerHandle,
-        tool_config: Option<wimo ai_wimo_tools::registry::types::ToolServerConfig>,
+        tool_config: Option<wimoai_wimo_tools::registry::types::ToolServerConfig>,
         capability: CapabilityMode,
     ) -> WorkspaceResult<Arc<WorkspaceSession>> {
         self.create_session_with_tracker_and_viewer_ctx(
@@ -826,9 +826,9 @@ impl WorkspaceHandle {
         session_id: impl Into<String>,
         cwd: std::path::PathBuf,
         hunk_tracker: HunkTrackerHandle,
-        tool_config: Option<wimo ai_wimo_tools::registry::types::ToolServerConfig>,
+        tool_config: Option<wimoai_wimo_tools::registry::types::ToolServerConfig>,
         capability: CapabilityMode,
-        viewer_ctx: Option<wimo ai_tool_runtime::WorkspaceViewerContext>,
+        viewer_ctx: Option<wimoai_tool_runtime::WorkspaceViewerContext>,
         system_notifications: bool,
     ) -> WorkspaceResult<Arc<WorkspaceSession>> {
         self.create_session_with_tracker_inner(
@@ -852,9 +852,9 @@ impl WorkspaceHandle {
         cwd: std::path::PathBuf,
         hunk_tracker: HunkTrackerHandle,
         hunk_tracker_cancel: Option<tokio_util::sync::CancellationToken>,
-        tool_config: Option<wimo ai_wimo_tools::registry::types::ToolServerConfig>,
+        tool_config: Option<wimoai_wimo_tools::registry::types::ToolServerConfig>,
         capability: CapabilityMode,
-        viewer_ctx: Option<wimo ai_tool_runtime::WorkspaceViewerContext>,
+        viewer_ctx: Option<wimoai_tool_runtime::WorkspaceViewerContext>,
         system_notifications: bool,
     ) -> WorkspaceResult<Arc<WorkspaceSession>> {
         let session_id = session_id.into();
@@ -949,7 +949,7 @@ impl WorkspaceHandle {
         &self,
         caller_session_id: &str,
         session_id: &str,
-        new_config: wimo ai_wimo_tools::registry::types::ToolServerConfig,
+        new_config: wimoai_wimo_tools::registry::types::ToolServerConfig,
     ) -> crate::error::WorkspaceResult<()> {
         let session = self
             .session(session_id)
@@ -975,7 +975,7 @@ impl WorkspaceHandle {
     pub(crate) async fn resolve_and_swap_session_toolset(
         &self,
         session: &Arc<crate::session::WorkspaceSession>,
-        new_config: wimo ai_wimo_tools::registry::types::ToolServerConfig,
+        new_config: wimoai_wimo_tools::registry::types::ToolServerConfig,
         trigger: SwapTrigger,
     ) -> crate::error::WorkspaceResult<SwapOutcome> {
         let _update_guard = session.update_lock.lock().await;
@@ -1044,7 +1044,7 @@ impl WorkspaceHandle {
     async fn resolve_and_swap_session_toolset_locked(
         &self,
         session: &Arc<crate::session::WorkspaceSession>,
-        new_config: wimo ai_wimo_tools::registry::types::ToolServerConfig,
+        new_config: wimoai_wimo_tools::registry::types::ToolServerConfig,
         new_fingerprint: Option<serde_json::Value>,
         trigger: SwapTrigger,
     ) -> crate::error::WorkspaceResult<SwapOutcome> {
@@ -1157,7 +1157,7 @@ impl WorkspaceHandle {
         let _ = self
             .shared
             .events
-            .send(wimo ai_wimo_workspace_types::WorkspaceEvent::ToolsChanged {
+            .send(wimoai_wimo_workspace_types::WorkspaceEvent::ToolsChanged {
                 session_id: session_id.to_owned(),
             });
         Ok(SwapOutcome::Swapped)
@@ -1167,7 +1167,7 @@ impl WorkspaceHandle {
     pub(crate) async fn rebind_existing_hub_session(
         &self,
         session_id: &str,
-        explicit_cfg: Option<wimo ai_wimo_tools::registry::types::ToolServerConfig>,
+        explicit_cfg: Option<wimoai_wimo_tools::registry::types::ToolServerConfig>,
         bind_fingerprint: Option<serde_json::Value>,
     ) -> Option<(Arc<crate::session::WorkspaceSession>, RebindOutcome)> {
         let session = self.session(session_id)?;
@@ -1266,7 +1266,7 @@ impl WorkspaceHandle {
     pub async fn on_before_turn(
         &self,
         session_id: &str,
-        payload: &wimo ai_tool_protocol::turn_hook::BeforeTurnPayload,
+        payload: &wimoai_tool_protocol::turn_hook::BeforeTurnPayload,
     ) {
         self.sync_session_yolo_mode(session_id, payload.yolo_mode);
         let before_handle = self
@@ -1304,14 +1304,14 @@ impl WorkspaceHandle {
     pub async fn on_after_turn(
         &self,
         session_id: &str,
-        payload: &wimo ai_tool_protocol::turn_hook::AfterTurnPayload,
+        payload: &wimoai_tool_protocol::turn_hook::AfterTurnPayload,
     ) {
         let _ = self.process_after_turn(session_id, payload).await;
     }
     async fn process_after_turn(
         &self,
         session_id: &str,
-        payload: &wimo ai_tool_protocol::turn_hook::AfterTurnPayload,
+        payload: &wimoai_tool_protocol::turn_hook::AfterTurnPayload,
     ) -> (
         Option<tokio::task::JoinHandle<EnqueueOutcome>>,
         Option<tokio::task::JoinHandle<EnqueueOutcome>>,
@@ -1362,9 +1362,9 @@ impl WorkspaceHandle {
     pub async fn compute_turn_injections(
         &self,
         session_id: &str,
-        request: &wimo ai_tool_protocol::turn_hook::TurnHookRequest,
-    ) -> wimo ai_tool_protocol::turn_hook::HookReply {
-        use wimo ai_tool_protocol::turn_hook::{HookReply, TurnHookRequest};
+        request: &wimoai_tool_protocol::turn_hook::TurnHookRequest,
+    ) -> wimoai_tool_protocol::turn_hook::HookReply {
+        use wimoai_tool_protocol::turn_hook::{HookReply, TurnHookRequest};
         match request {
             TurnHookRequest::Before(payload) => {
                 self.on_before_turn(session_id, payload).await;
@@ -1690,7 +1690,7 @@ impl WorkspaceHandle {
         self.shared.activity_tracker.tool_call_completed(
             call_id,
             Some(session_id),
-            wimo ai_wimo_session_events::ToolOutcome::Cancelled,
+            wimoai_wimo_session_events::ToolOutcome::Cancelled,
         );
         tracing::info!(%session_id, %call_id, "cancel_tool_call: marked as completed");
     }
@@ -1741,14 +1741,14 @@ impl WorkspaceHandle {
     /// The registry is loaded once at workspace construction from the global and project sources in `WorkspaceConfig`.
     /// Mid-session reloads (e.g. plugin hook appending) mutate the live registry in place via the `RwLock` on `WorkspaceShared`.
     /// The returned clone is not affected by subsequent mutations.
-    pub fn hook_registry(&self) -> wimo ai_wimo_hooks::discovery::HookRegistry {
+    pub fn hook_registry(&self) -> wimoai_wimo_hooks::discovery::HookRegistry {
         self.shared.hook_registry.read().clone()
     }
     /// Non-fatal errors from the initial hook discovery pass at workspace construction time.
     ///
     /// Empty when all hook files parsed cleanly.
     /// Not updated on mid-session hook mutations (e.g. plugin hook appending).
-    pub fn hook_load_errors(&self) -> &[wimo ai_wimo_hooks::error::HookError] {
+    pub fn hook_load_errors(&self) -> &[wimoai_wimo_hooks::error::HookError] {
         &self.shared.hook_load_errors
     }
     /// Canonicalize the workspace root directory.
@@ -2399,19 +2399,19 @@ impl WorkspaceHandle {
     pub fn get_or_create_codebase_index(
         &self,
         cwd: std::path::PathBuf,
-    ) -> (Arc<wimo ai_codebase_graph::IndexManagerHandle>, bool) {
+    ) -> (Arc<wimoai_codebase_graph::IndexManagerHandle>, bool) {
         self.shared.codebase_indexes.lock().get_or_create(cwd)
     }
     pub fn get_codebase_index(
         &self,
         cwd: &std::path::Path,
-    ) -> Option<Arc<wimo ai_codebase_graph::IndexManagerHandle>> {
+    ) -> Option<Arc<wimoai_codebase_graph::IndexManagerHandle>> {
         self.shared.codebase_indexes.lock().get(cwd)
     }
     pub fn get_covering_codebase_index(
         &self,
         path: &std::path::Path,
-    ) -> Option<Arc<wimo ai_codebase_graph::IndexManagerHandle>> {
+    ) -> Option<Arc<wimoai_codebase_graph::IndexManagerHandle>> {
         self.shared.codebase_indexes.lock().get_covering(path)
     }
     pub fn ensure_codebase_indexes(&self, roots: &[std::path::PathBuf]) {
@@ -2426,7 +2426,7 @@ impl WorkspaceHandle {
             let mut rx = shared.events.subscribe();
             loop {
                 match rx.recv().await {
-                    Ok(wimo ai_wimo_workspace_types::WorkspaceEvent::FsChanged { ref path, kind }) => {
+                    Ok(wimoai_wimo_workspace_types::WorkspaceEvent::FsChanged { ref path, kind }) => {
                         let idx = {
                             let indexes = shared.codebase_indexes.lock();
                             indexes
@@ -2441,7 +2441,7 @@ impl WorkspaceHandle {
                             }
                         }
                     }
-                    Ok(wimo ai_wimo_workspace_types::WorkspaceEvent::GitHeadChanged { .. }) => {
+                    Ok(wimoai_wimo_workspace_types::WorkspaceEvent::GitHeadChanged { .. }) => {
                         let idx_opt = {
                             let indexes = shared.codebase_indexes.lock();
                             indexes
@@ -2480,7 +2480,7 @@ impl WorkspaceHandle {
             let mut rx = handle.shared.events.subscribe();
             loop {
                 match rx.recv().await {
-                    Ok(wimo ai_wimo_workspace_types::WorkspaceEvent::ToolsChanged { session_id }) => {
+                    Ok(wimoai_wimo_workspace_types::WorkspaceEvent::ToolsChanged { session_id }) => {
                         if tool_defs_reemit_gate(
                             handle.shared.tool_defs_enabled,
                             &handle.shared.tool_defs_last_emit,
@@ -2541,7 +2541,7 @@ impl WorkspaceHandle {
         session_id: &str,
         cwd: &std::path::Path,
         trace_parent: Option<fastrace::collector::SpanContext>,
-    ) -> Option<wimo ai_file_utils::queue::EnqueueOutcome> {
+    ) -> Option<wimoai_file_utils::queue::EnqueueOutcome> {
         let upload_queue = self.shared.upload_queue.clone()?;
         if !is_safe_object_segment(session_id) {
             tracing::warn!(%session_id, "environment: unsafe session id, skipping");
@@ -2565,7 +2565,7 @@ impl WorkspaceHandle {
             .in_span(
                 fastrace::Span::root(
                     "tool_server.session_bind.environment_capture",
-                    trace_parent.unwrap_or_else(wimo ai_tracing::local_or_random_span_ctx),
+                    trace_parent.unwrap_or_else(wimoai_tracing::local_or_random_span_ctx),
                 )
                 .with_properties(|| {
                     [
@@ -2620,7 +2620,7 @@ impl WorkspaceHandle {
             )
             .await;
         match &outcome {
-            wimo ai_file_utils::queue::EnqueueOutcome::Failed { reason: _ } => {
+            wimoai_file_utils::queue::EnqueueOutcome::Failed { reason: _ } => {
                 dc_log!(
                     warn,
                     session_id = %session_id,
@@ -2711,7 +2711,7 @@ impl WorkspaceHandle {
             let _ =
                 self.shared
                     .events
-                    .send(wimo ai_wimo_workspace_types::WorkspaceEvent::ToolsChanged {
+                    .send(wimoai_wimo_workspace_types::WorkspaceEvent::ToolsChanged {
                         session_id: session_id.to_owned(),
                     });
         }
@@ -2822,7 +2822,7 @@ impl WorkspaceHandle {
             let _ =
                 self.shared
                     .events
-                    .send(wimo ai_wimo_workspace_types::WorkspaceEvent::ToolsChanged {
+                    .send(wimoai_wimo_workspace_types::WorkspaceEvent::ToolsChanged {
                         session_id: session_id.to_owned(),
                     });
         }
@@ -2938,7 +2938,7 @@ impl WorkspaceHandle {
             hub_guard.as_ref().map(|hub| hub.server.clone())
         };
         if let (Some(tool_server), Ok(sid)) =
-            (tool_server, wimo ai_tool_protocol::SessionId::new(session_id))
+            (tool_server, wimoai_tool_protocol::SessionId::new(session_id))
         {
             for server in servers.values() {
                 for tool_id in &server.tool_ids {
@@ -3004,12 +3004,12 @@ impl WorkspaceHandle {
             .tool_config
             .clone()
             .unwrap_or_else(|| (*parent.effective_tool_config()).clone());
-        let active_agent_message_id = wimo ai_wimo_tools::registry::types::ToolConfig::for_tool::<
-            wimo ai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
+        let active_agent_message_id = wimoai_wimo_tools::registry::types::ToolConfig::for_tool::<
+            wimoai_wimo_tools::implementations::wimo::SendSubagentMessageTool,
         >()
         .id;
         baseline.tools.retain(|tool| {
-            tool.kind != Some(wimo ai_wimo_tools::types::tool::ToolKind::ActiveAgentMessage)
+            tool.kind != Some(wimoai_wimo_tools::types::tool::ToolKind::ActiveAgentMessage)
                 && tool.id != active_agent_message_id
         });
         let cwd = config
@@ -3165,7 +3165,7 @@ impl WorkspaceHandle {
     /// Re-resolve every session's toolset against `new_snapshot` and emit one `WorkspaceEvent::ToolsChanged` per session.
     pub fn on_mcp_snapshot_changed(
         &self,
-        new_snapshot: Vec<wimo ai_wimo_tools::registry::types::ToolConfig>,
+        new_snapshot: Vec<wimoai_wimo_tools::registry::types::ToolConfig>,
     ) -> usize {
         self.shared.mcp_tools_snapshot.store(Arc::new(new_snapshot));
         tokio::task::block_in_place(|| {
@@ -3178,7 +3178,7 @@ impl WorkspaceHandle {
     /// Bulk-replace hub tool configs and re-resolve every session.
     pub fn on_hub_tools_changed(
         &self,
-        new_hub_tools: Vec<wimo ai_wimo_tools::registry::types::ToolConfig>,
+        new_hub_tools: Vec<wimoai_wimo_tools::registry::types::ToolConfig>,
     ) -> usize {
         self.shared
             .hub_tools_snapshot
@@ -3195,12 +3195,12 @@ impl WorkspaceHandle {
     /// Extracted from `connect_hub` so tests can drive the full bind path without a hub connection.
     pub(crate) fn session_bind_resolver(
         &self,
-        catalog: Arc<Vec<Arc<dyn wimo ai_computer_hub_sdk::ToolServerHandler>>>,
-        rpc_tool_id: wimo ai_tool_protocol::ToolId,
-    ) -> wimo ai_computer_hub_sdk::SessionHandlerResolver {
+        catalog: Arc<Vec<Arc<dyn wimoai_computer_hub_sdk::ToolServerHandler>>>,
+        rpc_tool_id: wimoai_tool_protocol::ToolId,
+    ) -> wimoai_computer_hub_sdk::SessionHandlerResolver {
         let weak_shared = Arc::downgrade(&self.shared);
         Arc::new(
-            move |sid: wimo ai_tool_protocol::SessionId, params: Option<serde_json::Value>| {
+            move |sid: wimoai_tool_protocol::SessionId, params: Option<serde_json::Value>| {
                 let catalog = catalog.clone();
                 let rpc_tool_id = rpc_tool_id.clone();
                 let weak_shared = weak_shared.clone();
@@ -3209,7 +3209,7 @@ impl WorkspaceHandle {
                     .and_then(|p| p.pointer("/trace_context"))
                     .and_then(serde_json::Value::as_str)
                     .and_then(fastrace::collector::SpanContext::decode_w3c_traceparent)
-                    .unwrap_or_else(wimo ai_tracing::local_or_random_span_ctx);
+                    .unwrap_or_else(wimoai_tracing::local_or_random_span_ctx);
                 let bind_span = fastrace::Span::root("tool_server.session_bind", bind_parent)
                     .with_properties(|| {
                         [
@@ -3225,7 +3225,7 @@ impl WorkspaceHandle {
                             .with_label_values(&["workspace_shutdown"])
                             .inc();
                         return Err(
-                            wimo ai_tool_runtime::ToolError::service_unavailable(
+                            wimoai_tool_runtime::ToolError::service_unavailable(
                                 "workspace is shutting down; cannot bind session",
                             ),
                         );
@@ -3265,7 +3265,7 @@ impl WorkspaceHandle {
                         (None, Some(v)) => Some(v.real_root_path()),
                         (cwd, None) => cwd,
                     };
-                    let empty_toolset = || wimo ai_wimo_tools::registry::types::ToolServerConfig {
+                    let empty_toolset = || wimoai_wimo_tools::registry::types::ToolServerConfig {
                         tools: vec![],
                         behavior_preset: None,
                     };
@@ -3304,7 +3304,7 @@ impl WorkspaceHandle {
                                  on session.bind (absent, or dropped as malformed — see \
                                  server logs) and this workspace requires one (presets are \
                                  not supported; server version {})",
-                                wimo ai_wimo_version::VERSION
+                                wimoai_wimo_version::VERSION
                             ),
                             );
                             Some(empty_toolset())
@@ -3318,7 +3318,7 @@ impl WorkspaceHandle {
                             resolve_error = Some(
                                 format!(
                                 "invalid_tool_config: {err} (server version {})",
-                                wimo ai_wimo_version::VERSION
+                                wimoai_wimo_version::VERSION
                             ),
                             );
                             Some(empty_toolset())
@@ -3394,7 +3394,7 @@ impl WorkspaceHandle {
                                         .await
                                 {
                                     return Err(
-                                        wimo ai_tool_runtime::ToolError::service_unavailable(
+                                        wimoai_tool_runtime::ToolError::service_unavailable(
                                             format!(
                                             "path-virt remount failed for `{sid_str}`: {e}"
                                         ),
@@ -3427,7 +3427,7 @@ impl WorkspaceHandle {
                                         .with_label_values(&["session_lookup_failed"])
                                         .inc();
                                     return Err(
-                                        wimo ai_tool_runtime::ToolError::service_unavailable(
+                                        wimoai_tool_runtime::ToolError::service_unavailable(
                                             format!(
                                             "session rebind raced teardown for `{sid_str}`; retry"
                                         ),
@@ -3445,7 +3445,7 @@ impl WorkspaceHandle {
                                 .with_label_values(&["session_error"])
                                 .inc();
                             return Err(
-                                wimo ai_tool_runtime::ToolError::service_unavailable(
+                                wimoai_tool_runtime::ToolError::service_unavailable(
                                     format!("failed to create workspace session: {e}"),
                                 ),
                             );
@@ -3459,7 +3459,7 @@ impl WorkspaceHandle {
                             && let Err(e) = session.set_cwd_for_virtualization(cwd).await
                         {
                             return Err(
-                                wimo ai_tool_runtime::ToolError::service_unavailable(
+                                wimoai_tool_runtime::ToolError::service_unavailable(
                                     format!(
                                 "path-virt remount failed for `{sid_str}`: {e}"
                             ),
@@ -3479,7 +3479,7 @@ impl WorkspaceHandle {
                             .inc();
                         let _ = ws.drop_session_with_teardown(&sid_str, &sid_str).await;
                         return Err(
-                            wimo ai_tool_runtime::ToolError::service_unavailable(
+                            wimoai_tool_runtime::ToolError::service_unavailable(
                                 format!(
                             "bind mount hook failed: {e}"
                         ),
@@ -3675,7 +3675,7 @@ impl WorkspaceHandle {
                         unserved = ?unserved_tool_ids,
                         "session.bind: advertising finalized session toolset"
                     );
-                    Ok(wimo ai_computer_hub_sdk::ResolvedSessionHandlers {
+                    Ok(wimoai_computer_hub_sdk::ResolvedSessionHandlers {
                         handlers,
                         unserved_tool_ids,
                         resolve_error,
@@ -3736,7 +3736,7 @@ impl WorkspaceHandle {
                 .iter()
                 .map(|h| h.tool_id().as_str().to_owned())
                 .collect();
-            let rpc_handler: Arc<dyn wimo ai_computer_hub_sdk::ToolServerHandler> =
+            let rpc_handler: Arc<dyn wimoai_computer_hub_sdk::ToolServerHandler> =
                 Arc::new(crate::hub_server::WorkspaceRpcHandler::new(self.clone()));
             let rpc_tool_id = rpc_handler.tool_id();
             handlers.push(rpc_handler);
@@ -3762,12 +3762,12 @@ impl WorkspaceHandle {
                 return Err(e);
             }
         };
-        let catalog: Arc<Vec<Arc<dyn wimo ai_computer_hub_sdk::ToolServerHandler>>> =
+        let catalog: Arc<Vec<Arc<dyn wimoai_computer_hub_sdk::ToolServerHandler>>> =
             Arc::new(template_handlers.clone());
         let resolver = self.session_bind_resolver(catalog, rpc_tool_id);
         let unbind_workspace = self.clone();
-        let on_session_unbound: Arc<wimo ai_computer_hub_sdk::SessionUnboundCallback> =
-            Arc::new(move |sid: &wimo ai_tool_protocol::SessionId| {
+        let on_session_unbound: Arc<wimoai_computer_hub_sdk::SessionUnboundCallback> =
+            Arc::new(move |sid: &wimoai_tool_protocol::SessionId| {
                 let workspace = unbind_workspace.clone();
                 let session_id = sid.as_str().to_owned();
                 let Some(session) = workspace.session(&session_id) else {
@@ -3819,7 +3819,7 @@ impl WorkspaceHandle {
             "WorkspaceHandle::connect_hub — connected, starting server + listeners"
         );
         let (activity_notify_handle, activity_notify_rx) =
-            wimo ai_wimo_tools::notification::types::ToolNotificationHandle::channel();
+            wimoai_wimo_tools::notification::types::ToolNotificationHandle::channel();
         let activity_feed_task = tokio::spawn(run_activity_feed(
             self.shared.activity_tracker.clone(),
             activity_notify_rx,
@@ -3841,7 +3841,7 @@ impl WorkspaceHandle {
         let listener_task = tokio::spawn(async move {
             while let Some(notification) = notification_rx.recv().await {
                 match notification {
-                    wimo ai_computer_hub_sdk::HubNotification::ToolsChanged {
+                    wimoai_computer_hub_sdk::HubNotification::ToolsChanged {
                         added,
                         removed,
                         updated,
@@ -3878,8 +3878,8 @@ impl WorkspaceHandle {
                     Ok(event) => {
                         let payload =
                             serde_json::to_value(&event).unwrap_or(serde_json::Value::Null);
-                        let frame = wimo ai_tool_protocol::ToolNotificationFrame::custom(
-                            wimo ai_tool_protocol::ToolId::new(
+                        let frame = wimoai_tool_protocol::ToolNotificationFrame::custom(
+                            wimoai_tool_protocol::ToolId::new(
                                 crate::hub_ids::WORKSPACE_EVENTS_TOOL_ID,
                             )
                             .expect("constant tool id"),
@@ -3918,7 +3918,7 @@ impl WorkspaceHandle {
             /// Returns `Some(true)` on success, `Some(false)` on transport failure (hub unreachable).
             /// `None` means the send was skipped due to a local error (serialization, id allocation) that does not indicate a dead connection.
             async fn send_status(
-                conn: &wimo ai_computer_hub_sdk::HubConnection,
+                conn: &wimoai_computer_hub_sdk::HubConnection,
                 payload: ToolServerStatusPayload,
             ) -> Option<bool> {
                 let params = match serde_json::to_value(&payload) {
@@ -3935,11 +3935,11 @@ impl WorkspaceHandle {
                         return None;
                     }
                 };
-                let req = wimo ai_tool_protocol::JsonRpcRequest {
-                    jsonrpc: wimo ai_tool_protocol::JsonRpcVersion,
-                    id: wimo ai_tool_protocol::JsonRpcId::from_request_id(&request_id),
+                let req = wimoai_tool_protocol::JsonRpcRequest {
+                    jsonrpc: wimoai_tool_protocol::JsonRpcVersion,
+                    id: wimoai_tool_protocol::JsonRpcId::from_request_id(&request_id),
                     session_id: None,
-                    method: wimo ai_tool_protocol::Method::ToolServerStatus
+                    method: wimoai_tool_protocol::Method::ToolServerStatus
                         .as_wire_str()
                         .to_owned(),
                     params,
@@ -4055,8 +4055,8 @@ impl WorkspaceHandle {
             let server_for_ext = handle.server.clone();
             let ext_task = tokio::spawn(async move {
                 while let Some((method, params)) = ext_rx.recv().await {
-                    let frame = wimo ai_tool_protocol::ToolNotificationFrame::custom(
-                        wimo ai_tool_protocol::ToolId::new(
+                    let frame = wimoai_tool_protocol::ToolNotificationFrame::custom(
+                        wimoai_tool_protocol::ToolId::new(
                             crate::hub_ids::WORKSPACE_CLIENT_EXT_NOTIFICATIONS_TOOL_ID,
                         )
                         .expect("constant tool id"),
@@ -4101,9 +4101,9 @@ impl WorkspaceHandle {
 /// It guards a regression from ever emitting two handlers with the same `tool_id`.
 /// Two same-id handlers would duplicate the bind response and silently first-win at dispatch.
 fn build_session_routed_handlers(
-    toolset: &wimo ai_wimo_tools::registry::types::FinalizedToolset,
+    toolset: &wimoai_wimo_tools::registry::types::FinalizedToolset,
     ws: &WorkspaceHandle,
-) -> Vec<Arc<dyn wimo ai_computer_hub_sdk::ToolServerHandler>> {
+) -> Vec<Arc<dyn wimoai_computer_hub_sdk::ToolServerHandler>> {
     let tool_kinds = toolset.tool_kind_map();
     let mut seen = std::collections::HashSet::new();
     let mut handlers = Vec::new();
@@ -4116,7 +4116,7 @@ fn build_session_routed_handlers(
             continue;
         }
         let semantic_kind = tool_kinds.get(&def.function.name).copied();
-        let mut desc = wimo ai_tool_types::ToolDescription::new(
+        let mut desc = wimoai_tool_types::ToolDescription::new(
             def.function.name.clone(),
             def.function.description.clone().unwrap_or_default(),
         );
@@ -4130,7 +4130,7 @@ fn build_session_routed_handlers(
             ws.clone(),
         ) {
             Ok(handler) => {
-                handlers.push(Arc::new(handler) as Arc<dyn wimo ai_computer_hub_sdk::ToolServerHandler>)
+                handlers.push(Arc::new(handler) as Arc<dyn wimoai_computer_hub_sdk::ToolServerHandler>)
             }
             Err(e) => {
                 tracing::warn!(
@@ -4147,9 +4147,9 @@ fn build_session_routed_handlers(
 /// `started` must precede `completed`, else the unknown `completed` no-ops and strands the count.
 pub(crate) fn apply_background_task_notification(
     tracker: &crate::activity::ActivityTracker,
-    notification: &wimo ai_wimo_tools::notification::types::ToolNotification,
+    notification: &wimoai_wimo_tools::notification::types::ToolNotification,
 ) {
-    use wimo ai_wimo_tools::notification::types::ToolNotification;
+    use wimoai_wimo_tools::notification::types::ToolNotification;
     match notification {
         ToolNotification::BashExecutionBackgrounded(bg) => {
             tracker.background_task_started(&bg.task_id);
@@ -4165,7 +4165,7 @@ pub(crate) fn apply_background_task_notification(
 pub(crate) async fn run_activity_feed(
     tracker: Arc<crate::activity::ActivityTracker>,
     mut rx: tokio::sync::mpsc::UnboundedReceiver<
-        wimo ai_wimo_tools::notification::types::ToolNotification,
+        wimoai_wimo_tools::notification::types::ToolNotification,
     >,
 ) {
     while let Some(notification) = rx.recv().await {
@@ -4382,7 +4382,7 @@ pub struct LocalWorkspaceConnectOptions {
 pub async fn connect_local_workspace(
     cwd: std::path::PathBuf,
     hub_url: url::Url,
-    auth: wimo ai_computer_hub_sdk::SharedAuthProvider,
+    auth: wimoai_computer_hub_sdk::SharedAuthProvider,
     options: LocalWorkspaceConnectOptions,
 ) -> WorkspaceResult<WorkspaceHandle> {
     use crate::session::tool_config::WorkspaceSessionContextFactory;
@@ -4426,7 +4426,7 @@ pub async fn connect_local_workspace(
         allow_insecure_ws,
         diag,
     };
-    let tool_config = wimo ai_wimo_agent::workspace_wimo_toolset();
+    let tool_config = wimoai_wimo_agent::workspace_wimo_toolset();
     let mut ws_config = WorkspaceConfig::new_for_proxy(
         cwd,
         Arc::new(factory),
@@ -4460,13 +4460,13 @@ pub async fn connect_local_workspace(
         api_base_url.clone(),
         identity.clone(),
     ));
-    let trace_source: Arc<dyn wimo ai_file_utils::queue::TraceExportSource> = Arc::new(
+    let trace_source: Arc<dyn wimoai_file_utils::queue::TraceExportSource> = Arc::new(
         crate::upload::WorkspaceTraceExportSource::new(proxy_storage.clone()),
     );
-    let upload_queue = Arc::new(wimo ai_file_utils::queue::UploadQueue::spawn(
+    let upload_queue = Arc::new(wimoai_file_utils::queue::UploadQueue::spawn(
         &workspace_home,
         trace_source,
-        wimo ai_file_utils::queue::UploadRetryPolicy::default(),
+        wimoai_file_utils::queue::UploadRetryPolicy::default(),
     ));
     {
         let recovery_started = std::time::Instant::now();
@@ -4483,7 +4483,7 @@ pub async fn connect_local_workspace(
             recovery_started.elapsed().as_secs_f64(),
         );
     }
-    upload_queue.cleanup_orphans(wimo ai_file_utils::queue::DEFAULT_MAX_AGE);
+    upload_queue.cleanup_orphans(wimoai_file_utils::queue::DEFAULT_MAX_AGE);
     crate::upload::spawn_queue_stats_sampler(
         upload_queue.clone(),
         std::time::Duration::from_secs(15),
@@ -4528,14 +4528,14 @@ pub async fn connect_local_workspace(
 /// Precedence:
 /// 1. `$wimo_WORKSPACE_HOME` (operator override).
 /// 2. `<wimo_home>/workspace`, where `<wimo_home>` honours `$wimo_HOME` and
-///    otherwise falls back to `~/.wimo` (see [`wimo ai_wimo_config::wimo_home`]).
+///    otherwise falls back to `~/.wimo` (see [`wimoai_wimo_config::wimo_home`]).
 pub fn resolve_workspace_home() -> std::path::PathBuf {
     if let Ok(p) = std::env::var("wimo_WORKSPACE_HOME")
         && !p.trim().is_empty()
     {
         return std::path::PathBuf::from(p);
     }
-    wimo ai_wimo_config::wimo_home().join("workspace")
+    wimoai_wimo_config::wimo_home().join("workspace")
 }
 /// Skill `ignore` entries for the allow-list: subdirs of `dir` not in the comma-separated list (`bundled__` prefix optional).
 /// Unreadable `dir` fails closed (ignore `dir` itself).
@@ -4579,7 +4579,7 @@ fn bundled_allowlist_ignore_dirs(dir: &str, allowlist: Option<&str>) -> Vec<Stri
 }
 /// Whether per-session `events.jsonl` recording is enabled (`wimo_WORKSPACE_EVENTS_ENABLED=true`).
 /// Any other value (including unset) keeps the legacy behaviour.
-/// [`WorkspaceShared::session_event_writer`] hands back [`EventWriter::noop()`](wimo ai_wimo_session_events::EventWriter::noop).
+/// [`WorkspaceShared::session_event_writer`] hands back [`EventWriter::noop()`](wimoai_wimo_session_events::EventWriter::noop).
 /// No `events.jsonl` is ever opened.
 fn events_enabled() -> bool {
     std::env::var("wimo_WORKSPACE_EVENTS_ENABLED").as_deref() == Ok("true")
@@ -4648,12 +4648,12 @@ fn tool_defs_reemit_gate(
 /// Enqueue serialized workspace tool definitions at `object_path`, mapping the outcome to a log line.
 /// Shared by `emit_workspace_tool_definitions` (which spawns it) and the unit tests (which await it).
 async fn enqueue_workspace_tool_definitions(
-    upload_queue: &wimo ai_file_utils::queue::UploadQueue,
+    upload_queue: &wimoai_file_utils::queue::UploadQueue,
     session_id: &str,
     object_path: &str,
     bytes: &[u8],
-) -> wimo ai_file_utils::queue::EnqueueOutcome {
-    use wimo ai_file_utils::queue::EnqueueOutcome;
+) -> wimoai_file_utils::queue::EnqueueOutcome {
+    use wimoai_file_utils::queue::EnqueueOutcome;
     let outcome = upload_queue
         .enqueue_bytes_blocking(
             bytes,
@@ -4690,8 +4690,8 @@ async fn enqueue_workspace_tool_definitions(
 }
 /// Single source of truth for mapping a turn-hook outcome to the `events.jsonl` [`TurnOutcomeLabel`].
 /// Kept as one `match` so the two enums cannot drift and the mapping is never duplicated across call sites.
-fn turn_outcome_label(outcome: wimo ai_tool_protocol::turn_hook::TurnHookOutcome) -> TurnOutcomeLabel {
-    use wimo ai_tool_protocol::turn_hook::TurnHookOutcome;
+fn turn_outcome_label(outcome: wimoai_tool_protocol::turn_hook::TurnHookOutcome) -> TurnOutcomeLabel {
+    use wimoai_tool_protocol::turn_hook::TurnHookOutcome;
     match outcome {
         TurnHookOutcome::Completed => TurnOutcomeLabel::Completed,
         TurnHookOutcome::Cancelled => TurnOutcomeLabel::Cancelled,
@@ -4788,7 +4788,7 @@ fn ephemeral_workspace_home() -> std::path::PathBuf {
 }
 /// Resolve `workspace_rewind_all_outcomes` from `wimo_WORKSPACE_REWIND_ALL_OUTCOMES` (default off).
 fn rewind_all_outcomes_from_env() -> bool {
-    wimo ai_wimo_config::env_bool("wimo_WORKSPACE_REWIND_ALL_OUTCOMES").unwrap_or(false)
+    wimoai_wimo_config::env_bool("wimo_WORKSPACE_REWIND_ALL_OUTCOMES").unwrap_or(false)
 }
 /// Flush the session toolset's `ResourcesPersistence` to disk (a fresh snapshot, waiting for the atomic-rename write to land).
 /// Then read the bytes back and enqueue them for the given turn.
@@ -4797,7 +4797,7 @@ async fn persist_and_enqueue_tool_state(
     session: Arc<crate::session::WorkspaceSession>,
     session_id: String,
     turn_number: u64,
-    upload_queue: Arc<wimo ai_file_utils::queue::UploadQueue>,
+    upload_queue: Arc<wimoai_file_utils::queue::UploadQueue>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let toolset = session.toolset();
     let Some(state_path) = toolset
@@ -4832,20 +4832,20 @@ async fn persist_and_enqueue_tool_state(
 /// This is the same dispatch pattern as [`SessionRoutedToolHandler`] in `hub.rs`.
 /// It implements `ToolHandle` (for `LocalRegistry`) instead of `ToolServerHandler` (for `ToolServer`).
 struct SessionToolHandle {
-    tool_id: wimo ai_tool_protocol::ToolId,
-    desc: wimo ai_tool_types::ToolDescription,
+    tool_id: wimoai_tool_protocol::ToolId,
+    desc: wimoai_tool_types::ToolDescription,
     workspace: WorkspaceHandle,
     session_id: String,
 }
 impl SessionToolHandle {
     fn new(
         tool_name: String,
-        desc: wimo ai_tool_types::ToolDescription,
+        desc: wimoai_tool_types::ToolDescription,
         workspace: WorkspaceHandle,
         session_id: String,
-    ) -> Result<Self, wimo ai_tool_protocol::IdError> {
+    ) -> Result<Self, wimoai_tool_protocol::IdError> {
         Ok(Self {
-            tool_id: wimo ai_tool_protocol::ToolId::new(tool_name)?,
+            tool_id: wimoai_tool_protocol::ToolId::new(tool_name)?,
             desc,
             workspace,
             session_id,
@@ -4864,22 +4864,22 @@ impl std::fmt::Debug for SessionToolHandle {
     }
 }
 #[async_trait::async_trait]
-impl wimo ai_tool_runtime::ToolDyn for SessionToolHandle {
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
+impl wimoai_tool_runtime::ToolDyn for SessionToolHandle {
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
         self.tool_id.clone()
     }
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
         self.desc.clone()
     }
     async fn execute(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         args: serde_json::Value,
-    ) -> wimo ai_tool_runtime::ToolStream<wimo ai_tool_runtime::TypedToolOutput> {
-        use wimo ai_tool_runtime::{ToolError, ToolErrorKind, ToolStreamItem, terminal_only};
+    ) -> wimoai_tool_runtime::ToolStream<wimoai_tool_runtime::TypedToolOutput> {
+        use wimoai_tool_runtime::{ToolError, ToolErrorKind, ToolStreamItem, terminal_only};
         let session = match self.workspace.session(&self.session_id) {
             Some(s) => s,
             None => {
@@ -4966,21 +4966,21 @@ impl WorkspaceHandle {
     pub fn create_local_harness(
         &self,
         session_id: &str,
-    ) -> WorkspaceResult<wimo ai_computer_hub_sdk::ToolHarness> {
+    ) -> WorkspaceResult<wimoai_computer_hub_sdk::ToolHarness> {
         let session = self
             .session(session_id)
             .ok_or_else(|| WorkspaceError::SessionNotFound(session_id.to_string()))?;
         let toolset = session.toolset();
-        let registry = wimo ai_computer_hub_sdk::LocalRegistry::new();
+        let registry = wimoai_computer_hub_sdk::LocalRegistry::new();
         for def in toolset.tool_definitions() {
             let tool_name = def.function.name.clone();
-            let desc = wimo ai_tool_types::ToolDescription::new(
+            let desc = wimoai_tool_types::ToolDescription::new(
                 tool_name.clone(),
                 def.function.description.clone().unwrap_or_default(),
             );
             match SessionToolHandle::new(tool_name, desc, self.clone(), session_id.to_string()) {
                 Ok(tool) => {
-                    registry.register_dyn(Arc::new(tool) as Arc<dyn wimo ai_tool_runtime::ToolDyn>);
+                    registry.register_dyn(Arc::new(tool) as Arc<dyn wimoai_tool_runtime::ToolDyn>);
                 }
                 Err(e) => {
                     tracing::warn!(
@@ -4991,12 +4991,12 @@ impl WorkspaceHandle {
                 }
             }
         }
-        let session_id = wimo ai_tool_protocol::SessionId::new(session_id.to_string())
+        let session_id = wimoai_tool_protocol::SessionId::new(session_id.to_string())
             .map_err(|e| WorkspaceError::HubError(format!("invalid session id: {e}")))?;
-        Ok(wimo ai_computer_hub_sdk::ToolHarness::local_only_with(
+        Ok(wimoai_computer_hub_sdk::ToolHarness::local_only_with(
             registry,
             session_id,
-            wimo ai_tool_runtime::TypedExtensions::default(),
+            wimoai_tool_runtime::TypedExtensions::default(),
         ))
     }
 }
@@ -5012,7 +5012,7 @@ impl WorkspaceHandle {
         use crate::session::tool_config::WorkspaceSessionContextFactory;
         let config = WorkspaceConfig {
             root_cwd: cwd,
-            default_tool_config: wimo ai_wimo_tools::registry::types::ToolServerConfig {
+            default_tool_config: wimoai_wimo_tools::registry::types::ToolServerConfig {
                 tools: vec![],
                 behavior_preset: None,
             },

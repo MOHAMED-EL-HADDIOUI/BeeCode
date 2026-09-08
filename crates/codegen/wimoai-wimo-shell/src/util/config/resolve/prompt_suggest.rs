@@ -1,6 +1,6 @@
 use crate::util::config::RemoteSettings;
 use toml::Value as TomlValue;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
+use wimoai_wimo_sampling_types::ReasoningEffort;
 
 pub(crate) const ENV_PROMPT_SUGGESTIONS: &str = "wimo_PROMPT_SUGGESTIONS";
 

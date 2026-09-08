@@ -15,7 +15,7 @@
 //! Those helpers compile on all targets including musl.
 //!
 //! ```rust,no_run
-//! use wimo ai_wimo_sandbox::{SandboxManager, ProfileName};
+//! use wimoai_wimo_sandbox::{SandboxManager, ProfileName};
 //! use std::path::Path;
 //!
 //! let workspace = Path::new("/home/user/project");
@@ -185,7 +185,7 @@ impl SandboxManager {
             return Ok(());
         }
         if requires_hook_write_deny(&self.profile, workspace) {
-            wimo ai_wimo_config::ensure_wimo_hook_slots(paths::wimo_home().as_path())
+            wimoai_wimo_config::ensure_wimo_hook_slots(paths::wimo_home().as_path())
                 .map_err(|e| anyhow::anyhow!("hook write-deny ensure failed: {e}"))?;
         }
         hook_write_deny::maybe_install_namespace_lockdown_inside_bwrap(&self.profile, workspace)
@@ -807,9 +807,9 @@ mod tests {
         let parent = root.join("sessions");
         let leaf = parent.join("extra-hooks");
         std::fs::create_dir_all(&leaf).unwrap();
-        let sources = [wimo ai_wimo_config::GlobalHookSource {
+        let sources = [wimoai_wimo_config::GlobalHookSource {
             path: leaf.clone(),
-            kind: wimo ai_wimo_config::GlobalHookSourceKind::ConfiguredSource,
+            kind: wimoai_wimo_config::GlobalHookSourceKind::ConfiguredSource,
         }];
         let plan = hook_write_deny::build_bwrap_plan(&sources).expect("plan");
         assert!(
@@ -928,7 +928,7 @@ mod tests {
         let wimo = ws.join(".wimo");
         std::fs::create_dir_all(&wimo).unwrap();
         std::fs::write(
-            wimo.join(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME),
+            wimo.join(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME),
             toml_body,
         )
         .unwrap();

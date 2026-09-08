@@ -39,7 +39,7 @@ impl Default for ToolContext {
         }
     }
 }
-use wimo ai_wimo_paths::{RelPathBuf, ToAbsPath};
+use wimoai_wimo_paths::{RelPathBuf, ToAbsPath};
 
 /// Either a relative path (preferred) or an absolute path kept for older sessions that stored absolute paths.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -819,8 +819,8 @@ impl FileStateTracker {
     }
 }
 
-// Canonical in wimo ai-wimo-workspace-types; re-exported for existing paths.
-pub use wimo ai_wimo_workspace_types::rpc::session::{
+// Canonical in wimoai-wimo-workspace-types; re-exported for existing paths.
+pub use wimoai_wimo_workspace_types::rpc::session::{
     ConflictType, FileRewindConflict, FileRewindResponse,
 };
 
@@ -980,7 +980,7 @@ mod tests {
     use super::*;
     use crate::file_system::MockFs;
     use std::sync::Arc;
-    use wimo ai_wimo_paths::AbsPathBuf;
+    use wimoai_wimo_paths::AbsPathBuf;
 
     #[tokio::test]
     async fn test_rewind_point_creation() {

@@ -31,10 +31,10 @@ pub fn try_resolve_runfiles(_path: &str) -> Option<PathBuf> {
 /// # Example
 ///
 /// ```ignore
-/// use wimo ai_test_utils::crate_root;
+/// use wimoai_test_utils::crate_root;
 ///
 /// fn test_data_dir() -> std::path::PathBuf {
-///     crate_root!("_main/crates/common/wimo ai-test-utils").join("testdata")
+///     crate_root!("_main/crates/common/wimoai-test-utils").join("testdata")
 /// }
 /// ```
 #[macro_export]

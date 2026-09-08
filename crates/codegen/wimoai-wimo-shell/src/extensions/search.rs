@@ -7,8 +7,8 @@ use crate::session::ExtMethodResult;
 use agent_client_protocol as acp;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use wimo ai_wimo_workspace::file_system::ContentSearchRequest as ContentSearchRequestParams;
-use wimo ai_wimo_workspace::workspace_ops::{FuzzyChangeReq, FuzzyCloseReq, FuzzyOpenReq};
+use wimoai_wimo_workspace::file_system::ContentSearchRequest as ContentSearchRequestParams;
+use wimoai_wimo_workspace::workspace_ops::{FuzzyChangeReq, FuzzyCloseReq, FuzzyOpenReq};
 
 type ExtResult = Result<acp::ExtResponse, acp::Error>;
 

@@ -2,13 +2,13 @@
 //!
 //! These types define the request/response contract between three crates:
 //!
-//! - **`wimo ai-wimo-tools`** — tool blocks on a oneshot, formats the result.
-//! - **`wimo ai-wimo-shell`** — coordinator receives requests over mpsc, calls the
+//! - **`wimoai-wimo-tools`** — tool blocks on a oneshot, formats the result.
+//! - **`wimoai-wimo-shell`** — coordinator receives requests over mpsc, calls the
 //!   client via ACP `ext_method`, sends results back over the oneshot.
-//! - **`wimo ai-wimo-pager`** — handles the `ExtMethod`, renders UI, returns a
+//! - **`wimoai-wimo-pager`** — handles the `ExtMethod`, renders UI, returns a
 //!   typed response.
 //!
-//! All three crates import these types from `wimo ai-wimo-tools`.
+//! All three crates import these types from `wimoai-wimo-tools`.
 
 use std::collections::HashMap;
 

@@ -697,7 +697,7 @@ pub fn responses_api_reasoning_and_text_events(
     events
 }
 
-/// SSE `event:` name and payload `type` of the non-standard doom-loop check event (`wimo ai_wimo_sampling_types::DOOM_LOOP_CHECK_EVENT_TYPE`).
+/// SSE `event:` name and payload `type` of the non-standard doom-loop check event (`wimoai_wimo_sampling_types::DOOM_LOOP_CHECK_EVENT_TYPE`).
 /// Hardcoded like every other wire string in this file.
 /// The shell integration tests pin the two spellings against each other by absorbing built frames through the real client.
 const DOOM_LOOP_CHECK_EVENT: &str = "response.doom_loop_check";

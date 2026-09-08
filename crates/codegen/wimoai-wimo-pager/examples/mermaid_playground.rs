@@ -13,7 +13,7 @@ use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
 use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
 use ratatui::layout::Rect;
-use wimo ai_wimo_pager::scrollback::{RenderBlock, ScratchBuffer, ScrollbackPane, ScrollbackState};
+use wimoai_wimo_pager::scrollback::{RenderBlock, ScratchBuffer, ScrollbackPane, ScrollbackState};
 
 const SAMPLES: &[(&str, &str)] = &[
     (

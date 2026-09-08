@@ -102,18 +102,18 @@ pub fn emit_notification(
 
     if ctx.is_tmux_backed() {
         let wrapped = tmux::tmux_passthrough(&sequence);
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             let _ = stderr.write_all(wrapped.as_bytes());
             let _ = stderr.flush();
         });
     } else if matches!(protocol, NotificationProtocol::Bel) {
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             let _ = stderr.write_all(BEL_BYTE);
             let _ = stderr.flush();
         });
     } else {
         let bytes = sequence.as_bytes();
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             let _ = stderr.write_all(bytes);
             let _ = stderr.flush();
         });

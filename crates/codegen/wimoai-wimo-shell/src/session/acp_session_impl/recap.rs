@@ -7,7 +7,7 @@ use super::side_call::{AuxCall, log_prompt_cache_usage};
 use super::*;
 
 use crate::session::SideQuestionError;
-use wimo ai_wimo_sampling_types::SamplingError;
+use wimoai_wimo_sampling_types::SamplingError;
 
 /// Max characters of a recap persisted to `summary.json` for session-list display.
 /// The full recap can be long and rides every row of the session-list response.
@@ -34,7 +34,7 @@ fn should_retry_side_question(e: &SamplingError) -> bool {
 /// Everything else is byte-identical.
 fn build_side_question_attempt(base: &ConversationRequest) -> ConversationRequest {
     let mut request = base.clone();
-    request.x_wimo_req_id = Some(format!("wimo ai-btw-{}", uuid::Uuid::new_v4()));
+    request.x_wimo_req_id = Some(format!("wimoai-btw-{}", uuid::Uuid::new_v4()));
     request
 }
 impl SessionActor {
@@ -63,7 +63,7 @@ impl SessionActor {
             sampling_client.api_backend(),
             reasoning_effort,
         ) {
-            items = wimo ai_chat_state::compaction_utils::strip_reasoning_blocks(items);
+            items = wimoai_chat_state::compaction_utils::strip_reasoning_blocks(items);
         }
 
         // /btw fires mid-turn, so the snapshot may end with an assistant message whose tool_calls have no matching ToolResult yet.
@@ -100,7 +100,7 @@ impl SessionActor {
             reasoning_effort,
             backend: sampling_client.api_backend(),
             conv_id: btw_session_id.clone(),
-            req_id: format!("wimo ai-btw-{}", uuid::Uuid::new_v4()),
+            req_id: format!("wimoai-btw-{}", uuid::Uuid::new_v4()),
         });
 
         // conversation_collect is one-shot (no sampler-actor retry)
@@ -148,7 +148,7 @@ impl SessionActor {
     ) -> (
         ConversationItem,
         Vec<ToolSpec>,
-        Vec<wimo ai_wimo_sampling_types::HostedTool>,
+        Vec<wimoai_wimo_sampling_types::HostedTool>,
     ) {
         let tag = self.reminder_wrapper_tag();
         let instruction = ConversationItem::user(format!(
@@ -257,7 +257,7 @@ impl SessionActor {
         let model = setup.model.clone();
         let started_at = chrono::Utc::now().to_rfc3339();
         let x_wimo_conv_id = format!("recap-{}", uuid::Uuid::new_v4());
-        let x_wimo_req_id = format!("wimo ai-recap-{}", uuid::Uuid::new_v4());
+        let x_wimo_req_id = format!("wimoai-recap-{}", uuid::Uuid::new_v4());
         let request = self
             .side_call_request(&setup, items, x_wimo_conv_id.clone(), x_wimo_req_id.clone())
             .await;
@@ -395,7 +395,7 @@ impl SessionActor {
         let _ = self.notifications.persistence_tx.send(
             crate::session::persistence::PersistenceMsg::LastRecap(Some(recap_preview)),
         );
-        self.send_wimo ai_notification(
+        self.send_wimoai_notification(
             crate::extensions::notification::SessionUpdate::SessionRecap { summary, auto },
         )
         .await;
@@ -487,7 +487,7 @@ impl SessionActor {
     /// Tell the live client that a manual `/recap` produced no recap, so it can clear the loading spinner instead of animating forever.
     /// Only the manual path shows a spinner, so callers gate this on `!auto`.
     async fn emit_recap_unavailable(&self) {
-        self.send_wimo ai_notification(
+        self.send_wimoai_notification(
             crate::extensions::notification::SessionUpdate::SessionRecapUnavailable,
         )
         .await;
@@ -552,7 +552,7 @@ impl SessionActor {
     ) -> Option<String> {
         use crate::session::helpers::prompt_suggest;
 
-        use wimo ai_wimo_telemetry::events::{PromptSuggestion, PromptSuggestionAction as PsAction};
+        use wimoai_wimo_telemetry::events::{PromptSuggestion, PromptSuggestionAction as PsAction};
 
         if !crate::util::config::prompt_suggestions_enabled_from_disk() {
             tracing::debug!("prompt suggest: feature disabled; skipping request");
@@ -584,7 +584,7 @@ impl SessionActor {
                 reasoning_is_off,
                 "prompt suggest: effective model not in catalog; skipping request"
             );
-            wimo ai_wimo_telemetry::session_ctx::log_event(PromptSuggestion {
+            wimoai_wimo_telemetry::session_ctx::log_event(PromptSuggestion {
                 action: PsAction::SkippedCatalog,
                 chars: 0,
                 words: 0,
@@ -620,7 +620,7 @@ impl SessionActor {
             supports_reasoning,
             self.models_manager.model_supports_reasoning_effort_value(
                 &model,
-                wimo ai_wimo_sampling_types::ReasoningEffort::None,
+                wimoai_wimo_sampling_types::ReasoningEffort::None,
             ),
         );
         self.models_manager.apply_supported_effort(
@@ -635,7 +635,7 @@ impl SessionActor {
         );
         let reasoning_effort = suggest_reasoning.effort;
         let request_model = sampling_config.model.clone();
-        let sampling_client = match wimo ai_wimo_sampler::SamplingClient::new(sampling_config) {
+        let sampling_client = match wimoai_wimo_sampler::SamplingClient::new(sampling_config) {
             Ok(client) => client,
             Err(e) => {
                 tracing::debug!(error = %e, "prompt suggest: sampling client unavailable");
@@ -663,7 +663,7 @@ impl SessionActor {
             )),
         ];
 
-        let request_id = format!("wimo ai-promptsuggest-{}", uuid::Uuid::new_v4());
+        let request_id = format!("wimoai-promptsuggest-{}", uuid::Uuid::new_v4());
         let request = ConversationRequest {
             items,
             tools: vec![],
@@ -674,13 +674,13 @@ impl SessionActor {
             x_wimo_conv_id: Some(format!("promptsuggest-{}", uuid::Uuid::new_v4())),
             x_wimo_req_id: Some(request_id.clone()),
             x_wimo_session_id: Some(self.session_info.id.to_string()),
-            x_wimo_agent_id: Some(wimo ai_wimo_telemetry::id::agent_id()),
+            x_wimo_agent_id: Some(wimoai_wimo_telemetry::id::agent_id()),
             ..Default::default()
         };
 
         let started = std::time::Instant::now();
         let log_fetch = |action, chars, words, latency_ms| {
-            wimo ai_wimo_telemetry::session_ctx::log_event(PromptSuggestion {
+            wimoai_wimo_telemetry::session_ctx::log_event(PromptSuggestion {
                 action,
                 chars,
                 words,
@@ -719,7 +719,7 @@ impl SessionActor {
             }
         };
         tracing::debug!(
-            raw_preview = %wimo ai_wimo_tools::util::truncate_str(raw.trim(), 60),
+            raw_preview = %wimoai_wimo_tools::util::truncate_str(raw.trim(), 60),
             accepted = suggestion.is_some(),
             "prompt suggest: response"
         );
@@ -826,7 +826,7 @@ mod tests {
         let a = build_side_question_attempt(&base);
         let b = build_side_question_attempt(&base);
         let (a_id, b_id) = (a.x_wimo_req_id.unwrap(), b.x_wimo_req_id.unwrap());
-        assert!(a_id.starts_with("wimo ai-btw-"));
+        assert!(a_id.starts_with("wimoai-btw-"));
         assert_ne!(a_id, b_id, "each attempt must get a fresh req_id");
         // Everything except the request id is byte-identical to the base.
         assert_eq!(a.x_wimo_conv_id, base.x_wimo_conv_id);

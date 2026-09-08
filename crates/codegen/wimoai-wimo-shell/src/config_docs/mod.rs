@@ -1,6 +1,6 @@
 //! Checks that the CLI config-reference page matches the live registries.
 //!
-//! The page `crates/codegen/wimo ai-wimo-pager/docs/user-guide/26-config-reference.md` is the source; edit that file.
+//! The page `crates/codegen/wimoai-wimo-pager/docs/user-guide/26-config-reference.md` is the source; edit that file.
 //! CI fails when a registered key has no row, or an MCP or `features.*` row names an unknown key.
 //! It also fails when a Requirements or Managed cell disagrees with the resolver metadata.
 //! The pager extracts the file to
@@ -9,7 +9,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use wimo ai_wimo_config_types::{FEATURES, KNOWN_MCP_SERVER_FIELDS};
+use wimoai_wimo_config_types::{FEATURES, KNOWN_MCP_SERVER_FIELDS};
 
 use crate::agent::config::UNMIRRORED_BOOLEAN_FEATURES;
 use crate::util::config::MANAGED_WINS_OVER_USER;
@@ -94,7 +94,7 @@ fn committed_markdown_path() -> PathBuf {
         )
     });
     root.join(format!(
-        "crates/codegen/wimo ai-wimo-pager/docs/user-guide/{USER_GUIDE_FILENAME}"
+        "crates/codegen/wimoai-wimo-pager/docs/user-guide/{USER_GUIDE_FILENAME}"
     ))
 }
 
@@ -110,7 +110,7 @@ fn find_monorepo_root() -> Option<PathBuf> {
         for _ in 0..12 {
             if dir
                 .join(format!(
-                    "crates/codegen/wimo ai-wimo-pager/docs/user-guide/{USER_GUIDE_FILENAME}"
+                    "crates/codegen/wimoai-wimo-pager/docs/user-guide/{USER_GUIDE_FILENAME}"
                 ))
                 .exists()
             {
@@ -139,11 +139,11 @@ fn agents_md_path() -> PathBuf {
     }
     let root = find_monorepo_root().unwrap_or_else(|| {
         panic!(
-            "wimo ai-wimo-shell AGENTS.md not found; set wimo_CONFIG_DOCS_AGENTS_MD or run from the monorepo (CARGO_MANIFEST_DIR={})",
+            "wimoai-wimo-shell AGENTS.md not found; set wimo_CONFIG_DOCS_AGENTS_MD or run from the monorepo (CARGO_MANIFEST_DIR={})",
             env!("CARGO_MANIFEST_DIR")
         )
     });
-    root.join("crates/codegen/wimo ai-wimo-shell/AGENTS.md")
+    root.join("crates/codegen/wimoai-wimo-shell/AGENTS.md")
 }
 
 fn load_agents_markdown() -> String {
@@ -514,7 +514,7 @@ mod tests {
         assert!(md.contains("| Key | Type / Values | Requirements | Managed | Details |"));
         assert!(md.contains("| `models.allowed_models` | `string[]` | `pin` |"));
         assert!(md.contains("### `cli`\n"));
-        assert!(!md.contains("Generated from `wimo ai-wimo-shell`"));
+        assert!(!md.contains("Generated from `wimoai-wimo-shell`"));
         for leak in [
             "FEATURES",
             "UNMIRRORED_BOOLEAN_FEATURES",

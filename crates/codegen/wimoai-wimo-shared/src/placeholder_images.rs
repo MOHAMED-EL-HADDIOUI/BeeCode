@@ -1,6 +1,6 @@
 //! Shared helper for resolving `[Image #N: <path>]` placeholders into image bytes.
 //!
-//! The TUI ([`wimo ai_wimo_pager::prompt_images`]) and the server-side ingestion path ([`crate::session::acp_session`]) need to recover image bytes.
+//! The TUI ([`wimoai_wimo_pager::prompt_images`]) and the server-side ingestion path ([`crate::session::acp_session`]) need to recover image bytes.
 //! A placeholder can arrive without its attached `PastedImage` / `ContentBlock::Image`.
 //! That happens on a paste from a previous session's prompt, a session reload, or a synthetic re-render.
 //! The two sides share one canonical loader so the validation rules cannot drift.
@@ -22,7 +22,7 @@
 //! * Enforces a per-image byte cap, a per-prompt placeholder count cap, and a per-prompt aggregate-bytes cap.
 //!   A single prompt therefore cannot trigger huge sequential syscall chains or memory spikes.
 //!
-//! Wire format: `[Image #<n>: <absolute_path>]`; the producer is [`wimo ai_wimo_pager::prompt_images::display_text`].
+//! Wire format: `[Image #<n>: <absolute_path>]`; the producer is [`wimoai_wimo_pager::prompt_images::display_text`].
 //! The shape of this placeholder is part of the chat-history contract; do NOT change it.
 //! The regex requires the literal `": "` separator that the producer always emits; see [`extract_placeholders`].
 //!
@@ -52,8 +52,8 @@ pub const MAX_PLACEHOLDERS_PER_PROMPT: usize = 16;
 pub const MAX_PLACEHOLDER_AGGREGATE_BYTES: usize = 200 * 1024 * 1024;
 
 /// `_meta` key under which an attached image's `[Image #N]` display number is recorded on its ACP image block.
-/// The server resolves `[Image #N]` tokens by this number rather than by list position (the two diverge; see `AttachedImages` in `wimo ai-wimo-tools`).
-pub const IMAGE_DISPLAY_NUMBER_META_KEY: &str = "wimo ai.dev/imageDisplayNumber";
+/// The server resolves `[Image #N]` tokens by this number rather than by list position (the two diverge; see `AttachedImages` in `wimoai-wimo-tools`).
+pub const IMAGE_DISPLAY_NUMBER_META_KEY: &str = "wimoai.dev/imageDisplayNumber";
 
 /// Build an ACP image-block `_meta` value carrying `display_number` under [`IMAGE_DISPLAY_NUMBER_META_KEY`].
 pub fn display_number_meta(display_number: usize) -> agent_client_protocol::Meta {
@@ -74,7 +74,7 @@ pub fn display_number_from_meta(meta: Option<&agent_client_protocol::Meta>) -> O
 }
 
 /// Build the per-turn registry mapping `[Image #N]` numbers to references from the user's inline attached images.
-/// See [`AttachedImages`](wimo ai_wimo_tools::types::resources::AttachedImages).
+/// See [`AttachedImages`](wimoai_wimo_tools::types::resources::AttachedImages).
 ///
 /// The display number comes from each block's `_meta` (set by the TUI), falling back to 1-based position for callers that don't record it.
 /// The reference is one `image_edit`'s resolver can read directly.
@@ -128,7 +128,7 @@ pub const DENY_PATH_CONTAINS: &[&str] = &[
 
 /// Compiled regex matching the TUI placeholder format `[Image #<digits>: <path>]`.
 ///
-/// * The producer emits exactly `": "` (colon, single space) as the separator; see [`wimo ai_wimo_pager::prompt_images::display_text`].
+/// * The producer emits exactly `": "` (colon, single space) as the separator; see [`wimoai_wimo_pager::prompt_images::display_text`].
 ///   The regex requires the same; a path token like `[Image #5:foo]` does **not** match.
 /// * The path capture excludes `]`, `\n`, and `\r` so the match terminates cleanly at the placeholder boundary.
 ///   That holds even on Windows-style line endings or path strings containing other bracket forms.
@@ -258,7 +258,7 @@ pub enum PlaceholderLoadError {
 /// If `dunce::canonicalize(workspace_cwd)` fails (transient permission, missing dir), the workspace prefix is dropped entirely.
 /// `$HOME` itself is **not** an allowed prefix: that would let arbitrary placeholders read files under `~/.ssh`, `~/.aws`, `~/.config`, etc.
 pub fn default_allowed_prefixes(workspace_cwd: &Path) -> Vec<PathBuf> {
-    default_allowed_prefixes_with_home(workspace_cwd, wimo ai_dirs::home_dir())
+    default_allowed_prefixes_with_home(workspace_cwd, wimoai_dirs::home_dir())
 }
 
 /// Variant of [`default_allowed_prefixes`] for tests: an explicit `home` avoids depending on the ambient `$HOME`.
@@ -312,7 +312,7 @@ pub const HOME_IMAGE_SUBDIRS: &[&str] = &[
 /// The function does not canonicalise them again; the caller pays that cost once.
 ///
 /// Symlinks: this loader follows symlinks (via `canonicalize`), then checks the **resolved** path against the prefix allowlist.
-/// That is strictly stronger than the legacy [`wimo ai_wimo_pager::prompt_images::read_image_at_path`], which has no prefix allowlist at all.
+/// That is strictly stronger than the legacy [`wimoai_wimo_pager::prompt_images::read_image_at_path`], which has no prefix allowlist at all.
 /// Both placeholder-recovery callers get this rule: the server-side `handle_prompt` fallback and the TUI orphan-placeholder fallback.
 /// The legacy user-initiated drag/paste path in `read_image_at_path` stays outside this allowlist.
 /// The user explicitly chose those files via the OS file picker.
@@ -402,7 +402,7 @@ pub fn load_canonical_placeholder_image(
 /// Header-only validation via the shared image_validate helper.
 /// Returns the matching MIME type, or `None` if the bytes fail validation.
 fn decode_image_mime(data: &[u8]) -> Option<&'static str> {
-    wimo ai_wimo_tools::util::image_validate::validate_image_bytes_with(data, false)
+    wimoai_wimo_tools::util::image_validate::validate_image_bytes_with(data, false)
         .ok()
         .map(|(_, _, mime)| mime)
 }
@@ -412,7 +412,7 @@ fn decode_image_mime(data: &[u8]) -> Option<&'static str> {
 /// Production wrapper over [`recover_orphan_placeholders_with_prefixes`].
 /// It derives the prefix allowlist from `workspace_cwd` via [`default_allowed_prefixes`].
 ///
-/// This wrapper reads the ambient process `$HOME` via `wimo ai_dirs::home_dir()` to construct [`HOME_IMAGE_SUBDIRS`] prefixes.
+/// This wrapper reads the ambient process `$HOME` via `wimoai_dirs::home_dir()` to construct [`HOME_IMAGE_SUBDIRS`] prefixes.
 /// An end-to-end test driving `handle_prompt` therefore inherits the test runner's `$HOME`.
 /// Any subdirectories the runner creates (`~/Downloads`, etc.) land in the allowlist.
 /// For hermetic isolation, call [`recover_orphan_placeholders_with_prefixes`] directly with an explicit prefix list.
@@ -1101,7 +1101,7 @@ mod tests {
     }
 
     /// Pin the inverse direction.
-    /// The placeholder text wire format is the unencoded path produced by `wimo ai_wimo_pager::prompt_images::display_text`.
+    /// The placeholder text wire format is the unencoded path produced by `wimoai_wimo_pager::prompt_images::display_text`.
     /// A percent-encoded path *inside the placeholder text* is **not** supported.
     /// `extract_placeholders` captures the raw `%20` substring and `canonicalize` rejects the synthetic name.
     /// The orphan loader logs a warn and skips the placeholder.

@@ -4,7 +4,7 @@ use std::num::NonZeroU64;
 use std::time::Duration;
 
 use tokio::sync::mpsc;
-use wimo ai_wimo_sampling_types::{ConversationItem, SamplingConfig};
+use wimoai_wimo_sampling_types::{ConversationItem, SamplingConfig};
 
 use crate::StrictAppendAck;
 use crate::actor::ChatStateActor;
@@ -496,7 +496,7 @@ async fn record_token_usage_emits_event() {
 
 #[tokio::test]
 async fn record_last_turn_usage_round_trip() {
-    use wimo ai_wimo_sampling_types::TokenUsage;
+    use wimoai_wimo_sampling_types::TokenUsage;
 
     let h = TestHarness::new();
 
@@ -539,7 +539,7 @@ async fn record_last_turn_usage_round_trip() {
 
 #[tokio::test]
 async fn prompt_usage_ledger_via_handle_resets_and_clears() {
-    use wimo ai_wimo_sampling_types::TokenUsage;
+    use wimoai_wimo_sampling_types::TokenUsage;
 
     let call = TokenUsage {
         prompt_tokens: 10,
@@ -713,7 +713,7 @@ async fn provider_counted_model_output_persists_without_bumping_estimate() {
     let h = TestHarness::new();
     h.handle.record_token_usage(100_000);
     h.handle.push_model_output(ConversationItem::Reasoning(
-        wimo ai_wimo_sampling_types::synthesized_reasoning_item("r".repeat(4_000)),
+        wimoai_wimo_sampling_types::synthesized_reasoning_item("r".repeat(4_000)),
     ));
 
     assert!(matches!(
@@ -820,7 +820,7 @@ async fn strip_conversation_images_replaces_only_listed_urls_and_persists() {
     assert!(
         u.content
             .iter()
-            .all(|p| !matches!(p, wimo ai_wimo_sampling_types::ContentPart::Image { .. })),
+            .all(|p| !matches!(p, wimoai_wimo_sampling_types::ContentPart::Image { .. })),
         "listed image part must be replaced"
     );
     let ConversationItem::User(survivor) = &conv[1] else {
@@ -830,7 +830,7 @@ async fn strip_conversation_images_replaces_only_listed_urls_and_persists() {
         survivor
             .content
             .iter()
-            .any(|p| matches!(p, wimo ai_wimo_sampling_types::ContentPart::Image { .. })),
+            .any(|p| matches!(p, wimoai_wimo_sampling_types::ContentPart::Image { .. })),
         "unlisted image must survive the scoped strip"
     );
 
@@ -1731,7 +1731,7 @@ async fn build_request_injects_memory_when_no_system() {
 
 #[tokio::test]
 async fn build_request_repairs_dangling_tool_calls() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     // Repair happens in ChatState::new() (called by with_conversation → spawn),
     // not in build_request. Both handler and clone-level repair are no-ops here.
@@ -1759,7 +1759,7 @@ async fn build_request_repairs_dangling_tool_calls() {
 
 #[tokio::test]
 async fn build_request_with_tool_definitions() {
-    use wimo ai_wimo_sampling_types::ToolSpec;
+    use wimoai_wimo_sampling_types::ToolSpec;
 
     let h = TestHarness::with_conversation(vec![
         ConversationItem::system("sys"),
@@ -1884,7 +1884,7 @@ async fn build_request_can_persist_memory_into_actor_state() {
 
 #[tokio::test]
 async fn build_request_with_multiple_tool_calls_and_results() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     let h = TestHarness::with_conversation(vec![
         ConversationItem::system("sys"),
@@ -1920,7 +1920,7 @@ async fn build_request_with_multiple_tool_calls_and_results() {
 // Parallel tool calls with mixed accept/reject
 // ============================================================================
 
-/// Simulates the exact sequence that `wimo ai-wimo-shell`'s `execute_tool_calls`
+/// Simulates the exact sequence that `wimoai-wimo-shell`'s `execute_tool_calls`
 /// produces when the model emits 3 parallel tool calls and:
 ///   - Tool #1 (read_file):       user **accepts** → executed successfully
 ///   - Tool #2 (edit_file):       user **rejects** → handle_tool_not_executed
@@ -1939,7 +1939,7 @@ async fn build_request_with_multiple_tool_calls_and_results() {
 ///   [5] ToolResult for call_3 (cancellation due to earlier rejection)
 #[tokio::test]
 async fn parallel_tool_calls_accept_first_reject_second_skip_third() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     let h = TestHarness::new();
 
@@ -1961,7 +1961,7 @@ async fn parallel_tool_calls_accept_first_reject_second_skip_third() {
     // In the real code, this is built from the streaming response and pushed
     // via `push_assistant_response`.
     let assistant_with_tools =
-        ConversationItem::Assistant(wimo ai_wimo_sampling_types::AssistantItem {
+        ConversationItem::Assistant(wimoai_wimo_sampling_types::AssistantItem {
             content: "I'll read the file, fix it, and run tests.".into(),
             tool_calls: vec![
                 ToolCall {
@@ -2097,7 +2097,7 @@ async fn parallel_tool_calls_accept_first_reject_second_skip_third() {
 /// would corrupt the rejection messages.
 #[tokio::test]
 async fn parallel_tool_calls_with_rejection_has_no_dangling_calls() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     let h = TestHarness::new();
 
@@ -2175,7 +2175,7 @@ async fn parallel_tool_calls_with_rejection_has_no_dangling_calls() {
 /// correctly for the parallel tool call scenario.
 #[tokio::test]
 async fn parallel_tool_calls_with_rejection_persists_all_items() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     let mut h = TestHarness::new();
 
@@ -2239,7 +2239,7 @@ async fn parallel_tool_calls_with_rejection_persists_all_items() {
 /// clone produced by `build_request`.
 #[tokio::test]
 async fn dangling_tool_calls_after_crash_are_repaired_on_load() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     // Simulate what chat_history.jsonl looks like after a crash:
     // The assistant message (with 3 tool calls) was persisted, and only
@@ -2247,7 +2247,7 @@ async fn dangling_tool_calls_after_crash_are_repaired_on_load() {
     let crashed_conversation = vec![
         ConversationItem::system("You are a helpful assistant."),
         ConversationItem::user("Read, edit, and test"),
-        ConversationItem::Assistant(wimo ai_wimo_sampling_types::AssistantItem {
+        ConversationItem::Assistant(wimoai_wimo_sampling_types::AssistantItem {
             content: std::sync::Arc::<str>::from(""),
             tool_calls: vec![
                 ToolCall {
@@ -2348,7 +2348,7 @@ async fn dangling_tool_calls_after_crash_are_repaired_on_load() {
 /// consistent after repair — the synthetic results appear in both.
 #[tokio::test]
 async fn dangling_tool_calls_repair_is_consistent_between_state_and_request() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     let crashed_conversation = vec![
         ConversationItem::system("sys"),
@@ -2397,7 +2397,7 @@ async fn dangling_tool_calls_repair_is_consistent_between_state_and_request() {
 /// ChatState::new should repair all 3 eagerly.
 #[tokio::test]
 async fn all_tool_calls_dangling_after_crash() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     let crashed_conversation = vec![
         ConversationItem::system("sys"),
@@ -2481,7 +2481,7 @@ async fn all_tool_calls_dangling_after_crash() {
 /// message, so the conversation is cleaned up in-place.
 #[tokio::test]
 async fn live_cancel_before_any_tool_execution_repairs_on_next_user_message() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     let h = TestHarness::new();
 
@@ -2586,7 +2586,7 @@ async fn live_cancel_before_any_tool_execution_repairs_on_next_user_message() {
 /// Tools #2 and #3 are dangling. Next user message should repair only those.
 #[tokio::test]
 async fn live_cancel_after_partial_tool_results_repairs_remaining() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     let h = TestHarness::new();
 
@@ -2705,7 +2705,7 @@ async fn turn_capture_collects_all_message_types() {
 
 #[tokio::test]
 async fn harness_trace_items_ride_own_turn_not_the_live_capture() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
     let h = TestHarness::new();
 
     let live_before = h.handle.get_conversation().await.len();
@@ -2763,7 +2763,7 @@ async fn harness_trace_items_ride_own_turn_not_the_live_capture() {
 
 #[tokio::test]
 async fn harness_trace_recorded_before_capture_seals_into_own_turn() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
     let h = TestHarness::new();
 
     // Planner-style: synthetic pair recorded BEFORE the turn's capture starts
@@ -2811,7 +2811,7 @@ async fn harness_trace_recorded_before_capture_seals_into_own_turn() {
 
 #[tokio::test]
 async fn harness_trace_turns_separate_per_flush_and_drain_clears() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
     let h = TestHarness::new();
 
     let pair = |id: &str| {
@@ -2996,7 +2996,7 @@ async fn restore_snapshot_does_not_touch_turn_capture() {
 
 #[tokio::test]
 async fn turn_capture_survives_integrity_repair_prefix_shrink() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
     let h = TestHarness::new();
 
     // Build a prefix (before the capture starts) holding three removable
@@ -3151,7 +3151,7 @@ async fn get_conversation_len_matches_full_conversation() {
 
 #[tokio::test]
 async fn has_dangling_tool_calls_reflects_unanswered_calls() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
     let h = TestHarness::new();
     assert!(!h.handle.has_dangling_tool_calls().await);
 
@@ -3325,7 +3325,7 @@ async fn get_trailing_assistant_report_skips_reasoning_between_segments() {
     let h = TestHarness::new();
     h.handle.push_user_message(ConversationItem::user("q"));
     h.handle.push_tool_result(ConversationItem::Reasoning(
-        wimo ai_wimo_sampling_types::synthesized_reasoning_item("r1"),
+        wimoai_wimo_sampling_types::synthesized_reasoning_item("r1"),
     ));
     h.handle
         .push_assistant_response(ConversationItem::assistant("seg1"));
@@ -3334,7 +3334,7 @@ async fn get_trailing_assistant_report_skips_reasoning_between_segments() {
     // Reasoning models commit a reasoning sibling before each segment; the
     // turn loop pushes it via the same non-Assistant commit path used here.
     h.handle.push_tool_result(ConversationItem::Reasoning(
-        wimo ai_wimo_sampling_types::synthesized_reasoning_item("r2"),
+        wimoai_wimo_sampling_types::synthesized_reasoning_item("r2"),
     ));
     h.handle
         .push_assistant_response(ConversationItem::assistant("seg2"));
@@ -3368,7 +3368,7 @@ async fn get_trailing_assistant_report_stops_at_non_salvage_reminder() {
 
 #[tokio::test]
 async fn get_trailing_assistant_report_stops_at_tool_boundary() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
     let h = TestHarness::new();
     h.handle.push_user_message(ConversationItem::user("q"));
     h.handle
@@ -3440,7 +3440,7 @@ async fn cancel_integrity_repair_drops_stranded_continue_reminder() {
             conv.last(),
             Some(ConversationItem::User(u))
                 if u.synthetic_reason
-                    == Some(wimo ai_wimo_sampling_types::SyntheticReason::LengthContinue)
+                    == Some(wimoai_wimo_sampling_types::SyntheticReason::LengthContinue)
         ),
         "the stranded reminder must not survive the cancel repair"
     );
@@ -3469,7 +3469,7 @@ async fn recovery_prompt_drops_stranded_continue_reminder() {
             i,
             ConversationItem::User(u)
                 if u.synthetic_reason
-                    == Some(wimo ai_wimo_sampling_types::SyntheticReason::LengthContinue)
+                    == Some(wimoai_wimo_sampling_types::SyntheticReason::LengthContinue)
         )),
         "the dead continuation's reminder must not precede the recovery prompt"
     );
@@ -3492,7 +3492,7 @@ async fn next_real_prompt_drops_stranded_continue_reminder() {
             i,
             ConversationItem::User(u)
                 if u.synthetic_reason
-                    == Some(wimo ai_wimo_sampling_types::SyntheticReason::LengthContinue)
+                    == Some(wimoai_wimo_sampling_types::SyntheticReason::LengthContinue)
         )),
         "the stranded reminder must not precede the new prompt"
     );
@@ -3510,7 +3510,7 @@ async fn assert_no_continue_reminder(h: &TestHarness, context: &str) {
             i,
             ConversationItem::User(u)
                 if u.synthetic_reason
-                    == Some(wimo ai_wimo_sampling_types::SyntheticReason::LengthContinue)
+                    == Some(wimoai_wimo_sampling_types::SyntheticReason::LengthContinue)
         )),
         "{context}: the dead continuation's reminder must be popped"
     );
@@ -3610,7 +3610,7 @@ async fn get_trailing_assistant_report_joins_later_reminderless_segments() {
     h.handle
         .push_assistant_response(ConversationItem::assistant("two, "));
     h.handle.push_tool_result(ConversationItem::Reasoning(
-        wimo ai_wimo_sampling_types::synthesized_reasoning_item("r"),
+        wimoai_wimo_sampling_types::synthesized_reasoning_item("r"),
     ));
     h.handle
         .push_assistant_response(ConversationItem::assistant("three"));
@@ -3624,7 +3624,7 @@ async fn get_trailing_assistant_report_joins_later_reminderless_segments() {
 
 #[tokio::test]
 async fn get_trailing_assistant_report_joins_into_a_tool_calling_tail() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
     let h = TestHarness::new();
     h.handle.push_user_message(ConversationItem::user("q"));
     h.handle
@@ -3668,7 +3668,7 @@ async fn get_trailing_assistant_report_survives_trailing_reminder() {
 
 #[tokio::test]
 async fn get_trailing_assistant_report_survives_trailing_tool_results() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
     let h = TestHarness::new();
     h.handle.push_user_message(ConversationItem::user("q"));
     h.handle
@@ -3775,7 +3775,7 @@ async fn get_conversation_item_at_does_not_mutate_state() {
 /// original call-site semantics used by the memory-search path.
 #[tokio::test]
 async fn get_first_user_text_image_first_returns_none() {
-    use wimo ai_wimo_sampling_types::{ContentPart, UserItem};
+    use wimoai_wimo_sampling_types::{ContentPart, UserItem};
 
     let h = TestHarness::new();
     // First message: image-only user message (no text part)
@@ -3795,7 +3795,7 @@ async fn get_first_user_text_image_first_returns_none() {
 /// `get_first_user_text()` still returns `None` (first-part-is-text semantics).
 #[tokio::test]
 async fn get_first_user_text_image_then_text_returns_none() {
-    use wimo ai_wimo_sampling_types::{ContentPart, UserItem};
+    use wimoai_wimo_sampling_types::{ContentPart, UserItem};
 
     let h = TestHarness::new();
     h.handle.push_user_message(ConversationItem::User(UserItem {
@@ -3818,7 +3818,7 @@ async fn get_first_user_text_image_then_text_returns_none() {
 /// Confirms the happy path for text-first multimodal messages.
 #[tokio::test]
 async fn get_first_user_text_text_then_image_returns_text() {
-    use wimo ai_wimo_sampling_types::{ContentPart, UserItem};
+    use wimoai_wimo_sampling_types::{ContentPart, UserItem};
 
     let h = TestHarness::new();
     h.handle.push_user_message(ConversationItem::User(UserItem {
@@ -4338,7 +4338,7 @@ async fn get_last_model_metadata_returns_both_fields() {
     let h = TestHarness::with_conversation(vec![
         ConversationItem::system("sys"),
         ConversationItem::user("hi"),
-        ConversationItem::Assistant(wimo ai_wimo_sampling_types::AssistantItem {
+        ConversationItem::Assistant(wimoai_wimo_sampling_types::AssistantItem {
             content: "hello".into(),
             tool_calls: vec![],
             model_id: Some("wimo-4.5".into()),
@@ -4368,7 +4368,7 @@ async fn get_last_model_metadata_returns_default_when_no_assistant() {
 /// not touch it.
 #[tokio::test]
 async fn sampling_config_survives_compaction_replacement() {
-    use wimo ai_wimo_sampling_types::ApiBackend;
+    use wimoai_wimo_sampling_types::ApiBackend;
 
     let config = SamplingConfig {
         base_url: "https://api.example.com".to_string(),
@@ -4389,7 +4389,7 @@ async fn sampling_config_survives_compaction_replacement() {
         vec![
             ConversationItem::system("You are a helpful assistant."),
             ConversationItem::user("fix the bug"),
-            ConversationItem::Assistant(wimo ai_wimo_sampling_types::AssistantItem {
+            ConversationItem::Assistant(wimoai_wimo_sampling_types::AssistantItem {
                 content: "I'll fix it.".into(),
                 tool_calls: vec![],
                 model_id: Some("wimo-4.5".into()),
@@ -4474,7 +4474,7 @@ async fn model_metadata_lost_after_compaction_then_recovered_on_next_turn() {
         vec![
             ConversationItem::system("sys"),
             ConversationItem::user("task"),
-            ConversationItem::Assistant(wimo ai_wimo_sampling_types::AssistantItem {
+            ConversationItem::Assistant(wimoai_wimo_sampling_types::AssistantItem {
                 content: "done".into(),
                 tool_calls: vec![],
                 model_id: Some("wimo-4.5".into()),
@@ -4509,7 +4509,7 @@ async fn model_metadata_lost_after_compaction_then_recovered_on_next_turn() {
         .push_user_message(ConversationItem::user("next task"));
     h.handle
         .push_assistant_response(ConversationItem::Assistant(
-            wimo ai_wimo_sampling_types::AssistantItem {
+            wimoai_wimo_sampling_types::AssistantItem {
                 content: "working on it".into(),
                 tool_calls: vec![],
                 model_id: Some("wimo-4.5".into()),
@@ -4542,7 +4542,7 @@ async fn model_metadata_lost_after_compaction_then_recovered_on_next_turn() {
 /// in the session layer.
 #[tokio::test]
 async fn context_window_downgrade_triggers_auto_compact() {
-    use wimo ai_wimo_sampling_types::ApiBackend;
+    use wimoai_wimo_sampling_types::ApiBackend;
 
     // Initial config: 500k context, Responses backend (matches wimo-4.5)
     let config = SamplingConfig {
@@ -4638,12 +4638,12 @@ async fn context_window_downgrade_triggers_auto_compact() {
 /// `patch_reasoning_text_types` which only stamps a `type` field on nested
 /// reasoning content blocks and does not reorder items).
 fn serialize_via_public_api(
-    req: &wimo ai_wimo_sampling_types::ConversationRequest,
+    req: &wimoai_wimo_sampling_types::ConversationRequest,
 ) -> serde_json::Value {
-    use wimo ai_wimo_sampling_types::rs;
+    use wimoai_wimo_sampling_types::rs;
     let create_response: rs::CreateResponse = req.into();
     let mut body = serde_json::to_value(&create_response).unwrap();
-    wimo ai_wimo_sampling_types::patch_reasoning_text_types(&mut body);
+    wimoai_wimo_sampling_types::patch_reasoning_text_types(&mut body);
     // Sanity guard: the placeholder string from the pre-refactor design
     // must never appear in the serialized output. If a future change
     // re-introduces a stringly-typed splice, this catches it.
@@ -4659,8 +4659,8 @@ fn serialize_via_public_api(
 /// Assert that request N's serialized input is a byte-stable prefix of
 /// request N+1's.
 fn assert_prefix_stable_pair(
-    base: &wimo ai_wimo_sampling_types::ConversationRequest,
-    extended: &wimo ai_wimo_sampling_types::ConversationRequest,
+    base: &wimoai_wimo_sampling_types::ConversationRequest,
+    extended: &wimoai_wimo_sampling_types::ConversationRequest,
     label: &str,
 ) {
     let base_body = serialize_via_public_api(base);
@@ -4694,7 +4694,7 @@ fn assert_prefix_stable_pair(
 /// encrypted_content. Replaces the pre-refactor "AssistantItem.raw_output"
 /// helper.
 fn reasoning_sibling(id: &str, encrypted: Option<&str>) -> ConversationItem {
-    use wimo ai_wimo_sampling_types::rs;
+    use wimoai_wimo_sampling_types::rs;
     ConversationItem::Reasoning(rs::ReasoningItem {
         id: id.to_string(),
         summary: vec![rs::SummaryPart::SummaryText(rs::SummaryTextContent {
@@ -4851,7 +4851,7 @@ async fn prefix_stable_with_reasoning_siblings_through_build_request() {
 /// Changing the tool set between requests must not affect the input prefix.
 #[tokio::test]
 async fn prefix_stable_after_tool_schema_change() {
-    use wimo ai_wimo_sampling_types::ToolSpec;
+    use wimoai_wimo_sampling_types::ToolSpec;
 
     let h = TestHarness::with_conversation(vec![
         ConversationItem::system("sys"),
@@ -4974,7 +4974,7 @@ async fn prefix_stable_with_synthetic_user_messages() {
 /// past `IMAGE_COMPACT_TRIGGER_BYTES` so the eviction actually fires.
 #[tokio::test]
 async fn prefix_stable_after_image_pruning() {
-    use wimo ai_wimo_sampling_types::ContentPart;
+    use wimoai_wimo_sampling_types::ContentPart;
 
     // Large enough that the serialized body crosses the compaction trigger.
     let big_image_url = format!(
@@ -4984,7 +4984,7 @@ async fn prefix_stable_after_image_pruning() {
 
     let h = TestHarness::with_conversation(vec![
         ConversationItem::system("sys"),
-        ConversationItem::User(wimo ai_wimo_sampling_types::UserItem {
+        ConversationItem::User(wimoai_wimo_sampling_types::UserItem {
             content: vec![
                 ContentPart::Text {
                     text: "look at this image".into(),
@@ -5009,7 +5009,7 @@ async fn prefix_stable_after_image_pruning() {
     h.handle
         .push_assistant_response(ConversationItem::assistant("a2"));
     h.handle
-        .push_user_message(ConversationItem::User(wimo ai_wimo_sampling_types::UserItem {
+        .push_user_message(ConversationItem::User(wimoai_wimo_sampling_types::UserItem {
             content: vec![
                 ContentPart::Text {
                     text: "new image".into(),
@@ -5080,7 +5080,7 @@ async fn prefix_stable_after_image_pruning() {
 /// behavior this size-gate replaces).
 #[tokio::test]
 async fn build_request_preserves_small_old_images() {
-    use wimo ai_wimo_sampling_types::{ContentPart, UserItem};
+    use wimoai_wimo_sampling_types::{ContentPart, UserItem};
 
     let h = TestHarness::with_conversation(vec![
         ConversationItem::system("sys"),
@@ -5120,7 +5120,7 @@ async fn build_request_preserves_small_old_images() {
 
 #[tokio::test]
 async fn build_request_budgets_tool_images_on_request_copy_only() {
-    use wimo ai_wimo_sampling_types::{ContentPart, ToolCall};
+    use wimoai_wimo_sampling_types::{ContentPart, ToolCall};
 
     let image_url = format!(
         "data:image/png;base64,{}",
@@ -5268,7 +5268,7 @@ async fn prefix_stable_after_tool_result_pruning() {
 /// in the conversation list and the wire input.
 #[tokio::test]
 async fn prefix_stable_with_backend_tool_calls() {
-    use wimo ai_wimo_sampling_types::{BackendToolCallItem, BackendToolKind, rs};
+    use wimoai_wimo_sampling_types::{BackendToolCallItem, BackendToolKind, rs};
 
     let h = TestHarness::with_conversation(vec![
         ConversationItem::system("sys"),
@@ -5378,7 +5378,7 @@ async fn prefix_stable_after_session_resume() {
 /// out-of-band `RepairHistory` command must strip it and persist the fix.
 #[tokio::test]
 async fn repair_history_command_strips_orphan_and_persists() {
-    use wimo ai_wimo_sampling_types::ToolCall;
+    use wimoai_wimo_sampling_types::ToolCall;
 
     let corrupted = vec![
         ConversationItem::system("sys"),

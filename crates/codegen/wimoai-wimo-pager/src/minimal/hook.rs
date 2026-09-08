@@ -1,9 +1,9 @@
 //! Function-pointer hooks for the optional minimal (scrollback-native) render mode.
 //!
-//! A dependency on `wimo ai-wimo-pager-minimal` would be a cargo cycle: that crate reads this crate's `AppView`, `views::*` widgets, and `scrollback`.
+//! A dependency on `wimoai-wimo-pager-minimal` would be a cargo cycle: that crate reads this crate's `AppView`, `views::*` widgets, and `scrollback`.
 //! The minimal crate instead registers its entry points here via [`install`], and this crate calls them through the stored function pointers.
 //!
-//! The `wimo ai-wimo-pager-bin` binary calls `wimo ai_wimo_pager_minimal::install()` once at startup.
+//! The `wimoai-wimo-pager-bin` binary calls `wimoai_wimo_pager_minimal::install()` once at startup.
 //! With no hooks installed, the pager's `ScreenMode::Minimal` branches are inert: `draw` is a no-op and `/transcript` falls back to the empty case.
 //! The default full-screen and inline render paths never touch this module.
 
@@ -12,7 +12,7 @@ use std::sync::OnceLock;
 use crate::app::PagerTerminal;
 use crate::app::app_view::AppView;
 
-/// Renders one minimal-mode frame; the installed implementation is `wimo ai_wimo_pager_minimal::draw`.
+/// Renders one minimal-mode frame; the installed implementation is `wimoai_wimo_pager_minimal::draw`.
 pub type MinimalDrawFn = fn(&mut AppView, &mut PagerTerminal);
 
 /// Minimal's `/transcript` used to install a second hook here; it no longer needs one.

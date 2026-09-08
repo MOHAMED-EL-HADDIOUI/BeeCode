@@ -21,7 +21,7 @@ pub enum EmbeddedEditor {
 
 /// Empty values are treated as absent (matching the sibling `detect_*_from_env` detectors via `env_get`).
 ///
-/// Adding a new env marker here requires extending `HOST_TERMINAL_ENV_VARS` in `wimo ai-wimo-pager-pty-harness/src/pty.rs`.
+/// Adding a new env marker here requires extending `HOST_TERMINAL_ENV_VARS` in `wimoai-wimo-pager-pty-harness/src/pty.rs`.
 /// The PTY harness strips those markers so the host terminal cannot leak into tests.
 pub fn embedded_editor_from_env(env: &HashMap<String, String>) -> Option<EmbeddedEditor> {
     // The markers cannot tell the editor running inside tmux (where wrapping always renders garbage) from tmux running inside the editor

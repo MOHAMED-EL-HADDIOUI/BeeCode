@@ -28,13 +28,13 @@ hJAE3EOL2ZddrMPF64QeU9UhvCm0Ch+Ceqa1ZWE0MygccggX5s2yQwtXO2ovJdjH\n\
     // Safety: sole test in this binary; set before any OnceLock resolve.
     unsafe {
         std::env::set_var(
-            wimo ai_wimo_extra_ca::ENV_wimo_EXTRA_CA_BUNDLE,
+            wimoai_wimo_extra_ca::ENV_wimo_EXTRA_CA_BUNDLE,
             path.as_os_str(),
         );
     }
 
-    assert_eq!(wimo ai_wimo_extra_ca::extra_root_ders().len(), 1);
+    assert_eq!(wimoai_wimo_extra_ca::extra_root_ders().len(), 1);
 
-    wimo ai_wimo_extra_ca::build_reqwest_client(|builder| builder)
+    wimoai_wimo_extra_ca::build_reqwest_client(|builder| builder)
         .expect("client with env-loaded root builds");
 }

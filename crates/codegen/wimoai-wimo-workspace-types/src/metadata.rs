@@ -2,7 +2,7 @@
 //! It carries per-call context like session ids, trace context, and deadlines.
 //!
 //! `Extensions` (the typed in-process map) is in-process only and not serialized, so it is not defined here.
-//! It lives in the runtime `wimo ai-wimo-workspace` crate alongside the transport implementations.
+//! It lives in the runtime `wimoai-wimo-workspace` crate alongside the transport implementations.
 //!
 //! [grpc-spec]: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#requests
 

@@ -1,7 +1,7 @@
 use reqwest::RequestBuilder;
 use std::sync::Arc;
 /// Deployment key (enterprise) sends bare `Bearer`, routed to management key auth.
-/// User token (wimo AI users) sends `Bearer` and `X-wimo ai-Token-Auth: wimo ai-wimo-cli`.
+/// User token (wimo AI users) sends `Bearer` and `X-wimoai-Token-Auth: wimoai-wimo-cli`.
 /// Deployment key takes precedence when both are present.
 #[derive(Clone)]
 pub struct wimoAuthCredentials {
@@ -101,8 +101,8 @@ impl wimoAuthCredentials {
             builder
                 .header("Authorization", format!("Bearer {}", token))
                 .header(
-                    obfstr::obfstr!("X-wimo ai-Token-Auth"),
-                    obfstr::obfstr!("wimo ai-wimo-cli"),
+                    obfstr::obfstr!("X-wimoai-Token-Auth"),
+                    obfstr::obfstr!("wimoai-wimo-cli"),
                 )
         } else {
             builder
@@ -111,7 +111,7 @@ impl wimoAuthCredentials {
         builder
     }
 }
-impl wimo ai_wimo_auth::HttpAuth for wimoAuthCredentials {
+impl wimoai_wimo_auth::HttpAuth for wimoAuthCredentials {
     fn apply(&self, builder: RequestBuilder, base_url: &str) -> RequestBuilder {
         wimoAuthCredentials::apply(self, builder, base_url)
     }

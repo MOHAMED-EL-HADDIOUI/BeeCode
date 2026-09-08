@@ -17,8 +17,8 @@
 //! These fixtures spread hunks to near EOF, so `full_file_slice` still measures roughly the whole file (the worst case a real upgrade pays).
 //!
 //! ```text
-//! cargo bench -p wimo ai-wimo-pager --bench edit_highlight
-//! cargo bench -p wimo ai-wimo-pager --bench edit_highlight -- edit_hl/upgrade
+//! cargo bench -p wimoai-wimo-pager --bench edit_highlight
+//! cargo bench -p wimoai-wimo-pager --bench edit_highlight -- edit_hl/upgrade
 //! ```
 
 use std::collections::HashMap;
@@ -31,13 +31,13 @@ use similar::ChangeTag;
 use syntect::highlighting::Style as SyntectStyle;
 use tempfile::TempDir;
 
-use wimo ai_wimo_pager::scrollback::blocks::tool::{
+use wimoai_wimo_pager::scrollback::blocks::tool::{
     DiffRenderConfig, EDIT_HL_MAX_BYTES, EDIT_HL_MAX_LINES, compute_file_scoped_styles,
     render_diff_hunks_highlighted, render_diff_hunks_with_styles,
 };
-use wimo ai_wimo_pager::syntax::{Syntect, get_syntect};
-use wimo ai_wimo_pager::theme::Theme;
-use wimo ai_wimo_pager_diff::{DiffHunk, DiffLine};
+use wimoai_wimo_pager::syntax::{Syntect, get_syntect};
+use wimoai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager_diff::{DiffHunk, DiffLine};
 
 const SAMPLE_SIZE: usize = 20;
 const SAMPLE_SIZE_HEAVY: usize = 10;

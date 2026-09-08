@@ -3,9 +3,9 @@
 //! This crate bridges MCP (Model Context Protocol) servers into the
 //! computer hub's tool routing infrastructure. An [`McpBridge`] connects
 //! to an MCP server via an [`McpTransport`], discovers the server's
-//! tools, and produces [`ToolServerHandler`](wimo ai_computer_hub_sdk::ToolServerHandler)
+//! tools, and produces [`ToolServerHandler`](wimoai_computer_hub_sdk::ToolServerHandler)
 //! implementations that can be registered with a hub
-//! [`ToolServerBuilder`](wimo ai_computer_hub_sdk::ToolServerBuilder).
+//! [`ToolServerBuilder`](wimoai_computer_hub_sdk::ToolServerBuilder).
 //!
 //! # Architecture
 //!

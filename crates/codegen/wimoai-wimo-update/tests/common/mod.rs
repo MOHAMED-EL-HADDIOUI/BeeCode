@@ -34,7 +34,7 @@ use std::sync::OnceLock;
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Returns a process-wide test `wimo_HOME`, initialized exactly once per test binary.
-/// Once initialized, `wimo ai_wimo_config::wimo_home()` will resolve to this directory for the lifetime of the process.
+/// Once initialized, `wimoai_wimo_config::wimo_home()` will resolve to this directory for the lifetime of the process.
 ///
 /// Also clears env vars that the auto-update code consults so a parent shell's values can't pollute the baseline.
 /// For example, running tests from `npm run` would otherwise inherit `npm_config_user_agent` and `NPM_TOKEN`.
@@ -104,9 +104,9 @@ pub fn host_platform() -> String {
     format!("{os}-{arch}")
 }
 
-/// Minimal [`wimo ai_wimo_update::UpdateConfig`] for install tests.
-pub fn make_update_config(channel: &str) -> wimo ai_wimo_update::UpdateConfig {
-    wimo ai_wimo_update::UpdateConfig {
+/// Minimal [`wimoai_wimo_update::UpdateConfig`] for install tests.
+pub fn make_update_config(channel: &str) -> wimoai_wimo_update::UpdateConfig {
+    wimoai_wimo_update::UpdateConfig {
         proxy_base_url: "http://test.invalid/v1".to_string(),
         auth_scope: "test".to_string(),
         deployment_key: None,

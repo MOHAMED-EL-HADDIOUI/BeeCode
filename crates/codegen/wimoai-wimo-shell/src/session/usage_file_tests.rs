@@ -1,6 +1,6 @@
 use super::*;
-use wimo ai_chat_state::UsageLedger;
-use wimo ai_wimo_sampling_types::TokenUsage;
+use wimoai_chat_state::UsageLedger;
+use wimoai_wimo_sampling_types::TokenUsage;
 
 fn tu(prompt: u32, completion: u32) -> TokenUsage {
     TokenUsage {

@@ -10,7 +10,7 @@ use std::sync::Arc;
 use anyhow::Context;
 
 use crate::UploadMethod;
-use wimo ai_wimo_auth::{AuthCredentialProvider, StaticAuthCredentialProvider};
+use wimoai_wimo_auth::{AuthCredentialProvider, StaticAuthCredentialProvider};
 
 use crate::storage_client::{Auth401AttributionCallback, StaticwimoAuth, StorageClient};
 

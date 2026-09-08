@@ -1417,8 +1417,8 @@ fn make_hyperlink(
     cols: std::ops::Range<usize>,
     url: &str,
     id: u32,
-) -> wimo ai_wimo_markdown::HyperlinkTarget {
-    wimo ai_wimo_markdown::HyperlinkTarget {
+) -> wimoai_wimo_markdown::HyperlinkTarget {
+    wimoai_wimo_markdown::HyperlinkTarget {
         line_index: line,
         column_range: cols,
         url: url.to_string(),
@@ -1674,7 +1674,7 @@ fn overlay_partial_column_overlap() {
 #[test]
 fn overlay_empty_hyperlinks_produces_nothing() {
     let output = make_block_output(&[("text", None)]);
-    let links: &[wimo ai_wimo_markdown::HyperlinkTarget] = &[];
+    let links: &[wimoai_wimo_markdown::HyperlinkTarget] = &[];
     let mut overlay = LinkOverlay::new();
     map_hyperlinks_to_overlay(links, &output, 0, 0, 10, 0, 0, &[], None, &mut overlay);
 
@@ -1724,7 +1724,7 @@ fn markdown_wrapped_project_media_path_fully_linkified() {
     // Regression: imagine-tool prose whose long, percent-encoded media path soft-wraps across rows
     // The whole path must be clickable, not just the leading fragment on the first row
     // Each visual row gets one overlay region, all pointing at the full file:// URL
-    let path = "/Users/alice/.wimo/projects/%2FUsers%2Falice%2Fcode%2Fwimo ai/\
+    let path = "/Users/alice/.wimo/projects/%2FUsers%2Falice%2Fcode%2Fwimoai/\
                 019e0000-0000-7000-8000-000000000001/images/1.jpg";
     let entries = vec![make_markdown_entry(&format!(
         "Image generated and saved to {path}\n"

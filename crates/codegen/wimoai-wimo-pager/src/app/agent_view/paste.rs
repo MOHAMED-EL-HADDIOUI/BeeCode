@@ -194,10 +194,10 @@ impl AgentView {
                         );
                     }
                     if ctx.source.tip_showing() {
-                        wimo ai_wimo_telemetry::session_ctx::log_event(
-                            wimo ai_wimo_telemetry::events::ContextualTip {
-                                tip: wimo ai_wimo_telemetry::events::ContextualTipKind::ImageInput,
-                                action: wimo ai_wimo_telemetry::events::ContextualTipAction::Accepted,
+                        wimoai_wimo_telemetry::session_ctx::log_event(
+                            wimoai_wimo_telemetry::events::ContextualTip {
+                                tip: wimoai_wimo_telemetry::events::ContextualTipKind::ImageInput,
+                                action: wimoai_wimo_telemetry::events::ContextualTipAction::Accepted,
                             },
                         );
                     }
@@ -1206,10 +1206,10 @@ pub(super) mod paste_key_tests {
     /// Build a `QuestionViewState` already in `InputMode` focus.
     pub(in crate::app::agent_view) fn make_question_view_state_in_input_mode()
     -> crate::views::question_view::QuestionViewState {
-        let question = wimo ai_wimo_tools::implementations::wimo::ask_user_question::Question {
+        let question = wimoai_wimo_tools::implementations::wimo::ask_user_question::Question {
             question: "Pick one?".to_string(),
             options: vec![
-                wimo ai_wimo_tools::implementations::wimo::ask_user_question::QuestionOption {
+                wimoai_wimo_tools::implementations::wimo::ask_user_question::QuestionOption {
                     label: "A".to_string(),
                     description: "Option A".to_string(),
                     preview: None,
@@ -2643,7 +2643,7 @@ pub(super) mod paste_key_tests {
         let completion = agent.complete_clipboard_attachment_paste(
             ctx,
             crate::app::actions::ProbedAttachment::NoRaster,
-            Some("file:///definitely/missing/wimo ai-primary-paste.png".to_owned()),
+            Some("file:///definitely/missing/wimoai-primary-paste.png".to_owned()),
         );
         assert_eq!(
             completion,
@@ -2651,7 +2651,7 @@ pub(super) mod paste_key_tests {
         );
         assert_eq!(
             agent.prompt.text(),
-            "/definitely/missing/wimo ai-primary-paste.png "
+            "/definitely/missing/wimoai-primary-paste.png "
         );
         assert!(agent.prompt.images.is_empty());
     }

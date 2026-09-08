@@ -2,7 +2,7 @@
 //!
 //! The pager learns a turn reached its terminal outcome from two rails.
 //! One is the fire-and-forget `x.ai/session/prompt_complete` broadcast, kept for one release so leaders that have not yet upgraded still work.
-//! The other is the durable `wimo aiSessionUpdate::TurnCompleted`, which is persisted and replayed.
+//! The other is the durable `wimoaiSessionUpdate::TurnCompleted`, which is persisted and replayed.
 //! Both converge on [`finalize_turn_from_terminal`] so the turn-finalize behavior lives in one place.
 //! A viewer that re-attaches mid-turn can then finalize the turn from replay instead of staying stuck on "Waiting…".
 
@@ -16,7 +16,7 @@ use super::cancel_latency::TurnEnd;
 
 /// `_meta.cancellationCategory` of a hook-denied turn end: renders the "blocked by a hook" marker instead of "cancelled by user" on every rail.
 pub(crate) const HOOK_DENIED_CATEGORY: &str =
-    wimo ai_wimo_shell::session::commands::HOOK_DENIED_CATEGORY;
+    wimoai_wimo_shell::session::commands::HOOK_DENIED_CATEGORY;
 
 /// `_meta` key of a cancelled terminal's trigger (`"send_now"`, `"ctrl_c"`, …).
 pub(crate) const CANCEL_TRIGGER_KEY: &str = "cancelTrigger";
@@ -26,10 +26,10 @@ pub(crate) const CANCELLATION_CATEGORY_KEY: &str = "cancellationCategory";
 /// It is stamped beside the category; absent on older shells.
 pub(crate) const CANCELLATION_CONTEXT_KEY: &str = "cancellationContext";
 /// `_meta` key distinguishing a queued prompt that never ran from a real cancel.
-pub(crate) const COMPLETION_KIND_KEY: &str = wimo ai_wimo_shell::session::commands::COMPLETION_KIND_KEY;
-/// `_meta.completionKind` of [`wimo ai_wimo_shell::session::commands::PromptCompletionKind::RemovedFromQueue`].
+pub(crate) const COMPLETION_KIND_KEY: &str = wimoai_wimo_shell::session::commands::COMPLETION_KIND_KEY;
+/// `_meta.completionKind` of [`wimoai_wimo_shell::session::commands::PromptCompletionKind::RemovedFromQueue`].
 pub(crate) const REMOVED_FROM_QUEUE_KIND: &str =
-    wimo ai_wimo_shell::session::commands::REMOVED_FROM_QUEUE_KIND;
+    wimoai_wimo_shell::session::commands::REMOVED_FROM_QUEUE_KIND;
 
 /// Unknown tokens stay [`TurnStopReason::Unknown`], which maps to `TurnCompleted` (live `_` arm).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -185,7 +185,7 @@ pub(super) fn note_hook_blocked_turn(
         Some((row_id, text)) => {
             // One parse point for the wire context
             // The shell serializes `CancellationContext` (camelCase); this deserializes into the same shared type instead of reading keys by string
-            let ctx: Option<wimo ai_wimo_shell::session::commands::CancellationContext> =
+            let ctx: Option<wimoai_wimo_shell::session::commands::CancellationContext> =
                 cancellation_context.and_then(|v| serde_json::from_value(v.clone()).ok());
             let blocked = crate::app::agent::BlockedPromptContext {
                 row_id,
@@ -230,7 +230,7 @@ fn open_prompt_blocked_card(
     prompt_text: String,
 ) {
     use crate::views::question_view::{LocalQuestionKind, QuestionViewState};
-    use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+    use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
         Question, QuestionOption,
     };
 
@@ -250,7 +250,7 @@ fn open_prompt_blocked_card(
     let row_id = blocked.row_id;
     let was_combined = blocked.was_combined;
     let hook_name = blocked.hook_name.as_deref().unwrap_or("a hook");
-    let short_hook_name = wimo ai_wimo_hooks::config::hook_display_name(hook_name);
+    let short_hook_name = wimoai_wimo_hooks::config::hook_display_name(hook_name);
     let reason = blocked.reason.as_deref().unwrap_or_default();
 
     // `\n\n` splits the card header into a bold label plus dimmed description lines (one per paragraph)

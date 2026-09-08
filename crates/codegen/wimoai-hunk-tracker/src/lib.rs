@@ -1,4 +1,4 @@
-//! wimo ai-hunk-tracker - Track file hunks (diffs) with agent/external attribution.
+//! wimoai-hunk-tracker - Track file hunks (diffs) with agent/external attribution.
 //!
 //! This crate provides:
 //! - Actor-based hunk tracking with source attribution (Agent vs External)
@@ -29,7 +29,7 @@
 //! ## Usage
 //!
 //! ```rust,ignore
-//! use wimo ai_hunk_tracker::{HunkTrackerActor, HunkEvent, TrackingMode, HunkAction};
+//! use wimoai_hunk_tracker::{HunkTrackerActor, HunkEvent, TrackingMode, HunkAction};
 //! use tokio::sync::mpsc;
 //!
 //! // Create event channel

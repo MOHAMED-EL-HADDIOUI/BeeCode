@@ -7,7 +7,7 @@ generated clients — not produced by serializing the Rust types.
 
 | Surface | Harness |
 |---------|---------|
-| Rust | `crates/common/wimo ai-tool-protocol/tests/bot_relay_conformance.rs` |
+| Rust | `crates/common/wimoai-tool-protocol/tests/bot_relay_conformance.rs` |
 | TypeScript | `frontend/packages/bot-relay-protocol/` (replay not in this PR) |
 | Swift | `generated/swift/BotRelayProtocol.swift` (replay not in this PR) |
 | Kotlin | `generated/kotlin/BotRelay.kt` (replay not in this PR) |

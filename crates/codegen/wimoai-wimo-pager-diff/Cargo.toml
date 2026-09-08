@@ -1,5 +1,5 @@
 [package]
-name = "wimo ai-wimo-pager-diff"
+name = "wimoai-wimo-pager-diff"
 version = "0.1.0"
 edition.workspace = true
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ description = "Diff hunk construction for the wimo Build TUI"
 similar = { workspace = true }
 # `SearchReplaceEditDetail` / `SearchReplaceOutput`: the edit-tool output shapes
 # the hunk builder reads.
-wimo ai-wimo-tools = { workspace = true }
+wimoai-wimo-tools = { workspace = true }
 # ACP `ToolCall` inspection for `extract_edit_hunks`.
 agent-client-protocol = { workspace = true }
 # Parsing `raw_output` / `Diff.meta` JSON payloads on ACP tool calls.

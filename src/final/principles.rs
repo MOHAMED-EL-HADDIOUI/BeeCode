@@ -1,5 +1,5 @@
 //! Final architecture principles — REAL architecture module (Section 49 of l.txt / Section 43 of prompt_ai.md)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 //! All previous 28+ modules connect to this core.
 
 pub const PRINCIPLES: &[&str] = &[

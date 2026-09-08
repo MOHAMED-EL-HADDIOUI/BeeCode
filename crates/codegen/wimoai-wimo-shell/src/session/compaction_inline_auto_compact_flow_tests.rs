@@ -7,9 +7,9 @@ use crate::terminal::runner::{TerminalError, TerminalRunRequest, TerminalRunResu
 use std::sync::OnceLock;
 use std::sync::atomic::Ordering::Relaxed;
 use tokio::sync::mpsc;
-use wimo ai_wimo_paths::AbsPathBuf;
-use wimo ai_wimo_workspace::file_system::MockFs;
-use wimo ai_wimo_workspace::permission::PermissionHandle;
+use wimoai_wimo_paths::AbsPathBuf;
+use wimoai_wimo_workspace::file_system::MockFs;
+use wimoai_wimo_workspace::permission::PermissionHandle;
 #[derive(Debug)]
 struct DummyTerminal;
 #[async_trait::async_trait]
@@ -22,18 +22,18 @@ async fn create_test_actor(
     total_tokens: u64,
     context_window: u64,
     threshold_percent: u8,
-    gateway_tx: mpsc::UnboundedSender<wimo ai_acp_lib::AcpClientMessage>,
+    gateway_tx: mpsc::UnboundedSender<wimoai_acp_lib::AcpClientMessage>,
     persistence_tx: mpsc::UnboundedSender<PersistenceMsg>,
 ) -> SessionActor {
     let cwd = AbsPathBuf::new(std::path::PathBuf::from("/tmp")).unwrap();
     let fs = Arc::new(MockFs::new(cwd.to_path_buf()));
     let terminal = Arc::new(DummyTerminal {});
     let (hunk_tx, _hunk_rx) = tokio::sync::mpsc::unbounded_channel();
-    let hunk_tracker_handle = wimo ai_hunk_tracker::HunkTrackerActor::spawn(
+    let hunk_tracker_handle = wimoai_hunk_tracker::HunkTrackerActor::spawn(
         "test-auto-compact".to_string(),
         cwd.to_path_buf(),
         hunk_tx,
-        wimo ai_hunk_tracker::TrackingMode::AgentOnly,
+        wimoai_hunk_tracker::TrackingMode::AgentOnly,
         tokio_util::sync::CancellationToken::new(),
     );
     let tool_context = ToolContext::new(cwd.clone(), None, None, fs, terminal, hunk_tracker_handle);
@@ -53,9 +53,9 @@ async fn create_test_actor(
     let (chat_event_tx, _chat_event_rx) = tokio::sync::mpsc::unbounded_channel();
     let (event_tx, _event_rx) =
         tokio::sync::mpsc::unbounded_channel::<crate::session::replay_events::SessionEvent>();
-    let chat_state_handle = wimo ai_chat_state::ChatStateActor::spawn(
+    let chat_state_handle = wimoai_chat_state::ChatStateActor::spawn(
         vec![],
-        wimo ai_wimo_sampling_types::SamplingConfig {
+        wimoai_wimo_sampling_types::SamplingConfig {
             base_url: "http://localhost".to_string(),
             model: "test".to_string(),
             max_completion_tokens: None,
@@ -70,7 +70,7 @@ async fn create_test_actor(
             reasoning_effort: None,
             stream_tool_calls: None,
         },
-        Box::new(wimo ai_chat_state::NullChatPersistence),
+        Box::new(wimoai_chat_state::NullChatPersistence),
         chat_event_tx,
         tokio_util::sync::CancellationToken::new(),
     );
@@ -131,7 +131,7 @@ async fn create_test_actor(
             count: std::sync::atomic::AtomicU64::new(0),
             auto_compact_suppressed: std::sync::atomic::AtomicU8::new(0),
             previous_model: std::cell::Cell::new(None),
-            compaction_mode: wimo ai_chat_state::CompactionMode::Transcript,
+            compaction_mode: wimoai_chat_state::CompactionMode::Transcript,
             verbatim_input: true,
             tool_choice: crate::util::config::CompactionToolChoice::Auto,
             prefire: crate::session::compaction_config::PrefireState::default(),
@@ -236,7 +236,7 @@ async fn create_test_actor(
         laziness_debug_log: None,
         last_live_orphan_reconcile: std::cell::Cell::new(None),
         deferred_prefix: TaskSlot::new(),
-        extension_registry: wimo ai_agent_lifecycle::LocalExtensionRegistry::default(),
+        extension_registry: wimoai_agent_lifecycle::LocalExtensionRegistry::default(),
         last_announced_local_date: std::cell::Cell::new(chrono::Local::now().date_naive()),
         prefix_carries_fallback_date: std::cell::Cell::new(false),
         last_search_prompt_index: std::sync::atomic::AtomicI64::new(-1),
@@ -247,7 +247,7 @@ async fn create_test_actor(
         turn_end_tx: Default::default(),
         client_hooks: Default::default(),
         hook_resolved_workspace_root: String::new(),
-        vcs_kind: wimo ai_wimo_workspace::session::git::VcsKind::Git,
+        vcs_kind: wimoai_wimo_workspace::session::git::VcsKind::Git,
         hook_load_errors: std::cell::RefCell::new(Vec::new()),
         plugin_registry: std::cell::RefCell::new(None),
         plugin_registry_handle: None,
@@ -271,13 +271,13 @@ async fn create_test_actor(
         turn_stream_drained: parking_lot::Mutex::new(std::collections::HashMap::new()),
         pending_image_strip: parking_lot::Mutex::new(std::collections::HashMap::new()),
         image_strip_rewrite_barrier: ImageStripRewriteBarrier::new(),
-        sampler_handle: wimo ai_wimo_sampler::SamplerHandle::noop(),
+        sampler_handle: wimoai_wimo_sampler::SamplerHandle::noop(),
         sampling_gate: None,
         rebuild_spec: crate::session::agent_rebuild::test_rebuild_spec_default(),
         image_description_model: crate::test_support::TEST_MODEL.to_owned(),
         image_describe_cache: Arc::new(crate::session::image_describe::ImageDescribeCache::new()),
         subagent_token_records: parking_lot::Mutex::new(std::collections::HashMap::new()),
-        workspace_ops: wimo ai_wimo_workspace::WorkspaceOps::for_test(),
+        workspace_ops: wimoai_wimo_workspace::WorkspaceOps::for_test(),
         trace_config_template: std::cell::RefCell::new(None),
     }
 }
@@ -572,7 +572,7 @@ fn is_auth_compact_error_classifies_401_messages() {
 }
 #[tokio::test(flavor = "current_thread")]
 async fn surface_compact_auth_failure_emits_reauthable_retry_state() {
-    use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+    use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
     use crate::session::storage::SessionUpdate;
     let local = tokio::task::LocalSet::new();
     local
@@ -586,8 +586,8 @@ async fn surface_compact_auth_failure_emits_reauthable_retry_state() {
             assert_eq!(out.code, acp::Error::auth_required().code);
             let mut saw_retry_auth = false;
             while let Ok(msg) = persistence_rx.try_recv() {
-                if let PersistenceMsg::Update(SessionUpdate::wimo ai(notif)) = msg
-                    && let wimo aiSessionUpdate::RetryState(
+                if let PersistenceMsg::Update(SessionUpdate::wimoai(notif)) = msg
+                    && let wimoaiSessionUpdate::RetryState(
                         crate::extensions::notification::RetryState::Failed {
                             error_type,
                             message,
@@ -680,7 +680,7 @@ async fn suppression_emits_composed_notification() {
                 .await;
             let mut text = None;
             while let Ok(msg) = persistence_rx.try_recv() {
-                if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(notif)) =
+                if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(notif)) =
                     msg
                     && let crate::extensions::notification::SessionUpdate::AutoCompactFailed {
                         error,
@@ -790,8 +790,8 @@ async fn spawn_capturing_status_body_server(
     });
     (format!("http://{addr}"), captured)
 }
-fn switch_target_config(model: &str, base_url: String) -> wimo ai_wimo_sampler::SamplerConfig {
-    wimo ai_wimo_sampler::SamplerConfig {
+fn switch_target_config(model: &str, base_url: String) -> wimoai_wimo_sampler::SamplerConfig {
+    wimoai_wimo_sampler::SamplerConfig {
         api_key: Some("test-key".to_string()),
         base_url,
         model: model.to_string(),
@@ -813,26 +813,26 @@ async fn family_switch_compacts_lossy_with_new_model() {
             actor.chat_state_handle.replace_conversation(vec![
                 ConversationItem::system("sys"),
                 ConversationItem::user("hello"),
-                ConversationItem::Reasoning(wimo ai_wimo_sampling_types::rs::ReasoningItem {
+                ConversationItem::Reasoning(wimoai_wimo_sampling_types::rs::ReasoningItem {
                     id: "tco_res-uuid_call-uuid-0".to_string(),
                     summary: vec![],
                     content: None,
                     encrypted_content: Some("tco_SEALEDCIPHERTEXT".to_string()),
                     status: None,
                 }),
-                ConversationItem::assistant_tool_calls(vec![wimo ai_wimo_sampling_types::ToolCall {
-                    id: std::sync::Arc::<str>::from("call_wimo ai_minted_id"),
+                ConversationItem::assistant_tool_calls(vec![wimoai_wimo_sampling_types::ToolCall {
+                    id: std::sync::Arc::<str>::from("call_wimoai_minted_id"),
                     name: "run_terminal_command".to_string(),
                     arguments: std::sync::Arc::<str>::from(r#"{"command":"ls"}"#),
                 }]),
-                ConversationItem::ToolResult(wimo ai_wimo_sampling_types::ToolResultItem {
-                    tool_call_id: "call_wimo ai_minted_id".to_string(),
+                ConversationItem::ToolResult(wimoai_wimo_sampling_types::ToolResultItem {
+                    tool_call_id: "call_wimoai_minted_id".to_string(),
                     content: std::sync::Arc::<str>::from("file listing"),
                     images: Vec::new(),
                 }),
                 ConversationItem::assistant("done"),
             ]);
-            let server = wimo ai_wimo_test_support::MockInferenceServer::start()
+            let server = wimoai_wimo_test_support::MockInferenceServer::start()
                 .await
                 .expect("mock inference server");
             actor
@@ -875,7 +875,7 @@ async fn family_switch_compacts_lossy_with_new_model() {
 /// 401 auto-compact: SUPPRESS_AUTH and a reauthable RetryState (abort for /login).
 #[tokio::test(flavor = "current_thread")]
 async fn e2e_auto_compact_401_suppresses_auth_and_surfaces_reauth() {
-    use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+    use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
     use crate::session::compaction_config::SUPPRESS_AUTH;
     use crate::session::storage::SessionUpdate;
     let local = tokio::task::LocalSet::new();
@@ -920,9 +920,9 @@ async fn e2e_auto_compact_401_suppresses_auth_and_surfaces_reauth() {
             let mut saw_retry_auth = false;
             let mut saw_auto_failed = false;
             while let Ok(msg) = persistence_rx.try_recv() {
-                if let PersistenceMsg::Update(SessionUpdate::wimo ai(notif)) = msg {
+                if let PersistenceMsg::Update(SessionUpdate::wimoai(notif)) = msg {
                     match &notif.update {
-                        wimo aiSessionUpdate::RetryState(
+                        wimoaiSessionUpdate::RetryState(
                             crate::extensions::notification::RetryState::Failed {
                                 error_type,
                                 message,
@@ -935,7 +935,7 @@ async fn e2e_auto_compact_401_suppresses_auth_and_surfaces_reauth() {
                             );
                             saw_retry_auth = true;
                         }
-                        wimo aiSessionUpdate::AutoCompactFailed { error } => {
+                        wimoaiSessionUpdate::AutoCompactFailed { error } => {
                             assert!(
                                 error.contains("/login") || error.contains("authentication"),
                                 "auto-failed={error}"
@@ -964,7 +964,7 @@ async fn e2e_auto_compact_401_suppresses_auth_and_surfaces_reauth() {
 /// as sticky `size`, with the "too large to compact" notification.
 #[tokio::test(flavor = "current_thread")]
 async fn e2e_auto_compact_413_steps_ladder_then_sticky_size_suppress() {
-    use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+    use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
     use crate::session::compaction_config::SUPPRESS_STICKY;
     use crate::session::storage::SessionUpdate;
     use std::sync::atomic::Ordering::Relaxed;
@@ -986,12 +986,12 @@ async fn e2e_auto_compact_413_steps_ladder_then_sticky_size_suppress() {
             actor.chat_state_handle.replace_conversation(vec![
                 ConversationItem::system("sys"),
                 ConversationItem::user("hello"),
-                ConversationItem::assistant_tool_calls(vec![wimo ai_wimo_sampling_types::ToolCall {
+                ConversationItem::assistant_tool_calls(vec![wimoai_wimo_sampling_types::ToolCall {
                     id: std::sync::Arc::<str>::from("call_1"),
                     name: "run_terminal_command".to_string(),
                     arguments: std::sync::Arc::<str>::from(r#"{"command":"ls"}"#),
                 }]),
-                ConversationItem::ToolResult(wimo ai_wimo_sampling_types::ToolResultItem {
+                ConversationItem::ToolResult(wimoai_wimo_sampling_types::ToolResultItem {
                     tool_call_id: "call_1".to_string(),
                     content: std::sync::Arc::<str>::from("file listing"),
                     images: Vec::new(),
@@ -1029,8 +1029,8 @@ async fn e2e_auto_compact_413_steps_ladder_then_sticky_size_suppress() {
             );
             let mut saw_size_notification = false;
             while let Ok(msg) = persistence_rx.try_recv() {
-                if let PersistenceMsg::Update(SessionUpdate::wimo ai(notif)) = msg
-                    && let wimo aiSessionUpdate::AutoCompactFailed { error } = &notif.update
+                if let PersistenceMsg::Update(SessionUpdate::wimoai(notif)) = msg
+                    && let wimoaiSessionUpdate::AutoCompactFailed { error } = &notif.update
                 {
                     assert!(
                         error.contains("too large to compact"),
@@ -1049,7 +1049,7 @@ async fn e2e_auto_compact_413_steps_ladder_then_sticky_size_suppress() {
 /// Model-switch compact 401 must surface reauth (same path as pre-sampling).
 #[tokio::test(flavor = "current_thread")]
 async fn e2e_model_switch_compact_401_surfaces_reauth() {
-    use crate::extensions::notification::SessionUpdate as wimo aiSessionUpdate;
+    use crate::extensions::notification::SessionUpdate as wimoaiSessionUpdate;
     use crate::session::compaction_config::{PreviousModelInfo, SUPPRESS_AUTH};
     use crate::session::storage::SessionUpdate;
     let local = tokio::task::LocalSet::new();
@@ -1092,8 +1092,8 @@ async fn e2e_model_switch_compact_401_surfaces_reauth() {
             );
             let mut saw_retry_auth = false;
             while let Ok(msg) = persistence_rx.try_recv() {
-                if let PersistenceMsg::Update(SessionUpdate::wimo ai(notif)) = msg
-                    && let wimo aiSessionUpdate::RetryState(
+                if let PersistenceMsg::Update(SessionUpdate::wimoai(notif)) = msg
+                    && let wimoaiSessionUpdate::RetryState(
                         crate::extensions::notification::RetryState::Failed {
                             error_type,
                             message,
@@ -1300,7 +1300,7 @@ async fn transient_auto_compact_failure_notifies_with_real_error() {
             );
             let mut error_text = None;
             while let Ok(msg) = persistence_rx.try_recv() {
-                if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(notif)) =
+                if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(notif)) =
                     msg
                     && let crate::extensions::notification::SessionUpdate::AutoCompactFailed {
                         error,
@@ -1335,7 +1335,7 @@ async fn transient_auto_compact_failure_notifies_with_real_error() {
 /// So the announced episodes clear and the MCP reminder goes dirty for a re-announcement at the next injection.
 #[tokio::test(flavor = "current_thread")]
 async fn compaction_rearms_failed_server_announcements() {
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -1384,7 +1384,7 @@ async fn compaction_rearms_failed_server_announcements() {
 #[tokio::test(flavor = "current_thread")]
 async fn forked_prefix_released_under_pressure_and_stays_released() {
     use crate::session::compaction_config::SUPPRESS_NONE;
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -1456,7 +1456,7 @@ async fn forked_prefix_released_under_pressure_and_stays_released() {
 #[tokio::test(flavor = "current_thread")]
 async fn forked_release_still_over_threshold_suppresses_auto() {
     use crate::session::compaction_config::SUPPRESS_STICKY;
-    use wimo ai_wimo_test_support::MockInferenceServer;
+    use wimoai_wimo_test_support::MockInferenceServer;
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
@@ -1498,7 +1498,7 @@ async fn forked_release_still_over_threshold_suppresses_auto() {
             );
             let mut saw_failure = false;
             while let Ok(msg) = persistence_rx.try_recv() {
-                if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(notif)) =
+                if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(notif)) =
                     msg
                     && matches!(
                         &notif.update,
@@ -1568,7 +1568,7 @@ fn user_facing_compact_error_strips_prefix_single_lines_and_caps() {
         SessionActor::user_facing_compact_error("compact failed: API error\n  detail  line\t2"),
         "API error detail line 2"
     );
-    let nested = wimo ai_wimo_compaction::sampler::CompactionSampleError::Build(format!(
+    let nested = wimoai_wimo_compaction::sampler::CompactionSampleError::Build(format!(
         "{COMPACT_FAILED_PREFIX}API error (status 400 Bad Request): invalid_image: too big"
     ))
     .to_string();
@@ -1668,7 +1668,7 @@ fn suppress_reason_as_str_is_stable() {
 mod preserve_prefix {
     use super::super::preserve_inherited_prefix;
     use super::super::project_preserved_reseed_tokens;
-    use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+    use wimoai_wimo_sampling_types::conversation::ConversationItem;
     #[test]
     fn splices_inherited_with_compacted_suffix() {
         let conversation = vec![
@@ -1767,9 +1767,9 @@ mod preserve_prefix {
         );
     }
 }
-fn api_error_with_context_window(context_window: u64) -> wimo ai_wimo_sampler::SamplingErrorInfo {
-    wimo ai_wimo_sampler::SamplingErrorInfo {
-        kind: wimo ai_wimo_sampler::SamplingErrorKind::Api,
+fn api_error_with_context_window(context_window: u64) -> wimoai_wimo_sampler::SamplingErrorInfo {
+    wimoai_wimo_sampler::SamplingErrorInfo {
+        kind: wimoai_wimo_sampler::SamplingErrorKind::Api,
         status_code: Some(400),
         message: "prompt is too long".to_string(),
         is_retryable: false,
@@ -1784,7 +1784,7 @@ fn api_error_with_context_window(context_window: u64) -> wimo ai_wimo_sampler::S
         empty_response_context: None,
         doom_loop_triggers: None,
         doom_loop_aborted_at_chunk: None,
-        credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+        credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
     }
 }
 /// Pre-sampling check uses estimated tokens (includes tool-result delta).
@@ -1793,7 +1793,7 @@ async fn test_pre_sampling_uses_estimated_tokens() {
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
-            let (gateway_tx, _) = mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+            let (gateway_tx, _) = mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(80_000, 100_000, 85, gateway_tx, persistence_tx).await;
             let result = actor.check_auto_compact_needed().await;
@@ -1811,7 +1811,7 @@ async fn test_model_switch_compaction_triggers_on_downgrade() {
     let local = tokio::task::LocalSet::new();
     local
         .run_until(async {
-            let (gateway_tx, _) = mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+            let (gateway_tx, _) = mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _) = mpsc::unbounded_channel::<PersistenceMsg>();
             let actor = create_test_actor(86_000, 100_000, 85, gateway_tx, persistence_tx).await;
             actor.compaction.previous_model.set(Some(
@@ -1846,11 +1846,11 @@ async fn get_transcript_path_returns_some_when_file_exists() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) = mpsc::unbounded_channel::<PersistenceMsg>();
             let mut actor =
                 create_test_actor(50_000, 200_000, 85, gateway_tx, persistence_tx).await;
-            actor.compaction.compaction_mode = wimo ai_chat_state::CompactionMode::Transcript;
+            actor.compaction.compaction_mode = wimoai_chat_state::CompactionMode::Transcript;
             let session_dir = crate::session::persistence::session_dir(&actor.session_info);
             std::fs::create_dir_all(&session_dir).unwrap();
             let updates_path = session_dir.join("updates.jsonl");
@@ -1865,7 +1865,7 @@ async fn get_transcript_path_returns_some_when_file_exists() {
             let hint = actor.transcript_hint().expect("transcript hint present");
             assert!(hint.contains("read the full transcript"));
             assert!(hint.ends_with("updates.jsonl"));
-            actor.compaction.compaction_mode = wimo ai_chat_state::CompactionMode::Summary;
+            actor.compaction.compaction_mode = wimoai_chat_state::CompactionMode::Summary;
             assert!(actor.transcript_hint().is_none());
             let _ = std::fs::remove_file(&updates_path);
             let _ = std::fs::remove_dir_all(&session_dir);

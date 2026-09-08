@@ -1,5 +1,5 @@
 use crate::extensions::notification::{
-    SessionNotification as wimo aiSessionNotification, SessionUpdate as wimo aiSessionUpdate,
+    SessionNotification as wimoaiSessionNotification, SessionUpdate as wimoaiSessionUpdate,
 };
 use crate::session::goal_tracker::{GoalOrchestration, GoalPhase, GoalStatus, GoalTracker};
 use crate::session::persistence::PersistenceMsg;
@@ -10,14 +10,14 @@ use crate::session::persistence::PersistenceMsg;
 
 pub(crate) struct GoalNotifySender {
     session_id: agent_client_protocol::SessionId,
-    gateway: wimo ai_acp_lib::AcpAgentGatewaySender,
+    gateway: wimoai_acp_lib::AcpAgentGatewaySender,
     persistence_tx: tokio::sync::mpsc::UnboundedSender<PersistenceMsg>,
 }
 
 impl GoalNotifySender {
     pub(crate) fn new(
         session_id: agent_client_protocol::SessionId,
-        gateway: wimo ai_acp_lib::AcpAgentGatewaySender,
+        gateway: wimoai_acp_lib::AcpAgentGatewaySender,
         persistence_tx: tokio::sync::mpsc::UnboundedSender<PersistenceMsg>,
     ) -> Self {
         Self {
@@ -71,18 +71,18 @@ impl GoalNotifySender {
     }
 
     /// Used for snapshot-derived payloads and for the "planning…" / "Verifying…" latch updates.
-    /// Those must not close the rewind window, which `send_wimo ai_notification` does as a side effect.
-    pub(crate) fn send_update(&self, update: wimo aiSessionUpdate) {
+    /// Those must not close the rewind window, which `send_wimoai_notification` does as a side effect.
+    pub(crate) fn send_update(&self, update: wimoaiSessionUpdate) {
         self.dispatch_update(update, true);
     }
 
     /// `persist == false` ships the update to the gateway only (no JSONL append) for recurring/transient ticks.
     /// See [`Self::emit_goal_updated_ephemeral`].
-    fn dispatch_update(&self, update: wimo aiSessionUpdate, persist: bool) {
+    fn dispatch_update(&self, update: wimoaiSessionUpdate, persist: bool) {
         // Stamped before the persist/broadcast fork; see `ensure_event_id_meta`
         let mut meta = None;
         crate::util::event_id::ensure_event_id_meta(&self.session_id.0, &mut meta);
-        let notification = wimo aiSessionNotification {
+        let notification = wimoaiSessionNotification {
             session_id: self.session_id.clone(),
             update,
             meta: meta.map(serde_json::Value::Object),
@@ -92,7 +92,7 @@ impl GoalNotifySender {
             .ok();
         if persist {
             let _ = self.persistence_tx.send(PersistenceMsg::Update(
-                crate::session::storage::SessionUpdate::wimo ai(Box::new(notification)),
+                crate::session::storage::SessionUpdate::wimoai(Box::new(notification)),
             ));
         }
         if let Some(raw) = raw {
@@ -133,7 +133,7 @@ pub(crate) fn build_goal_updated(
     o: &GoalOrchestration,
     tokens_used: i64,
     finished_subagent_tokens: i64,
-) -> wimo aiSessionUpdate {
+) -> wimoaiSessionUpdate {
     let last_entry = o.history.last();
 
     let status_str = match o.status {
@@ -154,7 +154,7 @@ pub(crate) fn build_goal_updated(
 
     let last_event = last_entry.map(|e| goal_event_as_str(&e.event).to_owned());
 
-    wimo aiSessionUpdate::GoalUpdated {
+    wimoaiSessionUpdate::GoalUpdated {
         goal_id: o.goal_id.clone(),
         objective: o.objective.clone(),
         status: status_str.to_owned(),
@@ -201,8 +201,8 @@ pub(crate) fn build_goal_updated(
 }
 
 /// Build a `GoalUpdated` with `status: "cleared"` to tell the pager to drop its goal state.
-pub(crate) fn build_goal_cleared() -> wimo aiSessionUpdate {
-    wimo aiSessionUpdate::GoalUpdated {
+pub(crate) fn build_goal_cleared() -> wimoaiSessionUpdate {
+    wimoaiSessionUpdate::GoalUpdated {
         goal_id: String::new(),
         objective: String::new(),
         status: "cleared".to_owned(),
@@ -277,7 +277,7 @@ mod tests {
         let o = make_base_orchestration();
         let update = build_goal_updated(&o, 0, 0);
         match update {
-            wimo aiSessionUpdate::GoalUpdated {
+            wimoaiSessionUpdate::GoalUpdated {
                 total_deliverables,
                 completed_deliverables,
                 classifier_runs_attempted,
@@ -313,7 +313,7 @@ mod tests {
 
         let update = build_goal_updated(&o, 0, 0);
         match update {
-            wimo aiSessionUpdate::GoalUpdated {
+            wimoaiSessionUpdate::GoalUpdated {
                 classifier_runs_attempted,
                 classifier_max_runs,
                 last_classifier_verdict,
@@ -353,9 +353,9 @@ mod tests {
         );
     }
 
-    fn planning_field(update: &wimo aiSessionUpdate) -> Option<bool> {
+    fn planning_field(update: &wimoaiSessionUpdate) -> Option<bool> {
         match update {
-            wimo aiSessionUpdate::GoalUpdated { planning, .. } => *planning,
+            wimoaiSessionUpdate::GoalUpdated { planning, .. } => *planning,
             _ => panic!("expected GoalUpdated"),
         }
     }
@@ -364,8 +364,8 @@ mod tests {
     fn build_goal_updated_verifying_flag_reflects_latch() {
         // Regression: a one-shot verifying flag flickered off the moment any mid-verification GoalUpdated fired
         let mut o = make_base_orchestration();
-        let verifying = |u: &wimo aiSessionUpdate| match u {
-            wimo aiSessionUpdate::GoalUpdated {
+        let verifying = |u: &wimoaiSessionUpdate| match u {
+            wimoaiSessionUpdate::GoalUpdated {
                 verifying_completion,
                 ..
             } => *verifying_completion,
@@ -386,7 +386,7 @@ mod tests {
         o.live_subagent_tokens = 5_000;
         let update = build_goal_updated(&o, 60_000, 40_000);
         match update {
-            wimo aiSessionUpdate::GoalUpdated {
+            wimoaiSessionUpdate::GoalUpdated {
                 tokens_used,
                 finished_subagent_tokens,
                 live_subagent_tokens,
@@ -406,7 +406,7 @@ mod tests {
         let mut o = make_base_orchestration();
         o.live_tokens_by_model = vec![("wimo-4".into(), 5_000)];
         match build_goal_updated(&o, 0, 0) {
-            wimo aiSessionUpdate::GoalUpdated {
+            wimoaiSessionUpdate::GoalUpdated {
                 live_tokens_by_model,
                 ..
             } => assert!(
@@ -419,7 +419,7 @@ mod tests {
         // Two or more distinct models are transmitted verbatim
         o.live_tokens_by_model = vec![("wimo-4".into(), 5_000), ("wimo-3".into(), 3_000)];
         match build_goal_updated(&o, 0, 0) {
-            wimo aiSessionUpdate::GoalUpdated {
+            wimoaiSessionUpdate::GoalUpdated {
                 live_tokens_by_model,
                 ..
             } => assert_eq!(
@@ -434,7 +434,7 @@ mod tests {
     fn build_goal_cleared_is_cleared() {
         let update = build_goal_cleared();
         match update {
-            wimo aiSessionUpdate::GoalUpdated {
+            wimoaiSessionUpdate::GoalUpdated {
                 status,
                 classifier_runs_attempted,
                 classifier_max_runs,

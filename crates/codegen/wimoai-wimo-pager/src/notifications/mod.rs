@@ -104,8 +104,8 @@ impl NotificationService {
                 &event.body,
                 self.terminal_ctx,
             );
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::NotificationEmitted {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::NotificationEmitted {
                     protocol: self.protocol.as_str(),
                     event_kind: event.kind.as_str(),
                     was_focused: self.focus_tracker.is_focused(),
@@ -130,7 +130,7 @@ impl NotificationService {
         }
 
         if !buf.is_empty() {
-            wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+            wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                 use std::io::Write;
                 let _ = stderr.write_all(buf.as_bytes());
                 let _ = stderr.flush();
@@ -200,7 +200,7 @@ impl NotificationService {
     pub fn shutdown(&mut self) {
         // Reset the tab title back to "wimo" so it doesn't linger on the last activity label after exit
         let title_esc = self.title_manager.reset();
-        wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+        wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
             use std::io::Write as _;
             let _ = stderr.write_all(title_esc.as_bytes());
             let _ = stderr.flush();
@@ -209,7 +209,7 @@ impl NotificationService {
         let mut buf = String::new();
         self.clear_progress_into(&mut buf);
         if !buf.is_empty() {
-            wimo ai_wimo_shell::util::with_locked_stderr(|stderr| {
+            wimoai_wimo_shell::util::with_locked_stderr(|stderr| {
                 use std::io::Write as _;
                 let _ = stderr.write_all(buf.as_bytes());
                 let _ = stderr.flush();

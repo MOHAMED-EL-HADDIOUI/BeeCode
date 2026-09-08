@@ -12,11 +12,11 @@
 
 use std::path::{Path, PathBuf};
 
-use wimo ai_tty_utils::git_command;
+use wimoai_tty_utils::git_command;
 
 use crate::util::wimo_home::wimo_home;
 
-const WORKTREE_POOL_LOG: &str = "wimo ai_worktree_pool";
+const WORKTREE_POOL_LOG: &str = "wimoai_worktree_pool";
 
 static CLEANUP_ONCE: std::sync::Once = std::sync::Once::new();
 
@@ -45,7 +45,7 @@ pub fn cleanup_stale_pool_worktrees(source_git_root: Option<&Path>) {
     if let Some(git_root) = source_git_root {
         let root = git_root.to_path_buf();
         REGISTRATION_CLEANUP_ONCE.call_once(move || {
-            let removed = wimo ai_fast_worktree::remove_stale_worktree_registrations_under(
+            let removed = wimoai_fast_worktree::remove_stale_worktree_registrations_under(
                 &root,
                 &pool_base_directory(),
             );

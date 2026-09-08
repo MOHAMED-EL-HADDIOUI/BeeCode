@@ -1,4 +1,4 @@
-//! Wire types for the `wimo ai-wimo-workspace` API.
+//! Wire types for the `wimoai-wimo-workspace` API.
 //!
 //! This crate is intentionally pure-data and depends on nothing more than `base64`, `serde`, `serde_json`, `thiserror`, and `chrono`.
 //! There is no tokio, no async-trait, no I/O.
@@ -46,7 +46,7 @@
 //! # TODO: proto generation
 //!
 //! A planned `build.rs` will walk the request, chunk, and event enums via reflection and emit a `.proto`.
-//! That codegen step is **not** implemented yet; it will land alongside the `wimo ai-wimo-workspace-grpc` crate.
+//! That codegen step is **not** implemented yet; it will land alongside the `wimoai-wimo-workspace-grpc` crate.
 //! The Rust types defined here are the source of truth.
 
 pub mod binding;
@@ -62,7 +62,7 @@ pub mod types;
 
 /// MCP tool name delimiter: server names are qualified as `"server__tool"`.
 /// Lives here so the permission-validation and MCP transport layers can share it without dragging the full workspace or rmcp into each other.
-/// Re-exported by `wimo ai_wimo_workspace::permission` for callers that historically imported it from there.
+/// Re-exported by `wimoai_wimo_workspace::permission` for callers that historically imported it from there.
 pub const MCP_TOOL_NAME_DELIMITER: &str = "__";
 
 pub use crate::chunks::{ChunkKind, OpsChunk, SessionChunk, ToolChunk, ToolResponse};

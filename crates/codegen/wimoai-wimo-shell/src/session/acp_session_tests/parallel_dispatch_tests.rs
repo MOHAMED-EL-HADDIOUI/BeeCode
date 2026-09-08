@@ -6,8 +6,8 @@
 
 use super::*;
 
-use wimo ai_wimo_tools::implementations::wimo::task::backend::SubagentBackend;
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_tools::implementations::wimo::task::backend::SubagentBackend;
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     ActiveAgentMessageOutcome, ActiveAgentMessageRequest, SubagentCancelOutcome,
     SubagentDescribeOutcome, SubagentRequest, SubagentResult, SubagentSnapshot,
     SubagentValidateTypeOutcome,
@@ -23,8 +23,8 @@ impl SubagentBackend for FixedActiveMessageBackend {
         &self,
         _: SubagentRequest,
         _: Option<tokio::sync::oneshot::Sender<()>>,
-    ) -> Result<SubagentResult, wimo ai_tool_runtime::ToolError> {
-        Err(wimo ai_tool_runtime::ToolError::custom(
+    ) -> Result<SubagentResult, wimoai_tool_runtime::ToolError> {
+        Err(wimoai_tool_runtime::ToolError::custom(
             "unsupported",
             "spawn unsupported",
         ))
@@ -125,8 +125,8 @@ fn active_message_event_names(
 
 #[test]
 fn active_message_outputs_distinguish_uncertain_from_proved_rejection() {
-    use wimo ai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageOutput;
-    use wimo ai_wimo_tools::types::output::ToolOutput;
+    use wimoai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageOutput;
+    use wimoai_wimo_tools::types::output::ToolOutput;
 
     for (label, output, expected) in [
         (
@@ -146,7 +146,7 @@ fn active_message_outputs_distinguish_uncertain_from_proved_rejection() {
         ),
     ] {
         let output = ToolOutput::SendSubagentMessage(output);
-        let result: Result<ToolRunResult, wimo ai_tool_runtime::ToolError> = Ok(ToolRunResult {
+        let result: Result<ToolRunResult, wimoai_tool_runtime::ToolError> = Ok(ToolRunResult {
             prompt_text: output.to_prompt_format(),
             output,
             effective_tool_name: None,
@@ -161,8 +161,8 @@ fn active_message_outputs_distinguish_uncertain_from_proved_rejection() {
 
 #[tokio::test(flavor = "current_thread")]
 async fn generic_tool_completion_chokepoint_has_exact_active_message_cardinality() {
-    use wimo ai_wimo_tools::implementations::wimo::task::backend::SubagentBackendResource;
-    use wimo ai_wimo_tools::implementations::wimo::task::types::{
+    use wimoai_wimo_tools::implementations::wimo::task::backend::SubagentBackendResource;
+    use wimoai_wimo_tools::implementations::wimo::task::types::{
         MAX_ACTIVE_AGENT_MESSAGE_BYTES, SubagentDepthCounter,
     };
 
@@ -170,7 +170,7 @@ async fn generic_tool_completion_chokepoint_has_exact_active_message_cardinality
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _persistence_rx) =
                 tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let actor =
@@ -261,9 +261,9 @@ async fn generic_tool_completion_chokepoint_has_exact_active_message_cardinality
                 events.as_slice(),
                 [
                     crate::session::telemetry::ActiveAgentMessageEvent::Completed(
-                        wimo ai_wimo_telemetry::events::ActiveAgentMessageCompleted {
+                        wimoai_wimo_telemetry::events::ActiveAgentMessageCompleted {
                             requested_operation:
-                                wimo ai_wimo_telemetry::events::ActiveAgentMessageOperation::Queue,
+                                wimoai_wimo_telemetry::events::ActiveAgentMessageOperation::Queue,
                             ..
                         }
                     )
@@ -610,7 +610,7 @@ fn lock_path_for_args_buckets_wimo_and_compat_to_same_lock_for_same_file() {
 /// Regression: skill-discovery reminders must land after all tool results, not mid-batch.
 #[test]
 fn test_skill_discovery_deferred_during_parallel_batch() {
-    use wimo ai_wimo_sampling_types::{ConversationItem, SyntheticReason};
+    use wimoai_wimo_sampling_types::{ConversationItem, SyntheticReason};
 
     let mut conversation = vec![ConversationItem::assistant("I'll call 3 tools.")];
     let mut deferred_followups: Vec<ConversationItem> = Vec::new();

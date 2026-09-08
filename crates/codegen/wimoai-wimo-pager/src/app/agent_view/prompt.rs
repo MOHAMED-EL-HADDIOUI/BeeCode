@@ -377,9 +377,9 @@ impl AgentView {
                     let (chars, words) =
                         crate::views::prompt_suggestion::suggestion_size(self.prompt.text());
                     let session_id = self.session.session_id.as_ref().map(|s| s.0.to_string());
-                    wimo ai_wimo_telemetry::session_ctx::log_event(
-                        wimo ai_wimo_telemetry::events::PromptSuggestion {
-                            action: wimo ai_wimo_telemetry::events::PromptSuggestionAction::Accepted,
+                    wimoai_wimo_telemetry::session_ctx::log_event(
+                        wimoai_wimo_telemetry::events::PromptSuggestion {
+                            action: wimoai_wimo_telemetry::events::PromptSuggestionAction::Accepted,
                             chars,
                             words,
                             model: None,
@@ -401,9 +401,9 @@ impl AgentView {
                 );
                 let session_id = self.session.session_id.as_ref().map(|s| s.0.to_string());
                 self.prompt.prompt_suggestion.dismiss();
-                wimo ai_wimo_telemetry::session_ctx::log_event(
-                    wimo ai_wimo_telemetry::events::PromptSuggestion {
-                        action: wimo ai_wimo_telemetry::events::PromptSuggestionAction::Dismissed,
+                wimoai_wimo_telemetry::session_ctx::log_event(
+                    wimoai_wimo_telemetry::events::PromptSuggestion {
+                        action: wimoai_wimo_telemetry::events::PromptSuggestionAction::Dismissed,
                         chars,
                         words,
                         model: None,
@@ -698,10 +698,10 @@ impl AgentView {
             match self.prompt.handle_key(key) {
                 PromptEvent::Edited => {
                     if undo_tip_accepted {
-                        wimo ai_wimo_telemetry::session_ctx::log_event(
-                            wimo ai_wimo_telemetry::events::ContextualTip {
-                                tip: wimo ai_wimo_telemetry::events::ContextualTipKind::Undo,
-                                action: wimo ai_wimo_telemetry::events::ContextualTipAction::Accepted,
+                        wimoai_wimo_telemetry::session_ctx::log_event(
+                            wimoai_wimo_telemetry::events::ContextualTip {
+                                tip: wimoai_wimo_telemetry::events::ContextualTipKind::Undo,
+                                action: wimoai_wimo_telemetry::events::ContextualTipAction::Accepted,
                             },
                         );
                         // Retire the hint on the restore that consumed it (its "Input cleared" copy is now stale)
@@ -1860,7 +1860,7 @@ mod apple_terminal_ctrl_o_upgrade_cta_tests {
     use crate::app::agent::AgentState;
     use crate::app::app_view::InputOutcome;
     use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-    use wimo ai_wimo_telemetry::events::AnnouncementCtaSurface;
+    use wimoai_wimo_telemetry::events::AnnouncementCtaSurface;
 
     fn ctrl_o() -> KeyEvent {
         KeyEvent::new(KeyCode::Char('o'), KeyModifiers::CONTROL)

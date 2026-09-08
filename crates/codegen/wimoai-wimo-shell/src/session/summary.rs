@@ -3,14 +3,14 @@
 //! Checks whether a summary exists, generates one via the LLM, persists it, syncs to remote, updates the session registry, and notifies the client.
 //! The persistence actor just calls [`SummaryGenerator::update`]; all state transitions are internal.
 
-use crate::extensions::notification::{SessionNotification, SessionUpdate as wimo aiSessionUpdate};
+use crate::extensions::notification::{SessionNotification, SessionUpdate as wimoaiSessionUpdate};
 use crate::sampling::Client as OaiCompatClient;
 use crate::session::helpers::session_summary::generate_session_summary;
 use crate::session::info::Info;
 use crate::session::persistence::PersistenceMsg;
 use agent_client_protocol as acp;
 use tokio::sync::mpsc;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
 
 enum State {
     /// No summary generated yet. The next [`SummaryGenerator::update`] call will attempt one.
@@ -111,7 +111,7 @@ pub(crate) fn notify_client(gateway: &Option<GatewaySender>, info: &Info, title:
 
     let notification = SessionNotification {
         session_id: info.id.clone(),
-        update: wimo aiSessionUpdate::SessionSummaryGenerated {
+        update: wimoaiSessionUpdate::SessionSummaryGenerated {
             session_summary: title.to_owned(),
         },
         meta: None,
@@ -217,7 +217,7 @@ mod tests {
     fn reset_returns_generator_to_idle() {
         let (tx, _rx) = tokio::sync::mpsc::unbounded_channel();
         let sampling_client =
-            OaiCompatClient::new(wimo ai_wimo_sampler::SamplerConfig::default()).unwrap();
+            OaiCompatClient::new(wimoai_wimo_sampler::SamplerConfig::default()).unwrap();
         let mut generator = SummaryGenerator::new(SummaryConfig {
             sampling_client,
             model: String::new(),

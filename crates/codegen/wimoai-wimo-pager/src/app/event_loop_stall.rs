@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use wimo ai_wimo_telemetry::events::EventLoopStall;
+use wimoai_wimo_telemetry::events::EventLoopStall;
 
 pub(crate) const STALL_REPORT_WINDOW: Duration = Duration::from_secs(60);
 
@@ -13,7 +13,7 @@ pub(crate) struct StallActivity {
 
 impl StallActivity {
     pub(crate) fn read() -> Self {
-        use wimo ai_wimo_telemetry::activity::{self, gauge_value};
+        use wimoai_wimo_telemetry::activity::{self, gauge_value};
         Self {
             compaction_active: gauge_value(activity::COMPACTIONS_ACTIVE_KEY) > 0,
             subagents_active: gauge_value(activity::SUBAGENTS_ACTIVE_KEY),

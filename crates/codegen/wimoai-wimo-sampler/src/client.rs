@@ -23,10 +23,10 @@ use reqwest::header::{
 use serde::Serialize;
 use tracing::Instrument;
 
-use wimo ai_wimo_sampling_types::error::{
+use wimoai_wimo_sampling_types::error::{
     parse_error_code, try_parse_stream_error, user_facing_api_error_message,
 };
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ConversationRequest,
     ConversationResponse, CreateResponseWrapper, DEFAULT_EXACT_REPETITION_MIN_TOKENS,
     DOOM_LOOP_CHECK_HEADER, EXACT_REPETITION_CHECK_HEADER, MessagesRequestWrapper,
@@ -38,9 +38,9 @@ use crate::config::{AuthScheme, OriginClientInfo, SamplerConfig};
 use crate::events::SamplingErrorInfo;
 use crate::span_timing::{ERROR, STATUS_CODE, SUCCESS, StreamSpanTiming};
 use crate::stream_classify::{chat_chunk_class, message_event_class, responses_event_class};
-use wimo ai_wimo_auth::bearer_suffix;
+use wimoai_wimo_auth::bearer_suffix;
 
-pub use wimo ai_wimo_sampling_types::ApiBackend;
+pub use wimoai_wimo_sampling_types::ApiBackend;
 
 /// Process-level fallback for the `x-wimo-client-identifier` header.
 const DEFAULT_CLIENT_IDENTIFIER: &str = "wimo-shell";
@@ -134,7 +134,7 @@ fn apply_terminal_event_overrides(event: &mut rs::ResponseStreamEvent, data: &st
         return;
     };
     // Stash cost ticks in metadata for stream_responses.
-    if let Some(ticks) = wimo ai_wimo_sampling_types::reported_cost_ticks(
+    if let Some(ticks) = wimoai_wimo_sampling_types::reported_cost_ticks(
         value
             .pointer("/response/usage/cost_in_usd_ticks")
             .and_then(|v| v.as_i64()),
@@ -154,7 +154,7 @@ fn apply_terminal_event_overrides(event: &mut rs::ResponseStreamEvent, data: &st
 }
 
 /// Metadata key that carries cost ticks through the typed Response events, which have no field for them.
-pub(crate) const COST_USD_TICKS_METADATA_KEY: &str = "wimo ai.cost_usd_ticks";
+pub(crate) const COST_USD_TICKS_METADATA_KEY: &str = "wimoai.cost_usd_ticks";
 
 /// Read `response.usage.context_details.{input_tokens, output_tokens}` from the parsed terminal-event JSON and return their sum.
 /// Returns `None` if either field is missing or out of `u32` range.
@@ -346,7 +346,7 @@ struct ClientDefaults {
     auth_scheme: AuthScheme,
     stream_tool_calls: bool,
     extra_response_includes: Vec<String>,
-    doom_loop_recovery: Option<wimo ai_wimo_sampling_types::DoomLoopRecoveryPolicy>,
+    doom_loop_recovery: Option<wimoai_wimo_sampling_types::DoomLoopRecoveryPolicy>,
 }
 
 /// Endpoint URL builder, resolved once at client construction so each request only appends its path.
@@ -445,7 +445,7 @@ impl PlatformInfo {
 }
 
 fn agent_version() -> String {
-    wimo ai_wimo_version::VERSION.to_string()
+    wimoai_wimo_version::VERSION.to_string()
 }
 
 /// Render a User-Agent string for the given origin client.
@@ -1211,7 +1211,7 @@ impl SamplingClient {
         append_response_includes(&mut request_body, &self.defaults.extra_response_includes);
         // async-openai's ReasoningTextContent struct omits the `type` discriminator that the Responses API requires on input
         // Patch it in after serializing
-        wimo ai_wimo_sampling_types::patch_reasoning_text_types(&mut request_body);
+        wimoai_wimo_sampling_types::patch_reasoning_text_types(&mut request_body);
         let SentRequest {
             builder,
             sent_bearer,
@@ -1350,7 +1350,7 @@ impl SamplingClient {
         }
         splice_extra_tool_entries(&mut request_body, extra_tool_entries);
         append_response_includes(&mut request_body, &self.defaults.extra_response_includes);
-        wimo ai_wimo_sampling_types::patch_reasoning_text_types(&mut request_body);
+        wimoai_wimo_sampling_types::patch_reasoning_text_types(&mut request_body);
         // Fresh per attempt so signals never leak across retries; `None` (check disabled) sends no header and does no peek work per event
         let doom_loop = self
             .defaults
@@ -1904,7 +1904,7 @@ impl SamplingClient {
         let x_wimo_agent_id = request.x_wimo_agent_id.clone();
 
         // The hosted tools travel as raw JSON, spliced in after serialization by `splice_extra_tool_entries`, whose doc explains why each one does
-        let extra_tools = wimo ai_wimo_sampling_types::extra_tool_entries(&request.hosted_tools);
+        let extra_tools = wimoai_wimo_sampling_types::extra_tool_entries(&request.hosted_tools);
 
         let responses_request: rs::CreateResponse = (&request).into();
 
@@ -1940,7 +1940,7 @@ impl SamplingClient {
         let x_wimo_agent_id = request.x_wimo_agent_id.clone();
 
         // The hosted tools travel as raw JSON, spliced in by `create_response` via `splice_extra_tool_entries`, whose doc explains why
-        let extra_tools = wimo ai_wimo_sampling_types::extra_tool_entries(&request.hosted_tools);
+        let extra_tools = wimoai_wimo_sampling_types::extra_tool_entries(&request.hosted_tools);
 
         let responses_request: rs::CreateResponse = (&request).into();
 
@@ -2029,7 +2029,7 @@ impl SamplingClient {
 
     /// Backend-aware streaming call that collects the full response.
     ///
-    /// Honors the request's [`LengthPolicy`](wimo ai_wimo_sampling_types::LengthPolicy) like the actor path.
+    /// Honors the request's [`LengthPolicy`](wimoai_wimo_sampling_types::LengthPolicy) like the actor path.
     /// The default still fails a text-only or empty `Length` stop, so side callers never persist a silently truncated result.
     pub async fn conversation_collect(
         &self,
@@ -2073,14 +2073,14 @@ impl SamplingClient {
     }
 }
 
-/// Applies the request's [`wimo ai_wimo_sampling_types::LengthPolicy`] to a collected response.
+/// Applies the request's [`wimoai_wimo_sampling_types::LengthPolicy`] to a collected response.
 /// Fails a `Length` stop the policy rejects, logs the salvage breadcrumb otherwise.
 /// The single gate shared by `drive_l2` and the direct-collect path so the two cannot drift.
 pub(crate) fn apply_length_policy(
-    policy: wimo ai_wimo_sampling_types::LengthPolicy,
-    response: wimo ai_wimo_sampling_types::ConversationResponse,
-) -> Result<wimo ai_wimo_sampling_types::ConversationResponse> {
-    use wimo ai_wimo_sampling_types::LengthVerdict;
+    policy: wimoai_wimo_sampling_types::LengthPolicy,
+    response: wimoai_wimo_sampling_types::ConversationResponse,
+) -> Result<wimoai_wimo_sampling_types::ConversationResponse> {
+    use wimoai_wimo_sampling_types::LengthVerdict;
     match policy.verdict(&response) {
         LengthVerdict::Pass => Ok(response),
         LengthVerdict::Fail => Err(SamplingError::MaxTokensTruncation),
@@ -2128,8 +2128,8 @@ mod tests {
     use indexmap::IndexMap;
     use tokio::net::TcpListener;
     use tokio::sync::oneshot;
-    use wimo ai_wimo_sampling_types::ApiErrorCode;
-    use wimo ai_wimo_sampling_types::types::ChatRequestMessage;
+    use wimoai_wimo_sampling_types::ApiErrorCode;
+    use wimoai_wimo_sampling_types::types::ChatRequestMessage;
 
     #[test]
     fn splice_extra_tool_entries_extends_existing_tools_array() {
@@ -2169,7 +2169,7 @@ mod tests {
             empty_response_context: None,
             doom_loop_triggers: None,
             doom_loop_aborted_at_chunk: None,
-            credential: wimo ai_wimo_sampling_types::SentCredential::Unknown,
+            credential: wimoai_wimo_sampling_types::SentCredential::Unknown,
         };
         // SamplingError is not PartialEq (it carries reqwest/serde errors), so destructure once and compare all fields in a single assert
         let SamplingError::Api {
@@ -2646,7 +2646,7 @@ mod tests {
 
     #[test]
     fn user_agent_collapses_when_origin_matches_agent() {
-        let agent_version = wimo ai_wimo_version::VERSION.to_string();
+        let agent_version = wimoai_wimo_version::VERSION.to_string();
         let origin = OriginClientInfo {
             product: AGENT_PRODUCT.to_string(),
             version: Some(agent_version.clone()),

@@ -44,7 +44,7 @@ pub(crate) fn runtime_socket_deny_paths() -> Vec<PathBuf> {
             paths.push(PathBuf::from(format!("/run/user/{uid}/{suffix}")));
         }
     }
-    if let Some(home) = wimo ai_dirs::home_dir() {
+    if let Some(home) = wimoai_dirs::home_dir() {
         for suffix in PER_HOME_SOCKET_SUFFIXES {
             paths.push(home.join(suffix));
         }

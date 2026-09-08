@@ -13,7 +13,7 @@
 //! Samples reuse the tree and process, so filesystem and JSON work uses a warm OS page cache.
 //! Fixed year-2100 timestamps pass the pager cutoff, though pager stages are excluded.
 //!
-//! Run: `cargo bench -p wimo ai-wimo-shell --bench session_list`
+//! Run: `cargo bench -p wimoai-wimo-shell --bench session_list`
 //! Allow roughly 4-8 minutes after compilation for the configured samples.
 
 use std::collections::HashSet;
@@ -29,11 +29,11 @@ use criterion::{
 };
 use filetime::{FileTime, set_file_mtime};
 use tempfile::TempDir;
-use wimo ai_fast_worktree::{ListFilter, WorktreeDb, WorktreeKind, WorktreeRecord, WorktreeStatus};
-use wimo ai_wimo_shell::session::info::Info;
-use wimo ai_wimo_shell::session::persistence::Summary;
-use wimo ai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
-use wimo ai_wimo_shell::session::unified_list::{ListReq, UnifiedListResult, build_unified_list};
+use wimoai_fast_worktree::{ListFilter, WorktreeDb, WorktreeKind, WorktreeRecord, WorktreeStatus};
+use wimoai_wimo_shell::session::info::Info;
+use wimoai_wimo_shell::session::persistence::Summary;
+use wimoai_wimo_shell::session::storage::{JsonlStorageAdapter, StorageAdapter};
+use wimoai_wimo_shell::session::unified_list::{ListReq, UnifiedListResult, build_unified_list};
 
 const WORKSPACE_COUNT: usize = 3_000;
 // Bump whenever the shape of the workload changes, even if aggregate counts do not
@@ -106,7 +106,7 @@ impl Fixture {
             } else {
                 benchmark_unrelated_cwd(workspace_index - SAME_REPO_CANDIDATE_COUNT)
             };
-            let encoded = wimo ai_wimo_shell::util::wimo_home::encode_cwd_dirname(&cwd);
+            let encoded = wimoai_wimo_shell::util::wimo_home::encode_cwd_dirname(&cwd);
             let cwd_dir = sessions_root.join(encoded);
             fs::create_dir(&cwd_dir).expect("create encoded cwd directory");
             let session_count = if same_repo {
@@ -195,7 +195,7 @@ impl Fixture {
     }
 
     fn assert_correct(&self, runtime: &tokio::runtime::Runtime) {
-        let discovered = wimo ai_wimo_shell::session::worktree::candidate_worktree_cwds_for_same_repo(
+        let discovered = wimoai_wimo_shell::session::worktree::candidate_worktree_cwds_for_same_repo(
             Path::new(&self.picker_cwd),
         )
         .expect("discover same-repo candidate cwd paths");
@@ -293,7 +293,7 @@ fn create_same_repo_cwds(home: &Path) -> SameRepoTopology {
     let repo = git2::Repository::init(&repo_dir).expect("initialize main git repository");
     repo.remote(
         "origin",
-        "https://github.com/wimo ai-org/session-list-benchmark.git",
+        "https://github.com/wimoai-org/session-list-benchmark.git",
     )
     .expect("create benchmark git remote");
 
@@ -314,7 +314,7 @@ fn create_same_repo_cwds(home: &Path) -> SameRepoTopology {
         .expect("create initial git commit");
 
     let main = dunce::canonicalize(&repo_dir).expect("canonicalize main checkout");
-    let worktree_base = wimo ai_wimo_shell::session::worktree::worktree_base_dir(&main);
+    let worktree_base = wimoai_wimo_shell::session::worktree::worktree_base_dir(&main);
     fs::create_dir_all(&worktree_base).expect("create worktree base");
     let canonical_worktree_base =
         dunce::canonicalize(&worktree_base).expect("canonicalize worktree base");
@@ -355,7 +355,7 @@ fn create_same_repo_cwds(home: &Path) -> SameRepoTopology {
             created_at: index as i64 + 1,
             last_accessed_at: None,
             status: WorktreeStatus::Alive,
-            metadata: Some(wimo ai_wimo_shell::session::worktree::build_label_metadata(
+            metadata: Some(wimoai_wimo_shell::session::worktree::build_label_metadata(
                 label, false,
             )),
         })
@@ -375,7 +375,7 @@ fn create_same_repo_cwds(home: &Path) -> SameRepoTopology {
         created_at: DB_TRACKED_WORKTREE_COUNT as i64,
         last_accessed_at: None,
         status: WorktreeStatus::Dead,
-        metadata: Some(wimo ai_wimo_shell::session::worktree::build_label_metadata(
+        metadata: Some(wimoai_wimo_shell::session::worktree::build_label_metadata(
             &db_only_label,
             false,
         )),
@@ -510,7 +510,7 @@ fn write_summary(
         hidden: None,
         source_workspace_dir: None,
         git_root_dir: Some(cwd.to_owned()),
-        git_remotes: vec!["git@github.com:wimo ai-org/benchmark.git".to_owned()],
+        git_remotes: vec!["git@github.com:wimoai-org/benchmark.git".to_owned()],
         head_commit: Some(format!("{ordinal:040x}")),
         head_branch: Some("main".to_owned()),
         request_id: None,
@@ -563,7 +563,7 @@ fn bench_session_list(c: &mut Criterion) {
     unsafe {
         std::env::set_var("wimo_HOME", home.path());
     }
-    assert_eq!(wimo ai_wimo_shell::util::wimo_home::wimo_home(), home.path());
+    assert_eq!(wimoai_wimo_shell::util::wimo_home::wimo_home(), home.path());
     let fixture = Fixture::new(home);
 
     let runtime = tokio::runtime::Builder::new_current_thread()

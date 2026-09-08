@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-wimo-shell"
+name = "wimoai-wimo-shell"
 version = "1.0.16"
 edition.workspace = true
 
@@ -9,7 +9,7 @@ default = []
 dhat-heap = ["dep:dhat"]
 # Loom model-checking for src/auth/manager/lock/flock_wait.rs; test-only
 # (compile_error!-guarded). Run in release (debug overflows loom's stacks):
-#   cargo test --release --features loom -p wimo ai-wimo-shell --lib flock_wait::loom -- --test-threads=1
+#   cargo test --release --features loom -p wimoai-wimo-shell --lib flock_wait::loom -- --test-threads=1
 loom = ["dep:loom"]
 # Session synthesis + in-process e2e harness (`session::testkit`) for soak,
 # load, and bench tests. Off by default; the tests/benches that use it declare
@@ -33,9 +33,9 @@ dunce = { workspace = true }
 tonic-prost = { workspace = true, optional = true }
 agent-client-protocol = { workspace = true }
 anyhow = { workspace = true }
-wimo ai-wimo-announcements = { workspace = true }
-wimo ai-prompt-queue = { workspace = true }
-wimo ai-wimo-version = { workspace = true }
+wimoai-wimo-announcements = { workspace = true }
+wimoai-prompt-queue = { workspace = true }
+wimoai-wimo-version = { workspace = true }
 
 async-openai = { workspace = true }
 async-trait = { workspace = true }
@@ -52,12 +52,12 @@ globset = { workspace = true }
 kanal = "0.1"
 loom = { workspace = true, optional = true }
 regex = { workspace = true }
-# rmcp 2.1 + reqwest 0.13 are quarantined inside `wimo ai-wimo-mcp`. The remaining
+# rmcp 2.1 + reqwest 0.13 are quarantined inside `wimoai-wimo-mcp`. The remaining
 # MCP code in this crate (extensions/mcp.rs, mcp_doctor.rs) reaches rmcp model
-# types via `wimo ai_wimo_mcp::rmcp::model::*`. reqwest 0.13 is a private impl
-# detail of wimo ai-wimo-mcp::servers; shell never sees it. Every HTTP call site
+# types via `wimoai_wimo_mcp::rmcp::model::*`. reqwest 0.13 is a private impl
+# detail of wimoai-wimo-mcp::servers; shell never sees it. Every HTTP call site
 # in this crate uses workspace reqwest 0.12.
-wimo ai-wimo-mcp = { workspace = true }
+wimoai-wimo-mcp = { workspace = true }
 reqwest = { workspace = true, features = ["stream", "blocking"] }
 reqwest-middleware = { workspace = true }
 serde = { workspace = true }
@@ -88,7 +88,7 @@ obfstr = { workspace = true }
 tokio-util = { workspace = true, features = ["compat", "rt"] }
 tokio-retry = { workspace = true }
 uuid = { workspace = true, features = ["v4", "v5", "v7"] }
-wimo ai-acp-lib = { workspace = true }
+wimoai-acp-lib = { workspace = true }
 axum = { workspace = true, features = ["ws", "multipart"] }
 backon = { workspace = true }
 webbrowser = { workspace = true }
@@ -125,57 +125,57 @@ jsonwebtoken = { version = "10", features = ["rust_crypto"] }
 sha2 = { workspace = true }
 rand = { workspace = true }
 strum = { workspace = true }
-wimo ai-fast-worktree = { path = "../wimo ai-fast-worktree", features = ["metadata"] }
+wimoai-fast-worktree = { path = "../wimoai-fast-worktree", features = ["metadata"] }
 
 tonic = { workspace = true, optional = true }
 prost = { workspace = true, optional = true }
-wimo ai-wimo-paths = { path = "../wimo ai-wimo-paths" }
-wimo ai-wimo-shell-base = { workspace = true }
-wimo ai-wimo-shell-session-support = { workspace = true }
-wimo ai-wimo-shell-terminal = { workspace = true }
-wimo ai-wimo-shared = { workspace = true }
-wimo ai-wimo-status-line = { workspace = true }
-wimo ai-tracing-macros = { path = "../wimo ai-tracing-macros" }
-wimo ai-fsnotify = { path = "../wimo ai-fsnotify" }
-wimo ai-codebase-graph = { path = "../wimo ai-codebase-graph" }
-wimo ai-hunk-tracker = { path = "../wimo ai-hunk-tracker" }
-wimo ai-agent-lifecycle = { workspace = true }
-wimo ai-interjection-core = { workspace = true }
-wimo ai-message-delivery-core = { workspace = true }
-wimo ai-wimo-sandbox = { path = "../wimo ai-wimo-sandbox", default-features = false }
-wimo ai-chat-state = { path = "../wimo ai-chat-state" }
+wimoai-wimo-paths = { path = "../wimoai-wimo-paths" }
+wimoai-wimo-shell-base = { workspace = true }
+wimoai-wimo-shell-session-support = { workspace = true }
+wimoai-wimo-shell-terminal = { workspace = true }
+wimoai-wimo-shared = { workspace = true }
+wimoai-wimo-status-line = { workspace = true }
+wimoai-tracing-macros = { path = "../wimoai-tracing-macros" }
+wimoai-fsnotify = { path = "../wimoai-fsnotify" }
+wimoai-codebase-graph = { path = "../wimoai-codebase-graph" }
+wimoai-hunk-tracker = { path = "../wimoai-hunk-tracker" }
+wimoai-agent-lifecycle = { workspace = true }
+wimoai-interjection-core = { workspace = true }
+wimoai-message-delivery-core = { workspace = true }
+wimoai-wimo-sandbox = { path = "../wimoai-wimo-sandbox", default-features = false }
+wimoai-chat-state = { path = "../wimoai-chat-state" }
 # Segment markdown rendering + the `compaction/` store path convention.
-wimo ai-compaction-transcript = { workspace = true }
-wimo ai-wimo-compaction = { path = "../../common/wimo ai-wimo-compaction" }
-wimo ai-wimo-extra-ca = { workspace = true }
-wimo ai-wimo-sampler = { path = "../wimo ai-wimo-sampler" }
+wimoai-compaction-transcript = { workspace = true }
+wimoai-wimo-compaction = { path = "../../common/wimoai-wimo-compaction" }
+wimoai-wimo-extra-ca = { workspace = true }
+wimoai-wimo-sampler = { path = "../wimoai-wimo-sampler" }
 # Session FTS search; owns this crate's only rusqlite/bundled-SQLite use.
-wimo ai-wimo-session-search = { workspace = true }
-wimo ai-token-estimation = { workspace = true }
-wimo ai-wimo-sampling-types = { path = "../wimo ai-wimo-sampling-types" }
-wimo ai-wimo-tools = { path = "../wimo ai-wimo-tools" }
-wimo ai-tty-utils = { workspace = true }
-wimo ai-workflow = { path = "../wimo ai-workflow" }
-wimo ai-system-power = { workspace = true }
-wimo ai-wimo-workspace = { workspace = true }
-# Backs the compatibility-only `wimo ai_wimo_shell::foreign_sessions` re-export.
-wimo ai-wimo-foreign-sessions = { workspace = true }
-wimo ai-wimo-subagent-resolution = { path = "../wimo ai-wimo-subagent-resolution" }
-wimo ai-wimo-agent = { path = "../wimo ai-wimo-agent" }
-wimo ai-wimo-bundle = { workspace = true }
-wimo ai-wimo-config = { workspace = true }
-wimo ai-wimo-config-types = { workspace = true }
-wimo ai-dirs = { workspace = true }
-wimo ai-wimo-memory = { workspace = true }
-wimo ai-wimo-hooks = { path = "../wimo ai-wimo-hooks" }
-wimo ai-hooks-plugins-types = { path = "../wimo ai-hooks-plugins-types" }
-wimo ai-wimo-plugin-marketplace = { path = "../wimo ai-wimo-plugin-marketplace" }
-wimo ai-file-utils = { path = "../wimo ai-file-utils" }
-wimo ai-wimo-session-events = { workspace = true }
-wimo ai-wimo-auth = { workspace = true, features = ["middleware"] }
-wimo ai-wimo-telemetry = { workspace = true }
-wimo ai-wimo-http = { workspace = true }
-wimo ai-wimo-models = { workspace = true }
+wimoai-wimo-session-search = { workspace = true }
+wimoai-token-estimation = { workspace = true }
+wimoai-wimo-sampling-types = { path = "../wimoai-wimo-sampling-types" }
+wimoai-wimo-tools = { path = "../wimoai-wimo-tools" }
+wimoai-tty-utils = { workspace = true }
+wimoai-workflow = { path = "../wimoai-workflow" }
+wimoai-system-power = { workspace = true }
+wimoai-wimo-workspace = { workspace = true }
+# Backs the compatibility-only `wimoai_wimo_shell::foreign_sessions` re-export.
+wimoai-wimo-foreign-sessions = { workspace = true }
+wimoai-wimo-subagent-resolution = { path = "../wimoai-wimo-subagent-resolution" }
+wimoai-wimo-agent = { path = "../wimoai-wimo-agent" }
+wimoai-wimo-bundle = { workspace = true }
+wimoai-wimo-config = { workspace = true }
+wimoai-wimo-config-types = { workspace = true }
+wimoai-dirs = { workspace = true }
+wimoai-wimo-memory = { workspace = true }
+wimoai-wimo-hooks = { path = "../wimoai-wimo-hooks" }
+wimoai-hooks-plugins-types = { path = "../wimoai-hooks-plugins-types" }
+wimoai-wimo-plugin-marketplace = { path = "../wimoai-wimo-plugin-marketplace" }
+wimoai-file-utils = { path = "../wimoai-file-utils" }
+wimoai-wimo-session-events = { workspace = true }
+wimoai-wimo-auth = { workspace = true, features = ["middleware"] }
+wimoai-wimo-telemetry = { workspace = true }
+wimoai-wimo-http = { workspace = true }
+wimoai-wimo-models = { workspace = true }
 prod-mc-cli-chat-proxy-types = { path = "../../../prod/mc/cli-chat-proxy-types" }
 flate2 = { workspace = true }
 fs2 = { workspace = true }
@@ -189,11 +189,11 @@ parking_lot.workspace = true
 dashmap.workspace = true
 
 # Used by acp_session.rs and mcp_servers.rs for the unified
-# wimo ai_tool_runtime::Tool dispatch model and the computer-hub MCP adapter.
-wimo ai-computer-hub-sdk = { workspace = true }
-wimo ai-tool-runtime = { workspace = true }
-wimo ai-tool-protocol = { workspace = true }
-wimo ai-tool-types = { workspace = true }
+# wimoai_tool_runtime::Tool dispatch model and the computer-hub MCP adapter.
+wimoai-computer-hub-sdk = { workspace = true }
+wimoai-tool-runtime = { workspace = true }
+wimoai-tool-protocol = { workspace = true }
+wimoai-tool-types = { workspace = true }
 
 [target.'cfg(unix)'.dependencies]
 libc = { workspace = true }
@@ -204,8 +204,8 @@ siphasher = { workspace = true }
 windows = { workspace = true }
 
 [dev-dependencies]
-wimo ai-dirs = { workspace = true }
-wimo ai-wimo-status-line = { workspace = true, features = ["test-support"] }
+wimoai-dirs = { workspace = true }
+wimoai-wimo-status-line = { workspace = true, features = ["test-support"] }
 criterion = { workspace = true }
 # Pre-main unified-log redirect (`test_support::redirect_unified_log_for_tests`).
 ctor = { workspace = true }
@@ -213,12 +213,12 @@ filetime = { workspace = true }
 pretty_assertions = { workspace = true }
 tempfile = { workspace = true }
 # `extensions::bundle` tests build archives with `bundle::test_helpers`, which
-# is `#[cfg(test)]`-only inside wimo ai-wimo-bundle without this feature.
-wimo ai-wimo-bundle = { workspace = true, features = ["test-support"] }
-wimo ai-wimo-memory = { workspace = true, features = ["test-support"] }
+# is `#[cfg(test)]`-only inside wimoai-wimo-bundle without this feature.
+wimoai-wimo-bundle = { workspace = true, features = ["test-support"] }
+wimoai-wimo-memory = { workspace = true, features = ["test-support"] }
 # sandbox-enforce: keep tests running against the enforcing sandbox build.
-wimo ai-wimo-workspace = { workspace = true, features = ["test-support", "sandbox-enforce"] }
-wimo ai-wimo-config = { workspace = true, features = [] }
+wimoai-wimo-workspace = { workspace = true, features = ["test-support", "sandbox-enforce"] }
+wimoai-wimo-config = { workspace = true, features = [] }
 ring = { workspace = true }
 tar = { workspace = true }
 flate2 = { workspace = true }
@@ -227,9 +227,9 @@ semver = { workspace = true }
 serial_test = { workspace = true }
 # Test-only builds expose `env::EnvVarGuard` and the cpu_profile test seams to
 # this crate's test targets.
-wimo ai-wimo-shell-base = { workspace = true, features = ["test-support"] }
-wimo ai-wimo-test-support = { workspace = true, features = [] }
-wimo ai-test-utils = { workspace = true }
+wimoai-wimo-shell-base = { workspace = true, features = ["test-support"] }
+wimoai-wimo-test-support = { workspace = true, features = [] }
+wimoai-test-utils = { workspace = true }
 # `test-util` enables `#[tokio::test(start_paused = true)]` (paused virtual
 # clock with auto-advance) so interval-driven loop tests in `auth::refresh`
 # can assert exact tick counts deterministically without real-time sleep.
@@ -256,7 +256,7 @@ name = "child_replay_lookup"
 harness = false
 
 # Ordinary integration tests live in `tests/all.rs` (`mod suite`) so cargo
-# links one binary. The test name is `wimo ai-wimo-shell-all` (Bazel `//pkg:all`
+# links one binary. The test name is `wimoai-wimo-shell-all` (Bazel `//pkg:all`
 # is the package wildcard). Process-isolated suites stay as implicit
 # `tests/*.rs` binaries.
 [[test]]

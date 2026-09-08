@@ -96,12 +96,12 @@ fn workspace_dashboard_renders_snapshot_member_without_delete_control() {
     });
     let mut agents = IndexMap::new();
     let registry = crate::actions::ActionRegistry::defaults();
-    let snapshot = wimo ai_wimo_dashboard_store::WorkspaceSnapshot {
-        grouping: wimo ai_wimo_dashboard_store::Grouping::State,
-        members: vec![wimo ai_wimo_dashboard_store::Member {
-            session_id: wimo ai_wimo_dashboard_store::SessionId::new("saved-session").unwrap(),
-            kind: wimo ai_wimo_dashboard_store::MemberKind::Build,
-            origin: wimo ai_wimo_dashboard_store::MemberOrigin::Local,
+    let snapshot = wimoai_wimo_dashboard_store::WorkspaceSnapshot {
+        grouping: wimoai_wimo_dashboard_store::Grouping::State,
+        members: vec![wimoai_wimo_dashboard_store::Member {
+            session_id: wimoai_wimo_dashboard_store::SessionId::new("saved-session").unwrap(),
+            kind: wimoai_wimo_dashboard_store::MemberKind::Build,
+            origin: wimoai_wimo_dashboard_store::MemberOrigin::Local,
             cwd: Some("/tmp/saved".to_owned()),
             title: Some("Saved workspace session".to_owned()),
             model: Some("wimo-test".to_owned()),

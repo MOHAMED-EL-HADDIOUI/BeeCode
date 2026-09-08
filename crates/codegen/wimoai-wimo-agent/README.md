@@ -1,12 +1,12 @@
-# `wimo ai-wimo-agent`
+# `wimoai-wimo-agent`
 
 Agent builder, definition parsing, and system prompt assembly.
 
-This crate extracts a first-class `Agent` type from `wimo ai-wimo-shell`.
+This crate extracts a first-class `Agent` type from `wimoai-wimo-shell`.
 An `Agent` bundles tools, system prompt, system-reminder policy,
 compaction policy, and model configuration into a single, portable
 object that any host can consume — whether that host is
-`wimo ai-wimo-shell`, another in-process host, or a headless batch runner.
+`wimoai-wimo-shell`, another in-process host, or a headless batch runner.
 
 ## Quick Start
 
@@ -16,8 +16,8 @@ Agent definitions are **Markdown files with YAML frontmatter**, stored
 in `.wimo/agents/` (project-level) or `~/.wimo/agents/` (user-level).
 
 ```rust
-use wimo ai_wimo_agent::{AgentDefinition, AgentBuilder};
-use wimo ai_wimo_tools::notification::ToolNotificationHandle;
+use wimoai_wimo_agent::{AgentDefinition, AgentBuilder};
+use wimoai_wimo_tools::notification::ToolNotificationHandle;
 
 // 1. Parse the definition file
 let def = AgentDefinition::from_file(".wimo/agents/code-reviewer.md")?;
@@ -48,7 +48,7 @@ let agent = AgentBuilder::new(cwd, None, ToolNotificationHandle::noop())
 ### Discover all definitions
 
 ```rust
-use wimo ai_wimo_agent::discovery;
+use wimoai_wimo_agent::discovery;
 
 // Find all .md files in .wimo/agents/ directories
 let definitions = discovery::discover(&cwd);
@@ -244,31 +244,31 @@ user-level definition with the same name.
 
 ```
 ┌──────────────────┐
-│  wimo ai-wimo-agent  │  ← This crate
+│  wimoai-wimo-agent  │  ← This crate
 │  (Agent, Builder, │
 │   Definition)     │
 └────────┬─────────┘
          │ depends on
          ▼
 ┌──────────────────┐
-│  wimo ai-wimo-tools  │
+│  wimoai-wimo-tools  │
 │  (ToolBridge,    │
 │   ToolRegistry,  │
 │   ToolState)     │
 └────────▲─────────┘
          │ depends on
 ┌────────┴─────────┐
-│  wimo ai-wimo-shell  │  uses AgentBuilder to create
+│  wimoai-wimo-shell  │  uses AgentBuilder to create
 │  (session host)  │  Agent during session setup
 └──────────────────┘
 ```
 
-- **`wimo ai-wimo-tools`**: Provides `ToolBridge`, `ToolRegistry`,
+- **`wimoai-wimo-tools`**: Provides `ToolBridge`, `ToolRegistry`,
   `ToolState`, `SystemReminderLayer`, and tool implementations.
-  `wimo ai-wimo-agent` depends on it for tool setup.
-- **`wimo ai-wimo-shell`**: The application shell. Uses `AgentBuilder`
+  `wimoai-wimo-agent` depends on it for tool setup.
+- **`wimoai-wimo-shell`**: The application shell. Uses `AgentBuilder`
   to construct an `Agent` during session creation. The shell
-  re-exports some modules from `wimo ai-wimo-agent` (AGENTS.md
+  re-exports some modules from `wimoai-wimo-agent` (AGENTS.md
   discovery, skills discovery, base prompt rendering).
 
 ## Built-in Agents
@@ -298,13 +298,13 @@ ones.
 
 ```bash
 # Check
-cargo check -p wimo ai-wimo-agent
+cargo check -p wimoai-wimo-agent
 
 # Test
-cargo test -p wimo ai-wimo-agent
+cargo test -p wimoai-wimo-agent
 
 # Clippy
-cargo clippy -p wimo ai-wimo-agent --fix --allow-dirty
+cargo clippy -p wimoai-wimo-agent --fix --allow-dirty
 
 # Format
 cargo fmt --all

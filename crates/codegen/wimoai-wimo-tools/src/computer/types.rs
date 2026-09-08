@@ -285,8 +285,8 @@ impl TaskSnapshot {
 /// Result of killing a terminal task.
 ///
 /// Serialized over the wire in the `x.ai/task/kill` ext response
-/// (`wimo ai-wimo-shell::extensions::task::KillTaskResponse`) and deserialized
-/// by clients (wimo ai-wimo-pager), so it derives both serde directions.
+/// (`wimoai-wimo-shell::extensions::task::KillTaskResponse`) and deserialized
+/// by clients (wimoai-wimo-pager), so it derives both serde directions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum KillOutcome {
@@ -328,8 +328,8 @@ pub struct BackgroundedForeground {
 /// The single abstraction over terminal execution backends.
 ///
 /// Implemented by:
-/// - `LocalTerminalBackend` (in wimo ai-wimo-tools, spawns processes)
-/// - `AcpTerminalBackend` (in wimo ai-wimo-shell, calls ACP protocol)
+/// - `LocalTerminalBackend` (in wimoai-wimo-tools, spawns processes)
+/// - `AcpTerminalBackend` (in wimoai-wimo-shell, calls ACP protocol)
 #[async_trait::async_trait]
 pub trait TerminalBackend: Send + Sync {
     /// Run a command. Blocks until completion or timeout.

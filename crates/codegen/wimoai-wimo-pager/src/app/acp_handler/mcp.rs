@@ -9,7 +9,7 @@ pub(super) fn push_server_status_enabled() -> bool {
     use std::sync::OnceLock;
     static ENABLED: OnceLock<bool> = OnceLock::new();
     *ENABLED.get_or_init(|| {
-        wimo ai_wimo_shell::util::config::resolve_mcp_push_server_status(
+        wimoai_wimo_shell::util::config::resolve_mcp_push_server_status(
             /* requirements */ None, /* user */ None, /* managed */ None,
         )
     })
@@ -45,11 +45,11 @@ pub(super) fn handle_mcp_init_progress(notif: &acp::ExtNotification, app: &mut A
 
 /// Handle `x.ai/mcp/tools_changed` and `x.ai/mcp_initialized`.
 ///
-/// Routing rules, verified against the four shell emit sites in `wimo ai-wimo-shell/src/session/acp_session.rs`
+/// Routing rules, verified against the four shell emit sites in `wimoai-wimo-shell/src/session/acp_session.rs`
 /// (toggle-tool ~L6661, `emit_mcp_tools_changed_notifications` ~L8997, post-handshake ~L10156, and `mcp_initialized` ~L10157):
 ///
 /// 1. Try `notif.params.sessionId`.
-///    All `tools_changed` emit sites carry `sessionId` via the typed [`wimo ai_wimo_shell::extensions::mcp::McpToolsChanged`] struct.
+///    All `tools_changed` emit sites carry `sessionId` via the typed [`wimoai_wimo_shell::extensions::mcp::McpToolsChanged`] struct.
 ///    `mcp_initialized` already carried it.
 ///    So the sessionId branch is the primary path for current builds.
 ///
@@ -158,7 +158,7 @@ pub(super) fn agent_has_pending_mcps_fetch(app: &AppView, agent_id: AgentId) -> 
 /// - the named server is not present in the cached `servers` vec ([`patch_server_row`] silently returns).
 ///
 /// Re-uses the shell's canonical wire types instead of re-declaring a parallel pager enum.
-/// The types: [`wimo ai_wimo_shell::extensions::mcp::McpServerStatusPayload`] and [`wimo ai_wimo_shell::extensions::mcp::McpServerStatus`].
+/// The types: [`wimoai_wimo_shell::extensions::mcp::McpServerStatusPayload`] and [`wimoai_wimo_shell::extensions::mcp::McpServerStatus`].
 /// Later variants (e.g. `RestartSucceeded` / `RestartFailed`) ride through automatically without a pager code change.
 ///
 /// `status` is **not** `serde(default)`; a malformed payload falls into the `tracing::warn!` arm rather than silently re-painting the row red.
@@ -170,7 +170,7 @@ pub(super) fn agent_has_pending_mcps_fetch(app: &AppView, agent_id: AgentId) -> 
 pub(super) fn handle_mcp_server_status(notif: &acp::ExtNotification, app: &mut AppView) -> bool {
     use crate::views::extensions_modal::TabDataState;
     use crate::views::mcps_modal::{McpServerDisplayStatus, McpToolDetail, patch_server_row};
-    use wimo ai_wimo_shell::extensions::mcp::{McpServerStatus, McpServerStatusPayload, McpToolEntry};
+    use wimoai_wimo_shell::extensions::mcp::{McpServerStatus, McpServerStatusPayload, McpToolEntry};
 
     let Ok(payload) = serde_json::from_str::<McpServerStatusPayload>(notif.params.get()) else {
         tracing::warn!(
@@ -238,7 +238,7 @@ pub(super) fn handle_mcp_server_status(notif: &acp::ExtNotification, app: &mut A
 /// Handle `x.ai/mcp/elicit_complete`: dismiss the matched agent's URL-mode elicitation card that is still waiting on this `elicitation_id`.
 pub(super) fn handle_mcp_elicit_complete(notif: &acp::ExtNotification, app: &mut AppView) -> bool {
     let Ok(payload) = serde_json::from_str::<
-        wimo ai_wimo_tools::mcp_elicitation::McpElicitCompletePayload,
+        wimoai_wimo_tools::mcp_elicitation::McpElicitCompletePayload,
     >(notif.params.get()) else {
         return false;
     };
@@ -256,7 +256,7 @@ pub(super) fn handle_mcp_elicit_complete(notif: &acp::ExtNotification, app: &mut
 /// Handle `x.ai/mcp/servers_updated`.
 ///
 /// Emitted by the shell from `MvpAgent` on managed-config resolve and on config reload.
-/// (See `notify_servers_updated` in `crates/codegen/wimo ai-wimo-shell/src/agent/mvp_agent.rs`.)
+/// (See `notify_servers_updated` in `crates/codegen/wimoai-wimo-shell/src/agent/mvp_agent.rs`.)
 /// The shell's `McpServersUpdated` wire shape (`{ mcpServers: [...] }`) is session-agnostic by design.
 /// An attempt to route by `sessionId` therefore always fell back to `app.active_view` and re-created the multi-agent bug.
 ///

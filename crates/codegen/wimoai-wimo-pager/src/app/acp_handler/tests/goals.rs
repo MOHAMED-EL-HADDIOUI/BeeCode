@@ -50,7 +50,7 @@
         let raw = serde_json::value::to_raw_value(&raw_payload).unwrap();
         let request = acp::ExtNotification::new("x.ai/session_notification", raw.into());
         let (tx, _rx) = tokio::sync::oneshot::channel();
-        let msg = AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+        let msg = AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
             request,
             response_tx: tx,
         });
@@ -140,7 +140,7 @@
             let raw = serde_json::value::to_raw_value(&raw_payload).unwrap();
             let (tx, _rx) = tokio::sync::oneshot::channel();
             handle(
-                AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+                AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
                     request: acp::ExtNotification::new("x.ai/session_notification", raw.into()),
                     response_tx: tx,
                 }),
@@ -358,7 +358,7 @@
         let raw = serde_json::value::to_raw_value(&raw_payload).unwrap();
         let request = acp::ExtNotification::new("x.ai/session_notification", raw.into());
         let (tx, _rx) = tokio::sync::oneshot::channel();
-        let msg = AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+        let msg = AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
             request,
             response_tx: tx,
         });
@@ -485,10 +485,10 @@
     }
 
     #[test]
-    fn workflow_updates_bypass_global_wimo ai_highwater_and_use_run_revision() {
+    fn workflow_updates_bypass_global_wimoai_highwater_and_use_run_revision() {
         let mut app = make_app_with_agent("sess-A");
         let id = AgentId(0);
-        app.agents.get_mut(&id).unwrap().last_applied_wimo ai_event_seq = Some(100);
+        app.agents.get_mut(&id).unwrap().last_applied_wimoai_event_seq = Some(100);
 
         let mut update = workflow_update_value("wf", "deep-research", "active", false);
         update["revision"] = serde_json::json!(1);
@@ -500,7 +500,7 @@
         let raw = serde_json::value::to_raw_value(&raw_payload).unwrap();
         let (tx, _rx) = tokio::sync::oneshot::channel();
         let affected = handle(
-            AcpClientMessage::ExtNotification(wimo ai_acp_lib::AcpArgs {
+            AcpClientMessage::ExtNotification(wimoai_acp_lib::AcpArgs {
                 request: acp::ExtNotification::new("x.ai/session_notification", raw.into()),
                 response_tx: tx,
             }),
@@ -509,7 +509,7 @@
 
         assert!(affected, "per-run workflow revision must win over the global highwater");
         assert_eq!(app.agents[&id].workflow_runs[0].run_id, "wf");
-        assert_eq!(app.agents[&id].last_applied_wimo ai_event_seq, Some(100));
+        assert_eq!(app.agents[&id].last_applied_wimoai_event_seq, Some(100));
         assert_eq!(app.agents[&id].last_seen_event_id.as_deref(), Some("sess-A-5"));
     }
 

@@ -213,12 +213,12 @@ impl ReplayBuffer {
                     second.map(|s| SessionNotification::Acp(Box::new(s))),
                 )
             }
-            (Some(SessionNotification::wimo ai(prev)), SessionNotification::wimo ai(new)) => {
-                let (force, first, second) = merge_wimo ai_chunks(*prev, *new);
+            (Some(SessionNotification::wimoai(prev)), SessionNotification::wimoai(new)) => {
+                let (force, first, second) = merge_wimoai_chunks(*prev, *new);
                 (
                     force,
-                    SessionNotification::wimo ai(Box::new(first)),
-                    second.map(|s| SessionNotification::wimo ai(Box::new(s))),
+                    SessionNotification::wimoai(Box::new(first)),
+                    second.map(|s| SessionNotification::wimoai(Box::new(s))),
                 )
             }
             // Different kinds: can't merge. Force-flush prev, return incoming as second.
@@ -451,7 +451,7 @@ fn merge_acp_chunks(
 }
 
 /// Merge two consecutive wimo AI notifications.
-fn merge_wimo ai_chunks(
+fn merge_wimoai_chunks(
     prev: crate::extensions::notification::SessionNotification,
     new: crate::extensions::notification::SessionNotification,
 ) -> (
@@ -542,7 +542,7 @@ fn estimate_payload_bytes(n: &SessionNotification) -> u64 {
             },
             _ => 0,
         },
-        SessionNotification::wimo ai(n) => match &n.update {
+        SessionNotification::wimoai(n) => match &n.update {
             crate::extensions::notification::SessionUpdate::ToolCallDeltaChunk {
                 arguments_delta,
                 name,
@@ -597,7 +597,7 @@ mod tests {
                 },
                 _ => None,
             },
-            SessionNotification::wimo ai(_) => None,
+            SessionNotification::wimoai(_) => None,
         }
     }
 
@@ -972,7 +972,7 @@ mod tests {
         assert!(replay_buffer.flush().is_none());
     }
 
-    // ── wimo ai / ToolCallDeltaChunk tests ──────────────────────────────
+    // ── wimoai / ToolCallDeltaChunk tests ──────────────────────────────
 
     fn delta_chunk(
         session: &str,
@@ -994,7 +994,7 @@ mod tests {
     }
 
     #[test]
-    fn wimo ai_same_id_deltas_merge_args_and_preserve_name() {
+    fn wimoai_same_id_deltas_merge_args_and_preserve_name() {
         let mut buf = ReplayBuffer::new(Some(settings(100, 1_000_000)));
         let init = delta_chunk("s", Some("call_1"), 0, Some("read_file"), None);
         let d1 = delta_chunk("s", None, 0, None, Some("{\"path\":"));
@@ -1006,8 +1006,8 @@ mod tests {
 
         let flushed = buf.flush().expect("should have pending");
         let n = match flushed {
-            SessionNotification::wimo ai(n) => *n,
-            _ => panic!("expected wimo ai"),
+            SessionNotification::wimoai(n) => *n,
+            _ => panic!("expected wimoai"),
         };
         match n.update {
             crate::extensions::notification::SessionUpdate::ToolCallDeltaChunk {
@@ -1025,7 +1025,7 @@ mod tests {
     }
 
     #[test]
-    fn wimo ai_different_tool_call_id_forces_flush() {
+    fn wimoai_different_tool_call_id_forces_flush() {
         let mut buf = ReplayBuffer::new(Some(settings(100, 1_000_000)));
         let first = delta_chunk("s", Some("call_a"), 0, Some("grep"), Some("a-args"));
         let second = delta_chunk("s", Some("call_b"), 1, Some("read_file"), Some("b-args"));
@@ -1034,13 +1034,13 @@ mod tests {
         let (flushed, rest) = buf.consume_chunk(second).expect("should force-flush");
 
         // Both emitted immediately to preserve ordering.
-        assert!(matches!(flushed, SessionNotification::wimo ai(_)));
+        assert!(matches!(flushed, SessionNotification::wimoai(_)));
         assert!(rest.is_some());
         assert!(buf.pending.is_none());
     }
 
     #[test]
-    fn wimo ai_tool_call_delta_is_bufferable() {
+    fn wimoai_tool_call_delta_is_bufferable() {
         let mut buf = ReplayBuffer::new(Some(settings(100, 1_000_000)));
         let chunk = delta_chunk("s", Some("call_1"), 0, Some("bash"), Some("{\"cmd\":"));
 
@@ -1051,17 +1051,17 @@ mod tests {
     }
 
     #[test]
-    fn wimo ai_after_acp_forces_flush() {
+    fn wimoai_after_acp_forces_flush() {
         let mut buf = ReplayBuffer::new(Some(settings(100, 1_000_000)));
         let acp_chunk = msg_chunk("s", 1, "thinking...");
-        let wimo ai_chunk = delta_chunk("s", Some("call_1"), 0, Some("bash"), Some("args"));
+        let wimoai_chunk = delta_chunk("s", Some("call_1"), 0, Some("bash"), Some("args"));
 
         assert!(buf.consume_chunk(acp_chunk).is_none());
-        let (flushed, rest) = buf.consume_chunk(wimo ai_chunk).expect("should force-flush");
+        let (flushed, rest) = buf.consume_chunk(wimoai_chunk).expect("should force-flush");
 
         // Both emitted immediately; different kinds can't merge
         assert!(matches!(flushed, SessionNotification::Acp(_)));
-        assert!(matches!(rest, Some(SessionNotification::wimo ai(_))));
+        assert!(matches!(rest, Some(SessionNotification::wimoai(_))));
         assert!(buf.pending.is_none());
     }
 }

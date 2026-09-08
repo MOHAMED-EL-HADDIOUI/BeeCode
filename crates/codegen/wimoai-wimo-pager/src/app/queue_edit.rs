@@ -1,6 +1,6 @@
 //! Queued-prompt editing (`PromptMode::EditingQueued`) state machine.
 //!
-//! Extracted from `agent_view.rs` as a sibling `impl AgentView` block (same pattern as wimo ai-wimo-shell's `compaction.rs`).
+//! Extracted from `agent_view.rs` as a sibling `impl AgentView` block (same pattern as wimoai-wimo-shell's `compaction.rs`).
 //! Covers entry from the queue pane, editing-mode key intercepts, the dirty-edit focus lock, and the exit/cleanup paths.
 //!
 //! Stash invariant: `stashed_prompt` is set exactly once on entry (`enter_queue_edit`) and `take()`n exactly once on exit.

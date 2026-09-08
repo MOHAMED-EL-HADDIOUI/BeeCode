@@ -3,7 +3,7 @@
 //!
 //! The exporters are plain `opentelemetry_otlp` http/protobuf or gRPC/protobuf exporters.
 //! They are built with **only** the customer headers from `OTEL_EXPORTER_OTLP_HEADERS`.
-//! No code path here can attach `Authorization`, `X-wimo ai-Token-Auth`, or `x-userid`.
+//! No code path here can attach `Authorization`, `X-wimoai-Token-Auth`, or `x-userid`.
 //! Those header constants live in `otel_layer` and are not referenced by this module.
 //! No `AuthCredentialProvider` is ever read.
 
@@ -344,7 +344,7 @@ fn grpc_tls_candidates(
         ClientTlsConfig::new().trust_anchors(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
     // Process-wide `wimo_EXTRA_CA_BUNDLE` roots (fail-open by that crate's contract), matching the HTTP transport's client policy
     // The same corporate CA must work on both transports
-    if let Some(extra_pem) = ders_to_pem_bundle(wimo ai_wimo_extra_ca::extra_root_ders()) {
+    if let Some(extra_pem) = ders_to_pem_bundle(wimoai_wimo_extra_ca::extra_root_ders()) {
         base = base.ca_certificate(Certificate::from_pem(extra_pem));
     }
     let base = match ca_certificate_path {
@@ -779,7 +779,7 @@ mod tests {
     }
 
     /// Header-isolation invariant: the outgoing header map equals exactly the parsed `OTEL_EXPORTER_OTLP_HEADERS`.
-    /// None of `Authorization`, `X-wimo ai-Token-Auth`, `x-userid`, or `x-teamid` appears unless customer-supplied.
+    /// None of `Authorization`, `X-wimoai-Token-Auth`, `x-userid`, or `x-teamid` appears unless customer-supplied.
     /// The complement of the internal pipeline's `extra_headers_override_bearer_but_keep_static_identity`.
     #[test]
     fn exporter_headers_are_exactly_customer_headers() {
@@ -788,7 +788,7 @@ mod tests {
         let expected: HashMap<String, String> =
             [("x-collector-token".to_string(), "abc".to_string())].into();
         assert_eq!(headers, expected);
-        for forbidden in ["Authorization", "X-wimo ai-Token-Auth", "x-userid", "x-teamid"] {
+        for forbidden in ["Authorization", "X-wimoai-Token-Auth", "x-userid", "x-teamid"] {
             assert!(
                 !headers.contains_key(forbidden),
                 "{forbidden} must never be auto-attached to external exports"
@@ -1069,7 +1069,7 @@ mod tests {
                 .and_then(|v| v.to_str().ok()),
             Some("abc")
         );
-        for forbidden in ["x-wimo ai-token-auth", "x-userid", "x-teamid"] {
+        for forbidden in ["x-wimoai-token-auth", "x-userid", "x-teamid"] {
             assert!(metadata.get(forbidden).is_none());
         }
     }

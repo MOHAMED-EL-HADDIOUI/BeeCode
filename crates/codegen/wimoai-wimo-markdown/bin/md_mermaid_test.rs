@@ -1,7 +1,7 @@
 //! Interactive Mermaid diagram rendering playground.
 //!
 //! Run with:
-//!   cargo run -p wimo ai-wimo-markdown --features playground --bin md-mermaid-test
+//!   cargo run -p wimoai-wimo-markdown --features playground --bin md-mermaid-test
 //!
 //! Controls:
 //!   Esc / Tab    — toggle textarea focus
@@ -23,10 +23,10 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, StatefulWidgetRef, Wrap};
 
-use wimo ai_wimo_markdown::{
+use wimoai_wimo_markdown::{
     MarkdownBuffers, MarkdownStyle, render_markdown_ratatui_with_buffers_width,
 };
-use wimo ai_ratatui_textarea::{TextArea, TextAreaState};
+use wimoai_ratatui_textarea::{TextArea, TextAreaState};
 
 #[path = "playground_common.rs"]
 mod playground_common;

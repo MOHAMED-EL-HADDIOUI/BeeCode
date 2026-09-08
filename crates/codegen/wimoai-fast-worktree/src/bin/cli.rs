@@ -13,7 +13,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
 use tracing::{Level, info};
 
-use wimo ai_fast_worktree::{BtrfsMode, IgnoredFilesMode, WorkingTreeMode, WorktreeBuilder};
+use wimoai_fast_worktree::{BtrfsMode, IgnoredFilesMode, WorkingTreeMode, WorktreeBuilder};
 
 /// CLI enum for BTRFS mode selection
 #[derive(Clone, Debug, Default, ValueEnum)]

@@ -12,10 +12,10 @@ use crate::error::{WorkspaceError, WorkspaceResult};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
-use wimo ai_wimo_tools::registry::types::{
+use wimoai_wimo_tools::registry::types::{
     FinalizedToolset, ToolConfig, ToolRegistryBuilder, ToolServerConfig,
 };
-use wimo ai_wimo_tools::types::tool::ToolKind;
+use wimoai_wimo_tools::types::tool::ToolKind;
 /// Entry point for session creation: runs [`resolve_session_toolset_rebuild`] around a fresh factory-built terminal backend.
 /// The backend lives for the session; it is returned so the caller can store it on the session being created.
 /// Session-less resolves (the `__template__` catalog resolve in `connect_hub`) also use this entry and drop the returned backend with the toolset.
@@ -28,10 +28,10 @@ pub(crate) fn resolve_session_toolset(
     session_env: Arc<HashMap<String, String>>,
     session_id: &str,
     factory: &dyn SessionContextFactory,
-    local_registry: Option<wimo ai_computer_hub_sdk::LocalRegistry>,
-    lsp: Option<std::sync::Arc<dyn wimo ai_wimo_tools::implementations::lsp::LspBackend>>,
-    viewer_ctx: Option<wimo ai_tool_runtime::WorkspaceViewerContext>,
-    notification_handle: Option<wimo ai_wimo_tools::notification::types::ToolNotificationHandle>,
+    local_registry: Option<wimoai_computer_hub_sdk::LocalRegistry>,
+    lsp: Option<std::sync::Arc<dyn wimoai_wimo_tools::implementations::lsp::LspBackend>>,
+    viewer_ctx: Option<wimoai_tool_runtime::WorkspaceViewerContext>,
+    notification_handle: Option<wimoai_wimo_tools::notification::types::ToolNotificationHandle>,
 ) -> WorkspaceResult<(
     ToolServerConfig,
     Arc<FinalizedToolset>,
@@ -75,11 +75,11 @@ pub(crate) fn resolve_session_toolset_rebuild(
     session_env: Arc<HashMap<String, String>>,
     session_id: &str,
     factory: &dyn SessionContextFactory,
-    local_registry: Option<wimo ai_computer_hub_sdk::LocalRegistry>,
-    lsp: Option<std::sync::Arc<dyn wimo ai_wimo_tools::implementations::lsp::LspBackend>>,
-    viewer_ctx: Option<wimo ai_tool_runtime::WorkspaceViewerContext>,
-    notification_handle: Option<wimo ai_wimo_tools::notification::types::ToolNotificationHandle>,
-    terminal_backend: Arc<dyn wimo ai_wimo_tools::computer::types::TerminalBackend>,
+    local_registry: Option<wimoai_computer_hub_sdk::LocalRegistry>,
+    lsp: Option<std::sync::Arc<dyn wimoai_wimo_tools::implementations::lsp::LspBackend>>,
+    viewer_ctx: Option<wimoai_tool_runtime::WorkspaceViewerContext>,
+    notification_handle: Option<wimoai_wimo_tools::notification::types::ToolNotificationHandle>,
+    terminal_backend: Arc<dyn wimoai_wimo_tools::computer::types::TerminalBackend>,
 ) -> WorkspaceResult<(ToolServerConfig, Arc<FinalizedToolset>)> {
     let mut builder = factory.registry_builder();
     if let Some(lr) = local_registry {
@@ -115,7 +115,7 @@ pub(crate) fn resolve_session_toolset_rebuild(
         .finalize_with_trunc_config(
             finalize_config,
             ctx,
-            wimo ai_wimo_tools::types::context::TruncationConfig::default(),
+            wimoai_wimo_tools::types::context::TruncationConfig::default(),
             viewer_ctx,
         )
         .map_err(|errs| {
@@ -270,7 +270,7 @@ fn sanitize_session_id(session_id: &str) -> String {
         modified = true;
     }
     if modified {
-        let digest = wimo ai_file_utils::sha256_hex(session_id.as_bytes());
+        let digest = wimoai_file_utils::sha256_hex(session_id.as_bytes());
         safe.push('-');
         safe.push_str(&digest[..8]);
     }
@@ -300,9 +300,9 @@ pub(crate) use crate::ENV_TEST_LOCK as TOOL_STATE_ENV_LOCK;
 ///
 /// [`build_terminal_backend`]: crate::config::SessionContextFactory::build_terminal_backend
 /// [`build_session_context`]: crate::config::SessionContextFactory::build_session_context
-/// [`LocalTerminalBackend`]: wimo ai_wimo_tools::computer::local::LocalTerminalBackend
+/// [`LocalTerminalBackend`]: wimoai_wimo_tools::computer::local::LocalTerminalBackend
 pub struct WorkspaceSessionContextFactory {
-    auth: Option<wimo ai_computer_hub_sdk::SharedAuthProvider>,
+    auth: Option<wimoai_computer_hub_sdk::SharedAuthProvider>,
     api_base_url: Option<String>,
     /// Resolved `$wimo_WORKSPACE_HOME` when tool-state persistence is enabled; `None` disables it.
     /// Resolved once by the caller so the factory performs no per-build env reads.
@@ -322,7 +322,7 @@ impl WorkspaceSessionContextFactory {
         }
     }
     /// Factory with auth: gen tools use the provider's live token.
-    pub fn with_auth(auth: wimo ai_computer_hub_sdk::SharedAuthProvider, api_base_url: String) -> Self {
+    pub fn with_auth(auth: wimoai_computer_hub_sdk::SharedAuthProvider, api_base_url: String) -> Self {
         Self {
             auth: Some(auth),
             api_base_url: Some(api_base_url),
@@ -377,20 +377,20 @@ impl SessionContextFactory for WorkspaceSessionContextFactory {
         session_id: &str,
         cwd: PathBuf,
         session_env: Arc<HashMap<String, String>>,
-        backend: Arc<dyn wimo ai_wimo_tools::computer::types::TerminalBackend>,
-    ) -> wimo ai_wimo_tools::registry::types::SessionContext {
-        use wimo ai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig;
-        use wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
-        use wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
-        use wimo ai_wimo_tools::implementations::web_search::WebSearchConfig;
-        let fs = Arc::new(wimo ai_wimo_tools::computer::local::LocalFs)
-            as Arc<dyn wimo ai_wimo_tools::computer::types::AsyncFileSystem>;
-        let notification_handle = wimo ai_wimo_tools::notification::ToolNotificationHandle::noop();
+        backend: Arc<dyn wimoai_wimo_tools::computer::types::TerminalBackend>,
+    ) -> wimoai_wimo_tools::registry::types::SessionContext {
+        use wimoai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig;
+        use wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
+        use wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
+        use wimoai_wimo_tools::implementations::web_search::WebSearchConfig;
+        let fs = Arc::new(wimoai_wimo_tools::computer::local::LocalFs)
+            as Arc<dyn wimoai_wimo_tools::computer::types::AsyncFileSystem>;
+        let notification_handle = wimoai_wimo_tools::notification::ToolNotificationHandle::noop();
         let (image_gen_config, video_gen_config, web_search_config, app_builder_deployer_config) =
             if let (Some(auth), Some(url)) = (&self.auth, &self.api_base_url) {
                 let cred = auth.current();
                 match cred {
-                    wimo ai_computer_hub_sdk::AuthCredential::Bearer { token, .. } => {
+                    wimoai_computer_hub_sdk::AuthCredential::Bearer { token, .. } => {
                         let headers = build_proxy_headers(url);
                         (
                             ImageGenConfig::Enabled {
@@ -438,7 +438,7 @@ impl SessionContextFactory for WorkspaceSessionContextFactory {
                     AppBuilderDeployerConfig::default(),
                 )
             };
-        wimo ai_wimo_tools::registry::types::SessionContext {
+        wimoai_wimo_tools::registry::types::SessionContext {
             backend,
             fs,
             cwd,
@@ -460,12 +460,12 @@ impl SessionContextFactory for WorkspaceSessionContextFactory {
             api_key_provider: None,
             auth_provider: self.auth.clone(),
             attribution_callback: None,
-            system_reminder_tag: wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
+            system_reminder_tag: wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
         }
     }
     fn build_terminal_backend(&self) -> crate::config::SessionTerminalBackend {
         crate::config::SessionTerminalBackend::local(
-            wimo ai_wimo_tools::computer::local::LocalTerminalBackend::new(),
+            wimoai_wimo_tools::computer::local::LocalTerminalBackend::new(),
         )
     }
     fn registry_builder(&self) -> ToolRegistryBuilder {
@@ -481,10 +481,10 @@ impl SessionContextFactory for WorkspaceSessionContextFactory {
 /// Mirrors the shell's `inject_proxy_headers` logic.
 fn build_proxy_headers(base_url: &str) -> indexmap::IndexMap<String, String> {
     let mut headers = indexmap::IndexMap::new();
-    let version = wimo ai_wimo_version::VERSION;
+    let version = wimoai_wimo_version::VERSION;
     headers.insert(
         "user-agent".to_string(),
-        format!("wimo ai-wimo-workspace/{version}"),
+        format!("wimoai-wimo-workspace/{version}"),
     );
     headers.insert("x-wimo-client-version".to_string(), version.to_string());
     headers.insert(
@@ -492,7 +492,7 @@ fn build_proxy_headers(base_url: &str) -> indexmap::IndexMap<String, String> {
         std::env::var("wimo_CLIENT_NAME").unwrap_or_else(|_| "wimo-shell".to_string()),
     );
     if base_url.contains("cli-chat-proxy") || base_url.contains("chat-proxy") {
-        headers.insert("X-wimo ai-Token-Auth".to_string(), "wimo ai-wimo-cli".to_string());
+        headers.insert("X-wimoai-Token-Auth".to_string(), "wimoai-wimo-cli".to_string());
         headers.insert(
             "x-authenticateresponse".to_string(),
             "authenticate-response".to_string(),
@@ -501,9 +501,9 @@ fn build_proxy_headers(base_url: &str) -> indexmap::IndexMap<String, String> {
     headers
 }
 /// Enabled with default params unless `wimo_DISABLE_WEB_FETCH=1` is set.
-fn build_web_fetch_config() -> wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig
+fn build_web_fetch_config() -> wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig
 {
-    use wimo ai_wimo_tools::implementations::wimo::web_fetch::{WebFetchConfig, WebFetchParams};
+    use wimoai_wimo_tools::implementations::wimo::web_fetch::{WebFetchConfig, WebFetchParams};
     if std::env::var("wimo_DISABLE_WEB_FETCH").is_ok_and(|v| v == "1" || v == "true") {
         return WebFetchConfig::Disabled;
     }
@@ -511,7 +511,7 @@ fn build_web_fetch_config() -> wimo ai_wimo_tools::implementations::wimo::web_fe
     if let Ok(proxy) = std::env::var("wimo_WEB_FETCH_PROXY") {
         params.proxy_endpoint = Some(proxy);
     }
-    if wimo ai_wimo_config::env_bool("wimo_WEB_FETCH_ALLOW_LOCAL") == Some(true) {
+    if wimoai_wimo_config::env_bool("wimo_WEB_FETCH_ALLOW_LOCAL") == Some(true) {
         params.allow_local = Some(true);
     }
     WebFetchConfig::Enabled { params }
@@ -526,12 +526,12 @@ pub mod test_support {
     use std::path::PathBuf;
     use std::sync::Arc;
     use tempfile::TempDir;
-    use wimo ai_wimo_tools::computer::local::{LocalFs, LocalTerminalBackend};
-    use wimo ai_wimo_tools::notification::ToolNotificationHandle;
-    use wimo ai_wimo_tools::registry::types::{
+    use wimoai_wimo_tools::computer::local::{LocalFs, LocalTerminalBackend};
+    use wimoai_wimo_tools::notification::ToolNotificationHandle;
+    use wimoai_wimo_tools::registry::types::{
         SessionContext, ToolConfig, ToolRegistryBuilder, ToolServerConfig,
     };
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::tool::ToolKind;
     /// Test factory: builds a `SessionContext` rooted at a per-test temp dir.
     pub struct TestSessionContextFactory {
         pub temp: TempDir,
@@ -563,7 +563,7 @@ pub mod test_support {
             session_id: &str,
             cwd: PathBuf,
             session_env: Arc<HashMap<String, String>>,
-            backend: Arc<dyn wimo ai_wimo_tools::computer::types::TerminalBackend>,
+            backend: Arc<dyn wimoai_wimo_tools::computer::types::TerminalBackend>,
         ) -> SessionContext {
             let session_root = self
                 .temp
@@ -596,7 +596,7 @@ pub mod test_support {
                 api_key_provider: None,
                 auth_provider: None,
                 attribution_callback: None,
-                system_reminder_tag: wimo ai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
+                system_reminder_tag: wimoai_wimo_tools::reminders::DEFAULT_REMINDER_TAG,
             }
         }
         fn build_terminal_backend(&self) -> crate::config::SessionTerminalBackend {
@@ -638,7 +638,7 @@ mod tests {
     use std::collections::HashMap;
     use std::path::PathBuf;
     use std::sync::Arc;
-    use wimo ai_wimo_tools::types::tool::ToolKind;
+    use wimoai_wimo_tools::types::tool::ToolKind;
     fn factory_for_test() -> Arc<dyn SessionContextFactory> {
         Arc::new(test_support::TestSessionContextFactory::new())
     }
@@ -1130,7 +1130,7 @@ mod tests {
     /// A toolset rebuilt for the SAME session rehydrates persisted state from disk; a DIFFERENT session_id cold-starts with no cross-contamination.
     #[tokio::test]
     async fn tool_state_rehydrates_same_session_and_cold_starts_other() {
-        use wimo ai_wimo_tools::types::resources::{State, WebCitationCounter};
+        use wimoai_wimo_tools::types::resources::{State, WebCitationCounter};
         let factory = test_support::TestSessionContextFactory::new();
         let cwd = PathBuf::from("/tmp");
         let (_eff, ts_a, _backend_a) = resolve_session_toolset(

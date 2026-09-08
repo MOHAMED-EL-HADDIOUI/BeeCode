@@ -1487,7 +1487,7 @@ fn scroll_log_records_flood_flushes_and_capped_finalize_drop() {
     assert!(last["ms_since_prev_flush"].as_f64().expect("spacing") > 0.0);
 }
 
-/// Producer-side twin of the harness's `scroll_matrix::log::ScrollLogLine` parser (`wimo ai-wimo-pager-pty-harness/src/scroll_matrix/log.rs`).
+/// Producer-side twin of the harness's `scroll_matrix::log::ScrollLogLine` parser (`wimoai-wimo-pager-pty-harness/src/scroll_matrix/log.rs`).
 /// The harness declares every always-emitted field REQUIRED, so its deserializer fails loudly on a pager-side rename.
 /// This test pins the same contract from the producer side as raw JSON key sets.
 /// The key lists are hardcoded string fixtures on purpose.

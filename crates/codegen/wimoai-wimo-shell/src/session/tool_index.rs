@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use bm25::{Language, SearchEngineBuilder};
-use wimo ai_wimo_tools::types::tool_index::{
+use wimoai_wimo_tools::types::tool_index::{
     SearchSnapshot, ServerSummary, ToolSearchIndex, ToolSearchResult,
 };
 

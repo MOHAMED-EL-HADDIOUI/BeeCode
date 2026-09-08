@@ -695,7 +695,7 @@ mod tests {
             format: None,
         };
 
-        let first = wimo ai_tool_runtime::Tool::run(&wimoReadFileTool, test_ctx(shared), input)
+        let first = wimoai_tool_runtime::Tool::run(&wimoReadFileTool, test_ctx(shared), input)
             .await
             .unwrap();
         let ReadFileOutput::FileContent(first) = first else {

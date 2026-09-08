@@ -61,7 +61,7 @@ impl FilePathProvider {
             &tok,
             &ctx.text,
             &ctx.cwd,
-            wimo ai_dirs::home_dir().as_deref(),
+            wimoai_dirs::home_dir().as_deref(),
             |name| std::env::var(name).ok(),
         );
         let (entries, truncated) = list_ranked_entries(&split.list_dir, split.match_prefix).await;
@@ -1041,7 +1041,7 @@ mod tests {
         let tmp = tempfile::TempDir::new().unwrap();
         std::fs::write(tmp.path().join("notes.md"), "").unwrap();
 
-        let _env = wimo ai_wimo_test_support::EnvGuard::set("wimo_SUGGEST_TEST_DIR", tmp.path());
+        let _env = wimoai_wimo_test_support::EnvGuard::set("wimo_SUGGEST_TEST_DIR", tmp.path());
         let ctx = SuggestContext::new(
             "cat $wimo_SUGGEST_TEST_DIR/no".into(),
             "cat $wimo_SUGGEST_TEST_DIR/no".len(),

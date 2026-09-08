@@ -54,7 +54,7 @@ impl ModelsCacheManager {
     ) -> Option<CacheResult> {
         let data = std::fs::read(&self.path).ok()?;
         let cache: ModelsCache = serde_json::from_slice(&data).ok()?;
-        if cache.wimo_version.as_deref() != Some(wimo ai_wimo_version::VERSION) {
+        if cache.wimo_version.as_deref() != Some(wimoai_wimo_version::VERSION) {
             tracing::debug!("models cache version mismatch");
             return None;
         }
@@ -90,7 +90,7 @@ impl ModelsCacheManager {
     ) {
         let cache = ModelsCache {
             fetched_at: Utc::now(),
-            wimo_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+            wimo_version: Some(wimoai_wimo_version::VERSION.to_string()),
             auth_method: Some(auth_method),
             origin: Some(origin.to_string()),
             etag: etag.map(|s| s.to_string()),

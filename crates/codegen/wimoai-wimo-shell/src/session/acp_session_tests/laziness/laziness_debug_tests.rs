@@ -8,7 +8,7 @@ use super::{
     flatten_transcript_for_classifier,
 };
 use crate::session::events::{LAZINESS_ABORT_USER_INPUT, LazinessCategory};
-use wimo ai_wimo_sampling_types::{
+use wimoai_wimo_sampling_types::{
     AssistantItem, ContentPart, ConversationItem, SystemItem, ToolCall, ToolResultItem, UserItem,
 };
 
@@ -56,10 +56,10 @@ fn assistant_with_reasoning_items(
     let mut out = Vec::new();
     if !reasoning_text.is_empty() {
         out.push(ConversationItem::Reasoning(
-            wimo ai_wimo_sampling_types::rs::ReasoningItem {
+            wimoai_wimo_sampling_types::rs::ReasoningItem {
                 id: String::new(),
-                summary: vec![wimo ai_wimo_sampling_types::rs::SummaryPart::SummaryText(
-                    wimo ai_wimo_sampling_types::rs::SummaryTextContent {
+                summary: vec![wimoai_wimo_sampling_types::rs::SummaryPart::SummaryText(
+                    wimoai_wimo_sampling_types::rs::SummaryTextContent {
                         text: reasoning_text.to_string(),
                     },
                 )],
@@ -104,7 +104,7 @@ fn flatten_marks_agent_message_as_untrusted_not_human() {
         out,
         format!(
             "[agent_message] {} review this change\n",
-            wimo ai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL
+            wimoai_chat_state::compaction_utils::AGENT_MESSAGE_MODEL_LABEL
         )
     );
 }
@@ -186,7 +186,7 @@ fn flatten_renders_assistant_reasoning() {
 fn flatten_skips_reasoning_when_encrypted_only() {
     // Encrypted reasoning is opaque to a text classifier, so drop it rather than emit a meaningless line
     let items = vec![
-        ConversationItem::Reasoning(wimo ai_wimo_sampling_types::rs::ReasoningItem {
+        ConversationItem::Reasoning(wimoai_wimo_sampling_types::rs::ReasoningItem {
             id: String::new(),
             summary: vec![],
             content: None,
@@ -213,10 +213,10 @@ fn flatten_skips_reasoning_when_encrypted_only() {
 fn flatten_skips_reasoning_when_text_is_empty() {
     // Empty-string reasoning is treated as no reasoning; a line with no content would only waste tokens
     let items = vec![
-        ConversationItem::Reasoning(wimo ai_wimo_sampling_types::rs::ReasoningItem {
+        ConversationItem::Reasoning(wimoai_wimo_sampling_types::rs::ReasoningItem {
             id: String::new(),
-            summary: vec![wimo ai_wimo_sampling_types::rs::SummaryPart::SummaryText(
-                wimo ai_wimo_sampling_types::rs::SummaryTextContent {
+            summary: vec![wimoai_wimo_sampling_types::rs::SummaryPart::SummaryText(
+                wimoai_wimo_sampling_types::rs::SummaryTextContent {
                     text: String::new(),
                 },
             )],
@@ -354,7 +354,7 @@ fn flatten_keeps_reasoning_when_include_reasoning_is_true() {
 
 fn synthetic_user_text(
     text: &str,
-    reason: wimo ai_wimo_sampling_types::SyntheticReason,
+    reason: wimoai_wimo_sampling_types::SyntheticReason,
 ) -> ConversationItem {
     ConversationItem::User(UserItem {
         content: vec![ContentPart::Text { text: text.into() }],
@@ -456,7 +456,7 @@ fn window_relaxes_minimums_when_chat_lacks_enough_turns() {
 fn window_ignores_synthetic_user_items_when_pinning() {
     // SystemReminder and AutoContinue user items are synthesised by the runtime, not typed by the user
     // They MUST NOT count toward `min_user_turns`.
-    use wimo ai_wimo_sampling_types::SyntheticReason;
+    use wimoai_wimo_sampling_types::SyntheticReason;
     let mut items = vec![user_text("real user prompt")]; // idx 0
     for _ in 0..29 {
         items.push(assistant_text("tool work"));
@@ -478,7 +478,7 @@ fn window_ignores_synthetic_user_items_when_pinning() {
 #[test]
 fn window_falls_back_to_tail_when_no_real_user_prompt_present() {
     // With no real user items at all, the user pin is None, so the window falls back to the plain 30-item tail (and the assistant pin if applicable)
-    use wimo ai_wimo_sampling_types::SyntheticReason;
+    use wimoai_wimo_sampling_types::SyntheticReason;
     let mut items: Vec<ConversationItem> = Vec::new();
     for _ in 0..40 {
         items.push(assistant_text("solo"));
@@ -505,9 +505,9 @@ fn window_short_session_returns_zero() {
 fn window_assistant_text_pin_skips_empty_assistant_turns() {
     // Assistant items with empty `.content` (tool-call-only routing turns) MUST NOT count toward min_assistant_turns
     // They have no prose for the classifier to interpret
-    let empty_asst = ConversationItem::Assistant(wimo ai_wimo_sampling_types::AssistantItem {
+    let empty_asst = ConversationItem::Assistant(wimoai_wimo_sampling_types::AssistantItem {
         content: String::new().into(),
-        tool_calls: vec![wimo ai_wimo_sampling_types::ToolCall {
+        tool_calls: vec![wimoai_wimo_sampling_types::ToolCall {
             id: "c".into(),
             name: "read_file".into(),
             arguments: "{}".into(),

@@ -20,7 +20,7 @@ pub(crate) struct GatewayToolDescriptor {
     pub(crate) json_schema: serde_json::Value,
 }
 
-/// Uses the sanitizer shared with `wimo ai-wimo-mcp` so the advertised folder matches disk.
+/// Uses the sanitizer shared with `wimoai-wimo-mcp` so the advertised folder matches disk.
 pub(crate) fn server_descriptor_dir(mcps_root: &Path, server_name: &str) -> PathBuf {
     mcps_root.join(sanitize_descriptor_segment(server_name))
 }

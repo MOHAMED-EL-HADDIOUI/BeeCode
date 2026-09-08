@@ -1,5 +1,5 @@
 //! Phase execution tracking — REAL 9-phase framework (Section 45 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub enum Phase {
     Phase1, // Audit / Architecture

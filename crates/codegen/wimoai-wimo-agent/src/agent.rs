@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use wimo ai_wimo_sampling_types::HostedTool;
-use wimo ai_wimo_tools::bridge::ToolBridge;
-use wimo ai_wimo_tools::types::definition::ToolDefinition;
+use wimoai_wimo_sampling_types::HostedTool;
+use wimoai_wimo_tools::bridge::ToolBridge;
+use wimoai_wimo_tools::types::definition::ToolDefinition;
 
 use crate::compaction::CompactionPolicy;
 use crate::config::{AgentDefinition, CompletionRequirement, PermissionMode};
@@ -173,7 +173,7 @@ impl Agent {
         context_window: std::num::NonZeroU64,
     ) -> bool {
         let cw = context_window.get();
-        wimo ai_token_estimation::exceeds_threshold(
+        wimoai_token_estimation::exceeds_threshold(
             total_tokens,
             cw,
             self.compaction_policy.auto_compact_threshold_percent as u8,

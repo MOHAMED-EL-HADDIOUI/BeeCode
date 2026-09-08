@@ -1,4 +1,4 @@
-use wimo ai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
+use wimoai_wimo_sampling_types::{ReasoningEffort, ReasoningEffortOption};
 
 pub(crate) struct NamedWorkflowArgs {
     pub args: serde_json::Value,
@@ -55,10 +55,10 @@ impl AgentBudget {
         if value == 0 {
             return Err("`agent_budget` must be a positive integer".to_string());
         }
-        if value > wimo ai_workflow::MAX_AGENT_BUDGET {
+        if value > wimoai_workflow::MAX_AGENT_BUDGET {
             return Err(format!(
                 "`agent_budget` must be at most {} agents",
-                wimo ai_workflow::MAX_AGENT_BUDGET
+                wimoai_workflow::MAX_AGENT_BUDGET
             ));
         }
         Ok(Self(value))

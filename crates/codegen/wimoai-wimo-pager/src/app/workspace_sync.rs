@@ -3,7 +3,7 @@ use super::actions::Effect;
 use super::agent_view::AgentView;
 use super::app_view::AppView;
 use std::time::UNIX_EPOCH;
-use wimo ai_wimo_dashboard_store::{
+use wimoai_wimo_dashboard_store::{
     MAX_CWD_BYTES, MAX_MODEL_BYTES, MAX_SUMMARY_BYTES, MAX_TITLE_BYTES, Member, MemberKind,
     MemberMetadata, MemberOrigin, NewMember, SessionId, WORKSPACE_CAPACITY,
 };
@@ -109,7 +109,7 @@ fn agent_to_new_member(agent: &AgentView) -> Option<NewMember> {
     }
     let session_id = SessionId::new(agent.session.session_id.as_ref()?.0.to_string()).ok()?;
     Some(NewMember {
-        key: wimo ai_wimo_dashboard_store::MemberKey {
+        key: wimoai_wimo_dashboard_store::MemberKey {
             session_id,
             kind: MemberKind::Build,
         },
@@ -225,7 +225,7 @@ mod tests {
     fn drain_moves_the_single_store_into_one_batch() {
         let temp = tempfile::tempdir().unwrap();
         let store =
-            wimo ai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
+            wimoai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
                 .unwrap();
         let snapshot = store.snapshot().unwrap();
         let mut app = crate::app::app_view::tests::test_app();
@@ -248,7 +248,7 @@ mod tests {
     fn drain_skips_metadata_already_in_snapshot() {
         let temp = tempfile::tempdir().unwrap();
         let mut store =
-            wimo ai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
+            wimoai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
                 .unwrap();
         let agent = eligible_agent();
         store
@@ -269,7 +269,7 @@ mod tests {
     fn drain_keeps_request_while_write_owns_store() {
         let temp = tempfile::tempdir().unwrap();
         let store =
-            wimo ai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
+            wimoai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
                 .unwrap();
         let snapshot = store.snapshot().unwrap();
         let mut app = crate::app::app_view::tests::test_app();
@@ -284,7 +284,7 @@ mod tests {
     fn drain_suppresses_identical_failed_metadata_until_it_changes() {
         let temp = tempfile::tempdir().unwrap();
         let store =
-            wimo ai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
+            wimoai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
                 .unwrap();
         let snapshot = store.snapshot().unwrap();
         let agent = eligible_agent();
@@ -312,7 +312,7 @@ mod tests {
     fn local_reinsert_preserves_existing_remote_origin() {
         let temp = tempfile::tempdir().unwrap();
         let mut store =
-            wimo ai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
+            wimoai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
                 .unwrap();
         let agent = eligible_agent();
         let mut remote = agent_to_new_member(&agent).unwrap();
@@ -328,7 +328,7 @@ mod tests {
     fn drain_caps_live_candidates_to_workspace_capacity() {
         let temp = tempfile::tempdir().unwrap();
         let store =
-            wimo ai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
+            wimoai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
                 .unwrap();
         let snapshot = store.snapshot().unwrap();
         let mut app = crate::app::app_view::tests::test_app();
@@ -352,7 +352,7 @@ mod tests {
     fn drain_reserves_capacity_for_pinned_non_candidates() {
         let temp = tempfile::tempdir().unwrap();
         let store =
-            wimo ai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
+            wimoai_wimo_dashboard_store::WorkspaceStore::open(&temp.path().join("workspace.db"))
                 .unwrap();
         let mut stored = Vec::new();
         for index in 0..(WORKSPACE_CAPACITY - 2) {
@@ -383,8 +383,8 @@ mod tests {
             pin_rank: Some(i64::MAX),
             order_rank: None,
         });
-        let snapshot = wimo ai_wimo_dashboard_store::WorkspaceSnapshot {
-            grouping: wimo ai_wimo_dashboard_store::Grouping::State,
+        let snapshot = wimoai_wimo_dashboard_store::WorkspaceSnapshot {
+            grouping: wimoai_wimo_dashboard_store::Grouping::State,
             members: stored,
             data_version: 1,
         };

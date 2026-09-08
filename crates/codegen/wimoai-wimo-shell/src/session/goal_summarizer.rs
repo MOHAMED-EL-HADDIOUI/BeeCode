@@ -14,12 +14,12 @@ use crate::session::goal_planner::{
 use crate::session::goal_role_tools::RoleToolNames;
 use std::path::Path;
 use std::sync::Arc;
-use wimo ai_wimo_session_events::EventWriter;
-use wimo ai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_session_events::EventWriter;
+use wimoai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     SubagentOwner, SubagentRequest, SubagentRuntimeOverrides,
 };
-use wimo ai_tool_types::SubagentCapabilityMode;
+use wimoai_tool_types::SubagentCapabilityMode;
 
 // Constants
 
@@ -74,16 +74,16 @@ pub(crate) trait GoalSummarizerSpawner: Send + Sync {
 
 pub(crate) struct ChannelSpawner {
     pub(crate) event_tx: tokio::sync::mpsc::UnboundedSender<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
     >,
     pub(crate) foreground_wait:
-        Option<wimo ai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait>,
+        Option<wimoai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait>,
     pub(crate) parent_session_id: String,
     pub(crate) parent_prompt_id: Option<String>,
     pub(crate) cwd: Option<String>,
     /// Trace-artifact sink and resolved `task` tool name; `None` disables recording.
     /// See [`crate::session::goal_classifier::record_subagent_trace`].
-    pub(crate) trace_sink: Option<(wimo ai_chat_state::ChatStateHandle, String)>,
+    pub(crate) trace_sink: Option<(wimoai_chat_state::ChatStateHandle, String)>,
     /// Event sink for the spawn-and-retry-once fail-open telemetry; `None` in tests or when no event log is wired.
     pub(crate) events: Option<EventWriter>,
 }
@@ -604,10 +604,10 @@ mod tests {
 
     #[tokio::test]
     async fn channel_spawner_request_is_harness_internal_and_read_only() {
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentResult,
         };
-        use wimo ai_tool_types::SubagentCapabilityMode;
+        use wimoai_tool_types::SubagentCapabilityMode;
 
         let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
         let spawner = ChannelSpawner {

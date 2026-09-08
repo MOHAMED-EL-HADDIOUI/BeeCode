@@ -4,9 +4,9 @@
 use async_trait::async_trait;
 use serde_json::{Value, json};
 
-use wimo ai_computer_hub_core::{Principal, Transport, TransportKind};
-use wimo ai_tool_protocol::{SessionId, ToolId, UserId};
-use wimo ai_tool_runtime::{
+use wimoai_computer_hub_core::{Principal, Transport, TransportKind};
+use wimoai_tool_protocol::{SessionId, ToolId, UserId};
+use wimoai_tool_runtime::{
     ToolCallContext, ToolError, ToolStream, ToolStreamItem, TypedToolOutput, terminal_only,
 };
 

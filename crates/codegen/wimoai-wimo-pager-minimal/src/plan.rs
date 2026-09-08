@@ -14,13 +14,13 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;
 
-use wimo ai_wimo_pager::app::agent_view::AgentView;
-use wimo ai_wimo_pager::app::app_view::{ActiveView, AppView};
-use wimo ai_wimo_pager::minimal_api;
-use wimo ai_wimo_pager::scrollback::block::RenderBlock;
-use wimo ai_wimo_pager::theme::Theme;
-use wimo ai_wimo_pager::views::plan_approval_view::PlanApprovalFocus;
-use wimo ai_wimo_pager::views::prompt_widget::{PromptBg, PromptStyle};
+use wimoai_wimo_pager::app::agent_view::AgentView;
+use wimoai_wimo_pager::app::app_view::{ActiveView, AppView};
+use wimoai_wimo_pager::minimal_api;
+use wimoai_wimo_pager::scrollback::block::RenderBlock;
+use wimoai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::views::plan_approval_view::PlanApprovalFocus;
+use wimoai_wimo_pager::views::prompt_widget::{PromptBg, PromptStyle};
 
 /// The active plan-approval focus, defaulting to `Preview`.
 fn focus(agent: &AgentView) -> PlanApprovalFocus {

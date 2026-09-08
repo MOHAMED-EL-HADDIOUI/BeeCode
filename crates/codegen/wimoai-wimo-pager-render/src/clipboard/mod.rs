@@ -1,4 +1,4 @@
-//! Re-exports [`ClipboardProvider`] and [`InternalClipboard`] from `wimo ai-ratatui-textarea`, and adds [`SystemClipboard`] backed by `arboard`.
+//! Re-exports [`ClipboardProvider`] and [`InternalClipboard`] from `wimoai-ratatui-textarea`, and adds [`SystemClipboard`] backed by `arboard`.
 //!
 //! A copy writes every active leg (native / tmux / OSC 52); [`ClipboardDelivery`] is the evidence the write reached its destination.
 
@@ -8,31 +8,31 @@ pub use trust::{
     ClipboardDelivery, ClipboardEnvironment, NativeClipboardPreflight, Osc52Capability,
     expected_delivery, native_clipboard_preflight,
 };
-pub use wimo ai_ratatui_textarea::{ClipboardProvider, InternalClipboard};
+pub use wimoai_ratatui_textarea::{ClipboardProvider, InternalClipboard};
 
 use std::sync::OnceLock;
 
 use crate::terminal::{MultiplexerKind, TerminalContext};
 
 /// Env var overriding where the copy backup file is written (supports `~`).
-/// Documented in `wimo ai-wimo-pager/docs/internal/22-environment-variables.md`.
+/// Documented in `wimoai-wimo-pager/docs/internal/22-environment-variables.md`.
 pub const wimo_COPY_FILE_ENV: &str = "wimo_COPY_FILE";
 
 /// Cached result of the remote-session check (env vars don't change at runtime).
 fn is_remote() -> bool {
     static REMOTE: OnceLock<bool> = OnceLock::new();
-    *REMOTE.get_or_init(wimo ai_wimo_shared::clipboard::is_remote_session)
+    *REMOTE.get_or_init(wimoai_wimo_shared::clipboard::is_remote_session)
 }
 
 /// Cached result of the container-without-display check.
 fn is_container_no_display() -> bool {
     static CONTAINER: OnceLock<bool> = OnceLock::new();
-    *CONTAINER.get_or_init(wimo ai_wimo_shared::clipboard::is_containerized_without_display)
+    *CONTAINER.get_or_init(wimoai_wimo_shared::clipboard::is_containerized_without_display)
 }
 
 /// Cached result of the "an upstream OSC 52 sink is capturing our output" check.
 ///
-/// `wimo wrap` runs a command inside a local PTY and scans its output for OSC 52 clipboard sequences (see `wimo ai-wimo-pager`'s `pty_wrap` module).
+/// `wimo wrap` runs a command inside a local PTY and scans its output for OSC 52 clipboard sequences (see `wimoai-wimo-pager`'s `pty_wrap` module).
 /// It writes each payload to the *real* (local) system clipboard and advertises this to the wrapped program via an environment variable.
 /// The inner `wimo` then knows its OSC 52 writes are reliably intercepted and copied, even when the inner terminal brand is misdetected.
 /// Over SSH only `TERM` propagates, so Apple Terminal and unknown brands look OSC-52-incapable.
@@ -70,7 +70,7 @@ pub fn clipboard_route() -> &'static ClipboardRoute {
 pub fn wayland_data_control_label() -> &'static str {
     match crate::host::DisplayServer::current() {
         crate::host::DisplayServer::Wayland => {
-            if wimo ai_wimo_shared::clipboard::wayland_data_control_supported() {
+            if wimoai_wimo_shared::clipboard::wayland_data_control_supported() {
                 "yes"
             } else {
                 "no"
@@ -173,17 +173,17 @@ fn write_tmux_buffer(text: &str) -> bool {
     let result = (|| -> Result<(), Box<dyn std::error::Error>> {
         // Spooled stdin, not a pipe: a payload past the pipe buffer would block the UI thread if a wedged tmux server stops draining stdin
         // The bounded wait below also needs stdin already closed
-        let stdin = wimo ai_wimo_shared::clipboard::spool_for_stdin(text.as_bytes())?;
+        let stdin = wimoai_wimo_shared::clipboard::spool_for_stdin(text.as_bytes())?;
         let mut cmd = Command::new("tmux");
         cmd.args(["load-buffer", "-"])
             .stdin(Stdio::from(stdin))
             .stdout(Stdio::null())
             .stderr(Stdio::null());
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         #[allow(clippy::disallowed_methods)] // short-lived clipboard helper, waited on below
         let mut child = cmd.spawn()?;
         // Bounded wait: a wedged tmux server must not freeze the UI thread.
-        let status = wimo ai_wimo_shared::clipboard::wait_with_deadline(
+        let status = wimoai_wimo_shared::clipboard::wait_with_deadline(
             &mut child,
             std::time::Duration::from_secs(2),
         )?;
@@ -198,7 +198,7 @@ fn write_tmux_buffer(text: &str) -> bool {
     result.is_ok()
 }
 
-/// Delegates to [`wimo ai_wimo_shared::clipboard`], which uses `pbcopy`/`pbpaste` on macOS (avoiding AppKit GPU overhead) and `arboard` elsewhere.
+/// Delegates to [`wimoai_wimo_shared::clipboard`], which uses `pbcopy`/`pbpaste` on macOS (avoiding AppKit GPU overhead) and `arboard` elsewhere.
 ///
 /// In tmux-backed environments, clipboard writes follow the full three-leg contract: native clipboard, tmux buffer, and OSC 52.
 #[derive(Debug)]
@@ -214,7 +214,7 @@ impl SystemClipboard {
 
 impl ClipboardProvider for SystemClipboard {
     fn get(&mut self) -> Option<String> {
-        wimo ai_wimo_shared::clipboard::get_text().ok().flatten()
+        wimoai_wimo_shared::clipboard::get_text().ok().flatten()
     }
 
     fn set(&mut self, text: &str) {
@@ -254,7 +254,7 @@ fn clipboard_write_with_route(text: &str, route: &ClipboardRoute) -> ClipboardWr
     };
 
     if route.native {
-        let outcome = wimo ai_wimo_shared::clipboard::set_text_with_outcome(text);
+        let outcome = wimoai_wimo_shared::clipboard::set_text_with_outcome(text);
         legs.cli_ok = outcome.cli_ok;
         legs.arboard_ok = outcome.arboard_ok;
         legs.data_control = outcome.data_control;
@@ -271,7 +271,7 @@ fn clipboard_write_with_route(text: &str, route: &ClipboardRoute) -> ClipboardWr
     }
 
     if route.osc52 {
-        match wimo ai_wimo_shared::clipboard::set_text_osc52(text, route.osc52_tmux_passthrough) {
+        match wimoai_wimo_shared::clipboard::set_text_osc52(text, route.osc52_tmux_passthrough) {
             Ok(()) => legs.osc52_ok = true,
             Err(e) => {
                 tracing::debug!("OSC 52 clipboard write failed (best-effort): {e}");
@@ -504,7 +504,7 @@ pub fn default_copy_fallback_path() -> Option<std::path::PathBuf> {
             ));
         }
     }
-    wimo ai_wimo_config::user_wimo_home().map(|wimo_home| wimo_home.join("last-copy.txt"))
+    wimoai_wimo_config::user_wimo_home().map(|wimo_home| wimo_home.join("last-copy.txt"))
 }
 
 /// Render a backup-file path for user-facing messages using the codebase-wide
@@ -652,10 +652,10 @@ fn log_clipboard_copy_event(
     toast_kind: &'static str,
     started: std::time::Instant,
 ) {
-    if !wimo ai_wimo_telemetry::client::is_enabled() {
+    if !wimoai_wimo_telemetry::client::is_enabled() {
         return;
     }
-    wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::ClipboardCopy {
+    wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::ClipboardCopy {
         terminal: crate::terminal::terminal_context().telemetry_snapshot(),
         source: "copy_text",
         text_len: text.len() as u64,
@@ -702,7 +702,7 @@ pub fn system_clipboard_read_text() -> Result<Option<String>, ClipboardTextReadE
     if let Some(text) = test_support::hook_text_result() {
         return text;
     }
-    wimo ai_wimo_shared::clipboard::get_text().map_err(|error| {
+    wimoai_wimo_shared::clipboard::get_text().map_err(|error| {
         tracing::debug!("clipboard text read failed: {error}");
         ClipboardTextReadError
     })
@@ -726,10 +726,10 @@ pub fn system_primary_selection_get() -> Option<String> {
             .filter(|text| !text.is_empty());
     }
 
-    if !wimo ai_wimo_shared::clipboard::x11_display_env_present() {
+    if !wimoai_wimo_shared::clipboard::x11_display_env_present() {
         return None;
     }
-    wimo ai_wimo_shared::clipboard::get_primary_text()
+    wimoai_wimo_shared::clipboard::get_primary_text()
         .ok()
         .flatten()
         .filter(|text| !text.is_empty())
@@ -745,7 +745,7 @@ pub fn x11_primary_guidance_available() -> bool {
     #[cfg(target_os = "linux")]
     {
         is_native_x11(crate::host::DisplayServer::current())
-            && wimo ai_wimo_shared::clipboard::x11_display_env_present()
+            && wimoai_wimo_shared::clipboard::x11_display_env_present()
     }
     #[cfg(not(target_os = "linux"))]
     {
@@ -777,11 +777,11 @@ pub fn log_paste_key_empty_host_clipboard(surface: &str) {
         paste.surface = %surface,
         "paste_key_empty_host_clipboard"
     );
-    if !wimo ai_wimo_telemetry::client::is_enabled() {
+    if !wimoai_wimo_telemetry::client::is_enabled() {
         return;
     }
-    wimo ai_wimo_telemetry::session_ctx::log_event(
-        wimo ai_wimo_telemetry::events::PasteKeyEmptyHostClipboard {
+    wimoai_wimo_telemetry::session_ctx::log_event(
+        wimoai_wimo_telemetry::events::PasteKeyEmptyHostClipboard {
             terminal,
             surface: surface.to_owned(),
         },
@@ -1001,10 +1001,10 @@ fn log_clipboard_paste_event(
     image_mime: &str,
     started: std::time::Instant,
 ) {
-    if !wimo ai_wimo_telemetry::client::is_enabled() {
+    if !wimoai_wimo_telemetry::client::is_enabled() {
         return;
     }
-    wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::ClipboardImagePaste {
+    wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::ClipboardImagePaste {
         terminal: crate::terminal::terminal_context().telemetry_snapshot(),
         probe: probe.to_owned(),
         outcome: outcome.to_owned(),
@@ -1018,7 +1018,7 @@ fn log_clipboard_paste_event(
 /// On non-macOS this composes separate arboard reads.
 fn system_clipboard_get_attachments() -> Result<AttachmentsProbeResult, ClipboardProbeError> {
     let started = std::time::Instant::now();
-    match wimo ai_wimo_shared::clipboard::get_attachments() {
+    match wimoai_wimo_shared::clipboard::get_attachments() {
         Ok(att) => {
             let (outcome, mime) = match (&att.image, &att.file_urls) {
                 (Some(img), _) => ("image", img.mime_type.as_str()),
@@ -1047,7 +1047,7 @@ struct AttachmentsProbeResult {
 }
 
 /// Re-export [`ImageData`] so pager code does not import the shell directly.
-pub use wimo ai_wimo_shared::clipboard::ImageData;
+pub use wimoai_wimo_shared::clipboard::ImageData;
 
 /// One pasteboard snapshot `(change_count, has_pasteable_image)` read in a single native pass (macOS native, sub-millisecond, no data read).
 /// `(None, false)` off-macOS or when AppKit cannot be loaded.
@@ -1056,7 +1056,7 @@ pub fn clipboard_image_snapshot() -> (Option<u64>, bool) {
     if let Some(snapshot) = test_support::hook_image_snapshot() {
         return snapshot;
     }
-    wimo ai_wimo_shared::clipboard::clipboard_image_snapshot()
+    wimoai_wimo_shared::clipboard::clipboard_image_snapshot()
 }
 
 /// Cheap pasteboard `changeCount` read (one native message, no type scan, no data read).
@@ -1068,7 +1068,7 @@ pub fn clipboard_change_count() -> Option<u64> {
     if let Some((change_count, _)) = test_support::hook_image_snapshot() {
         return change_count;
     }
-    wimo ai_wimo_shared::clipboard::clipboard_change_count()
+    wimoai_wimo_shared::clipboard::clipboard_change_count()
 }
 
 /// Whether the fast image probe exists on this platform.
@@ -1078,7 +1078,7 @@ pub fn clipboard_image_probe_supported() -> bool {
     if let Some(supported) = test_support::hook_image_probe_supported() {
         return supported;
     }
-    wimo ai_wimo_shared::clipboard::clipboard_image_probe_supported()
+    wimoai_wimo_shared::clipboard::clipboard_image_probe_supported()
 }
 
 /// Prime the macOS AppKit `dlopen` ONCE on a detached background thread.
@@ -1092,14 +1092,14 @@ pub fn prewarm_image_probe() {
         return;
     }
     WARMED.call_once(|| {
-        std::thread::spawn(wimo ai_wimo_shared::clipboard::clipboard_prewarm);
+        std::thread::spawn(wimoai_wimo_shared::clipboard::clipboard_prewarm);
     });
 }
 
 /// Read an image while preserving an empty-versus-error distinction.
 fn system_clipboard_get_image_result() -> Result<Option<ImageData>, ClipboardProbeError> {
     let started = std::time::Instant::now();
-    match wimo ai_wimo_shared::clipboard::get_image() {
+    match wimoai_wimo_shared::clipboard::get_image() {
         Ok(img) => {
             let (outcome, mime) = match &img {
                 Some(img) => ("image", img.mime_type.as_str()),
@@ -2214,7 +2214,7 @@ mod tests {
         }
         let path = default_copy_fallback_path();
         // Test envs always resolve a home (or set wimo_HOME).
-        let expected = wimo ai_wimo_config::user_wimo_home()
+        let expected = wimoai_wimo_config::user_wimo_home()
             .expect("home resolves in tests")
             .join("last-copy.txt");
         assert_eq!(path, Some(expected));
@@ -2222,11 +2222,11 @@ mod tests {
 
     /// Toast paths collapse the home prefix to `~`.
     /// wimo-home paths go through the shared `abbreviate_path` convention.
-    /// The `wimo_HOME`-override integration test in `wimo ai-wimo-pager` covers that further.
+    /// The `wimo_HOME`-override integration test in `wimoai-wimo-pager` covers that further.
     #[test]
     fn display_copy_path_abbreviates_home() {
         if std::env::var_os("wimo_HOME").is_none() {
-            let home = wimo ai_dirs::home_dir().expect("home resolves in tests");
+            let home = wimoai_dirs::home_dir().expect("home resolves in tests");
             assert_eq!(
                 display_copy_path(&home.join(".wimo").join("last-copy.txt")),
                 "~/.wimo/last-copy.txt"

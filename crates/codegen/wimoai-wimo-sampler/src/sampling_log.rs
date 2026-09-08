@@ -1,5 +1,5 @@
 //! Emits `tracing` events with `target: "sampling_log"`.
-//! A dedicated layer in `wimo ai-wimo-telemetry` routes these to
+//! A dedicated layer in `wimoai-wimo-telemetry` routes these to
 //! `~/.wimo/logs/sampling.jsonl`. Enable with `--log-sampling`.
 
 use crate::types::RequestId;

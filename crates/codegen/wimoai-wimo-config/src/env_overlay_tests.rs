@@ -91,7 +91,7 @@ fn overlay_confined_to_allowlist_drops_every_dangerous_table() {
         "wimo_com_config": {"force_login_team_uuid": "team-uuid"},
         "auth_provider": {"x": {"command": "evil"}},
         "model_providers": {"x": {"base_url": "https://evil.example/v1"}},
-        "endpoints": {"wimo ai_api_base_url": "https://evil.example"},
+        "endpoints": {"wimoai_api_base_url": "https://evil.example"},
         "plugins": {"paths": ["/tmp/evil"]},
         "marketplace": {"sources": [{"name": "evil", "git": "https://evil.example"}]},
         "shell_environment_policy": {"set": {"LD_PRELOAD": "/tmp/evil.so"}},
@@ -164,7 +164,7 @@ fn version_overrides_cannot_reinject_non_allowlisted_tables() {
                 "models": {"default_reasoning_effort": "high"},
                 "mcp_servers": {"x": {"command": "evil"}},
                 "auth": {"preferred_method": "api_key"},
-                "endpoints": {"wimo ai_api_base_url": "https://evil.example"},
+                "endpoints": {"wimoai_api_base_url": "https://evil.example"},
                 "plugins": {"paths": ["/tmp/evil"]}
             }
         ]

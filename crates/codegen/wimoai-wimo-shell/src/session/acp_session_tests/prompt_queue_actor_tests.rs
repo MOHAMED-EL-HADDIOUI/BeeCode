@@ -211,11 +211,11 @@ fn combine_front_skips_edit_hold() {
     assert!(rx2.try_recv().is_err(), "held row must stay queued");
 }
 
-fn x_search_cutoff_update() -> wimo ai_wimo_sampling_types::ToolOverridesUpdate {
-    wimo ai_wimo_sampling_types::ToolOverridesUpdate {
-        x_search: Some(Some(wimo ai_wimo_sampling_types::XSearchOptions {
+fn x_search_cutoff_update() -> wimoai_wimo_sampling_types::ToolOverridesUpdate {
+    wimoai_wimo_sampling_types::ToolOverridesUpdate {
+        x_search: Some(Some(wimoai_wimo_sampling_types::XSearchOptions {
             date_bound: Some(
-                wimo ai_wimo_sampling_types::SearchDateBound::new(None, Some("2024-03-15".to_string()))
+                wimoai_wimo_sampling_types::SearchDateBound::new(None, Some("2024-03-15".to_string()))
                     .unwrap(),
             ),
         })),
@@ -319,7 +319,7 @@ async fn two_enqueues_drain_fifo_and_stale_edit_is_noop() {
             // The final broadcast must reflect the empty queue.
             let mut last: Option<crate::session::prompt_queue::QueueChanged> = None;
             while let Ok(msg) = gateway_rx.try_recv() {
-                if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
+                if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
                     && args.request.method.as_ref()
                         == crate::session::prompt_queue::QUEUE_CHANGED_METHOD
                 {
@@ -1372,7 +1372,7 @@ async fn interject_after_cancel_does_nothing_and_keeps_prompt_queued() {
             // The interject no-op still rebroadcasts so clients reconcile.
             let mut saw_broadcast = false;
             while let Ok(msg) = gateway_rx.try_recv() {
-                if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
+                if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
                     && args.request.method.as_ref()
                         == crate::session::prompt_queue::QUEUE_CHANGED_METHOD
                 {
@@ -1563,7 +1563,7 @@ async fn interject_queued_bash_row_noop_keeps_row_queued() {
 
             let mut saw_broadcast = false;
             while let Ok(msg) = gateway_rx.try_recv() {
-                if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
+                if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
                     && args.request.method.as_ref()
                         == crate::session::prompt_queue::QUEUE_CHANGED_METHOD
                 {
@@ -2816,9 +2816,9 @@ async fn tool_overrides_update_applies_at_promotion_never_at_enqueue() {
     local
         .run_until(async {
             let (actor, _rx) = build_actor().await;
-            let options = wimo ai_wimo_sampling_types::XSearchOptions {
+            let options = wimoai_wimo_sampling_types::XSearchOptions {
                 date_bound: Some(
-                    wimo ai_wimo_sampling_types::SearchDateBound::new(
+                    wimoai_wimo_sampling_types::SearchDateBound::new(
                         None,
                         Some("2024-03-15".to_string()),
                     )
@@ -2826,11 +2826,11 @@ async fn tool_overrides_update_applies_at_promotion_never_at_enqueue() {
                 ),
             };
             // A per-turn update that SETS the x_search override to `options`.
-            let set_update = || wimo ai_wimo_sampling_types::ToolOverridesUpdate {
+            let set_update = || wimoai_wimo_sampling_types::ToolOverridesUpdate {
                 x_search: Some(Some(options.clone())),
                 web_search: None,
             };
-            let expected = wimo ai_wimo_sampling_types::ToolOverrides {
+            let expected = wimoai_wimo_sampling_types::ToolOverrides {
                 x_search: Some(options.clone()),
                 web_search: None,
             };
@@ -2894,7 +2894,7 @@ async fn tool_overrides_update_applies_at_promotion_never_at_enqueue() {
                 Some(&expected),
                 "a prompt with no update leaves the sticky override in place"
             );
-            actor.apply_tool_overrides_update(Some(wimo ai_wimo_sampling_types::ToolOverridesUpdate {
+            actor.apply_tool_overrides_update(Some(wimoai_wimo_sampling_types::ToolOverridesUpdate {
                 x_search: Some(None),
                 web_search: None,
             }));
@@ -2919,7 +2919,7 @@ async fn effective_tool_overrides_echoes_and_gates_on_backend_search() {
             let (actor, _rx) = build_actor().await;
             // Backend search on, with a bare (unbounded) x_search hosted tool.
             *actor.agent.borrow_mut() =
-                test_agent_backend_search(vec![wimo ai_wimo_sampling_types::HostedTool::XSearch {
+                test_agent_backend_search(vec![wimoai_wimo_sampling_types::HostedTool::XSearch {
                     options: None,
                 }])
                 .await;
@@ -2930,16 +2930,16 @@ async fn effective_tool_overrides_echoes_and_gates_on_backend_search() {
             );
 
             // A standing per-turn cutoff (toDate only).
-            let options = wimo ai_wimo_sampling_types::XSearchOptions {
+            let options = wimoai_wimo_sampling_types::XSearchOptions {
                 date_bound: Some(
-                    wimo ai_wimo_sampling_types::SearchDateBound::new(
+                    wimoai_wimo_sampling_types::SearchDateBound::new(
                         None,
                         Some("2024-03-15".to_string()),
                     )
                     .unwrap(),
                 ),
             };
-            let expected = wimo ai_wimo_sampling_types::ToolOverrides {
+            let expected = wimoai_wimo_sampling_types::ToolOverrides {
                 x_search: Some(options.clone()),
                 web_search: None,
             };
@@ -2952,7 +2952,7 @@ async fn effective_tool_overrides_echoes_and_gates_on_backend_search() {
             );
             assert_eq!(
                 actor.effective_hosted_tools(),
-                vec![wimo ai_wimo_sampling_types::HostedTool::XSearch {
+                vec![wimoai_wimo_sampling_types::HostedTool::XSearch {
                     options: Some(options.clone()),
                 }],
                 "the wire's XSearch entry carries exactly the bound the echo attests (wire == echo)"
@@ -2981,12 +2981,12 @@ async fn unsupported_backend_search_sends_no_hosted_tool_on_either_channel() {
     local
         .run_until(async {
             let (actor, _rx) = build_actor().await;
-            let configured = wimo ai_wimo_sampling_types::WebSearchOptions {
+            let configured = wimoai_wimo_sampling_types::WebSearchOptions {
                 allowed_domains: None,
                 excluded_domains: Some(vec!["reddit.com".to_string()]),
             };
             *actor.agent.borrow_mut() =
-                test_agent_backend_search(vec![wimo ai_wimo_sampling_types::HostedTool::WebSearch {
+                test_agent_backend_search(vec![wimoai_wimo_sampling_types::HostedTool::WebSearch {
                     options: Some(configured),
                 }])
                 .await;
@@ -2995,7 +2995,7 @@ async fn unsupported_backend_search_sends_no_hosted_tool_on_either_channel() {
             actor.supports_backend_search.set(true);
             assert!(!actor.hosted_tools_for_turn().is_empty());
             assert_eq!(
-                wimo ai_wimo_sampling_types::extra_tool_entries(&actor.hosted_tools_for_turn()).len(),
+                wimoai_wimo_sampling_types::extra_tool_entries(&actor.hosted_tools_for_turn()).len(),
                 1
             );
 
@@ -3006,7 +3006,7 @@ async fn unsupported_backend_search_sends_no_hosted_tool_on_either_channel() {
                 "the backend-search gate must drop the hosted tool"
             );
             assert!(
-                wimo ai_wimo_sampling_types::extra_tool_entries(&actor.hosted_tools_for_turn())
+                wimoai_wimo_sampling_types::extra_tool_entries(&actor.hosted_tools_for_turn())
                     .is_empty(),
                 "and so no raw-JSON entry is produced to splice"
             );
@@ -3024,12 +3024,12 @@ async fn per_turn_tool_overrides_win_over_the_config_web_search_policy() {
         .run_until(async {
             let (actor, _rx) = build_actor().await;
             // The hosted tool as `build_agent` leaves it: config blocklist already folded in.
-            let configured = wimo ai_wimo_sampling_types::WebSearchOptions {
+            let configured = wimoai_wimo_sampling_types::WebSearchOptions {
                 allowed_domains: None,
                 excluded_domains: Some(vec!["reddit.com".to_string()]),
             };
             *actor.agent.borrow_mut() =
-                test_agent_backend_search(vec![wimo ai_wimo_sampling_types::HostedTool::WebSearch {
+                test_agent_backend_search(vec![wimoai_wimo_sampling_types::HostedTool::WebSearch {
                     options: Some(configured.clone()),
                 }])
                 .await;
@@ -3039,30 +3039,30 @@ async fn per_turn_tool_overrides_win_over_the_config_web_search_policy() {
             // No per-turn update: the config policy is what reaches the wire.
             assert_eq!(
                 actor.effective_hosted_tools(),
-                vec![wimo ai_wimo_sampling_types::HostedTool::WebSearch {
+                vec![wimoai_wimo_sampling_types::HostedTool::WebSearch {
                     options: Some(configured.clone()),
                 }],
             );
 
-            let per_turn = wimo ai_wimo_sampling_types::WebSearchOptions {
+            let per_turn = wimoai_wimo_sampling_types::WebSearchOptions {
                 allowed_domains: Some(vec!["docs.x.ai".to_string()]),
                 excluded_domains: None,
             };
-            actor.apply_tool_overrides_update(Some(wimo ai_wimo_sampling_types::ToolOverridesUpdate {
+            actor.apply_tool_overrides_update(Some(wimoai_wimo_sampling_types::ToolOverridesUpdate {
                 x_search: None,
                 web_search: Some(Some(per_turn.clone())),
             }));
 
             assert_eq!(
                 actor.effective_hosted_tools(),
-                vec![wimo ai_wimo_sampling_types::HostedTool::WebSearch {
+                vec![wimoai_wimo_sampling_types::HostedTool::WebSearch {
                     options: Some(per_turn.clone()),
                 }],
                 "an explicit per-turn override replaces the configured policy on the wire"
             );
             assert_eq!(
                 actor.effective_tool_overrides(),
-                Some(wimo ai_wimo_sampling_types::ToolOverrides {
+                Some(wimoai_wimo_sampling_types::ToolOverrides {
                     x_search: None,
                     web_search: Some(per_turn),
                 }),
@@ -3070,13 +3070,13 @@ async fn per_turn_tool_overrides_win_over_the_config_web_search_policy() {
             );
 
             // Clearing the per-turn override falls back to the configured policy.
-            actor.apply_tool_overrides_update(Some(wimo ai_wimo_sampling_types::ToolOverridesUpdate {
+            actor.apply_tool_overrides_update(Some(wimoai_wimo_sampling_types::ToolOverridesUpdate {
                 x_search: None,
                 web_search: Some(None),
             }));
             assert_eq!(
                 actor.effective_hosted_tools(),
-                vec![wimo ai_wimo_sampling_types::HostedTool::WebSearch {
+                vec![wimoai_wimo_sampling_types::HostedTool::WebSearch {
                     options: Some(configured),
                 }],
             );
@@ -3101,10 +3101,10 @@ async fn agent_rebuild_republishes_the_configured_cutoff() {
                 "the default definition seeds no cutoff",
             );
 
-            let seed = wimo ai_wimo_sampling_types::ToolOverrides {
-                x_search: Some(wimo ai_wimo_sampling_types::XSearchOptions {
+            let seed = wimoai_wimo_sampling_types::ToolOverrides {
+                x_search: Some(wimoai_wimo_sampling_types::XSearchOptions {
                     date_bound: Some(
-                        wimo ai_wimo_sampling_types::SearchDateBound::new(
+                        wimoai_wimo_sampling_types::SearchDateBound::new(
                             None,
                             Some("2020-01-01".to_string()),
                         )
@@ -3113,7 +3113,7 @@ async fn agent_rebuild_republishes_the_configured_cutoff() {
                 }),
                 web_search: None,
             };
-            let mut seeded = wimo ai_wimo_agent::AgentDefinition::default_wimo();
+            let mut seeded = wimoai_wimo_agent::AgentDefinition::default_wimo();
             seeded.tool_overrides = Some(seed.clone());
             actor
                 .handle_rebuild_agent_for_definition(seeded)
@@ -3131,7 +3131,7 @@ async fn agent_rebuild_republishes_the_configured_cutoff() {
             // Rebuilding to a seedless definition must clear the cell; a stale bound is a divergence.
             actor
                 .handle_rebuild_agent_for_definition(
-                    wimo ai_wimo_agent::AgentDefinition::default_wimo(),
+                    wimoai_wimo_agent::AgentDefinition::default_wimo(),
                 )
                 .await
                 .expect("second rebuild should succeed");
@@ -3152,10 +3152,10 @@ async fn set_tool_overrides_publishes_the_inheritance_cell_before_any_turn() {
         .run_until(async {
             let (actor, _rx) = build_actor().await;
             assert!(actor.resolved_tool_overrides.load().is_none());
-            let cutoff = wimo ai_wimo_sampling_types::ToolOverrides {
-                x_search: Some(wimo ai_wimo_sampling_types::XSearchOptions {
+            let cutoff = wimoai_wimo_sampling_types::ToolOverrides {
+                x_search: Some(wimoai_wimo_sampling_types::XSearchOptions {
                     date_bound: Some(
-                        wimo ai_wimo_sampling_types::SearchDateBound::new(
+                        wimoai_wimo_sampling_types::SearchDateBound::new(
                             None,
                             Some("2020-01-01".to_string()),
                         )
@@ -3366,19 +3366,19 @@ async fn promoter_arms_rewind_window_and_first_update_disarms_it() {
 
             // Intake diagnostics do not count as output; they must leave the window open
             for update in [
-                wimo aiSessionUpdate::HookExecution {
+                wimoaiSessionUpdate::HookExecution {
                     event_name: "user_prompt_submit".into(),
                     tool_name: None,
                     prompt_id: Some("m1".into()),
                     runs: vec![],
                 },
-                wimo aiSessionUpdate::ImageCompressed {
+                wimoaiSessionUpdate::ImageCompressed {
                     images: vec![],
                     message: "resized".into(),
                 },
-                wimo aiSessionUpdate::ImageDropped { notes: vec![] },
+                wimoaiSessionUpdate::ImageDropped { notes: vec![] },
             ] {
-                actor.send_wimo ai_notification(update).await;
+                actor.send_wimoai_notification(update).await;
                 assert!(
                     actor.state.try_lock().expect("uncontended").rewindable,
                     "prompt-intake diagnostics must not close the rewind window"
@@ -3661,7 +3661,7 @@ async fn bash_turn_sets_committed_flag_before_running_the_command() {
     local
         .run_until(async {
             let (gateway_tx, _gateway_rx) =
-                tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+                tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
             let (persistence_tx, _prx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
             let (actor, _ev) = create_test_actor_with_terminal(
                 0,

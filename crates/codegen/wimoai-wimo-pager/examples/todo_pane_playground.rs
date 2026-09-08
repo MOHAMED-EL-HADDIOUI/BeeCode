@@ -1,7 +1,7 @@
 //! Interactive playground for the Ctrl+T todo pane (hide-done empty state).
 //!
 //! ```text
-//! cargo run -p wimo ai-wimo-pager --example todo_pane_playground
+//! cargo run -p wimoai-wimo-pager --example todo_pane_playground
 //! ```
 //!
 //! Keys: h toggles hide/show done (same as the real pane), n/p switch scenarios, Esc/q quits.
@@ -18,9 +18,9 @@ use ratatui::layout::{Constraint, Layout};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
-use wimo ai_wimo_pager::appearance::LayoutConfig;
-use wimo ai_wimo_pager::views::todo_pane::TodoPane;
-use wimo ai_wimo_shell::tools::{TodoItem, TodoPriority, TodoStatus};
+use wimoai_wimo_pager::appearance::LayoutConfig;
+use wimoai_wimo_pager::views::todo_pane::TodoPane;
+use wimoai_wimo_shell::tools::{TodoItem, TodoPriority, TodoStatus};
 
 type Scenario = (&'static str, &'static str, Vec<TodoItem>);
 

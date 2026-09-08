@@ -1,9 +1,9 @@
 use super::fork_filter_chat;
-use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+use wimoai_wimo_sampling_types::conversation::ConversationItem;
 
 #[test]
 fn fork_filter_removes_synthetic_user_messages() {
-    use wimo ai_wimo_sampling_types::conversation::*;
+    use wimoai_wimo_sampling_types::conversation::*;
 
     let mut items = vec![
         ConversationItem::system("system prompt"),
@@ -40,7 +40,7 @@ fn fork_filter_truncates_at_complete_turn() {
 }
 #[test]
 fn fork_filter_consecutive_users_with_tool_calls() {
-    use wimo ai_wimo_sampling_types::conversation::*;
+    use wimoai_wimo_sampling_types::conversation::*;
 
     let mut items = vec![
         ConversationItem::system("sys"),
@@ -69,7 +69,7 @@ fn fork_filter_consecutive_users_with_tool_calls() {
 }
 #[test]
 fn fork_filter_preserves_complete_tool_turn() {
-    use wimo ai_wimo_sampling_types::conversation::*;
+    use wimoai_wimo_sampling_types::conversation::*;
 
     let mut items = vec![
         ConversationItem::user("q"),
@@ -91,7 +91,7 @@ fn fork_filter_preserves_complete_tool_turn() {
 }
 #[test]
 fn fork_filter_strips_incomplete_tool_turn() {
-    use wimo ai_wimo_sampling_types::conversation::*;
+    use wimoai_wimo_sampling_types::conversation::*;
 
     let mut items = vec![
         ConversationItem::user("q1"),
@@ -120,13 +120,13 @@ fn fork_filter_strips_incomplete_tool_turn() {
 }
 #[test]
 fn fork_filter_keeps_turn_with_reasoning_between_user_and_assistant() {
-    use wimo ai_wimo_sampling_types::conversation::*;
+    use wimoai_wimo_sampling_types::conversation::*;
 
     // Reasoning between the user query and the assistant must not end the turn scan
     let mut items = vec![
         ConversationItem::system("sys"),
         ConversationItem::user("q"),
-        ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item(
+        ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item(
             "thinking",
         )),
         ConversationItem::assistant("a"),
@@ -141,13 +141,13 @@ fn fork_filter_keeps_turn_with_reasoning_between_user_and_assistant() {
 }
 #[test]
 fn fork_filter_keeps_multi_tool_turn_with_reasoning_between_results() {
-    use wimo ai_wimo_sampling_types::conversation::*;
+    use wimoai_wimo_sampling_types::conversation::*;
 
     // Reasoning between the tool results must not hide the second result from the completeness scan
     let mut items = vec![
         ConversationItem::system("sys"),
         ConversationItem::user("q"),
-        ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item("plan")),
+        ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item("plan")),
         ConversationItem::Assistant(AssistantItem {
             content: String::new().into(),
             tool_calls: vec![
@@ -167,9 +167,9 @@ fn fork_filter_keeps_multi_tool_turn_with_reasoning_between_results() {
             reasoning_effort: None,
         }),
         ConversationItem::tool_result("tc1", "out1"),
-        ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item("mid")),
+        ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item("mid")),
         ConversationItem::tool_result("tc2", "out2"),
-        ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item(
+        ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item(
             "reflect",
         )),
         ConversationItem::assistant("final"),
@@ -187,14 +187,14 @@ fn fork_filter_keeps_multi_tool_turn_with_reasoning_between_results() {
 }
 #[test]
 fn fork_filter_drops_trailing_incomplete_goal_turn_after_reasoning() {
-    use wimo ai_wimo_sampling_types::conversation::*;
+    use wimoai_wimo_sampling_types::conversation::*;
 
     // The /goal turn is still running: a trailing user message with no assistant reply
     // It must be dropped even though a Reasoning item sits before the prior assistant
     let mut items = vec![
         ConversationItem::system("sys"),
         ConversationItem::user("q"),
-        ConversationItem::Reasoning(wimo ai_wimo_sampling_types::synthesized_reasoning_item(
+        ConversationItem::Reasoning(wimoai_wimo_sampling_types::synthesized_reasoning_item(
             "thinking",
         )),
         ConversationItem::assistant("a"),

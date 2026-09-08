@@ -216,14 +216,14 @@ pub(crate) fn auto_mode_classifier_defaults(
     cfg: &crate::agent::config::AutoModeConfig,
     effective_supports_reasoning_effort: bool,
 ) -> (
-    wimo ai_wimo_workspace::permission::ClassifierPromptType,
-    Option<wimo ai_wimo_sampling_types::ReasoningEffort>,
+    wimoai_wimo_workspace::permission::ClassifierPromptType,
+    Option<wimoai_wimo_sampling_types::ReasoningEffort>,
 ) {
     let prompt_type = cfg
         .prompt_type
-        .unwrap_or(wimo ai_wimo_workspace::permission::ClassifierPromptType::Full);
+        .unwrap_or(wimoai_wimo_workspace::permission::ClassifierPromptType::Full);
     let reasoning_effort = cfg.reasoning_effort.or_else(|| {
-        effective_supports_reasoning_effort.then_some(wimo ai_wimo_sampling_types::ReasoningEffort::Low)
+        effective_supports_reasoning_effort.then_some(wimoai_wimo_sampling_types::ReasoningEffort::Low)
     });
     (prompt_type, reasoning_effort)
 }
@@ -413,7 +413,7 @@ mod auto_permission_mode_gate_tests {
 
     #[test]
     fn auto_mode_config_is_overlay_free() {
-        use wimo ai_wimo_workspace::permission::ClassifierPromptType;
+        use wimoai_wimo_workspace::permission::ClassifierPromptType;
 
         let user = crate::config::ConfigLayers {
             user: toml::from_str(
@@ -450,8 +450,8 @@ mod auto_permission_mode_gate_tests {
     #[test]
     fn merge_auto_mode_config_precedence() {
         use crate::agent::config::AutoModeConfig;
-        use wimo ai_wimo_sampling_types::ReasoningEffort;
-        use wimo ai_wimo_workspace::permission::ClassifierPromptType;
+        use wimoai_wimo_sampling_types::ReasoningEffort;
+        use wimoai_wimo_workspace::permission::ClassifierPromptType;
         // config wins where set; remote fills the gaps.
         let config = AutoModeConfig {
             enabled: Some(true),
@@ -525,8 +525,8 @@ mod auto_permission_mode_gate_tests {
     #[test]
     fn auto_mode_classifier_defaults_apply_when_unset() {
         use crate::agent::config::AutoModeConfig;
-        use wimo ai_wimo_sampling_types::ReasoningEffort;
-        use wimo ai_wimo_workspace::permission::ClassifierPromptType;
+        use wimoai_wimo_sampling_types::ReasoningEffort;
+        use wimoai_wimo_workspace::permission::ClassifierPromptType;
         // With config unset and an effective model that supports reasoning effort, the defaults are full (transcript) and low
         let (pt, eff) = auto_mode_classifier_defaults(&AutoModeConfig::default(), true);
         assert_eq!(pt, ClassifierPromptType::Full);
@@ -548,7 +548,7 @@ mod auto_permission_mode_gate_tests {
 
     #[test]
     fn auto_mode_config_from_toml_round_trips_and_warns_on_malformed() {
-        use wimo ai_wimo_workspace::permission::ClassifierPromptType;
+        use wimoai_wimo_workspace::permission::ClassifierPromptType;
         // A real [auto_mode] table round-trips (not silently dropped).
         let toml: TomlValue = toml::from_str(
             "[auto_mode]\nenabled = true\nprompt_type = \"just_command\"\nclassifier_model = \"m\"\nclassify_timeout_ms = 45000\n",
@@ -569,7 +569,7 @@ mod auto_permission_mode_gate_tests {
 
     #[test]
     fn remote_cache_single_store_killswitch_preserves_fields() {
-        use wimo ai_wimo_workspace::permission::ClassifierPromptType;
+        use wimoai_wimo_workspace::permission::ClassifierPromptType;
         let _g = guard();
         // Seed the full remote config, then flip ONLY the gate via the pager kill-switch path; classifier fields must survive
         cache_remote_auto_mode(Some(serde_json::json!({

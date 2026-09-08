@@ -7,7 +7,7 @@ use serial_test::serial;
 use std::sync::Arc as StdArc;
 use std::sync::atomic::{AtomicUsize, Ordering as SeqOrd};
 use tempfile::TempDir;
-use wimo ai_wimo_tools::implementations::wimo::task::types::{SubagentEvent, SubagentResult};
+use wimoai_wimo_tools::implementations::wimo::task::types::{SubagentEvent, SubagentResult};
 
 /// Pull the planner's plan-file path from the prompt by its backtick-quoted `.md` token.
 /// Rewording the surrounding sentence therefore can't silently break the fake, which would otherwise write nothing and fail far from the cause.
@@ -165,7 +165,7 @@ async fn make_planner_actor(
 ) -> (StdArc<SessionActor>, TempDir) {
     let tmp = TempDir::new().expect("tempdir");
     let (gateway_tx, _gateway_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+        tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
     let (persistence_tx, _persistence_rx) =
         tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
     let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
@@ -194,7 +194,7 @@ async fn make_planner_actor_capturing(
 ) {
     let tmp = TempDir::new().expect("tempdir");
     let (gateway_tx, _gateway_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_acp_lib::AcpClientMessage>();
+        tokio::sync::mpsc::unbounded_channel::<wimoai_acp_lib::AcpClientMessage>();
     let (persistence_tx, persistence_rx) = tokio::sync::mpsc::unbounded_channel::<PersistenceMsg>();
     let mut actor = create_test_actor(0, 256_000, 85, gateway_tx, persistence_tx).await;
     actor.events = crate::session::events::EventTracker::new(tmp.path());
@@ -216,7 +216,7 @@ fn drain_goal_planning_flags(
 ) -> Vec<Option<bool>> {
     let mut out = Vec::new();
     while let Ok(msg) = rx.try_recv() {
-        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimo ai(n)) = msg
+        if let PersistenceMsg::Update(crate::session::storage::SessionUpdate::wimoai(n)) = msg
             && let crate::extensions::notification::SessionUpdate::GoalUpdated { planning, .. } =
                 n.update
         {

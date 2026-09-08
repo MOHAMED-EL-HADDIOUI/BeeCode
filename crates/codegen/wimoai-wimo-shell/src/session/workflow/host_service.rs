@@ -5,12 +5,12 @@ use std::time::Duration;
 
 use tokio::sync::{mpsc, oneshot};
 use tokio_util::sync::CancellationToken;
-use wimo ai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
-use wimo ai_wimo_tools::implementations::wimo::task::types::{
+use wimoai_wimo_tools::implementations::wimo::task::backend::{ChannelBackend, SubagentBackend};
+use wimoai_wimo_tools::implementations::wimo::task::types::{
     ModelOverrideProvenance, SubagentCancelRequest, SubagentCancelTarget, SubagentEvent,
     SubagentOwner, SubagentRequest, SubagentRuntimeOverrides,
 };
-use wimo ai_workflow::{AgentOpts, AgentResult, BudgetState, HostError, WorkflowHostRequest};
+use wimoai_workflow::{AgentOpts, AgentResult, BudgetState, HostError, WorkflowHostRequest};
 
 use super::notify::WorkflowNotifySender;
 use super::schema_contract::{
@@ -19,7 +19,7 @@ use super::schema_contract::{
 use super::tracker::WorkflowTracker;
 
 pub(crate) const WORKFLOW_MAX_AGENT_RUNS: u32 =
-    (wimo ai_workflow::MAX_AGENT_BUDGET as u32) * (SCHEMA_CONTRACT_RETRIES + 1);
+    (wimoai_workflow::MAX_AGENT_BUDGET as u32) * (SCHEMA_CONTRACT_RETRIES + 1);
 pub(crate) const DEFAULT_WORKFLOW_MAX_CONCURRENT_AGENTS: usize = 32;
 
 /// The configured cap clamped to the machine's parallelism, so small hosts run fewer agents at once.
@@ -79,11 +79,11 @@ pub(crate) struct WorkflowHostParams {
     pub store: super::store::WorkflowRunStore,
     pub notify: WorkflowNotifySender,
     pub subagent_event_tx: mpsc::UnboundedSender<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
     >,
     pub parent_session_id: String,
     pub allow_fork_context: bool,
-    pub effort: Option<wimo ai_wimo_sampling_types::ReasoningEffort>,
+    pub effort: Option<wimoai_wimo_sampling_types::ReasoningEffort>,
     pub templates: std::collections::HashMap<String, String>,
     pub telemetry: TelemetryHook,
     pub stats: Arc<WorkflowAgentStats>,
@@ -389,8 +389,8 @@ impl HostService {
                 if self.params.cancel.is_cancelled() {
                     return Err(HostError::Cancelled);
                 }
-                wimo ai_wimo_telemetry::session_ctx::log_event(
-                    wimo ai_wimo_telemetry::events::SubagentLimitHit::workflow_run_concurrent(
+                wimoai_wimo_telemetry::session_ctx::log_event(
+                    wimoai_wimo_telemetry::events::SubagentLimitHit::workflow_run_concurrent(
                         self.params.parent_session_id.clone(),
                         self.params.run_id.clone(),
                         self.params.max_concurrent_agents as u64,
@@ -475,7 +475,7 @@ impl HostService {
             .as_deref()
             .map(|effort| {
                 effort
-                    .parse::<wimo ai_wimo_sampling_types::ReasoningEffort>()
+                    .parse::<wimoai_wimo_sampling_types::ReasoningEffort>()
                     .map_err(|error| {
                         HostError::Failed(format!("invalid workflow agent effort: {error}"))
                     })
@@ -498,7 +498,7 @@ impl HostService {
         };
         let isolation = opts
             .isolation_worktree
-            .then_some(wimo ai_tool_types::SubagentIsolationMode::Worktree);
+            .then_some(wimoai_tool_types::SubagentIsolationMode::Worktree);
         let subagent_type = opts
             .agent_type
             .clone()
@@ -939,8 +939,8 @@ impl HostService {
             .stdin(std::process::Stdio::null())
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped())
-            .envs(wimo ai_tty_utils::pager_env());
-        wimo ai_tty_utils::detach_command(&mut cmd);
+            .envs(wimoai_tty_utils::pager_env());
+        wimoai_tty_utils::detach_command(&mut cmd);
 
         let output = tokio::time::timeout(DIFF_TIMEOUT, cmd.output())
             .await
@@ -982,7 +982,7 @@ mod tests {
         scratch_suffix: &str,
         tracker: Arc<parking_lot::Mutex<WorkflowTracker>>,
         subagent_event_tx: mpsc::UnboundedSender<
-            wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+            wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
         >,
     ) -> (WorkflowHostParams, mpsc::UnboundedReceiver<PersistenceMsg>) {
         let (persist_tx, persist_rx) = mpsc::unbounded_channel::<PersistenceMsg>();
@@ -990,7 +990,7 @@ mod tests {
         let (gateway_tx, _gateway_rx) = mpsc::unbounded_channel();
         let notify = WorkflowNotifySender::new(
             agent_client_protocol::SessionId::new("test-session"),
-            wimo ai_acp_lib::AcpAgentGatewaySender::new(gateway_tx),
+            wimoai_acp_lib::AcpAgentGatewaySender::new(gateway_tx),
             persist_tx,
             store.clone(),
         );
@@ -1172,10 +1172,10 @@ mod tests {
                 .unwrap();
             reply_rx
         };
-        let succeed = |spawn: wimo ai_wimo_tools::implementations::wimo::task::types::SubagentSpawnRequest| {
+        let succeed = |spawn: wimoai_wimo_tools::implementations::wimo::task::types::SubagentSpawnRequest| {
             spawn
                 .respond_with(|request| {
-                    wimo ai_wimo_tools::implementations::wimo::task::types::SubagentResult {
+                    wimoai_wimo_tools::implementations::wimo::task::types::SubagentResult {
                         success: true,
                         output: Arc::from("done"),
                         subagent_id: request.id.clone(),

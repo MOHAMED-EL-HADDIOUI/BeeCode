@@ -1,4 +1,4 @@
-//! Implements `wimo ai-wimo-tools::TerminalBackend` over ACP gateway calls, for bash execution when the client serves the terminal.
+//! Implements `wimoai-wimo-tools::TerminalBackend` over ACP gateway calls, for bash execution when the client serves the terminal.
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -8,8 +8,8 @@ use std::time::Duration;
 use super::exit_watcher::{poll_for_terminal_exit, release_terminal, watch_for_exit};
 use super::output_recorder::{OutputRecorder, read_log_tail};
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::{AcpAgentGatewaySender as GatewaySender, acp_channel_failure};
-use wimo ai_wimo_tools::computer::types::{
+use wimoai_acp_lib::{AcpAgentGatewaySender as GatewaySender, acp_channel_failure};
+use wimoai_wimo_tools::computer::types::{
     BackgroundHandle, ComputerError, KillOutcome, KillSource, TaskKind, TaskSnapshot,
     TerminalBackend, TerminalRunRequest, TerminalRunResult,
 };
@@ -168,7 +168,7 @@ pub(super) fn parse_exit(
     }
 }
 
-/// Wraps wimo ai-wimo-shell's ACP gateway to satisfy wimo ai-wimo-tools' TerminalBackend.
+/// Wraps wimoai-wimo-shell's ACP gateway to satisfy wimoai-wimo-tools' TerminalBackend.
 pub struct AcpTerminalAdapter {
     gateway: GatewaySender,
     session_id: acp::SessionId,

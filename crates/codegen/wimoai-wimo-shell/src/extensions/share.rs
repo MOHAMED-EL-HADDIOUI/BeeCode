@@ -14,7 +14,7 @@ use crate::session::info::Info as SessionInfo;
 use crate::session::persistence::list_summaries;
 use crate::session::share::{ShareSessionRequest, ShareSessionResponse};
 use crate::upload::trace::{SessionMetadataType, upload_session_metadata};
-use wimo ai_wimo_telemetry::id::agent_id;
+use wimoai_wimo_telemetry::id::agent_id;
 
 #[tracing::instrument(skip_all, fields(method = %args.method))]
 pub async fn handle(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
@@ -30,7 +30,7 @@ pub async fn handle(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
 async fn handle_share_session(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
     let request: ShareSessionRequest = parse_params(args)?;
 
-    let auth = require_wimo ai_auth_for_share(&agent.auth_manager)?;
+    let auth = require_wimoai_auth_for_share(&agent.auth_manager)?;
 
     // Remote settings / feature-flag gate: sharing_enabled defaults to false and is only enabled for eligible accounts
     let sharing_enabled = agent
@@ -142,7 +142,7 @@ async fn upload_share_data_to_gcs(
     let gcs_path = format!("share/{}_{}_data.json", session_id, timestamp);
 
     use crate::upload::gcs::WithAuth as _;
-    if let Err(e) = wimo ai_file_utils::gcs::upload_bytes_signed(
+    if let Err(e) = wimoai_file_utils::gcs::upload_bytes_signed(
         &gcs_config.with_auth(auth_manager),
         &gcs_path,
         &data_json,
@@ -159,10 +159,10 @@ async fn upload_share_data_to_gcs(
     }
 }
 
-fn require_wimo ai_auth_for_share(
+fn require_wimoai_auth_for_share(
     auth_manager: &crate::auth::AuthManager,
 ) -> Result<crate::auth::wimoAuth, acp::Error> {
-    super::auth_gate::require_wimo ai_auth(
+    super::auth_gate::require_wimoai_auth(
         auth_manager,
         "Authentication required to share session",
         "Share session is disabled. Run `wimo login` to authenticate.",
@@ -190,8 +190,8 @@ mod tests {
         let expires_at = Utc::now() + ttl;
 
         // We must explicitly set oidc_issuer to a first-party wimo AI issuer.
-        // Only OIDC tokens against https://auth.x.ai (or the local-dev equivalent) return true from is_wimo ai_auth()
-        // The share tests need that to exercise the happy path through require_wimo ai_auth_for_share
+        // Only OIDC tokens against https://auth.x.ai (or the local-dev equivalent) return true from is_wimoai_auth()
+        // The share tests need that to exercise the happy path through require_wimoai_auth_for_share
         let auth = wimoAuth {
             auth_mode: AuthMode::Oidc,
             oidc_issuer: Some("https://auth.x.ai".to_string()),
@@ -208,7 +208,7 @@ mod tests {
     fn share_works_outside_the_5m_early_invalidation_window() {
         let (mgr, _dir) = make_auth_manager_with_token_expiring_in(Duration::minutes(10));
         assert!(mgr.current().is_some());
-        assert!(require_wimo ai_auth_for_share(&mgr).is_ok());
+        assert!(require_wimoai_auth_for_share(&mgr).is_ok());
     }
 
     #[test]
@@ -221,11 +221,11 @@ mod tests {
         );
         assert!(mgr.expired_auth().is_some());
 
-        // require_wimo ai_auth_for_share reads current_or_expired(), so this passes
-        let res = require_wimo ai_auth_for_share(&mgr);
+        // require_wimoai_auth_for_share reads current_or_expired(), so this passes
+        let res = require_wimoai_auth_for_share(&mgr);
         assert!(
             res.is_ok(),
-            "require_wimo ai_auth_for_share must succeed for a still-valid buffered wimo AI token"
+            "require_wimoai_auth_for_share must succeed for a still-valid buffered wimo AI token"
         );
     }
 
@@ -236,11 +236,11 @@ mod tests {
             dir.path(),
             wimoComConfig::default(),
         ));
-        assert!(require_wimo ai_auth_for_share(&mgr).is_err());
+        assert!(require_wimoai_auth_for_share(&mgr).is_err());
     }
 
     #[test]
-    fn share_rejects_non_wimo ai_auth_with_actionable_wimo_login_message() {
+    fn share_rejects_non_wimoai_auth_with_actionable_wimo_login_message() {
         let dir = tempdir().expect("tempdir");
         let mgr = Arc::new(crate::auth::AuthManager::new(
             dir.path(),
@@ -248,15 +248,15 @@ mod tests {
         ));
 
         // API key is the simplest non-wimo AI credential (External and enterprise OIDC are also rejected the same way)
-        let non_wimo ai = wimoAuth {
+        let non_wimoai = wimoAuth {
             auth_mode: AuthMode::ApiKey,
-            key: "wimo ai-test-key".into(),
+            key: "wimoai-test-key".into(),
             create_time: Utc::now(),
             ..Default::default()
         };
-        mgr.hot_swap(non_wimo ai);
+        mgr.hot_swap(non_wimoai);
 
-        let err = require_wimo ai_auth_for_share(&mgr)
+        let err = require_wimoai_auth_for_share(&mgr)
             .expect_err("non-wimo AI accounts (API key, External, enterprise IdP) must be rejected");
 
         // Test the *exact* actionable data string for the non-wimo AI path (distinct from the generic "Authentication required to share session" path)

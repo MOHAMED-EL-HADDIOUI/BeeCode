@@ -16,7 +16,7 @@
 //! Other workspace keys under the path, including nested git roots, are not covered.
 //! The persisted file is written atomically with owner-only (`0600`) permissions.
 //!
-//! The store is rooted at [`wimo ai_wimo_config::user_wimo_home`], never the cwd-relative `./.wimo` fallback.
+//! The store is rooted at [`wimoai_wimo_config::user_wimo_home`], never the cwd-relative `./.wimo` fallback.
 //! That home is `None` when neither `$wimo_HOME` nor a home directory is set (e.g. a minimal container / CI).
 //! In that no-home environment [`TrustStore::load`] yields an empty store that trusts nothing and persists nothing.
 //! So a cloned repo can never ship a `./.wimo/trusted_folders.toml` that self-trusts its own checkout (fail closed).
@@ -30,7 +30,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde::{Deserialize, Serialize};
 
 /// Filename of the folder-trust store under `~/.wimo/`.
-pub const TRUST_FILE_NAME: &str = wimo ai_wimo_config::TRUSTED_FOLDERS_FILENAME;
+pub const TRUST_FILE_NAME: &str = wimoai_wimo_config::TRUSTED_FOLDERS_FILENAME;
 
 /// A single folder's trust record.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -95,10 +95,10 @@ impl TrustStore {
 
     /// Default on-disk path: `<user_wimo_home>/trusted_folders.toml`, or `None` when no user home resolves.
     ///
-    /// Resolves via [`wimo ai_wimo_config::user_wimo_home`], never [`wimo ai_wimo_config::wimo_home`], so it never falls back to a cwd-relative `./.wimo`.
+    /// Resolves via [`wimoai_wimo_config::user_wimo_home`], never [`wimoai_wimo_config::wimo_home`], so it never falls back to a cwd-relative `./.wimo`.
     /// That fallback would let an untrusted cloned repo's `.wimo` masquerade as the user-global store and self-trust the checkout.
     pub fn default_path() -> Option<PathBuf> {
-        Self::default_path_in(wimo ai_wimo_config::user_wimo_home())
+        Self::default_path_in(wimoai_wimo_config::user_wimo_home())
     }
 
     /// Map a resolved user-wimo-home to the store path, preserving "no home" as "no path" (never synthesizing a fallback).
@@ -368,7 +368,7 @@ fn git_derived_workspace_key(cwd: &Path) -> PathBuf {
 
 /// Whether `path` resolves to the user's home directory.
 pub fn is_home_dir(path: &Path) -> bool {
-    let Some(home) = wimo ai_dirs::home_dir() else {
+    let Some(home) = wimoai_dirs::home_dir() else {
         return false;
     };
     canonicalize_or_owned(path) == canonicalize_or_owned(&home)
@@ -443,7 +443,7 @@ pub fn migrate_legacy_hook_trust() {
     }
     static MIGRATED: Once = Once::new();
     MIGRATED.call_once(|| {
-        let Some(legacy_file) = wimo ai_wimo_hooks::trust::legacy_trust_file_path() else {
+        let Some(legacy_file) = wimoai_wimo_hooks::trust::legacy_trust_file_path() else {
             return;
         };
         let mut store = TrustStore::load();
@@ -462,7 +462,7 @@ pub fn migrate_legacy_hook_trust() {
 fn migrate_legacy_hook_trust_in(legacy_file: &Path, store: &mut TrustStore) -> usize {
     // A read error must NOT be mistaken for "no grants": bail without renaming
     // A transient/permission failure then can't permanently consume the legacy file
-    let projects = match wimo ai_wimo_hooks::trust::list_trusted_projects_with_file(legacy_file) {
+    let projects = match wimoai_wimo_hooks::trust::list_trusted_projects_with_file(legacy_file) {
         Ok(p) => p,
         Err(e) => {
             tracing::warn!(
@@ -671,7 +671,7 @@ mod tests {
         // The real regression guard is `default_path_in(None) == None` above
         assert_eq!(
             TrustStore::default_path(),
-            wimo ai_wimo_config::user_wimo_home().map(|h| h.join(TRUST_FILE_NAME))
+            wimoai_wimo_config::user_wimo_home().map(|h| h.join(TRUST_FILE_NAME))
         );
     }
 
@@ -964,7 +964,7 @@ mod tests {
             .unwrap_or_else(|e| e.into_inner());
         let tmp = tempfile::tempdir().unwrap();
         let store_path = tmp.path().join(TRUST_FILE_NAME);
-        let Some(home) = wimo ai_dirs::home_dir() else {
+        let Some(home) = wimoai_dirs::home_dir() else {
             return; // no home dir in this environment; nothing to assert
         };
 
@@ -996,7 +996,7 @@ mod tests {
     #[test]
     fn workspace_key_ignores_home_git_repo_for_subdir() {
         // Home-is-a-git-repo (dotfiles in $HOME): the git up-walk finds home as the repo root, but a subdir must key on the SUBDIR, not $HOME
-        // Pin HOME and USERPROFILE: wimo ai_dirs::home_dir reads USERPROFILE on Windows
+        // Pin HOME and USERPROFILE: wimoai_dirs::home_dir reads USERPROFILE on Windows
         let _lock = crate::ENV_TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
@@ -1109,7 +1109,7 @@ mod tests {
             .lock()
             .unwrap_or_else(|e| e.into_inner());
         // A hand-edited / migrated `[folders."<home>"]` record must not trust repos under $HOME; the read side ignores it, matching set_trusted
-        let Some(home) = wimo ai_dirs::home_dir() else {
+        let Some(home) = wimoai_dirs::home_dir() else {
             return; // no home dir in this environment; nothing to assert
         };
         let canonical_home = canonicalize_or_owned(&home);
@@ -1420,7 +1420,7 @@ mod tests {
         source_repo: &Path,
         creation_mode: &str,
     ) -> (LockedTestEnv, PathBuf) {
-        use wimo ai_fast_worktree::{WorktreeDb, WorktreeKind, WorktreeRecord, WorktreeStatus};
+        use wimoai_fast_worktree::{WorktreeDb, WorktreeKind, WorktreeRecord, WorktreeStatus};
 
         // Canonicalize so macOS's `/var` (a symlink to `/private/var`) agrees between the stored record path and the canonicalized lookup query
         let root = dunce::canonicalize(temp.path()).unwrap();

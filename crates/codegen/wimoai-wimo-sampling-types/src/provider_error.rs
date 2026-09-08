@@ -300,7 +300,7 @@ mod tests {
             None,
         ),
         (
-            "wimo ai_flat_sentence_code",
+            "wimoai_flat_sentence_code",
             r#"{"code":"The service is currently unavailable","error":"Service temporarily unavailable."}"#,
             "Service temporarily unavailable.",
             None,

@@ -7,9 +7,9 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 
-use wimo ai_wimo_shell::tools::{TodoItem, TodoStatus};
+use wimoai_wimo_shell::tools::{TodoItem, TodoStatus};
 
-use wimo ai_wimo_shell::extensions::notification::GoalClassifierVerdict;
+use wimoai_wimo_shell::extensions::notification::GoalClassifierVerdict;
 
 use crate::app::agent::{GoalDisplayState, GoalDisplayStatus};
 use crate::render::SafeBuf;

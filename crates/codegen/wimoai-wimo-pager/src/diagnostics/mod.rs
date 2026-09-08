@@ -51,10 +51,10 @@ pub use view::{DiagnosticSnapshot, view};
 /// The TUI passes true only while voice mode is enabled.
 /// Standalone doctor uses the same finding whenever this build supports capture and the probe is missing.
 pub fn apply_voice_probe(report: &mut DiagnosticReport, emit_missing_issue: bool) {
-    if !wimo ai_wimo_voice::AUDIO_SUPPORTED {
+    if !wimoai_wimo_voice::AUDIO_SUPPORTED {
         return;
     }
-    match wimo ai_wimo_voice::input_device_info() {
+    match wimoai_wimo_voice::input_device_info() {
         Ok(device) => {
             report.facts.voice = Some(VoiceFacts::Device {
                 name: device.name,
@@ -63,7 +63,7 @@ pub fn apply_voice_probe(report: &mut DiagnosticReport, emit_missing_issue: bool
         }
         Err(err) => {
             let error = match err {
-                wimo ai_wimo_voice::VoiceError::Config(message) => message,
+                wimoai_wimo_voice::VoiceError::Config(message) => message,
                 other => other.to_string(),
             };
             report.facts.voice = Some(VoiceFacts::Missing {
@@ -396,7 +396,7 @@ pub(crate) fn wezterm_kitty_keyboard_warning_from(
 }
 
 pub fn sandbox_profile_conflict_warning(workspace: &Path) -> Option<TerminalWarning> {
-    sandbox_profile_conflict_warning_from(wimo ai_wimo_sandbox::sandbox_profile_conflicts(workspace))
+    sandbox_profile_conflict_warning_from(wimoai_wimo_sandbox::sandbox_profile_conflicts(workspace))
 }
 
 fn sandbox_profile_conflict_warning_from(conflicts: Vec<String>) -> Option<TerminalWarning> {
@@ -419,7 +419,7 @@ fn sandbox_profile_conflict_warning_from(conflicts: Vec<String>) -> Option<Termi
             "wimo is using the user profile. Compare `.wimo/sandbox.toml` with {}, then rename \
              or remove the conflicting project profile. Project settings can add profile names \
              but can't redefine a user profile.",
-            crate::util::display_user_wimo_path(wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME)
+            crate::util::display_user_wimo_path(wimoai_wimo_config::SANDBOX_CONFIG_FILENAME)
         )),
     })
 }
@@ -573,7 +573,7 @@ pub(crate) fn collect_notification_warnings_with_method(
             "If the bell works for you, no change is needed. Otherwise, set `method` in \
              `[ui.notifications]` in {} to a protocol your terminal supports. Set it to `none` \
              to turn off terminal notifications.",
-            crate::util::display_user_wimo_path(wimo ai_wimo_config::USER_CONFIG_FILENAME)
+            crate::util::display_user_wimo_path(wimoai_wimo_config::USER_CONFIG_FILENAME)
         ));
         warnings.push(warning);
     }
@@ -606,7 +606,7 @@ pub(crate) fn collect_notification_warnings_with_method(
             "This terminal may not report focus changes, so notifications set to `unfocused` may not appear",
             Some("condition = \"always\" in [ui.notifications]"),
             Some(&crate::util::display_user_wimo_path(
-                wimo ai_wimo_config::USER_CONFIG_FILENAME,
+                wimoai_wimo_config::USER_CONFIG_FILENAME,
             )),
         );
         warning.note = Some(
@@ -2052,7 +2052,7 @@ mod tests {
             note.contains("rename or remove")
                 && note.contains(".wimo/sandbox.toml")
                 && note.contains(&crate::util::display_user_wimo_path(
-                    wimo ai_wimo_config::SANDBOX_CONFIG_FILENAME,
+                    wimoai_wimo_config::SANDBOX_CONFIG_FILENAME,
                 ))
                 && note.contains("can't redefine")
         }));
@@ -2440,7 +2440,7 @@ mod tests {
             remediation.fix.contains("condition = \"always\"")
                 && remediation.config_path.as_deref()
                     == Some(
-                        crate::util::display_user_wimo_path(wimo ai_wimo_config::USER_CONFIG_FILENAME)
+                        crate::util::display_user_wimo_path(wimoai_wimo_config::USER_CONFIG_FILENAME)
                             .as_str(),
                     )
         }));

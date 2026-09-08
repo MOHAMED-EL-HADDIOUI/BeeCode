@@ -39,7 +39,7 @@ async fn handle_record(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
     let url = format!("{proxy_url}/consent/accept");
     let token_header = agent.auth_manager.wimo_com_config().token_header.clone();
 
-    let provider: std::sync::Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider> = std::sync::Arc::new(
+    let provider: std::sync::Arc<dyn wimoai_wimo_auth::AuthCredentialProvider> = std::sync::Arc::new(
         crate::auth::credential_provider::ShellAuthCredentialProvider::new(
             agent.auth_manager.clone(),
             None,
@@ -56,8 +56,8 @@ async fn handle_record(agent: &MvpAgent, args: &acp::ExtRequest) -> ExtResult {
             "x-wimo-client-identifier",
             crate::http::process_client_identifier(),
         )
-        .header("X-wimo ai-Token-Auth", &token_header)
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+        .header("X-wimoai-Token-Auth", &token_header)
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
         .header(
             crate::http::CLIENT_MODE_HEADER,
             crate::http::process_client_mode(),

@@ -7,8 +7,8 @@ use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::oneshot;
 use url::Url;
-use wimo ai_file_utils::queue::{EnqueueOutcome, TraceExportSource, UploadQueue, UploadRetryPolicy};
-use wimo ai_wimo_workspace::permission::PermissionEvent;
+use wimoai_file_utils::queue::{EnqueueOutcome, TraceExportSource, UploadQueue, UploadRetryPolicy};
+use wimoai_wimo_workspace::permission::PermissionEvent;
 /// Upload the canonical tool definitions trace and wait for completion.
 ///
 /// `ToolDefinition` serializes in Chat Completions format: `{ "type": "function", "function": { ... } }`.
@@ -37,7 +37,7 @@ pub(crate) async fn upload_tool_definitions(
         format!("{prefix}/tool_definitions.json")
     };
     use crate::upload::gcs::WithAuth as _;
-    let ok = wimo ai_file_utils::gcs::upload_bytes(
+    let ok = wimoai_file_utils::gcs::upload_bytes(
         &gcs_config.with_auth(auth_manager),
         &object_path,
         &bytes,
@@ -207,9 +207,9 @@ pub(super) fn record_upload_failure(ctx: &PromptTraceContext, f: UploadFailure<'
         "phase": f.phase,
     }));
     if level == UploadFailureLogLevel::Warn {
-        wimo ai_wimo_telemetry::unified_log::warn(&msg, sid, log_ctx);
+        wimoai_wimo_telemetry::unified_log::warn(&msg, sid, log_ctx);
     } else {
-        wimo ai_wimo_telemetry::unified_log::error(&msg, sid, log_ctx);
+        wimoai_wimo_telemetry::unified_log::error(&msg, sid, log_ctx);
     }
 }
 /// Increment when making breaking changes to PromptMetadata structure.
@@ -217,10 +217,10 @@ pub(crate) use prod_mc_cli_chat_proxy_types::{
     GCS_SCHEMA_VERSION, LocalSandboxTelemetry, PromptMetadata, PromptMetadataParams,
 };
 pub(crate) fn local_sandbox_telemetry() -> Option<LocalSandboxTelemetry> {
-    let profile = wimo ai_wimo_sandbox::configured_profile_name()?;
+    let profile = wimoai_wimo_sandbox::configured_profile_name()?;
     Some(LocalSandboxTelemetry {
         profile: profile.to_owned(),
-        applied: wimo ai_wimo_sandbox::is_active(),
+        applied: wimoai_wimo_sandbox::is_active(),
     })
 }
 /// In CI environments, git config may inject access tokens via URL rewriting (e.g., `url."https://x-access-token:TOKEN@github.com/".insteadOf`).
@@ -258,7 +258,7 @@ fn classify_workspace(cwd: &str) -> String {
     let path = std::path::Path::new(cwd);
     if path.ancestors().any(|p| p.join(".git").exists()) {
         "git".to_owned()
-    } else if wimo ai_file_utils::workspace_classifier::is_project_dir(path) {
+    } else if wimoai_file_utils::workspace_classifier::is_project_dir(path) {
         "project".to_owned()
     } else {
         "non_project".to_owned()
@@ -401,7 +401,7 @@ pub(crate) async fn upload_subagent_metadata(
     let config = base_config.with_auth(Some(auth_manager));
     match tokio::time::timeout(
         SUBAGENT_METADATA_UPLOAD_BOUND,
-        wimo ai_file_utils::gcs::upload_bytes(&config, &gcs_path, &json, "application/json"),
+        wimoai_file_utils::gcs::upload_bytes(&config, &gcs_path, &json, "application/json"),
     )
     .await
     {
@@ -491,9 +491,9 @@ pub(crate) async fn upload_full_prompt_txt(
 /// Uploaded as `plugins.json` alongside other per-turn trace artifacts.
 pub(crate) async fn upload_plugin_state(
     ctx: &PromptTraceContext,
-    registry: Option<&wimo ai_wimo_agent::plugins::PluginRegistry>,
+    registry: Option<&wimoai_wimo_agent::plugins::PluginRegistry>,
 ) {
-    use wimo ai_wimo_agent::plugins::discovery::PluginScope;
+    use wimoai_wimo_agent::plugins::discovery::PluginScope;
     #[derive(serde::Serialize)]
     struct PluginEntry {
         name: String,
@@ -573,7 +573,7 @@ pub(crate) async fn upload_plugin_state(
     .await;
 }
 use super::gcs::WithAuth as _;
-use wimo ai_file_utils::gcs::upload_bytes;
+use wimoai_file_utils::gcs::upload_bytes;
 pub(crate) async fn upload_artifact_to_gcs(
     ctx: &PromptTraceContext,
     gcs_path: &str,
@@ -598,7 +598,7 @@ pub(crate) async fn upload_artifact_to_gcs(
         }
         Err(e) => {
             let status_code = e
-                .downcast_ref::<wimo ai_file_utils::storage_client::HttpUploadError>()
+                .downcast_ref::<wimoai_file_utils::storage_client::HttpUploadError>()
                 .map(|e| e.status_code);
             record_upload_failure(
                 ctx,
@@ -845,7 +845,7 @@ pub(crate) async fn upload_session_metadata(
 pub(crate) async fn upload_unified_log(ctx: &PromptTraceContext, wait: UploadWait) {
     let session_id = ctx.session_info.id.0.to_string();
     let log_bytes = match tokio::task::spawn_blocking(move || {
-        wimo ai_wimo_telemetry::unified_log::snapshot_session_log(&session_id)
+        wimoai_wimo_telemetry::unified_log::snapshot_session_log(&session_id)
     })
     .await
     {
@@ -882,7 +882,7 @@ pub(crate) async fn upload_unified_log(ctx: &PromptTraceContext, wait: UploadWai
     )
     .await;
     let full_log_bytes =
-        tokio::task::spawn_blocking(wimo ai_wimo_telemetry::unified_log::snapshot_log).await;
+        tokio::task::spawn_blocking(wimoai_wimo_telemetry::unified_log::snapshot_log).await;
     let user_id = ctx
         .auth_manager
         .current_or_expired()
@@ -933,7 +933,7 @@ pub(crate) async fn upload_permission_events(
 }
 pub(crate) async fn upload_turn_messages(
     ctx: &PromptTraceContext,
-    _capture: wimo ai_chat_state::TurnCapture,
+    _capture: wimoai_chat_state::TurnCapture,
     _wait: UploadWait,
 ) -> bool {
     super::manifest::skip_artifact(
@@ -958,7 +958,7 @@ fn session_state_archive_join_error(err: tokio::task::JoinError) -> SessionState
     }
 }
 fn serialize_chat_history_jsonl(
-    messages: &[wimo ai_wimo_sampling_types::conversation::ConversationItem],
+    messages: &[wimoai_wimo_sampling_types::conversation::ConversationItem],
 ) -> Result<Vec<u8>, SessionStateBuildError> {
     {
         let _ = messages;
@@ -1007,7 +1007,7 @@ fn compress_chat_history_archive(jsonl: Vec<u8>) -> Result<Vec<u8>, SessionState
 /// Empty `messages` yield a zero-byte payload the viewer treats as "no history".
 /// Harness pairs always carry at least one message, so this is only a safety floor.
 pub(crate) async fn build_chat_history_session_state(
-    messages: &[wimo ai_wimo_sampling_types::conversation::ConversationItem],
+    messages: &[wimoai_wimo_sampling_types::conversation::ConversationItem],
 ) -> Result<Vec<u8>, SessionStateBuildError> {
     let jsonl = serialize_chat_history_jsonl(messages)?;
     match tokio::task::spawn_blocking(move || compress_chat_history_archive(jsonl)).await {
@@ -1016,10 +1016,10 @@ pub(crate) async fn build_chat_history_session_state(
     }
 }
 pub(crate) async fn build_chat_history_then_move_capture(
-    capture: wimo ai_chat_state::TurnCapture,
+    capture: wimoai_chat_state::TurnCapture,
 ) -> (
     Result<Vec<u8>, SessionStateBuildError>,
-    wimo ai_chat_state::TurnCapture,
+    wimoai_chat_state::TurnCapture,
 ) {
     let session_state = build_chat_history_session_state(&capture.messages).await;
     (session_state, capture)
@@ -1070,14 +1070,14 @@ impl TraceExportSource for DynamicResolver {
     }
     fn proxy_attribution(
         &self,
-    ) -> Option<Arc<dyn wimo ai_file_utils::storage_client::Auth401AttributionCallback>> {
-        wimo ai_file_utils::gcs::StorageConfig::proxy_attribution(&self.with_auth())
+    ) -> Option<Arc<dyn wimoai_file_utils::storage_client::Auth401AttributionCallback>> {
+        wimoai_file_utils::gcs::StorageConfig::proxy_attribution(&self.with_auth())
     }
-    fn proxy_credentials(&self) -> Option<Arc<dyn wimo ai_wimo_auth::AuthCredentialProvider>> {
-        wimo ai_file_utils::gcs::StorageConfig::proxy_credentials(&self.with_auth())
+    fn proxy_credentials(&self) -> Option<Arc<dyn wimoai_wimo_auth::AuthCredentialProvider>> {
+        wimoai_file_utils::gcs::StorageConfig::proxy_credentials(&self.with_auth())
     }
     fn proxy_http_client(&self) -> Option<reqwest::Client> {
-        wimo ai_file_utils::gcs::StorageConfig::proxy_http_client(&self.with_auth())
+        wimoai_file_utils::gcs::StorageConfig::proxy_http_client(&self.with_auth())
     }
     fn has_usable_credential(&self) -> bool {
         if let crate::session::repo_changes::UploadMethod::Proxy {
@@ -1178,13 +1178,13 @@ pub(crate) fn spawn_startup_spill_reconcile(
         match queue {
             Some(queue) => {
                 let report =
-                    wimo ai_wimo_workspace::recovery::run_startup_recovery(&wimo_home, &queue).await;
+                    wimoai_wimo_workspace::recovery::run_startup_recovery(&wimo_home, &queue).await;
                 tracing::info!(?report, "startup spill recovery complete");
-                queue.cleanup_orphans(wimo ai_file_utils::queue::DEFAULT_MAX_AGE);
+                queue.cleanup_orphans(wimoai_file_utils::queue::DEFAULT_MAX_AGE);
             }
             None => {
                 let purged = tokio::task::spawn_blocking(move || {
-                    wimo ai_wimo_workspace::recovery::purge_spilled_items(&wimo_home)
+                    wimoai_wimo_workspace::recovery::purge_spilled_items(&wimo_home)
                 })
                 .await;
                 match purged {
@@ -2116,7 +2116,7 @@ pub(crate) mod tests {
     #[test]
     fn dynamic_resolver_supplies_proxy_credentials_and_attribution() {
         use crate::session::repo_changes::UploadMethod;
-        use wimo ai_file_utils::queue::TraceExportSource;
+        use wimoai_file_utils::queue::TraceExportSource;
         let dir = tempfile::tempdir().unwrap();
         let auth_manager = Arc::new(crate::auth::AuthManager::new(
             dir.path(),
@@ -2157,7 +2157,7 @@ pub(crate) mod tests {
     #[tokio::test]
     async fn dynamic_resolver_auth_recovery_wakes_on_already_rotated_token() {
         use crate::session::repo_changes::UploadMethod;
-        use wimo ai_file_utils::queue::TraceExportSource;
+        use wimoai_file_utils::queue::TraceExportSource;
         let dir = tempfile::tempdir().unwrap();
         let auth_manager = Arc::new(crate::auth::AuthManager::new(
             dir.path(),
@@ -2199,7 +2199,7 @@ pub(crate) mod tests {
     #[tokio::test]
     async fn dynamic_resolver_auth_recovery_ignores_session_token_for_deployment_key() {
         use crate::session::repo_changes::UploadMethod;
-        use wimo ai_file_utils::queue::TraceExportSource;
+        use wimoai_file_utils::queue::TraceExportSource;
         let dir = tempfile::tempdir().unwrap();
         let auth_manager = Arc::new(crate::auth::AuthManager::new(
             dir.path(),
@@ -2343,7 +2343,7 @@ pub(crate) mod tests {
     }
     #[test]
     fn chat_history_jsonl_is_empty_when_feature_disabled() {
-        use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+        use wimoai_wimo_sampling_types::conversation::ConversationItem;
         let messages = vec![ConversationItem::user("ignored without the feature")];
         let jsonl = serialize_chat_history_jsonl(&messages).unwrap();
         assert!(jsonl.is_empty());
@@ -2352,7 +2352,7 @@ pub(crate) mod tests {
     #[tokio::test(flavor = "current_thread")]
     #[serial_test::serial(archive_build_fault)]
     async fn chat_history_wrapper_ignores_messages_when_feature_disabled() {
-        use wimo ai_wimo_sampling_types::conversation::ConversationItem;
+        use wimoai_wimo_sampling_types::conversation::ConversationItem;
         let messages = vec![ConversationItem::user("must not appear in the archive")];
         let archive = build_chat_history_session_state(&messages).await.unwrap();
         let entries = read_tar_gz_entries(&archive);
@@ -2529,11 +2529,11 @@ pub(crate) mod tests {
     }
     /// Project dir under $HOME so `is_project_dir` passes; None in sandboxes or git-repo homes.
     fn home_project_dir() -> Option<tempfile::TempDir> {
-        let home = wimo ai_dirs::home_dir()?;
+        let home = wimoai_dirs::home_dir()?;
         if home.ancestors().any(|p| p.join(".git").exists()) {
             return None;
         }
-        if !wimo ai_file_utils::workspace_classifier::is_project_dir(&home.join("probe")) {
+        if !wimoai_file_utils::workspace_classifier::is_project_dir(&home.join("probe")) {
             return None;
         }
         tempfile::tempdir_in(home).ok()

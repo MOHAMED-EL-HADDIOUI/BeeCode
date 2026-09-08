@@ -5,7 +5,7 @@ use documented::{Documented, DocumentedFields};
 use ratatui::style::Color;
 use serde::{Deserialize, Serialize};
 use toml_edit::{DocumentMut, Item, RawString};
-use wimo ai_wimo_shared::ui_config::UiConfig;
+use wimoai_wimo_shared::ui_config::UiConfig;
 
 // ============================================================================
 // Runtime Config (used by render code)
@@ -1801,7 +1801,7 @@ static PAGER_TOML_SAVE_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 pub fn persist_respect_manual_folds(enabled: bool) -> std::io::Result<()> {
     use std::io::{Error, ErrorKind};
 
-    if wimo ai_wimo_config::user_wimo_home().is_none() {
+    if wimoai_wimo_config::user_wimo_home().is_none() {
         return Err(Error::new(
             ErrorKind::NotFound,
             "no user wimo home resolved; refusing to write a cwd-relative pager.toml \

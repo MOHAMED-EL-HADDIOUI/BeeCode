@@ -22,7 +22,7 @@ pub struct SearchFileMatch {
     pub matches: Vec<SearchLineMatch>,
 }
 
-/// Output mode mirroring `OutputMode` from wimo ai-wimo-tools.
+/// Output mode mirroring `OutputMode` from wimoai-wimo-tools.
 /// We keep our own copy to avoid pulling in that dependency.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum SearchOutputMode {

@@ -1,7 +1,7 @@
 //! Handler for x.ai/git/worktree/* extension methods.
 
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
 
 use crate::agent::mvp_agent::MvpAgent;
 use crate::session::ExtMethodResult;
@@ -13,12 +13,12 @@ use crate::session::worktree::{
     create_jj_workspace, create_worktree_async, create_worktree_from_worktree_async,
     rehydrate_session_in_worktree, resolve_session_repo_wide, resume_session_in_worktree,
 };
-use wimo ai_wimo_telemetry::instrument_task;
-use wimo ai_wimo_telemetry::region::Parent;
+use wimoai_wimo_telemetry::instrument_task;
+use wimoai_wimo_telemetry::region::Parent;
 
 type ExtResult = Result<acp::ExtResponse, acp::Error>;
 
-const WORKTREE_EXT_LOG: &str = "wimo ai_worktree";
+const WORKTREE_EXT_LOG: &str = "wimoai_worktree";
 
 /// Wrapper to send worktree progress notifications via gateway.
 #[derive(Clone)]
@@ -151,7 +151,7 @@ fn log_effective_worktree_type(
 #[tracing::instrument(name = "ext.worktree", skip_all, fields(method = %args.method))]
 pub async fn handle(
     agent: &MvpAgent,
-    ops: &wimo ai_wimo_workspace::WorkspaceOps,
+    ops: &wimoai_wimo_workspace::WorkspaceOps,
     args: &acp::ExtRequest,
 ) -> ExtResult {
     let worktree_type_default = agent.worktree_type;
@@ -228,7 +228,7 @@ pub async fn handle(
             );
             let result = ops
                 .dispatch(
-                    &wimo ai_wimo_workspace::workspace_ops::PrepareWorktreeFromWorktreeReq {
+                    &wimoai_wimo_workspace::workspace_ops::PrepareWorktreeFromWorktreeReq {
                         inner: req.clone(),
                     },
                     None,
@@ -273,7 +273,7 @@ pub async fn handle(
             let source_path = std::path::Path::new(&req.source_worktree_path);
             let resolved_root = ops
                 .dispatch(
-                    &wimo ai_wimo_workspace::workspace_ops::GitResolveRootReq {
+                    &wimoai_wimo_workspace::workspace_ops::GitResolveRootReq {
                         cwd: source_path.to_path_buf(),
                     },
                     None,
@@ -284,13 +284,13 @@ pub async fn handle(
             if let Some(git_root) = resolved_root {
                 let vcs_kind = ops
                     .dispatch(
-                        &wimo ai_wimo_workspace::workspace_ops::DetectVcsKindReq {
+                        &wimoai_wimo_workspace::workspace_ops::DetectVcsKindReq {
                             path: git_root.clone(),
                         },
                         None,
                     )
                     .await
-                    .unwrap_or(wimo ai_wimo_workspace::session::git::VcsKind::Git);
+                    .unwrap_or(wimoai_wimo_workspace::session::git::VcsKind::Git);
                 if vcs_kind.is_jj() {
                     tracing::info!("using jj workspace for subagent isolation");
                     return to_response(create_jj_workspace(&req).await);
@@ -310,7 +310,7 @@ pub async fn handle(
             );
             let result = ops
                 .dispatch(
-                    &wimo ai_wimo_workspace::workspace_ops::CreateWorktreeFromWorktreeSyncReq {
+                    &wimoai_wimo_workspace::workspace_ops::CreateWorktreeFromWorktreeSyncReq {
                         inner: req.into_wire(),
                     },
                     None,
@@ -332,7 +332,7 @@ pub async fn handle(
             apply_grove_worktree_flag(agent, &mut grove_worktree);
             let grove_worktree = grove_worktree.unwrap_or(false);
             let registry_client = agent.session_registry_client();
-            let agent_id = wimo ai_wimo_telemetry::id::agent_id();
+            let agent_id = wimoai_wimo_telemetry::id::agent_id();
 
             to_response(
                 resume_session_in_worktree(
@@ -381,7 +381,7 @@ pub async fn handle(
         }
         // ── Worktree management methods ──────────────────────────────────
         "x.ai/git/worktree/list" => {
-            let req: wimo ai_wimo_workspace::workspace_ops::WorktreeListReq =
+            let req: wimoai_wimo_workspace::workspace_ops::WorktreeListReq =
                 serde_json::from_str(args.params.get())
                     .map_err(|e| acp::Error::internal_error().data(e.to_string()))?;
             let result = ops
@@ -392,7 +392,7 @@ pub async fn handle(
         }
         "x.ai/git/worktree/show" => {
             let req = serde_json::from_str::<ShowWorktreeRequest>(args.params.get())?;
-            let op = wimo ai_wimo_workspace::workspace_ops::WorktreeShowReq {
+            let op = wimoai_wimo_workspace::workspace_ops::WorktreeShowReq {
                 id_or_path: req.id_or_path,
             };
             let result = ops
@@ -404,7 +404,7 @@ pub async fn handle(
         "x.ai/git/worktree/gc" => {
             let req = serde_json::from_str::<GcWorktreeRequest>(args.params.get())?;
             let max_age_secs = req.max_age.as_deref().map(parse_duration).transpose()?;
-            let op = wimo ai_wimo_workspace::workspace_ops::WorktreeGcReq {
+            let op = wimoai_wimo_workspace::workspace_ops::WorktreeGcReq {
                 dry_run: req.dry_run,
                 max_age_secs,
                 force: req.force,
@@ -418,7 +418,7 @@ pub async fn handle(
         "x.ai/git/worktree/db/stats" => {
             let result = ops
                 .dispatch(
-                    &wimo ai_wimo_workspace::workspace_ops::WorktreeDbStatsReq {},
+                    &wimoai_wimo_workspace::workspace_ops::WorktreeDbStatsReq {},
                     None,
                 )
                 .await
@@ -428,7 +428,7 @@ pub async fn handle(
         "x.ai/git/worktree/db/rebuild" => {
             let result = ops
                 .dispatch(
-                    &wimo ai_wimo_workspace::workspace_ops::WorktreeDbRebuildReq {},
+                    &wimoai_wimo_workspace::workspace_ops::WorktreeDbRebuildReq {},
                     None,
                 )
                 .await
@@ -438,7 +438,7 @@ pub async fn handle(
         "x.ai/git/worktree/db/path" => {
             let result = ops
                 .dispatch(
-                    &wimo ai_wimo_workspace::workspace_ops::WorktreeDbPathReq {},
+                    &wimoai_wimo_workspace::workspace_ops::WorktreeDbPathReq {},
                     None,
                 )
                 .await
@@ -456,7 +456,7 @@ pub async fn handle(
             let req = serde_json::from_str::<DetachReq>(args.params.get())?;
             let result = ops
                 .dispatch(
-                    &wimo ai_wimo_workspace::workspace_ops::WorktreeDetachReq {
+                    &wimoai_wimo_workspace::workspace_ops::WorktreeDetachReq {
                         id_or_path: req.id_or_path,
                         allow_copy: req.allow_copy,
                     },
@@ -476,7 +476,7 @@ pub async fn handle(
             let req = serde_json::from_str::<SalvageReq>(args.params.get())?;
             let result = ops
                 .dispatch(
-                    &wimo ai_wimo_workspace::workspace_ops::WorktreeSalvageReq {
+                    &wimoai_wimo_workspace::workspace_ops::WorktreeSalvageReq {
                         id_or_path: req.id_or_path,
                         out: req.out,
                     },
@@ -495,7 +495,7 @@ pub async fn handle(
             let req = serde_json::from_str::<CleanReq>(args.params.get())?;
             let result = ops
                 .dispatch(
-                    &wimo ai_wimo_workspace::workspace_ops::WorktreeCleanArtifactsReq {
+                    &wimoai_wimo_workspace::workspace_ops::WorktreeCleanArtifactsReq {
                         id_or_path: req.id_or_path,
                     },
                     None,
@@ -545,9 +545,9 @@ mod tests {
 
     #[test]
     fn list_request_with_filters() {
-        let json = r#"{"repo": "wimo ai", "type": ["session", "fork"], "includeAll": true}"#;
+        let json = r#"{"repo": "wimoai", "type": ["session", "fork"], "includeAll": true}"#;
         let req: ListWorktreeRequest = serde_json::from_str(json).unwrap();
-        assert_eq!(req.repo.as_deref(), Some("wimo ai"));
+        assert_eq!(req.repo.as_deref(), Some("wimoai"));
         assert_eq!(req.r#type, vec!["session", "fork"]);
         assert!(req.include_all);
     }

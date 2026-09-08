@@ -1,9 +1,9 @@
 //! Server-authoritative prompt queue wire types.
 //!
-//! Canonical definitions live in `wimo ai_prompt_queue`.
-//! This re-export keeps every existing `crate::session::prompt_queue::*` and `wimo ai_wimo_shell::session::prompt_queue::*` path resolving without edits.
+//! Canonical definitions live in `wimoai_prompt_queue`.
+//! This re-export keeps every existing `crate::session::prompt_queue::*` and `wimoai_wimo_shell::session::prompt_queue::*` path resolving without edits.
 
-pub use wimo ai_prompt_queue::{
+pub use wimoai_prompt_queue::{
     COMBINED_DISPLAY_TEXTS_META, CombineGate, QueueChanged, QueueEntryMeta, QueueEntryWire,
     TEXT_SEPARATOR, combine_prefix_len, is_combined, join_texts, stamp_combined_display_texts,
 };

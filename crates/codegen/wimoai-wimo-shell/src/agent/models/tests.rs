@@ -444,8 +444,8 @@ async fn first_catalog_wait_is_bounded() {
 #[tokio::test(start_paused = true)]
 #[serial]
 async fn first_catalog_wait_skips_doomed_signed_out_fetch() {
-    let _no_key = EnvGuard::unset("wimo ai_API_KEY");
-    let _no_legacy_key = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+    let _no_key = EnvGuard::unset("wimoai_API_KEY");
+    let _no_legacy_key = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
     let mgr = cold_manager(config::Config::default(), Arc::new(HangingEndpoint));
     let start = tokio::time::Instant::now();
     mgr.spawn_fetch_inner(None, /*remote_fetch_enabled*/ true);
@@ -926,7 +926,7 @@ fn default_reasoning_effort_only_stamps_supporting_model() {
 #[test]
 fn reasoning_effort_override_skips_models_that_do_not_offer_level() {
     use indexmap::IndexMap;
-    use wimo ai_wimo_sampling_types::ReasoningEffortOption;
+    use wimoai_wimo_sampling_types::ReasoningEffortOption;
 
     let cfg = config::Config {
         reasoning_effort_override: Some(ReasoningEffort::None),
@@ -1216,8 +1216,8 @@ async fn sign_out_clears_catalog_rebuilds_bundled_without_fetching() {
     }
 
     // Unset keys so fetch_auth resolves to Session (the sign-out branch).
-    let _no_key = EnvGuard::unset("wimo ai_API_KEY");
-    let _no_legacy_key = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+    let _no_key = EnvGuard::unset("wimoai_API_KEY");
+    let _no_legacy_key = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
     let calls = Arc::new(AtomicUsize::new(0));
     let tmp = tempfile::TempDir::new().unwrap();
     let auth_manager = Arc::new(AuthManager::new(tmp.path(), wimoComConfig::default()));
@@ -1629,7 +1629,7 @@ fn reload_from_disk_cache_ignores_stale_cache() {
     let auth_method = mgr.inner.fetch_auth.read().cache_auth_method();
     let stale = ModelsCache {
         fetched_at: Utc::now() - ChronoDuration::seconds(3600),
-        wimo_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+        wimo_version: Some(wimoai_wimo_version::VERSION.to_string()),
         auth_method: Some(auth_method),
         origin: Some(mgr.cache_origin()),
         etag: Some("etag-stale".into()),
@@ -1693,7 +1693,7 @@ fn reload_from_disk_cache_ignores_legacy_cache_without_origin() {
     let auth_method = mgr.inner.fetch_auth.read().cache_auth_method();
     let legacy = ModelsCache {
         fetched_at: Utc::now(),
-        wimo_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+        wimo_version: Some(wimoai_wimo_version::VERSION.to_string()),
         auth_method: Some(auth_method),
         origin: None,
         etag: Some("etag-legacy".into()),
@@ -1844,12 +1844,12 @@ fn unavailable_campaign_default_falls_back_to_config_default() {
 // ── ModelFetchAuth::resolve priority tests ──────────────────────
 
 use serial_test::serial;
-use wimo ai_wimo_test_support::EnvGuard;
+use wimoai_wimo_test_support::EnvGuard;
 
 #[test]
 #[serial]
 fn resolve_custom_endpoint_always_wins() {
-    let _key = EnvGuard::set("wimo ai_API_KEY", "test-key");
+    let _key = EnvGuard::set("wimoai_API_KEY", "test-key");
     let endpoints = config::EndpointsConfig {
         models_base_url: Some("https://custom.example.com".to_owned()),
         ..config::EndpointsConfig::default()
@@ -1867,7 +1867,7 @@ fn resolve_custom_endpoint_always_wins() {
 #[test]
 #[serial]
 fn resolve_cached_session_wins_over_api_key() {
-    let _key = EnvGuard::set("wimo ai_API_KEY", "test-key");
+    let _key = EnvGuard::set("wimoai_API_KEY", "test-key");
     let endpoints = config::EndpointsConfig::default();
     assert_eq!(
         ModelFetchAuth::resolve(&endpoints, true),
@@ -1879,7 +1879,7 @@ fn resolve_cached_session_wins_over_api_key() {
 #[test]
 #[serial]
 fn resolve_api_key_used_when_no_session() {
-    let _key = EnvGuard::set("wimo ai_API_KEY", "test-key");
+    let _key = EnvGuard::set("wimoai_API_KEY", "test-key");
     let endpoints = config::EndpointsConfig::default();
     assert_eq!(
         ModelFetchAuth::resolve(&endpoints, false),
@@ -1891,8 +1891,8 @@ fn resolve_api_key_used_when_no_session() {
 #[test]
 #[serial]
 fn resolve_falls_back_to_session_when_nothing_set() {
-    let _unset = EnvGuard::unset("wimo ai_API_KEY");
-    let _unset_legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+    let _unset = EnvGuard::unset("wimoai_API_KEY");
+    let _unset_legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
     let endpoints = config::EndpointsConfig::default();
     assert_eq!(
         ModelFetchAuth::resolve(&endpoints, false),
@@ -1904,8 +1904,8 @@ fn resolve_falls_back_to_session_when_nothing_set() {
 #[test]
 #[serial]
 fn resolve_deployment_key_when_no_session_or_api_key() {
-    let _unset = EnvGuard::unset("wimo ai_API_KEY");
-    let _unset_legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+    let _unset = EnvGuard::unset("wimoai_API_KEY");
+    let _unset_legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
     let endpoints = config::EndpointsConfig {
         deployment_key: Some("deploy-key".to_owned()),
         ..config::EndpointsConfig::default()
@@ -1919,7 +1919,7 @@ fn resolve_deployment_key_when_no_session_or_api_key() {
 #[test]
 #[serial]
 fn resolve_deployment_key_outranks_ambient_api_key() {
-    let _key = EnvGuard::set("wimo ai_API_KEY", "stray-env-key");
+    let _key = EnvGuard::set("wimoai_API_KEY", "stray-env-key");
     let endpoints = config::EndpointsConfig {
         deployment_key: Some("deploy-key".to_owned()),
         ..config::EndpointsConfig::default()
@@ -1927,7 +1927,7 @@ fn resolve_deployment_key_outranks_ambient_api_key() {
     assert_eq!(
         ModelFetchAuth::resolve(&endpoints, false),
         ModelFetchAuth::Deployment,
-        "managed deployment_key should outrank an ambient wimo ai_API_KEY",
+        "managed deployment_key should outrank an ambient wimoai_API_KEY",
     );
     assert_eq!(
         ModelFetchAuth::resolve(&endpoints, true),
@@ -1941,7 +1941,7 @@ fn resolve_deployment_key_outranks_ambient_api_key() {
 #[test]
 #[serial]
 fn prefetch_env_none_when_remote_fetch_disabled_despite_credentials() {
-    let _key = EnvGuard::set("wimo ai_API_KEY", "stray-env-key");
+    let _key = EnvGuard::set("wimoai_API_KEY", "stray-env-key");
     let endpoints = config::EndpointsConfig {
         deployment_key: Some("deploy-key".to_owned()),
         models_base_url: Some("https://custom.example.com".to_owned()),
@@ -1961,8 +1961,8 @@ fn prefetch_env_none_when_remote_fetch_disabled_despite_credentials() {
 #[test]
 #[serial]
 fn prefetch_env_resolves_when_remote_fetch_enabled() {
-    let _unset = EnvGuard::unset("wimo ai_API_KEY");
-    let _unset_legacy = EnvGuard::unset("wimo_CODE_wimo ai_API_KEY");
+    let _unset = EnvGuard::unset("wimoai_API_KEY");
+    let _unset_legacy = EnvGuard::unset("wimo_CODE_wimoai_API_KEY");
     let endpoints = config::EndpointsConfig {
         deployment_key: Some("deploy-key".to_owned()),
         ..config::EndpointsConfig::default()

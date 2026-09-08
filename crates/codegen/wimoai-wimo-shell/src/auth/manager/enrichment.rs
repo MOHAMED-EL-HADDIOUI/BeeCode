@@ -30,7 +30,7 @@ impl Drop for EnrichmentExitGuard {
         if !self.armed {
             return;
         }
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth update enrichment dropped",
             None,
             Some(serde_json::json!({
@@ -60,8 +60,8 @@ async fn fetch_user_info(manager: &AuthManager, key: &str, log_label: &str) -> O
         .get(&user_url)
         .timeout(USER_FETCH_TIMEOUT)
         .header("Authorization", format!("Bearer {}", key))
-        .header("X-wimo ai-Token-Auth", token_header.as_str())
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+        .header("X-wimoai-Token-Auth", token_header.as_str())
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
         .header(
             crate::http::CLIENT_MODE_HEADER,
             crate::http::process_client_mode(),
@@ -73,7 +73,7 @@ async fn fetch_user_info(manager: &AuthManager, key: &str, log_label: &str) -> O
         Ok(resp) if resp.status().is_success() => match resp.json::<UserInfo>().await {
             Ok(ui) if !ui.user_id.is_empty() => Some(ui),
             Ok(_) => {
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     &format!("{log_label} skipped"),
                     None,
                     Some(serde_json::json!({
@@ -84,7 +84,7 @@ async fn fetch_user_info(manager: &AuthManager, key: &str, log_label: &str) -> O
                 None
             }
             Err(e) => {
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     &format!("{log_label} failed"),
                     None,
                     Some(serde_json::json!({
@@ -97,7 +97,7 @@ async fn fetch_user_info(manager: &AuthManager, key: &str, log_label: &str) -> O
             }
         },
         Ok(resp) => {
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 &format!("{log_label} failed"),
                 None,
                 Some(serde_json::json!({
@@ -109,7 +109,7 @@ async fn fetch_user_info(manager: &AuthManager, key: &str, log_label: &str) -> O
             None
         }
         Err(e) => {
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 &format!("{log_label} failed"),
                 None,
                 Some(serde_json::json!({
@@ -149,7 +149,7 @@ async fn run_user_info_enrichment(manager: &AuthManager, auth: wimoAuth) {
         .into_guard();
     let lock_wait_ms = lock_started.elapsed().as_millis() as u64;
     let Some(_lock_guard) = lock_guard else {
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth update enrichment skipped",
             None,
             Some(serde_json::json!({
@@ -161,7 +161,7 @@ async fn run_user_info_enrichment(manager: &AuthManager, auth: wimoAuth) {
     };
 
     let Ok(mut map) = read_auth_json(&manager.path) else {
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth update enrichment skipped",
             None,
             Some(serde_json::json!({ "reason": "read_disk_failed" })),
@@ -169,7 +169,7 @@ async fn run_user_info_enrichment(manager: &AuthManager, auth: wimoAuth) {
         return;
     };
     let Some(mut disk) = lookup_auth(&map, &manager.scope) else {
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth update enrichment skipped",
             None,
             Some(serde_json::json!({ "reason": "no_disk_auth" })),
@@ -181,13 +181,13 @@ async fn run_user_info_enrichment(manager: &AuthManager, auth: wimoAuth) {
     // OR, not AND: during a concurrent refresh usually only the key changes while the refresh token stays
     // Team-login transitions (a placeholder user_id becoming real) rotate no tokens, so they still pass this check and get enriched
     if disk.key != auth.key || disk.refresh_token != auth.refresh_token {
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth update enrichment skipped",
             None,
             Some(serde_json::json!({
                 "reason": "sibling_rotated",
-                "written_key_prefix": wimo ai_wimo_auth::bearer_suffix(&auth.key),
-                "disk_key_prefix": wimo ai_wimo_auth::bearer_suffix(&disk.key),
+                "written_key_prefix": wimoai_wimo_auth::bearer_suffix(&auth.key),
+                "disk_key_prefix": wimoai_wimo_auth::bearer_suffix(&disk.key),
             })),
         );
         return;
@@ -198,7 +198,7 @@ async fn run_user_info_enrichment(manager: &AuthManager, auth: wimoAuth) {
     map.insert(manager.scope.clone(), disk.clone());
     let write_started = std::time::Instant::now();
     if let Err(e) = write_auth_json(&manager.path, &map) {
-        wimo ai_wimo_telemetry::unified_log::error(
+        wimoai_wimo_telemetry::unified_log::error(
             "auth update enrichment write failed",
             None,
             Some(serde_json::json!({
@@ -211,7 +211,7 @@ async fn run_user_info_enrichment(manager: &AuthManager, auth: wimoAuth) {
         return;
     }
     manager.with_inner_write(|inner| *inner = Some(disk));
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "auth update enrichment done",
         None,
         Some(serde_json::json!({

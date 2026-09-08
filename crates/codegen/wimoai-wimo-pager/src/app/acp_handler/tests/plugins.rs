@@ -8,7 +8,7 @@
         let mut app = make_app_with_agent("sess-plugins");
         let mut modal = ExtensionsModalState::new(ExtensionsTab::Plugins);
         modal.plugins_data =
-            TabDataState::Loaded(wimo ai_hooks_plugins_types::PluginsListResponse { plugins: vec![] });
+            TabDataState::Loaded(wimoai_hooks_plugins_types::PluginsListResponse { plugins: vec![] });
         modal.plugins_groups_seeded = true;
         modal
             .plugins_collapsed_groups
@@ -18,10 +18,10 @@
         let handled = handle(
             make_ext_session_notification(
                 "sess-plugins",
-                wimo aiSessionUpdate::PluginsChanged {
+                wimoaiSessionUpdate::PluginsChanged {
                     plugins: vec![crate::views::extensions_modal::test_plugin_info(
                         "user-tool",
-                        Some(wimo ai_hooks_plugins_types::PluginOrigin::Userwimo),
+                        Some(wimoai_hooks_plugins_types::PluginOrigin::Userwimo),
                     )],
                 },
             ),
@@ -56,15 +56,15 @@
         let handled = handle(
             make_ext_session_notification(
                 "sess-plugins",
-                wimo aiSessionUpdate::PluginsChanged {
+                wimoaiSessionUpdate::PluginsChanged {
                     plugins: vec![
                         crate::views::extensions_modal::test_plugin_info(
                             "user-tool",
-                            Some(wimo ai_hooks_plugins_types::PluginOrigin::Userwimo),
+                            Some(wimoai_hooks_plugins_types::PluginOrigin::Userwimo),
                         ),
                         crate::views::extensions_modal::test_plugin_info(
                             "claude-tool",
-                            Some(wimo ai_hooks_plugins_types::PluginOrigin::UserClaude),
+                            Some(wimoai_hooks_plugins_types::PluginOrigin::UserClaude),
                         ),
                     ],
                 },
@@ -99,10 +99,10 @@
         let handled = handle(
             make_ext_session_notification(
                 "sess-plugins",
-                wimo aiSessionUpdate::PluginsChanged {
+                wimoaiSessionUpdate::PluginsChanged {
                     plugins: vec![crate::views::extensions_modal::test_plugin_info(
                         "user-tool",
-                        Some(wimo ai_hooks_plugins_types::PluginOrigin::Userwimo),
+                        Some(wimoai_hooks_plugins_types::PluginOrigin::Userwimo),
                     )],
                 },
             ),

@@ -16,7 +16,7 @@
 //!   dirs are gitignored *below* the top level: per-dir mode (Linux default)
 //!   prunes them; fan-out mode pays for them on emulated-recursion backends.
 //!
-//! Run with `cargo bench -p wimo ai-fsnotify --bench startup`. Medians land in
+//! Run with `cargo bench -p wimoai-fsnotify --bench startup`. Medians land in
 //! `target/criterion/watcher_startup/<scenario>/new/estimates.json`.
 //! `wimo_FSNOTIFY_PER_DIR=0|1` pins the strategy for A/B runs.
 
@@ -25,7 +25,7 @@ use std::path::Path;
 
 use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
 use tempfile::TempDir;
-use wimo ai_fsnotify::{FsConfig, FsEventSource};
+use wimoai_fsnotify::{FsConfig, FsEventSource};
 
 const TOTAL_DIRS: usize = 12_000;
 

@@ -21,12 +21,12 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;
 
-use wimo ai_wimo_pager::app::agent_view::AgentView;
-use wimo ai_wimo_pager::minimal_api;
-use wimo ai_wimo_pager::theme::Theme;
-use wimo ai_wimo_pager::views::extensions_modal::{ExtensionsTab, TabDataState};
-use wimo ai_wimo_pager::views::modal::ActiveModal;
-use wimo ai_wimo_pager::views::picker::{self, PickerEntry, PickerField, PickerHitAreas, PickerRow};
+use wimoai_wimo_pager::app::agent_view::AgentView;
+use wimoai_wimo_pager::minimal_api;
+use wimoai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::views::extensions_modal::{ExtensionsTab, TabDataState};
+use wimoai_wimo_pager::views::modal::ActiveModal;
+use wimoai_wimo_pager::views::picker::{self, PickerEntry, PickerField, PickerHitAreas, PickerRow};
 
 /// Rows of chrome around the scrolling list: title + subtitle/search + divider + footer.
 const CHROME_ROWS: u16 = 4;
@@ -536,8 +536,8 @@ fn measure_entries(entries: &[PickerEntry<'_>]) -> u16 {
 mod tests {
     use super::*;
     use ratatui::layout::Rect;
-    use wimo ai_wimo_pager::views::extensions_modal::ExtensionsModalState;
-    use wimo ai_wimo_pager::views::mcps_modal::{McpServerDisplayStatus, McpServerInfo, McpWireSource};
+    use wimoai_wimo_pager::views::extensions_modal::ExtensionsModalState;
+    use wimoai_wimo_pager::views::mcps_modal::{McpServerDisplayStatus, McpServerInfo, McpWireSource};
 
     fn agent() -> AgentView {
         minimal_api::test_agent_view(Some("s1"), std::path::PathBuf::from("/tmp/repo"))
@@ -575,8 +575,8 @@ mod tests {
         a
     }
 
-    fn session_entry(id: &str) -> wimo ai_wimo_pager::app::app_view::SessionPickerEntry {
-        wimo ai_wimo_pager::app::app_view::SessionPickerEntry {
+    fn session_entry(id: &str) -> wimoai_wimo_pager::app::app_view::SessionPickerEntry {
+        wimoai_wimo_pager::app::app_view::SessionPickerEntry {
             id: id.into(),
             summary: id.into(),
             updated_at: chrono::Utc::now(),
@@ -597,7 +597,7 @@ mod tests {
         }
     }
 
-    fn with_resume(entries: Vec<wimo ai_wimo_pager::app::app_view::SessionPickerEntry>) -> AgentView {
+    fn with_resume(entries: Vec<wimoai_wimo_pager::app::app_view::SessionPickerEntry>) -> AgentView {
         let mut a = agent();
         a.active_modal = Some(ActiveModal::SessionPicker {
             state: picker::PickerState::default(),
@@ -605,13 +605,13 @@ mod tests {
             loading: false,
             lanes: Default::default(),
             previous_palette: None,
-            window: wimo ai_wimo_pager::views::modal_window::ModalWindowState::new(),
+            window: wimoai_wimo_pager::views::modal_window::ModalWindowState::new(),
             content_results: None,
             content_loading: false,
             deep_search_seq: 0,
             generation: 0,
             detail_seq: 0,
-            source_filter: wimo ai_wimo_pager::views::session_picker::SourceFilter::default(),
+            source_filter: wimoai_wimo_pager::views::session_picker::SourceFilter::default(),
             pending_delete: None,
             entries_query: None,
         });

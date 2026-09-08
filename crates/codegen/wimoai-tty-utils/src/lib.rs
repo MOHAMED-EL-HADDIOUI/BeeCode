@@ -13,7 +13,7 @@
 //! # Usage
 //!
 //! ```rust,no_run
-//! use wimo ai_tty_utils::{detach_command, pager_env};
+//! use wimoai_tty_utils::{detach_command, pager_env};
 //! use std::process::Stdio;
 //!
 //! let mut cmd = tokio::process::Command::new("git");
@@ -26,7 +26,7 @@
 //! For `std::process::Command`:
 //!
 //! ```rust,no_run
-//! use wimo ai_tty_utils::{detach_std_command, pager_env};
+//! use wimoai_tty_utils::{detach_std_command, pager_env};
 //! use std::process::Stdio;
 //!
 //! let mut cmd = std::process::Command::new("git");
@@ -307,7 +307,7 @@ fn open_null_fd(path: &std::path::Path) -> Option<std::os::fd::OwnedFd> {
 /// sees EOF — a child given it as stdin would block instead of starting
 /// cleanly. Since the descriptor is cached for the process's lifetime, that
 /// would be sticky, and a hang is a worse outcome than the `ENOENT` this
-/// fallback exists to avoid. Mirrors `os_pipe` in wimo ai-wimo-tools' shell_state,
+/// fallback exists to avoid. Mirrors `os_pipe` in wimoai-wimo-tools' shell_state,
 /// including the best-effort `fcntl` path where `pipe2` is unavailable.
 #[cfg(unix)]
 fn eof_pipe_fd() -> Option<std::os::fd::OwnedFd> {
@@ -1461,7 +1461,7 @@ mod tests {
     /// Env marker dispatching the re-exec'd test binary into the
     /// intermediate-parent logic.
     #[cfg(target_os = "linux")]
-    const PDEATHSIG_INTERMEDIATE_ENV: &str = "__wimo ai_TTY_UTILS_PDEATHSIG_INTERMEDIATE";
+    const PDEATHSIG_INTERMEDIATE_ENV: &str = "__wimoai_TTY_UTILS_PDEATHSIG_INTERMEDIATE";
 
     /// Intermediate parent: spawn the armed grandchild, report its pid on
     /// stdout, linger briefly so the driver can observe it alive, then exit
@@ -1715,7 +1715,7 @@ mod tests {
         let status = std::process::Command::new(std::env::current_exe().unwrap())
             .arg("--exact")
             .arg("tests::stderr_redirect_roundtrip_body")
-            .env("__wimo ai_STDERR_REDIRECT_SUBPROCESS", "1")
+            .env("__wimoai_STDERR_REDIRECT_SUBPROCESS", "1")
             .status()
             .expect("failed to spawn test subprocess");
         assert!(status.success(), "subprocess integration test failed");
@@ -1725,7 +1725,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn stderr_redirect_roundtrip_body() {
-        if std::env::var("__wimo ai_STDERR_REDIRECT_SUBPROCESS").is_err() {
+        if std::env::var("__wimoai_STDERR_REDIRECT_SUBPROCESS").is_err() {
             return; // skip when not invoked as subprocess
         }
 
@@ -1869,7 +1869,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn null_fd_outlives_its_path() {
-        let path = std::env::temp_dir().join(format!("wimo ai-tty-utils-null-{}", std::process::id()));
+        let path = std::env::temp_dir().join(format!("wimoai-tty-utils-null-{}", std::process::id()));
         std::fs::write(&path, b"").expect("create stand-in null");
         let fd = open_null_fd(&path).expect("open stand-in null");
         std::fs::remove_file(&path).expect("unlink stand-in null");

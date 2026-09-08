@@ -1,5 +1,5 @@
 //! Benchmark framework — REAL measurement (Section 41 of l.txt)
-//! wimo ai is open source (opensource). Anyone can contribute.
+//! wimoai is open source (opensource). Anyone can contribute.
 
 pub struct BenchmarkResult {
     pub name: String,

@@ -6,9 +6,9 @@ use super::persistence::{LocalFeedbackEntry, PersistenceMsg};
 use agent_client_protocol as acp;
 use std::collections::{HashMap, HashSet};
 use tokio::sync::{mpsc, oneshot};
-use wimo ai_file_utils::queue::UploadQueue;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
-use wimo ai_hunk_tracker::HunkTrackerHandle;
+use wimoai_file_utils::queue::UploadQueue;
+use wimoai_wimo_sampling_types::ReasoningEffort;
+use wimoai_hunk_tracker::HunkTrackerHandle;
 /// Coarse lifecycle state of a session as known to the leader/agent.
 ///
 /// A wimo session is a resumable log on disk with no terminal status field of its own, so "liveness" is residency plus turn state, not a pid.
@@ -36,7 +36,7 @@ pub const SCHEDULER_BACKGROUND_LOOPS_META_KEY: &str = "x.ai/schedulerBackgroundL
 /// Everything the `session/new` reply reads from session state; built before the actor task starts so the reply cannot wait on it.
 #[derive(Clone)]
 pub struct SpawnSnapshot {
-    pub applied_tool_overrides: Option<wimo ai_wimo_sampling_types::ToolOverrides>,
+    pub applied_tool_overrides: Option<wimoai_wimo_sampling_types::ToolOverrides>,
     /// Whether this session's scheduled fires run as detached background subagents.
     /// Copied from the value the spawn resolved for the session's [`AgentRebuildSpec`](crate::session::agent_rebuild::AgentRebuildSpec).
     /// It is pinned for the session's whole life exactly like the fire side.
@@ -69,10 +69,10 @@ pub struct SessionHandle {
     /// `None` means unlimited.
     pub max_turns: Option<usize>,
     pub resolved_tool_overrides:
-        std::sync::Arc<arc_swap::ArcSwapOption<wimo ai_wimo_sampling_types::ToolOverrides>>,
+        std::sync::Arc<arc_swap::ArcSwapOption<wimoai_wimo_sampling_types::ToolOverrides>>,
     pub spawn_snapshot: SpawnSnapshot,
     pub hunk_tracker_handle: HunkTrackerHandle,
-    pub chat_state_handle: wimo ai_chat_state::ChatStateHandle,
+    pub chat_state_handle: wimoai_chat_state::ChatStateHandle,
     /// Handle to session signals (used for completion tracking)
     pub signals_handle: super::signals::SessionSignalsHandle,
     /// Shared gate controlling whether the session actor forwards notifications to the client via the gateway.
@@ -135,11 +135,11 @@ pub struct SessionHandle {
     /// Consumed (reset to `false`) atomically on use via `compare_exchange`.
     /// Set via `x.ai/debug/arm_auto_compact`.
     pub force_compact: std::sync::Arc<std::sync::atomic::AtomicBool>,
-    pub permission_handle: wimo ai_wimo_workspace::permission::PermissionHandle,
+    pub permission_handle: wimoai_wimo_workspace::permission::PermissionHandle,
     /// The parent SessionActor's live `Auth401AttributionCallback` (if any).
     /// Exposed on the handle so `MvpAgent::build_subagent_spawn_context` can copy it into the spawn context.
     /// Subagents then inherit the parent's callback rather than getting a fresh one, preserving the parent's session_id on the child's emits.
-    pub attribution_callback: Option<wimo ai_wimo_sampler::SharedAttributionCallback>,
+    pub attribution_callback: Option<wimoai_wimo_sampler::SharedAttributionCallback>,
     /// The agent definition name for this session.
     pub agent_name: String,
     pub managed_mcp_proxy_base_url: String,
@@ -147,19 +147,19 @@ pub struct SessionHandle {
     /// Subagent types this agent can spawn (from Agent(t1, t2) in tools).
     pub allowed_subagent_types: Option<Vec<String>>,
     /// Hook registry for this session (snapshot from spawn time).
-    pub hook_registry: Option<std::sync::Arc<wimo ai_wimo_hooks::discovery::HookRegistry>>,
+    pub hook_registry: Option<std::sync::Arc<wimoai_wimo_hooks::discovery::HookRegistry>>,
     /// Typed workspace operations handle (agent sessions use local ops).
-    pub workspace_ops: wimo ai_wimo_workspace::WorkspaceOps,
+    pub workspace_ops: wimoai_wimo_workspace::WorkspaceOps,
     /// Subagents inherit the parent's backend so background tasks and monitors survive the subagent's exit.
     pub terminal_backend:
-        Option<std::sync::Arc<dyn wimo ai_wimo_tools::computer::types::TerminalBackend>>,
+        Option<std::sync::Arc<dyn wimoai_wimo_tools::computer::types::TerminalBackend>>,
     /// Notification handle for this session's tool bridge.
     /// Subagents use this to reparent surviving tasks' notification handles on exit so events route to the parent's notification bridge.
     pub tools_notification_handle:
-        Option<wimo ai_wimo_tools::notification::types::ToolNotificationHandle>,
+        Option<wimoai_wimo_tools::notification::types::ToolNotificationHandle>,
     /// Subagents inherit the parent's handle so scheduled tasks survive the subagent's exit.
     pub scheduler_handle:
-        Option<wimo ai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle>,
+        Option<wimoai_wimo_tools::implementations::wimo::scheduler::types::SchedulerHandle>,
 }
 impl SessionHandle {
     pub(crate) fn message_delivery(&self) -> super::message_delivery::MessageDeliveryHandle {
@@ -169,7 +169,7 @@ impl SessionHandle {
         )
     }
     /// Last assistant `model_id` / `model_fingerprint` in conversation (global, not turn-scoped).
-    pub(crate) async fn get_model_metadata(&self) -> wimo ai_chat_state::ModelMetadata {
+    pub(crate) async fn get_model_metadata(&self) -> wimoai_chat_state::ModelMetadata {
         let (tx, rx) = oneshot::channel();
         if self
             .cmd_tx
@@ -178,7 +178,7 @@ impl SessionHandle {
         {
             rx.await.unwrap_or_default()
         } else {
-            wimo ai_chat_state::ModelMetadata::default()
+            wimoai_chat_state::ModelMetadata::default()
         }
     }
     /// Move a foreground bash command to background by tool_call_id.
@@ -201,8 +201,8 @@ impl SessionHandle {
     pub(crate) async fn kill_background_task(
         &self,
         task_id: &str,
-        source: wimo ai_wimo_tools::types::KillSource,
-    ) -> Result<wimo ai_wimo_tools::types::KillOutcome, String> {
+        source: wimoai_wimo_tools::types::KillSource,
+    ) -> Result<wimoai_wimo_tools::types::KillOutcome, String> {
         let (tx, rx) = oneshot::channel();
         if self
             .cmd_tx
@@ -244,7 +244,7 @@ impl SessionHandle {
     }
     /// List all background tasks.
     /// Routes through the session actor to the ToolBridge's TerminalBackend.
-    pub async fn list_tasks(&self) -> Option<Vec<wimo ai_wimo_tools::types::TaskSnapshot>> {
+    pub async fn list_tasks(&self) -> Option<Vec<wimoai_wimo_tools::types::TaskSnapshot>> {
         let (tx, rx) = oneshot::channel();
         if self
             .cmd_tx
@@ -258,7 +258,7 @@ impl SessionHandle {
     /// Get hooks list for the pager modal.
     pub(crate) async fn get_hooks_list(
         &self,
-    ) -> Option<wimo ai_hooks_plugins_types::HooksListResponse> {
+    ) -> Option<wimoai_hooks_plugins_types::HooksListResponse> {
         let (tx, rx) = oneshot::channel();
         if self
             .cmd_tx
@@ -272,8 +272,8 @@ impl SessionHandle {
     /// Execute a hooks management action from the pager modal.
     pub(crate) async fn execute_hooks_action(
         &self,
-        action: wimo ai_hooks_plugins_types::HooksAction,
-    ) -> Option<wimo ai_hooks_plugins_types::ActionOutcome> {
+        action: wimoai_hooks_plugins_types::HooksAction,
+    ) -> Option<wimoai_hooks_plugins_types::ActionOutcome> {
         let (tx, rx) = oneshot::channel();
         if self
             .cmd_tx
@@ -290,8 +290,8 @@ impl SessionHandle {
     /// Execute a plugins management action from the pager modal.
     pub(crate) async fn execute_plugins_action(
         &self,
-        action: wimo ai_hooks_plugins_types::PluginsAction,
-    ) -> Option<wimo ai_hooks_plugins_types::ActionOutcome> {
+        action: wimoai_hooks_plugins_types::PluginsAction,
+    ) -> Option<wimoai_hooks_plugins_types::ActionOutcome> {
         let (tx, rx) = oneshot::channel();
         if self
             .cmd_tx
@@ -308,7 +308,7 @@ impl SessionHandle {
     /// This session's plugin registry, including plugins loaded via `_meta.pluginDirs`.
     pub(crate) async fn plugins_list(
         &self,
-    ) -> Option<std::sync::Arc<wimo ai_wimo_agent::plugins::PluginRegistry>> {
+    ) -> Option<std::sync::Arc<wimoai_wimo_agent::plugins::PluginRegistry>> {
         let (tx, rx) = oneshot::channel();
         if self
             .cmd_tx
@@ -352,7 +352,7 @@ impl SessionHandle {
     }
     /// Snapshot the session's resolved tool schema for verbatim-fork inheritance.
     /// A dead actor or dropped reply fails open to an empty list (child then builds its own toolset, same as a non-fork spawn).
-    pub(crate) async fn snapshot_tool_definitions(&self) -> Vec<wimo ai_wimo_sampling_types::ToolSpec> {
+    pub(crate) async fn snapshot_tool_definitions(&self) -> Vec<wimoai_wimo_sampling_types::ToolSpec> {
         let (tx, rx) = oneshot::channel();
         if self
             .cmd_tx

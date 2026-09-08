@@ -6,12 +6,12 @@ use std::sync::atomic::Ordering;
 use super::*;
 
 use crate::extensions::notification::{PromptUsage, PromptUsageModel, ticks_to_usd};
-use wimo ai_wimo_status_line::{
+use wimoai_wimo_status_line::{
     STATUS_LINE_SCHEMA_VERSION, StatusLineContext, StatusLineContextWindow, StatusLineCost,
     StatusLineEffort, StatusLineModel, StatusLineRepo, StatusLineSessionUsage, StatusLineTurn,
     StatusLineWorkspace, StatusLineWorktree,
 };
-use wimo ai_wimo_workspace::session::git::normalize_repo_url;
+use wimoai_wimo_workspace::session::git::normalize_repo_url;
 
 #[derive(Default)]
 struct RepoState {
@@ -71,7 +71,7 @@ fn build_context_window(
     // The field is omitted rather than zero when the window is unknown, which is the only part the helper cannot express
     let used_percentage = used_tokens
         .filter(|_| size > 0)
-        .map(|used| wimo ai_token_estimation::usage_percentage_u8(used, size));
+        .map(|used| wimoai_token_estimation::usage_percentage_u8(used, size));
     StatusLineContextWindow {
         context_window_size: (size > 0).then_some(size),
         context_tokens: used_tokens,
@@ -202,7 +202,7 @@ impl SessionActor {
                 git_worktree: worktree.as_ref().and_then(|w| w.name.clone()),
                 repo: repo_state.repo,
             },
-            version: wimo ai_wimo_version::VERSION.to_string(),
+            version: wimoai_wimo_version::VERSION.to_string(),
             cost: StatusLineCost {
                 total_cost_usd: totals.and_then(|t| t.cost_usd_ticks).map(ticks_to_usd),
                 total_duration_ms: self.session_start.elapsed().as_millis() as u64,
@@ -261,12 +261,12 @@ impl SessionActor {
     }
 
     async fn emit_status_snapshot(&self) {
-        // `send_wimo ai_notification_transient` checks this too; here it skips the build, which an attach re-requests once the gate is open
+        // `send_wimoai_notification_transient` checks this too; here it skips the build, which an attach re-requests once the gate is open
         if !self.notifications.gateway_enabled.load(Ordering::Relaxed) {
             return;
         }
         let context = self.build_status_context().await;
-        self.send_wimo ai_notification_transient(wimo aiSessionUpdate::SessionStatus(Box::new(context)));
+        self.send_wimoai_notification_transient(wimoaiSessionUpdate::SessionStatus(Box::new(context)));
     }
 }
 

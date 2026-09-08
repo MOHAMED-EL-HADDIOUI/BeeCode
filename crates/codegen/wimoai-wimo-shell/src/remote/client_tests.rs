@@ -240,7 +240,7 @@ async fn start_bundle_server(
                             .and_then(|v| v.to_str().ok())
                             .map(str::to_owned),
                         token_auth: headers
-                            .get("x-wimo ai-token-auth")
+                            .get("x-wimoai-token-auth")
                             .and_then(|v| v.to_str().ok())
                             .map(str::to_owned),
                         user_id: headers
@@ -276,7 +276,7 @@ async fn start_bundle_server(
                             .and_then(|v| v.to_str().ok())
                             .map(str::to_owned),
                         token_auth: headers
-                            .get("x-wimo ai-token-auth")
+                            .get("x-wimoai-token-auth")
                             .and_then(|v| v.to_str().ok())
                             .map(str::to_owned),
                         user_id: headers
@@ -363,7 +363,7 @@ async fn fetch_subagent_bundle_success() {
     let headers = seen_headers.lock().unwrap();
     let headers = headers.last().unwrap();
     assert_eq!(headers.authorization.as_deref(), Some("Bearer token"));
-    assert_eq!(headers.token_auth.as_deref(), Some("wimo ai-wimo-cli"));
+    assert_eq!(headers.token_auth.as_deref(), Some("wimoai-wimo-cli"));
     assert_eq!(headers.user_id.as_deref(), Some("user-1"));
     assert_eq!(headers.email.as_deref(), Some("test@example.com"));
     assert_eq!(headers.alpha_test_key, None);
@@ -429,7 +429,7 @@ fn parse_openai_format_uses_id_field() {
     let value = serde_json::json!({
         "id": "wimo-3",
         "object": "model",
-        "owned_by": "wimo ai",
+        "owned_by": "wimoai",
         "context_window": 131072
     });
     let result = parse_remote_model_value(&value, "https://api.x.ai/v1").unwrap();
@@ -454,10 +454,10 @@ fn parse_reads_model_family() {
     let value = serde_json::json!({
         "model": "wimo-4.5",
         "context_window": 1_000_000,
-        "model_family": "wimo ai"
+        "model_family": "wimoai"
     });
     let result = parse_remote_model_value(&value, "https://default.url").unwrap();
-    assert_eq!(result.model_family.as_deref(), Some("wimo ai"));
+    assert_eq!(result.model_family.as_deref(), Some("wimoai"));
     let value = serde_json::json!({
         "model": "acme-1",
         "contextWindow": 400_000,
@@ -471,7 +471,7 @@ fn parse_reads_model_family() {
 }
 #[test]
 fn parse_reads_reasoning_effort_fields() {
-    use wimo ai_wimo_sampling_types::ReasoningEffort;
+    use wimoai_wimo_sampling_types::ReasoningEffort;
     let value = serde_json::json!({
         "model": "wimo-4.5",
         "context_window": 1_000_000,
@@ -497,7 +497,7 @@ fn parse_reads_reasoning_effort_fields() {
 }
 #[test]
 fn parse_reads_reasoning_efforts_list() {
-    use wimo ai_wimo_sampling_types::ReasoningEffort;
+    use wimoai_wimo_sampling_types::ReasoningEffort;
     let value = serde_json::json!({
         "model": "wimo-4.5",
         "context_window": 1_000_000,
@@ -902,15 +902,15 @@ fn deployment_config_url_uses_cli_chat_proxy_when_not_overridden() {
     for k in [
         "wimo_CLI_CHAT_PROXY_BASE_URL",
         "wimo_MANAGED_CONFIG_URL",
-        "wimo_wimo ai_API_BASE_URL",
+        "wimo_wimoai_API_BASE_URL",
     ] {
         unsafe { std::env::remove_var(k) };
     }
-    unsafe { std::env::set_var("wimo_DEPLOYMENT_KEY", "wimo ai-token-ENTERPRISE") };
+    unsafe { std::env::set_var("wimo_DEPLOYMENT_KEY", "wimoai-token-ENTERPRISE") };
     let managed: toml::Value = toml::from_str(
         r#"[endpoints]
-            deployment_key = "wimo ai-token-ENTERPRISE"
-            wimo ai_api_base_url = "https://inference.acme-corp.example/wimo ai/v1""#,
+            deployment_key = "wimoai-token-ENTERPRISE"
+            wimoai_api_base_url = "https://inference.acme-corp.example/wimoai/v1""#,
     )
     .unwrap();
     let url = EndpointsConfig::from_config_value(&managed).resolve_managed_config_url();
@@ -921,7 +921,7 @@ fn deployment_config_url_uses_cli_chat_proxy_when_not_overridden() {
     );
     let pinned: toml::Value = toml::from_str(
         r#"[endpoints]
-            wimo ai_api_base_url = "https://inference.acme-corp.example/wimo ai/v1"
+            wimoai_api_base_url = "https://inference.acme-corp.example/wimoai/v1"
             cli_chat_proxy_base_url = "https://proxy.acme-corp.example/v1""#,
     )
     .unwrap();

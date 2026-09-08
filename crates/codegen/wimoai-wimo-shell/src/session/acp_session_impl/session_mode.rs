@@ -1,7 +1,7 @@
 //! Session/plan-mode concern for `SessionActor` (`handle_session_mode`, plan-mode reminders and persistence, active-template detection).
 use super::*;
 pub(super) fn prompt_mode_from_session_mode_id(session_mode_id: &acp::SessionModeId) -> PromptMode {
-    use wimo ai_wimo_tools::types::SessionMode;
+    use wimoai_wimo_tools::types::SessionMode;
     match SessionMode::from_id(session_mode_id.0.as_ref()) {
         SessionMode::Plan => PromptMode::Plan,
         SessionMode::Ask => PromptMode::Ask,
@@ -11,7 +11,7 @@ pub(super) fn prompt_mode_from_session_mode_id(session_mode_id: &acp::SessionMod
 /// Inverse of [`prompt_mode_from_session_mode_id`]: the mode id a client displays for a prompt mode.
 /// Needed wherever a transition the client did not drive has to be reported back to it.
 pub(super) fn session_mode_id_from_prompt_mode(prompt_mode: PromptMode) -> acp::SessionModeId {
-    use wimo ai_wimo_tools::types::SessionMode;
+    use wimoai_wimo_tools::types::SessionMode;
     let mode = match prompt_mode {
         PromptMode::Plan => SessionMode::Plan,
         PromptMode::Ask => SessionMode::Ask,
@@ -42,7 +42,7 @@ impl SessionActor {
         false
     }
     pub(super) async fn handle_session_mode(&self, session_mode_id: acp::SessionModeId) {
-        use wimo ai_wimo_tools::types::SessionMode;
+        use wimoai_wimo_tools::types::SessionMode;
         let prompt_mode = prompt_mode_from_session_mode_id(&session_mode_id);
         *self.current_prompt_mode.lock() = prompt_mode;
         let mode = SessionMode::from_id(session_mode_id.0.as_ref());
@@ -63,10 +63,10 @@ impl SessionActor {
             if entered && turn_in_flight {
                 self.activate_plan_mode_mid_turn().await;
             }
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::PlanModeToggled {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::PlanModeToggled {
                     enabled: true,
-                    trigger: wimo ai_wimo_telemetry::events::PlanModeTrigger::User,
+                    trigger: wimoai_wimo_telemetry::events::PlanModeTrigger::User,
                     turn_in_flight,
                     was_previously_active: !entered,
                     from_mode: Some(if entered {
@@ -109,10 +109,10 @@ impl SessionActor {
                 turn_in_flight,
                 "Plan mode toggled OFF"
             );
-            wimo ai_wimo_telemetry::session_ctx::log_event(
-                wimo ai_wimo_telemetry::events::PlanModeToggled {
+            wimoai_wimo_telemetry::session_ctx::log_event(
+                wimoai_wimo_telemetry::events::PlanModeToggled {
                     enabled: false,
-                    trigger: wimo ai_wimo_telemetry::events::PlanModeTrigger::User,
+                    trigger: wimoai_wimo_telemetry::events::PlanModeTrigger::User,
                     turn_in_flight,
                     was_previously_active: true,
                     from_mode: Some("plan".into()),
@@ -131,7 +131,7 @@ impl SessionActor {
             "browser_use" => Some(AgentDefinition::browser_use()),
             name => {
                 let cwd = self.tool_context.cwd.as_path();
-                wimo ai_wimo_agent::discovery::by_name_in_cwd(name, cwd)
+                wimoai_wimo_agent::discovery::by_name_in_cwd(name, cwd)
             }
         };
         if let Some(ref def) = agent_def {

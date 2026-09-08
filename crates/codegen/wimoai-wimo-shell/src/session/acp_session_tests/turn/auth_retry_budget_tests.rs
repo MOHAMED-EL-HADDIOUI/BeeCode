@@ -9,7 +9,7 @@ use crate::auth::{AuthManager, AuthMode, wimoAuth, wimoComConfig};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
-use wimo ai_wimo_test_support::{MockInferenceServer, MockModelEntry};
+use wimoai_wimo_test_support::{MockInferenceServer, MockModelEntry};
 
 /// The token the mock server accepts and the refresher mints on success.
 const FRESH_TOKEN: &str = "refreshed-test-token";
@@ -63,20 +63,20 @@ fn expired_auth_manager(
 }
 
 /// `x.ai/session_notification` payloads the client was sent.
-type wimo aiUpdates = Arc<parking_lot::Mutex<Vec<serde_json::Value>>>;
+type wimoaiUpdates = Arc<parking_lot::Mutex<Vec<serde_json::Value>>>;
 
 fn drain_gateway(
-    mut rx: tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>,
-) -> wimo aiUpdates {
-    let captured = wimo aiUpdates::default();
+    mut rx: tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>,
+) -> wimoaiUpdates {
+    let captured = wimoaiUpdates::default();
     let sink = captured.clone();
     tokio::task::spawn_local(async move {
         while let Some(msg) = rx.recv().await {
             match msg {
-                wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                     let _ = args.response_tx.send(Ok(()));
                 }
-                wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) => {
+                wimoai_acp_lib::AcpClientMessage::ExtNotification(args) => {
                     if let Ok(value) = serde_json::from_str(args.params.get()) {
                         sink.lock().push(value);
                     }
@@ -89,7 +89,7 @@ fn drain_gateway(
 }
 
 /// `(error_type, message)` of the turn's terminal `retryState`, if the client was told about one.
-fn terminal_failure(updates: &wimo aiUpdates) -> Option<(String, String)> {
+fn terminal_failure(updates: &wimoaiUpdates) -> Option<(String, String)> {
     updates.lock().iter().find_map(|value| {
         let update = value.get("update")?;
         if update.get("sessionUpdate")? != "retry_state" || update.get("type")? != "failed" {
@@ -107,21 +107,21 @@ fn terminal_failure(updates: &wimo aiUpdates) -> Option<(String, String)> {
 async fn session_token_actor(
     server: &MockInferenceServer,
     auth_manager: Arc<AuthManager>,
-) -> (Arc<SessionActor>, wimo aiUpdates) {
-    let sampling_cfg = wimo ai_wimo_sampler::SamplerConfig {
+) -> (Arc<SessionActor>, wimoaiUpdates) {
+    let sampling_cfg = wimoai_wimo_sampler::SamplerConfig {
         base_url: server.url(),
         model: "test".to_string(),
-        api_backend: wimo ai_wimo_sampler::ApiBackend::Responses,
+        api_backend: wimoai_wimo_sampler::ApiBackend::Responses,
         context_window: 256_000,
         max_retries: Some(0),
         idle_timeout_secs: Some(30),
         ..Default::default()
     };
     let (sampler_event_tx, sampler_event_rx) =
-        tokio::sync::mpsc::unbounded_channel::<wimo ai_wimo_sampler::SamplingEvent>();
-    let sampler_handle = wimo ai_wimo_sampler::SamplerActor::spawn(
+        tokio::sync::mpsc::unbounded_channel::<wimoai_wimo_sampler::SamplingEvent>();
+    let sampler_handle = wimoai_wimo_sampler::SamplerActor::spawn(
         sampling_cfg,
-        wimo ai_wimo_sampler::RetryPolicy {
+        wimoai_wimo_sampler::RetryPolicy {
             max_retries: 0,
             rate_limit_retry_threshold: 0,
             ..Default::default()
@@ -130,7 +130,7 @@ async fn session_token_actor(
     );
 
     let (gateway_tx, gateway_rx) = tokio::sync::mpsc::unbounded_channel();
-    let wimo ai_updates = drain_gateway(gateway_rx);
+    let wimoai_updates = drain_gateway(gateway_rx);
     let (persistence_tx, persistence_rx) = tokio::sync::mpsc::unbounded_channel();
     drain_persistence(persistence_rx);
 
@@ -145,12 +145,12 @@ async fn session_token_actor(
         .await
         .expect("test actor has sampling config");
     cfg.base_url = server.url();
-    cfg.api_backend = wimo ai_wimo_sampling_types::ApiBackend::Responses;
+    cfg.api_backend = wimoai_wimo_sampling_types::ApiBackend::Responses;
     cfg.model = "test".to_string();
     actor.chat_state_handle.update_sampling_config(cfg);
     let mut creds = actor.chat_state_handle.get_credentials().await;
     creds.api_key = None;
-    creds.auth_type = wimo ai_chat_state::AuthType::SessionToken;
+    creds.auth_type = wimoai_chat_state::AuthType::SessionToken;
     actor.chat_state_handle.update_credentials(creds);
 
     // Definite NotByok: the session-token gate must stay active against the loopback mock URL (an `Unknown` would demand a first-party host)
@@ -186,7 +186,7 @@ async fn session_token_actor(
             }
         });
     }
-    (actor, wimo ai_updates)
+    (actor, wimoai_updates)
 }
 
 async fn run_prompt(

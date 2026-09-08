@@ -6,12 +6,12 @@ use super::*;
 use super::reasoning_effort::EffortTarget;
 use crate::auth::PreferredAuthMethod;
 use crate::upload::trace::PromptMetadataParams;
-use wimo ai_wimo_tools::implementations::wimo::task::backend::SubagentBackend;
-use wimo ai_tty_utils::ProcessScope;
+use wimoai_wimo_tools::implementations::wimo::task::backend::SubagentBackend;
+use wimoai_tty_utils::ProcessScope;
 struct SessionConfigInputs {
     model_id: acp::ModelId,
     effort_options: Vec<ReasoningEffortOption>,
-    current_effort: Option<wimo ai_wimo_sampling_types::ReasoningEffort>,
+    current_effort: Option<wimoai_wimo_sampling_types::ReasoningEffort>,
 }
 /// `preferred` model, else catalog `current`, else first with own credentials.
 fn byok_from_models(
@@ -141,7 +141,7 @@ impl MvpAgent {
     }
     fn has_proxy_credentials(&self) -> bool {
         self.cfg.borrow().endpoints.deployment_key.is_some()
-            || self.auth_manager.current_or_expired().is_some_and(|a| a.is_wimo ai_auth())
+            || self.auth_manager.current_or_expired().is_some_and(|a| a.is_wimoai_auth())
     }
     /// `true` for session-based ACP auth methods.
     fn is_session_based_auth(&self) -> bool {
@@ -176,7 +176,7 @@ impl MvpAgent {
                 if self.is_session_based_auth() {
                     let auth = self.auth_manager.expired_auth();
                     if auth.is_some() {
-                        wimo ai_wimo_telemetry::unified_log::info(
+                        wimoai_wimo_telemetry::unified_log::info(
                             "auth buffered token fallback",
                             None,
                             None,
@@ -473,7 +473,7 @@ impl MvpAgent {
         let user_token = self
             .auth_manager
             .current_or_expired()
-            .filter(|a| a.is_wimo ai_auth())
+            .filter(|a| a.is_wimoai_auth())
             .map(|a| a.key.clone());
         let cfg = self.cfg.borrow();
         let base_url = cfg.endpoints.resolve_feedback_base_url();
@@ -490,7 +490,7 @@ impl MvpAgent {
                 .auth_manager
                 .current()
                 .filter(|a| {
-                    a.is_wimo ai_auth() || a.auth_mode == crate::auth::AuthMode::ApiKey
+                    a.is_wimoai_auth() || a.auth_mode == crate::auth::AuthMode::ApiKey
                 }) else {
                 return;
             };
@@ -501,19 +501,19 @@ impl MvpAgent {
                     .and_then(|rs| rs.subscription_tier_display.clone()),
                 Some(&auth),
             );
-            let (user_id, team_id) = if auth.is_wimo ai_auth() {
+            let (user_id, team_id) = if auth.is_wimoai_auth() {
                 (Some(auth.user_id), auth.team_id)
             } else {
                 (None, auth.team_id)
             };
-            wimo ai_wimo_telemetry::client::init_if_needed(
+            wimoai_wimo_telemetry::client::init_if_needed(
                 cfg.telemetry.clone(),
                 mode,
                 user_id,
                 team_id,
                 cfg.endpoints.deployment_key.clone(),
                 self.origin_client_info_from_meta(None),
-                wimo ai_wimo_version::VERSION.to_owned(),
+                wimoai_wimo_version::VERSION.to_owned(),
                 subscription_tier,
                 crate::http::shared_client(),
             );
@@ -543,7 +543,7 @@ impl MvpAgent {
             return None;
         }
         let auth = self.auth_manager.current_or_expired()?;
-        if !auth.is_wimo ai_auth() {
+        if !auth.is_wimoai_auth() {
             return None;
         }
         let key = auth.key.clone();
@@ -632,7 +632,7 @@ impl MvpAgent {
     /// Shared plugin registry handle used by extensions for snapshot/reload.
     pub(crate) fn plugin_registry_handle(
         &self,
-    ) -> &wimo ai_wimo_agent::plugins::SharedPluginRegistryHandle {
+    ) -> &wimoai_wimo_agent::plugins::SharedPluginRegistryHandle {
         &self.plugin_registry_handle
     }
     /// `true` when the agent runs in writeback storage mode.
@@ -802,7 +802,7 @@ impl MvpAgent {
                 cfg.hub.url.as_deref(),
             )
         };
-        let auth_path = wimo ai_wimo_workspace::hub_auth::default_auth_path().ok();
+        let auth_path = wimoai_wimo_workspace::hub_auth::default_auth_path().ok();
         let binary = crate::gateway_bridge::local_workspace_supervisor::resolve_workspace_server_bin()
             .ok();
         let agent_ref = LocalRef::new(self);
@@ -1243,7 +1243,7 @@ impl MvpAgent {
     /// This is the same boot stall as plugin discovery on wimo-desktop Windows.
     fn ensure_local_workspace_ops(
         &self,
-    ) -> Result<wimo ai_wimo_workspace::WorkspaceOps, acp::Error> {
+    ) -> Result<wimoai_wimo_workspace::WorkspaceOps, acp::Error> {
         if let Some(ops) = self.workspace_ops.borrow().clone() {
             return Ok(ops);
         }
@@ -1253,10 +1253,10 @@ impl MvpAgent {
             .current_or_expired()
             .map(|a| match a.team_id.filter(|t| !t.is_empty()) {
                 Some(team) => {
-                    wimo ai_wimo_workspace::WorkspaceIdentity::team(a.user_id, team)
+                    wimoai_wimo_workspace::WorkspaceIdentity::team(a.user_id, team)
                 }
                 None => {
-                    wimo ai_wimo_workspace::WorkspaceIdentity::new(
+                    wimoai_wimo_workspace::WorkspaceIdentity::new(
                         a.user_id,
                         a.principal_type,
                         a.principal_id,
@@ -1264,12 +1264,12 @@ impl MvpAgent {
                 }
             })
             .unwrap_or_default();
-        let ops = match wimo ai_wimo_workspace::handle::WorkspaceHandle::new_minimal(
+        let ops = match wimoai_wimo_workspace::handle::WorkspaceHandle::new_minimal(
             cwd.to_path_buf(),
             workspace_identity,
             project_lsp_trusted,
         ) {
-            Ok(handle) => wimo ai_wimo_workspace::WorkspaceOps::local(handle),
+            Ok(handle) => wimoai_wimo_workspace::WorkspaceOps::local(handle),
             Err(e) => {
                 tracing::error!(
                     error = %e,
@@ -1289,7 +1289,7 @@ impl MvpAgent {
     /// Called at the `ext_method` dispatch boundary and in session spawn; extensions receive the resolved `&WorkspaceOps` directly.
     pub(crate) fn resolve_workspace_ops(
         &self,
-    ) -> Result<wimo ai_wimo_workspace::WorkspaceOps, acp::Error> {
+    ) -> Result<wimoai_wimo_workspace::WorkspaceOps, acp::Error> {
         let ops = self.ensure_local_workspace_ops()?;
         if let Some(handle) = ops.workspace_handle() && !handle.has_client_ext_sink() {
             let gw = self.gateway.clone();
@@ -1315,25 +1315,25 @@ impl MvpAgent {
     ///   - `auth_manager` currently has a live (non-expired) credential, OR
     ///   - the active auth method is session-based (`cached_token`, `wimo.com`, `oidc`), even if the in-memory token is currently expired or missing.
     ///
-    /// Returns `ApiKey` only when the auth method is BYOK (`wimo ai.api_key`) or no auth method has been selected yet AND no live credential exists.
+    /// Returns `ApiKey` only when the auth method is BYOK (`wimoai.api_key`) or no auth method has been selected yet AND no live credential exists.
     ///
     /// The session-based clause is load-bearing.
     /// Without it, chat_state can get locked into `auth_type = ApiKey` and skip token refresh on later prompts.
-    pub(crate) fn auth_type(&self) -> wimo ai_chat_state::AuthType {
+    pub(crate) fn auth_type(&self) -> wimoai_chat_state::AuthType {
         if self.auth_manager.current().is_some() || self.is_session_based_auth() {
-            wimo ai_chat_state::AuthType::SessionToken
+            wimoai_chat_state::AuthType::SessionToken
         } else {
-            wimo ai_chat_state::AuthType::ApiKey
+            wimoai_chat_state::AuthType::ApiKey
         }
     }
-    /// Fall through to `wimo ai.api_key` if the startup probe still allows it, else `wimo.com`.
+    /// Fall through to `wimoai.api_key` if the startup probe still allows it, else `wimo.com`.
     /// `None` when `preferred_method` is pinned.
     pub(super) fn cached_token_fallthrough_method_id(
         &self,
     ) -> Option<acp::AuthMethodId> {
         let preferred = self.cfg.borrow().wimo_com_config.preferred_method;
         let id = auth_method::method_id_after_cached_token_unavailable(
-            auth_method::should_advertise_wimo ai_api_key_with_env_ok(
+            auth_method::should_advertise_wimoai_api_key_with_env_ok(
                 self.cfg.borrow().wimo_com_config.api_key_auth_disabled(),
                 self.models_manager.models().values(),
                 self.auth_manager.first_party_env_api_key_ok(),
@@ -1357,7 +1357,7 @@ impl MvpAgent {
                 _ => auth_method::PREFERRED_OIDC_UNAVAILABLE,
             };
             tracing::info!(%msg, "cached_token unavailable; preferred_method forbids fallthrough");
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth cached_token fallthrough blocked by preferred_method",
                 None,
                 Some(
@@ -1374,7 +1374,7 @@ impl MvpAgent {
             arguments.meta
         };
         tracing::info!(fallback = %method_id.0, "cached_token fallthrough");
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth cached_token fallthrough",
             None,
             Some(serde_json::json!({ "fallback": method_id.0.as_ref() })),
@@ -1397,7 +1397,7 @@ impl MvpAgent {
         if let Some(identity) = self
             .auth_manager
             .current_or_expired()
-            .filter(|a| a.is_wimo ai_auth())
+            .filter(|a| a.is_wimoai_auth())
             .map(|a| a.user_id)
         {
             self.tier_allowed
@@ -1434,7 +1434,7 @@ impl MvpAgent {
         }
     }
     /// Upgrade storage mode from newly-arrived remote settings.
-    /// Mirrors the `resolve_config` gate: only upgrades from `Local`, writeback needs wimo ai auth.
+    /// Mirrors the `resolve_config` gate: only upgrades from `Local`, writeback needs wimoai auth.
     fn reapply_storage_mode(&self) {
         if self.storage_mode.get() != StorageMode::Local {
             return;
@@ -1444,11 +1444,11 @@ impl MvpAgent {
             if cfg.mode == crate::agent::config::AgentMode::Generic {
                 return;
             }
-            let has_wimo ai_auth = self
+            let has_wimoai_auth = self
                 .auth_manager
                 .current_or_expired()
-                .is_some_and(|a| a.is_wimo ai_auth());
-            StorageMode::from_remote_gated(cfg.remote_settings.as_ref(), has_wimo ai_auth)
+                .is_some_and(|a| a.is_wimoai_auth());
+            StorageMode::from_remote_gated(cfg.remote_settings.as_ref(), has_wimoai_auth)
         };
         if resolved_mode == self.storage_mode.get() {
             return;
@@ -1569,7 +1569,7 @@ impl MvpAgent {
             tracing::debug!("post-auth settings refresh skipped: remote_fetch disabled");
             return;
         }
-        let is_wimo ai = auth.is_wimo ai_auth();
+        let is_wimoai = auth.is_wimoai_auth();
         let user_id = auth.user_id.clone();
         let team_id = auth.team_id.clone();
         let remote_was_absent = self.cfg.borrow().remote_settings.is_none();
@@ -1600,8 +1600,8 @@ impl MvpAgent {
                 trace_upload = %trace_upload,
                 "post-auth data capture config re-resolved",
             );
-            let wimo_user_id = is_wimo ai.then(|| user_id.clone());
-            let wimo_team_id = is_wimo ai.then(|| team_id.clone()).flatten();
+            let wimo_user_id = is_wimoai.then(|| user_id.clone());
+            let wimo_team_id = is_wimoai.then(|| team_id.clone()).flatten();
             let telemetry_config = cfg.telemetry.clone();
             let deployment_key = cfg.endpoints.deployment_key.clone();
             let subscription_tier_display = cfg
@@ -1621,14 +1621,14 @@ impl MvpAgent {
             subscription_tier,
             self.auth_manager.current_or_expired().as_ref(),
         );
-        wimo ai_wimo_telemetry::client::init(
+        wimoai_wimo_telemetry::client::init(
             telemetry_config,
             telemetry_mode,
             wimo_user_id,
             wimo_team_id,
             deployment_key,
             self.origin_client_info_from_meta(None),
-            wimo ai_wimo_version::VERSION.to_owned(),
+            wimoai_wimo_version::VERSION.to_owned(),
             subscription_tier,
             crate::http::shared_client(),
         );
@@ -1806,7 +1806,7 @@ impl MvpAgent {
     pub(super) fn apply_polled_announcements(
         &self,
         fresh: crate::util::config::RemoteSettings,
-        pre_fetch: Option<Vec<wimo ai_wimo_announcements::RemoteAnnouncement>>,
+        pre_fetch: Option<Vec<wimoai_wimo_announcements::RemoteAnnouncement>>,
     ) {
         let mut cfg = self.cfg.borrow_mut();
         let Some(stored) = cfg.remote_settings.as_mut() else {
@@ -1978,29 +1978,29 @@ impl MvpAgent {
             session.as_ref().map(|a| a.key.as_str()),
         );
         if prefers_oidc && !model.has_own_credentials()
-            && credentials.auth_type == wimo ai_chat_state::AuthType::ApiKey
+            && credentials.auth_type == wimoai_chat_state::AuthType::ApiKey
         {
             credentials.api_key = None;
-            credentials.auth_type = wimo ai_chat_state::AuthType::SessionToken;
+            credentials.auth_type = wimoai_chat_state::AuthType::SessionToken;
         }
         crate::agent::config::enforce_disable_api_key_auth(
             &mut credentials,
             self.cfg.borrow().wimo_com_config.api_key_auth_disabled(),
             session.as_ref().map(|a| a.key.as_str()),
         );
-        if !has_session_key && credentials.auth_type == wimo ai_chat_state::AuthType::ApiKey
+        if !has_session_key && credentials.auth_type == wimoai_chat_state::AuthType::ApiKey
             && !model.has_own_credentials() && is_session_based_auth
         {
             tracing::info!(
                 model = model.info().model.as_str(),
                 "auth: overriding auth_type to SessionToken (session-based auth method)",
             );
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth auth_type override to SessionToken",
                 None,
                 Some(serde_json::json!({ "model": model.info().model.as_str() })),
             );
-            credentials.auth_type = wimo ai_chat_state::AuthType::SessionToken;
+            credentials.auth_type = wimoai_chat_state::AuthType::SessionToken;
         }
         if should_warn_missing_session(MissingSessionCtx {
             has_session_key,
@@ -2014,7 +2014,7 @@ impl MvpAgent {
                 auth_type = ?credentials.auth_type,
                 "auth: prepare_sampling_config has no session key",
             );
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth: prepare_sampling_config has no session key",
                 None,
                 Some(
@@ -2036,7 +2036,7 @@ impl MvpAgent {
         let user_id = self
             .auth_manager
             .current_or_expired()
-            .filter(|a| a.is_wimo ai_auth())
+            .filter(|a| a.is_wimoai_auth())
             .map(|a| a.user_id);
         let mut config = crate::agent::config::sampling_config_for_model(
             model,
@@ -2101,7 +2101,7 @@ impl MvpAgent {
         let Some(auth) = self.auth_manager.current() else {
             return false;
         };
-        if !auth.is_wimo ai_auth() || auth.team_id.is_some() {
+        if !auth.is_wimoai_auth() || auth.team_id.is_some() {
             return false;
         }
         let tier = self
@@ -2113,27 +2113,27 @@ impl MvpAgent {
             .or_else(|| jwt_tier_claim(&auth.key));
         tier.as_deref().is_some_and(crate::tier::is_restricted_tier_name)
     }
-    /// Both BYOK and session (OAuth) users go direct to `wimo ai_api_base_url`.
+    /// Both BYOK and session (OAuth) users go direct to `wimoai_api_base_url`.
     /// `sampling_config.api_key` carries the OAuth bearer for session users (the `api_key_provider` refreshes it per request).
     /// So IC authenticates and meters Imagine usage per-user.
     pub(super) fn prepare_image_gen_config(
         &self,
-    ) -> wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig {
-        use wimo ai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
+    ) -> wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig {
+        use wimoai_wimo_tools::implementations::wimo::image_gen::ImageGenConfig;
         let sampling_config = self.sampling_config.borrow();
         let Some(ref api_key) = sampling_config.api_key else {
             return ImageGenConfig::Disabled;
         };
         let tier_restricted = self.is_tier_restricted_capability();
         let cfg = self.cfg.borrow();
-        let base_url = cfg.endpoints.wimo ai_api_base_url.clone();
+        let base_url = cfg.endpoints.wimoai_api_base_url.clone();
         let version = cfg
             .client_version
             .clone()
-            .unwrap_or_else(|| wimo ai_wimo_version::VERSION.to_string());
+            .unwrap_or_else(|| wimoai_wimo_version::VERSION.to_string());
         let alpha_test_key = cfg.endpoints.alpha_test_key.clone();
         let mut headers = indexmap::IndexMap::new();
-        headers.insert("user-agent".to_string(), format!("wimo ai-wimo/{version}"));
+        headers.insert("user-agent".to_string(), format!("wimoai-wimo/{version}"));
         inject_proxy_headers(
             &mut headers,
             cfg.client_version.as_deref(),
@@ -2154,15 +2154,15 @@ impl MvpAgent {
     /// The tool talks directly to the deployer service.
     pub(super) fn prepare_app_builder_deployer_config(
         &self,
-    ) -> wimo ai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig {
-        use wimo ai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig;
+    ) -> wimoai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig {
+        use wimoai_wimo_tools::implementations::wimo::app_builder::AppBuilderDeployerConfig;
         AppBuilderDeployerConfig::Disabled
     }
     /// Video tools call the wimo AI API directly.
     pub(super) fn prepare_video_gen_config(
         &self,
-    ) -> wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig {
-        use wimo ai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
+    ) -> wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig {
+        use wimoai_wimo_tools::implementations::wimo::video_gen::VideoGenConfig;
         let cfg = self.cfg.borrow();
         if !cfg.resolve_video_gen().value {
             return VideoGenConfig::Disabled;
@@ -2181,14 +2181,14 @@ impl MvpAgent {
         if zdr_restricted {
             tracing::info!("video_gen zdr-restricted by tools.disable_zdr_incompatible_tools");
         }
-        let base_url = cfg.endpoints.wimo ai_api_base_url.clone();
+        let base_url = cfg.endpoints.wimoai_api_base_url.clone();
         let version = cfg
             .client_version
             .clone()
-            .unwrap_or_else(|| wimo ai_wimo_version::VERSION.to_string());
+            .unwrap_or_else(|| wimoai_wimo_version::VERSION.to_string());
         let alpha_test_key = cfg.endpoints.alpha_test_key.clone();
         let mut headers = indexmap::IndexMap::new();
-        headers.insert("user-agent".to_string(), format!("wimo ai-wimo/{version}"));
+        headers.insert("user-agent".to_string(), format!("wimoai-wimo/{version}"));
         inject_proxy_headers(
             &mut headers,
             cfg.client_version.as_deref(),
@@ -2251,8 +2251,8 @@ impl MvpAgent {
     /// - `allow_local`: `[toolset.web_fetch] allow_local` > `wimo_WEB_FETCH_ALLOW_LOCAL` > false
     pub(super) fn prepare_web_fetch_config(
         &self,
-    ) -> wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig {
-        use wimo ai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig;
+    ) -> wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig {
+        use wimoai_wimo_tools::implementations::wimo::web_fetch::WebFetchConfig;
         let cfg = self.cfg.borrow();
         if cfg.disable_web_search {
             return WebFetchConfig::Disabled;
@@ -2301,10 +2301,10 @@ impl MvpAgent {
         let default_auto_mode = cfg.default_auto_mode;
         let tui_mode = cfg.mode == crate::agent::config::AgentMode::Tui;
         let relay_config_enabled = crate::util::config::load_relay_sync_enabled_sync();
-        let has_wimo ai_auth = auth_manager
+        let has_wimoai_auth = auth_manager
             .current_or_expired()
-            .is_some_and(|a| a.is_wimo ai_auth());
-        let relay_sync_enabled = tui_mode && relay_config_enabled && has_wimo ai_auth;
+            .is_some_and(|a| a.is_wimoai_auth());
+        let relay_sync_enabled = tui_mode && relay_config_enabled && has_wimoai_auth;
         let config_root = crate::config::load_effective_config().ok();
         let empty_config = toml::Value::Table(toml::map::Map::new());
         let raw = config_root.as_ref().unwrap_or(&empty_config);
@@ -2326,7 +2326,7 @@ impl MvpAgent {
         );
         if relay_sync_enabled {
             tracing::info!("[wimo] Relay sync: ENABLED");
-        } else if tui_mode && relay_config_enabled && !has_wimo ai_auth {
+        } else if tui_mode && relay_config_enabled && !has_wimoai_auth {
             tracing::info!("[wimo] Relay sync: DISABLED (no auth - run 'wimo login' first)");
         } else if tui_mode && !relay_config_enabled {
             tracing::debug!("Relay sync: DISABLED (not configured in config.toml or env)");
@@ -2351,7 +2351,7 @@ impl MvpAgent {
             launch_cwd: std::env::current_dir()
                 .unwrap_or_else(|_| std::path::PathBuf::from(".")),
             launch_dir_trust: std::cell::OnceCell::new(),
-            plugin_registry_handle: wimo ai_wimo_agent::plugins::SharedPluginRegistryHandle::new(
+            plugin_registry_handle: wimoai_wimo_agent::plugins::SharedPluginRegistryHandle::new(
                 None,
                 cfg.plugins.cli_plugin_dirs.clone(),
             ),
@@ -2412,7 +2412,7 @@ impl MvpAgent {
             subagent_sampling_semaphore: Arc::new(
                 tokio::sync::Semaphore::new(cfg.subagents_sampling_limit),
             ),
-            monitor_event_buffer: wimo ai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer::default(),
+            monitor_event_buffer: wimoai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer::default(),
             bundle_sync_in_flight: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             post_unblock_jwt_retry_in_flight: Arc::new(
                 std::sync::atomic::AtomicBool::new(false),
@@ -2758,8 +2758,8 @@ impl MvpAgent {
         &self,
         session_id: &str,
         task_id: &str,
-        source: wimo ai_wimo_tools::types::KillSource,
-    ) -> Result<wimo ai_wimo_tools::types::KillOutcome, String> {
+        source: wimoai_wimo_tools::types::KillSource,
+    ) -> Result<wimoai_wimo_tools::types::KillOutcome, String> {
         let sid = acp::SessionId::new(session_id);
         if let Some(handle) = self.get_session_handle(&sid) {
             handle.kill_background_task(task_id, source).await
@@ -2784,8 +2784,8 @@ impl MvpAgent {
     pub(crate) async fn cancel_subagent(
         &self,
         subagent_id: &str,
-    ) -> wimo ai_wimo_tools::implementations::wimo::task::types::SubagentCancelOutcome {
-        wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
+    ) -> wimoai_wimo_tools::implementations::wimo::task::types::SubagentCancelOutcome {
+        wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
                 self.subagent_event_tx.event_sender().0,
             )
             .cancel(subagent_id)
@@ -2795,9 +2795,9 @@ impl MvpAgent {
         &self,
         parent_session_id: &str,
     ) -> Vec<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentInspection,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentInspection,
     > {
-        let backend = wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
+        let backend = wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
             self.subagent_event_tx.event_sender().0,
         );
         let sid = acp::SessionId::new(parent_session_id);
@@ -2819,9 +2819,9 @@ impl MvpAgent {
         &self,
         subagent_id: &str,
     ) -> Option<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentInspection,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentInspection,
     > {
-        wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
+        wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
                 self.subagent_event_tx.event_sender().0,
             )
             .inspect(subagent_id)
@@ -2833,9 +2833,9 @@ impl MvpAgent {
         block: bool,
         timeout_ms: Option<u64>,
     ) -> Option<
-        wimo ai_wimo_tools::implementations::wimo::task::types::SubagentSnapshot,
+        wimoai_wimo_tools::implementations::wimo::task::types::SubagentSnapshot,
     > {
-        wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
+        wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
                 self.subagent_event_tx.event_sender().0,
             )
             .query(subagent_id, block, timeout_ms)
@@ -2846,7 +2846,7 @@ impl MvpAgent {
         parent_session_id: &str,
         prompt_id: &str,
     ) -> Vec<crate::upload::trace::SubagentSpawnedRef> {
-        wimo ai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
+        wimoai_wimo_tools::implementations::wimo::task::backend::ChannelBackend::new(
                 self.subagent_event_tx.event_sender().0,
             )
             .spawned_refs_for_prompt(parent_session_id, prompt_id)
@@ -2867,7 +2867,7 @@ impl MvpAgent {
     pub async fn list_tasks(
         &self,
         session_id: &str,
-    ) -> Option<Vec<wimo ai_wimo_tools::types::TaskSnapshot>> {
+    ) -> Option<Vec<wimoai_wimo_tools::types::TaskSnapshot>> {
         let sid = acp::SessionId::new(session_id);
         if let Some(handle) = self.get_session_handle(&sid) {
             handle.list_tasks().await
@@ -3003,7 +3003,7 @@ impl MvpAgent {
     pub(crate) async fn list_hooks(
         &self,
         session_id: &acp::SessionId,
-    ) -> Option<wimo ai_hooks_plugins_types::HooksListResponse> {
+    ) -> Option<wimoai_hooks_plugins_types::HooksListResponse> {
         let handle = self.get_session_handle(session_id)?;
         handle.get_hooks_list().await
     }
@@ -3011,14 +3011,14 @@ impl MvpAgent {
     pub(crate) async fn execute_hooks_action(
         &self,
         session_id: &acp::SessionId,
-        action: wimo ai_hooks_plugins_types::HooksAction,
-    ) -> Option<wimo ai_hooks_plugins_types::ActionOutcome> {
-        if matches!(action, wimo ai_hooks_plugins_types::HooksAction::Untrust)
+        action: wimoai_hooks_plugins_types::HooksAction,
+    ) -> Option<wimoai_hooks_plugins_types::ActionOutcome> {
+        if matches!(action, wimoai_hooks_plugins_types::HooksAction::Untrust)
             && let Some(cwd) = self.get_session_cwd(session_id)
         {
             self.interactive_trust_prompted
                 .borrow_mut()
-                .remove(&wimo ai_wimo_workspace::trust::workspace_key(&cwd));
+                .remove(&wimoai_wimo_workspace::trust::workspace_key(&cwd));
         }
         let handle = self.get_session_handle(session_id)?;
         handle.execute_hooks_action(action).await
@@ -3027,14 +3027,14 @@ impl MvpAgent {
     pub(crate) async fn execute_plugins_action(
         &self,
         session_id: &acp::SessionId,
-        action: wimo ai_hooks_plugins_types::PluginsAction,
-    ) -> Option<wimo ai_hooks_plugins_types::ActionOutcome> {
-        let is_reload = matches!(action, wimo ai_hooks_plugins_types::PluginsAction::Reload);
+        action: wimoai_hooks_plugins_types::PluginsAction,
+    ) -> Option<wimoai_hooks_plugins_types::ActionOutcome> {
+        let is_reload = matches!(action, wimoai_hooks_plugins_types::PluginsAction::Reload);
         let handle = self.get_session_handle(session_id)?;
         let outcome = handle.execute_plugins_action(action).await;
         let succeeded = matches!(
             outcome.as_ref().map(|o| &o.status),
-            Some(wimo ai_hooks_plugins_types::OutcomeStatus::Success)
+            Some(wimoai_hooks_plugins_types::OutcomeStatus::Success)
         );
         if is_reload && succeeded {
             self.broadcast_plugin_registry_to_sessions(Some(session_id));
@@ -3044,7 +3044,7 @@ impl MvpAgent {
     /// Get a snapshot of the shared plugin registry (for `x.ai/plugins/list`).
     pub(crate) fn plugin_registry_snapshot(
         &self,
-    ) -> Option<std::sync::Arc<wimo ai_wimo_agent::plugins::PluginRegistry>> {
+    ) -> Option<std::sync::Arc<wimoai_wimo_agent::plugins::PluginRegistry>> {
         self.plugin_registry_handle.snapshot()
     }
     /// Returns an upload method, or `None` when trace uploads are disabled.
@@ -3066,7 +3066,7 @@ impl MvpAgent {
         let auth_token = if cfg.endpoints.deployment_key.is_none() {
             self.auth_manager
                 .current_or_expired()
-                .filter(|auth| auth.is_wimo ai_auth())
+                .filter(|auth| auth.is_wimoai_auth())
                 .map(|auth| auth.key)
         } else {
             None
@@ -3165,7 +3165,7 @@ impl MvpAgent {
                         .auth()
                         .await
                         .ok()
-                        .filter(|auth| auth.is_wimo ai_auth())
+                        .filter(|auth| auth.is_wimoai_auth())
                         .map(|auth| auth.key)
             };
             if auth_token.is_some() || has_deployment_key {
@@ -3301,7 +3301,7 @@ impl MvpAgent {
         session_id: &acp::SessionId,
         model_id: &acp::ModelId,
         value_id: &str,
-    ) -> Option<wimo ai_wimo_sampling_types::ReasoningEffort> {
+    ) -> Option<wimoai_wimo_sampling_types::ReasoningEffort> {
         let state = acp::SessionModelState::new(model_id.clone(), Vec::new());
         self.session_config_inputs(Some(session_id), &state)
             .effort_options
@@ -3406,7 +3406,7 @@ impl MvpAgent {
             if let Some(auth) = self.auth_manager.current_or_expired() {
                 sampling_config.api_key = Some(auth.key);
                 tracing::debug!("auth: seed_client_config set auth (SessionToken)");
-                wimo ai_wimo_telemetry::unified_log::debug(
+                wimoai_wimo_telemetry::unified_log::debug(
                     "auth: seed_client_config set auth (SessionToken)",
                     None,
                     None,
@@ -3418,7 +3418,7 @@ impl MvpAgent {
                 .any(|m| m.has_own_credentials())
             {
                 tracing::warn!("No credentials found: no login token and no model api_key/env_key");
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "No credentials found: no login token and no model api_key/env_key",
                     None,
                     None,
@@ -3493,7 +3493,7 @@ impl MvpAgent {
             return false;
         }
         cfg.endpoints.deployment_key.is_none()
-            && self.auth_manager.current_or_expired().is_some_and(|a| a.is_wimo ai_auth())
+            && self.auth_manager.current_or_expired().is_some_and(|a| a.is_wimoai_auth())
     }
     /// Trace upload being off as *policy* (an MDM/requirements pin or a telemetry-disabled posture) must suppress the card.
     /// It must not invite the user to override the policy.
@@ -3543,7 +3543,7 @@ impl MvpAgent {
             .auth()
             .await
             .ok()
-            .filter(|auth| auth.is_wimo ai_auth())
+            .filter(|auth| auth.is_wimoai_auth())
             .map(|auth| auth.key);
         let cfg = self.cfg.borrow();
         let upload_method = cfg.endpoints.resolve_upload_method(auth_token)?;
@@ -3593,7 +3593,7 @@ impl MvpAgent {
         info: &crate::session::info::Info,
         cmd_tx: &tokio::sync::mpsc::UnboundedSender<crate::session::SessionCommand>,
         model: &str,
-        turns: Vec<Vec<wimo ai_wimo_sampling_types::conversation::ConversationItem>>,
+        turns: Vec<Vec<wimoai_wimo_sampling_types::conversation::ConversationItem>>,
     ) {
         use crate::upload::manifest::{
             build_manifest, resolve_upload_method, write_upload_manifest,
@@ -3645,8 +3645,8 @@ impl MvpAgent {
         info: &crate::session::info::Info,
         model: &str,
         base: u64,
-        turns: Vec<Vec<wimo ai_wimo_sampling_types::conversation::ConversationItem>>,
-    ) -> Vec<(PromptTraceContext, PromptMetadata, wimo ai_chat_state::TurnCapture)> {
+        turns: Vec<Vec<wimoai_wimo_sampling_types::conversation::ConversationItem>>,
+    ) -> Vec<(PromptTraceContext, PromptMetadata, wimoai_chat_state::TurnCapture)> {
         let mut uploads = Vec::with_capacity(turns.len());
         for (offset, items) in turns.into_iter().enumerate() {
             let turn_number = base.saturating_add(offset as u64);
@@ -3677,11 +3677,11 @@ impl MvpAgent {
                 prompt_was_truncated: Some(false),
                 prompt_verbatim: Some(true),
                 cwd: Some(info.cwd.clone()),
-                shell_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+                shell_version: Some(wimoai_wimo_version::VERSION.to_string()),
                 sandbox: local_sandbox_telemetry(),
                 ..Default::default()
             });
-            let capture = wimo ai_chat_state::TurnCapture {
+            let capture = wimoai_chat_state::TurnCapture {
                 messages: items,
                 compaction_occurred: false,
             };
@@ -3714,7 +3714,7 @@ impl MvpAgent {
                 );
                 obj.insert("turn_number".into(), serde_json::json!(turn_number));
             }
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "trace.upload.decision",
                 Some(session_info.id.0.as_ref()),
                 Some(decision),
@@ -3723,7 +3723,7 @@ impl MvpAgent {
         let upload_method = match upload_method {
             Some(method) => method,
             None => {
-                wimo ai_wimo_telemetry::session_ctx::log_session_event(crate::agent::session_metrics::TraceUploadSkipped {
+                wimoai_wimo_telemetry::session_ctx::log_session_event(crate::agent::session_metrics::TraceUploadSkipped {
                     session_id: session_info.id.0.to_string(),
                     turn_number,
                     reason: upload_reason.as_str().to_owned(),
@@ -3738,7 +3738,7 @@ impl MvpAgent {
                     match cfg.endpoints.resolve_trace_bucket_url() {
                         Some(resolved) => Some(resolved.value),
                         None => {
-                            wimo ai_wimo_telemetry::session_ctx::log_session_event(crate::agent::session_metrics::TraceUploadSkipped {
+                            wimoai_wimo_telemetry::session_ctx::log_session_event(crate::agent::session_metrics::TraceUploadSkipped {
                                 session_id: session_info.id.0.to_string(),
                                 turn_number,
                                 reason: "no_trace_bucket_configured".to_owned(),
@@ -3770,7 +3770,7 @@ impl MvpAgent {
                 let queue = crate::upload::trace::spawn_upload_queue(
                     &wimo_home,
                     &gcs_config,
-                    Some(wimo ai_wimo_version::VERSION),
+                    Some(wimoai_wimo_version::VERSION),
                     self.auth_manager.clone(),
                 );
                 crate::upload::trace::spawn_startup_spill_reconcile(
@@ -3806,26 +3806,26 @@ impl MvpAgent {
     /// 6. Built-in default agent.
     ///
     /// `wimo_AGENT` and an explicit `[agent] name` bypass step 1.
-    /// Strict-harness classification is structural; see [`wimo ai_wimo_agent::config::is_strict_harness_agent_type`].
+    /// Strict-harness classification is structural; see [`wimoai_wimo_agent::config::is_strict_harness_agent_type`].
     ///
     /// Harness inheritance for a profile that pins its own model is applied by the caller via [`inherited_harness_template`], not here.
     pub fn resolve_agent_definition(
         cwd: &std::path::Path,
         agent_profile_path: Option<&std::path::Path>,
         agent_config: &config::AgentSelectionConfig,
-        acp_agent_profile: Option<wimo ai_wimo_agent::AgentDefinition>,
+        acp_agent_profile: Option<wimoai_wimo_agent::AgentDefinition>,
         model_agent_type: Option<&str>,
-    ) -> wimo ai_wimo_agent::AgentDefinition {
-        use wimo ai_wimo_agent::AgentDefinition;
+    ) -> wimoai_wimo_agent::AgentDefinition {
+        use wimoai_wimo_agent::AgentDefinition;
         let wimo_agent_env_set = std::env::var("wimo_AGENT")
             .ok()
             .is_some_and(|s| !s.trim().is_empty());
         let config_agent_explicitly_set = agent_config.name.is_some();
         let model_requires_strict_harness = model_agent_type
-            .is_some_and(wimo ai_wimo_agent::config::is_strict_harness_agent_type);
+            .is_some_and(wimoai_wimo_agent::config::is_strict_harness_agent_type);
         if !wimo_agent_env_set && !config_agent_explicitly_set
             && model_requires_strict_harness && let Some(required) = model_agent_type
-            && let Some(def) = wimo ai_wimo_agent::discovery::by_name_in_cwd(required, cwd)
+            && let Some(def) = wimoai_wimo_agent::discovery::by_name_in_cwd(required, cwd)
         {
             tracing::info!(
                 agent_name = %def.name,
@@ -3883,7 +3883,7 @@ impl MvpAgent {
                 agent_name = %name,
                 "Resolving agent definition from config.toml [agent] name"
             );
-            if let Some(def) = wimo ai_wimo_agent::discovery::by_name_in_cwd(name, cwd) {
+            if let Some(def) = wimoai_wimo_agent::discovery::by_name_in_cwd(name, cwd) {
                 return def;
             }
             tracing::warn!(
@@ -3912,7 +3912,7 @@ impl MvpAgent {
                 }
             }
             Some(name) => {
-                wimo ai_wimo_agent::discovery::by_name_in_cwd(name, cwd)
+                wimoai_wimo_agent::discovery::by_name_in_cwd(name, cwd)
                     .unwrap_or_else(AgentDefinition::wimo_plan)
             }
             None => AgentDefinition::wimo_plan(),
@@ -3926,7 +3926,7 @@ impl MvpAgent {
                 model_agent_type = %required,
                 "resolve_agent_definition: model requires different agent, re-resolving"
             );
-            if let Some(def) = wimo ai_wimo_agent::discovery::by_name_in_cwd(required, cwd) {
+            if let Some(def) = wimoai_wimo_agent::discovery::by_name_in_cwd(required, cwd) {
                 return def;
             }
             tracing::warn!(
@@ -3946,13 +3946,13 @@ impl MvpAgent {
         meta: Option<&acp::Meta>,
         init: &acp::InitializeRequest,
     ) -> bool {
-        meta.and_then(|m| m.get(wimo ai_wimo_status_line::CLIENT_STATUS_LINE_META))
+        meta.and_then(|m| m.get(wimoai_wimo_status_line::CLIENT_STATUS_LINE_META))
             .or_else(|| {
                 init
                     .client_capabilities
                     .meta
                     .as_ref()
-                    .and_then(|m| m.get(wimo ai_wimo_status_line::STATUS_LINE_CAPABILITY))
+                    .and_then(|m| m.get(wimoai_wimo_status_line::STATUS_LINE_CAPABILITY))
             })
             .and_then(|v| v.as_bool())
             .unwrap_or(false)
@@ -4045,7 +4045,7 @@ impl MvpAgent {
         let load_envrc = self.cfg.borrow().session.load_envrc.unwrap_or(true);
         let project_env_trusted = folder_trust::project_scope_allowed(cwd.as_path());
         let envrc = envrc
-            .unwrap_or_else(|| wimo ai_wimo_workspace::envrc::spawn_envrc_load(
+            .unwrap_or_else(|| wimoai_wimo_workspace::envrc::spawn_envrc_load(
                 cwd.as_path().to_path_buf(),
                 load_envrc && project_env_trusted,
             ));
@@ -4057,7 +4057,7 @@ impl MvpAgent {
             .and_then(|m| m.get("x.ai/fs_notify"))
             .and_then(|v| {
                 use crate::session::{ClientFsConfig, ClientFsMode};
-                use wimo ai_fsnotify::FsConfig;
+                use wimoai_fsnotify::FsConfig;
                 if v.as_bool() == Some(true) {
                     return Some(ClientFsConfig::default());
                 }
@@ -4082,7 +4082,7 @@ impl MvpAgent {
                 }
                 Some(ClientFsConfig { fs, mode })
             });
-        let fs: Arc<dyn wimo ai_wimo_workspace::file_system::AsyncFileSystem> = if use_acp_fs {
+        let fs: Arc<dyn wimoai_wimo_workspace::file_system::AsyncFileSystem> = if use_acp_fs {
             let mut acp_fs = AcpSessionFs::new(
                 cwd.to_path_buf(),
                 session_info.id.clone(),
@@ -4152,10 +4152,10 @@ impl MvpAgent {
                 );
                 (handle, Some((hunk_event_rx, cancel)))
             }
-            None => (wimo ai_hunk_tracker::HunkTrackerHandle::noop(), None),
+            None => (wimoai_hunk_tracker::HunkTrackerHandle::noop(), None),
         };
-        let has_wimo ai_auth = self.auth_manager.current().is_some_and(|a| a.is_wimo ai_auth());
-        let loc_tracking_enabled = hunk_tracking_enabled && has_wimo ai_auth
+        let has_wimoai_auth = self.auth_manager.current().is_some_and(|a| a.is_wimoai_auth());
+        let loc_tracking_enabled = hunk_tracking_enabled && has_wimoai_auth
             && (self
                 .cfg
                 .borrow()
@@ -4181,15 +4181,15 @@ impl MvpAgent {
                 let (loc_agg_tx, loc_agg_rx) = tokio::sync::mpsc::unbounded_channel();
                 let loc_path = crate::session::persistence::session_dir(&session_info)
                     .join("hunk_records.jsonl");
-                let loc_writer = wimo ai_hunk_tracker::JsonlHunkRecordWriter::new(loc_path);
-                let loc_ctx = wimo ai_hunk_tracker::LocSinkContext {
+                let loc_writer = wimoai_hunk_tracker::JsonlHunkRecordWriter::new(loc_path);
+                let loc_ctx = wimoai_hunk_tracker::LocSinkContext {
                     session_id: session_info.id.0.to_string(),
                     agent_id: agent_id(),
                     user_id: self.auth_manager.current().map(|a| a.user_id.clone()),
                     aggregate_tx: Some(loc_agg_tx),
                 };
                 tokio::spawn(
-                    wimo ai_hunk_tracker::run_loc_sink(
+                    wimoai_hunk_tracker::run_loc_sink(
                         hunk_event_rx,
                         loc_writer,
                         loc_ctx,
@@ -4201,7 +4201,7 @@ impl MvpAgent {
             _ => None,
         };
         let session_env_timer = crate::instrumentation_timer!("session.spawn_and_register.session_env");
-        let mut session_env = wimo ai_wimo_workspace::permission::claude_settings::load_claude_env_with_project(
+        let mut session_env = wimoai_wimo_workspace::permission::claude_settings::load_claude_env_with_project(
             cwd.as_path(),
             project_env_trusted,
         );
@@ -4346,7 +4346,7 @@ impl MvpAgent {
         let pinned_model: Option<(acp::ModelId, ModelEntry)> = match &agent_definition
             .model
         {
-            wimo ai_wimo_agent::config::ModelOverride::Override(id) => {
+            wimoai_wimo_agent::config::ModelOverride::Override(id) => {
                 let mid = acp::ModelId::new(Arc::from(id.as_str()));
                 match self.resolve_model_id(&mid) {
                     Ok(entry) => Some((mid, entry)),
@@ -4360,7 +4360,7 @@ impl MvpAgent {
                     }
                 }
             }
-            wimo ai_wimo_agent::config::ModelOverride::Inherit => None,
+            wimoai_wimo_agent::config::ModelOverride::Inherit => None,
         };
         if let Some(template) = inherited_harness_template(
             &agent_definition.user_message_template,
@@ -4443,7 +4443,7 @@ impl MvpAgent {
                     p.inline_lsp_servers.as_ref().map(|v| (v, p.name.as_str()))
                 })
                 .unzip();
-            let sourced = wimo ai_wimo_tools::implementations::lsp::config::load_servers_with_plugins_sourced(
+            let sourced = wimoai_wimo_tools::implementations::lsp::config::load_servers_with_plugins_sourced(
                 tool_ctx.cwd.as_path(),
                 &plugin_lsp_paths,
                 &plugin_inline_lsp,
@@ -4456,7 +4456,7 @@ impl MvpAgent {
             );
             tool_ctx.lsp_server_names = servers.keys().cloned().collect();
             if servers.is_empty() {
-                let user_path = wimo ai_wimo_tools::util::wimo_home::wimo_home()
+                let user_path = wimoai_wimo_tools::util::wimo_home::wimo_home()
                     .join("lsp.json");
                 let project_path = tool_ctx.cwd.as_path().join(".wimo").join("lsp.json");
                 tracing::debug!(
@@ -4466,7 +4466,7 @@ impl MvpAgent {
                     "LSP tools enabled, but no language servers are configured"
                 );
             } else {
-                use wimo ai_wimo_tools::implementations::lsp::{
+                use wimoai_wimo_tools::implementations::lsp::{
                     LspBackend, LspBackendAdapter, LspManager,
                 };
                 let mgr = std::sync::Arc::new(
@@ -4475,7 +4475,7 @@ impl MvpAgent {
                                 servers,
                                 tool_ctx.cwd.as_path().to_path_buf(),
                                 true,
-                                wimo ai_wimo_tools::notification::ToolNotificationHandle::noop(),
+                                wimoai_wimo_tools::notification::ToolNotificationHandle::noop(),
                             )
                             .with_process_scope(tool_ctx.process_scope.clone()),
                     ),
@@ -4613,7 +4613,7 @@ impl MvpAgent {
         let (mut handle, permission_events_rx, agent_system_prompt, session_thread) = {
             let _timer = crate::instrumentation_timer!("session.spawn_actor_call");
             let session_key = self.auth_manager.current_or_expired().map(|a| a.key);
-            let credentials = wimo ai_chat_state::Credentials {
+            let credentials = wimoai_chat_state::Credentials {
                 api_key: sampling_config.api_key.clone(),
                 auth_type: crate::agent::config::resolve_chat_state_auth_type(
                     sampling_config.model.as_str(),
@@ -4624,7 +4624,7 @@ impl MvpAgent {
                 client_version: sampling_config.client_version.clone(),
             };
             let attribution_callback: Option<
-                wimo ai_wimo_sampler::SharedAttributionCallback,
+                wimoai_wimo_sampler::SharedAttributionCallback,
             > = Some(
                 crate::auth::attribution::ShellAttribution::new(
                     self.auth_manager.clone(),
@@ -4636,11 +4636,11 @@ impl MvpAgent {
                 .as_ref()
                 .and_then(|hooks_config| {
                     let hooks_val = hooks_config.as_value();
-                    let (specs, errors) = wimo ai_wimo_hooks::config::parse_hooks_from_value_with_dir(
+                    let (specs, errors) = wimoai_wimo_hooks::config::parse_hooks_from_value_with_dir(
                         &hooks_val,
                         &format!(
                         "{}{}",
-                        wimo ai_wimo_hooks::config::AGENT_HOOK_PREFIX,
+                        wimoai_wimo_hooks::config::AGENT_HOOK_PREFIX,
                         agent_definition.name
                     ),
                         std::path::Path::new(&session_info.cwd),
@@ -4655,7 +4655,7 @@ impl MvpAgent {
                     let hooks_trusted = folder_trust::project_scope_allowed(cwd);
                     let git_root = {
                         let _timer = crate::instrumentation_timer!("session.spawn_git_root");
-                        wimo ai_wimo_workspace::session::git::find_git_root_from_path(cwd)
+                        wimoai_wimo_workspace::session::git::find_git_root_from_path(cwd)
                             .ok()
                     };
                     let (disk_registry, disk_errors) = {
@@ -4811,7 +4811,7 @@ impl MvpAgent {
                     prompt_display_cwd,
                     subagent_toggle,
                     Vec::new(),
-                    wimo ai_wimo_agent::prompt::context::PromptAudience::Primary,
+                    wimoai_wimo_agent::prompt::context::PromptAudience::Primary,
                     None,
                     None,
                     disable_web_search,
@@ -4881,14 +4881,14 @@ impl MvpAgent {
             tokio::spawn(async move {
                 while let Some(agg) = loc_rx.recv().await {
                     match agg {
-                        wimo ai_hunk_tracker::LocAggregate::LinesChanged {
+                        wimoai_hunk_tracker::LocAggregate::LinesChanged {
                             author_type,
                             lines_added,
                             lines_removed,
                             file_path,
                         } => {
                             let is_agent = author_type
-                                == wimo ai_hunk_tracker::AuthorType::Agent;
+                                == wimoai_hunk_tracker::AuthorType::Agent;
                             signals
                                 .record_loc_change(
                                     is_agent,
@@ -4897,7 +4897,7 @@ impl MvpAgent {
                                     file_path,
                                 );
                         }
-                        wimo ai_hunk_tracker::LocAggregate::LinesReverted {
+                        wimoai_hunk_tracker::LocAggregate::LinesReverted {
                             lines_added_reverted,
                             lines_removed_reverted,
                         } => {

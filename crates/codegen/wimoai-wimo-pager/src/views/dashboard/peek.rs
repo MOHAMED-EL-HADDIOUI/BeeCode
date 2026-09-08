@@ -431,7 +431,7 @@ fn paint_peek_config_badge(
     let model_label = panel.model_name.clone().unwrap_or_default();
     let mut flags: Vec<PromptFlag> = Vec::new();
     // Mirror the chat prompt's flag precedence: plan wins over always-approve, which wins over auto
-    // Plan mode blocks edits regardless of the underlying permission mode (the gate in wimo ai-wimo-shell)
+    // Plan mode blocks edits regardless of the underlying permission mode (the gate in wimoai-wimo-shell)
     // `plan` alone is therefore the honest badge even when yolo stays on underneath
     if panel.plan_mode {
         flags.push(PromptFlag {

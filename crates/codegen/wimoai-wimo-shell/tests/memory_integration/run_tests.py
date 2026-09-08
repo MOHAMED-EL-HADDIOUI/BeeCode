@@ -12,16 +12,16 @@ Requires: cargo, rg (ripgrep).
 
 Usage:
     # Run from the repo root:
-    python3 crates/codegen/wimo ai-wimo-shell/tests/memory_integration/run_tests.py
+    python3 crates/codegen/wimoai-wimo-shell/tests/memory_integration/run_tests.py
 
     # Run only fast (no-model) tests:
-    python3 crates/codegen/wimo ai-wimo-shell/tests/memory_integration/run_tests.py --fast
+    python3 crates/codegen/wimoai-wimo-shell/tests/memory_integration/run_tests.py --fast
 
     # Run a single test by name:
-    python3 crates/codegen/wimo ai-wimo-shell/tests/memory_integration/run_tests.py test_fts_search_quality
+    python3 crates/codegen/wimoai-wimo-shell/tests/memory_integration/run_tests.py test_fts_search_quality
 
     # Skip build (use pre-built binary):
-    wimo_BINARY=/path/to/wimo ai-wimo-pager python3 run_tests.py --fast
+    wimo_BINARY=/path/to/wimoai-wimo-pager python3 run_tests.py --fast
 """
 
 import json
@@ -2575,13 +2575,13 @@ def find_repo_root():
 
 
 def build_binary():
-    """Build wimo ai-wimo-pager with --features dev --release. Returns binary path."""
+    """Build wimoai-wimo-pager with --features dev --release. Returns binary path."""
     repo = find_repo_root()
     if not repo:
         print(f"{R}Could not find repo root (no Cargo.toml + crates/ above cwd){N}")
         sys.exit(1)
 
-    binary = os.path.join(repo, "target", "release", "wimo ai-wimo-pager")
+    binary = os.path.join(repo, "target", "release", "wimoai-wimo-pager")
 
     # Find rg for wimo_SHELL_BUNDLE_RG_PATH
     rg = shutil.which("rg")
@@ -2592,9 +2592,9 @@ def build_binary():
     env = os.environ.copy()
     env["wimo_SHELL_BUNDLE_RG_PATH"] = rg
 
-    print(f"{B}Building wimo ai-wimo-pager (release + dev)...{N}")
+    print(f"{B}Building wimoai-wimo-pager (release + dev)...{N}")
     result = subprocess.run(
-        ["cargo", "build", "-p", "wimo ai-wimo-pager", "--features", "dev", "--release"],
+        ["cargo", "build", "-p", "wimoai-wimo-pager", "--features", "dev", "--release"],
         cwd=repo,
         env=env,
     )

@@ -3,17 +3,17 @@
 //! The card holds the braille logo, the version, the cwd, the model, and a one-line hint.
 //! It mirrors the full-TUI hero box's style (rounded dim border and logo) without its menu and onboarding.
 //!
-//! It is printed via [`wimo ai_ratatui_inline::Terminal::insert_before`], the same one-shot mechanism the commit pipeline uses.
+//! It is printed via [`wimoai_ratatui_inline::Terminal::insert_before`], the same one-shot mechanism the commit pipeline uses.
 //! An `AppView` flag set at session creation gates it, so it prints exactly once per session and re-prints when a new session starts.
 
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, Widget};
 
-use wimo ai_wimo_pager::app::PagerTerminal;
-use wimo ai_wimo_pager::app::app_view::{ActiveView, AppView};
-use wimo ai_wimo_pager::minimal_api;
-use wimo ai_wimo_pager::theme::Theme;
+use wimoai_wimo_pager::app::PagerTerminal;
+use wimoai_wimo_pager::app::app_view::{ActiveView, AppView};
+use wimoai_wimo_pager::minimal_api;
+use wimoai_wimo_pager::theme::Theme;
 
 /// Commit the welcome card when one is pending (set at session start / `/new`).
 ///
@@ -43,7 +43,7 @@ pub fn maybe_commit_welcome(app: &mut AppView, terminal: &mut PagerTerminal) {
     let _ = terminal.clear();
 
     let theme = Theme::current();
-    let version = wimo ai_wimo_version::VERSION;
+    let version = wimoai_wimo_version::VERSION;
     let (cwd, model) = match &app.active_view {
         ActiveView::Agent(id) => {
             let agent = app.agents.get(id);
@@ -88,7 +88,7 @@ pub fn maybe_commit_welcome(app: &mut AppView, terminal: &mut PagerTerminal) {
     // RGB themes: blend a soft border
     // Terminal-native (both Reset): fall through to Reset so the terminal's default foreground draws the border
     let border_color =
-        wimo ai_wimo_pager::render::color::blend_color(theme.bg_base, theme.gray_dim, 0.45)
+        wimoai_wimo_pager::render::color::blend_color(theme.bg_base, theme.gray_dim, 0.45)
             .unwrap_or(theme.gray_dim);
 
     let inserted = terminal.insert_before(height, move |buf| {

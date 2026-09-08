@@ -1,6 +1,6 @@
 use super::*;
 use crate::extensions::notification::{
-    SessionNotification as wimo aiNotification, SessionUpdate as wimo aiSessionUpdate,
+    SessionNotification as wimoaiNotification, SessionUpdate as wimoaiSessionUpdate,
 };
 use crate::session::storage::SessionUpdate;
 use agent_client_protocol as acp;
@@ -37,9 +37,9 @@ fn agent_chunk(text: &str) -> SessionUpdate {
 }
 
 fn rewind_marker(target: usize) -> SessionUpdate {
-    SessionUpdate::wimo ai(Box::new(wimo aiNotification {
+    SessionUpdate::wimoai(Box::new(wimoaiNotification {
         session_id: acp::SessionId::new("s1"),
-        update: wimo aiSessionUpdate::RewindMarker {
+        update: wimoaiSessionUpdate::RewindMarker {
             target_prompt_index: target,
             created_at: "2024-01-01T00:00:00Z".to_string(),
         },

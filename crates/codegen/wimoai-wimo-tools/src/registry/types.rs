@@ -29,7 +29,7 @@ use std::sync::{Arc, OnceLock};
 /// [`ToolRegistryBuilder::new`].
 ///
 /// This inverts the dependency for harness code that must live outside
-/// this crate: instead of `wimo ai-wimo-tools` referencing an out-of-tree tool
+/// this crate: instead of `wimoai-wimo-tools` referencing an out-of-tree tool
 /// pack, the pack calls
 /// [`register_tool_pack`] at startup and registers itself here.
 ///
@@ -112,7 +112,7 @@ impl ToolConfig {
     ///
     /// The fully-qualified id (`"<namespace>:<id>"`) and `kind` are derived
     /// from the type via `ToolMetadata::tool_namespace()` and
-    /// `wimo ai_tool_runtime::Tool::id()`. Use this for built-in tools known
+    /// `wimoai_tool_runtime::Tool::id()`. Use this for built-in tools known
     /// at compile time — it gives compile-time checking of the tool name
     /// and auto-populates `kind` so capability-mode filtering works.
     ///
@@ -121,7 +121,7 @@ impl ToolConfig {
     /// `ToolRegistryBuilder::register`).
     pub fn for_tool<T>() -> Self
     where
-        T: crate::types::tool_metadata::ToolMetadata + wimo ai_tool_runtime::Tool + Default,
+        T: crate::types::tool_metadata::ToolMetadata + wimoai_tool_runtime::Tool + Default,
     {
         Self::from(&T::default())
     }
@@ -180,7 +180,7 @@ impl ToolConfig {
             .unwrap_or_else(|| default_id.to_owned())
     }
 }
-impl<T: crate::types::tool_metadata::ToolMetadata + wimo ai_tool_runtime::Tool> From<&T>
+impl<T: crate::types::tool_metadata::ToolMetadata + wimoai_tool_runtime::Tool> From<&T>
     for ToolConfig
 {
     fn from(tool: &T) -> Self {
@@ -188,7 +188,7 @@ impl<T: crate::types::tool_metadata::ToolMetadata + wimo ai_tool_runtime::Tool> 
             id: format!(
                 "{}:{}",
                 tool.tool_namespace(),
-                wimo ai_tool_runtime::Tool::id(tool).as_str()
+                wimoai_tool_runtime::Tool::id(tool).as_str()
             ),
             params: None,
             name_override: None,
@@ -255,7 +255,7 @@ pub struct SessionContext {
     /// after every tool execution. The file stores serialized `State<T>`
     /// values (e.g., `TodoState`).
     ///
-    /// Empty means this registry gives the session a handle that reads and writes nothing. `wimo ai-wimo-agent` reads
+    /// Empty means this registry gives the session a handle that reads and writes nothing. `wimoai-wimo-agent` reads
     /// the same empty value as "use the temp directory" for `session_folder`; unifying the two is a follow-up.
     pub state_path: PathBuf,
     /// Optional memory backend for cross-session knowledge retrieval.
@@ -295,12 +295,12 @@ pub struct SessionContext {
     /// instead of using the key baked into their config at construction time.
     /// Prevents 401 failures when a session outlives the initial token lifetime.
     pub api_key_provider: Option<crate::types::SharedApiKeyProvider>,
-    /// Auth provider which returns a wimo ai_computer_hub_sdk::AuthCredential. Can be used by
+    /// Auth provider which returns a wimoai_computer_hub_sdk::AuthCredential. Can be used by
     /// tools that need to authenticate with services.
     ///
     /// Not to be confused with the api_key_provider, which is a legacy
     /// provider used by the shell's auth manager.
-    pub auth_provider: Option<wimo ai_computer_hub_sdk::SharedAuthProvider>,
+    pub auth_provider: Option<wimoai_computer_hub_sdk::SharedAuthProvider>,
     /// Optional 401-attribution callback for tool HTTP clients. When
     /// set, a 401 from `image_gen` / `video_gen` / `web_search`
     /// emits an `auth_401_attribution` event via this hook. Hosts can
@@ -333,13 +333,13 @@ impl ToolMetadata for DefaultToolMetadata {
 /// Drain a `ToolStream<TypedToolOutput>` to the terminal result's `value`.
 /// Progress items are discarded.
 pub async fn drain_value_stream(
-    mut stream: wimo ai_tool_runtime::ToolStream<wimo ai_tool_runtime::TypedToolOutput>,
-) -> Result<serde_json::Value, wimo ai_tool_runtime::ToolError> {
+    mut stream: wimoai_tool_runtime::ToolStream<wimoai_tool_runtime::TypedToolOutput>,
+) -> Result<serde_json::Value, wimoai_tool_runtime::ToolError> {
     use futures::StreamExt;
     while let Some(item) = stream.next().await {
         match item {
-            wimo ai_tool_runtime::ToolStreamItem::Progress(_) => continue,
-            wimo ai_tool_runtime::ToolStreamItem::Terminal(result) => {
+            wimoai_tool_runtime::ToolStreamItem::Progress(_) => continue,
+            wimoai_tool_runtime::ToolStreamItem::Terminal(result) => {
                 return result.map(|typed| typed.value);
             }
         }
@@ -348,8 +348,8 @@ pub async fn drain_value_stream(
 }
 /// The error yielded when a dispatch stream ends without a terminal item.
 /// Centralized so the code/message can't drift across call sites.
-fn stream_no_terminal_error() -> wimo ai_tool_runtime::ToolError {
-    wimo ai_tool_runtime::ToolError::custom(
+fn stream_no_terminal_error() -> wimoai_tool_runtime::ToolError {
+    wimoai_tool_runtime::ToolError::custom(
         "stream_no_terminal",
         "dispatch stream ended without a terminal item",
     )
@@ -363,10 +363,10 @@ type OutputConverter =
 /// `.await`.
 struct DispatchParts {
     /// Resolved `LocalRegistry` handle to dispatch through.
-    lr_handle: Arc<dyn wimo ai_computer_hub_core::ToolHandle>,
+    lr_handle: Arc<dyn wimoai_computer_hub_core::ToolHandle>,
     /// Runtime context built for the call (resources, renderer, cwd,
     /// behavior version, inner-dispatch).
-    ctx: wimo ai_tool_runtime::ToolCallContext,
+    ctx: wimoai_tool_runtime::ToolCallContext,
     /// Canonical (reverse-remapped) params to pass to dispatch.
     canonical_params: serde_json::Value,
     /// Converts the dispatch's `serde_json::Value` back to `ToolOutput`.
@@ -402,11 +402,11 @@ struct ToolEntry {
     /// Noop when `T::Params = ()`.
     register_params: Box<dyn Fn(&mut Resources) + Send + Sync>,
     parse_input: Box<
-        dyn Fn(serde_json::Value) -> Result<ToolInput, wimo ai_tool_runtime::ToolError> + Send + Sync,
+        dyn Fn(serde_json::Value) -> Result<ToolInput, wimoai_tool_runtime::ToolError> + Send + Sync,
     >,
     /// Registers this tool into a `LocalRegistry` using the concrete type.
     /// Captured at `register::<T>()` time when T is known.
-    register_in_local: Box<dyn Fn(&wimo ai_computer_hub_sdk::LocalRegistry) + Send + Sync>,
+    register_in_local: Box<dyn Fn(&wimoai_computer_hub_sdk::LocalRegistry) + Send + Sync>,
 }
 /// Per-reminder metadata stored in the builder.
 struct ReminderEntry {
@@ -442,7 +442,7 @@ struct FinalizedTool {
     reverse_params: HashMap<String, String>,
     /// useful for parsing input to specific type
     parse_input: Arc<
-        dyn Fn(serde_json::Value) -> Result<ToolInput, wimo ai_tool_runtime::ToolError> + Send + Sync,
+        dyn Fn(serde_json::Value) -> Result<ToolInput, wimoai_tool_runtime::ToolError> + Send + Sync,
     >,
     /// Resolved behavior contract version for this tool (e.g. `"current"`,
     /// `"legacy-0.4.10"`). `None` for unmanaged tools and dynamically
@@ -462,7 +462,7 @@ pub struct FinalizedToolset {
     scheduler_cancel: Option<tokio_util::sync::CancellationToken>,
     /// Shared local registry for in-process dispatch.
     /// Contains only config-enabled tools. Can be shared with ToolHarness.
-    local_registry: wimo ai_computer_hub_sdk::LocalRegistry,
+    local_registry: wimoai_computer_hub_sdk::LocalRegistry,
     /// Lock-free access to the template renderer for tool name/param resolution.
     /// Cloned into `ToolCallContext::extensions` on each `call()` so tools
     /// can resolve names without acquiring the `resources` mutex.
@@ -471,7 +471,7 @@ pub struct FinalizedToolset {
     system_reminder_tag: &'static str,
     /// Per-user feature-flag bag stamped on every dispatch ctx by
     /// `prepare_dispatch`. `None` outside a workspace bind.
-    workspace_viewer_ctx: Option<wimo ai_tool_runtime::WorkspaceViewerContext>,
+    workspace_viewer_ctx: Option<wimoai_tool_runtime::WorkspaceViewerContext>,
 }
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct RequirementError {
@@ -531,7 +531,7 @@ impl RequirementError {
 pub struct ToolRegistryBuilder {
     tools: HashMap<String, ToolEntry>,
     reminders: Vec<ReminderEntry>,
-    shared_local_registry: Option<wimo ai_computer_hub_sdk::LocalRegistry>,
+    shared_local_registry: Option<wimoai_computer_hub_sdk::LocalRegistry>,
     /// Whether the client delivers system reminders (completion
     /// notifications for backgrounded commands/subagents) to the model.
     /// Exposed to description templates as `system_reminders_enabled` so
@@ -555,7 +555,7 @@ impl ToolRegistryBuilder {
     /// [`register_tool_pack`] can contribute tool registrations.
     pub fn register<T>(&mut self)
     where
-        T: wimo ai_tool_runtime::Tool
+        T: wimoai_tool_runtime::Tool
             + ToolMetadata
             + std::fmt::Debug
             + Default
@@ -577,7 +577,7 @@ impl ToolRegistryBuilder {
     /// [`register_tool_pack`] can contribute tool registrations.
     pub fn register_with_params<T, P>(&mut self)
     where
-        T: wimo ai_tool_runtime::Tool
+        T: wimoai_tool_runtime::Tool
             + ToolMetadata
             + std::fmt::Debug
             + Default
@@ -598,10 +598,10 @@ impl ToolRegistryBuilder {
         let name = format!(
             "{}:{}",
             tool.tool_namespace(),
-            wimo ai_tool_runtime::Tool::id(&tool).as_str()
+            wimoai_tool_runtime::Tool::id(&tool).as_str()
         );
         let namespace = tool.tool_namespace().to_string();
-        let id = wimo ai_tool_runtime::Tool::id(&tool).as_str().to_string();
+        let id = wimoai_tool_runtime::Tool::id(&tool).as_str().to_string();
         let kind = tool.kind();
         let requires = tool.requires_expr();
         self.tools.insert(
@@ -633,7 +633,7 @@ impl ToolRegistryBuilder {
                     let typed = serde_json::from_value::<T::Args>(json)?;
                     Ok(typed.into())
                 }),
-                register_in_local: Box::new(|lr: &wimo ai_computer_hub_sdk::LocalRegistry| {
+                register_in_local: Box::new(|lr: &wimoai_computer_hub_sdk::LocalRegistry| {
                     lr.register(T::default());
                 }),
             },
@@ -767,7 +767,7 @@ impl ToolRegistryBuilder {
         }
         b
     }
-    pub fn with_local_registry(mut self, registry: wimo ai_computer_hub_sdk::LocalRegistry) -> Self {
+    pub fn with_local_registry(mut self, registry: wimoai_computer_hub_sdk::LocalRegistry) -> Self {
         self.shared_local_registry = Some(registry);
         self
     }
@@ -965,7 +965,7 @@ impl ToolRegistryBuilder {
         config: ToolServerConfig,
         ctx: SessionContext,
         truncation_config: crate::types::context::TruncationConfig,
-        workspace_viewer_ctx: Option<wimo ai_tool_runtime::WorkspaceViewerContext>,
+        workspace_viewer_ctx: Option<wimoai_tool_runtime::WorkspaceViewerContext>,
     ) -> Result<FinalizedToolset, Vec<RequirementError>> {
         let errors = self.validate_config(&config);
         if !errors.is_empty() {
@@ -1170,7 +1170,7 @@ impl ToolRegistryBuilder {
                     desc,
                     &client_name,
                     crate::DEFAULT_TOOL_OUTPUT_BYTES,
-                    wimo ai_tool_types::max_wait_block_ms(),
+                    wimoai_tool_types::max_wait_block_ms(),
                 ));
             }
             renderer.render_schema_descriptions(&mut definition.function.parameters);
@@ -1178,7 +1178,7 @@ impl ToolRegistryBuilder {
                 &mut definition.function.parameters,
                 &client_name,
                 crate::DEFAULT_TOOL_OUTPUT_BYTES,
-                wimo ai_tool_types::max_wait_block_ms(),
+                wimoai_tool_types::max_wait_block_ms(),
             );
             (entry.apply_params)(&effective_params, &mut resources);
             tools.push(FinalizedTool {
@@ -1288,7 +1288,7 @@ impl Drop for FinalizedToolset {
 /// Stored in [`InnerDispatch`] inside `ToolCallContext::extensions` —
 /// stack-bounded, dropped when `Tool::run()` returns.
 ///
-/// Implements the canonical `wimo ai_tool_runtime::ToolDispatch` trait so the
+/// Implements the canonical `wimoai_tool_runtime::ToolDispatch` trait so the
 /// dispatch contract is uniform across all boundaries. The impedance
 /// mismatch (`ToolStream<Value>` vs `Result<ToolOutput>`) is bridged by
 /// serializing `ToolOutput` to `Value` in the stream; callers use
@@ -1297,27 +1297,27 @@ struct InnerDispatchForToolset {
     toolset: Arc<FinalizedToolset>,
 }
 #[async_trait::async_trait]
-impl wimo ai_tool_runtime::ToolDispatch for InnerDispatchForToolset {
+impl wimoai_tool_runtime::ToolDispatch for InnerDispatchForToolset {
     async fn call(
         &self,
-        tool_id: wimo ai_tool_protocol::ToolId,
+        tool_id: wimoai_tool_protocol::ToolId,
         args: serde_json::Value,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
-    ) -> wimo ai_tool_runtime::ToolStream<wimo ai_tool_runtime::TypedToolOutput> {
+        ctx: wimoai_tool_runtime::ToolCallContext,
+    ) -> wimoai_tool_runtime::ToolStream<wimoai_tool_runtime::TypedToolOutput> {
         let result = self
             .toolset
             .call_raw(tool_id.as_str(), args, ctx)
             .await
             .and_then(|output| {
                 let value = serde_json::to_value(&output).map_err(|e| {
-                    wimo ai_tool_runtime::ToolError::custom("output_encoding", e.to_string())
+                    wimoai_tool_runtime::ToolError::custom("output_encoding", e.to_string())
                 })?;
-                Ok(wimo ai_tool_runtime::TypedToolOutput::from_value(
+                Ok(wimoai_tool_runtime::TypedToolOutput::from_value(
                     tool_id.clone(),
                     value,
                 ))
             });
-        wimo ai_tool_runtime::terminal_only(result)
+        wimoai_tool_runtime::terminal_only(result)
     }
 }
 impl FinalizedToolset {
@@ -1333,7 +1333,7 @@ impl FinalizedToolset {
             )),
             resources_persistence: Arc::new(ResourcesPersistence::noop()),
             scheduler_cancel: None,
-            local_registry: wimo ai_computer_hub_sdk::LocalRegistry::new(),
+            local_registry: wimoai_computer_hub_sdk::LocalRegistry::new(),
             renderer: Arc::new(TemplateRenderer::new(
                 std::collections::HashMap::new(),
                 std::collections::HashMap::new(),
@@ -1342,7 +1342,7 @@ impl FinalizedToolset {
             workspace_viewer_ctx: None,
         }
     }
-    pub fn local_registry(&self) -> &wimo ai_computer_hub_sdk::LocalRegistry {
+    pub fn local_registry(&self) -> &wimoai_computer_hub_sdk::LocalRegistry {
         &self.local_registry
     }
     /// Whether the server must await this tool's in-process cancellation cleanup.
@@ -1457,16 +1457,16 @@ impl FinalizedToolset {
             .find(|t| t.client_name == tool_name)
             .map(|t| crate::normalization::tool_identity_of(t.metadata.as_ref()))
     }
-    fn tool_not_found_error(tool_name: &str) -> wimo ai_tool_runtime::ToolError {
-        let tid = wimo ai_tool_protocol::ToolId::new(tool_name)
-            .unwrap_or_else(|_| wimo ai_tool_protocol::ToolId::new("unknown").expect("valid"));
-        wimo ai_tool_runtime::ToolError::not_found(tid, format!("Tool not found: {tool_name}"))
+    fn tool_not_found_error(tool_name: &str) -> wimoai_tool_runtime::ToolError {
+        let tid = wimoai_tool_protocol::ToolId::new(tool_name)
+            .unwrap_or_else(|_| wimoai_tool_protocol::ToolId::new("unknown").expect("valid"));
+        wimoai_tool_runtime::ToolError::not_found(tid, format!("Tool not found: {tool_name}"))
     }
     pub async fn try_parse(
         &self,
         tool_name: &str,
         tool_params: &serde_json::Value,
-    ) -> Result<ToolInput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ToolInput, wimoai_tool_runtime::ToolError> {
         let (reverse_params, parse_input) = {
             let tools = self.tools.read();
             let tool = tools
@@ -1502,8 +1502,8 @@ impl FinalizedToolset {
         &self,
         tool_name: &str,
         tool_args: serde_json::Value,
-        parent_ctx: wimo ai_tool_runtime::ToolCallContext,
-    ) -> Result<crate::types::output::ToolOutput, wimo ai_tool_runtime::ToolError> {
+        parent_ctx: wimoai_tool_runtime::ToolCallContext,
+    ) -> Result<crate::types::output::ToolOutput, wimoai_tool_runtime::ToolError> {
         let (registry_id, output_converter, reverse_params) = {
             let tools = self.tools.read();
             let entry = tools
@@ -1521,22 +1521,22 @@ impl FinalizedToolset {
         } else {
             remap_json_keys(tool_args, &reverse_params)
         };
-        let mut ctx = wimo ai_tool_runtime::ToolCallContext::new(parent_ctx.call_id.clone());
+        let mut ctx = wimoai_tool_runtime::ToolCallContext::new(parent_ctx.call_id.clone());
         ctx.extensions.insert(self.resources.clone());
         ctx.extensions.insert_arc(Arc::clone(&self.renderer));
-        if let Some(cancellation) = parent_ctx.get::<wimo ai_tool_runtime::Cancellation>() {
+        if let Some(cancellation) = parent_ctx.get::<wimoai_tool_runtime::Cancellation>() {
             ctx.extensions.insert((*cancellation).clone());
         }
         ctx.extensions.insert(
             crate::types::resources::InvokingToolParamNames::from_reverse_params(&reverse_params),
         );
-        if let Some(cwd) = parent_ctx.extensions.get::<wimo ai_tool_runtime::Cwd>() {
+        if let Some(cwd) = parent_ctx.extensions.get::<wimoai_tool_runtime::Cwd>() {
             ctx.extensions.insert((*cwd).clone());
         }
-        let tool_id = wimo ai_tool_protocol::ToolId::new(&registry_id)
-            .unwrap_or_else(|_| wimo ai_tool_protocol::ToolId::new("unknown").expect("valid"));
+        let tool_id = wimoai_tool_protocol::ToolId::new(&registry_id)
+            .unwrap_or_else(|_| wimoai_tool_protocol::ToolId::new("unknown").expect("valid"));
         let lr_handle = self.local_registry.find(&tool_id).ok_or_else(|| {
-            wimo ai_tool_runtime::ToolError::not_found(
+            wimoai_tool_runtime::ToolError::not_found(
                 tool_id,
                 format!("Tool not found in LocalRegistry: {registry_id}"),
             )
@@ -1544,7 +1544,7 @@ impl FinalizedToolset {
         let stream = lr_handle.execute(ctx, canonical_params).await;
         let value = drain_value_stream(stream).await?;
         (output_converter)(value)
-            .map_err(|e| wimo ai_tool_runtime::ToolError::custom("output_decoding", e.to_string()))
+            .map_err(|e| wimoai_tool_runtime::ToolError::custom("output_decoding", e.to_string()))
     }
     /// Dispatch a tool call by client-facing name with client-facing params.
     ///
@@ -1558,7 +1558,7 @@ impl FinalizedToolset {
         tool_args: serde_json::Value,
         tool_call_id: &str,
         cwd_override: Option<std::path::PathBuf>,
-    ) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ToolRunResult, wimoai_tool_runtime::ToolError> {
         self.call_with_cancellation(tool_name, tool_args, tool_call_id, cwd_override, None)
             .await
     }
@@ -1570,7 +1570,7 @@ impl FinalizedToolset {
         tool_call_id: &str,
         cwd_override: Option<std::path::PathBuf>,
         cancellation: Option<tokio_util::sync::CancellationToken>,
-    ) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ToolRunResult, wimoai_tool_runtime::ToolError> {
         use futures::StreamExt;
         let mut stream = self.call_streaming_with_cancellation(
             tool_name,
@@ -1581,8 +1581,8 @@ impl FinalizedToolset {
         );
         while let Some(item) = stream.next().await {
             match item {
-                wimo ai_tool_runtime::ToolStreamItem::Progress(_) => continue,
-                wimo ai_tool_runtime::ToolStreamItem::Terminal(result) => return result,
+                wimoai_tool_runtime::ToolStreamItem::Progress(_) => continue,
+                wimoai_tool_runtime::ToolStreamItem::Terminal(result) => return result,
             }
         }
         Err(stream_no_terminal_error())
@@ -1599,15 +1599,15 @@ impl FinalizedToolset {
     /// all `.await` and `Arc::clone(self)` happen *inside* the stream block so
     /// nothing borrows `self` across the stream.
     ///
-    /// [`ToolStream`]: wimo ai_tool_runtime::ToolStream
-    /// [`ToolStreamItem::Progress`]: wimo ai_tool_runtime::ToolStreamItem::Progress
+    /// [`ToolStream`]: wimoai_tool_runtime::ToolStream
+    /// [`ToolStreamItem::Progress`]: wimoai_tool_runtime::ToolStreamItem::Progress
     pub fn call_streaming(
         self: &Arc<Self>,
         tool_name: &str,
         tool_args: serde_json::Value,
         tool_call_id: &str,
         cwd_override: Option<std::path::PathBuf>,
-    ) -> wimo ai_tool_runtime::ToolStream<ToolRunResult> {
+    ) -> wimoai_tool_runtime::ToolStream<ToolRunResult> {
         self.call_streaming_with_cancellation(
             tool_name,
             tool_args,
@@ -1624,7 +1624,7 @@ impl FinalizedToolset {
         tool_call_id: &str,
         cwd_override: Option<std::path::PathBuf>,
         cancellation: Option<tokio_util::sync::CancellationToken>,
-    ) -> wimo ai_tool_runtime::ToolStream<ToolRunResult> {
+    ) -> wimoai_tool_runtime::ToolStream<ToolRunResult> {
         use futures::StreamExt;
         let this = Arc::clone(self);
         let tool_name = tool_name.to_owned();
@@ -1639,7 +1639,7 @@ impl FinalizedToolset {
             ) {
                 Ok(parts) => parts,
                 Err(e) => {
-                    yield wimo ai_tool_runtime::ToolStreamItem::Terminal(Err(e));
+                    yield wimoai_tool_runtime::ToolStreamItem::Terminal(Err(e));
                     return;
                 }
             };
@@ -1654,23 +1654,23 @@ impl FinalizedToolset {
             let mut inner = lr_handle.execute(ctx, canonical_params).await;
             while let Some(item) = inner.next().await {
                 match item {
-                    wimo ai_tool_runtime::ToolStreamItem::Progress(p) => {
-                        yield wimo ai_tool_runtime::ToolStreamItem::Progress(p);
+                    wimoai_tool_runtime::ToolStreamItem::Progress(p) => {
+                        yield wimoai_tool_runtime::ToolStreamItem::Progress(p);
                     }
-                    wimo ai_tool_runtime::ToolStreamItem::Terminal(Err(e)) => {
-                        yield wimo ai_tool_runtime::ToolStreamItem::Terminal(Err(e));
+                    wimoai_tool_runtime::ToolStreamItem::Terminal(Err(e)) => {
+                        yield wimoai_tool_runtime::ToolStreamItem::Terminal(Err(e));
                         return;
                     }
-                    wimo ai_tool_runtime::ToolStreamItem::Terminal(Ok(typed)) => {
+                    wimoai_tool_runtime::ToolStreamItem::Terminal(Ok(typed)) => {
                         let run_result = this
                             .finalize_output(typed.value, &output_converter, effective_tool_name)
                             .await;
-                        yield wimo ai_tool_runtime::ToolStreamItem::Terminal(run_result);
+                        yield wimoai_tool_runtime::ToolStreamItem::Terminal(run_result);
                         return;
                     }
                 }
             }
-            yield wimo ai_tool_runtime::ToolStreamItem::Terminal(Err(stream_no_terminal_error()));
+            yield wimoai_tool_runtime::ToolStreamItem::Terminal(Err(stream_no_terminal_error()));
         })
     }
     /// Pre-dispatch setup shared by [`call`] / [`call_streaming`].
@@ -1686,7 +1686,7 @@ impl FinalizedToolset {
         tool_call_id: &str,
         cwd_override: Option<std::path::PathBuf>,
         cancellation: Option<tokio_util::sync::CancellationToken>,
-    ) -> Result<DispatchParts, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<DispatchParts, wimoai_tool_runtime::ToolError> {
         let (registry_id, output_converter, reverse_params) = {
             let tools = self.tools.read();
             let entry = tools
@@ -1714,24 +1714,24 @@ impl FinalizedToolset {
             None
         };
         let contract_version = self.get_contract_version(tool_name);
-        let rt_call_id = wimo ai_tool_protocol::ToolCallId::new(tool_call_id)
-            .unwrap_or_else(|_| wimo ai_tool_protocol::ToolCallId::new_v7());
-        let mut ctx = wimo ai_tool_runtime::ToolCallContext::new(rt_call_id);
+        let rt_call_id = wimoai_tool_protocol::ToolCallId::new(tool_call_id)
+            .unwrap_or_else(|_| wimoai_tool_protocol::ToolCallId::new_v7());
+        let mut ctx = wimoai_tool_runtime::ToolCallContext::new(rt_call_id);
         ctx.extensions.insert(self.resources.clone());
         ctx.extensions.insert_arc(Arc::clone(&self.renderer));
         ctx.extensions.insert(
             crate::types::resources::InvokingToolParamNames::from_reverse_params(&reverse_params),
         );
         if let Some(cwd) = cwd_override {
-            ctx.extensions.insert(wimo ai_tool_runtime::Cwd(cwd));
+            ctx.extensions.insert(wimoai_tool_runtime::Cwd(cwd));
         }
         if let Some(cancellation) = cancellation {
             ctx.extensions
-                .insert(wimo ai_tool_runtime::Cancellation(cancellation));
+                .insert(wimoai_tool_runtime::Cancellation(cancellation));
         }
         if let Some(ref version) = contract_version {
             ctx.extensions
-                .insert(wimo ai_tool_runtime::BehaviorVersion(version.clone()));
+                .insert(wimoai_tool_runtime::BehaviorVersion(version.clone()));
         }
         ctx.extensions.insert(InnerDispatch(std::sync::Arc::new(
             InnerDispatchForToolset {
@@ -1741,10 +1741,10 @@ impl FinalizedToolset {
         if let Some(wvc) = self.workspace_viewer_ctx.as_ref() {
             ctx.extensions.insert(wvc.clone());
         }
-        let tool_id = wimo ai_tool_protocol::ToolId::new(&registry_id)
-            .unwrap_or_else(|_| wimo ai_tool_protocol::ToolId::new("unknown").expect("valid"));
+        let tool_id = wimoai_tool_protocol::ToolId::new(&registry_id)
+            .unwrap_or_else(|_| wimoai_tool_protocol::ToolId::new("unknown").expect("valid"));
         let lr_handle = self.local_registry.find(&tool_id).ok_or_else(|| {
-            wimo ai_tool_runtime::ToolError::not_found(
+            wimoai_tool_runtime::ToolError::not_found(
                 tool_id,
                 format!("Tool not found in LocalRegistry: {registry_id}"),
             )
@@ -1768,9 +1768,9 @@ impl FinalizedToolset {
         value: serde_json::Value,
         output_converter: &OutputConverter,
         effective_tool_name: Option<String>,
-    ) -> Result<ToolRunResult, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<ToolRunResult, wimoai_tool_runtime::ToolError> {
         let output = (output_converter)(value)
-            .map_err(|e| wimo ai_tool_runtime::ToolError::custom("output_decoding", e.to_string()))?;
+            .map_err(|e| wimoai_tool_runtime::ToolError::custom("output_decoding", e.to_string()))?;
         let reminders_enabled;
         {
             reminders_enabled = self
@@ -1831,7 +1831,7 @@ impl FinalizedToolset {
     }
     /// Register a tool at runtime (e.g., MCP tools).
     ///
-    /// The tool must implement `wimo ai_tool_runtime::Tool + ToolMetadata`.
+    /// The tool must implement `wimoai_tool_runtime::Tool + ToolMetadata`.
     /// MCP tools typically use:
     /// - `type Args = serde_json::Value` (untyped JSON passthrough)
     /// - `kind() -> ToolKind::Other`
@@ -1850,20 +1850,20 @@ impl FinalizedToolset {
         name: String,
         tool: T,
         input_schema_override: Option<serde_json::Value>,
-    ) -> Result<(), wimo ai_tool_runtime::ToolError>
+    ) -> Result<(), wimoai_tool_runtime::ToolError>
     where
-        T: wimo ai_tool_runtime::Tool + ToolMetadata + std::fmt::Debug + Send + Sync + 'static,
+        T: wimoai_tool_runtime::Tool + ToolMetadata + std::fmt::Debug + Send + Sync + 'static,
         T::Output: serde::Serialize,
     {
         let mut tools = self.tools.write();
         if tools.iter().any(|t| t.client_name == name) {
-            return Err(wimo ai_tool_runtime::ToolError::invalid_arguments(format!(
+            return Err(wimoai_tool_runtime::ToolError::invalid_arguments(format!(
                 "Tool already registered: {name}"
             )));
         }
         let description = tool.description_template().to_string();
         let kind = tool.kind();
-        let registry_id = wimo ai_tool_runtime::Tool::id(&tool).as_str().to_owned();
+        let registry_id = wimoai_tool_runtime::Tool::id(&tool).as_str().to_owned();
         let input_schema = input_schema_override.unwrap_or_else(generate_schema_cached::<T::Args>);
         let definition = ToolDefinition::function(&name, Some(&description), input_schema.clone());
         self.local_registry.register(tool);
@@ -1902,7 +1902,7 @@ impl FinalizedToolset {
         let to_remove: Vec<_> = tools
             .iter()
             .filter(|t| t.client_name.starts_with(prefix))
-            .filter_map(|t| wimo ai_tool_protocol::ToolId::new(&t.registry_id).ok())
+            .filter_map(|t| wimoai_tool_protocol::ToolId::new(&t.registry_id).ok())
             .collect();
         tools.retain(|t| !t.client_name.starts_with(prefix));
         for tid in &to_remove {
@@ -1915,7 +1915,7 @@ impl FinalizedToolset {
         let tool_id = tools
             .iter()
             .find(|t| t.client_name == name)
-            .and_then(|t| wimo ai_tool_protocol::ToolId::new(&t.registry_id).ok());
+            .and_then(|t| wimoai_tool_protocol::ToolId::new(&t.registry_id).ok());
         let before = tools.len();
         tools.retain(|t| t.client_name != name);
         let removed = tools.len() < before;
@@ -2580,9 +2580,9 @@ mod tests {
             .tools
             .iter()
             .filter_map(|(name, entry)| {
-                let lr = wimo ai_computer_hub_sdk::LocalRegistry::new();
+                let lr = wimoai_computer_hub_sdk::LocalRegistry::new();
                 (entry.register_in_local)(&lr);
-                let id = wimo ai_tool_protocol::ToolId::new(&entry.id)
+                let id = wimoai_tool_protocol::ToolId::new(&entry.id)
                     .unwrap_or_else(|_| panic!("{name}: invalid tool id {:?}", entry.id));
                 let caps = lr
                     .find(&id)
@@ -3202,23 +3202,23 @@ mod tests {
             &self.description
         }
     }
-    impl wimo ai_tool_runtime::Tool for FakeMcpTool {
+    impl wimoai_tool_runtime::Tool for FakeMcpTool {
         type Args = serde_json::Value;
         type Output = String;
-        fn id(&self) -> wimo ai_tool_protocol::ToolId {
-            wimo ai_tool_protocol::ToolId::new("fake_mcp").expect("valid")
+        fn id(&self) -> wimoai_tool_protocol::ToolId {
+            wimoai_tool_protocol::ToolId::new("fake_mcp").expect("valid")
         }
         fn description(
             &self,
-            _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-        ) -> wimo ai_tool_types::ToolDescription {
-            wimo ai_tool_types::ToolDescription::new("fake_mcp", &self.description)
+            _ctx: &::wimoai_tool_runtime::ListToolsContext,
+        ) -> wimoai_tool_types::ToolDescription {
+            wimoai_tool_types::ToolDescription::new("fake_mcp", &self.description)
         }
         async fn run(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> Result<String, wimo ai_tool_runtime::ToolError> {
+        ) -> Result<String, wimoai_tool_runtime::ToolError> {
             Ok("ok".into())
         }
     }
@@ -3280,23 +3280,23 @@ mod tests {
             "non-streaming stub"
         }
     }
-    impl wimo ai_tool_runtime::Tool for NonStreamingStub {
+    impl wimoai_tool_runtime::Tool for NonStreamingStub {
         type Args = serde_json::Value;
         type Output = String;
-        fn id(&self) -> wimo ai_tool_protocol::ToolId {
-            wimo ai_tool_protocol::ToolId::new("non_streaming_stub").expect("valid")
+        fn id(&self) -> wimoai_tool_protocol::ToolId {
+            wimoai_tool_protocol::ToolId::new("non_streaming_stub").expect("valid")
         }
         fn description(
             &self,
-            _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-        ) -> wimo ai_tool_types::ToolDescription {
-            wimo ai_tool_types::ToolDescription::new("non_streaming_stub", "non-streaming stub")
+            _ctx: &::wimoai_tool_runtime::ListToolsContext,
+        ) -> wimoai_tool_types::ToolDescription {
+            wimoai_tool_types::ToolDescription::new("non_streaming_stub", "non-streaming stub")
         }
         async fn run(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> Result<String, wimo ai_tool_runtime::ToolError> {
+        ) -> Result<String, wimoai_tool_runtime::ToolError> {
             Ok("stub-output".into())
         }
     }
@@ -3316,35 +3316,35 @@ mod tests {
             "streaming stub"
         }
     }
-    impl wimo ai_tool_runtime::Tool for StreamingStub {
+    impl wimoai_tool_runtime::Tool for StreamingStub {
         type Args = serde_json::Value;
         type Output = String;
-        fn id(&self) -> wimo ai_tool_protocol::ToolId {
-            wimo ai_tool_protocol::ToolId::new("streaming_stub").expect("valid")
+        fn id(&self) -> wimoai_tool_protocol::ToolId {
+            wimoai_tool_protocol::ToolId::new("streaming_stub").expect("valid")
         }
         fn description(
             &self,
-            _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-        ) -> wimo ai_tool_types::ToolDescription {
-            wimo ai_tool_types::ToolDescription::new("streaming_stub", "streaming stub")
+            _ctx: &::wimoai_tool_runtime::ListToolsContext,
+        ) -> wimoai_tool_types::ToolDescription {
+            wimoai_tool_types::ToolDescription::new("streaming_stub", "streaming stub")
         }
         async fn run(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> Result<String, wimo ai_tool_runtime::ToolError> {
+        ) -> Result<String, wimoai_tool_runtime::ToolError> {
             Ok("terminal-value".into())
         }
         async fn execute(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> wimo ai_tool_runtime::ToolStream<String> {
+        ) -> wimoai_tool_runtime::ToolStream<String> {
             Box::pin(futures::stream::iter(vec![
-                wimo ai_tool_runtime::ToolStreamItem::Progress(wimo ai_tool_runtime::ToolProgress::Text {
+                wimoai_tool_runtime::ToolStreamItem::Progress(wimoai_tool_runtime::ToolProgress::Text {
                     text: "progress-1".into(),
                 }),
-                wimo ai_tool_runtime::ToolStreamItem::Terminal(Ok("terminal-value".to_string())),
+                wimoai_tool_runtime::ToolStreamItem::Terminal(Ok("terminal-value".to_string())),
             ]))
         }
     }
@@ -3405,15 +3405,15 @@ mod tests {
         let mut terminal: Option<ToolRunResult> = None;
         while let Some(item) = stream.next().await {
             match item {
-                wimo ai_tool_runtime::ToolStreamItem::Progress(p) => {
+                wimoai_tool_runtime::ToolStreamItem::Progress(p) => {
                     assert!(
                         terminal.is_none(),
                         "progress must arrive before the terminal"
                     );
-                    assert!(matches!(p, wimo ai_tool_runtime::ToolProgress::Text { .. }));
+                    assert!(matches!(p, wimoai_tool_runtime::ToolProgress::Text { .. }));
                     progress_count += 1;
                 }
-                wimo ai_tool_runtime::ToolStreamItem::Terminal(result) => {
+                wimoai_tool_runtime::ToolStreamItem::Terminal(result) => {
                     assert!(terminal.is_none(), "exactly one terminal");
                     terminal = Some(result.expect("terminal should be Ok"));
                 }
@@ -3451,30 +3451,30 @@ mod tests {
             "no-terminal stub"
         }
     }
-    impl wimo ai_tool_runtime::Tool for NoTerminalStub {
+    impl wimoai_tool_runtime::Tool for NoTerminalStub {
         type Args = serde_json::Value;
         type Output = String;
-        fn id(&self) -> wimo ai_tool_protocol::ToolId {
-            wimo ai_tool_protocol::ToolId::new("no_terminal_stub").expect("valid")
+        fn id(&self) -> wimoai_tool_protocol::ToolId {
+            wimoai_tool_protocol::ToolId::new("no_terminal_stub").expect("valid")
         }
         fn description(
             &self,
-            _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-        ) -> wimo ai_tool_types::ToolDescription {
-            wimo ai_tool_types::ToolDescription::new("no_terminal_stub", "no-terminal stub")
+            _ctx: &::wimoai_tool_runtime::ListToolsContext,
+        ) -> wimoai_tool_types::ToolDescription {
+            wimoai_tool_types::ToolDescription::new("no_terminal_stub", "no-terminal stub")
         }
         async fn run(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> Result<String, wimo ai_tool_runtime::ToolError> {
+        ) -> Result<String, wimoai_tool_runtime::ToolError> {
             Ok("unused".into())
         }
         async fn execute(
             &self,
-            _ctx: wimo ai_tool_runtime::ToolCallContext,
+            _ctx: wimoai_tool_runtime::ToolCallContext,
             _input: serde_json::Value,
-        ) -> wimo ai_tool_runtime::ToolStream<String> {
+        ) -> wimoai_tool_runtime::ToolStream<String> {
             Box::pin(futures::stream::empty())
         }
     }
@@ -4911,7 +4911,7 @@ mod tests {
         );
     }
     fn toolset_with_viewer_ctx(
-        viewer_ctx: Option<wimo ai_tool_runtime::WorkspaceViewerContext>,
+        viewer_ctx: Option<wimoai_tool_runtime::WorkspaceViewerContext>,
     ) -> (Arc<FinalizedToolset>, TempDir) {
         let tmp = TempDir::new().unwrap();
         let builder = ToolRegistryBuilder::new();
@@ -4941,7 +4941,7 @@ mod tests {
     #[tokio::test]
     async fn prepare_dispatch_stamps_workspace_viewer_ctx_when_present() {
         let (toolset, _tmp) =
-            toolset_with_viewer_ctx(Some(wimo ai_tool_runtime::WorkspaceViewerContext {
+            toolset_with_viewer_ctx(Some(wimoai_tool_runtime::WorkspaceViewerContext {
                 stream_tool_progress: true,
             }));
         let parts = toolset
@@ -4956,7 +4956,7 @@ mod tests {
         let wvc = parts
             .ctx
             .extensions
-            .get::<wimo ai_tool_runtime::WorkspaceViewerContext>()
+            .get::<wimoai_tool_runtime::WorkspaceViewerContext>()
             .expect("WorkspaceViewerContext must be stamped on the ctx");
         assert!(wvc.stream_tool_progress);
     }
@@ -4976,7 +4976,7 @@ mod tests {
             parts
                 .ctx
                 .extensions
-                .get::<wimo ai_tool_runtime::WorkspaceViewerContext>()
+                .get::<wimoai_tool_runtime::WorkspaceViewerContext>()
                 .is_none(),
             "no extension must be stamped when workspace_viewer_ctx is None",
         );
@@ -5012,7 +5012,7 @@ mod tests {
                     config,
                     ctx,
                     crate::types::context::TruncationConfig::default(),
-                    Some(wimo ai_tool_runtime::WorkspaceViewerContext {
+                    Some(wimoai_tool_runtime::WorkspaceViewerContext {
                         stream_tool_progress: true,
                     }),
                 )
@@ -5031,8 +5031,8 @@ mod tests {
         let mut got_terminal = false;
         while let Some(item) = stream.next().await {
             match item {
-                wimo ai_tool_runtime::ToolStreamItem::Progress(_) => progress_count += 1,
-                wimo ai_tool_runtime::ToolStreamItem::Terminal(r) => {
+                wimoai_tool_runtime::ToolStreamItem::Progress(_) => progress_count += 1,
+                wimoai_tool_runtime::ToolStreamItem::Terminal(r) => {
                     r.expect("terminal must succeed");
                     got_terminal = true;
                 }

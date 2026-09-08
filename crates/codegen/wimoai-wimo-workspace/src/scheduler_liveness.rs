@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 
-use wimo ai_wimo_tools::implementations::wimo::scheduler::types::{
+use wimoai_wimo_tools::implementations::wimo::scheduler::types::{
     ScheduledTask, SchedulerCommand, SchedulerHandle,
 };
 

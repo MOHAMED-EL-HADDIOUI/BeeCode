@@ -4,7 +4,7 @@
 //! lookup must be cheaper than re-loading from `~/.wimo/config.toml`.
 //! [`current_kind`] returns the in-memory value, lazily seeding from the shell's layered effective config on first call.
 //!
-//! Disk writes live in `wimo ai_wimo_shell::util::config::set_theme()` (and friends), invoked via `Effect::PersistSetting` from the dispatcher.
+//! Disk writes live in `wimoai_wimo_shell::util::config::set_theme()` (and friends), invoked via `Effect::PersistSetting` from the dispatcher.
 
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -93,12 +93,12 @@ pub fn set_terminal_native_lock(locked: bool) {
     TERMINAL_NATIVE_LOCK.store(locked, Ordering::Relaxed);
     // Cap quantization at ANSI-16 and switch syntax tokens to the dual-polarity accent map (default-fg grays and base ANSI hues)
     // Without the polarity-safe remap, night-theme pastels collapse to White and vanish on light terminal profiles in minimal mode
-    wimo ai_wimo_markdown::set_color_level_cap(if locked {
-        wimo ai_wimo_markdown::ColorLevel::Basic
+    wimoai_wimo_markdown::set_color_level_cap(if locked {
+        wimoai_wimo_markdown::ColorLevel::Basic
     } else {
-        wimo ai_wimo_markdown::ColorLevel::TrueColor
+        wimoai_wimo_markdown::ColorLevel::TrueColor
     });
-    wimo ai_wimo_markdown::set_polarity_safe_syntax(locked);
+    wimoai_wimo_markdown::set_polarity_safe_syntax(locked);
 }
 
 // -- Auto-mode ---------------------------------------------------------------
@@ -217,7 +217,7 @@ pub fn resolve_auto() -> ThemeKind {
 /// Read the theme from the effective config (managed_config.toml merged under config.toml; user wins).
 /// Checks `[ui].theme` first (the canonical location), then falls back to a top-level `theme` key for backwards compatibility.
 fn load_from_disk() -> Option<ThemeKind> {
-    let root = wimo ai_wimo_config::load_effective_config_disk_only().ok()?;
+    let root = wimoai_wimo_config::load_effective_config_disk_only().ok()?;
     let table = root.as_table()?;
     // Canonical: [ui] section
     let value = table
@@ -232,7 +232,7 @@ fn load_from_disk() -> Option<ThemeKind> {
 /// Reads `[ui].auto_dark_theme` and `[ui].auto_light_theme` from the effective config, parsing them as theme names.
 /// Filters out `Auto` to prevent circular reference.
 fn load_auto_theme_config() -> AutoThemeConfig {
-    let Ok(root) = wimo ai_wimo_config::load_effective_config_disk_only() else {
+    let Ok(root) = wimoai_wimo_config::load_effective_config_disk_only() else {
         return AutoThemeConfig::default();
     };
     let Some(table) = root.as_table() else {
@@ -366,14 +366,14 @@ mod tests {
     #[test]
     fn terminal_native_lock_enables_polarity_safe_syntax() {
         with_test_env(|| {
-            assert!(!wimo ai_wimo_markdown::polarity_safe_syntax());
+            assert!(!wimoai_wimo_markdown::polarity_safe_syntax());
             set_terminal_native_lock(true);
             assert!(
-                wimo ai_wimo_markdown::polarity_safe_syntax(),
+                wimoai_wimo_markdown::polarity_safe_syntax(),
                 "minimal must engage polarity-safe syntax remapping"
             );
             set_terminal_native_lock(false);
-            assert!(!wimo ai_wimo_markdown::polarity_safe_syntax());
+            assert!(!wimoai_wimo_markdown::polarity_safe_syntax());
         });
     }
 

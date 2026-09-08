@@ -12,10 +12,10 @@
 use std::time::Duration;
 
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::AcpAgentGatewaySender;
-use wimo ai_wimo_mcp::acp_transport::AcpReverseInvoker;
-use wimo ai_wimo_mcp::servers::AcpServerEntry;
-use wimo ai_wimo_mcp::wire;
+use wimoai_acp_lib::AcpAgentGatewaySender;
+use wimoai_wimo_mcp::acp_transport::AcpReverseInvoker;
+use wimoai_wimo_mcp::servers::AcpServerEntry;
+use wimoai_wimo_mcp::wire;
 
 /// Parse `_meta["x.ai/mcp/servers"]` into [`AcpServerEntry`] registrations.
 /// Each entry deserializes directly into the canonical type, so serde checks the `serverId` wire field rather than hand-reading it.

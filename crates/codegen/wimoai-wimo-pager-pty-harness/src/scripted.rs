@@ -1,4 +1,4 @@
-//! Scripted TUI scenario runner for wimo ai-wimo-pager.
+//! Scripted TUI scenario runner for wimoai-wimo-pager.
 //!
 //! A test describes a scenario declaratively; the runner plays it against the real pager binary in a PTY.
 //! Steps send keys and resizes, assert on visible terminal output, and persist visual artifacts for bug triage.
@@ -655,7 +655,7 @@ impl ScriptedScenarioRunner {
 /// The returned `TempDir` must be held for the whole run so the directory outlives the pager process.
 fn materialize_workspace(
     workspace: &WorkspaceConfig,
-    sandbox: &wimo ai_wimo_test_support::TestSandbox,
+    sandbox: &wimoai_wimo_test_support::TestSandbox,
 ) -> Result<tempfile::TempDir> {
     let dir = tempfile::tempdir().context("create scenario workspace temp dir")?;
     for (rel_path, contents) in &workspace.files {
@@ -2018,7 +2018,7 @@ mod tests {
             git_init: false,
             files: BTreeMap::from([(".mcp.json".to_string(), "{}".to_string())]),
         };
-        let sandbox = wimo ai_wimo_test_support::TestSandbox::new();
+        let sandbox = wimoai_wimo_test_support::TestSandbox::new();
         assert!(materialize_workspace(&ok, &sandbox).is_ok());
 
         // Absolute and `..`-traversing keys are rejected before any write.
@@ -2047,7 +2047,7 @@ mod tests {
             )]),
         };
 
-        let sandbox = wimo ai_wimo_test_support::TestSandbox::new();
+        let sandbox = wimoai_wimo_test_support::TestSandbox::new();
         let dir = materialize_workspace(&workspace, &sandbox).expect("materialize git workspace");
         assert!(dir.path().join(".git").is_dir());
         assert_eq!(

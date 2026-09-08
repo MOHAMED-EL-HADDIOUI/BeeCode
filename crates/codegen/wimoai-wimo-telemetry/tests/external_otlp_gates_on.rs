@@ -14,7 +14,7 @@
 mod otlp_collector;
 
 use otlp_collector as col;
-use wimo ai_wimo_telemetry::external::{self, ExternalOtelRemotePolicy, IdentityAttrs};
+use wimoai_wimo_telemetry::external::{self, ExternalOtelRemotePolicy, IdentityAttrs};
 
 // Secret shapes that MUST be scrubbed everywhere, even inside gated content
 const SECRET_KEY: &str = "sk-LEAKaaaaaaaaaaaaaaaa1234567890";
@@ -77,14 +77,14 @@ fn external_stream_gates_on_end_to_end() {
     });
 
     // Product events stay disabled; the external sink must still emit through the real funnel
-    assert!(!wimo ai_wimo_telemetry::is_enabled());
+    assert!(!wimoai_wimo_telemetry::is_enabled());
 
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::SessionHarness {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::SessionHarness {
         session_id: "sess-gates-on".into(),
         client_identifier: Some("wimo-pager".into()),
         model_id: "wimo-4".into(),
         agent_name: "wimo-plan".into(),
-        permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+        permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
         mcp_server_names: vec!["internal-mcp".into()],
         plugin_names: vec![],
         skill_names: vec![],
@@ -92,11 +92,11 @@ fn external_stream_gates_on_end_to_end() {
         hook_names: vec![],
         agents_md_dir_names: vec![],
         memory_enabled: false,
-        memory_retrieval_mode: wimo ai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
+        memory_retrieval_mode: wimoai_wimo_telemetry::events::MemoryRetrievalMode::Disabled,
         is_git_repo: true,
         auto_update: None,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::PromptSubmitted {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::PromptSubmitted {
         prompt_length: 100,
         model_id: "wimo-4".into(),
         client_identifier: None,
@@ -104,7 +104,7 @@ fn external_stream_gates_on_end_to_end() {
         prompt_text: Some(format!("refactor {PROMPT_MARK} with key {SECRET_KEY} now")),
         command_name: Some("compact".into()),
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::ModelResponseReceived {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::ModelResponseReceived {
         model_id: SECRET_MODEL.into(),
         duration_ms: 5,
         stop_reason: Some("stop".into()),
@@ -115,9 +115,9 @@ fn external_stream_gates_on_end_to_end() {
         cache_creation_tokens: None,
         cost_usd_ticks: None,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::ToolCallCompleted {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::ToolCallCompleted {
         tool_name: "github__create_issue".into(),
-        outcome: wimo ai_wimo_session_events::types::ToolOutcome::Success,
+        outcome: wimoai_wimo_session_events::types::ToolOutcome::Success,
         hook_rewrote: false,
         duration_ms: 12,
         tool_result_size_bytes: None,
@@ -132,9 +132,9 @@ fn external_stream_gates_on_end_to_end() {
         error_message: None,
     });
     let long_command = format!("{LONG_CMD_MARK}{}", "x".repeat(600));
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::ToolCallCompleted {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::ToolCallCompleted {
         tool_name: "run_terminal_cmd".into(),
-        outcome: wimo ai_wimo_session_events::types::ToolOutcome::Success,
+        outcome: wimoai_wimo_session_events::types::ToolOutcome::Success,
         hook_rewrote: false,
         duration_ms: 8,
         tool_result_size_bytes: None,
@@ -144,13 +144,13 @@ fn external_stream_gates_on_end_to_end() {
         tool_output: None,
         error_message: None,
     });
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::PermissionDecisionRecord {
-        payload: wimo ai_wimo_telemetry::events::PermissionDecisionPayload {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::PermissionDecisionRecord {
+        payload: wimoai_wimo_telemetry::events::PermissionDecisionPayload {
             tool_name: "run_terminal_cmd".into(),
-            access_kind: wimo ai_wimo_telemetry::events::AccessKind::Bash,
-            decision: wimo ai_wimo_telemetry::events::PermissionOutcome::Deny,
+            access_kind: wimoai_wimo_telemetry::events::AccessKind::Bash,
+            decision: wimoai_wimo_telemetry::events::PermissionOutcome::Deny,
             wait_ms: 10,
-            permission_mode: wimo ai_wimo_telemetry::enums::PermissionMode::Ask,
+            permission_mode: wimoai_wimo_telemetry::enums::PermissionMode::Ask,
             source: Some("user_reject".into()),
             subagent_session_id: None,
             subagent_type: None,
@@ -166,12 +166,12 @@ fn external_stream_gates_on_end_to_end() {
             auto_denials_consecutive: None,
             auto_denials_total: None,
         },
-        tool_input: wimo ai_wimo_telemetry::events::ExternalToolInput {
+        tool_input: wimoai_wimo_telemetry::events::ExternalToolInput {
             parameters: Some(serde_json::json!({ "command": DENY_CMD_MARK })),
             tool_use_id: Some("call-deny-1".into()),
         },
     });
-    wimo ai_wimo_telemetry::external::emit(&wimo ai_wimo_telemetry::events::AssistantResponse {
+    wimoai_wimo_telemetry::external::emit(&wimoai_wimo_telemetry::events::AssistantResponse {
         response_length: RESPONSE_MARK.len(),
         response_text: Some(RESPONSE_MARK.into()),
     });
@@ -189,7 +189,7 @@ fn external_stream_gates_on_end_to_end() {
     let records = col::log_records(&collected);
     let harness = col::find_event(&collected, "wimo_code.session_start")
         .expect("session_start must be present");
-    assert_eq!(harness.scope_name, "ai.wimo ai.wimo_code");
+    assert_eq!(harness.scope_name, "ai.wimoai.wimo_code");
     assert_eq!(
         harness
             .resource
@@ -436,7 +436,7 @@ fn external_stream_gates_on_end_to_end() {
         !external::is_active(),
         "kill switch must clear the emission gate"
     );
-    wimo ai_wimo_telemetry::log_event(wimo ai_wimo_telemetry::events::PromptSubmitted {
+    wimoai_wimo_telemetry::log_event(wimoai_wimo_telemetry::events::PromptSubmitted {
         prompt_length: 1,
         model_id: "wimo-4".into(),
         client_identifier: None,

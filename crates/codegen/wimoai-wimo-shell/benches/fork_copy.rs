@@ -1,7 +1,7 @@
 //! Measures the throughput of `StorageAdapter::copy_session_data` over a synthesized session shaped like production data.
 //! The bound on peak RSS is checked in `tests/test_fork_copy_memory.rs`.
 //!
-//! Run: `cargo bench -p wimo ai-wimo-shell --bench fork_copy`
+//! Run: `cargo bench -p wimoai-wimo-shell --bench fork_copy`
 //! Size override: `FORK_BENCH_MB=64 cargo bench ...` (default 16 MB).
 
 use std::hint::black_box;
@@ -12,9 +12,9 @@ use criterion::{
     BenchmarkId, Criterion, SamplingMode, Throughput, criterion_group, criterion_main,
 };
 use tempfile::TempDir;
-use wimo ai_wimo_shell::session::info::Info;
-use wimo ai_wimo_shell::session::storage::{CopySessionOptions, JsonlStorageAdapter, StorageAdapter};
-use wimo ai_wimo_shell::session::testkit::synth::make_session_with_size_blocking;
+use wimoai_wimo_shell::session::info::Info;
+use wimoai_wimo_shell::session::storage::{CopySessionOptions, JsonlStorageAdapter, StorageAdapter};
+use wimoai_wimo_shell::session::testkit::synth::make_session_with_size_blocking;
 
 fn bench_fork_copy(c: &mut Criterion) {
     let target_mb: u64 = std::env::var("FORK_BENCH_MB")

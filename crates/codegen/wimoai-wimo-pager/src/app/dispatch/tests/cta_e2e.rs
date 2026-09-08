@@ -8,18 +8,18 @@ fn plugin_cta_catalog_loaded_sanitizes_components_at_ingestion() {
     let id = AgentId(0);
 
     let mut entry = cta_entry("dirty", "not_installed");
-    entry.components = Some(wimo ai_hooks_plugins_types::PluginComponents {
-        skills: vec![wimo ai_hooks_plugins_types::ComponentItem {
+    entry.components = Some(wimoai_hooks_plugins_types::PluginComponents {
+        skills: vec![wimoai_hooks_plugins_types::ComponentItem {
             name: "evil\u{1b}[31mskill".into(),
             description: Some(format!("\u{7}{}", "d".repeat(300))),
         }],
         ..Default::default()
     });
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
-            source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
+            source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
             source_kind: "git".into(),
-            source_url_or_path: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
+            source_url_or_path: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
             plugins: vec![entry],
             error: None,
         }],
@@ -42,10 +42,10 @@ fn plugin_cta_catalog_loaded_sanitizes_components_at_ingestion() {
 }
 
 fn cta_outcome_reload(
-    status: wimo ai_hooks_plugins_types::OutcomeStatus,
+    status: wimoai_hooks_plugins_types::OutcomeStatus,
     message: &str,
-) -> wimo ai_hooks_plugins_types::ActionOutcome {
-    wimo ai_hooks_plugins_types::ActionOutcome {
+) -> wimoai_hooks_plugins_types::ActionOutcome {
+    wimoai_hooks_plugins_types::ActionOutcome {
         status,
         message: message.into(),
         requires_reload: true,
@@ -58,12 +58,12 @@ fn plugin_cta_catalog_keeps_official_not_installed_only() {
     let mut app = test_app_with_agent();
     let id = AgentId(0);
 
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
         sources: vec![
-            wimo ai_hooks_plugins_types::MarketplaceScanResult {
-                source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+            wimoai_hooks_plugins_types::MarketplaceScanResult {
+                source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
                 source_kind: "git".into(),
-                source_url_or_path: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
+                source_url_or_path: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
                 plugins: vec![
                     cta_entry("keep-me", "not_installed"),
                     cta_entry("already-installed", "installed"),
@@ -71,17 +71,17 @@ fn plugin_cta_catalog_keeps_official_not_installed_only() {
                 ],
                 error: None,
             },
-            wimo ai_hooks_plugins_types::MarketplaceScanResult {
+            wimoai_hooks_plugins_types::MarketplaceScanResult {
                 source_name: "Third Party".into(),
                 source_kind: "git".into(),
                 source_url_or_path: "https://github.com/other/repo.git".into(),
                 plugins: vec![cta_entry("third-party", "not_installed")],
                 error: None,
             },
-            wimo ai_hooks_plugins_types::MarketplaceScanResult {
+            wimoai_hooks_plugins_types::MarketplaceScanResult {
                 source_name: "Custom Mirror".into(),
                 source_kind: "git".into(),
-                source_url_or_path: "git@github.com:wimo ai-org/plugin-marketplace.git".into(),
+                source_url_or_path: "git@github.com:wimoai-org/plugin-marketplace.git".into(),
                 plugins: vec![cta_entry("url-official", "not_installed")],
                 error: None,
             },
@@ -105,7 +105,7 @@ fn plugin_cta_catalog_keeps_official_not_installed_only() {
     assert_eq!(cta.candidates[0].install_status, "not_installed");
     assert_eq!(
         cta.source_url_or_path.as_deref(),
-        Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL),
+        Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL),
         "without an override the install target stays the official source"
     );
 }
@@ -117,19 +117,19 @@ fn plugin_cta_default_prefers_url_verified_official_over_impostor() {
 
     // A first-listed source that merely calls itself "wimo AI Official" must not become the install root
     // The URL-verified official source wins even when registered later
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
         sources: vec![
-            wimo ai_hooks_plugins_types::MarketplaceScanResult {
-                source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+            wimoai_hooks_plugins_types::MarketplaceScanResult {
+                source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
                 source_kind: "path".into(),
                 source_url_or_path: "/srv/impostor-marketplace".into(),
                 plugins: vec![cta_entry("impostor", "not_installed")],
                 error: None,
             },
-            wimo ai_hooks_plugins_types::MarketplaceScanResult {
-                source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+            wimoai_hooks_plugins_types::MarketplaceScanResult {
+                source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
                 source_kind: "git".into(),
-                source_url_or_path: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
+                source_url_or_path: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
                 plugins: vec![cta_entry("genuine", "not_installed")],
                 error: None,
             },
@@ -148,7 +148,7 @@ fn plugin_cta_default_prefers_url_verified_official_over_impostor() {
     assert_eq!(names, vec!["genuine"]);
     assert_eq!(
         cta.source_url_or_path.as_deref(),
-        Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL)
+        Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL)
     );
 }
 
@@ -158,9 +158,9 @@ fn plugin_cta_default_name_only_official_mirror_selected() {
     let id = AgentId(0);
 
     // No URL-verified official source in the scan: a mirror registered under the official name (e.g. an on-prem path source) still feeds the CTA.
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
-            source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
+            source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
             source_kind: "path".into(),
             source_url_or_path: "/srv/onprem-mirror".into(),
             plugins: vec![cta_entry("mirrored", "not_installed")],
@@ -190,8 +190,8 @@ fn plugin_cta_marketplace_override_selects_named_source() {
     app.plugin_cta_marketplace = Some("SpaceX Marketplace".into());
     let id = AgentId(0);
 
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
             source_name: "SpaceX Marketplace".into(),
             source_kind: "path".into(),
             source_url_or_path: "/srv/spacex-marketplace".into(),
@@ -229,16 +229,16 @@ fn plugin_cta_marketplace_duplicate_named_sources_first_wins() {
 
     // Two sources share the override name: candidates and install target must both come from the first
     // Otherwise a later source's candidate would install against the wrong URL
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
         sources: vec![
-            wimo ai_hooks_plugins_types::MarketplaceScanResult {
+            wimoai_hooks_plugins_types::MarketplaceScanResult {
                 source_name: "SpaceX Marketplace".into(),
                 source_kind: "path".into(),
                 source_url_or_path: "/srv/spacex-marketplace".into(),
                 plugins: vec![cta_entry("starlink", "not_installed")],
                 error: None,
             },
-            wimo ai_hooks_plugins_types::MarketplaceScanResult {
+            wimoai_hooks_plugins_types::MarketplaceScanResult {
                 source_name: "SpaceX Marketplace".into(),
                 source_kind: "git".into(),
                 source_url_or_path: "https://github.com/impostor/spacex.git".into(),
@@ -280,8 +280,8 @@ fn plugin_cta_marketplace_override_install_targets_named_source() {
 
     let mut entry = cta_entry("zzspacexcta", "not_installed");
     entry.keywords = vec!["zzspacexcta".into()];
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
             source_name: "SpaceX Marketplace".into(),
             source_kind: "path".into(),
             source_url_or_path: "/srv/spacex-marketplace".into(),
@@ -321,14 +321,14 @@ fn plugin_cta_marketplace_override_install_targets_named_source() {
 fn plugin_cta_marketplace_override_naming_official_selects_it() {
     let mut app = test_app_with_agent();
     app.plugin_cta_marketplace =
-        Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.to_string());
+        Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.to_string());
     let id = AgentId(0);
 
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
-            source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
+            source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
             source_kind: "git".into(),
-            source_url_or_path: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
+            source_url_or_path: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
             plugins: vec![cta_entry("official-plugin", "not_installed")],
             error: None,
         }],
@@ -347,7 +347,7 @@ fn plugin_cta_marketplace_override_naming_official_selects_it() {
     assert_eq!(names, vec!["official-plugin"]);
     assert_eq!(
         cta.source_url_or_path.as_deref(),
-        Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL)
+        Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL)
     );
 }
 
@@ -357,16 +357,16 @@ fn plugin_cta_marketplace_override_excludes_official_source() {
     app.plugin_cta_marketplace = Some("SpaceX Marketplace".into());
     let id = AgentId(0);
 
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
         sources: vec![
-            wimo ai_hooks_plugins_types::MarketplaceScanResult {
-                source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+            wimoai_hooks_plugins_types::MarketplaceScanResult {
+                source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
                 source_kind: "git".into(),
-                source_url_or_path: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
+                source_url_or_path: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
                 plugins: vec![cta_entry("official-only", "not_installed")],
                 error: None,
             },
-            wimo ai_hooks_plugins_types::MarketplaceScanResult {
+            wimoai_hooks_plugins_types::MarketplaceScanResult {
                 source_name: "SpaceX Marketplace".into(),
                 source_kind: "path".into(),
                 source_url_or_path: "/srv/spacex-marketplace".into(),
@@ -405,11 +405,11 @@ fn plugin_cta_marketplace_override_absent_source_hides_cta() {
 
     let mut entry = cta_entry("figma", "not_installed");
     entry.keywords = vec!["figma".into()];
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
-            source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
+            source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
             source_kind: "git".into(),
-            source_url_or_path: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
+            source_url_or_path: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
             plugins: vec![entry],
             error: None,
         }],
@@ -435,7 +435,7 @@ fn plugin_cta_catalog_err_preserves_cache() {
     let id = AgentId(0);
     {
         let cta = &mut app.agents.get_mut(&id).unwrap().plugin_cta;
-        cta.source_url_or_path = Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
+        cta.source_url_or_path = Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
         cta.candidates = vec![cta_entry("cached", "not_installed")];
     }
 
@@ -462,17 +462,17 @@ fn plugin_cta_catalog_reload_empty_candidates_preserves_installed_checkmark() {
     let id = AgentId(0);
     {
         let cta = &mut app.agents.get_mut(&id).unwrap().plugin_cta;
-        cta.source_url_or_path = Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
+        cta.source_url_or_path = Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
         cta.candidates = vec![cta_entry("figma", "not_installed")];
         cta.phase = CtaPhase::Installed {
             name: "figma".into(),
         };
     }
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
-            source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
+            source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
             source_kind: "git".into(),
-            source_url_or_path: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
+            source_url_or_path: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
             plugins: vec![cta_entry("figma", "installed")],
             error: None,
         }],
@@ -522,11 +522,11 @@ fn plugin_cta_catalog_load_recomputes_match_for_typed_draft() {
         .set_text("let's try zzctaplugin today");
     let mut entry = cta_entry("zzctaplugin", "not_installed");
     entry.keywords = vec!["zzctaplugin".into()];
-    let response = wimo ai_hooks_plugins_types::MarketplaceListResponse {
-        sources: vec![wimo ai_hooks_plugins_types::MarketplaceScanResult {
-            source_name: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
+    let response = wimoai_hooks_plugins_types::MarketplaceListResponse {
+        sources: vec![wimoai_hooks_plugins_types::MarketplaceScanResult {
+            source_name: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_NAME.into(),
             source_kind: "git".into(),
-            source_url_or_path: wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
+            source_url_or_path: wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into(),
             plugins: vec![entry],
             error: None,
         }],
@@ -655,7 +655,7 @@ fn cta_impression_edge_only_on_new_appearance() {
 
 #[test]
 fn cta_install_error_category_maps_outcome() {
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
     assert_eq!(
         cta_install_error_category(&Ok(cta_outcome(OutcomeStatus::Success, "ok"))),
         None
@@ -718,7 +718,7 @@ fn plugin_cta_debounce_sets_hidden_when_feature_disabled() {
     app.plugin_cta_enabled = false;
     {
         let cta = &mut app.agents.get_mut(&id).unwrap().plugin_cta;
-        cta.source_url_or_path = Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
+        cta.source_url_or_path = Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
         cta.candidates = vec![cta_entry("figma", "not_installed")];
         cta.debounce_generation = 1;
         cta.phase = CtaPhase::Matched {
@@ -766,7 +766,7 @@ fn plugin_cta_debounce_preserves_in_flight_states() {
         {
             let cta = &mut app.agents.get_mut(&id).unwrap().plugin_cta;
             cta.source_url_or_path =
-                Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
+                Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
             cta.candidates = vec![cta_entry("figma", "not_installed")];
             cta.debounce_generation = 1;
             cta.phase = phase.clone();
@@ -786,7 +786,7 @@ fn plugin_cta_debounce_preserves_in_flight_states() {
 #[test]
 fn cta_install_done_ok_no_reload_enters_awaiting_mcps() {
     use crate::app::agent_view::CtaPhase;
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     {
@@ -820,7 +820,7 @@ fn cta_install_done_ok_no_reload_enters_awaiting_mcps() {
 #[test]
 fn cta_install_done_ok_requires_reload_enters_awaiting_reload() {
     use crate::app::agent_view::CtaPhase;
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     app.agents.get_mut(&id).unwrap().plugin_cta.phase = CtaPhase::Installing {
@@ -882,7 +882,7 @@ fn cta_install_done_err_sets_error() {
 #[test]
 fn cta_install_done_non_success_sets_error_with_sanitized_message() {
     use crate::app::agent_view::CtaPhase;
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     app.agents.get_mut(&id).unwrap().plugin_cta.phase = CtaPhase::Installing {
@@ -890,7 +890,7 @@ fn cta_install_done_non_success_sets_error_with_sanitized_message() {
         name: "figma".into(),
     };
     // Input and expectation both derive from the shared table so no service name is respelled here and a rename cannot strand the assertions
-    let (pattern, expected) = wimo ai_wimo_shell::sampling::error::SERVICE_NAME_REWRITES[0];
+    let (pattern, expected) = wimoai_wimo_shell::sampling::error::SERVICE_NAME_REWRITES[0];
     let effects = dispatch(
         Action::TaskComplete(TaskResult::CtaPluginInstallDone {
             agent_id: id,
@@ -915,7 +915,7 @@ fn cta_install_done_non_success_sets_error_with_sanitized_message() {
 #[test]
 fn cta_install_done_ignored_when_not_installing() {
     use crate::app::agent_view::CtaPhase;
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     app.agents.get_mut(&id).unwrap().plugin_cta.phase = CtaPhase::Matched {
@@ -943,7 +943,7 @@ fn cta_install_done_ignored_when_not_installing() {
 #[test]
 fn cta_install_done_ignored_for_different_plugin() {
     use crate::app::agent_view::CtaPhase;
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     app.agents.get_mut(&id).unwrap().plugin_cta.phase = CtaPhase::Installing {
@@ -985,7 +985,7 @@ fn cta_install_relative_path_prefers_candidate_then_falls_back() {
 #[test]
 fn cta_reload_done_ok_enters_awaiting_mcps() {
     use crate::app::agent_view::CtaPhase;
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     {
@@ -1018,7 +1018,7 @@ fn cta_reload_done_ok_enters_awaiting_mcps() {
 #[test]
 fn cta_reload_done_non_success_sets_error() {
     use crate::app::agent_view::CtaPhase;
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
     let mut app = test_app_with_agent();
     let id = AgentId(0);
     {
@@ -1078,7 +1078,7 @@ fn cta_reload_done_err_sets_error() {
 #[test]
 fn cta_reload_done_ignored_for_stale_phase_or_plugin() {
     use crate::app::agent_view::CtaPhase;
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
     // Wrong plugin name.
     let mut app = test_app_with_agent();
     let id = AgentId(0);
@@ -1623,11 +1623,11 @@ mod cta_e2e {
     use crate::app::dispatch::dispatch;
     use crate::views::extensions_modal::{ExtensionsTab, TabDataState};
     use crate::views::mcps_modal::{McpSectionId, McpServerDisplayStatus, section_key};
-    use wimo ai_hooks_plugins_types::OutcomeStatus;
+    use wimoai_hooks_plugins_types::OutcomeStatus;
 
     const PROMPT: &str = "please open figma now";
 
-    fn figma_candidate() -> wimo ai_hooks_plugins_types::MarketplacePluginEntry {
+    fn figma_candidate() -> wimoai_hooks_plugins_types::MarketplacePluginEntry {
         let mut entry = cta_entry("figma", "not_installed");
         entry.keywords = vec!["figma".into()];
         // MCP-bearing plugin: install enters AwaitingMcps and polls for auth.
@@ -1664,7 +1664,7 @@ mod cta_e2e {
         {
             let cta = &mut app.agents.get_mut(&id).unwrap().plugin_cta;
             cta.source_url_or_path =
-                Some(wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
+                Some(wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.into());
             cta.candidates = vec![figma_candidate()];
             cta.debounce_generation = 1;
         }
@@ -1737,7 +1737,7 @@ mod cta_e2e {
             ] => {
                 assert_eq!(
                     source_url_or_path,
-                    wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL
+                    wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL
                 );
                 assert_eq!(plugin_relative_path, "plugins/figma");
             }
@@ -2018,7 +2018,7 @@ mod cta_e2e {
         let config_path = tmp.path().join("config.toml");
         let candidates = vec![figma_candidate()];
 
-        let dismissed = wimo ai_wimo_shell::config::dismissed_plugin_ctas_in_file(&config_path);
+        let dismissed = wimoai_wimo_shell::config::dismissed_plugin_ctas_in_file(&config_path);
         let matched =
             plugin_cta_phase_for(true, true, &candidates, PROMPT, |id| dismissed.contains(id));
         assert_eq!(
@@ -2029,9 +2029,9 @@ mod cta_e2e {
             }
         );
 
-        wimo ai_wimo_shell::config::add_dismissed_plugin_cta_to_file("figma", &config_path)
+        wimoai_wimo_shell::config::add_dismissed_plugin_cta_to_file("figma", &config_path)
             .expect("persist dismissal");
-        let dismissed = wimo ai_wimo_shell::config::dismissed_plugin_ctas_in_file(&config_path);
+        let dismissed = wimoai_wimo_shell::config::dismissed_plugin_ctas_in_file(&config_path);
         assert!(dismissed.contains("figma"));
 
         let hidden =
@@ -2048,7 +2048,7 @@ mod cta_e2e {
             {
                 let cta = &mut app.agents.get_mut(&id).unwrap().plugin_cta;
                 cta.source_url_or_path = source_present
-                    .then(|| wimo ai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.to_string());
+                    .then(|| wimoai_wimo_plugin_marketplace::OFFICIAL_SOURCE_GIT_URL.to_string());
                 cta.candidates = vec![figma_candidate()];
                 cta.debounce_generation = 1;
                 cta.phase = CtaPhase::Matched {

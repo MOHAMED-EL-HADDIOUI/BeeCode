@@ -3,8 +3,8 @@
 use std::sync::Arc;
 use std::time::Instant;
 
-use wimo ai_wimo_telemetry::TelemetryCtx;
-use wimo ai_wimo_telemetry::events::{
+use wimoai_wimo_telemetry::TelemetryCtx;
+use wimoai_wimo_telemetry::events::{
     ActiveAgentMessageCompleted as Completed,
     ActiveAgentMessageFallbackDisposition as FallbackDisposition,
     ActiveAgentMessageFallbackReason as FallbackReason, ActiveAgentMessageLimitHit as LimitHit,
@@ -12,9 +12,9 @@ use wimo ai_wimo_telemetry::events::{
     ActiveAgentMessageSettled as Settled,
     ActiveAgentMessageSettlementDisposition as SettlementDisposition,
 };
-use wimo ai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageOutput;
-use wimo ai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation;
-use wimo ai_wimo_tools::types::output::ToolOutput;
+use wimoai_wimo_tools::implementations::wimo::send_subagent_message::SendSubagentMessageOutput;
+use wimoai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageOperation;
+use wimoai_wimo_tools::types::output::ToolOutput;
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum ActiveAgentMessageEvent {
@@ -73,7 +73,7 @@ impl ActiveAgentMessageAdmissionTelemetry {
     }
 }
 
-pub(crate) use wimo ai_wimo_telemetry::events::ActiveAgentMessageFallbackReason;
+pub(crate) use wimoai_wimo_telemetry::events::ActiveAgentMessageFallbackReason;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum ActiveAgentMessageSettlementStatus {
@@ -122,13 +122,13 @@ impl ActiveAgentMessageEventSink for ProductEventSink {
     fn emit(&mut self, event: ActiveAgentMessageEvent) {
         match event {
             ActiveAgentMessageEvent::Completed(event) => {
-                wimo ai_wimo_telemetry::session_ctx::log_event(event);
+                wimoai_wimo_telemetry::session_ctx::log_event(event);
             }
             ActiveAgentMessageEvent::LimitHit(event) => {
-                wimo ai_wimo_telemetry::session_ctx::log_event(event);
+                wimoai_wimo_telemetry::session_ctx::log_event(event);
             }
             ActiveAgentMessageEvent::Settled(event) => {
-                wimo ai_wimo_telemetry::session_ctx::log_event(event);
+                wimoai_wimo_telemetry::session_ctx::log_event(event);
             }
         }
     }
@@ -314,7 +314,7 @@ pub(crate) async fn record_settlement(
     let Some((parent_ctx, event)) = project_settlement(admission, status, Instant::now()) else {
         return;
     };
-    wimo ai_wimo_telemetry::with_session_ctx(parent_ctx, async {
+    wimoai_wimo_telemetry::with_session_ctx(parent_ctx, async {
         ProductEventSink.emit(ActiveAgentMessageEvent::Settled(event));
     })
     .await;

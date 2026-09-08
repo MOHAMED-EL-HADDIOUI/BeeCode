@@ -3,7 +3,7 @@
 //! One `git2` discovery and one walk from cwd up to the root.
 //! The folder-trust gate reuses it across the many repo-local config marker checks it runs back-to-back.
 //! Lives in its own module (rather than `discovery`) because it is a generic repo-walk primitive, not agent-definition discovery.
-//! `wimo ai-wimo-workspace` consumes it cross-crate.
+//! `wimoai-wimo-workspace` consumes it cross-crate.
 
 use std::path::{Path, PathBuf};
 
@@ -68,10 +68,10 @@ impl RepoDirChain {
 }
 
 /// Whether `path` canonicalizes to the user's home directory.
-/// It stays local (not reused from `wimo ai-wimo-workspace`, which depends on THIS crate) to keep the dep edge one-way.
+/// It stays local (not reused from `wimoai-wimo-workspace`, which depends on THIS crate) to keep the dep edge one-way.
 /// It backs the guard in [`RepoDirChain::resolve`] that drops a $HOME git root.
 fn is_home_dir(path: &Path) -> bool {
-    let Some(home) = wimo ai_dirs::home_dir() else {
+    let Some(home) = wimoai_dirs::home_dir() else {
         return false;
     };
     let canon = |p: &Path| dunce::canonicalize(p).unwrap_or_else(|_| p.to_path_buf());
@@ -169,7 +169,7 @@ mod tests {
     fn resolve_treats_home_git_repo_as_no_repo() {
         // Home-is-a-git-repo (dotfiles in $HOME): discovery walks up to $HOME, but the guard drops that root
         // A subdir then resolves as no-repo (probe cwd only) instead of spanning the whole home subtree
-        // Pin HOME and USERPROFILE: wimo ai_dirs::home_dir reads USERPROFILE on Windows
+        // Pin HOME and USERPROFILE: wimoai_dirs::home_dir reads USERPROFILE on Windows
         let tmp = tempfile::tempdir().unwrap();
         let home = dunce::canonicalize(tmp.path()).unwrap();
         git2::Repository::init(&home).unwrap();

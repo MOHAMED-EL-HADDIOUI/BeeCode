@@ -31,7 +31,7 @@ pub struct CancellationContext {
 #[non_exhaustive]
 pub enum SideQuestionError {
     #[error("side question model call failed: {0}")]
-    Sampling(#[from] wimo ai_wimo_sampling_types::SamplingError),
+    Sampling(#[from] wimoai_wimo_sampling_types::SamplingError),
     #[error("failed to prepare client: {0}")]
     PrepareClient(String),
     #[error("No response from model")]
@@ -45,7 +45,7 @@ pub enum PromptCompletionKind {
     /// Distinct from Completed so goal continuation is not re-queued under an active goal.
     StationarityEnded,
     Cancelled {
-        category: Option<wimo ai_wimo_session_events::types::CancellationCategory>,
+        category: Option<wimoai_wimo_session_events::types::CancellationCategory>,
         context: Option<CancellationContext>,
     },
     MaxTurnsReached {
@@ -75,9 +75,9 @@ pub const ACTION_STATIONARITY_CATEGORY: &str = "action_stationarity";
 /// This is deliberately a second vocabulary next to the serde snake_case of the events.jsonl / after-turn rails.
 /// `_meta` shipped PascalCase and clients match it.
 pub fn meta_category_str(
-    category: wimo ai_wimo_session_events::types::CancellationCategory,
+    category: wimoai_wimo_session_events::types::CancellationCategory,
 ) -> &'static str {
-    use wimo ai_wimo_session_events::types::CancellationCategory;
+    use wimoai_wimo_session_events::types::CancellationCategory;
     match category {
         CancellationCategory::HookDenied => HOOK_DENIED_CATEGORY,
         CancellationCategory::PermissionRejected => "PermissionRejected",
@@ -121,7 +121,7 @@ pub struct PromptTurnOk {
     /// `None` unless a schema was requested; `Some(Err)` carries a parse/validation error message.
     pub structured_output: Option<Result<serde_json::Value, String>>,
     pub usage: Option<crate::extensions::notification::PromptUsage>,
-    pub tool_overrides: Option<wimo ai_wimo_sampling_types::ToolOverrides>,
+    pub tool_overrides: Option<wimoai_wimo_sampling_types::ToolOverrides>,
 }
 pub(crate) type PromptTurnResult = Result<PromptTurnOk, acp::Error>;
 pub(crate) fn ok_end_turn(tokens: u64, snapshot: Option<TurnDeltaSnapshot>) -> PromptTurnResult {
@@ -278,13 +278,13 @@ pub enum SessionCommand {
         manual: bool,
     },
     GetToolOverrides {
-        respond_to: oneshot::Sender<Option<wimo ai_wimo_sampling_types::ToolOverrides>>,
+        respond_to: oneshot::Sender<Option<wimoai_wimo_sampling_types::ToolOverrides>>,
     },
     /// Establish the per-turn tool-overrides state before the first prompt runs.
     /// Sent once by `handle_subagent_request` ahead of the child's first `Prompt`.
     /// A spawned subagent's inherited cutoff is then applied and published (for its own subagents to read) before any turn.
     SetToolOverrides {
-        overrides: wimo ai_wimo_sampling_types::ToolOverrides,
+        overrides: wimoai_wimo_sampling_types::ToolOverrides,
     },
     Prompt {
         prompt_id: String,
@@ -308,7 +308,7 @@ pub enum SessionCommand {
         send_now: bool,
         /// Actor-authoritative admission and deferred fallback for terminal task wakes.
         admission: Option<TaskWakeAdmission>,
-        tool_overrides_update: Option<wimo ai_wimo_sampling_types::ToolOverridesUpdate>,
+        tool_overrides_update: Option<wimoai_wimo_sampling_types::ToolOverridesUpdate>,
         respond_to: oneshot::Sender<PromptTurnResult>,
         /// Optional initial-child readiness signal.
         /// Carried onto the queued item and resolved only when that exact row is promoted, or closed on removal.
@@ -326,12 +326,12 @@ pub enum SessionCommand {
     /// Admit an owning root's model-authored message as an ordinary protected turn.
     ParentAgentMessage {
         delivery:
-            wimo ai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageDelivery,
+            wimoai_wimo_tools::implementations::wimo::task::types::ActiveAgentMessageDelivery,
         #[allow(private_interfaces)]
         receipt_sink: tokio::sync::mpsc::Sender<crate::agent::subagent::PromptTurnReceipt>,
-        parent_telemetry_ctx: wimo ai_wimo_telemetry::TelemetryCtx,
+        parent_telemetry_ctx: wimoai_wimo_telemetry::TelemetryCtx,
         respond_to: oneshot::Sender<
-            wimo ai_wimo_tools::implementations::wimo::task::coordinator::ActiveMessageAdmission,
+            wimoai_wimo_tools::implementations::wimo::task::coordinator::ActiveMessageAdmission,
         >,
     },
     SessionMode {
@@ -339,7 +339,7 @@ pub enum SessionCommand {
         responds_to: oneshot::Sender<()>,
     },
     SetSessionModel {
-        sampling_config: wimo ai_wimo_sampler::SamplerConfig,
+        sampling_config: wimoai_wimo_sampler::SamplerConfig,
         use_concise: bool,
         /// The two models declare differing `model_family`s, so a lossy compaction runs at switch end.
         is_family_switch: bool,
@@ -360,7 +360,7 @@ pub enum SessionCommand {
     /// Set only the reasoning effort on the session's live model. Carrying no
     /// model keeps a concurrent `SetSessionModel` from being reverted.
     SetReasoningEffort {
-        effort: wimo ai_wimo_sampling_types::ReasoningEffort,
+        effort: wimoai_wimo_sampling_types::ReasoningEffort,
         responds_to: oneshot::Sender<Result<acp::ModelId, acp::Error>>,
     },
     /// Zero-turn harness rebuild: build a brand-new `Agent` from the session's `AgentRebuildSpec` and the new `AgentDefinition`.
@@ -370,7 +370,7 @@ pub enum SessionCommand {
     /// Triggered by `MvpAgent::set_session_model` when the new model's `agent_type` differs from the session's current one.
     /// It only fires while no user message has been sent (`turn_count == 0`).
     RebuildAgentForDefinition {
-        definition: wimo ai_wimo_agent::AgentDefinition,
+        definition: wimoai_wimo_agent::AgentDefinition,
         responds_to: oneshot::Sender<Result<(), acp::Error>>,
     },
     /// Override the model name and optionally inject extra HTTP headers into the session's sampling config.
@@ -397,7 +397,7 @@ pub enum SessionCommand {
         responds_to: oneshot::Sender<PromptMode>,
     },
     GetModelMetadata {
-        responds_to: oneshot::Sender<wimo ai_chat_state::ModelMetadata>,
+        responds_to: oneshot::Sender<wimoai_chat_state::ModelMetadata>,
     },
     /// Snapshot for `/session-info`.
     GetSessionInfo {
@@ -409,7 +409,7 @@ pub enum SessionCommand {
     },
     /// Reload plugin hooks and registry mid-session.
     ReloadPlugins {
-        registry: Option<std::sync::Arc<wimo ai_wimo_agent::plugins::PluginRegistry>>,
+        registry: Option<std::sync::Arc<wimoai_wimo_agent::plugins::PluginRegistry>>,
     },
     /// Re-discover the session's own project hooks (`.wimo/hooks`, `.cursor/hooks.json`, …) mid-session, re-evaluating folder trust.
     /// Used by the interactive folder-trust grant so a granted folder's repo-local hooks start without a session restart.
@@ -443,7 +443,7 @@ pub enum SessionCommand {
     RepairHistory {
         dry_run: bool,
         respond_to:
-            oneshot::Sender<anyhow::Result<wimo ai_chat_state::compaction_utils::HistoryRepairReport>>,
+            oneshot::Sender<anyhow::Result<wimoai_chat_state::compaction_utils::HistoryRepairReport>>,
     },
     GetRewindPoints {
         respond_to: oneshot::Sender<RewindPointsResponse>,
@@ -473,14 +473,14 @@ pub enum SessionCommand {
         respond_to: oneshot::Sender<()>,
     },
     /// wimo AI extension session notification: client-side events to store in persistence
-    wimo aiSessionNotification {
+    wimoaiSessionNotification {
         notification: SessionNotification,
     },
     /// Apply subagent usage into parent ledgers.
     /// Acks `()` once chat state has applied it (prompt-attributed or session-only).
     /// Drop the oneshot on failure so the child treats the fold as not landed.
     RecordSubagentUsage {
-        by_model: Vec<(String, wimo ai_chat_state::UsageTotals)>,
+        by_model: Vec<(String, wimoai_chat_state::UsageTotals)>,
         parent_prompt_id: Option<String>,
         /// Nested subagent bill may under-count.
         incomplete: bool,
@@ -574,7 +574,7 @@ pub enum SessionCommand {
     /// Snapshot the session's resolved tool schema (the same list the parent's own turn sends).
     /// A verbatim-fork child can then present a byte-identical tool prefix.
     SnapshotToolDefinitions {
-        respond_to: oneshot::Sender<Vec<wimo ai_wimo_sampling_types::ToolSpec>>,
+        respond_to: oneshot::Sender<Vec<wimoai_wimo_sampling_types::ToolSpec>>,
     },
     /// Replace the session's client-registered hooks.
     /// Sent on `load_session` reconnect to a live actor so a client can re-register (or clear) its hooks without a fresh session.
@@ -615,8 +615,8 @@ pub enum SessionCommand {
     /// Routes through the ToolBridge's TerminalBackend (lock-free, Arc-shared).
     KillBackgroundTask {
         task_id: String,
-        source: wimo ai_wimo_tools::types::KillSource,
-        respond_to: oneshot::Sender<Result<wimo ai_wimo_tools::types::KillOutcome, String>>,
+        source: wimoai_wimo_tools::types::KillSource,
+        respond_to: oneshot::Sender<Result<wimoai_wimo_tools::types::KillOutcome, String>>,
     },
     DeleteScheduledTask {
         task_id: String,
@@ -624,7 +624,7 @@ pub enum SessionCommand {
     },
     /// Routes through the ToolBridge's TerminalBackend.
     ListTasks {
-        respond_to: oneshot::Sender<Option<Vec<wimo ai_wimo_tools::types::TaskSnapshot>>>,
+        respond_to: oneshot::Sender<Option<Vec<wimoai_wimo_tools::types::TaskSnapshot>>>,
     },
     /// Query whether the session has work in flight: a running turn (`running_task.is_some()`) **or** queued inputs (`pending_inputs` non-empty).
     /// Used by the leader's idle-unload decision on client disconnect to avoid unloading a session that still has pending work.
@@ -632,25 +632,25 @@ pub enum SessionCommand {
         respond_to: oneshot::Sender<bool>,
     },
     GetHooksList {
-        respond_to: oneshot::Sender<wimo ai_hooks_plugins_types::HooksListResponse>,
+        respond_to: oneshot::Sender<wimoai_hooks_plugins_types::HooksListResponse>,
     },
     /// Execute a hooks management action from the pager modal.
     HooksAction {
-        action: wimo ai_hooks_plugins_types::HooksAction,
-        respond_to: oneshot::Sender<wimo ai_hooks_plugins_types::ActionOutcome>,
+        action: wimoai_hooks_plugins_types::HooksAction,
+        respond_to: oneshot::Sender<wimoai_hooks_plugins_types::ActionOutcome>,
     },
     NotifyPluginUpdates {
         updates: Vec<(String, String, String)>,
     },
     /// Execute a plugins management action from the pager modal.
     PluginsAction {
-        action: wimo ai_hooks_plugins_types::PluginsAction,
-        respond_to: oneshot::Sender<wimo ai_hooks_plugins_types::ActionOutcome>,
+        action: wimoai_hooks_plugins_types::PluginsAction,
+        respond_to: oneshot::Sender<wimoai_hooks_plugins_types::ActionOutcome>,
     },
     /// This session's plugin registry, as served by `x.ai/plugins/list`.
     PluginsList {
         respond_to:
-            oneshot::Sender<Option<std::sync::Arc<wimo ai_wimo_agent::plugins::PluginRegistry>>>,
+            oneshot::Sender<Option<std::sync::Arc<wimoai_wimo_agent::plugins::PluginRegistry>>>,
     },
     /// Inject a notification (monitor event or bash task completion) into the session's notification queue.
     /// Notifications wait for an idle session and are batched by `maybe_drain_notifications`.
@@ -666,7 +666,7 @@ pub enum SessionCommand {
     DropMonitorNotifications {
         task_id: String,
     },
-    /// Dispatch a compat `Notification` hook (e.g. `task_complete` from the notification bridge, which does not go through `send_wimo ai_notification`).
+    /// Dispatch a compat `Notification` hook (e.g. `task_complete` from the notification bridge, which does not go through `send_wimoai_notification`).
     DispatchNotificationHook {
         notification_type: String,
         message: Option<String>,
@@ -840,14 +840,14 @@ pub enum SessionCommand {
     },
     /// Take turn messages from the chat state actor (proxied from mvp_agent).
     TakeTurnMessages {
-        respond_to: oneshot::Sender<Option<wimo ai_chat_state::TurnCapture>>,
+        respond_to: oneshot::Sender<Option<wimoai_chat_state::TurnCapture>>,
     },
     /// Drain the sealed harness trace turns (goal planner and verifier panels) from the chat state actor (proxied from mvp_agent).
     /// Routed through the session actor (like `TakeTurnMessages`) so the drain is ordered ahead of any subsequent turn's harness recording.
     /// Each `Vec` is one turn's synthetic `task` pairs, uploaded as its own sibling `turn_{N}` artifact.
     TakeHarnessTraceTurns {
         respond_to:
-            oneshot::Sender<Vec<Vec<wimo ai_wimo_sampling_types::conversation::ConversationItem>>>,
+            oneshot::Sender<Vec<Vec<wimoai_wimo_sampling_types::conversation::ConversationItem>>>,
     },
     /// Take and clear the session actor's out-of-band streaming-turn capture.
     ///
@@ -875,7 +875,7 @@ pub enum SessionCommand {
 #[cfg(test)]
 mod cancellation_category_meta_tests {
     use super::PromptCompletionKind;
-    use wimo ai_wimo_session_events::types::CancellationCategory;
+    use wimoai_wimo_session_events::types::CancellationCategory;
     /// Pins every `_meta.cancellationCategory` wire name: shipped clients string-match these, so a rename is a wire break the compiler can't see.
     #[test]
     fn pins_every_wire_name() {

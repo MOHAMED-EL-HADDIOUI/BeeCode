@@ -2,7 +2,7 @@
 //!
 //! Single source of truth for checking whether a path is ignored by
 //! `.gitignore` rules. Used by both the initial AGENTS.md discovery
-//! (`wimo ai-wimo-agent::prompt::ignore`) and the runtime tracker
+//! (`wimoai-wimo-agent::prompt::ignore`) and the runtime tracker
 //! (`AgentsMdTracker`).
 
 use ignore::gitignore::Gitignore;

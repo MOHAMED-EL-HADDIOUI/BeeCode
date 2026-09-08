@@ -11,7 +11,7 @@ use std::sync::OnceLock;
 use serial_test::serial;
 
 /// Shared temp directory that lives for the entire test binary.
-/// All tests share this as wimo_HOME (the `OnceLock` in wimo ai-wimo-config only allows one value per process).
+/// All tests share this as wimo_HOME (the `OnceLock` in wimoai-wimo-config only allows one value per process).
 fn test_home() -> &'static PathBuf {
     static HOME: OnceLock<PathBuf> = OnceLock::new();
     HOME.get_or_init(|| {
@@ -52,8 +52,8 @@ async fn update_config_does_not_leak_requirements_into_user_config() {
     .unwrap();
 
     // Sanity-check: effective config should show auto_update = false (requirements wins over user config)
-    let effective = wimo ai_wimo_shell::config::load_effective_config().unwrap();
-    let effective_cfg = wimo ai_wimo_shell::util::config::load_config_from_toml(&effective);
+    let effective = wimoai_wimo_shell::config::load_effective_config().unwrap();
+    let effective_cfg = wimoai_wimo_shell::util::config::load_config_from_toml(&effective);
     assert_eq!(
         effective_cfg.cli.auto_update,
         Some(false),
@@ -62,7 +62,7 @@ async fn update_config_does_not_leak_requirements_into_user_config() {
 
     // --- Act ---
     // Simulate an unrelated config write (e.g. persisting a model preference).
-    wimo ai_wimo_shell::util::config::update_config(|cfg| {
+    wimoai_wimo_shell::util::config::update_config(|cfg| {
         cfg.models.default = Some("wimo-3".to_string());
     })
     .await
@@ -72,7 +72,7 @@ async fn update_config_does_not_leak_requirements_into_user_config() {
     // Read the user's config.toml back from disk (raw, no merge).
     let raw = fs::read_to_string(home.join("config.toml")).unwrap();
     let user_toml: toml::Value = toml::from_str(&raw).unwrap();
-    let user_cfg = wimo ai_wimo_shell::util::config::load_config_from_toml(&user_toml);
+    let user_cfg = wimoai_wimo_shell::util::config::load_config_from_toml(&user_toml);
 
     assert_eq!(
         user_cfg.cli.auto_update,
@@ -105,7 +105,7 @@ async fn update_config_preserves_none_when_only_requirements_sets_value() {
     .unwrap();
 
     // Write an unrelated field
-    wimo ai_wimo_shell::util::config::update_config(|cfg| {
+    wimoai_wimo_shell::util::config::update_config(|cfg| {
         cfg.ui.yolo = true;
     })
     .await
@@ -114,7 +114,7 @@ async fn update_config_preserves_none_when_only_requirements_sets_value() {
     // Read back
     let raw = fs::read_to_string(home.join("config.toml")).unwrap();
     let user_toml: toml::Value = toml::from_str(&raw).unwrap();
-    let user_cfg = wimo ai_wimo_shell::util::config::load_config_from_toml(&user_toml);
+    let user_cfg = wimoai_wimo_shell::util::config::load_config_from_toml(&user_toml);
 
     assert_eq!(
         user_cfg.cli.auto_update, None,
@@ -142,7 +142,7 @@ async fn update_config_does_not_leak_managed_config_values() {
     )
     .unwrap();
 
-    wimo ai_wimo_shell::util::config::update_config(|cfg| {
+    wimoai_wimo_shell::util::config::update_config(|cfg| {
         cfg.models.default = Some("test-model".to_string());
     })
     .await
@@ -150,7 +150,7 @@ async fn update_config_does_not_leak_managed_config_values() {
 
     let raw = fs::read_to_string(home.join("config.toml")).unwrap();
     let user_toml: toml::Value = toml::from_str(&raw).unwrap();
-    let user_cfg = wimo ai_wimo_shell::util::config::load_config_from_toml(&user_toml);
+    let user_cfg = wimoai_wimo_shell::util::config::load_config_from_toml(&user_toml);
 
     assert_eq!(
         user_cfg.cli.auto_update, None,

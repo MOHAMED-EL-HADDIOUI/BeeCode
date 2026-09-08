@@ -13,10 +13,10 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use serde_json::{Value, json};
 
-use wimo ai_wimo_mcp::mcp_http_client::{McpHttpClient, WarnBudget};
-use wimo ai_wimo_mcp::rmcp::ServiceExt;
-use wimo ai_wimo_mcp::rmcp::transport::StreamableHttpClientTransport;
-use wimo ai_wimo_mcp::rmcp::transport::streamable_http_client::StreamableHttpClientTransportConfig;
+use wimoai_wimo_mcp::mcp_http_client::{McpHttpClient, WarnBudget};
+use wimoai_wimo_mcp::rmcp::ServiceExt;
+use wimoai_wimo_mcp::rmcp::transport::StreamableHttpClientTransport;
+use wimoai_wimo_mcp::rmcp::transport::streamable_http_client::StreamableHttpClientTransportConfig;
 
 #[derive(Clone)]
 struct ServerState {

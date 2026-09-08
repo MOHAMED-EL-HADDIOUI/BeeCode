@@ -2,7 +2,7 @@ pub mod reloader;
 pub mod watcher;
 use crate::bundle;
 use serde::Deserialize;
-pub use wimo ai_wimo_config_types::{
+pub use wimoai_wimo_config_types::{
     DEFAULT_RECENCY_DECAY, MemoryConfig, MemoryDreamConfig, MemoryDreamSettings,
     MemoryEmbeddingConfig, MemoryEmbeddingSettings, MemoryFlushConfig, MemoryFlushSettings,
     MemoryGcConfig, MemoryGcSettings, MemoryIndexConfig, MemoryIndexSettings,
@@ -84,7 +84,7 @@ pub struct SubagentsConfig {
     #[serde(default)]
     pub personas: std::collections::HashMap<String, SubagentPersona>,
 }
-use wimo ai_wimo_subagent_resolution::config::{SubagentPersona, SubagentRole};
+use wimoai_wimo_subagent_resolution::config::{SubagentPersona, SubagentRole};
 impl SubagentsConfig {
     fn discover_personas_in_dir(&mut self, dir: &std::path::Path) {
         if !dir.is_dir() {
@@ -302,7 +302,7 @@ impl SubagentsConfig {
             env,
             config,
             remote,
-            wimo ai_wimo_tools::implementations::wimo::task::admission::DEFAULT_MAX_CONCURRENT,
+            wimoai_wimo_tools::implementations::wimo::task::admission::DEFAULT_MAX_CONCURRENT,
         )
     }
     /// Resolve the subagent turn-sampling limit, clamped to [`crate::agent::subagent::MAX_SUBAGENT_SAMPLING_LIMIT`].
@@ -344,8 +344,8 @@ impl SubagentsConfig {
         env: Option<&str>,
         config: Option<&str>,
         remote: Option<&str>,
-    ) -> wimo ai_wimo_tools::implementations::wimo::task::admission::LimitBehavior {
-        use wimo ai_wimo_tools::implementations::wimo::task::admission::LimitBehavior;
+    ) -> wimoai_wimo_tools::implementations::wimo::task::admission::LimitBehavior {
+        use wimoai_wimo_tools::implementations::wimo::task::admission::LimitBehavior;
         for (source, value) in [("env", env), ("config", config), ("remote", remote)] {
             let Some(value) = value else { continue };
             if value.eq_ignore_ascii_case("fail") {
@@ -373,7 +373,7 @@ impl SubagentsConfig {
     ///
     /// Project files are excluded from this trust-independent base; Task boundaries overlay them using the parent cwd's authoritative trust verdict.
     pub fn resolve(cli_flag: bool, config: &toml::Value) -> Self {
-        let user_wimo_root = wimo ai_wimo_config::user_wimo_home();
+        let user_wimo_root = wimoai_wimo_config::user_wimo_home();
         Self::resolve_base_with_sources(
             cli_flag,
             config,
@@ -663,7 +663,7 @@ pub struct ToolsConfig {
     /// The generated video then lands in a team-owned bucket instead of being downloaded locally.
     /// Only effective when `disable_zdr_incompatible_tools` is `true`. Populated from `[tools.zdr_video_output_s3]` in config.
     pub zdr_video_output_s3:
-        Option<wimo ai_wimo_tools::implementations::wimo::video_gen::ZdrVideoOutputS3Config>,
+        Option<wimoai_wimo_tools::implementations::wimo::video_gen::ZdrVideoOutputS3Config>,
     pub media_gen: MediaGenToolsConfig,
 }
 impl ToolsConfig {
@@ -692,7 +692,7 @@ impl ToolsConfig {
                 .and_then(|s3_val| match s3_val
                     .clone()
                     .try_into::<
-                        wimo ai_wimo_tools::implementations::wimo::video_gen::ZdrVideoOutputS3Config,
+                        wimoai_wimo_tools::implementations::wimo::video_gen::ZdrVideoOutputS3Config,
                     >()
                 {
                     Ok(cfg) if cfg.is_valid() => Some(cfg),
@@ -751,7 +751,7 @@ impl ToolsConfig {
             env,
             config,
             remote,
-            wimo ai_wimo_tools::media_gen_limits::DEFAULT_MAX_PARALLEL_IMAGE_GEN,
+            wimoai_wimo_tools::media_gen_limits::DEFAULT_MAX_PARALLEL_IMAGE_GEN,
         )
     }
     pub(crate) fn resolve_max_parallel_video_gen_calls(
@@ -764,7 +764,7 @@ impl ToolsConfig {
             env,
             config,
             remote,
-            wimo ai_wimo_tools::media_gen_limits::DEFAULT_MAX_PARALLEL_VIDEO_GEN,
+            wimoai_wimo_tools::media_gen_limits::DEFAULT_MAX_PARALLEL_VIDEO_GEN,
         )
     }
 }
@@ -807,7 +807,7 @@ pub(crate) fn resolve_positive_count(
     default: usize,
 ) -> usize {
     if let Some(value) = env {
-        match wimo ai_wimo_tools::util::env::parse_positive(value.trim()) {
+        match wimoai_wimo_tools::util::env::parse_positive(value.trim()) {
             Some(parsed) => return usize::try_from(parsed).unwrap_or(usize::MAX),
             None => {
                 tracing::warn!(
@@ -875,16 +875,16 @@ impl StorageMode {
     /// It is used at boot ([`crate::agent::init`]) and by the post-readiness self-heal (`MvpAgent::reapply_storage_mode`).
     pub(crate) fn from_remote_gated(
         remote: Option<&crate::util::config::RemoteSettings>,
-        has_wimo ai_auth: bool,
+        has_wimoai_auth: bool,
     ) -> Self {
         match Self::resolve(None, remote) {
-            Self::Writeback if !has_wimo ai_auth => Self::Local,
+            Self::Writeback if !has_wimoai_auth => Self::Local,
             mode => mode,
         }
     }
 }
-pub use wimo ai_wimo_config::ConfigLayers;
-pub use wimo ai_wimo_config::{
+pub use wimoai_wimo_config::ConfigLayers;
+pub use wimoai_wimo_config::{
     wimo_CONFIG_ENV, wimo_CONFIG_PATH_ENV, MDM_REQUIREMENTS_SOURCE, OverlaySource,
     RequirementsLayer, RequirementsSource, ResolvedOverlay, ServingIdentity, SyncMarker,
     claude_managed_settings_probe_path, confirmed_team_switch, confirmed_team_switch_at,
@@ -1010,12 +1010,12 @@ impl std::fmt::Display for EnforcedField {
 pub(crate) fn apply_managed_settings_features(
     config: &mut crate::agent::config::Config,
 ) -> Vec<EnforcedField> {
-    let ms = wimo ai_wimo_workspace::permission::resolution::managed_settings();
+    let ms = wimoai_wimo_workspace::permission::resolution::managed_settings();
     apply_managed_settings_features_inner(config, &ms.features)
 }
 fn apply_managed_settings_features_inner(
     config: &mut crate::agent::config::Config,
-    features: &wimo ai_wimo_workspace::permission::resolution::ManagedSettingsFeatures,
+    features: &wimoai_wimo_workspace::permission::resolution::ManagedSettingsFeatures,
 ) -> Vec<EnforcedField> {
     let Some(ref path) = features.source_path else {
         return Vec::new();
@@ -1319,11 +1319,11 @@ fn apply_requirements_inner(
         "required_maximum_version",
         config.cli.required_maximum_version
     );
-    if let Some(val) = req_str(req, "endpoints", "wimo ai_api_base_url")
-        && config.endpoints.wimo ai_api_base_url != val
+    if let Some(val) = req_str(req, "endpoints", "wimoai_api_base_url")
+        && config.endpoints.wimoai_api_base_url != val
     {
-        config.endpoints.wimo ai_api_base_url = val.to_owned();
-        push("endpoints.wimo ai_api_base_url", val.to_owned());
+        config.endpoints.wimoai_api_base_url = val.to_owned();
+        push("endpoints.wimoai_api_base_url", val.to_owned());
     }
     if let Some(val) = req_str(req, "endpoints", "cli_chat_proxy_base_url")
         && config.endpoints.cli_chat_proxy_base_url.as_deref() != Some(val)
@@ -1493,25 +1493,25 @@ pub fn apply_sandbox(
         .as_ref()
         .and_then(|v| v.get("sandbox")?.get("auto_allow_bash")?.as_bool());
     let resolved = config.resolve_profile(cli_profile, profile_req);
-    wimo ai_wimo_sandbox::set_auto_allow_bash(config.resolve_auto_allow_bash(auto_allow_req).value);
-    let sandbox_profile: wimo ai_wimo_sandbox::ProfileName =
+    wimoai_wimo_sandbox::set_auto_allow_bash(config.resolve_auto_allow_bash(auto_allow_req).value);
+    let sandbox_profile: wimoai_wimo_sandbox::ProfileName =
         resolved.value.parse().unwrap_or_else(|e| {
             eprintln!("warning: {e}, defaulting to no sandbox");
-            wimo ai_wimo_sandbox::ProfileName::Off
+            wimoai_wimo_sandbox::ProfileName::Off
         });
-    wimo ai_wimo_sandbox::set_configured_profile(&resolved.value);
+    wimoai_wimo_sandbox::set_configured_profile(&resolved.value);
     let workspace = cwd
         .and_then(|p| dunce::canonicalize(p).ok())
         .or_else(|| std::env::current_dir().ok())
         .unwrap_or_else(|| std::path::PathBuf::from("."));
     #[cfg(target_os = "linux")]
-    let requires_read_deny = wimo ai_wimo_sandbox::requires_read_deny(&sandbox_profile, &workspace);
+    let requires_read_deny = wimoai_wimo_sandbox::requires_read_deny(&sandbox_profile, &workspace);
     #[cfg(target_os = "linux")]
     let requires_hook_write_deny =
-        wimo ai_wimo_sandbox::requires_hook_write_deny(&sandbox_profile, &workspace);
+        wimoai_wimo_sandbox::requires_hook_write_deny(&sandbox_profile, &workspace);
     #[cfg(target_os = "linux")]
     let requires_data_write_deny =
-        wimo ai_wimo_sandbox::requires_data_write_deny(&sandbox_profile, &workspace);
+        wimoai_wimo_sandbox::requires_data_write_deny(&sandbox_profile, &workspace);
     #[cfg(target_os = "linux")]
     let requires_bwrap = requires_read_deny || requires_hook_write_deny || requires_data_write_deny;
     #[cfg(target_os = "linux")]
@@ -1522,8 +1522,8 @@ pub fn apply_sandbox(
                  {cause} Refusing to start with denied paths unprotected."
             );
         };
-        let command = wimo ai_wimo_sandbox::bwrap_reexec_for_profile(&sandbox_profile, &workspace);
-        match route_bwrap_startup(command, wimo ai_wimo_sandbox::is_inside_bwrap(), requires_bwrap) {
+        let command = wimoai_wimo_sandbox::bwrap_reexec_for_profile(&sandbox_profile, &workspace);
+        match route_bwrap_startup(command, wimoai_wimo_sandbox::is_inside_bwrap(), requires_bwrap) {
             BwrapStartup::ReexecRequired(mut cmd) => {
                 use std::os::unix::process::CommandExt;
                 let err = cmd.exec();
@@ -1544,7 +1544,7 @@ pub fn apply_sandbox(
             }
             BwrapStartup::Verify => {
                 if requires_hook_write_deny
-                    && let Err(e) = wimo ai_wimo_sandbox::verify_hook_write_deny_enforced()
+                    && let Err(e) = wimoai_wimo_sandbox::verify_hook_write_deny_enforced()
                 {
                     eprintln!(
                         "error: sandbox reports bwrap but required hook write-deny \
@@ -1555,7 +1555,7 @@ pub fn apply_sandbox(
                 }
                 if requires_read_deny
                     && let Err(e) =
-                        wimo ai_wimo_sandbox::verify_read_deny_enforced(&sandbox_profile, &workspace)
+                        wimoai_wimo_sandbox::verify_read_deny_enforced(&sandbox_profile, &workspace)
                 {
                     eprintln!(
                         "error: sandbox reports bwrap but required read-deny mounts \
@@ -1565,7 +1565,7 @@ pub fn apply_sandbox(
                     std::process::exit(1);
                 }
                 if requires_data_write_deny
-                    && let Err(e) = wimo ai_wimo_sandbox::verify_data_write_deny_enforced(
+                    && let Err(e) = wimoai_wimo_sandbox::verify_data_write_deny_enforced(
                         &sandbox_profile,
                         &workspace,
                     )
@@ -1588,15 +1588,15 @@ pub fn apply_sandbox(
             BwrapStartup::Continue => {}
         }
     }
-    if sandbox_profile != wimo ai_wimo_sandbox::ProfileName::Off {
+    if sandbox_profile != wimoai_wimo_sandbox::ProfileName::Off {
         #[cfg(any(target_os = "linux", target_os = "macos"))]
         let requires_protection = {
-            let is_custom = matches!(sandbox_profile, wimo ai_wimo_sandbox::ProfileName::Custom(_));
+            let is_custom = matches!(sandbox_profile, wimoai_wimo_sandbox::ProfileName::Custom(_));
             let needs_hooks =
-                wimo ai_wimo_sandbox::requires_hook_write_deny(&sandbox_profile, &workspace);
+                wimoai_wimo_sandbox::requires_hook_write_deny(&sandbox_profile, &workspace);
             is_custom || needs_hooks
         };
-        let mut sandbox = wimo ai_wimo_sandbox::SandboxManager::new(sandbox_profile, &workspace);
+        let mut sandbox = wimoai_wimo_sandbox::SandboxManager::new(sandbox_profile, &workspace);
         if let Err(e) = sandbox.apply(&workspace) {
             eprintln!("warning: sandbox could not be applied: {e}");
         }
@@ -1614,8 +1614,8 @@ pub fn apply_sandbox(
             }
             #[cfg(target_os = "linux")]
             if requires_hook_write_deny
-                && wimo ai_wimo_sandbox::is_inside_bwrap()
-                && let Err(e) = wimo ai_wimo_sandbox::verify_hook_write_deny_enforced()
+                && wimoai_wimo_sandbox::is_inside_bwrap()
+                && let Err(e) = wimoai_wimo_sandbox::verify_hook_write_deny_enforced()
             {
                 eprintln!(
                     "error: required hook write-deny mounts not verified after apply ({e}); \
@@ -1627,7 +1627,7 @@ pub fn apply_sandbox(
         sandbox.install();
     }
 }
-pub use wimo ai_wimo_workspace::project_config::find_project_configs;
+pub use wimoai_wimo_workspace::project_config::find_project_configs;
 /// Resolve the effective `[plugins]` config for a working directory the same way a session does at reload time:
 /// global/user config ([`load_effective_config`]),
 /// plus every ancestor project `.wimo/config.toml` ([`find_project_configs`], extending `paths` and `disabled`),
@@ -1662,7 +1662,7 @@ pub(crate) fn resolve_effective_plugins_config(
     plugins_cfg.merge_claude_enabled_plugins(Some(cwd));
     plugins_cfg
 }
-pub use wimo ai_wimo_config::{deep_merge_toml, expand_env_vars_in_string, expand_env_vars_in_toml};
+pub use wimoai_wimo_config::{deep_merge_toml, expand_env_vars_in_string, expand_env_vars_in_toml};
 /// Add a plugin path to `[plugins].paths` in `~/.wimo/config.toml`.
 ///
 /// Creates the `[plugins]` section and `paths` array if they don't exist.
@@ -1924,7 +1924,7 @@ pub(crate) fn validate_hooks_path(path: &str) -> Result<(), Box<dyn std::error::
 /// Auto-enables all plugins in the repo so they are active after the next reload.
 /// Returns `(plugin_names, warnings)` for status messaging.
 pub(crate) fn post_install_plugin(repo_key: &str) -> (Vec<String>, Vec<String>) {
-    let registry = wimo ai_wimo_agent::plugins::InstallRegistry::load();
+    let registry = wimoai_wimo_agent::plugins::InstallRegistry::load();
     let Some(repo) = registry.get_repo(repo_key) else {
         return (
             vec![],

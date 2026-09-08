@@ -5,7 +5,7 @@
 //! As their own `[[test]]` target they get their own Bazel test action (serialized from the main PTY pool) and can be invoked in isolation:
 //!
 //! ```bash
-//! cargo test -p wimo ai-wimo-pager --test leader_pty_e2e -- --ignored --test-threads=1 --nocapture
+//! cargo test -p wimoai-wimo-pager --test leader_pty_e2e -- --ignored --test-threads=1 --nocapture
 //! ```
 //!
 //! Binary resolution and harness setup are identical to `pty_e2e` (see that target's `mod.rs`).

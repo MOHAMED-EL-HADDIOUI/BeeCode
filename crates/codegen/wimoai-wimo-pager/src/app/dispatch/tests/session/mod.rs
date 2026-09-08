@@ -9,8 +9,8 @@ mod load;
 mod modal;
 mod take_deferred;
 
-fn content_hit(id: &str) -> wimo ai_wimo_shell::extensions::session_search::SearchSessionHit {
-    wimo ai_wimo_shell::extensions::session_search::SearchSessionHit {
+fn content_hit(id: &str) -> wimoai_wimo_shell::extensions::session_search::SearchSessionHit {
+    wimoai_wimo_shell::extensions::session_search::SearchSessionHit {
         session_id: id.into(),
         summary: id.into(),
         cwd: "/repo".into(),

@@ -4,8 +4,8 @@ use super::{
 };
 use crate::tools::todo::TodoStatus;
 use std::collections::HashMap;
-use wimo ai_wimo_tools::types::template_renderer::TemplateRenderer;
-use wimo ai_wimo_tools::types::tool::ToolKind;
+use wimoai_wimo_tools::types::template_renderer::TemplateRenderer;
+use wimoai_wimo_tools::types::tool::ToolKind;
 
 // ── TodoGate pure-function tests ──────────────────────────────────
 //

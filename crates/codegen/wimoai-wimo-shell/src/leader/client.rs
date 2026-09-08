@@ -658,7 +658,7 @@ mod tests {
             FakeLeaderBehavior::Normal {
                 versions: FakeVersions {
                     protocol_version: Some(999),
-                    binary_version: Some(wimo ai_wimo_version::VERSION.to_string()),
+                    binary_version: Some(wimoai_wimo_version::VERSION.to_string()),
                 },
                 caps: fake_caps(true, false),
             },

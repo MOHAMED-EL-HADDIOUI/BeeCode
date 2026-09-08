@@ -6,7 +6,7 @@ use parking_lot::RwLock;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration as StdDuration;
-use wimo ai_wimo_auth::bearer_suffix;
+use wimoai_wimo_auth::bearer_suffix;
 
 use tokio_util::sync::CancellationToken;
 
@@ -31,7 +31,7 @@ use crate::auth::backend::{ActiveAuthBackend, AuthBackend};
 use crate::auth::config::wimoComConfig;
 use crate::auth::error::AuthError;
 use crate::auth::token_type::TokenType;
-use wimo ai_wimo_telemetry::events::ManualAuthSurface;
+use wimoai_wimo_telemetry::events::ManualAuthSurface;
 
 #[cfg(test)]
 use super::model::UserInfo;
@@ -227,7 +227,7 @@ pub struct AuthManager {
     power_listener_started: std::sync::atomic::AtomicBool,
     /// Keeps the OS power listener alive for this manager's lifetime; dropping it stops the listener.
     /// `None` until started (or if unavailable).
-    power_listener: parking_lot::Mutex<Option<wimo ai_system_power::SystemPowerListener>>,
+    power_listener: parking_lot::Mutex<Option<wimoai_system_power::SystemPowerListener>>,
     /// Per-process `manual_auth` KPI debounce, shared by all recoveries on this manager.
     /// Repeated 401s on the most-recent dead credential emit once.
     manual_auth: crate::auth::recovery::ManualAuthTracker,
@@ -312,7 +312,7 @@ impl AuthManager {
         let proxy_base_url =
             crate::agent::config::EndpointsConfig::from_effective_config().proxy_url();
 
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "AuthManager::new",
             None,
             Some(serde_json::json!({
@@ -384,7 +384,7 @@ impl AuthManager {
                 (None, detail, state)
             }
         };
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "AuthManager::new auth.json load result",
             None,
             Some(auth_read_detail),
@@ -536,7 +536,7 @@ impl AuthManager {
         };
         // Intentional removal must be attributable from unified.jsonl
         // Downstream, a deliberately deleted auth.json is indistinguishable from accidental loss (corruption, external deletion)
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth: scope removed from auth.json",
             None,
             Some(serde_json::json!({
@@ -636,7 +636,7 @@ impl AuthManager {
         );
         let retain = in_mem.as_ref().is_some_and(|a| a.refresh_token.is_some()) && !sticky_verdict;
         if let Some(a) = in_mem.filter(|_| retain) {
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth: disk anomaly, retaining in-memory credentials",
                 None,
                 Some(serde_json::json!({
@@ -660,7 +660,7 @@ impl AuthManager {
     /// Permanent discard after a live IdP rejection uses [`clear_inner`] alone so the sticky short-circuit survives until login.
     fn drop_in_memory_credentials(&self, reason: &str) {
         if let Some(d) = self.current_or_expired() {
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "auth: in-memory credentials dropped (disk reload found none)",
                 None,
                 Some(serde_json::json!({
@@ -706,7 +706,7 @@ impl AuthManager {
         }
         // The pin reads an wimo AI-issued claim, and a token minted elsewhere has none.
         // The failure path clears the scope, so an unguarded check deletes the credential every launch.
-        if !ActiveAuthBackend::default().is_wimo ai_authority() {
+        if !ActiveAuthBackend::default().is_wimoai_authority() {
             return None;
         }
         let policy = crate::auth::oidc::login_principal_policy(&self.wimo_com_config)?;
@@ -725,7 +725,7 @@ impl AuthManager {
             AuthError::ApiKeyAuthDisabled => "api_key_disabled",
             _ => "login_policy",
         };
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth: cached session rejected by login policy; clearing",
             None,
             Some(serde_json::json!({ "policy": policy, "reason": error.to_string() })),
@@ -886,7 +886,7 @@ impl AuthManager {
             Err(e) => {
                 // Non-recoverable error (PermissionDenied, etc.); keep conservative
                 tracing::warn!(error = %e, "auth: read failed, updating in-memory only");
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "auth update skipped disk write (read failed)",
                     None,
                     Some(serde_json::json!({ "error": e.to_string() })),
@@ -903,7 +903,7 @@ impl AuthManager {
         let write_result = write_auth_json(&self.path, &map);
         let elapsed_ms = update_started.elapsed().as_millis() as u64;
         match &write_result {
-            Ok(()) => wimo ai_wimo_telemetry::unified_log::info(
+            Ok(()) => wimoai_wimo_telemetry::unified_log::info(
                 "auth update disk written",
                 None,
                 Some(serde_json::json!({
@@ -912,7 +912,7 @@ impl AuthManager {
                     "elapsed_ms": elapsed_ms,
                 })),
             ),
-            Err(e) => wimo ai_wimo_telemetry::unified_log::error(
+            Err(e) => wimoai_wimo_telemetry::unified_log::error(
                 "auth update disk write failed",
                 None,
                 Some(serde_json::json!({
@@ -946,7 +946,7 @@ impl AuthManager {
             Err(e) => {
                 // Non-recoverable error; keep conservative
                 tracing::warn!(error = %e, "auth: read failed, updating in-memory only (no enrichment)");
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "auth update skipped disk write (read failed, no enrichment)",
                     None,
                     Some(serde_json::json!({ "error": e.to_string() })),
@@ -961,7 +961,7 @@ impl AuthManager {
         let write_result = write_auth_json(&self.path, &map);
         let elapsed_ms = started.elapsed().as_millis() as u64;
         match &write_result {
-            Ok(()) => wimo ai_wimo_telemetry::unified_log::info(
+            Ok(()) => wimoai_wimo_telemetry::unified_log::info(
                 "auth update disk written (no enrichment)",
                 None,
                 Some(serde_json::json!({
@@ -970,7 +970,7 @@ impl AuthManager {
                     "elapsed_ms": elapsed_ms,
                 })),
             ),
-            Err(e) => wimo ai_wimo_telemetry::unified_log::error(
+            Err(e) => wimoai_wimo_telemetry::unified_log::error(
                 "auth update disk write failed (no enrichment)",
                 None,
                 Some(serde_json::json!({
@@ -990,7 +990,7 @@ impl AuthManager {
     /// `/user` lives on the wimo AI proxy, so a build pointed elsewhere would send its bearer to the wrong host.
     /// That would happen on every login and every refresh.
     fn spawn_user_info_enrichment(self: &Arc<Self>, auth: wimoAuth) {
-        if !ActiveAuthBackend::default().is_wimo ai_authority() {
+        if !ActiveAuthBackend::default().is_wimoai_authority() {
             return;
         }
         enrichment::spawn(Arc::clone(self), auth);
@@ -1128,7 +1128,7 @@ impl AuthManager {
                 decline @ (DiskTokenDecline::LaggingMemoryMint
                 | DiskTokenDecline::SameKeyAsRejected),
             ) => {
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "auth: disk token declined",
                     None,
                     Some(serde_json::json!({
@@ -1143,7 +1143,7 @@ impl AuthManager {
             Err(_) => return None,
         };
         let adopted = bearer_suffix(&refreshed.key);
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             msg,
             None,
             Some(serde_json::json!({
@@ -1309,7 +1309,7 @@ impl AuthManager {
         match new_state {
             // Recovery (or first observation in wimo_AUTH mode).
             DiskAuthState::Ok => {
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "auth disk state: entry present",
                     None,
                     Some(ctx),
@@ -1319,7 +1319,7 @@ impl AuthManager {
             DiskAuthState::FileMissing
             | DiskAuthState::EntryMissing
             | DiskAuthState::Unreadable => {
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "auth disk state: entry lost",
                     None,
                     Some(ctx),
@@ -1548,14 +1548,14 @@ impl AuthManager {
     ) -> Result<wimoAuth, AuthError> {
         // Devbox mints an wimo AI credential and clears auth.json to do it.
         // Under another authority, doing that would evict the sibling login and hand an wimo AI refresh token to a foreign host
-        if !ActiveAuthBackend::default().is_wimo ai_authority() {
+        if !ActiveAuthBackend::default().is_wimoai_authority() {
             return Err(AuthError::NotLoggedIn);
         }
         if self.wimo_com_config.blocks_automatic_oidc() {
             tracing::debug!(
                 "auth: devbox recovery skipped (preferred_method=api_key blocks automatic OIDC)"
             );
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "auth: devbox recovery skipped (preferred_method=api_key)",
                 None,
                 None,
@@ -1577,7 +1577,7 @@ impl AuthManager {
         }
 
         tracing::info!("auth: attempting devbox recovery (purge + re-mint)");
-        wimo ai_wimo_telemetry::unified_log::info("auth: devbox recovery starting", None, None);
+        wimoai_wimo_telemetry::unified_log::info("auth: devbox recovery starting", None, None);
 
         // Raw mint: the `/user` merge would block up to 10s under refresh_lock.
         let new_auth = super::devbox_login::mint_devbox_auth_raw()
@@ -1599,7 +1599,7 @@ impl AuthManager {
         // ZDR flags arrive via the background `/user` merge, off the lock.
         self.spawn_user_info_enrichment(auth.clone());
 
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "auth: devbox recovery succeeded",
             None,
             Some(serde_json::json!({
@@ -1633,7 +1633,7 @@ impl AuthManager {
             RefreshOutcome::Success(new_auth) => match self.update(*new_auth).await {
                 Ok(auth) => {
                     let new_suffix = bearer_suffix(&auth.key);
-                    wimo ai_wimo_telemetry::unified_log::info(
+                    wimoai_wimo_telemetry::unified_log::info(
                         "auth.refresh.success",
                         None,
                         Some(serde_json::json!({
@@ -1649,7 +1649,7 @@ impl AuthManager {
                 }
                 Err(e) => {
                     tracing::warn!(error = %e, "auth: failed to persist refreshed token");
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "auth.refresh.persist_failed",
                         None,
                         Some(serde_json::json!({ "error": format!("{e}") })),
@@ -1663,7 +1663,7 @@ impl AuthManager {
                 tried_refresh_token,
             } => {
                 tracing::warn!(reason = ?error.reason, "auth.refresh.permanent_failure");
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "auth.refresh.permanent_failure",
                     None,
                     Some(serde_json::json!({
@@ -1707,7 +1707,7 @@ impl AuthManager {
                     };
                     if sibling_rotated {
                         tracing::info!("auth: sibling-rotation detected; demoting to transient");
-                        wimo ai_wimo_telemetry::unified_log::info(
+                        wimoai_wimo_telemetry::unified_log::info(
                             "auth.refresh.sibling_rotation_demoted",
                             None,
                             Some(serde_json::json!({
@@ -1753,7 +1753,7 @@ impl AuthManager {
                     if clear_mem {
                         self.clear_inner();
                     }
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "auth: cleared credentials after permanent refresh failure",
                         None,
                         Some(serde_json::json!({
@@ -1770,7 +1770,7 @@ impl AuthManager {
             }
             RefreshOutcome::TransientFailure { message } => {
                 tracing::warn!(%message, "auth.refresh.transient_failure");
-                wimo ai_wimo_telemetry::unified_log::warn(
+                wimoai_wimo_telemetry::unified_log::warn(
                     "auth.refresh.transient_failure",
                     None,
                     Some(serde_json::json!({ "message": &message })),
@@ -1803,7 +1803,7 @@ impl AuthManager {
         // This path cannot replace a newer in-memory mint with an older disk token or bypass the sticky-verdict handling in the shared swap
         match self.try_use_disk_token(Some(&auth), RefreshReason::PreRequest) {
             Ok(adopted) => {
-                wimo ai_wimo_telemetry::unified_log::info(
+                wimoai_wimo_telemetry::unified_log::info(
                     "auth: pick_up_sibling_token adopted",
                     None,
                     Some(serde_json::json!({
@@ -1840,7 +1840,7 @@ impl AuthManager {
     ) {
         // Don't advertise a TTL for a sticky (never-expiring) verdict.
         let ttl_seconds = (!error.reason.is_sticky()).then(|| PERMANENT_FAILURE_TTL.as_secs());
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "auth.permanent_failure.set",
             None,
             Some(serde_json::json!({
@@ -2018,7 +2018,7 @@ impl AuthManager {
             {
                 Ok(_) => return true,
                 Err(e) if e.is_transient() && attempt + 1 < MAX_TRANSIENT_ATTEMPTS => {
-                    wimo ai_wimo_telemetry::unified_log::warn(
+                    wimoai_wimo_telemetry::unified_log::warn(
                         "auth recovery: transient failure, retrying",
                         None,
                         Some(serde_json::json!({
@@ -2052,7 +2052,7 @@ impl AuthManager {
     }
 
     #[cfg(test)]
-    pub(crate) fn manual_auth_last_emit(&self) -> Option<wimo ai_wimo_telemetry::events::ManualAuth> {
+    pub(crate) fn manual_auth_last_emit(&self) -> Option<wimoai_wimo_telemetry::events::ManualAuth> {
         self.manual_auth.last_emit_for_test()
     }
 
@@ -2157,7 +2157,7 @@ impl AuthManager {
                             "auth: proactive refresh skipped, in-memory token still valid"
                         );
                     }
-                    wimo ai_wimo_telemetry::unified_log::info(
+                    wimoai_wimo_telemetry::unified_log::info(
                         "auth: proactive refresh skipped",
                         None,
                         Some(serde_json::json!({
@@ -2175,7 +2175,7 @@ impl AuthManager {
                     Ok(auth) => {
                         consecutive_failures = 0;
                         tracing::info!("auth: proactive refresh succeeded");
-                        wimo ai_wimo_telemetry::unified_log::info(
+                        wimoai_wimo_telemetry::unified_log::info(
                             "auth: proactive refresh completed",
                             None,
                             Some(serde_json::json!({
@@ -2188,7 +2188,7 @@ impl AuthManager {
                     Err(e) => {
                         consecutive_failures = consecutive_failures.saturating_add(1);
                         tracing::warn!(error = %e, "auth: proactive refresh failed");
-                        wimo ai_wimo_telemetry::unified_log::warn(
+                        wimoai_wimo_telemetry::unified_log::warn(
                             "auth: proactive refresh completed",
                             None,
                             Some(serde_json::json!({
@@ -2291,7 +2291,7 @@ pub(crate) fn compute_proactive_sleep(this: &AuthManager) -> StdDuration {
 /// Kill-switch / `preferred_method = oidc` block static keys.
 pub(crate) struct SharedAuthKeyProvider(pub Arc<AuthManager>);
 
-impl wimo ai_wimo_tools::types::ApiKeyProvider for SharedAuthKeyProvider {
+impl wimoai_wimo_tools::types::ApiKeyProvider for SharedAuthKeyProvider {
     fn current_api_key(&self) -> Option<String> {
         if prefers_static_api_key(&self.0) {
             return resolve_static_api_key(&self.0);
@@ -2339,7 +2339,7 @@ fn resolve_static_api_key(am: &AuthManager) -> Option<String> {
     ) {
         return None;
     }
-    non_empty_key(crate::agent::auth_method::read_wimo ai_api_key_env().ok())
+    non_empty_key(crate::agent::auth_method::read_wimoai_api_key_env().ok())
         .or_else(|| non_empty_key(am.process_static_api_key.read().clone()))
         .or_else(|| am.cached_disk_api_key())
 }
@@ -2370,7 +2370,7 @@ fn auth_file_stamp(path: &Path) -> Option<AuthFileStamp> {
 }
 
 impl AuthManager {
-    /// `wimo ai::api_key` from this manager's auth file, memoized on [`AuthFileStamp`].
+    /// `wimoai::api_key` from this manager's auth file, memoized on [`AuthFileStamp`].
     /// Bearer resolution runs per tool call, so this costs a `stat` instead of a read and parse on the hot path.
     fn cached_disk_api_key(&self) -> Option<String> {
         let stamp = auth_file_stamp(&self.path);
@@ -2411,7 +2411,7 @@ fn non_empty_key(key: Option<String>) -> Option<String> {
 /// Per-request bearer for out-of-crate consumers (e.g. pager voice).
 pub fn shared_api_key_provider(
     auth_manager: Arc<AuthManager>,
-) -> wimo ai_wimo_tools::types::SharedApiKeyProvider {
+) -> wimoai_wimo_tools::types::SharedApiKeyProvider {
     Arc::new(SharedAuthKeyProvider(auth_manager))
 }
 

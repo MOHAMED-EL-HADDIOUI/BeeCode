@@ -1,5 +1,5 @@
-//! Shared utilities used by both `wimo ai-wimo-shell` and its downstream clients (e.g. `wimo ai-wimo-pager-render`).
-//! This crate sits upstream of `wimo ai-wimo-shell` so it must never depend on it.
+//! Shared utilities used by both `wimoai-wimo-shell` and its downstream clients (e.g. `wimoai-wimo-pager-render`).
+//! This crate sits upstream of `wimoai-wimo-shell` so it must never depend on it.
 
 pub mod clipboard;
 pub mod placeholder_images;

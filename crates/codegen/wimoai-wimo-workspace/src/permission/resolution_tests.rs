@@ -327,7 +327,7 @@ fn discovery_with_no_settings_files() {
 fn project_claude_absent_when_home_is_git_repo() {
     // When $HOME is itself a git repo (dotfiles), the repo-root walk from a cwd under home must not treat `~/.claude` as project-tier
     // Project-tier env is injected into every spawned subprocess
-    // Serialize and guard $HOME: find_repo_root reaches home via `.git`, and the guard reads wimo ai_dirs::home_dir()
+    // Serialize and guard $HOME: find_repo_root reaches home via `.git`, and the guard reads wimoai_dirs::home_dir()
     // Pin USERPROFILE too: home_dir() prefers it on Windows and ignores HOME
     let _lock = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let home = tempfile::tempdir().unwrap();
@@ -1016,7 +1016,7 @@ fn untrusted_project_claude_permissions_are_not_honored() {
 /// Untrusted clone must not contribute project `.wimo/config.toml` [permission].
 ///
 /// The test is sync and uses `block_on` so `ENV_LOCK` is not held across `.await` (clippy `await_holding_lock`).
-/// It does not assert exact global rule counts: `wimo ai_wimo_config::wimo_home()` is a process-wide `OnceLock`.
+/// It does not assert exact global rule counts: `wimoai_wimo_config::wimo_home()` is a process-wide `OnceLock`.
 /// Under single-process `cargo test` an earlier test may have already pinned `wimo_HOME`.
 /// Project-rule filtering is independent of that; global survival is checked only when our temp home is the live `user_wimo_home()`.
 #[test]
@@ -1084,7 +1084,7 @@ allow = ["Bash(evil *)"]
     );
 
     // Global survival is checked only when this process's OnceLock points at our temp home
-    let global_live = wimo ai_wimo_config::user_wimo_home()
+    let global_live = wimoai_wimo_config::user_wimo_home()
         .is_some_and(|g| g == home.path() || g.starts_with(home.path()));
     if global_live {
         let untrusted = untrusted.expect("global rules present when wimo_HOME is live");
@@ -2456,7 +2456,7 @@ async fn managed_config_toml_rules_resolve_as_non_admin_defaults() {
     )
     .unwrap();
 
-    let layers = wimo ai_wimo_config::managed_config_layers_at(Some(system.path()), Some(user.path()));
+    let layers = wimoai_wimo_config::managed_config_layers_at(Some(system.path()), Some(user.path()));
     assert!(layers[0].is_system && layers[0].path.starts_with(system.path()));
     assert!(!layers[1].is_system && layers[1].path.starts_with(user.path()));
     let rules = managed_config_permissions(&layers);
@@ -2472,7 +2472,7 @@ async fn managed_config_toml_rules_resolve_as_non_admin_defaults() {
     )
     .unwrap();
     assert_eq!(
-        wimo ai_wimo_config::managed_config_layers_at(Some(system.path()), Some(user.path())).len(),
+        wimoai_wimo_config::managed_config_layers_at(Some(system.path()), Some(user.path())).len(),
         1
     );
 

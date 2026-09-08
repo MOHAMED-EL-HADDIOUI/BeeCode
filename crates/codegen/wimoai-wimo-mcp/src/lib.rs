@@ -3,13 +3,13 @@
 //! 1. **Quarantines `rmcp` 2.1 and `reqwest` 0.13.** `rmcp` 2.1 requires
 //!    `reqwest >= 0.13.2`. The rest of the workspace consumes `reqwest` 0.12
 //!    and a transitive ecosystem (`opentelemetry-otlp`, `oauth2`,
-//!    `wimo ai-mixpanel`, `wimo ai-wimo-tools`, ...) also pinned to 0.12. Bumping every
+//!    `wimoai-mixpanel`, `wimoai-wimo-tools`, ...) also pinned to 0.12. Bumping every
 //!    crate to 0.13 to satisfy `rmcp` triggers a cascade — an OpenTelemetry
 //!    `HttpClient` adapter and cross-version test breakage when a crate
 //!    carries both versions under a renamed `package = "reqwest"` alias.
 //!    reqwest 0.13 is now a fully private impl detail of [`servers`]; no
 //!    re-export. Consumers reach `rmcp` model types through this namespace
-//!    (`wimo ai_wimo_mcp::rmcp::*`).
+//!    (`wimoai_wimo_mcp::rmcp::*`).
 //!
 //! 2. **Owns MCP-specific integration code**:
 //!    - [`credentials`]: on-disk `$wimo_HOME/mcp_credentials.json` store and the rmcp `CredentialStore` adapter.
@@ -30,7 +30,7 @@ pub fn isolate_wimo_home_for_tests() {
         let dir = tempfile::TempDir::new().expect("test wimo home").keep();
         // SAFETY: OnceLock-guarded single set; the concurrent env-read race is accepted in tests.
         unsafe { std::env::set_var("wimo_HOME", &dir) };
-        let memo = wimo ai_wimo_config::wimo_home();
+        let memo = wimoai_wimo_config::wimo_home();
         assert!(
             memo.starts_with(&dir),
             "wimo-home memo was warmed before test isolation: {}",

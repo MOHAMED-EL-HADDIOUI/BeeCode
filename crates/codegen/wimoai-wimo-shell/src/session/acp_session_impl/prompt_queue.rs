@@ -1,5 +1,5 @@
 use super::*;
-use wimo ai_agent_lifecycle::ShutdownPolicy;
+use wimoai_agent_lifecycle::ShutdownPolicy;
 
 /// Outcome of a queue send-now request ([`SessionActor::handle_interject_queued_prompt`]).
 /// `mutated` reports whether the request changed anything (promoted, steered, or saved an edit).
@@ -31,7 +31,7 @@ pub(crate) struct QueueInputRequest {
     pub(crate) json_schema: Option<serde_json::Value>,
     pub(crate) send_now: bool,
     pub(crate) task_wake_fallback: Option<TaskWakeFallback>,
-    pub(crate) tool_overrides_update: Option<wimo ai_wimo_sampling_types::ToolOverridesUpdate>,
+    pub(crate) tool_overrides_update: Option<wimoai_wimo_sampling_types::ToolOverridesUpdate>,
     pub(crate) respond_to: oneshot::Sender<PromptTurnResult>,
     pub(crate) persist_ack: Option<oneshot::Sender<()>>,
     pub(crate) parsed_prompt_tx: Option<oneshot::Sender<ParsedPromptInfo>>,
@@ -134,7 +134,7 @@ impl SessionActor {
         } = request;
         tracing::info!("queueing prompt: {prompt_id}");
         let queue_depth = { self.state.lock().await.pending_inputs.len() };
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "shell.prompt.queued",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({
@@ -363,7 +363,7 @@ impl SessionActor {
             "server appended prompt to pending_inputs",
         );
         if send_now && turn_running {
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "shell.prompt.send_now_decision",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -868,7 +868,7 @@ impl SessionActor {
                 cancel_running_turn = cancel_decision;
                 tracing::info!(queued_id = %id, cancel_running_turn, "send-now: promoted queued prompt to run next");
             }
-            wimo ai_wimo_telemetry::unified_log::info(
+            wimoai_wimo_telemetry::unified_log::info(
                 "shell.prompt.send_now_decision",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -1080,7 +1080,7 @@ impl SessionActor {
         if !self.state.lock().await.take_hook_block_hold() {
             return;
         }
-        wimo ai_wimo_telemetry::unified_log::info(
+        wimoai_wimo_telemetry::unified_log::info(
             "shell.prompt.hook_block_hold_released",
             Some(self.session_info.id.0.as_ref()),
             Some(serde_json::json!({ "reason": reason })),
@@ -1101,14 +1101,14 @@ impl SessionActor {
             .any(|item| item.is_queue_protected() && item.has_queue_id(id))
     }
 
-    /// Merge consecutive plain prompts into `pending[0]` via [`wimo ai_prompt_queue::combine_prefix_len`].
+    /// Merge consecutive plain prompts into `pending[0]` via [`wimoai_prompt_queue::combine_prefix_len`].
     /// `skip_ids` holds rows under composer edit.
     /// Merged-away items complete as [`PromptCompletionKind::RemovedFromQueue`].
     pub(super) fn combine_front_pending_inputs(
         pending: &mut std::collections::VecDeque<InputItem>,
         skip_ids: &[&str],
     ) {
-        use wimo ai_prompt_queue::{CombineGate, combine_prefix_len};
+        use wimoai_prompt_queue::{CombineGate, combine_prefix_len};
 
         if pending.len() < 2 {
             return;
@@ -1133,7 +1133,7 @@ impl SessionActor {
         }
     }
 
-    fn combine_gate(item: &InputItem) -> wimo ai_prompt_queue::CombineGate<'_> {
+    fn combine_gate(item: &InputItem) -> wimoai_prompt_queue::CombineGate<'_> {
         let is_bash = Self::extract_bash_command(&item.prompt_blocks).is_some();
         let is_plain_prompt = item.is_queue_editable()
             && item.queue_meta.as_ref().map(|m| m.kind.as_str()) == Some("prompt")
@@ -1162,7 +1162,7 @@ impl SessionActor {
             .as_ref()
             .map(|m| m.text.as_str())
             .unwrap_or("");
-        wimo ai_prompt_queue::CombineGate {
+        wimoai_prompt_queue::CombineGate {
             id: item.prompt_id.as_str(),
             // A row with its own override can't merge into another turn (the merge would drop its override)
             is_plain_prompt: is_plain_prompt
@@ -1197,7 +1197,7 @@ impl SessionActor {
     }
 
     fn joined_text_blocks(blocks: &[acp::ContentBlock]) -> String {
-        use wimo ai_prompt_queue::join_texts;
+        use wimoai_prompt_queue::join_texts;
         join_texts(blocks.iter().filter_map(|block| match block {
             acp::ContentBlock::Text(t) if !t.text.is_empty() => Some(t.text.as_str()),
             _ => None,
@@ -1205,7 +1205,7 @@ impl SessionActor {
     }
 
     fn append_text_to_prompt(item: &mut InputItem, extra: &str) {
-        use wimo ai_prompt_queue::TEXT_SEPARATOR;
+        use wimoai_prompt_queue::TEXT_SEPARATOR;
 
         if extra.is_empty() {
             return;
@@ -1237,7 +1237,7 @@ impl SessionActor {
     }
 
     fn stamp_combined_display_texts_meta(item: &mut InputItem) {
-        use wimo ai_prompt_queue::stamp_combined_display_texts;
+        use wimoai_prompt_queue::stamp_combined_display_texts;
 
         let Some(segs) = item
             .queue_meta

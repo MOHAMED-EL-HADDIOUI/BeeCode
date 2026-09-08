@@ -164,7 +164,7 @@
         ));
 
         let affected = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-view", "pid-driver", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-view", "pid-driver", "end_turn", false),
             &mut app,
         );
         assert!(affected, "finalizing the active viewer turn should redraw");
@@ -182,7 +182,7 @@
         // A duplicate/stale terminal for the now-finished turn is a no-op.
         let len_before = app.agents.get(&AgentId(0)).unwrap().scrollback.len();
         let affected = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-view", "pid-driver", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-view", "pid-driver", "end_turn", false),
             &mut app,
         );
         assert!(!affected, "a duplicate TurnCompleted must be a no-op");
@@ -206,7 +206,7 @@
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_failed_with_error_kind(
+            &wimoai_turn_completed_failed_with_error_kind(
                 "sess-view",
                 "pid-driver",
                 "a future failure quoting: response truncated by max_tokens",
@@ -238,7 +238,7 @@
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_failed_with_error_kind(
+            &wimoai_turn_completed_failed_with_error_kind(
                 "sess-view",
                 "pid-driver",
                 "turn ended early",
@@ -270,7 +270,7 @@
         }
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-drive", "pid-local", "cancelled", false),
+            &wimoai_turn_completed_notif("sess-drive", "pid-local", "cancelled", false),
             &mut app,
         );
 
@@ -294,7 +294,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let affected = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif(
+            &wimoai_wake_turn_completed_notif(
                 "sess-wake",
                 "task-completed-bg1",
                 Some(1_700_000_000_000 + 5_000),
@@ -332,7 +332,7 @@
         assert_eq!(count_turn_markers(&app.agents[&AgentId(0)]), 0);
 
         let affected = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
             &mut app,
         );
         assert!(affected);
@@ -360,13 +360,13 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
             &mut app,
         );
         assert_eq!(count_turn_markers(&app.agents[&AgentId(0)]), 1);
 
         let _ = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
             &mut app,
         );
         assert_eq!(
@@ -412,7 +412,7 @@
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
             &mut app,
         );
         let agent = app.agents.get(&AgentId(0)).unwrap();
@@ -437,7 +437,7 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg2", None),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg2", None),
             &mut app,
         );
         let _ = handle(
@@ -466,7 +466,7 @@
             .enqueue_prompt("follow-up after wake".into());
 
         let _ = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
             &mut app,
         );
         assert!(
@@ -499,7 +499,7 @@
         app.reconnect_pending = true;
 
         let _ = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
             &mut app,
         );
         assert!(
@@ -530,7 +530,7 @@
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
             &mut app,
         );
         assert!(
@@ -553,7 +553,7 @@
         let started_at = app.agents[&AgentId(0)].turn_started_at;
 
         let affected = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-wake",
                 "task-completed-bg1",
                 "end_turn",
@@ -587,7 +587,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let affected = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-cron", "scheduler-fired-abc", Some(1_000)),
+            &wimoai_wake_turn_completed_notif("sess-cron", "scheduler-fired-abc", Some(1_000)),
             &mut app,
         );
 
@@ -606,7 +606,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
             &mut app,
         );
 
@@ -623,7 +623,7 @@
         let mut app = make_app_with_agent("sess-wake");
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_failed_with_error_kind(
+            &wimoai_turn_completed_failed_with_error_kind(
                 "sess-wake",
                 "task-completed-bg1",
                 "turn ended early",
@@ -651,7 +651,7 @@
         app.agents.get_mut(&AgentId(0)).unwrap().session.state = AgentState::TurnRunning;
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_failed_with_error_kind(
+            &wimoai_turn_completed_failed_with_error_kind(
                 "sess-wake",
                 "task-completed-bg1",
                 "turn ended early",
@@ -683,7 +683,7 @@
                                subscription for higher limits: https://wimo.com/superwimo";
         let payload = SessionNotification {
             session_id: acp::SessionId::new("sess-wake"),
-            update: wimo aiSessionUpdate::TurnCompleted {
+            update: wimoaiSessionUpdate::TurnCompleted {
                 prompt_id: "task-completed-bg1".into(),
                 stop_reason: "rate_limit".into(),
                 agent_result: Some(rate_limit_copy.into()),
@@ -729,7 +729,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
             &mut app,
         );
 
@@ -768,7 +768,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
             &mut app,
         );
 
@@ -792,7 +792,7 @@
             Some(chrono::Utc::now().timestamp_millis() - 600_000);
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
             &mut app,
         );
 
@@ -814,13 +814,13 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "goal-summary-g1", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-wake", "goal-summary-g1", "end_turn", false),
             &mut app,
         );
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "end_turn", false),
             &mut app,
         );
 
@@ -844,7 +844,7 @@
 
         for _ in 0..2 {
             let _ = handle_ext_notification(
-                &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
+                &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
                 &mut app,
             );
         }
@@ -874,14 +874,14 @@
             started_at: std::time::Instant::now(),
         };
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "end_turn", false),
             &mut app,
         );
         app.agents.get_mut(&AgentId(0)).unwrap().session.state = AgentState::Idle;
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg2", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg2", "end_turn", false),
             &mut app,
         );
 
@@ -904,7 +904,7 @@
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg2", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg2", "end_turn", false),
             &mut app,
         );
 
@@ -923,12 +923,12 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "goal-summary-g1", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-wake", "goal-summary-g1", "end_turn", false),
             &mut app,
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
             &mut app,
         );
 
@@ -947,7 +947,7 @@
 
         for _ in 0..2 {
             let _ = handle_ext_notification(
-                &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
+                &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
                 &mut app,
             );
         }
@@ -967,7 +967,7 @@
 
         for stop_reason in ["cancelled", "rate_limit"] {
             let _ = handle_ext_notification(
-                &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", stop_reason, false),
+                &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", stop_reason, false),
                 &mut app,
             );
         }
@@ -992,7 +992,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif_with_cancel_trigger(
+            &wimoai_turn_completed_notif_with_cancel_trigger(
                 "sess-wake",
                 "task-completed-bg1",
                 "cancelled",
@@ -1027,7 +1027,7 @@
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "cancelled", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "cancelled", false),
             &mut app,
         );
 
@@ -1052,7 +1052,7 @@
             .expect_send_now_cancel = Some("user-prompt-other".into());
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "cancelled", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "cancelled", false),
             &mut app,
         );
 
@@ -1077,7 +1077,7 @@
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "rate_limit", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "rate_limit", false),
             &mut app,
         );
 
@@ -1097,7 +1097,7 @@
         );
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "error", false),
             &mut app,
         );
 
@@ -1115,7 +1115,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "cancelled", false),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "cancelled", false),
             &mut app,
         );
 
@@ -1149,7 +1149,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let affected = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", Some(6_000)),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", Some(6_000)),
             &mut app,
         );
 
@@ -1189,7 +1189,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let _ = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
+            &wimoai_wake_turn_completed_notif("sess-wake", "task-completed-bg1", None),
             &mut app,
         );
 
@@ -1218,7 +1218,7 @@
         let len_before = app.agents[&AgentId(0)].scrollback.len();
 
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif("sess-stop", "stop", false),
+            &wimoai_hook_execution_notif("sess-stop", "stop", false),
             &mut app,
         );
 
@@ -1248,7 +1248,7 @@
             .loading_replay = true;
 
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif("sess-replay", "stop", true),
+            &wimoai_hook_execution_notif("sess-replay", "stop", true),
             &mut app,
         );
 
@@ -1266,7 +1266,7 @@
     #[test]
     fn blocked_wire_flag_maps_to_blocked_status() {
         use crate::scrollback::blocks::tool::HookRunStatus;
-        use wimo ai_wimo_shell::extensions::notification::{HookRunEntryDto, HookRunStatusDto};
+        use wimoai_wimo_shell::extensions::notification::{HookRunEntryDto, HookRunStatusDto};
 
         let mut app = make_app_with_agent("sess-blocked");
         {
@@ -1276,7 +1276,7 @@
         }
 
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_with_runs(
+            &wimoai_hook_execution_notif_with_runs(
                 "sess-blocked",
                 "stop",
                 Some("pid-1"),
@@ -1336,7 +1336,7 @@
         }
 
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt("sess-foreign", "stop", Some("pid-old"), false),
+            &wimoai_hook_execution_notif_for_prompt("sess-foreign", "stop", Some("pid-old"), false),
             &mut app,
         );
 
@@ -1349,7 +1349,7 @@
 
         // The running turn's own batch (matching wire pid) still stashes.
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt("sess-foreign", "stop", Some("pid-new"), false),
+            &wimoai_hook_execution_notif_for_prompt("sess-foreign", "stop", Some("pid-new"), false),
             &mut app,
         );
         let agent = app.agents.get(&AgentId(0)).unwrap();
@@ -1376,13 +1376,13 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-idle-foreign", "pid-new", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-idle-foreign", "pid-new", "end_turn", false),
             &mut app,
         );
 
         // The marker's own batch (matching pid) merges…
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt(
+            &wimoai_hook_execution_notif_for_prompt(
                 "sess-idle-foreign",
                 "stop",
                 Some("pid-new"),
@@ -1400,7 +1400,7 @@
 
         // …a foreign-pid batch is refused even with a fresh event name.
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt(
+            &wimoai_hook_execution_notif_for_prompt(
                 "sess-idle-foreign",
                 "stop_failure",
                 Some("pid-old"),
@@ -1434,8 +1434,8 @@
                 &mut app,
             );
             let terminal =
-                wimo ai_turn_completed_notif("sess-cancelled-hooks", "pid-c", "cancelled", false);
-            let batch = wimo ai_hook_execution_notif_for_prompt(
+                wimoai_turn_completed_notif("sess-cancelled-hooks", "pid-c", "cancelled", false);
+            let batch = wimoai_hook_execution_notif_for_prompt(
                 "sess-cancelled-hooks",
                 "stop_cancelled",
                 Some("pid-c"),
@@ -1471,7 +1471,7 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-interleaved", "pid-new", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-interleaved", "pid-new", "end_turn", false),
             &mut app,
         );
         app.agents
@@ -1487,7 +1487,7 @@
             ));
 
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt(
+            &wimoai_hook_execution_notif_for_prompt(
                 "sess-interleaved",
                 "stop",
                 Some("pid-new"),
@@ -1516,11 +1516,11 @@
             agent.session.current_prompt_id = Some("pid-1".into());
         }
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif("sess-stash-dup", "stop", false),
+            &wimoai_hook_execution_notif("sess-stash-dup", "stop", false),
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif("sess-stash-dup", "stop", false),
+            &wimoai_hook_execution_notif("sess-stash-dup", "stop", false),
             &mut app,
         );
 
@@ -1548,7 +1548,7 @@
             agent.session.current_prompt_id = None;
         }
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt("sess-wire-key", "stop", Some("pid-a"), false),
+            &wimoai_hook_execution_notif_for_prompt("sess-wire-key", "stop", Some("pid-a"), false),
             &mut app,
         );
 
@@ -1562,7 +1562,7 @@
         // The session-end Stop batch fires with no turn running and no fresh marker in the tail: legacy standalone block
         let mut app = make_app_with_agent("sess-end");
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif("sess-end", "stop", false),
+            &wimoai_hook_execution_notif("sess-end", "stop", false),
             &mut app,
         );
 
@@ -1581,7 +1581,7 @@
             agent.session.current_prompt_id = Some("pid-1".into());
         }
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif("sess-ls", "session_start", false),
+            &wimoai_hook_execution_notif("sess-ls", "session_start", false),
             &mut app,
         );
 
@@ -1744,7 +1744,7 @@
         app.agents.get_mut(&id).unwrap().session.loading_replay = true;
 
         let affected = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-1", "p-run", "end_turn", true),
+            &wimoai_turn_completed_notif("sess-1", "p-run", "end_turn", true),
             &mut app,
         );
         assert!(
@@ -1801,7 +1801,7 @@
         assert!(!is_matched_agent_active(&app, id));
 
         let affected = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-bg", "pid-bg", "cancelled", false),
+            &wimoai_turn_completed_notif("sess-bg", "pid-bg", "cancelled", false),
             &mut app,
         );
         assert!(
@@ -1833,7 +1833,7 @@
             agent.unexpected_replay_drops = 3;
         }
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-1", "p-first", "end_turn", true),
+            &wimoai_turn_completed_notif("sess-1", "p-first", "end_turn", true),
             &mut app,
         );
         assert!(
@@ -1877,7 +1877,7 @@
 
         // Hook beats the wake terminal.
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt(
+            &wimoai_hook_execution_notif_for_prompt(
                 "sess-wake-idle",
                 "stop",
                 Some("notifications-019f-abc"),
@@ -1895,11 +1895,11 @@
 
         // Hook trails the wake terminal: same standalone shape
         let _ = handle_ext_notification(
-            &wimo ai_wake_turn_completed_notif("sess-wake-idle", "task-completed-bg1", None),
+            &wimoai_wake_turn_completed_notif("sess-wake-idle", "task-completed-bg1", None),
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt(
+            &wimoai_hook_execution_notif_for_prompt(
                 "sess-wake-idle",
                 "stop",
                 Some("task-completed-bg1"),
@@ -1922,7 +1922,7 @@
         }
 
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt(
+            &wimoai_hook_execution_notif_for_prompt(
                 "sess-wake-local",
                 "stop",
                 Some("task-completed-bg1"),
@@ -1956,7 +1956,7 @@
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "end_turn",
@@ -1983,7 +1983,7 @@
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-1", "p1", "end_turn", true),
+            &wimoai_turn_completed_notif("sess-1", "p1", "end_turn", true),
             &mut app,
         );
         let agent = app.agents.get(&AgentId(0)).unwrap();
@@ -2000,7 +2000,7 @@
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "cancelled",
@@ -2022,7 +2022,7 @@
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "cancelled",
@@ -2044,7 +2044,7 @@
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "error",
@@ -2066,7 +2066,7 @@
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_failed_with_error_kind(
+            &wimoai_turn_completed_failed_with_error_kind(
                 "sess-1",
                 "p1",
                 "turn ended early",
@@ -2100,7 +2100,7 @@
         begin_replay(&mut app);
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "error",
@@ -2121,7 +2121,7 @@
         begin_replay(&mut app);
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "rate_limit",
@@ -2147,7 +2147,7 @@
         );
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-wake",
                 "task-completed-bg1",
                 "rate_limit",
@@ -2176,7 +2176,7 @@
         begin_replay(&mut app);
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "rate_limit", true),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "rate_limit", true),
             &mut app,
         );
         let agent = app.agents.get(&AgentId(0)).unwrap();
@@ -2191,7 +2191,7 @@
         begin_replay(&mut app);
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "cancelled",
@@ -2211,7 +2211,7 @@
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "brand_new_token",
@@ -2233,7 +2233,7 @@
     fn replay_duplicate_pid_one_marker() {
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
-        let n = wimo ai_turn_completed_replay(
+        let n = wimoai_turn_completed_replay(
             "sess-1",
             "p1",
             "end_turn",
@@ -2255,7 +2255,7 @@
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "end_turn",
@@ -2266,7 +2266,7 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p2",
                 "end_turn",
@@ -2291,7 +2291,7 @@
         begin_replay(&mut app);
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-wake", "task-completed-bg1", "end_turn", true),
+            &wimoai_turn_completed_notif("sess-wake", "task-completed-bg1", "end_turn", true),
             &mut app,
         );
         let agent = app.agents.get(&AgentId(0)).unwrap();
@@ -2304,11 +2304,11 @@
         let mut app = make_app_with_agent("sess-1");
         begin_replay(&mut app);
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt("sess-1", "stop", Some("p1"), true),
+            &wimoai_hook_execution_notif_for_prompt("sess-1", "stop", Some("p1"), true),
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p1",
                 "end_turn",
@@ -2319,7 +2319,7 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_hook_execution_notif_for_prompt("sess-1", "stop", Some("p1"), true),
+            &wimoai_hook_execution_notif_for_prompt("sess-1", "stop", Some("p1"), true),
             &mut app,
         );
         let agent = app.agents.get(&AgentId(0)).unwrap();
@@ -2338,7 +2338,7 @@
         send_replay_suppressed_tool_call(&mut app, "sess-wake", "task-completed-bg1");
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-wake",
                 "task-completed-bg1",
                 "end_turn",
@@ -2363,7 +2363,7 @@
         begin_replay(&mut app);
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "goal-summary-g1",
                 "error",
@@ -2385,7 +2385,7 @@
         send_replay_bash_tool_call(&mut app, "sess-1", "p-bash");
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p-bash",
                 "end_turn",
@@ -2412,7 +2412,7 @@
         send_replay_bash_tool_call(&mut app, "sess-1", "p-bash");
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p-bash",
                 "cancelled",
@@ -2443,7 +2443,7 @@
         send_replay_bash_tool_call(&mut app, "sess-1", "p-bash");
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "p-bash",
                 "error",
@@ -2473,7 +2473,7 @@
         begin_replay(&mut app);
         let len_before = app.agents[&AgentId(0)].scrollback.len();
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_replay(
+            &wimoai_turn_completed_replay(
                 "sess-1",
                 "",
                 "end_turn",
@@ -2489,14 +2489,14 @@
     }
 
     /// Builds a live `LastTurnSummary` notification.
-    fn wimo ai_last_turn_summary_notif(
+    fn wimoai_last_turn_summary_notif(
         session_id: &str,
         summary: &str,
         prompt_id: Option<&str>,
     ) -> acp::ExtNotification {
         let payload = SessionNotification {
             session_id: acp::SessionId::new(session_id),
-            update: wimo aiSessionUpdate::LastTurnSummary {
+            update: wimoaiSessionUpdate::LastTurnSummary {
                 summary: summary.into(),
                 prompt_id: prompt_id.map(String::from),
             },
@@ -2522,11 +2522,11 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-lts", "pid-a", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-lts", "pid-a", "end_turn", false),
             &mut app,
         );
         let affected = handle_ext_notification(
-            &wimo ai_last_turn_summary_notif("sess-lts", "Did the thing", Some("pid-a")),
+            &wimoai_last_turn_summary_notif("sess-lts", "Did the thing", Some("pid-a")),
             &mut app,
         );
         assert!(affected);
@@ -2541,7 +2541,7 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-lts", "pid-b", "cancelled", false),
+            &wimoai_turn_completed_notif("sess-lts", "pid-b", "cancelled", false),
             &mut app,
         );
         assert!(app.agents.get(&AgentId(0)).unwrap().session.state.is_idle());
@@ -2557,11 +2557,11 @@
             &mut app,
         );
         let _ = handle_ext_notification(
-            &wimo ai_turn_completed_notif("sess-lts", "pid-c", "end_turn", false),
+            &wimoai_turn_completed_notif("sess-lts", "pid-c", "end_turn", false),
             &mut app,
         );
         let affected = handle_ext_notification(
-            &wimo ai_last_turn_summary_notif("sess-lts", "Did the next thing", Some("pid-c")),
+            &wimoai_last_turn_summary_notif("sess-lts", "Did the next thing", Some("pid-c")),
             &mut app,
         );
         assert!(affected);

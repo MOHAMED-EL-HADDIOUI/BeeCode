@@ -484,7 +484,7 @@ impl ActionRegistry {
     }
 }
 
-/// Emit [`wimo ai_wimo_telemetry::events::ShortcutUsed`] for an allowlisted binding.
+/// Emit [`wimoai_wimo_telemetry::events::ShortcutUsed`] for an allowlisted binding.
 ///
 /// See that event's docs for the product contract (intent-only allowlist).
 /// `context` is a free-form label for where the key was pressed (`When::telemetry_name()` or e.g. `"queue"` when focus is not a registry `When`).
@@ -493,7 +493,7 @@ pub fn log_shortcut_used(key: &KeyEvent, action_id: ActionId, context: &str) {
     let Some(action) = shortcut_used_action_label(action_id) else {
         return;
     };
-    wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::ShortcutUsed {
+    wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::ShortcutUsed {
         key: KeyShortcut::from(*key).display_telemetry(),
         action: action.to_string(),
         context: context.to_string(),

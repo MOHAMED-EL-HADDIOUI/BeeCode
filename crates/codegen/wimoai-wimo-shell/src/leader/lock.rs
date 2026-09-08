@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use fs2::FileExt;
-use wimo ai_wimo_workspace::util::is_lock_contended;
+use wimoai_wimo_workspace::util::is_lock_contended;
 
 use crate::util::wimo_home::wimo_home;
 

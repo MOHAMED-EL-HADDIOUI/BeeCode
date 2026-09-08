@@ -33,7 +33,7 @@ pub(crate) use auth_provider::{test_backdate_provider_mint, test_counting_provid
 pub(crate) use config::LEGACY_AUTH_SCOPE;
 pub use config::{
     ForceLoginTeam, wimoComConfig, OAuth2ProviderConfig, OidcAuthConfig, PreferredAuthMethod,
-    wimo ai_OAUTH2_ISSUER, is_wimo ai_oauth2_issuer, wimo ai_oauth2_issuer,
+    wimoai_OAUTH2_ISSUER, is_wimoai_oauth2_issuer, wimoai_oauth2_issuer,
 };
 pub(crate) use config::{
     force_login_team_from_env, force_login_team_from_requirements, resolve_force_login_team,

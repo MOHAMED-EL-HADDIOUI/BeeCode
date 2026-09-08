@@ -73,8 +73,8 @@ pub(super) fn map_transport_failure(failure: crate::http::TransportFailure) -> M
         TransportFailureKind::CertificateUntrusted => {
             ManagedConfigError::CertificateUntrusted(policy::certificate_detail(
                 failure.detail,
-                wimo ai_wimo_extra_ca::configured_bundle_env(),
-                wimo ai_wimo_extra_ca::extra_root_ders().len(),
+                wimoai_wimo_extra_ca::configured_bundle_env(),
+                wimoai_wimo_extra_ca::extra_root_ders().len(),
             ))
         }
         TransportFailureKind::CertificateInvalid => {
@@ -105,13 +105,13 @@ async fn fetch_managed_config_once(
         .header("Authorization", format!("Bearer {}", token))
         .timeout(std::time::Duration::from_secs(15));
     // Replay-probe echo (telemetry only); fail-open so a corrupt sidecar never bricks the fetch.
-    if let Some(nonce) = wimo ai_wimo_config::signed_policy::stored_envelope_nonce(
+    if let Some(nonce) = wimoai_wimo_config::signed_policy::stored_envelope_nonce(
         &crate::util::wimo_home::wimo_home(),
         echo_principal,
     ) && let Ok(value) = reqwest::header::HeaderValue::from_str(&nonce)
     {
         request = request.header(
-            wimo ai_wimo_config::signed_policy::MANAGED_CONFIG_NONCE_ECHO_HEADER,
+            wimoai_wimo_config::signed_policy::MANAGED_CONFIG_NONCE_ECHO_HEADER,
             value,
         );
     }
@@ -503,10 +503,10 @@ fn policy_repair_pending_from(
 pub async fn ensure_managed_policy_present(
     auth_manager: &std::sync::Arc<crate::auth::AuthManager>,
 ) {
-    wimo ai_wimo_telemetry::startup::enter(wimo ai_wimo_telemetry::startup::StartupPhase::ManagedPolicy);
+    wimoai_wimo_telemetry::startup::enter(wimoai_wimo_telemetry::startup::StartupPhase::ManagedPolicy);
     let has_deployment_key = store::resolve_deployment_key().is_some();
     let signed_in_team = store::team_principal_signed_in();
-    wimo ai_wimo_telemetry::startup::set_auth_mode(policy::auth_mode(
+    wimoai_wimo_telemetry::startup::set_auth_mode(policy::auth_mode(
         has_deployment_key,
         &signed_in_team,
     ));
@@ -580,7 +580,7 @@ pub async fn fetch_setup_report() -> Result<SetupReport, ManagedConfigError> {
     };
     // A payload the installer would refuse is an error, not printable config.
     if source.is_some()
-        && wimo ai_wimo_config::signed_policy::verification_active()
+        && wimoai_wimo_config::signed_policy::verification_active()
         && let Err(e) = verify_signed_envelope(&body, store::active_team_id_any_expiry().as_deref())
     {
         tracing::warn!("managed config signature rejected: {e}");

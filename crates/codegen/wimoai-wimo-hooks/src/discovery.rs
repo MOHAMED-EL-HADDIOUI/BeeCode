@@ -313,7 +313,7 @@ fn load_hooks_from_directory(dir: &Path) -> (Vec<HookSpec>, Vec<HookError>) {
     let mut errors = Vec::new();
 
     // Best-effort listing: a bad dirent is recorded and skipped so sibling hooks still load
-    // (Sandbox fail-closed listing lives in wimo ai_wimo_config.)
+    // (Sandbox fail-closed listing lives in wimoai_wimo_config.)
     let entries = match std::fs::read_dir(dir) {
         Ok(e) => e,
         Err(e) => {
@@ -344,7 +344,7 @@ fn load_hooks_from_directory(dir: &Path) -> (Vec<HookSpec>, Vec<HookError>) {
         let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
             continue;
         };
-        if !wimo ai_wimo_config::is_direct_hook_json_name(name) || !path.is_file() {
+        if !wimoai_wimo_config::is_direct_hook_json_name(name) || !path.is_file() {
             continue;
         }
         json_files.push(path);
@@ -380,7 +380,7 @@ fn is_valid_hook_file(path: &Path) -> bool {
     let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
         return false;
     };
-    wimo ai_wimo_config::is_direct_hook_json_name(name) && path.is_file()
+    wimoai_wimo_config::is_direct_hook_json_name(name) && path.is_file()
 }
 
 #[cfg(test)]

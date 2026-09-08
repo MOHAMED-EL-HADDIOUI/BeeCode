@@ -21,7 +21,7 @@ impl SessionActor {
     /// No-op if no `in_progress` items exist.
     pub(super) async fn emit_turn_end_plan_cleanup(&self) {
         use crate::tools::todo::{TodoState, TodoStatus, plan_entry_from_todo_item};
-        use wimo ai_wimo_tools::types::resources::State;
+        use wimoai_wimo_tools::types::resources::State;
 
         // Read the current TodoState (no mutation).
         let (entries, stale_count) = {
@@ -85,9 +85,9 @@ impl SessionActor {
 
         // `get_worktree_info` doubles as the "in a git repo?" probe (None when not).
         let (worktree_info, branch, commit) = tokio::join!(
-            wimo ai_wimo_workspace::session::git::get_worktree_info(cwd),
-            wimo ai_wimo_workspace::session::git::get_branch(cwd),
-            wimo ai_wimo_workspace::session::git::get_current_commit(cwd),
+            wimoai_wimo_workspace::session::git::get_worktree_info(cwd),
+            wimoai_wimo_workspace::session::git::get_branch(cwd),
+            wimoai_wimo_workspace::session::git::get_current_commit(cwd),
         );
         let Some((is_worktree, main_repo)) = worktree_info else {
             return;
@@ -107,7 +107,7 @@ impl SessionActor {
             *last = Some(dedup_key);
         }
 
-        let params = wimo ai_wimo_workspace::session::git::GitHeadChanged {
+        let params = wimoai_wimo_workspace::session::git::GitHeadChanged {
             session_id: self.session_info.id.0.to_string(),
             branch,
             is_worktree,
@@ -131,12 +131,12 @@ impl SessionActor {
     pub(super) async fn outstanding_reply_for_prompt(
         &self,
         prompt_id: &str,
-    ) -> Option<wimo ai_wimo_tools::implementations::wimo::task::types::SubagentOutstandingReply>
+    ) -> Option<wimoai_wimo_tools::implementations::wimo::task::types::SubagentOutstandingReply>
     {
         let Some(tx) = &self.tool_context.subagent_event_tx else {
             return Some(Default::default());
         };
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentEvent, SubagentOutstandingRequest,
         };
         let (respond_to, rx) = tokio::sync::oneshot::channel();
@@ -157,7 +157,7 @@ impl SessionActor {
     /// Delegates to [`super::turn::UsageDrainOutcome::report_incomplete`].
     pub(super) fn usage_incomplete_from_reply(
         reply: Option<
-            &wimo ai_wimo_tools::implementations::wimo::task::types::SubagentOutstandingReply,
+            &wimoai_wimo_tools::implementations::wimo::task::types::SubagentOutstandingReply,
         >,
     ) -> bool {
         super::turn::UsageDrainOutcome::from_outstanding_reply(reply).report_incomplete()
@@ -167,7 +167,7 @@ impl SessionActor {
         let Some(tx) = &self.tool_context.subagent_event_tx else {
             return;
         };
-        use wimo ai_wimo_tools::implementations::wimo::task::types::{
+        use wimoai_wimo_tools::implementations::wimo::task::types::{
             SubagentClearUsageNotAppliedRequest, SubagentEvent,
         };
         let _ = tx.send(SubagentEvent::ClearUsageNotApplied(
@@ -196,7 +196,7 @@ impl SessionActor {
         else {
             let state = self.state.lock().await;
             tracing::warn!("Received stale completion for prompt: {prompt_id}");
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "shell.turn.stale_completion_dropped",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -248,7 +248,7 @@ impl SessionActor {
             broadcast_queue = input.queue_meta.is_some();
         } else {
             tracing::warn!("Received completion for unknown prompt: {prompt_id}");
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "shell.turn.stale_completion_dropped",
                 Some(self.session_info.id.0.as_ref()),
                 Some(serde_json::json!({
@@ -257,11 +257,11 @@ impl SessionActor {
                 })),
             );
         }
-        let binding = wimo ai_message_delivery_core::TurnBinding::new(prompt_id.clone(), epoch);
+        let binding = wimoai_message_delivery_core::TurnBinding::new(prompt_id.clone(), epoch);
         let (message_completions, had_message_fallbacks) = self.transition_parent_messages(
             &mut state,
-            wimo ai_message_delivery_core::TerminalTarget::Turn(&binding),
-            wimo ai_message_delivery_core::TerminalCause::Completion,
+            wimoai_message_delivery_core::TerminalTarget::Turn(&binding),
+            wimoai_message_delivery_core::TerminalCause::Completion,
         );
         broadcast_queue |= had_message_fallbacks;
         // Owned (dequeued at the front) completions only
@@ -421,7 +421,7 @@ impl SessionActor {
             extra.insert("cancellationContext".to_string(), ctx);
         }
         let extra_meta = (!extra.is_empty()).then_some(extra);
-        self.send_wimo ai_notification_with_extra_meta(
+        self.send_wimoai_notification_with_extra_meta(
             crate::session::turn_completion::build_turn_completed(
                 prompt_id,
                 stop_reason,
@@ -441,7 +441,7 @@ impl SessionActor {
 
     /// Telemetry error category; delegates to `stop_failure_error_type` so the two classifications cannot drift.
     pub(super) fn classify_turn_error(err: &acp::Error) -> String {
-        use wimo ai_wimo_hooks::event::StopFailureKind as K;
+        use wimoai_wimo_hooks::event::StopFailureKind as K;
         match Self::stop_failure_error_type(err) {
             K::RateLimit => "rate_limit",
             K::AuthenticationFailed => "auth",
@@ -457,8 +457,8 @@ impl SessionActor {
     /// Structured markers win over the JSON-RPC code because they are more specific; anything the runtime cannot distinguish stays `Unknown`.
     pub(super) fn stop_failure_error_type(
         err: &acp::Error,
-    ) -> wimo ai_wimo_hooks::event::StopFailureKind {
-        use wimo ai_wimo_hooks::event::StopFailureKind as K;
+    ) -> wimoai_wimo_hooks::event::StopFailureKind {
+        use wimoai_wimo_hooks::event::StopFailureKind as K;
         if crate::sampling::error::is_max_tokens_turn_error(err) {
             return K::MaxOutputTokens;
         }
@@ -569,7 +569,7 @@ impl SessionActor {
     }
 
     pub(super) fn classify_install_error(
-        err: &wimo ai_wimo_agent::plugins::install_registry::InstallError,
+        err: &wimoai_wimo_agent::plugins::install_registry::InstallError,
     ) -> String {
         crate::plugin::classify_install_error(err)
     }

@@ -1,6 +1,6 @@
 [package]
 license = "Apache-2.0"
-name = "wimo ai-compaction-transcript"
+name = "wimoai-compaction-transcript"
 version = "0.1.0"
 edition.workspace = true
 description = "Markdown rendering of compacted conversation segments and the on-disk segment-store naming convention"
@@ -13,7 +13,7 @@ serde_json = { workspace = true }
 # `Display` for the detail level and the segment-read artifact kind.
 strum = { workspace = true }
 # `ConversationItem`, the segment view that gets rendered.
-wimo ai-wimo-sampling-types = { path = "../wimo ai-wimo-sampling-types" }
+wimoai-wimo-sampling-types = { path = "../wimoai-wimo-sampling-types" }
 
 [lints]
 workspace = true

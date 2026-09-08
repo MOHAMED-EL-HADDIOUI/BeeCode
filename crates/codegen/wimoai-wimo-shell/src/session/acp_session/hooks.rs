@@ -6,10 +6,10 @@ use agent_client_protocol as acp;
 use agent_client_protocol::Client as _;
 use futures::stream::{FuturesUnordered, StreamExt as _};
 use serde_json::value::RawValue;
-use wimo ai_wimo_hooks::event::{
+use wimoai_wimo_hooks::event::{
     HookEventEnvelope, HookEventName, HookPayload, MAX_HOOK_FEEDBACK_CHARS, clip_text,
 };
-use wimo ai_wimo_telemetry::events::{ClientHookGateOutcome, HookBlockCause};
+use wimoai_wimo_telemetry::events::{ClientHookGateOutcome, HookBlockCause};
 
 use super::{SessionActor, ToolLoop};
 use crate::extensions::hooks::{
@@ -23,10 +23,10 @@ const HOOK_RUN_METHOD: &str = "x.ai/hooks/run";
 const CLIENT_HOOK_TIMEOUT: Duration = Duration::from_secs(30);
 
 const CLIENT_VERIFICATION_GATE_TIMEOUT: Duration =
-    Duration::from_secs(wimo ai_wimo_hooks::config::DEFAULT_VERIFICATION_GATE_TIMEOUT_SECS);
+    Duration::from_secs(wimoai_wimo_hooks::config::DEFAULT_VERIFICATION_GATE_TIMEOUT_SECS);
 
-fn default_client_gate_timeout(gate: wimo ai_wimo_hooks::event::GateKind) -> Duration {
-    use wimo ai_wimo_hooks::event::GateKind;
+fn default_client_gate_timeout(gate: wimoai_wimo_hooks::event::GateKind) -> Duration {
+    use wimoai_wimo_hooks::event::GateKind;
     match gate {
         GateKind::Stop | GateKind::PostTool => CLIENT_VERIFICATION_GATE_TIMEOUT,
         GateKind::Observe | GateKind::Tool | GateKind::Prompt => CLIENT_HOOK_TIMEOUT,
@@ -107,7 +107,7 @@ fn matching_callback_ids<'a>(
     groups
         .iter()
         .filter(|group| {
-            wimo ai_wimo_hooks::matcher::matcher_allows(group.matcher.as_ref(), match_value)
+            wimoai_wimo_hooks::matcher::matcher_allows(group.matcher.as_ref(), match_value)
         })
         .flat_map(|group| group.callback_ids.iter().map(String::as_str))
         .collect()
@@ -237,7 +237,7 @@ impl SessionActor {
         cause: HookBlockCause,
         detail: &str,
     ) -> Result<ToolLoop, acp::Error> {
-        wimo ai_wimo_telemetry::session_ctx::log_event(wimo ai_wimo_telemetry::events::HookBlocked {
+        wimoai_wimo_telemetry::session_ctx::log_event(wimoai_wimo_telemetry::events::HookBlocked {
             hook_name: hook_name.clone(),
             cause,
         });
@@ -267,7 +267,7 @@ impl SessionActor {
         groups
             .iter()
             .filter(move |group| {
-                wimo ai_wimo_hooks::matcher::matcher_allows(group.matcher.as_ref(), tool_name)
+                wimoai_wimo_hooks::matcher::matcher_allows(group.matcher.as_ref(), tool_name)
             })
             .flat_map(move |group| {
                 let timeout = group.timeout.unwrap_or(default_timeout);
@@ -287,8 +287,8 @@ impl SessionActor {
                     let (response, gate_outcome) =
                         classify(self.send_hook_run(&dispatch, timeout).await);
                     let elapsed = started.elapsed();
-                    wimo ai_wimo_telemetry::session_ctx::log_event(
-                        wimo ai_wimo_telemetry::events::ClientHookGate {
+                    wimoai_wimo_telemetry::session_ctx::log_event(
+                        wimoai_wimo_telemetry::events::ClientHookGate {
                             callback_id: callback_id.to_string(),
                             tool_name: tool_name.map(str::to_string),
                             outcome: gate_outcome,
@@ -373,10 +373,10 @@ impl SessionActor {
     pub(super) async fn run_stop_client_hooks(
         &self,
         envelope: &HookEventEnvelope,
-    ) -> wimo ai_wimo_hooks::dispatcher::StopDispatchResult {
-        use wimo ai_wimo_hooks::result::HookRunResult;
+    ) -> wimoai_wimo_hooks::dispatcher::StopDispatchResult {
+        use wimoai_wimo_hooks::result::HookRunResult;
 
-        let mut out = wimo ai_wimo_hooks::dispatcher::StopDispatchResult::default();
+        let mut out = wimoai_wimo_hooks::dispatcher::StopDispatchResult::default();
         let Some(groups) = self
             .client_hooks
             .borrow()
@@ -409,7 +409,7 @@ impl SessionActor {
                     .unwrap_or_else(|| "stopped by client hook".to_string())
             });
 
-            let detail = wimo ai_wimo_hooks::dispatcher::stop_detail(
+            let detail = wimoai_wimo_hooks::dispatcher::stop_detail(
                 stop_reason.is_some(),
                 stop_reason.as_deref(),
                 block_reason.as_deref(),
@@ -440,7 +440,7 @@ impl SessionActor {
 
             out.absorb(
                 &hook_name,
-                wimo ai_wimo_hooks::dispatcher::StopSignals {
+                wimoai_wimo_hooks::dispatcher::StopSignals {
                     block_reason,
                     stop_reason,
                     additional_context: response
@@ -456,10 +456,10 @@ impl SessionActor {
     pub(super) async fn run_post_tool_use_client_hooks(
         &self,
         envelope: &HookEventEnvelope,
-    ) -> wimo ai_wimo_hooks::dispatcher::PostToolUseResult {
-        use wimo ai_wimo_hooks::result::HookRunResult;
+    ) -> wimoai_wimo_hooks::dispatcher::PostToolUseResult {
+        use wimoai_wimo_hooks::result::HookRunResult;
 
-        let mut out = wimo ai_wimo_hooks::dispatcher::PostToolUseResult::default();
+        let mut out = wimoai_wimo_hooks::dispatcher::PostToolUseResult::default();
         let Some(groups) = self
             .client_hooks
             .borrow()
@@ -500,14 +500,14 @@ impl SessionActor {
                     .filter(|s| !s.trim().is_empty())
                     .unwrap_or_else(|| "blocked by client hook".to_string());
                 out.blocks
-                    .push(wimo ai_wimo_hooks::dispatcher::PostToolUseBlock {
+                    .push(wimoai_wimo_hooks::dispatcher::PostToolUseBlock {
                         hook_name: hook_name.clone(),
                         reason: clip_text(&reason, MAX_HOOK_FEEDBACK_CHARS),
                     });
             }
             if let Some(context) = response.additional_context.filter(|c| !c.trim().is_empty()) {
                 out.additional_context
-                    .push(wimo ai_wimo_hooks::dispatcher::AdditionalContext {
+                    .push(wimoai_wimo_hooks::dispatcher::AdditionalContext {
                         hook_name,
                         text: clip_text(&context, MAX_HOOK_FEEDBACK_CHARS),
                     });
@@ -605,7 +605,7 @@ mod tests {
 
     #[test]
     fn verification_gates_get_the_long_deadline() {
-        use wimo ai_wimo_hooks::event::HookEventName;
+        use wimoai_wimo_hooks::event::HookEventName;
 
         for event in [HookEventName::Stop, HookEventName::PostToolUse] {
             assert_eq!(
@@ -625,7 +625,7 @@ mod tests {
 
     #[tokio::test(flavor = "current_thread")]
     async fn may_have_hooks_for_inert_vs_active() {
-        use wimo ai_wimo_hooks::event::HookEventName;
+        use wimoai_wimo_hooks::event::HookEventName;
 
         let local = tokio::task::LocalSet::new();
         local
@@ -657,7 +657,7 @@ mod tests {
                 assert!(!actor.may_have_hooks_for(HookEventName::Stop));
 
                 *actor.hook_registry.borrow_mut() = Some(std::sync::Arc::new(
-                    wimo ai_wimo_hooks::discovery::HookRegistry::default(),
+                    wimoai_wimo_hooks::discovery::HookRegistry::default(),
                 ));
                 assert!(actor.may_have_hooks_for(HookEventName::Stop));
                 assert!(actor.may_have_hooks_for(HookEventName::PostCompact));
@@ -667,7 +667,7 @@ mod tests {
 
     #[test]
     fn matching_callback_ids_filters_by_matcher() {
-        use wimo ai_wimo_hooks::matcher::HookMatcher;
+        use wimoai_wimo_hooks::matcher::HookMatcher;
 
         let groups = vec![
             ClientHookGroup {

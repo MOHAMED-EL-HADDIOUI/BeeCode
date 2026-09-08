@@ -471,7 +471,7 @@ impl ScrollbackSearchState {
         self.editor.text()
     }
 
-    pub fn query_viewport(&self, width: usize) -> wimo ai_ratatui_textarea::SingleLineViewport {
+    pub fn query_viewport(&self, width: usize) -> wimoai_ratatui_textarea::SingleLineViewport {
         self.editor.viewport(width)
     }
 

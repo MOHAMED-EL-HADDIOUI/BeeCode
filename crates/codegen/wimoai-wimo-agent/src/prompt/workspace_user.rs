@@ -1,6 +1,6 @@
 //! Optional multi-user workspace helpers for loading per-user agent config.
 //!
-//! When `wimo ai_ROOT` and `wimo ai_USER` are set and the resolved directory exists, that path can contribute AGENTS.md / rules / skills discovery.
+//! When `wimoai_ROOT` and `wimoai_USER` are set and the resolved directory exists, that path can contribute AGENTS.md / rules / skills discovery.
 //! Unset env vars are a no-op (typical for standalone installs).
 
 use std::path::PathBuf;
@@ -8,12 +8,12 @@ use std::path::PathBuf;
 /// If optional workspace env vars are set, returns the user's config directory when the resolved path exists on disk.
 /// Unset or missing paths yield `None`.
 pub fn optional_workspace_user_dir() -> Option<PathBuf> {
-    let root = std::env::var("wimo ai_ROOT").ok()?;
-    let user = std::env::var("wimo ai_USER").ok()?;
+    let root = std::env::var("wimoai_ROOT").ok()?;
+    let user = std::env::var("wimoai_USER").ok()?;
     resolve_workspace_user_dir(&root, &workspace_user_relpath(&user))
 }
 
-/// Map `$wimo ai_USER` to a path relative to the workspace root.
+/// Map `$wimoai_USER` to a path relative to the workspace root.
 ///
 /// A bare username is nested one level under `x/` so it cannot collide with an unrelated same-named directory at the workspace root.
 /// Values that already contain a path separator are used as-is (explicit relative path).

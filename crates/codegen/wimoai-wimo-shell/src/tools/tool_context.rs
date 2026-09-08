@@ -1,17 +1,17 @@
 //! Session context, kept under its legacy name "ToolContext".
 //!
 //! The session actor needs it for non-tool operations (ACP communication, git, rewind, etc.).
-//! Tool execution goes through the ToolBridge, which has its own SessionContext from wimo ai-wimo-tools.
+//! Tool execution goes through the ToolBridge, which has its own SessionContext from wimoai-wimo-tools.
 use crate::terminal::AsyncTerminalRunner;
 use agent_client_protocol as acp;
 use std::collections::HashMap;
 use std::sync::Arc;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-use wimo ai_wimo_paths::AbsPathBuf;
-use wimo ai_wimo_workspace::file_system::{AsyncFileSystem, AsyncFsWrapper};
-use wimo ai_wimo_workspace::session::file_state::FileStateHandle;
-use wimo ai_hunk_tracker::HunkTrackerHandle;
-use wimo ai_tty_utils::ProcessScope;
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_wimo_paths::AbsPathBuf;
+use wimoai_wimo_workspace::file_system::{AsyncFileSystem, AsyncFsWrapper};
+use wimoai_wimo_workspace::session::file_state::FileStateHandle;
+use wimoai_hunk_tracker::HunkTrackerHandle;
+use wimoai_tty_utils::ProcessScope;
 #[derive(Debug, Clone, Default)]
 pub struct TaskOutputTokenBudget {
     inner: Arc<parking_lot::Mutex<TaskOutputTokenBudgetState>>,
@@ -177,8 +177,8 @@ impl Drop for BlockingWaitGuard {
 }
 pub(crate) fn subagent_foreground_wait(
     state: Arc<BlockingWaitState>,
-) -> wimo ai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait {
-    wimo ai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait::new(
+) -> wimoai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait {
+    wimoai_wimo_tools::implementations::wimo::task::types::SubagentForegroundWait::new(
         move || Box::new(BlockingWaitGuard::enter(Arc::clone(&state))),
     )
 }
@@ -205,14 +205,14 @@ pub struct ToolContext {
     /// `None` if subagent support is not enabled.
     pub subagent_event_tx: Option<
         tokio::sync::mpsc::UnboundedSender<
-            wimo ai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
+            wimoai_wimo_tools::implementations::wimo::task::types::SubagentEvent,
         >,
     >,
     pub subagent_coordinator_sender: Option<
-        wimo ai_wimo_tools::implementations::wimo::task::backend::SubagentCoordinatorSender,
+        wimoai_wimo_tools::implementations::wimo::task::backend::SubagentCoordinatorSender,
     >,
     /// Shared LSP runtime, cloned cheaply (Arc) from parent to child.
-    pub lsp: Option<Arc<dyn wimo ai_wimo_tools::implementations::lsp::LspBackend>>,
+    pub lsp: Option<Arc<dyn wimoai_wimo_tools::implementations::lsp::LspBackend>>,
     /// LSP server names captured at session creation (not updated mid-session).
     pub lsp_server_names: Vec<String>,
     /// Shared turn-active flag: set `true` at turn start, `false` at turn end.
@@ -222,11 +222,11 @@ pub struct ToolContext {
     /// The session turn loop (`inject_pending_monitor_events`) drains events pushed here.
     /// They are injected as ONE hidden synthetic user message before the next sampling step.
     pub monitor_event_buffer:
-        Option<wimo ai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer>,
+        Option<wimoai_wimo_tools::implementations::wimo::monitor::types::MonitorEventBuffer>,
     pub task_completion_reservations:
-        Option<wimo ai_wimo_tools::reminders::task_completion::TaskCompletionReservations>,
+        Option<wimoai_wimo_tools::reminders::task_completion::TaskCompletionReservations>,
     pub task_wake_suppressed:
-        Option<wimo ai_wimo_tools::reminders::task_completion::TaskWakeSuppressed>,
+        Option<wimoai_wimo_tools::reminders::task_completion::TaskWakeSuppressed>,
     /// Channel for requesting trace uploads for synthetic auto-wake turns.
     pub(crate) synthetic_trace_tx:
         Option<tokio::sync::mpsc::UnboundedSender<crate::upload::turn::SyntheticTurnTraceRequest>>,
@@ -342,7 +342,7 @@ impl ToolContext {
             synthetic_trace_tx: None,
             synthetic_trace_tx_shared: None,
             task_output_tool_name:
-                wimo ai_wimo_tools::reminders::task_completion::DEFAULT_TASK_OUTPUT_TOOL.to_string(),
+                wimoai_wimo_tools::reminders::task_completion::DEFAULT_TASK_OUTPUT_TOOL.to_string(),
             scheduler_delete_tool_name: None,
             auto_wake_enabled: true,
             goal_loop_active_gate: Arc::new(std::sync::atomic::AtomicBool::new(false)),
@@ -401,9 +401,9 @@ mod tests {
     use crate::{terminal::AsyncTerminalRunner, tools::ToolContext};
     use std::collections::HashMap;
     use std::sync::Arc;
-    use wimo ai_wimo_paths::AbsPathBuf;
-    use wimo ai_wimo_workspace::file_system::{AsyncFileSystem, AsyncFsWrapper};
-    use wimo ai_hunk_tracker::HunkTrackerHandle;
+    use wimoai_wimo_paths::AbsPathBuf;
+    use wimoai_wimo_workspace::file_system::{AsyncFileSystem, AsyncFsWrapper};
+    use wimoai_hunk_tracker::HunkTrackerHandle;
     impl ToolContext {
         pub(crate) fn new_local_context(
             cwd: AbsPathBuf,
@@ -437,7 +437,7 @@ mod tests {
                 synthetic_trace_tx: None,
                 synthetic_trace_tx_shared: None,
                 task_output_tool_name:
-                    wimo ai_wimo_tools::reminders::task_completion::DEFAULT_TASK_OUTPUT_TOOL.to_string(),
+                    wimoai_wimo_tools::reminders::task_completion::DEFAULT_TASK_OUTPUT_TOOL.to_string(),
                 scheduler_delete_tool_name: None,
                 auto_wake_enabled: true,
                 goal_loop_active_gate: Arc::new(std::sync::atomic::AtomicBool::new(false)),

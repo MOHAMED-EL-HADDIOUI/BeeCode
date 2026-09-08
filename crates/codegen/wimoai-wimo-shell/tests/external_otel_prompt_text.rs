@@ -1,7 +1,7 @@
 //! Dedicated binary: the external-stream `OnceLock` is process-global, so this
 //! construction canary cannot live in the lib test suite.
 
-use wimo ai_wimo_telemetry::external::{self, ExternalOtelConfig};
+use wimoai_wimo_telemetry::external::{self, ExternalOtelConfig};
 
 #[test]
 fn prompt_submitted_prompt_text_is_some_when_stream_active() {
@@ -14,7 +14,7 @@ fn prompt_submitted_prompt_text_is_some_when_stream_active() {
         None,
     )
     .expect("double opt-in must resolve");
-    cfg.client = wimo ai_wimo_telemetry::external::config::ExternalClientInfo {
+    cfg.client = wimoai_wimo_telemetry::external::config::ExternalClientInfo {
         service_version: "0.0.0-test".into(),
         client_version: "0.0.0-test".into(),
         app_entrypoint: "cli".into(),
@@ -26,7 +26,7 @@ fn prompt_submitted_prompt_text_is_some_when_stream_active() {
     );
 
     let user_message = "PARITY_PROMPT live construction";
-    let ev = wimo ai_wimo_telemetry::events::PromptSubmitted {
+    let ev = wimoai_wimo_telemetry::events::PromptSubmitted {
         prompt_length: user_message.len(),
         model_id: "wimo-4".into(),
         client_identifier: None,

@@ -1,13 +1,13 @@
 //! Client-side error taxonomy.
 //!
-//! Wire-level [`wimo ai_tool_protocol::ToolErrorWire`] variants and JSON-RPC
+//! Wire-level [`wimoai_tool_protocol::ToolErrorWire`] variants and JSON-RPC
 //! error envelopes are mapped into the smaller [`ClientError`] vocabulary
 //! at the SDK boundary so consumers can match on a single enum without
 //! re-deriving the numeric/string code mapping.
 
 use thiserror::Error;
 use url::Url;
-use wimo ai_tool_protocol::{IdError, JsonRpcError, ToolCallId, ToolErrorWire};
+use wimoai_tool_protocol::{IdError, JsonRpcError, ToolCallId, ToolErrorWire};
 
 /// Errors surfaced by the client SDK.
 #[derive(Debug, Error)]
@@ -78,7 +78,7 @@ pub enum ClientError {
     /// waiter and response correlation are left intact; this error
     /// surfaces synchronously so the second caller can retry with a
     /// fresh id. Mint a fresh [`ToolCallId::new_v7`] (or use
-    /// [`wimo ai_tool_runtime::ToolCallContext::default`], which does so)
+    /// [`wimoai_tool_runtime::ToolCallContext::default`], which does so)
     /// per call. This is client misuse, not a transport or server
     /// failure.
     #[error("call_id {call_id} already in flight on this connection")]
@@ -202,7 +202,7 @@ impl From<tokio::sync::oneshot::error::RecvError> for ClientError {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wimo ai_tool_protocol::{
+    use wimoai_tool_protocol::{
         WORKSPACE_UNAVAILABLE_SUBCODE, WorkspaceGonePhase, WorkspaceGoneReason,
         workspace_unavailable_wire,
     };
@@ -330,7 +330,7 @@ mod tests {
     fn sdk_reexported_recognizer_matches_decoded_error() {
         // SDK-only consumers reach the recognizer through the SDK re-export and
         // the core decode path.
-        let err = wimo ai_computer_hub_core::error_from_envelope(workspace_gone_envelope());
+        let err = wimoai_computer_hub_core::error_from_envelope(workspace_gone_envelope());
         assert!(crate::is_workspace_unavailable(&err));
     }
 
@@ -346,7 +346,7 @@ mod tests {
             message: "nope".to_owned(),
             data: Some(serde_json::to_value(&wire).unwrap()),
         };
-        let err = wimo ai_computer_hub_core::error_from_envelope(env);
+        let err = wimoai_computer_hub_core::error_from_envelope(env);
         assert!(!crate::is_workspace_unavailable(&err));
     }
 }

@@ -303,7 +303,7 @@ fn e2e_compact_auth_failure_holds_prompt_and_resubmits_after_login() {
     use crate::app::agent::{AgentState, InFlightPrompt};
     use crate::scrollback::EntryId;
     use crate::scrollback::block::RenderBlock;
-    use wimo ai_wimo_shell::extensions::notification::{RetryState, SessionUpdate as wimo aiSessionUpdate};
+    use wimoai_wimo_shell::extensions::notification::{RetryState, SessionUpdate as wimoaiSessionUpdate};
 
     let mut app = test_app_with_agent();
     let id = AgentId(0);
@@ -322,7 +322,7 @@ fn e2e_compact_auth_failure_holds_prompt_and_resubmits_after_login() {
         });
 
         apply_session_event_for_test(
-            &wimo aiSessionUpdate::AutoCompactStarted {
+            &wimoaiSessionUpdate::AutoCompactStarted {
                 tokens_used: 180_000,
                 context_window: 200_000,
                 percentage: 90,
@@ -346,7 +346,7 @@ fn e2e_compact_auth_failure_holds_prompt_and_resubmits_after_login() {
         );
 
         apply_session_event_for_test(
-            &wimo aiSessionUpdate::AutoCompactFailed {
+            &wimoaiSessionUpdate::AutoCompactFailed {
                 error: "authentication problem — re-authenticate using /login and retry.".into(),
             },
             &mut agent.session,
@@ -355,7 +355,7 @@ fn e2e_compact_auth_failure_holds_prompt_and_resubmits_after_login() {
         assert!(agent.session.compact_held_prompt.is_some());
 
         apply_session_event_for_test(
-            &wimo aiSessionUpdate::RetryState(RetryState::Failed {
+            &wimoaiSessionUpdate::RetryState(RetryState::Failed {
                 error_type: "auth".into(),
                 message: "Unauthorized (401): compaction failed".into(),
             }),
@@ -785,7 +785,7 @@ fn auth_complete_preserves_show_resolved_model_when_absent() {
     dispatch(
         Action::TaskComplete(TaskResult::AuthComplete {
             request_seq: 1,
-            meta: Some(serde_json::to_value(wimo ai_wimo_shell::auth::AuthMeta::default()).unwrap()),
+            meta: Some(serde_json::to_value(wimoai_wimo_shell::auth::AuthMeta::default()).unwrap()),
         }),
         &mut app,
     );

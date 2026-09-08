@@ -2,16 +2,16 @@
 
 use std::time::{Duration, Instant};
 
-use wimo ai_wimo_telemetry::events::ShellTrueNoop;
-use wimo ai_wimo_telemetry::{process_metrics, session_ctx};
+use wimoai_wimo_telemetry::events::ShellTrueNoop;
+use wimoai_wimo_telemetry::{process_metrics, session_ctx};
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn a_gated_emit_takes_no_snapshot_and_the_second_snapshot_reports_cpu() {
     assert!(
-        !wimo ai_wimo_telemetry::is_enabled(),
+        !wimoai_wimo_telemetry::is_enabled(),
         "this binary must never install a telemetry client"
     );
-    wimo ai_wimo_telemetry::log_event(ShellTrueNoop {
+    wimoai_wimo_telemetry::log_event(ShellTrueNoop {
         tool_name: "bash".into(),
     });
     session_ctx::drain_pending(Duration::from_secs(5)).await;

@@ -16,7 +16,7 @@ use std::path::Path;
 use agent_client_protocol as acp;
 use chrono::{DateTime, Utc};
 use fs2::FileExt;
-use wimo ai_wimo_sampling_types::ReasoningEffort;
+use wimoai_wimo_sampling_types::ReasoningEffort;
 
 use crate::session::persistence::Summary;
 use crate::session::worktree::WorktreeIdentity;

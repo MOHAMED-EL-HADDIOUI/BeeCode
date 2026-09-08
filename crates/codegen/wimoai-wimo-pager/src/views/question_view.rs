@@ -16,9 +16,9 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
-use wimo ai_acp_lib::AcpResult;
-use wimo ai_wimo_markdown::StreamingMarkdownRenderer;
-pub use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+use wimoai_acp_lib::AcpResult;
+use wimoai_wimo_markdown::StreamingMarkdownRenderer;
+pub use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
     AskUserQuestionMode, Question, QuestionOption,
 };
 
@@ -112,19 +112,19 @@ pub enum LocalQuestionKind {
     /// credits / PAYG) plus "Try Again". `choices` maps each option
     /// index to a telemetry choice variant.
     CreditLimitUpsell {
-        choices: Vec<wimo ai_wimo_telemetry::events::CreditLimitChoice>,
+        choices: Vec<wimoai_wimo_telemetry::events::CreditLimitChoice>,
     },
     /// Superwimo upsell modal: the free-usage paywall (429 with `subscription:free-usage-exhausted`) or a tier-restricted slash command invocation.
     /// Upgrade options carry their URL in the option `id`.
     FreeUsageUpsell {
         /// Telemetry source for `SuperwimoUpsellClicked`; distinguishes the paywall from the restricted-command upsell.
-        source: wimo ai_wimo_telemetry::events::SuperwimoUpsell,
+        source: wimoai_wimo_telemetry::events::SuperwimoUpsell,
     },
     /// Modal shown when the shell rejects a model switch due to agent type incompatibility.
     /// Carries the target model and effort so the answer handler can create a new session with it.
     AgentTypeMismatch {
         model_id: agent_client_protocol::ModelId,
-        effort: Option<wimo ai_wimo_shell::sampling::types::ReasoningEffort>,
+        effort: Option<wimoai_wimo_shell::sampling::types::ReasoningEffort>,
     },
     DoctorFix {
         target: crate::app::actions::DoctorFixTarget,
@@ -147,7 +147,7 @@ pub const FEEDBACK_QUESTION_LABEL: &str = "How can we improve wimo Build?";
 /// Trace-consent question shown after the report is submitted.
 /// The wording comes from legal review: it discloses retention/training scope, not just debugging.
 pub const FEEDBACK_TRACE_QUESTION_LABEL: &str = "Opt-in to provide your trace for debugging \
-     purposes. This will also provide Spacewimo ai the ability to retain and train on coding data, \
+     purposes. This will also provide Spacewimoai the ability to retain and train on coding data, \
      e.g., prompts, traces, & metrics.";
 
 /// Option ids for the trace-consent question; the submit handler maps ids (never positions) back to a [`crate::app::actions::FeedbackTraceChoice`].
@@ -970,11 +970,11 @@ impl QuestionViewState {
     /// - Notes included when freeform text is non-empty and selected.
     pub fn build_accepted_response(
         &self,
-    ) -> wimo ai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionExtResponse
+    ) -> wimoai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionExtResponse
     {
         use indexmap::IndexMap;
         use std::collections::HashMap;
-        use wimo ai_wimo_tools::implementations::wimo::ask_user_question::{
+        use wimoai_wimo_tools::implementations::wimo::ask_user_question::{
             AskUserQuestionExtResponse, QuestionAnnotation,
         };
 
@@ -1052,7 +1052,7 @@ impl QuestionViewState {
     /// After sending, `response_tx` is consumed (set to `None`) to prevent double-send.
     pub fn send_ext_response(
         &mut self,
-        response: wimo ai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionExtResponse,
+        response: wimoai_wimo_tools::implementations::wimo::ask_user_question::AskUserQuestionExtResponse,
     ) -> bool {
         let Some(tx) = self.response_tx.take() else {
             return false;

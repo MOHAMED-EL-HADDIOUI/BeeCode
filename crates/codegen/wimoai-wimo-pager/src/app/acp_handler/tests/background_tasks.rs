@@ -12,7 +12,7 @@
         let id = AgentId(0);
         assert!(app.agents[&id].session.bg_tasks.is_empty());
 
-        let update = wimo aiSessionUpdate::TaskBackgrounded {
+        let update = wimoaiSessionUpdate::TaskBackgrounded {
             tool_call_id: "tc-mon".into(),
             task_id: "mon-1".into(),
             command: "tail -f deploy.log".into(),
@@ -49,7 +49,7 @@
             make_ext_session_notification_with_method(
                 "sess-1",
                 "x.ai/session/update",
-                wimo aiSessionUpdate::ScheduledTaskCreated {
+                wimoaiSessionUpdate::ScheduledTaskCreated {
                     task_id: "loop-1".into(),
                     prompt: "check deploy".into(),
                     human_schedule: "every 5 minutes".into(),
@@ -70,7 +70,7 @@
             make_ext_session_notification_with_method(
                 "sess-1",
                 "x.ai/session/update",
-                wimo aiSessionUpdate::ScheduledTaskDeleted {
+                wimoaiSessionUpdate::ScheduledTaskDeleted {
                     task_id: "loop-1".into(),
                     reason: Default::default(),
                 },
@@ -159,7 +159,7 @@
 
         let notif = SessionNotification {
             session_id: acp::SessionId::new("sess-1"),
-            update: wimo aiSessionUpdate::TaskBackgrounded {
+            update: wimoaiSessionUpdate::TaskBackgrounded {
                 tool_call_id: tc_id.into(),
                 task_id: "task-late-desc".into(),
                 command: "sleep 9999".into(),
@@ -211,7 +211,7 @@
 
         let notif = SessionNotification {
             session_id: acp::SessionId::new("sess-1"),
-            update: wimo aiSessionUpdate::TaskBackgrounded {
+            update: wimoaiSessionUpdate::TaskBackgrounded {
                 tool_call_id: tc_id.into(),
                 task_id: "task-blank-wire".into(),
                 command: "sleep 9999".into(),
@@ -625,8 +625,8 @@
         task_id: &str,
         command: &str,
         exit_code: Option<i32>,
-    ) -> wimo ai_wimo_tools::types::TaskSnapshot {
-        wimo ai_wimo_tools::types::TaskSnapshot {
+    ) -> wimoai_wimo_tools::types::TaskSnapshot {
+        wimoai_wimo_tools::types::TaskSnapshot {
             task_id: task_id.into(),
             command: command.into(),
             display_command: None,
@@ -652,12 +652,12 @@
 
     fn completed_notif_from_snapshot(
         session_id: &str,
-        task_snapshot: wimo ai_wimo_tools::types::TaskSnapshot,
+        task_snapshot: wimoai_wimo_tools::types::TaskSnapshot,
         replayed: bool,
     ) -> acp::ExtNotification {
         let notif = SessionNotification {
             session_id: acp::SessionId::new(session_id),
-            update: wimo aiSessionUpdate::TaskCompleted {
+            update: wimoaiSessionUpdate::TaskCompleted {
                 task_snapshot,
                 will_wake: false,
             },
@@ -697,7 +697,7 @@
         // The late TaskBackgrounded (with a wire description) arrives.
         let notif = SessionNotification {
             session_id: acp::SessionId::new("sess-1"),
-            update: wimo aiSessionUpdate::TaskBackgrounded {
+            update: wimoaiSessionUpdate::TaskBackgrounded {
                 tool_call_id: "tc-race".into(),
                 task_id: "task-race".into(),
                 command: "echo done".into(),
@@ -810,7 +810,7 @@
         let mut app = make_app_with_agent("sess-1");
 
         let mut snapshot = race_snapshot("task-mon", "tail -f x.log", Some(0));
-        snapshot.kind = wimo ai_wimo_tools::computer::types::TaskKind::Monitor;
+        snapshot.kind = wimoai_wimo_tools::computer::types::TaskKind::Monitor;
         let done = completed_notif_from_snapshot("sess-1", snapshot, false);
         assert!(handle_task_completed(&done, &mut app));
 

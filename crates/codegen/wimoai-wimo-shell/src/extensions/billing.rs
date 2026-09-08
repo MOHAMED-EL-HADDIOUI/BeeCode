@@ -186,7 +186,7 @@ fn billing_unified_log_ctx(billing: &BillingConfigResponse) -> serde_json::Value
 }
 
 async fn handle_get_billing(agent: &MvpAgent) -> ExtResult {
-    let auth = super::auth_gate::require_wimo ai_auth(
+    let auth = super::auth_gate::require_wimoai_auth(
         &agent.auth_manager,
         "Authentication required to fetch billing data",
         "Billing data requires auth with wimo.com. Run `wimo login` to authenticate.",
@@ -201,11 +201,11 @@ async fn handle_get_billing(agent: &MvpAgent) -> ExtResult {
         .get(&credits_url)
         .header("Authorization", format!("Bearer {}", &auth.key))
         .header(
-            "X-wimo ai-Token-Auth",
+            "X-wimoai-Token-Auth",
             crate::auth::wimoComConfig::default().token_header,
         )
         .header("x-userid", &auth.user_id)
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
         .header(
             crate::http::CLIENT_MODE_HEADER,
             crate::http::process_client_mode(),
@@ -215,7 +215,7 @@ async fn handle_get_billing(agent: &MvpAgent) -> ExtResult {
         .await
         .map_err(|e| {
             tracing::error!(error = %e, "billing: upstream request failed");
-            wimo ai_wimo_telemetry::unified_log::warn(
+            wimoai_wimo_telemetry::unified_log::warn(
                 "billing: upstream request failed",
                 None,
                 Some(serde_json::json!({ "error": e.to_string() })),
@@ -233,7 +233,7 @@ async fn handle_get_billing(agent: &MvpAgent) -> ExtResult {
             .and_then(|v| v.get("error").and_then(|e| e.as_str()).map(String::from))
             .unwrap_or_else(|| format!("HTTP {status}"));
 
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "billing: upstream error",
             None,
             Some(serde_json::json!({
@@ -247,7 +247,7 @@ async fn handle_get_billing(agent: &MvpAgent) -> ExtResult {
 
     let mut billing: BillingConfigResponse = credits_resp.json().await.map_err(|e| {
         tracing::error!(error = %e, "billing: failed to parse response");
-        wimo ai_wimo_telemetry::unified_log::warn(
+        wimoai_wimo_telemetry::unified_log::warn(
             "billing: failed to parse response",
             None,
             Some(serde_json::json!({ "error": e.to_string() })),
@@ -266,7 +266,7 @@ async fn handle_get_billing(agent: &MvpAgent) -> ExtResult {
 
     // Every prompt, `/usage`, and poll path hits `x.ai/billing`
     // Log the fetched credits snapshot so support can correlate the limit UI with real balances
-    wimo ai_wimo_telemetry::unified_log::info(
+    wimoai_wimo_telemetry::unified_log::info(
         "billing: fetched credits config",
         None,
         Some(billing_unified_log_ctx(&billing)),
@@ -276,7 +276,7 @@ async fn handle_get_billing(agent: &MvpAgent) -> ExtResult {
 }
 
 async fn handle_get_auto_topup_rule(agent: &MvpAgent) -> ExtResult {
-    let auth = super::auth_gate::require_wimo ai_auth(
+    let auth = super::auth_gate::require_wimoai_auth(
         &agent.auth_manager,
         "Authentication required to fetch auto top-up rule",
         "Auto top-up data requires auth with wimo.com. Run `wimo login` to authenticate.",
@@ -291,11 +291,11 @@ async fn handle_get_auto_topup_rule(agent: &MvpAgent) -> ExtResult {
         .get(&url)
         .header("Authorization", format!("Bearer {}", &auth.key))
         .header(
-            "X-wimo ai-Token-Auth",
+            "X-wimoai-Token-Auth",
             crate::auth::wimoComConfig::default().token_header,
         )
         .header("x-userid", &auth.user_id)
-        .header("x-wimo-client-version", wimo ai_wimo_version::VERSION)
+        .header("x-wimo-client-version", wimoai_wimo_version::VERSION)
         .header(
             crate::http::CLIENT_MODE_HEADER,
             crate::http::process_client_mode(),

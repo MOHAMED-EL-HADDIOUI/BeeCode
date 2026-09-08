@@ -10,12 +10,12 @@
 //!
 //! Run:
 //! ```bash
-//! cargo test -p wimo ai-wimo-tools --test path_suggestions_production
+//! cargo test -p wimoai-wimo-tools --test path_suggestions_production
 //! ```
 
 use std::path::PathBuf;
 use tempfile::TempDir;
-use wimo ai_wimo_tools::util::path_suggestions::{format_not_found_error, path_not_found_hint};
+use wimoai_wimo_tools::util::path_suggestions::{format_not_found_error, path_not_found_hint};
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -37,7 +37,7 @@ fn setup_fs(dirs: &[&str], files: &[&str]) -> (TempDir, PathBuf) {
 }
 
 /// Extract leaf file names from the `similar` vec for assertion.
-fn similar_names(hint: &wimo ai_wimo_tools::util::path_suggestions::PathNotFoundHint) -> Vec<String> {
+fn similar_names(hint: &wimoai_wimo_tools::util::path_suggestions::PathNotFoundHint) -> Vec<String> {
     hint.similar
         .iter()
         .filter_map(|p| p.file_name().map(|n| n.to_string_lossy().to_string()))

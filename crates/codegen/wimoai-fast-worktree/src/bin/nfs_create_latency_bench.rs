@@ -83,10 +83,10 @@ mod mac {
     use std::process::{Command, Stdio};
     use std::sync::atomic::{AtomicBool, AtomicPtr, Ordering};
     use std::time::Instant;
-    use wimo ai_fast_worktree::create_latency_stamp::{
+    use wimoai_fast_worktree::create_latency_stamp::{
         LIBRARY_CREATE_ENV, format_create_p50, format_create_stamp,
     };
-    use wimo ai_fast_worktree::{
+    use wimoai_fast_worktree::{
         CreationMode, NfsWorktreeOpts, WorkingTreeMode, WorktreeBuilder, remove_worktree,
     };
 
@@ -100,7 +100,7 @@ mod mac {
         cmd.stdin(Stdio::null())
             .stdout(Stdio::piped())
             .stderr(Stdio::null());
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         let Ok(out) = cmd.output() else {
             return 0;
         };
@@ -267,7 +267,7 @@ mod mac {
     }
 
     fn assert_clean_shape(src: &Path, expect: Option<usize>) -> Result<usize> {
-        let tracked = wimo ai_fast_worktree::count_tracked_files(src)
+        let tracked = wimoai_fast_worktree::count_tracked_files(src)
             .with_context(|| format!("count_tracked_files {}", src.display()))?;
         if let Some(n) = expect
             && tracked != n
@@ -340,7 +340,7 @@ mod mac {
     fn stamp_host() -> String {
         let mut cmd = Command::new("sw_vers");
         cmd.arg("-productVersion");
-        wimo ai_tty_utils::detach_std_command(&mut cmd);
+        wimoai_tty_utils::detach_std_command(&mut cmd);
         if let Ok(out) = cmd.output() {
             let v = String::from_utf8_lossy(&out.stdout).trim().to_string();
             if !v.is_empty() {

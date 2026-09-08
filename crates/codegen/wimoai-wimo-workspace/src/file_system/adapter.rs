@@ -1,4 +1,4 @@
-//! This adapter translates wimo ai-wimo-tools' `AsyncFileSystem` trait into ACP protocol calls:
+//! This adapter translates wimoai-wimo-tools' `AsyncFileSystem` trait into ACP protocol calls:
 //!   `read_file()` → read_text_file
 //!   `write_file()` → write_text_file
 //!   `delete_file()` → not supported by ACP (returns error)
@@ -8,10 +8,10 @@
 use std::path::Path;
 
 use agent_client_protocol as acp;
-use wimo ai_acp_lib::AcpAgentGatewaySender as GatewaySender;
-use wimo ai_wimo_tools::computer::types::{AsyncFileSystem, ComputerError};
+use wimoai_acp_lib::AcpAgentGatewaySender as GatewaySender;
+use wimoai_wimo_tools::computer::types::{AsyncFileSystem, ComputerError};
 
-/// Wraps wimo ai-wimo-shell's ACP gateway to satisfy wimo ai-wimo-tools' AsyncFileSystem.
+/// Wraps wimoai-wimo-shell's ACP gateway to satisfy wimoai-wimo-tools' AsyncFileSystem.
 ///
 /// When a client advertises `clientCapabilities.fs.readTextFile` and `writeTextFile`, tools stop hitting the local disk directly.
 /// File operations (read_file, search_replace, etc.) are routed through the ACP gateway back to the client.

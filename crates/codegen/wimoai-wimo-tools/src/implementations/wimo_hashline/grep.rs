@@ -194,28 +194,28 @@ impl crate::types::tool_metadata::ToolMetadata for HashlineGrepTool {
     }
 }
 
-impl wimo ai_tool_runtime::Tool for HashlineGrepTool {
+impl wimoai_tool_runtime::Tool for HashlineGrepTool {
     type Args = GrepSearchInput;
     type Output = GrepSearchOutput;
 
-    fn id(&self) -> wimo ai_tool_protocol::ToolId {
-        wimo ai_tool_protocol::ToolId::new("hashline_grep").expect("valid tool id")
+    fn id(&self) -> wimoai_tool_protocol::ToolId {
+        wimoai_tool_protocol::ToolId::new("hashline_grep").expect("valid tool id")
     }
 
     fn description(
         &self,
-        _ctx: &::wimo ai_tool_runtime::ListToolsContext,
-    ) -> wimo ai_tool_types::ToolDescription {
-        wimo ai_tool_types::ToolDescription::new(
+        _ctx: &::wimoai_tool_runtime::ListToolsContext,
+    ) -> wimoai_tool_types::ToolDescription {
+        wimoai_tool_types::ToolDescription::new(
             "hashline_grep",
             crate::types::tool_metadata::ToolMetadata::sanitized_description_template(self),
         )
     }
 
-    fn capabilities(&self) -> wimo ai_tool_protocol::ToolCapabilities {
-        wimo ai_tool_protocol::ToolCapabilities {
+    fn capabilities(&self) -> wimoai_tool_protocol::ToolCapabilities {
+        wimoai_tool_protocol::ToolCapabilities {
             is_read_only: true,
-            tool_scope: Some(wimo ai_tool_protocol::ToolScope::Read),
+            tool_scope: Some(wimoai_tool_protocol::ToolScope::Read),
             ..Default::default()
         }
     }
@@ -227,9 +227,9 @@ impl wimo ai_tool_runtime::Tool for HashlineGrepTool {
     )]
     async fn run(
         &self,
-        ctx: wimo ai_tool_runtime::ToolCallContext,
+        ctx: wimoai_tool_runtime::ToolCallContext,
         input: GrepSearchInput,
-    ) -> Result<GrepSearchOutput, wimo ai_tool_runtime::ToolError> {
+    ) -> Result<GrepSearchOutput, wimoai_tool_runtime::ToolError> {
         use crate::types::tool_metadata::shared_resources;
         let resources = shared_resources(&ctx)?;
 
@@ -238,15 +238,15 @@ impl wimo ai_tool_runtime::Tool for HashlineGrepTool {
         // Delegate to standard GrepTool for ripgrep execution.
         let grep = GrepTool;
         let cwd = crate::types::tool_metadata::resolve_cwd(&ctx, &resources).await?;
-        let call_id = wimo ai_tool_protocol::ToolCallId::new_v7();
-        let mut rt_ctx = wimo ai_tool_runtime::ToolCallContext::new(call_id);
+        let call_id = wimoai_tool_protocol::ToolCallId::new_v7();
+        let mut rt_ctx = wimoai_tool_runtime::ToolCallContext::new(call_id);
         rt_ctx.extensions.insert(resources.clone());
-        rt_ctx.extensions.insert(wimo ai_tool_runtime::Cwd(cwd));
-        let mut result = wimo ai_tool_runtime::Tool::run(&grep, rt_ctx, input)
+        rt_ctx.extensions.insert(wimoai_tool_runtime::Cwd(cwd));
+        let mut result = wimoai_tool_runtime::Tool::run(&grep, rt_ctx, input)
             .await
             .map_err(|e| {
-                wimo ai_tool_runtime::ToolError::execution(
-                    wimo ai_tool_protocol::ToolId::new("grep").expect("valid"),
+                wimoai_tool_runtime::ToolError::execution(
+                    wimoai_tool_protocol::ToolId::new("grep").expect("valid"),
                     e.to_string(),
                 )
             })?;
@@ -267,7 +267,7 @@ impl wimo ai_tool_runtime::Tool for HashlineGrepTool {
                 let scheme = params
                     .0
                     .build_scheme()
-                    .map_err(wimo ai_tool_runtime::ToolError::invalid_arguments)?;
+                    .map_err(wimoai_tool_runtime::ToolError::invalid_arguments)?;
                 (fs, scheme)
             };
             match tokio::time::timeout(
@@ -335,9 +335,9 @@ mod tests {
     fn tool_metadata() {
         use crate::types::tool_metadata::ToolMetadata;
         let tool = HashlineGrepTool;
-        assert_eq!(wimo ai_tool_runtime::Tool::id(&tool).as_str(), "hashline_grep");
+        assert_eq!(wimoai_tool_runtime::Tool::id(&tool).as_str(), "hashline_grep");
         assert_eq!(ToolMetadata::kind(&tool), ToolKind::Search);
-        assert!(wimo ai_tool_runtime::Tool::capabilities(&tool).is_read_only);
+        assert!(wimoai_tool_runtime::Tool::capabilities(&tool).is_read_only);
         assert!(matches!(
             ToolMetadata::tool_namespace(&tool),
             ToolNamespace::WimoHashline

@@ -36,7 +36,7 @@ impl Listener {
         let signals = proxy.receive_signal("PrepareForSleep").ok()?;
 
         thread::Builder::new()
-            .name("wimo ai-power-listener".into())
+            .name("wimoai-power-listener".into())
             .spawn(move || run_thread(proxy, signals, callback))
             .ok()?;
 

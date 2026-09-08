@@ -10,7 +10,7 @@ const T2: &str = "CLUSTER_SENTINEL_T2";
 /// The driver and viewer roles flip for the next turn.
 /// This is an in-process port of the `leader_two_clients_shared_session` PTY case.
 #[test]
-#[ignore = "leader-cluster: needs single-process isolation (process-global env + wimo_home OnceLock in the shared lib test binary); run: cargo test -p wimo ai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1"]
+#[ignore = "leader-cluster: needs single-process isolation (process-global env + wimo_home OnceLock in the shared lib test binary); run: cargo test -p wimoai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1"]
 #[serial_test::serial(wimo_HOME)]
 fn two_clients_share_session_and_stream_both_ways() {
     let rt = tokio::runtime::Builder::new_current_thread()
@@ -72,7 +72,7 @@ fn two_clients_share_session_and_stream_both_ways() {
 /// Live turns broadcast to every subscriber exactly once.
 /// Each viewer's attach replay is unicast; it never duplicates into the already-attached clients.
 #[test]
-#[ignore = "leader-cluster: needs single-process isolation (process-global env + wimo_home OnceLock in the shared lib test binary); run: cargo test -p wimo ai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1"]
+#[ignore = "leader-cluster: needs single-process isolation (process-global env + wimo_home OnceLock in the shared lib test binary); run: cargo test -p wimoai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1"]
 #[serial_test::serial(wimo_HOME)]
 fn n_client_fan_out_without_replay_duplication() {
     let rt = tokio::runtime::Builder::new_current_thread()
@@ -151,7 +151,7 @@ fn n_client_fan_out_without_replay_duplication() {
 /// The fresh client replays it exactly once, lands Idle, and no inference request is re-driven.
 /// This is an in-process port of `leader_reattach_completion_roundtrips_durable_log`.
 #[test]
-#[ignore = "leader-cluster: needs single-process isolation (process-global env + wimo_home OnceLock in the shared lib test binary); run: cargo test -p wimo ai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1"]
+#[ignore = "leader-cluster: needs single-process isolation (process-global env + wimo_home OnceLock in the shared lib test binary); run: cargo test -p wimoai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1"]
 #[serial_test::serial(wimo_HOME)]
 fn reattach_completion_roundtrips_durable_log() {
     let rt = tokio::runtime::Builder::new_current_thread()
@@ -227,7 +227,7 @@ fn reattach_completion_roundtrips_durable_log() {
 /// The reload driver mirrors the event loop's reconnect arm.
 /// Its `plan_reconnect_load` is event_loop-private, so the cwd and meta derivation is replicated inline.
 #[test]
-#[ignore = "leader-cluster: needs single-process isolation (process-global env + wimo_home OnceLock in the shared lib test binary); run: cargo test -p wimo ai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1"]
+#[ignore = "leader-cluster: needs single-process isolation (process-global env + wimo_home OnceLock in the shared lib test binary); run: cargo test -p wimoai-wimo-pager --lib -- app::leader_cluster --ignored --test-threads=1"]
 #[serial_test::serial(wimo_HOME)]
 fn leader_kill_reconnect_reloads_without_duplicating_history() {
     let rt = tokio::runtime::Builder::new_current_thread()
@@ -280,7 +280,7 @@ fn leader_kill_reconnect_reloads_without_duplicating_history() {
         let _: acp::AuthenticateResponse = bounded(
             "reconnect re-authenticate",
             acp_send(
-                acp::AuthenticateRequest::new(acp::AuthMethodId::new("wimo ai.api_key"))
+                acp::AuthenticateRequest::new(acp::AuthMethodId::new("wimoai.api_key"))
                     .meta(serde_json::json!({ "headless": true }).as_object().cloned()),
                 &a.app.acp_tx,
             ),

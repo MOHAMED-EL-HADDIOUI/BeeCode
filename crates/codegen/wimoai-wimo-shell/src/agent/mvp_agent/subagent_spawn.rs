@@ -16,7 +16,7 @@ impl MvpAgent {
             return;
         };
         let agent_ref = LocalRef::new(self);
-        let limits = wimo ai_wimo_tools::implementations::wimo::task::admission::SubagentLimits {
+        let limits = wimoai_wimo_tools::implementations::wimo::task::admission::SubagentLimits {
             max_concurrent: self.cfg.borrow().subagents_max_concurrent,
             behavior: self.cfg.borrow().subagents_limit_behavior,
         };
@@ -103,14 +103,14 @@ impl MvpAgent {
         let parent_depth = ps.map(|h| h.tool_context.subagent_depth).unwrap_or(0);
         let hunk_tracker_handle = ps
             .map(|h| h.tool_context.hunk_tracker_handle.clone())
-            .unwrap_or_else(wimo ai_hunk_tracker::HunkTrackerHandle::noop);
+            .unwrap_or_else(wimoai_hunk_tracker::HunkTrackerHandle::noop);
         let hunk_tracking_enabled = ps
             .map(|h| h.tool_context.hunk_tracking_enabled)
             .unwrap_or(false);
         let fs = ps
             .map(|h| h.tool_context.fs.inner().clone())
             .unwrap_or_else(|| {
-                std::sync::Arc::new(wimo ai_wimo_workspace::file_system::LocalFs::new(
+                std::sync::Arc::new(wimoai_wimo_workspace::file_system::LocalFs::new(
                     parent_cwd.clone(),
                 ))
             });
@@ -336,7 +336,7 @@ impl MvpAgent {
                 .as_ref()
                 .map(|h| h.tool_context.task_output_tool_name.clone())
                 .unwrap_or_else(|| {
-                    wimo ai_wimo_tools::reminders::task_completion::DEFAULT_TASK_OUTPUT_TOOL.to_string()
+                    wimoai_wimo_tools::reminders::task_completion::DEFAULT_TASK_OUTPUT_TOOL.to_string()
                 }),
             scheduler_delete_tool_name: parent_handle
                 .as_ref()

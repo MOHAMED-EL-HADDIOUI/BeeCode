@@ -6,7 +6,7 @@ use super::turn_end_hooks::TurnEnd;
 use super::turn_report_slot::{CommitOutcome, TurnReportState};
 use super::*;
 use crate::session::CancelTrigger;
-use wimo ai_wimo_hooks::event::{HookEventName, StopCancelledReason, StopFailureKind};
+use wimoai_wimo_hooks::event::{HookEventName, StopCancelledReason, StopFailureKind};
 
 #[derive(Default)]
 pub(super) struct RecordingLifecycle {
@@ -15,15 +15,15 @@ pub(super) struct RecordingLifecycle {
 }
 
 #[async_trait::async_trait(?Send)]
-impl wimo ai_agent_lifecycle::LocalTurnLifecycleContributor for RecordingLifecycle {
-    async fn on_turn_abort(&self, _input: &wimo ai_agent_lifecycle::TurnAbortInput) {
+impl wimoai_agent_lifecycle::LocalTurnLifecycleContributor for RecordingLifecycle {
+    async fn on_turn_abort(&self, _input: &wimoai_agent_lifecycle::TurnAbortInput) {
         self.aborts.set(self.aborts.get() + 1);
     }
 }
 
 #[async_trait::async_trait(?Send)]
-impl wimo ai_agent_lifecycle::LocalSessionLifecycleContributor for RecordingLifecycle {
-    async fn on_session_idle(&self, _input: &wimo ai_agent_lifecycle::SessionIdleInput) {
+impl wimoai_agent_lifecycle::LocalSessionLifecycleContributor for RecordingLifecycle {
+    async fn on_session_idle(&self, _input: &wimoai_agent_lifecycle::SessionIdleInput) {
         self.idles.set(self.idles.get() + 1);
     }
 }
@@ -31,12 +31,12 @@ impl wimo ai_agent_lifecycle::LocalSessionLifecycleContributor for RecordingLife
 struct Harness {
     actor: Arc<SessionActor>,
     lifecycle: std::rc::Rc<RecordingLifecycle>,
-    gateway: Option<tokio::sync::mpsc::UnboundedReceiver<wimo ai_acp_lib::AcpClientMessage>>,
+    gateway: Option<tokio::sync::mpsc::UnboundedReceiver<wimoai_acp_lib::AcpClientMessage>>,
     events: Option<tokio::sync::mpsc::UnboundedReceiver<SessionEvent>>,
     /// Stands in for the one `run_session` owns; [`Self::spawn_loop`] retires it.
     queue: Option<super::turn_end_hooks::TurnEndQueue>,
     /// Held only so the loop does not see its chat channel close.
-    chat: Option<tokio::sync::mpsc::UnboundedSender<wimo ai_chat_state::ChatStateEvent>>,
+    chat: Option<tokio::sync::mpsc::UnboundedSender<wimoai_chat_state::ChatStateEvent>>,
 }
 
 impl Harness {
@@ -62,7 +62,7 @@ impl Harness {
             actor.startup_hints.subagent_type = Some("explore".into());
         }
         let lifecycle = std::rc::Rc::new(RecordingLifecycle::default());
-        let mut builder = wimo ai_agent_lifecycle::LocalExtensionRegistryBuilder::default();
+        let mut builder = wimoai_agent_lifecycle::LocalExtensionRegistryBuilder::default();
         builder.turn_lifecycle_contributor(lifecycle.clone());
         builder.session_lifecycle_contributor(lifecycle.clone());
         actor.extension_registry = builder.build();
@@ -115,13 +115,13 @@ impl Harness {
         tokio::task::spawn_local(async move {
             while let Some(msg) = gateway.recv().await {
                 match msg {
-                    wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) => {
+                    wimoai_acp_lib::AcpClientMessage::ExtNotification(args) => {
                         if args.request.method.as_ref() == "x.ai/hooks/event" {
                             sink.borrow_mut()
                                 .push(serde_json::from_str(args.request.params.get()).unwrap());
                         }
                     }
-                    wimo ai_acp_lib::AcpClientMessage::SessionNotification(args) => {
+                    wimoai_acp_lib::AcpClientMessage::SessionNotification(args) => {
                         let _ = args.response_tx.send(Ok(()));
                     }
                     _ => {}
@@ -135,7 +135,7 @@ impl Harness {
             events,
             None,
             Arc::new(parking_lot::Mutex::new(
-                wimo ai_wimo_workspace::file_system::CodebaseIndexManager::new(),
+                wimoai_wimo_workspace::file_system::CodebaseIndexManager::new(),
             )),
             std::path::PathBuf::from("/tmp"),
             crate::session::fs_watch::FsWatchCapabilities::none(),
@@ -229,7 +229,7 @@ impl Harness {
             .expect("the loop owns the gateway; assert on the sink it returns");
         let mut events = Vec::new();
         while let Ok(msg) = gateway.try_recv() {
-            if let wimo ai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
+            if let wimoai_acp_lib::AcpClientMessage::ExtNotification(args) = msg
                 && args.request.method.as_ref() == "x.ai/hooks/event"
             {
                 events.push(serde_json::from_str(args.request.params.get()).unwrap());
@@ -420,7 +420,7 @@ async fn a_rewind_reports_nothing_but_still_settles_the_session() {
 async fn a_turn_announces_its_abort_once() {
     run(async {
         let h = Harness::new().await;
-        let interrupted = wimo ai_agent_lifecycle::TurnAbortReason::Interrupted;
+        let interrupted = wimoai_agent_lifecycle::TurnAbortReason::Interrupted;
         let first = h.actor.turn_report.epoch();
         h.actor.notify_turn_abort(first, interrupted).await;
         h.actor.notify_turn_abort(first, interrupted).await;
@@ -447,13 +447,13 @@ async fn a_subagent_session_end_names_the_child() {
 
         let mut parent = Harness::new().await;
         parent.listen(&events);
-        let timer = wimo ai_wimo_telemetry::session_end::SessionEndTimer::new_shared();
+        let timer = wimoai_wimo_telemetry::session_end::SessionEndTimer::new_shared();
         super::run_loop::fire_session_end_hooks(&parent.actor, "shutdown", &timer).await;
         assert_eq!(parent.fired(), vec!["session_end", "stop"]);
 
         let mut child = Harness::subagent().await;
         child.listen(&events);
-        let child_timer = wimo ai_wimo_telemetry::session_end::SessionEndTimer::new_shared();
+        let child_timer = wimoai_wimo_telemetry::session_end::SessionEndTimer::new_shared();
         super::run_loop::fire_session_end_hooks(&child.actor, "shutdown", &child_timer).await;
         let fired = child.fired_payloads();
         assert_eq!(
@@ -697,7 +697,7 @@ async fn dropping_the_queue_leaves_nothing_reportable() {
 #[tokio::test(flavor = "current_thread")]
 async fn a_long_assistant_message_is_clipped() {
     run(async {
-        let over = wimo ai_wimo_hooks::event::MAX_ASSISTANT_MESSAGE_CHARS + 500;
+        let over = wimoai_wimo_hooks::event::MAX_ASSISTANT_MESSAGE_CHARS + 500;
         // Four bytes a char, the UTF-8 worst case the char budget is derived from.
         let long = || ConversationItem::assistant("\u{1f642}".repeat(over));
         let assert_clipped = |text: &str| {
@@ -707,7 +707,7 @@ async fn a_long_assistant_message_is_clipped() {
                 text.chars().count()
             );
             assert!(
-                text.chars().count() <= wimo ai_wimo_hooks::event::MAX_ASSISTANT_MESSAGE_CHARS + 32,
+                text.chars().count() <= wimoai_wimo_hooks::event::MAX_ASSISTANT_MESSAGE_CHARS + 32,
                 "{} chars",
                 text.chars().count()
             );
@@ -730,7 +730,7 @@ async fn a_long_assistant_message_is_clipped() {
         let sub = Harness::subagent().await;
         sub.actor.chat_state_handle.push_assistant_response(long());
         sub.start_turn("p1").await;
-        let wimo ai_wimo_hooks::event::HookPayload::SubagentStop {
+        let wimoai_wimo_hooks::event::HookPayload::SubagentStop {
             last_assistant_message,
             ..
         } = sub.actor.stop_payload_for_test().await
@@ -951,12 +951,12 @@ async fn a_completion_reports_its_own_cancel_reason() {
             (
                 "cancelTrigger",
                 "ctrl_c",
-                wimo ai_wimo_hooks::event::MAX_CANCEL_TRIGGER_CHARS,
+                wimoai_wimo_hooks::event::MAX_CANCEL_TRIGGER_CHARS,
             ),
             (
                 "reasonDetails",
                 "read_file: ",
-                wimo ai_wimo_hooks::event::MAX_STOP_ENTRY_TEXT_CHARS,
+                wimoai_wimo_hooks::event::MAX_STOP_ENTRY_TEXT_CHARS,
             ),
         ] {
             let text = fired[1][field]

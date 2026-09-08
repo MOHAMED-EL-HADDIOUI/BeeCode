@@ -1,6 +1,6 @@
 //! Home-directory resolution generally: USERPROFILE-first `home_dir`, plus
-//! wimo-home (`$wimo_HOME` or `<home>/.wimo`). Shared by `wimo ai-wimo-config`
-//! and `wimo ai-fast-worktree`.
+//! wimo-home (`$wimo_HOME` or `<home>/.wimo`). Shared by `wimoai-wimo-config`
+//! and `wimoai-fast-worktree`.
 //!
 //! Which function to call:
 //! - [`wimo_home`]: the usual choice, a cached, created path to build on.
