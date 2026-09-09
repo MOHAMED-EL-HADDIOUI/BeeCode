@@ -206,31 +206,29 @@ fn finalize_overlay(
     Some((overlay, source, sections))
 }
 
+/// Parse a JSON config layer (object) into a `toml::Value` table.
+/// Shared by the `wimo_CONFIG` overlay and the project `.wimo/settings.json` layer.
+/// `null`s are stripped (they mean "unset"); anything not representable as a
+/// TOML table is rejected. Never logs content (it may carry secrets).
+pub(crate) fn parse_json_layer(raw: &str) -> Option<toml::Value> {
+    let mut json: serde_json::Value = serde_json::from_str(raw).ok()?;
+    strip_json_nulls(&mut json);
+    let value = toml::Value::try_from(json).ok()?;
+    value.is_table().then_some(value)
+}
+
 fn parse_overlay(raw: &str, format: OverlayFormat, source: &str) -> Option<toml::Value> {
     let value = match format {
-        OverlayFormat::Json => {
-            let mut json: serde_json::Value = match serde_json::from_str(raw) {
-                Ok(json) => json,
-                Err(_) => {
-                    tracing::warn!(
-                        source,
-                        "config overlay is not valid JSON; ignoring the overlay"
-                    );
-                    return None;
-                }
-            };
-            strip_json_nulls(&mut json);
-            match toml::Value::try_from(json) {
-                Ok(v) => v,
-                Err(_) => {
-                    tracing::warn!(
-                        source,
-                        "config overlay JSON is not representable as TOML; ignoring the overlay"
-                    );
-                    return None;
-                }
+        OverlayFormat::Json => match parse_json_layer(raw) {
+            Some(v) => v,
+            None => {
+                tracing::warn!(
+                    source,
+                    "config overlay is not valid JSON or not representable as TOML; ignoring the overlay"
+                );
+                return None;
             }
-        }
+        },
         OverlayFormat::Toml => match toml::from_str::<toml::Value>(raw) {
             Ok(v) => v,
             Err(_) => {

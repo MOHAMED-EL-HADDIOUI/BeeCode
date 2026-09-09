@@ -2943,11 +2943,10 @@ fn build_agent_with_api_key_auth_disabled() -> MvpAgent {
     MvpAgent::new(gateway, &cfg, auth_manager, None).expect("valid test config")
 }
 /// Deployment-key / managed-config user: `wimoai_API_KEY` resolves and the kill switch is off.
-/// A dead `cached_token` MUST then fall through to `wimoai.api_key` (no browser).
-/// This is the exact regression the fallthrough fixes.
+/// A dead session credential MUST then fall through to `wimoai.api_key` (no browser).
 #[tokio::test(flavor = "current_thread")]
 #[serial_test::serial]
-async fn cached_token_fallthrough_prefers_api_key_for_deployment_key() {
+async fn api_key_fallthrough_prefers_api_key_for_deployment_key() {
     use crate::agent::auth_method::{wimoai_API_KEY_ENV_VAR, wimoai_API_KEY_METHOD_ID};
     use wimoai_wimo_test_support::EnvGuard;
     let _lockdown = EnvGuard::unset("wimo_DISABLE_API_KEY_AUTH");
@@ -2955,41 +2954,37 @@ async fn cached_token_fallthrough_prefers_api_key_for_deployment_key() {
     let agent = build_minimal_agent_for_tests();
     assert_eq!(
         agent
-            .cached_token_fallthrough_method_id()
+            .api_key_fallthrough_method_id()
             .as_ref()
             .map(|id| id.0.as_ref()),
         Some(wimoai_API_KEY_METHOD_ID),
         "deployment-key user (wimoai_API_KEY set, no kill switch) must fall \
-         through to wimoai.api_key on a dead cached_token -- not interactive login",
+         through to wimoai.api_key -- there is no interactive login anymore",
     );
 }
-/// Forced-IdP deployment: even with `wimoai_API_KEY` present, the admin kill switch keeps the fallthrough on interactive `wimo.com`.
-/// Api-key auth is neither advertised nor an eligible fallthrough.
+/// Forced-IdP deployment: even with `wimoai_API_KEY` present, the admin kill switch disables key auth.
+/// With interactive login removed, the fallthrough is `None` (fail-closed).
 #[tokio::test(flavor = "current_thread")]
 #[serial_test::serial]
-async fn cached_token_fallthrough_respects_kill_switch() {
-    use crate::agent::auth_method::{wimo_COM_METHOD_ID, wimoai_API_KEY_ENV_VAR};
+async fn api_key_fallthrough_respects_kill_switch() {
+    use crate::agent::auth_method::wimoai_API_KEY_ENV_VAR;
     use wimoai_wimo_test_support::EnvGuard;
     let _lockdown = EnvGuard::unset("wimo_DISABLE_API_KEY_AUTH");
     let _key = EnvGuard::set(wimoai_API_KEY_ENV_VAR, "test-deployment-key");
     let agent = build_agent_with_api_key_auth_disabled();
     assert_eq!(
-        agent
-            .cached_token_fallthrough_method_id()
-            .as_ref()
-            .map(|id| id.0.as_ref()),
-        Some(wimo_COM_METHOD_ID),
-        "disable_api_key_auth must keep the cached_token fallthrough on \
-         interactive wimo.com so wimoai_API_KEY can't bypass forced IdP login",
+        agent.api_key_fallthrough_method_id(),
+        None,
+        "disable_api_key_auth must leave no fallthrough target: key auth is \
+         off and interactive login was removed",
     );
 }
-/// No advertiseable credentials at all (no env key, no kill switch): the user genuinely needs to log in.
-/// The fallthrough is interactive `wimo.com`.
+/// No advertiseable credentials at all (no env key, no kill switch): fail-closed, no login target.
 #[tokio::test(flavor = "current_thread")]
 #[serial_test::serial]
-async fn cached_token_fallthrough_falls_to_wimo_com_without_credentials() {
+async fn api_key_fallthrough_fails_closed_without_credentials() {
     use crate::agent::auth_method::{
-        wimo_COM_METHOD_ID, LEGACY_wimoai_API_KEY_ENV_VAR, wimoai_API_KEY_ENV_VAR,
+        LEGACY_wimoai_API_KEY_ENV_VAR, wimoai_API_KEY_ENV_VAR,
     };
     use wimoai_wimo_test_support::EnvGuard;
     let _lockdown = EnvGuard::unset("wimo_DISABLE_API_KEY_AUTH");
@@ -2997,12 +2992,9 @@ async fn cached_token_fallthrough_falls_to_wimo_com_without_credentials() {
     let _legacy = EnvGuard::unset(LEGACY_wimoai_API_KEY_ENV_VAR);
     let agent = build_minimal_agent_for_tests();
     assert_eq!(
-        agent
-            .cached_token_fallthrough_method_id()
-            .as_ref()
-            .map(|id| id.0.as_ref()),
-        Some(wimo_COM_METHOD_ID),
-        "no API-key creds and no kill switch -> interactive wimo.com login",
+        agent.api_key_fallthrough_method_id(),
+        None,
+        "no API-key creds and no kill switch -> None (no interactive login exists)",
     );
 }
 /// Verifies the 4-state matrix of `(disable_zdr_incompatible_tools, zdr_video_output_s3)`:

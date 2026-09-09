@@ -29,12 +29,27 @@ cargo fmt --all                                          # rustfmt.toml; `use_fi
 - Windows: run tests single-threaded (`cargo test -p <crate> -- --test-threads=1`).
   The default parallel harness stalls with no output (verified on `wimoai-wimo-config`:
   190/190 pass individually in <1 min, parallel run hangs indefinitely).
+- Windows env failures (pre-existing, unrelated to the provider rework):
+  `wimoai-wimo-config` `managed_text::*` (temp-file locking) and any test
+  using the `test_counting_provider` shell-out (needs a POSIX shell) fail.
 
 ## Architecture entry points
 - `crates/codegen/wimoai-wimo-pager-bin/` — composition root; binary `wimoai-wimo-pager`. Exists to break the `pager ↔ pager-minimal` dependency cycle (minimal-mode hooks installed via fn-pointer seam at startup).
 - `wimoai-wimo-pager` — TUI (scrollback, prompt, modals, rendering); `wimoai-wimo-shell` — agent runtime + leader/stdio/headless entry points; `wimoai-wimo-tools` — tool impls (bundles pinned rg/fd binaries in release via `build.rs`); `wimoai-wimo-workspace` — filesystem/VCS/execution/checkpoints.
 - `crates/build/wimoai-proto-build` — protobuf codegen helper.
 - User guide ships in-crate: `crates/codegen/wimoai-wimo-pager/docs/user-guide/`.
+
+## Providers & auth (differs from upstream)
+- LLM config comes from project `.wimo/settings.json` (walk-up from CWD,
+  nearest wins), merged into the user tier above `~/.wimo/config.toml` and
+  below `wimo_CONFIG` overlays / requirements. Same shape as `config.toml`
+  in JSON: `[models] default` + `[model.<name>]` (OpenAI `responses` /
+  `chat_completions`, Anthropic `messages` backends).
+- Auth is provider API keys only (`[model.*]` `api_key`/`env_key`,
+  `wimoai_API_KEY` fallback). Session login (`wimo.com`, `oidc`,
+  `cached_token`), `wimo login/logout` CLI + `/login`/`/logout` slash
+  commands are removed — only `wimoai.api_key` is ever advertised.
+  The OAuth/device-code machinery underneath is dormant, not deleted.
 
 ## Clippy bans (`clippy.toml`, enforced on `crates/codegen/**`)
 - No `std::fs::canonicalize` / `Path::canonicalize` / `tokio::fs::canonicalize` — Windows `\\?\` verbatim paths. Use `dunce::canonicalize` (or the `wimoai-wimo-tools` fs helpers).

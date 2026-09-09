@@ -84,6 +84,12 @@ impl ConfigLayers {
         let managed_campaigns = take_campaign_entries(&mut managed, "managed");
 
         let mut user = load_from_disk()?;
+        // Project `.wimo/settings.json` folds into the user tier above
+        // `config.toml` (below the `wimo_CONFIG` overlay and requirements).
+        // Full-power like `config.toml`: only run wimo in projects you trust.
+        if let Some(project) = crate::project_settings::load_project_settings() {
+            deep_merge_toml(&mut user, &project);
+        }
         let user_campaigns = take_campaign_entries(&mut user, "user");
 
         let env_overlay = crate::env_overlay::load_env_overlay();

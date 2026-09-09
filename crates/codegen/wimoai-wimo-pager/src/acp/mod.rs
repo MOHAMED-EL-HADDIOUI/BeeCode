@@ -989,12 +989,6 @@ mod tests {
         let built = build_auth_methods(AuthMethodsBuildInputs {
             // Enterprise-style: model has `env_key` set and the env var resolves, so the shell-side predicate returns true
             has_external_api_key: true,
-            // Realistic enterprise user: no cached session token, default `wimo.com` login (no enterprise OIDC)
-            has_cached_token: false,
-            has_enterprise_oidc: false,
-            enterprise_oidc_issuer: None,
-            login_label: None,
-            has_auth_provider_command: false,
             preferred_method: None,
         });
 

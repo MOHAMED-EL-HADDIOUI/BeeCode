@@ -82,98 +82,58 @@ where
 /// Inputs to [`build_auth_methods`].
 ///
 /// The caller (`MvpAgent::initialize()`) computes the booleans.
-/// They depend on async side effects (token refresh) and shared mutable state (`AuthManager`).
 /// The list-construction logic itself is pure so it can be unit-tested without any of that machinery.
-pub struct AuthMethodsBuildInputs<'a> {
-    /// True if `wimoai.api_key` should be advertised AT ALL.
-    /// Login/initialize callers compute it via [`should_advertise_wimoai_api_key_with_env_ok`] after the validity probe.
-    /// Presence-only paths may use [`should_advertise_wimoai_api_key`].
-    /// When `preferred_method` is `Oidc`, this is ignored (API key is never advertised under that pin).
+///
+/// Interactive session login (`wimo.com`, `oidc`, `cached_token`) was removed:
+/// authentication is provider API keys only (per-model `[model.*]`
+/// `api_key`/`env_key` from `.wimo/settings.json` or `config.toml`, or the
+/// `wimoai_API_KEY` fallback). There is deliberately no other variant to
+/// advertise, so an empty method list means "no usable key" (fail auth).
+pub struct AuthMethodsBuildInputs {
+    /// True if API-key credentials are available (per-model keys or the
+    /// `wimoai_API_KEY` env fallback). Computed via
+    /// [`should_advertise_wimoai_api_key_with_env_ok`].
+    /// When `preferred_method` is `Oidc`, this is ignored (fail-closed).
     pub has_external_api_key: bool,
-    /// True if a cached session token is available (either present at startup or recovered via silent refresh).
-    pub has_cached_token: bool,
-    /// True if enterprise OIDC is configured.
-    /// Mutually exclusive with the default `wimo.com` method.
-    pub has_enterprise_oidc: bool,
-    /// Required when `has_enterprise_oidc` is true; ignored otherwise.
-    pub enterprise_oidc_issuer: Option<&'a str>,
-    /// Optional display label for the login method (`wimo.com` or `oidc`).
-    pub login_label: Option<&'a str>,
-    /// True if `wimo_com_config.auth_provider_command` is configured (sets `meta.external_provider = true` on the `wimo.com` method).
-    pub has_auth_provider_command: bool,
     /// Config pin (`[auth] preferred_method`).
-    /// `None` keeps multi-method fallthrough; `Some` is fail-closed (only that method family).
+    /// `None` keeps the single key method; `Oidc` fails closed (only an empty
+    /// list and `None`, since interactive login no longer exists).
     pub preferred_method: Option<PreferredAuthMethod>,
 }
 
 /// Output of [`build_auth_methods`].
 pub struct BuiltAuthMethods {
-    /// Auth methods in advertised order.
-    /// ORDER IS THE CONTRACT: the pager's `startup_auth_metadata()` reads `methods.first()` to decide whether interactive login is needed.
+    /// Auth methods in advertised order: either exactly [`wimoai_API_KEY_METHOD_ID`]
+    /// or empty. ORDER IS THE CONTRACT: the pager's `startup_auth_metadata()`
+    /// reads `methods.first()` to decide whether interactive login is needed —
+    /// with only the key method ever advertised, the login screen never shows.
     pub methods: Vec<acp::AuthMethod>,
-    /// The default `auth_method_id` to install on the agent.
-    /// When unpinned, `cached_token` wins over `wimoai.api_key` when both are present.
-    /// When pinned, only the preferred method may appear; `None` means unavailable (fail auth, no cross-method fallthrough).
+    /// The default `auth_method_id` to install on the agent:
+    /// `wimoai.api_key` when advertised, else `None` (fail auth).
     pub default_auth_method_id: Option<acp::AuthMethodId>,
 }
 
 /// Build the `auth_methods` list and default `auth_method_id` from pre-computed inputs.
 ///
-/// REGRESSION GUARD: when unpinned and `has_external_api_key` is true, the **first** entry MUST be `wimoai.api_key`.
-/// A prior change deferred it to the END for per-model credentials, which made the pager send per-model-key users to the login screen.
-/// Unit tests lock this.
+/// Only one method family exists: provider API keys (`wimoai.api_key`, covering
+/// per-model `[model.*]` credentials and the `wimoai_API_KEY` fallback).
+/// Session login (`cached_token`, `wimo.com`, `oidc`) was removed, so:
 ///
-/// Unpinned ordering (when each method is enabled):
-/// 1. `wimoai.api_key`     (if `has_external_api_key`)
-/// 2. `cached_token`    (if `has_cached_token`)
-/// 3. exactly one of:
-///    - `oidc`          (if `has_enterprise_oidc`)
-///    - `wimo.com`      (otherwise)
-///
-/// Unpinned `default_auth_method_id`:
-/// - `cached_token` if `has_cached_token`
-/// - `wimoai.api_key`  else if `has_external_api_key`
-/// - `None`         otherwise
-///
-/// Pinned (`preferred_method`):
-/// - `ApiKey`: only `wimoai.api_key` if available; else an empty list and `None` (fail).
-/// - `Oidc`: `cached_token` (if any) then interactive login; never `wimoai.api_key`.
-///   Default is `cached_token` when present, else `None` (interactive).
-pub fn build_auth_methods(inputs: AuthMethodsBuildInputs<'_>) -> BuiltAuthMethods {
+/// - unpinned with credentials: `[wimoai.api_key]`, default `wimoai.api_key`
+/// - unpinned without credentials: `[]`, default `None` (fail with a
+///   key-configuration error, never a login screen)
+/// - pinned `api_key`: same as unpinned
+/// - pinned `oidc`: `[]`, default `None` (fail-closed; interactive login no
+///   longer exists, so the pin can never be satisfied)
+pub fn build_auth_methods(inputs: AuthMethodsBuildInputs) -> BuiltAuthMethods {
     let AuthMethodsBuildInputs {
         has_external_api_key,
-        has_cached_token,
-        has_enterprise_oidc,
-        enterprise_oidc_issuer,
-        login_label,
-        has_auth_provider_command,
         preferred_method,
     } = inputs;
 
-    match preferred_method {
-        Some(PreferredAuthMethod::ApiKey) => build_pinned_api_key(has_external_api_key),
-        Some(PreferredAuthMethod::Oidc) => build_pinned_oidc(
-            has_cached_token,
-            has_enterprise_oidc,
-            enterprise_oidc_issuer,
-            login_label,
-            has_auth_provider_command,
-        ),
-        None => build_unpinned(
-            has_external_api_key,
-            has_cached_token,
-            has_enterprise_oidc,
-            enterprise_oidc_issuer,
-            login_label,
-            has_auth_provider_command,
-        ),
-    }
-}
-
-fn build_pinned_api_key(has_external_api_key: bool) -> BuiltAuthMethods {
-    if !has_external_api_key {
+    if preferred_method == Some(PreferredAuthMethod::Oidc) {
         wimoai_wimo_telemetry::unified_log::warn(
-            "auth: preferred_method=api_key but no API key credentials available",
+            "auth: preferred_method=oidc is no longer supported (interactive login was removed)",
             None,
             None,
         );
@@ -182,104 +142,15 @@ fn build_pinned_api_key(has_external_api_key: bool) -> BuiltAuthMethods {
             default_auth_method_id: None,
         };
     }
+    if !has_external_api_key {
+        return BuiltAuthMethods {
+            methods: Vec::new(),
+            default_auth_method_id: None,
+        };
+    }
     BuiltAuthMethods {
         methods: vec![wimoai_api_key_auth_method()],
         default_auth_method_id: Some(acp::AuthMethodId::new(wimoai_API_KEY_METHOD_ID)),
-    }
-}
-
-fn build_pinned_oidc(
-    has_cached_token: bool,
-    has_enterprise_oidc: bool,
-    enterprise_oidc_issuer: Option<&str>,
-    login_label: Option<&str>,
-    has_auth_provider_command: bool,
-) -> BuiltAuthMethods {
-    let mut methods: Vec<acp::AuthMethod> = Vec::new();
-    let mut default_auth_method_id: Option<acp::AuthMethodId> = None;
-
-    if has_cached_token {
-        methods.push(cached_token_auth_method());
-        default_auth_method_id = Some(acp::AuthMethodId::new(CACHED_TOKEN_AUTH_METHOD_ID));
-    }
-
-    push_interactive_login(
-        &mut methods,
-        has_enterprise_oidc,
-        enterprise_oidc_issuer,
-        login_label,
-        has_auth_provider_command,
-    );
-
-    BuiltAuthMethods {
-        methods,
-        default_auth_method_id,
-    }
-}
-
-fn build_unpinned(
-    has_external_api_key: bool,
-    has_cached_token: bool,
-    has_enterprise_oidc: bool,
-    enterprise_oidc_issuer: Option<&str>,
-    login_label: Option<&str>,
-    has_auth_provider_command: bool,
-) -> BuiltAuthMethods {
-    let mut methods: Vec<acp::AuthMethod> = Vec::new();
-    let mut default_auth_method_id: Option<acp::AuthMethodId> = None;
-
-    if has_external_api_key {
-        methods.push(wimoai_api_key_auth_method());
-        default_auth_method_id = Some(acp::AuthMethodId::new(wimoai_API_KEY_METHOD_ID));
-    }
-
-    if has_cached_token {
-        methods.push(cached_token_auth_method());
-        // cached_token wins over wimoai.api_key for default_auth_method_id so is_session_based_auth() returns true and OIDC refresh stays alive
-        let overrode_api_key = default_auth_method_id.is_some();
-        default_auth_method_id = Some(acp::AuthMethodId::new(CACHED_TOKEN_AUTH_METHOD_ID));
-        if overrode_api_key {
-            wimoai_wimo_telemetry::unified_log::info(
-                "auth method priority: cached_token overrides wimoai.api_key for default_auth_method_id",
-                None,
-                Some(serde_json::json!({
-                    "has_external_api_key": has_external_api_key,
-                    "has_cached_token": has_cached_token,
-                })),
-            );
-        }
-    }
-
-    push_interactive_login(
-        &mut methods,
-        has_enterprise_oidc,
-        enterprise_oidc_issuer,
-        login_label,
-        has_auth_provider_command,
-    );
-
-    BuiltAuthMethods {
-        methods,
-        default_auth_method_id,
-    }
-}
-
-fn push_interactive_login(
-    methods: &mut Vec<acp::AuthMethod>,
-    has_enterprise_oidc: bool,
-    enterprise_oidc_issuer: Option<&str>,
-    login_label: Option<&str>,
-    has_auth_provider_command: bool,
-) {
-    if has_enterprise_oidc {
-        // Caller invariant: `enterprise_oidc_issuer` MUST be `Some(...)` when `has_enterprise_oidc` is true
-        // Production callers derive both from the same `cfg.wimo_com_config.oidc` Option
-        // The inconsistent `(true, None)` combination is a programmer error, so panic loudly
-        let issuer = enterprise_oidc_issuer
-            .expect("enterprise_oidc_issuer is required when has_enterprise_oidc is true");
-        methods.push(oidc_auth_method(issuer, login_label));
-    } else {
-        methods.push(wimo_com_auth_method(login_label, has_auth_provider_command));
     }
 }
 
@@ -373,36 +244,34 @@ pub(crate) fn session_token_auth_gate(
 }
 
 pub const AUTH_ERROR_SESSION_EXPIRED: &str =
-    "Session expired. Run `wimo login` to re-authenticate.";
+    "Session expired. Re-check your provider API key in .wimo/settings.json ([model.*] api_key/env_key) or its environment variable.";
 
-pub const AUTH_ERROR_API_KEY: &str = "Authentication failed. Run `wimo login`, set wimoai_API_KEY, or add api_key to ~/.wimo/config.toml.";
+pub const AUTH_ERROR_API_KEY: &str = "Authentication failed. Add your provider API key to .wimo/settings.json ([model.*] api_key/env_key) or set the corresponding environment variable.";
 
-/// Next ACP method id when `cached_token` cannot proceed (missing / expired / legacy WebLogin), or `None` when fallthrough is forbidden.
+/// Next ACP method id when no session credential can proceed, or `None` when
+/// no key credentials exist. Interactive login was removed, so there is no
+/// interactive fallthrough: the only target is non-interactive `wimoai.api_key`.
 ///
-/// Unpinned: prefer non-interactive `wimoai.api_key` when advertiseable, else interactive `wimo.com`.
-///
-/// Pinned `oidc`: **no** fallthrough to api_key; return `None` so the caller fails auth.
-/// Pinned `api_key` should not reach this path (cached_token is not advertised).
-pub(crate) fn method_id_after_cached_token_unavailable(
+/// Pinned `oidc` always fails closed (`None`); every other pin falls through
+/// to the key method when advertiseable.
+pub(crate) fn api_key_fallthrough_method_id(
     has_external_api_key: bool,
     preferred_method: Option<PreferredAuthMethod>,
 ) -> Option<&'static str> {
     match preferred_method {
-        Some(PreferredAuthMethod::Oidc) | Some(PreferredAuthMethod::ApiKey) => None,
-        None => Some(if has_external_api_key {
-            wimoai_API_KEY_METHOD_ID
-        } else {
-            wimo_COM_METHOD_ID
-        }),
+        Some(PreferredAuthMethod::Oidc) => None,
+        _ if has_external_api_key => Some(wimoai_API_KEY_METHOD_ID),
+        _ => None,
     }
 }
 
 /// Error when `preferred_method=api_key` but no key/BYOK credentials exist.
-pub const PREFERRED_API_KEY_UNAVAILABLE: &str = "preferred_method=api_key but no API key is configured (set wimoai_API_KEY or model api_key/env_key in config.toml).";
+pub const PREFERRED_API_KEY_UNAVAILABLE: &str = "preferred_method=api_key but no API key is configured (set a provider env var or model api_key/env_key in .wimo/settings.json).";
 
 /// Error when `preferred_method=oidc` but the session path cannot proceed.
+/// Interactive login was removed, so this pin can never be satisfied.
 pub const PREFERRED_OIDC_UNAVAILABLE: &str =
-    "preferred_method=oidc but no session is available. Run `wimo login` to authenticate.";
+    "preferred_method=oidc is no longer supported (interactive login was removed). Use preferred_method=api_key with provider keys in .wimo/settings.json.";
 
 pub const wimoai_API_KEY_METHOD_ID: &str = "wimoai.api_key";
 pub(crate) fn wimoai_api_key_auth_method() -> acp::AuthMethod {
@@ -412,54 +281,20 @@ pub(crate) fn wimoai_api_key_auth_method() -> acp::AuthMethod {
             "wimoai.api_key".to_string(),
         )
         .description(Some(format!(
-            "{wimoai_API_KEY_ENV_VAR} or api_key/env_key in config.toml"
+            "{wimoai_API_KEY_ENV_VAR} or api_key/env_key in .wimo/settings.json"
         ))),
     )
 }
 
+/// Session-login method ids (`cached_token`, `wimo.com`, `oidc`) are never
+/// advertised anymore (interactive login was removed), but the ids stay
+/// reserved so persisted selections and wire traffic keep classifying
+/// correctly via [`AuthMethodKind`].
 pub const CACHED_TOKEN_AUTH_METHOD_ID: &str = "cached_token";
-pub(crate) fn cached_token_auth_method() -> acp::AuthMethod {
-    acp::AuthMethod::Agent(
-        acp::AuthMethodAgent::new(
-            acp::AuthMethodId::new(CACHED_TOKEN_AUTH_METHOD_ID),
-            "cached_token".to_string(),
-        )
-        .description(Some("Cached token from ~/.wimo/auth.json".to_string())),
-    )
-}
 
 pub const wimo_COM_METHOD_ID: &str = "wimo.com";
 
-/// wimo AI OAuth2/OIDC auth. Method id `"wimo.com"` kept for ACP wire compatibility.
-pub(crate) fn wimo_com_auth_method(
-    label: Option<&str>,
-    has_auth_provider_command: bool,
-) -> acp::AuthMethod {
-    let name = label.unwrap_or("wimo");
-    let meta = if has_auth_provider_command {
-        let mut m = acp::Meta::new();
-        m.insert("external_provider".to_owned(), serde_json::json!(true));
-        Some(m)
-    } else {
-        None
-    };
-    acp::AuthMethod::Agent(
-        acp::AuthMethodAgent::new(acp::AuthMethodId::new(wimo_COM_METHOD_ID), name.to_string())
-            .description(Some(format!("Sign in with {name}")))
-            .meta(meta),
-    )
-}
-
 pub const OIDC_METHOD_ID: &str = "oidc";
-pub(crate) fn oidc_auth_method(issuer: &str, label: Option<&str>) -> acp::AuthMethod {
-    let name = label
-        .map(|l| l.to_string())
-        .unwrap_or_else(|| format!("Single sign-on ({})", issuer));
-    acp::AuthMethod::Agent(
-        acp::AuthMethodAgent::new(acp::AuthMethodId::new(OIDC_METHOD_ID), name.clone())
-            .description(Some(format!("Sign in with {name}"))),
-    )
-}
 
 #[cfg(test)]
 mod tests {
@@ -468,36 +303,40 @@ mod tests {
     use agent_client_protocol as acp;
     use serial_test::serial;
 
-    /// When API-key credentials are advertiseable, fall through from a dead `cached_token` to non-interactive `wimoai.api_key` (not browser OAuth).
-    /// Covers the both-advertised case: `has_cached_token` was true at initialize but the session later went missing/expired/legacy.
-    /// Advertise order still puts `wimoai.api_key` first while `default_auth_method_id` prefers session.
-    /// After the session fails, this helper must still pick `wimoai.api_key`.
+    /// When API-key credentials are advertiseable, the fallthrough picks non-interactive `wimoai.api_key`.
+    /// Interactive login was removed, so there is no other target.
     #[test]
-    fn after_cached_token_unavailable_prefers_api_key_when_advertiseable() {
+    fn api_key_fallthrough_prefers_api_key_when_advertiseable() {
         assert_eq!(
-            method_id_after_cached_token_unavailable(true, None),
+            api_key_fallthrough_method_id(true, None),
+            Some(wimoai_API_KEY_METHOD_ID),
+        );
+        assert_eq!(
+            api_key_fallthrough_method_id(true, Some(PreferredAuthMethod::ApiKey)),
             Some(wimoai_API_KEY_METHOD_ID),
         );
     }
 
-    /// With no advertiseable API-key credentials, fall to interactive `wimo.com`.
+    /// With no advertiseable API-key credentials, the fallthrough is `None` (fail-closed).
+    /// There is no interactive login to fall back to anymore.
     #[test]
-    fn after_cached_token_unavailable_falls_to_wimo_com_without_api_key() {
+    fn api_key_fallthrough_fails_closed_without_api_key() {
+        assert_eq!(api_key_fallthrough_method_id(false, None), None,);
         assert_eq!(
-            method_id_after_cached_token_unavailable(false, None),
-            Some(wimo_COM_METHOD_ID),
+            api_key_fallthrough_method_id(false, Some(PreferredAuthMethod::ApiKey)),
+            None,
         );
     }
 
-    /// Pinned methods never fall through between api_key and oidc.
+    /// Pinned `oidc` never falls through (interactive login no longer exists).
     #[test]
-    fn after_cached_token_unavailable_fails_closed_when_pinned() {
+    fn api_key_fallthrough_fails_closed_when_oidc_pinned() {
         assert_eq!(
-            method_id_after_cached_token_unavailable(true, Some(PreferredAuthMethod::Oidc)),
+            api_key_fallthrough_method_id(true, Some(PreferredAuthMethod::Oidc)),
             None,
         );
         assert_eq!(
-            method_id_after_cached_token_unavailable(true, Some(PreferredAuthMethod::ApiKey)),
+            api_key_fallthrough_method_id(false, Some(PreferredAuthMethod::Oidc)),
             None,
         );
     }
@@ -536,16 +375,11 @@ mod tests {
 
     // ── Helpers ─────────────────────────────────────────────────────────
 
-    /// Default inputs to `build_auth_methods` representing a session-only user with no API key anywhere.
+    /// Default inputs to `build_auth_methods`: no credentials anywhere.
     /// Tests override only the fields they care about.
-    fn default_inputs() -> AuthMethodsBuildInputs<'static> {
+    fn default_inputs() -> AuthMethodsBuildInputs {
         AuthMethodsBuildInputs {
             has_external_api_key: false,
-            has_cached_token: false,
-            has_enterprise_oidc: false,
-            enterprise_oidc_issuer: None,
-            login_label: None,
-            has_auth_provider_command: false,
             preferred_method: None,
         }
     }
@@ -565,15 +399,14 @@ mod tests {
         methods.first().map(|m| AuthMethodKind::from_id(m.id()))
     }
 
-    // build_auth_methods regression: pin production call-site ordering.
-    // Reordering so `wimoai.api_key` is after login methods must fail the tests below.
+    // build_auth_methods: only `wimoai.api_key` is ever advertised.
+    // Advertising anything else (or an empty list when a key exists) must fail the tests below.
 
     /// BYOK with only per-model `env_key` must list `wimoai.api_key` first.
     #[test]
     fn enterprise_byok_first_method_is_wimoai_api_key() {
         let inputs = AuthMethodsBuildInputs {
-            has_external_api_key: true, // enterprise user with resolved per-model env_key
-            has_cached_token: false,
+            has_external_api_key: true, // user with resolved per-model env_key
             ..default_inputs()
         };
         let built = build_auth_methods(inputs);
@@ -599,127 +432,31 @@ mod tests {
         );
     }
 
-    /// BYOK plus a cached session token: wimoai.api_key stays first in the methods list, skipping the login screen.
-    /// `default_auth_method_id` is still `cached_token`, which keeps OIDC refresh alive.
+    /// Credentials present: exactly one method (`wimoai.api_key`) is advertised and defaulted.
+    /// No session-login method (`cached_token`, `wimo.com`, `oidc`) may ever appear.
     #[test]
-    fn byok_with_cached_token_keeps_wimoai_api_key_first() {
-        let inputs = AuthMethodsBuildInputs {
+    fn api_key_credentials_advertise_only_wimoai_api_key() {
+        let built = build_auth_methods(AuthMethodsBuildInputs {
             has_external_api_key: true,
-            has_cached_token: true,
             ..default_inputs()
-        };
-        let built = build_auth_methods(inputs);
+        });
 
-        assert_eq!(
-            first_kind(&built.methods),
-            Some(AuthMethodKind::wimoaiApiKey),
-            "wimoai.api_key MUST precede cached_token in advertised order",
-        );
-        // Sanity: cached_token still appears, just second.
+        assert_eq!(method_ids(&built), vec![wimoai_API_KEY_METHOD_ID]);
+        assert_eq!(default_id(&built), Some(wimoai_API_KEY_METHOD_ID));
         assert!(
-            built
-                .methods
-                .iter()
-                .any(|m| AuthMethodKind::from_id(m.id()) == AuthMethodKind::CachedToken),
-            "cached_token must still be advertised when present",
-        );
-        // cached_token wins for default_auth_method_id (keeps OIDC refresh alive).
-        assert_eq!(
-            built
-                .default_auth_method_id
-                .as_ref()
-                .map(|id| id.0.as_ref()),
-            Some(CACHED_TOKEN_AUTH_METHOD_ID),
+            !AuthMethodKind::from_id(built.methods[0].id()).needs_interactive_login(),
+            "the only advertised method MUST NOT need interactive login",
         );
     }
 
-    /// Session-only user (no API key anywhere): cached_token first, then `wimo.com`.
-    /// `auth_methods.first()` does NOT need interactive login, so this user also skips the login screen at startup.
+    /// No credentials anywhere: empty method list, no default (fail auth, never a login screen).
     #[test]
-    fn session_only_user_first_method_is_cached_token() {
-        let inputs = AuthMethodsBuildInputs {
-            has_external_api_key: false,
-            has_cached_token: true,
-            ..default_inputs()
-        };
-        let built = build_auth_methods(inputs);
-
-        assert_eq!(
-            first_kind(&built.methods),
-            Some(AuthMethodKind::CachedToken)
-        );
-        assert_eq!(
-            built
-                .default_auth_method_id
-                .as_ref()
-                .map(|id| id.0.as_ref()),
-            Some(CACHED_TOKEN_AUTH_METHOD_ID),
-        );
-    }
-
-    /// Brand-new user (no API key, no cached token): only `wimo.com` is advertised, and the pager will (correctly) show the login screen.
-    /// `default_auth_method_id` is None so the pager falls back to the advertised login method.
-    #[test]
-    fn fresh_user_only_advertises_wimo_com_and_requires_login() {
+    fn no_credentials_advertises_nothing() {
         let built = build_auth_methods(default_inputs());
 
-        assert_eq!(first_kind(&built.methods), Some(AuthMethodKind::wimoCom));
+        assert!(built.methods.is_empty());
         assert!(built.default_auth_method_id.is_none());
-        assert_eq!(built.methods.len(), 1);
-    }
-
-    /// Enterprise OIDC replaces `wimo.com` (mutually exclusive).
-    /// wimoai.api_key, when present, still leads.
-    #[test]
-    fn enterprise_oidc_replaces_wimo_com_but_wimoai_api_key_still_first() {
-        let inputs = AuthMethodsBuildInputs {
-            has_external_api_key: true,
-            has_cached_token: false,
-            has_enterprise_oidc: true,
-            enterprise_oidc_issuer: Some("https://sso.example.com"),
-            ..default_inputs()
-        };
-        let built = build_auth_methods(inputs);
-
-        assert_eq!(first_kind(&built.methods), Some(AuthMethodKind::wimoaiApiKey));
-        assert!(
-            built
-                .methods
-                .iter()
-                .any(|m| AuthMethodKind::from_id(m.id()) == AuthMethodKind::Oidc),
-            "oidc must be advertised when has_enterprise_oidc",
-        );
-        assert!(
-            !built
-                .methods
-                .iter()
-                .any(|m| AuthMethodKind::from_id(m.id()) == AuthMethodKind::wimoCom),
-            "wimo.com and oidc are mutually exclusive",
-        );
-    }
-
-    /// `has_auth_provider_command` reaches the `wimo.com` method as `meta.external_provider = true`.
-    /// Pinned here so the pager's `AuthStartMode::Command` path keeps working.
-    #[test]
-    fn auth_provider_command_sets_external_provider_meta() {
-        let inputs = AuthMethodsBuildInputs {
-            has_auth_provider_command: true,
-            login_label: Some("Acme Corp"),
-            ..default_inputs()
-        };
-        let built = build_auth_methods(inputs);
-
-        let wimo = built
-            .methods
-            .iter()
-            .find(|m| AuthMethodKind::from_id(m.id()) == AuthMethodKind::wimoCom)
-            .expect("wimo.com must be advertised");
-        assert_eq!(wimo.name(), "Acme Corp");
-        let meta = wimo.meta().expect("meta should be set");
-        assert_eq!(
-            meta.get("external_provider").and_then(|v| v.as_bool()),
-            Some(true),
-        );
+        assert_eq!(first_kind(&built.methods), None);
     }
 
     // ── End-to-end: enterprise TOML to resolved models to build_auth_methods ─
@@ -761,7 +498,7 @@ mod tests {
             Some(vec![TEST_ENV_VAR])
         );
 
-        // Without the env var present, has_own_credentials() and the predicate return false, and the builder advertises only the login method
+        // Without the env var present, has_own_credentials() and the predicate return false, and the builder advertises nothing.
         // Confirms the predicate isn't trivially true
         {
             let _unset = EnvGuard::unset(TEST_ENV_VAR);
@@ -771,10 +508,9 @@ mod tests {
                 has_external_api_key,
                 ..default_inputs()
             });
-            assert_ne!(
-                first_kind(&built.methods),
-                Some(AuthMethodKind::wimoaiApiKey),
-                "without env_key resolved, wimoai.api_key must NOT be advertised first",
+            assert!(
+                built.methods.is_empty(),
+                "without env_key resolved, nothing must be advertised",
             );
         }
 
@@ -786,8 +522,6 @@ mod tests {
             assert!(has_external_api_key);
             let built = build_auth_methods(AuthMethodsBuildInputs {
                 has_external_api_key,
-                // Realistic enterprise user: no cached session token, default wimo.com login (no enterprise OIDC)
-                has_cached_token: false,
                 ..default_inputs()
             });
             assert_eq!(
@@ -824,7 +558,7 @@ mod tests {
 
     /// Admin kill switch (`disable_api_key_auth`): the predicate must return false even when credentials are available everywhere.
     /// That includes both the global env var and a per-model env_key.
-    /// The builder then never advertises `wimoai.api_key`, and the pager sends the user to the deployment's login method instead.
+    /// The builder then advertises nothing (fail-closed); there is no login method to fall back to.
     #[test]
     #[serial]
     fn disable_api_key_auth_suppresses_wimoai_api_key_method() {
@@ -851,9 +585,8 @@ mod tests {
         );
         assert_eq!(
             first_kind(&built.methods),
-            Some(AuthMethodKind::wimoCom),
-            "with api-key auth disabled and no cached token, the login method \
-             must lead so the pager requires interactive login",
+            None,
+            "with api-key auth disabled, nothing is advertised (no login fallback exists)",
         );
         assert!(built.default_auth_method_id.is_none());
     }
@@ -877,7 +610,7 @@ mod tests {
             has_external_api_key: false,
             ..default_inputs()
         });
-        assert_eq!(first_kind(&built.methods), Some(AuthMethodKind::wimoCom));
+        assert_eq!(first_kind(&built.methods), None);
     }
 
     #[test]
@@ -944,122 +677,22 @@ mod tests {
         assert_eq!(read_wimoai_api_key_env().unwrap(), "new-key");
     }
 
-    // -- wimo login --legacy regression coverage ------------------------
-    //
-    // `wimo login --legacy` produces a wimoAuth with `auth_mode: WebLogin`, `oidc_issuer: None`, and no `expires_at` (30-day hardcoded TTL)
-    // When this token is in the `wimo_AUTH` env var (or the legacy scope fallback in auth.json), `AuthManager::new` returns it from `current()`
-    // That feeds `has_cached_token = true` into `build_auth_methods`, which puts `cached_token` first
-    // `startup_auth_metadata()` then returns `needs_login = false`: legacy users get frictionless auth, no login screen
-    //
-    // This test pins the env-var path (highest priority in AuthManager) end-to-end
-    // A regression in wimo_AUTH JSON parsing or in auth method ordering would send legacy-token users to the login screen
-
-    /// END-TO-END REGRESSION TEST for a legacy auth token (WebLogin, no expires_at) in the `wimo_AUTH` env var with no other auth available.
-    /// `AuthManager` MUST load it and `build_auth_methods` must advertise `cached_token` first.
-    /// The pager therefore skips the login screen (frictionless legacy auth).
+    /// Negative case: with no credentials anywhere, `build_auth_methods` advertises nothing.
+    /// This pins the "no" answer so the BYOK tests above aren't trivially passing.
     #[test]
     #[serial]
-    fn wimo_login_legacy_token_does_not_require_login() {
-        use crate::auth::{AuthManager, AuthMode, wimoAuth, wimoComConfig};
-
-        // Ensure clean slate for "no other auth available".
-        let _g1 = EnvGuard::unset("wimo_AUTH_PATH");
-        let _g2 = EnvGuard::unset(wimoai_API_KEY_ENV_VAR);
-
-        // Construct a legacy-style token exactly as `wimo login --legacy` produces it
-        // That means WebLogin mode, no OIDC fields, no refresh_token, no expires_at (is_expired falls back to the 30-day age check)
-        let legacy_token = wimoAuth {
-            key: "legacy-relay-token".into(),
-            auth_mode: AuthMode::WebLogin,
-            create_time: chrono::Utc::now(),
-            user_id: "legacy-user".into(),
-            email: Some("legacy@example.com".into()),
-            oidc_issuer: None,
-            oidc_client_id: None,
-            refresh_token: None,
-            expires_at: None,
-            ..wimoAuth::test_default()
-        };
-
-        // Provide it via the wimo_AUTH env var (highest priority code path in AuthManager::new)
-        // This is the "legacy auth token exists in the env" case with no other auth
-        let legacy_json = serde_json::to_string(&legacy_token).expect("serialize legacy token");
-        let _g = EnvGuard::set("wimo_AUTH", &legacy_json);
-
-        // AuthManager picks it up from the env var directly (no file needed).
-        let dir = tempfile::tempdir().unwrap();
-        let cfg = wimoComConfig::default();
-        let mgr = AuthManager::new(dir.path(), cfg);
-        let current = mgr.current();
-        assert!(
-            current.is_some(),
-            "legacy token in wimo_AUTH env MUST be loaded directly -- if this fails, \
-             users with legacy auth in env would be sent to the login screen",
-        );
-        assert_eq!(
-            current.as_ref().unwrap().key,
-            "legacy-relay-token",
-            "loaded token must match the one injected via env",
-        );
-
-        // Derive has_cached_token exactly as initialize() does
-        let has_cached_token = mgr.current().is_some();
-        assert!(has_cached_token);
-
-        // With only this legacy token (no wimoai api key), the first method must be cached_token so the pager skips the login screen
-        let built = build_auth_methods(AuthMethodsBuildInputs {
-            has_external_api_key: false,
-            has_cached_token,
-            ..default_inputs()
-        });
-
-        assert_eq!(
-            first_kind(&built.methods),
-            Some(AuthMethodKind::CachedToken),
-            "legacy token in env: cached_token MUST be auth_methods.first() \
-             (pager startup_auth_metadata returns needs_login=false)",
-        );
-        assert!(
-            !AuthMethodKind::from_id(built.methods[0].id()).needs_interactive_login(),
-            "auth_methods.first() MUST NOT need interactive login when legacy token \
-             is in env -- prevents login screen regression",
-        );
-        assert_eq!(
-            built
-                .default_auth_method_id
-                .as_ref()
-                .map(|id| id.0.as_ref()),
-            Some(CACHED_TOKEN_AUTH_METHOD_ID),
-        );
-    }
-
-    /// Negative case for the legacy flow: when auth.json does NOT contain a legacy-scope entry, AuthManager::current() is None.
-    /// has_cached_token is then false and build_auth_methods advertises only the login method.
-    /// This pins the predicate's "no" answer so the test above isn't trivially passing.
-    #[test]
-    #[serial]
-    fn no_legacy_token_means_no_cached_token_advertised() {
-        use crate::auth::{AuthManager, wimoComConfig};
-
+    fn no_credentials_means_nothing_advertised() {
         let _g1 = EnvGuard::unset("wimo_AUTH");
         let _g2 = EnvGuard::unset("wimo_AUTH_PATH");
-
-        let dir = tempfile::tempdir().unwrap();
-        // No auth.json in the tempdir.
-        let cfg = wimoComConfig::default();
-        let mgr = AuthManager::new(dir.path(), cfg);
-        assert!(mgr.current().is_none());
+        let _g3 = EnvGuard::unset(wimoai_API_KEY_ENV_VAR);
+        let _g4 = EnvGuard::unset(LEGACY_wimoai_API_KEY_ENV_VAR);
 
         let built = build_auth_methods(AuthMethodsBuildInputs {
             has_external_api_key: false,
-            has_cached_token: mgr.current().is_some(),
             ..default_inputs()
         });
-        assert_eq!(
-            first_kind(&built.methods),
-            Some(AuthMethodKind::wimoCom),
-            "no cached token AND no api key: pager must show login (wimo.com first)",
-        );
+        assert!(built.methods.is_empty());
+        assert!(built.default_auth_method_id.is_none());
     }
 
     // ── preferred_method pin (fail-closed) ──────────────────────────────
@@ -1068,7 +701,6 @@ mod tests {
     fn pin_api_key_with_key_only_advertises_api_key() {
         let built = build_auth_methods(AuthMethodsBuildInputs {
             has_external_api_key: true,
-            has_cached_token: true,
             preferred_method: Some(PreferredAuthMethod::ApiKey),
             ..default_inputs()
         });
@@ -1077,10 +709,9 @@ mod tests {
     }
 
     #[test]
-    fn pin_api_key_without_key_fails_closed_even_with_session() {
+    fn pin_api_key_without_key_fails_closed() {
         let built = build_auth_methods(AuthMethodsBuildInputs {
             has_external_api_key: false,
-            has_cached_token: true,
             preferred_method: Some(PreferredAuthMethod::ApiKey),
             ..default_inputs()
         });
@@ -1089,29 +720,18 @@ mod tests {
     }
 
     #[test]
-    fn pin_oidc_with_session_hides_api_key() {
-        let built = build_auth_methods(AuthMethodsBuildInputs {
-            has_external_api_key: true,
-            has_cached_token: true,
-            preferred_method: Some(PreferredAuthMethod::Oidc),
-            ..default_inputs()
-        });
-        assert_eq!(
-            method_ids(&built),
-            vec![CACHED_TOKEN_AUTH_METHOD_ID, wimo_COM_METHOD_ID]
-        );
-        assert_eq!(default_id(&built), Some(CACHED_TOKEN_AUTH_METHOD_ID));
-    }
-
-    #[test]
-    fn pin_oidc_without_session_is_interactive_only() {
-        let built = build_auth_methods(AuthMethodsBuildInputs {
-            has_external_api_key: true,
-            has_cached_token: false,
-            preferred_method: Some(PreferredAuthMethod::Oidc),
-            ..default_inputs()
-        });
-        assert_eq!(method_ids(&built), vec![wimo_COM_METHOD_ID]);
-        assert!(built.default_auth_method_id.is_none());
+    fn pin_oidc_always_fails_closed() {
+        for has_external_api_key in [false, true] {
+            let built = build_auth_methods(AuthMethodsBuildInputs {
+                has_external_api_key,
+                preferred_method: Some(PreferredAuthMethod::Oidc),
+                ..default_inputs()
+            });
+            assert!(
+                built.methods.is_empty(),
+                "oidc pin advertises nothing (has_external_api_key={has_external_api_key})"
+            );
+            assert!(built.default_auth_method_id.is_none());
+        }
     }
 }

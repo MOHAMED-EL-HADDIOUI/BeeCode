@@ -252,7 +252,7 @@ async fn create_test_actor_inner(
     SessionActor,
     tokio::sync::mpsc::UnboundedReceiver<SessionEvent>,
 ) {
-    let cwd = wimoai_wimo_paths::AbsPathBuf::new(std::path::PathBuf::from("/tmp")).unwrap();
+    let cwd = wimoai_wimo_paths::AbsPathBuf::new(std::env::temp_dir()).unwrap();
     let fs = Arc::new(wimoai_wimo_workspace::file_system::MockFs::new(
         cwd.to_path_buf(),
     ));

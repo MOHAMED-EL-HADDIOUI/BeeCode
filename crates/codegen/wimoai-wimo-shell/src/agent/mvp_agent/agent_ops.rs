@@ -1326,13 +1326,12 @@ impl MvpAgent {
             wimoai_chat_state::AuthType::ApiKey
         }
     }
-    /// Fall through to `wimoai.api_key` if the startup probe still allows it, else `wimo.com`.
-    /// `None` when `preferred_method` is pinned.
-    pub(super) fn cached_token_fallthrough_method_id(
-        &self,
-    ) -> Option<acp::AuthMethodId> {
+    /// Fall through to `wimoai.api_key` if the startup probe still allows it.
+    /// `None` when `preferred_method` is pinned to `oidc` or no key credentials exist.
+    /// Interactive login was removed, so there is no interactive fallthrough target.
+    pub(super) fn api_key_fallthrough_method_id(&self) -> Option<acp::AuthMethodId> {
         let preferred = self.cfg.borrow().wimo_com_config.preferred_method;
-        let id = auth_method::method_id_after_cached_token_unavailable(
+        let id = auth_method::api_key_fallthrough_method_id(
             auth_method::should_advertise_wimoai_api_key_with_env_ok(
                 self.cfg.borrow().wimo_com_config.api_key_auth_disabled(),
                 self.models_manager.models().values(),
@@ -1342,13 +1341,15 @@ impl MvpAgent {
         )?;
         Some(acp::AuthMethodId::new(id))
     }
-    /// Shared exit for missing/expired/legacy `cached_token`: fall through with `use_oauth` only when the target is interactive `wimo.com`.
-    /// When `preferred_method` is pinned, fail instead of falling through.
+    /// Shared exit when no session credential can proceed: fall through to
+    /// non-interactive `wimoai.api_key` when available, else fail with a
+    /// key-configuration error. Interactive login was removed, so there is
+    /// no `use_oauth` target anymore.
     pub(super) async fn authenticate_after_cached_token_unavailable(
         &self,
         arguments: acp::AuthenticateRequest,
     ) -> Result<AuthenticateResponse, acp::Error> {
-        let Some(method_id) = self.cached_token_fallthrough_method_id() else {
+        let Some(method_id) = self.api_key_fallthrough_method_id() else {
             let preferred = self.cfg.borrow().wimo_com_config.preferred_method;
             let msg = match preferred {
                 Some(crate::auth::PreferredAuthMethod::ApiKey) => {
@@ -1356,9 +1357,9 @@ impl MvpAgent {
                 }
                 _ => auth_method::PREFERRED_OIDC_UNAVAILABLE,
             };
-            tracing::info!(%msg, "cached_token unavailable; preferred_method forbids fallthrough");
+            tracing::info!(%msg, "no session credential; key fallthrough unavailable");
             wimoai_wimo_telemetry::unified_log::warn(
-                "auth cached_token fallthrough blocked by preferred_method",
+                "auth key fallthrough unavailable",
                 None,
                 Some(
                     serde_json::json!({
@@ -1368,14 +1369,10 @@ impl MvpAgent {
             );
             return Err(acp::Error::auth_required().data(msg));
         };
-        let meta = if method_id.0.as_ref() == auth_method::wimo_COM_METHOD_ID {
-            serde_json::json!({ "use_oauth": true }).as_object().cloned()
-        } else {
-            arguments.meta
-        };
-        tracing::info!(fallback = %method_id.0, "cached_token fallthrough");
+        let meta = arguments.meta;
+        tracing::info!(fallback = %method_id.0, "api_key fallthrough");
         wimoai_wimo_telemetry::unified_log::warn(
-            "auth cached_token fallthrough",
+            "auth api_key fallthrough",
             None,
             Some(serde_json::json!({ "fallback": method_id.0.as_ref() })),
         );

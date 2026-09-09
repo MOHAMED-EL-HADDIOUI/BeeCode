@@ -446,16 +446,17 @@ fn auto_respond_to_permissions(
 }
 
 /// "Not signed in" error message, tailored to the session type.
+/// Interactive login was removed: authentication is provider API keys only.
 fn auth_required_message(interactive: bool) -> String {
     if interactive {
-        "Not signed in. Run `wimo login` to authenticate \
-         (or `wimo login --device-code` if no browser is available)."
+        "No provider API key is configured. Add your OpenAI/Anthropic key to \
+         .wimo/settings.json ([model.*] api_key/env_key) or set the \
+         corresponding environment variable, then run again."
             .to_string()
     } else {
-        "Not signed in. To authenticate without a browser, run:\n  \
-         wimo login --device-code\n\n\
-         Alternatively, set the wimoai_API_KEY environment variable \
-         or run `wimo login` on a machine with a browser."
+        "No provider API key is configured. Add your OpenAI/Anthropic key to \
+         .wimo/settings.json ([model.*] api_key/env_key) or set the \
+         corresponding environment variable (e.g. OPENAI_API_KEY, ANTHROPIC_API_KEY)."
             .to_string()
     }
 }

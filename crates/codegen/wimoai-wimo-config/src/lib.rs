@@ -4,9 +4,14 @@
 //! 1. `/etc/wimo/managed_config.toml`
 //! 2. `$wimo_HOME/managed_config.toml`
 //! 3. `$wimo_HOME/config.toml`
-//! 4. `$wimo_HOME/requirements.toml` (cloud cache; Ed25519-signed at rest once a key is embedded, see [`signed_policy`])
+//! 4. Project `.wimo/settings.json` (walk-up from CWD, nearest wins; above `config.toml`)
+//! 5. `$wimo_HOME/requirements.toml` (cloud cache; Ed25519-signed at rest once a key is embedded, see [`signed_policy`])
 //! 5. `/etc/wimo/requirements.toml`
 //! 6. macOS MDM managed preferences (`ai.x.wimo`, admin-forced), macOS only
+//!
+//! The `wimo_CONFIG` / `wimo_CONFIG_PATH` overlay merges above the project
+//! settings; requirements (disk layers here, remote campaigns in the shell)
+//! always win.
 //!
 //! Each layer applies its own [`[[version_overrides]]`](version_overrides) before merge.
 //! Requirements layers (#4 through #6) may opt into fail-closed startup; see [`validate_requirements`].
@@ -22,6 +27,7 @@ mod macos_managed;
 mod managed_cache;
 pub mod managed_text;
 mod paths;
+pub mod project_settings;
 pub mod shell;
 pub mod signed_policy;
 mod validation;

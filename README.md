@@ -46,6 +46,21 @@ cargo build -p "wimoai-wimo-pager-bin" --release # binary: target/release/wimoai
 
 > macOS and Linux are supported. Windows builds are best-effort.
 
+## LLM providers (no login required)
+
+wimo authenticates with provider API keys — OpenAI, Anthropic, or any
+OpenAI-compatible endpoint. No account login, no OAuth.
+
+1. Copy `.wimo/settings.example.json` to `.wimo/settings.json` in your project
+   (nearest one walking up from where you run wins).
+2. Set your key: `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` (or inline `api_key`,
+   not recommended — never commit real keys).
+3. Run: `wimo -p "hello"`.
+
+`api_backend` selects the protocol: `responses` / `chat_completions` (OpenAI),
+`messages` (Anthropic). Settings merge above `~/.wimo/config.toml`, below
+`wimo_CONFIG` overlays and enterprise pins.
+
 ## Development
 
 ```sh

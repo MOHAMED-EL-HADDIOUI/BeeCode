@@ -52,12 +52,10 @@ fn process_identity(command: Option<&Command>, is_interactive: bool) -> Option<P
     let (entrypoint, interactivity) = match command {
         Some(Command::Agent(_)) => return None,
         Some(Command::Dashboard) => return None,
-        Some(Command::Login { .. }) => (Entrypoint::Cli, Interactivity::Interactive),
         Some(
             Command::Inspect { .. }
             | Command::Doctor(_)
             | Command::Leader(_)
-            | Command::Logout
             | Command::Mcp(_)
             | Command::Plugin(_)
             | Command::Memory(_)
@@ -97,8 +95,6 @@ fn command_needs_pre_sandbox_policy_heal(command: Option<&Command>) -> bool {
             Command::Inspect { .. }
             | Command::Doctor(_)
             | Command::Leader(_)
-            | Command::Logout
-            | Command::Login { .. }
             | Command::Mcp(_)
             | Command::Plugin(_)
             | Command::Memory(_)
@@ -229,8 +225,7 @@ async fn run_setup_command(json: bool) {
     if !managed_config::has_principal() {
         eprintln!("No deployment key or team sign-in found.");
         eprintln!();
-        eprintln!("To install managed configuration, sign in with a team using `wimo login`,");
-        eprintln!("or set a deployment key:");
+        eprintln!("To install managed configuration, set a deployment key:");
         eprintln!();
         if cfg!(unix) {
             eprintln!("  export wimo_DEPLOYMENT_KEY=<your-key>");
@@ -531,7 +526,7 @@ async fn run_workspace_mgmt(args: WorkspaceMgmtArgs) -> Result<()> {
         WorkspaceGate::Unknown => {
             anyhow::bail!(
                 "Could not load your settings for `wimo workspace`. Check your \
-             network connection (run `wimo login` if you are signed out), then \
+             network connection and provider API key, then \
              try again."
             )
         }
@@ -636,7 +631,7 @@ async fn workspace_start(
     ensure_authenticated(
         &agent_config.wimo_com_config,
         false,
-        Some("No cached credentials found. Run `wimo login` first."),
+        Some("No cached credentials found. Configure a provider API key first."),
     )
     .await?;
     let env_urls = LeaderEnvUrls::from(&agent_config.wimo_com_config);
@@ -2250,27 +2245,6 @@ async fn async_main(args: PagerArgs) -> Result<()> {
                     &update_config,
                 )
                 .await;
-            }
-            Command::Login {
-                legacy: _,
-                oauth,
-                device_auth,
-                devbox,
-            } => {
-                init_tracing_simple("cli");
-                let _otel_guard = wimoai_wimo_telemetry::otel_layer::otel_guard();
-                let config = wimoai_wimo_shell::config::load_agent_config_disk_only()
-                    .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
-                wimoai_wimo_shell::auth::run_cli_login(&config, oauth, device_auth, devbox).await?;
-                println!();
-                wimoai_wimo_shell::instrumentation::finalize_and_exit(0);
-            }
-            Command::Logout => {
-                init_tracing_simple("cli");
-                let config = wimoai_wimo_shell::config::load_agent_config_disk_only()
-                    .map_err(|e| anyhow::anyhow!("Failed to create agent config: {e}"))?;
-                wimoai_wimo_shell::auth::run_cli_logout(&config)?;
-                wimoai_wimo_shell::instrumentation::finalize_and_exit(0);
             }
             Command::Wrap(ref wrap_args) => {
                 return wimoai_wimo_pager::wrap_cmd::run(wrap_args);

@@ -18,31 +18,6 @@ pub enum Command {
     Doctor(crate::doctor_cmd::DoctorArgs),
     /// Manage running leader processes
     Leader(LeaderMgmtArgs),
-    /// Sign out and clear cached credentials
-    Logout,
-    /// Sign in to wimo
-    Login {
-        /// Ignored (kept for backwards compatibility). OAuth2 is now the only auth method.
-        #[arg(long, hide = true)]
-        legacy: bool,
-        /// Use wimo OAuth via auth.x.ai.
-        #[arg(long = "oauth", alias = "oidc", conflicts_with_all = ["device_auth"])]
-        oauth: bool,
-        /// Use device-code authentication for headless/remote environments.
-        #[arg(
-            long = "device-auth",
-            visible_alias = "device-code",
-            conflicts_with_all = ["oauth"]
-        )]
-        device_auth: bool,
-        /// Authenticate for remote development environments (hidden).
-        ///
-        /// Field is always present so match arms stay feature-unification-safe
-        /// across Bazel/cargo graphs; clap only registers `--devbox` when
-        /// `devbox-login` is enabled (`arg(skip)` otherwise → always false).
-        #[arg(skip)]
-        devbox: bool,
-    },
     /// Manage MCP server configurations
     Mcp(crate::mcp_cmd::McpArgs),
     /// Manage plugins and marketplace sources
@@ -1405,9 +1380,11 @@ mod tests {
     }
     #[test]
     fn subcommand_takes_precedence_over_positional_prompt() {
-        let args = PagerArgs::try_parse_from(["wimo", "logout"]).expect("subcommand parses");
-        assert!(matches!(args.command, Some(Command::Logout)));
-        assert!(args.prompt.is_none());
+        // `login`/`logout` no longer exist (interactive login was removed):
+        // a bare word is a prompt, not a subcommand.
+        let args = PagerArgs::try_parse_from(["wimo", "logout"]).expect("word parses");
+        assert!(args.command.is_none());
+        assert_eq!(args.prompt.as_deref(), Some("logout"));
     }
     #[test]
     fn usage_command_parses_session_and_optional_turn() {

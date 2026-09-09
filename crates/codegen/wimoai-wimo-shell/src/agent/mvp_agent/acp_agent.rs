@@ -332,79 +332,16 @@ impl acp::Agent for MvpAgent {
             self.models_manager.models().values(),
             first_party_env_ok,
         );
-        let init_token_state = self.auth_manager.cached_token_state();
-        let init_has_current = matches!(init_token_state, CachedTokenState::Valid(_));
-        let init_is_expired = matches!(init_token_state, CachedTokenState::Expired);
-        wimoai_wimo_telemetry::unified_log::info(
-            "auth init token state",
-            None,
-            Some(
-                serde_json::json!({
-                "has_current": init_has_current,
-                "is_expired": init_is_expired,
-            }),
-            ),
-        );
-        let mut has_cached_token = init_has_current;
-        if !init_has_current && init_is_expired {
-            has_cached_token = match self.auth_manager.silent_refresh().await {
-                SilentRefresh::Renewed(_) => true,
-                SilentRefresh::Failed(remedy) => remedy.is_self_healing(),
-            };
-        }
-        let (
-            login_label,
-            has_auth_provider,
-            has_enterprise_oidc,
-            enterprise_oidc_issuer,
-        ) = {
-            let cfg = self.cfg.borrow();
-            let issuer = cfg.wimo_com_config.oidc.as_ref().map(|o| o.issuer.clone());
-            (
-                cfg.wimo_com_config.auth_provider_label.clone(),
-                cfg.wimo_com_config.auth_provider_command.is_some(),
-                cfg.wimo_com_config.oidc.is_some(),
-                issuer,
-            )
-        };
-        if has_enterprise_oidc {
-            let issuer = enterprise_oidc_issuer
-                .as_deref()
-                .expect(
-                    "enterprise_oidc_issuer must be Some when has_enterprise_oidc is true",
-                );
-            tracing::info!(
-                issuer = %issuer,
-                "auth: advertising enterprise OIDC auth method",
-            );
-            wimoai_wimo_telemetry::unified_log::info(
-                "auth: advertising enterprise OIDC auth method",
-                None,
-                Some(serde_json::json!({ "issuer": issuer })),
-            );
-        } else {
-            tracing::info!(
-                label = ?login_label,
-                has_auth_provider,
-                "auth: advertising wimo.com auth method",
-            );
-        }
+        // Interactive session login (cached_token, wimo.com, OIDC) was removed:
+        // authentication is provider API keys only. There is no token refresh
+        // or login method to compute here.
         let preferred_method = preferred_method_early;
         let has_external_api_key = match preferred_method {
             Some(crate::auth::PreferredAuthMethod::Oidc) => false,
             _ => has_external_api_key,
         };
-        let has_cached_token = match preferred_method {
-            Some(crate::auth::PreferredAuthMethod::ApiKey) => false,
-            _ => has_cached_token,
-        };
         let built = auth_method::build_auth_methods(auth_method::AuthMethodsBuildInputs {
             has_external_api_key,
-            has_cached_token,
-            has_enterprise_oidc,
-            enterprise_oidc_issuer: enterprise_oidc_issuer.as_deref(),
-            login_label: login_label.as_deref(),
-            has_auth_provider_command: has_auth_provider,
             preferred_method,
         });
         let auth_methods = built.methods;
@@ -418,10 +355,6 @@ impl acp::Agent for MvpAgent {
                 "has_external_api_key": has_external_api_key,
                 "first_party_env_api_key_ok": first_party_env_ok,
                 "disable_api_key_auth": disable_api_key_auth,
-                "has_cached_token": has_cached_token,
-                "has_enterprise_oidc": has_enterprise_oidc,
-                "init_has_current": init_has_current,
-                "init_is_expired": init_is_expired,
                 "auth_mode": self.auth_manager.current().map(|a| format!("{:?}", a.auth_mode)),
                 "methods": auth_methods.iter().map(|m| m.id().0.as_ref()).collect::<Vec<_>>(),
                 "default_auth_method_id": built.default_auth_method_id.as_ref().map(|id| id.0.as_ref()),
@@ -452,7 +385,6 @@ impl acp::Agent for MvpAgent {
                     serde_json::json!({
                     "default_auth_method_id": default_id.0.as_ref(),
                     "has_external_api_key": has_external_api_key,
-                    "has_cached_token": has_cached_token,
                     "methods_first": auth_methods.first().map(|m| m.id().0.as_ref()),
                     "methods_count": auth_methods.len(),
                 }),

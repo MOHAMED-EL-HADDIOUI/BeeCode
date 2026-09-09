@@ -1,6 +1,7 @@
 //! Wiring tests for MCP tool-layer images through `handle_bridge_tool_success`.
 use super::support::*;
 use super::*;
+use base64::Engine as _;
 use wimoai_wimo_sampling_types::{ContentPart, ConversationItem};
 use wimoai_wimo_tools::types::output::{MCPOutput, ToolOutput, ToolRunResult};
 use wimoai_wimo_tools::util::base64_images::{ExtractedImage, IMAGE_CONTENT_PLACEHOLDER};
