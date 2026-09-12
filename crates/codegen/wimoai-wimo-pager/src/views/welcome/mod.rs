@@ -417,11 +417,11 @@ impl WelcomeLayout {
 
 /// Controls what the version badge renders.
 pub(super) enum VersionBadgeMode<'a> {
-    /// Full badge: team | tier | api_key | **wimo Build** VERSION+channel (right-aligned).
+/// Full badge: team | tier | api_key | **BeeCode** VERSION+channel (right-aligned).
     Full { subscription_tier: Option<&'a str> },
     /// Hero footer: team | api_key | channel (right-aligned, gray).
     HeroFooter,
-    /// Hero inline: **wimo Build**  VERSION (left-aligned).
+/// Hero inline: **BeeCode**  VERSION (left-aligned).
     HeroInline,
 }
 
@@ -478,7 +478,7 @@ pub(super) fn render_version_badge(
     match &mode {
         VersionBadgeMode::Full { .. } => {
             spans.push(Span::styled(
-                "wimo Build  ",
+            "BeeCode  ",
                 Style::default()
                     .fg(theme.text_primary)
                     .add_modifier(Modifier::BOLD),
@@ -498,7 +498,7 @@ pub(super) fn render_version_badge(
         }
         VersionBadgeMode::HeroInline => {
             spans.push(Span::styled(
-                "wimo Build  ",
+            "BeeCode  ",
                 Style::default()
                     .fg(theme.text_primary)
                     .add_modifier(Modifier::BOLD),
@@ -770,7 +770,7 @@ pub fn render_welcome(
                 content_area,
                 buf,
                 Some((
-                    "wimo Build is not yet available for this account.",
+                    "BeeCode is not yet available for this account.",
                     theme.gray_bright,
                 )),
                 &menu,
@@ -926,7 +926,7 @@ fn render_welcome_blocked(
 
 /// Render the folder-trust question.
 /// Mirrors [`render_welcome_blocked`]'s stacked layout (logo, message, menu, version badge).
-/// Here the message is a multi-line block showing the workspace path and the warning that wimo Build may run or modify contents in this directory.
+/// Here the message is a multi-line block showing the workspace path and the warning that BeeCode may run or modify contents in this directory.
 /// The y/N answer is handled by the welcome input interceptor, so this only paints; `menu_rects` are returned for parity with the other welcome arms.
 fn render_welcome_trust(
     content_area: Rect,
@@ -952,7 +952,7 @@ fn render_welcome_trust(
         Line::default(),
         // Two lines so the warning never clips at narrow / compact widths (a single ~78-char line would truncate "...posing security risks")
         Line::from(Span::styled(
-            "wimo Build may run or modify contents in this directory,",
+            "BeeCode may run or modify contents in this directory,",
             Style::default().fg(theme.gray),
         ))
         .alignment(Alignment::Center),
@@ -2642,8 +2642,10 @@ fn masked_auth_token_view(input: &str, cursor_byte: usize, width: usize) -> (Str
         return ("Paste your token here...".to_string(), 0);
     }
     let masked = build_masked_auth_token(input, cursor_byte);
-    let buffer =
-        wimoai_ratatui_textarea::EditBuffer::from_parts(masked.display.as_str(), masked.cursor_byte);
+    let buffer = wimoai_ratatui_textarea::EditBuffer::from_parts(
+        masked.display.as_str(),
+        masked.cursor_byte,
+    );
     let viewport = buffer.single_line_viewport(width);
     (
         masked.display[viewport.visible_byte_range].to_owned(),
@@ -2688,8 +2690,8 @@ mod tests {
                 "badge must not label the product: {rendered:?}"
             );
         }
-        assert!(full.contains("wimo Build"), "full badge: {full:?}");
-        assert!(inline.contains("wimo Build"), "inline badge: {inline:?}");
+        assert!(full.contains("BeeCode"), "full badge: {full:?}");
+        assert!(inline.contains("BeeCode"), "inline badge: {inline:?}");
         assert!(footer.contains("acme"), "footer keeps the team: {footer:?}");
         assert!(
             !footer.ends_with('\u{2502}'),

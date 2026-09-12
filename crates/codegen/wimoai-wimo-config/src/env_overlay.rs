@@ -1,4 +1,4 @@
-//! `wimo_CONFIG` / `wimo_CONFIG_PATH` config overlay resolution.
+//! `BEECODE_CONFIG` / `BEECODE_CONFIG_PATH` overlay resolution, with Wimo compatibility.
 
 use std::path::{Path, PathBuf};
 
@@ -8,9 +8,13 @@ use crate::loader::{
 
 /// Inline config overlay: a JSON object.
 pub const wimo_CONFIG_ENV: &str = "wimo_CONFIG";
+/// Preferred BeeCode inline config overlay: a JSON object.
+pub const BEECODE_CONFIG_ENV: &str = "BEECODE_CONFIG";
 
 /// Path to an additional JSON or TOML config-overlay file (read by extension).
 pub const wimo_CONFIG_PATH_ENV: &str = "wimo_CONFIG_PATH";
+/// Preferred BeeCode path overlay.
+pub const BEECODE_CONFIG_PATH_ENV: &str = "BEECODE_CONFIG_PATH";
 
 /// Hard cap on a `wimo_CONFIG_PATH` overlay read.
 /// Matches the untrusted-config read cap in `managed_text` (`MAX_CONFIG_BYTES`, also 4 MiB).
@@ -40,17 +44,20 @@ pub struct ResolvedOverlay {
 }
 
 fn env_overlay_inputs() -> (Option<String>, Option<PathBuf>) {
-    let inline = match std::env::var_os(wimo_CONFIG_ENV) {
+    let inline = match std::env::var_os(BEECODE_CONFIG_ENV)
+        .or_else(|| std::env::var_os(wimo_CONFIG_ENV))
+    {
         Some(raw) => match raw.into_string() {
             Ok(s) => Some(s),
             Err(_) => {
-                tracing::warn!("wimo_CONFIG is not valid UTF-8; ignoring the overlay");
+                tracing::warn!("BeeCode config overlay is not valid UTF-8; ignoring the overlay");
                 None
             }
         },
         None => None,
     };
-    let path = std::env::var_os(wimo_CONFIG_PATH_ENV)
+    let path = std::env::var_os(BEECODE_CONFIG_PATH_ENV)
+        .or_else(|| std::env::var_os(wimo_CONFIG_PATH_ENV))
         .filter(|v| !v.is_empty())
         .map(PathBuf::from);
     (inline, path)
@@ -60,13 +67,13 @@ pub(crate) fn load_env_overlay() -> Option<toml::Value> {
     let (inline, path) = env_overlay_inputs();
     let (overlay, source, sections) = resolve_overlay_detailed(inline.as_deref(), path.as_deref())?;
     let source_label = match source {
-        OverlaySource::Inline => wimo_CONFIG_ENV,
-        OverlaySource::Path(_) => wimo_CONFIG_PATH_ENV,
+        OverlaySource::Inline => BEECODE_CONFIG_ENV,
+        OverlaySource::Path(_) => BEECODE_CONFIG_PATH_ENV,
     };
     tracing::trace!(
         source = source_label,
         ?sections,
-        "resolved wimo_CONFIG overlay"
+        "resolved BeeCode config overlay"
     );
     Some(overlay)
 }

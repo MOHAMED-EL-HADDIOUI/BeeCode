@@ -1,5 +1,5 @@
 //! All colors come from the `Theme` struct. No hardcoded colors elsewhere.
-//! The default theme is wimoNight (neutral gray base with TokyoNight accents).
+//! The default theme is BeeHive (dark charcoal with controlled honey accents).
 //!
 //! ## Color support
 //!
@@ -10,8 +10,6 @@
 pub mod cache;
 pub mod color_support;
 pub mod env_appearance;
-mod wimoday;
-mod wimonight;
 pub mod md_style;
 pub mod osc11;
 mod oscura;
@@ -19,6 +17,8 @@ mod rosepine;
 pub mod system_appearance;
 mod terminal_default;
 pub mod tokyonight;
+mod wimoday;
+mod wimonight;
 
 pub use color_support::quantize;
 pub use tokyonight::{Theme, pulse_brightness, wave_brightness};
@@ -65,7 +65,7 @@ impl ThemeKind {
 
     pub fn display_name(self) -> &'static str {
         match self {
-            Self::wimoNight => "wimonight",
+            Self::wimoNight => "beehive",
             Self::TokyoNight => "tokyonight",
             Self::wimoDay => "wimoday",
             Self::RosePineMoon => "rosepine-moon",
@@ -96,7 +96,9 @@ impl ThemeKind {
         let lower = name.to_lowercase();
         match lower.as_str() {
             "auto" | "system" => Some(Self::Auto),
-            "wimonight" | "wimo-night" | "dark" => Some(Self::wimoNight),
+            "beehive" | "bee-hive" | "wimonight" | "wimo-night" | "dark" => {
+                Some(Self::wimoNight)
+            }
             "tokyonight" | "tokyo-night" | "tokyo" => Some(Self::TokyoNight),
             "wimoday" | "wimo-day" | "light" | "day" => Some(Self::wimoDay),
             "rosepine" | "rose-pine" | "rosepine-moon" | "rose-pine-moon" => {
@@ -129,12 +131,12 @@ pub fn canonical_name(value: &str) -> Option<&'static str> {
     ThemeKind::from_name(value).map(|k| k.display_name())
 }
 
-/// Human-friendly display name for a canonical theme value (e.g. `"wimonight"` becomes `"wimo Night"`).
+/// Human-friendly display name for a canonical theme value.
 /// Falls back to `value` verbatim.
 pub fn display_name_for_canonical(value: &str) -> &str {
     match value {
         "auto" => "Auto",
-        "wimonight" => "wimo Night",
+        "beehive" | "wimonight" => "BeeHive",
         "wimoday" => "wimo Day",
         "tokyonight" => "Tokyo Night",
         "rosepine-moon" => "Rose Pine Moon",

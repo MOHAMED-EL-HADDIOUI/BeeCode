@@ -374,13 +374,16 @@ pub struct LeaderArgs {
 }
 #[derive(Debug, Clone, Parser)]
 #[command(
-    name = "wimo",
+    name = "bee",
     version = wimoai_wimo_version::full_version(),
-    about = "wimo Build TUI",
+    about = "BeeCode — The AI Coding Agent",
+    long_about = "BeeCode — The AI Coding Agent\n\nSmall agent. Big work.\n\nA focused coding agent for exploring a repository, using tools, making changes, and verifying the result.",
     disable_version_flag = true,
     next_display_order = None,
     help_template = "\
 {before-help}{about-with-newline}
+Small agent. Big work.
+
 {usage-heading} {usage}
 
 Arguments:
@@ -389,8 +392,13 @@ Arguments:
 Options:
 {options}
 
-Commands:
-{subcommands}{after-help}\
+ Commands:
+ {subcommands}
+
+ Examples:
+   bee \"fix the failing tests\"
+   bee --single \"explain this module\"
+ {after-help}\
 "
 )]
 pub struct PagerArgs {
@@ -884,7 +892,9 @@ impl PagerArgs {
         } else {
             HeadlessPolicy::Exclude
         };
-        wimoai_wimo_shell::session::persistence::RecentSessionSelection::from_headless_policy(policy)
+        wimoai_wimo_shell::session::persistence::RecentSessionSelection::from_headless_policy(
+            policy,
+        )
     }
     /// Classify flags for sandbox profile lookup on an existing session.
     ///

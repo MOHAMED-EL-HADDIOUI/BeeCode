@@ -1,4 +1,4 @@
-//! wimoNight theme: neutral gray base with TokyoNight accent colors.
+//! BeeCode Hive theme: dark terminal surfaces with restrained honey accents.
 //!
 //! The canonical palette is defined in RGB (`Color::Rgb`).
 //! At startup [`Theme::quantized`] downgrades every color to the terminal's detected capability level (256-color, 16-color, etc.).
@@ -15,7 +15,7 @@ const fn rgb(r: u8, g: u8, b: u8) -> Color {
 //   • bg  = #141414 (20)
 //   • fg  = #f3f3f3 (243)
 //
-// Accent colors are the original TokyoNight Night hex values.
+// Honey is reserved for focus, progress and intent; most of the interface stays dark.
 #[allow(dead_code)]
 mod palette {
     use super::*;
@@ -35,20 +35,20 @@ mod palette {
     pub const DARK3: Color = rgb(90, 90, 90); //  #5a5a5a, medium gray
     pub const DARK5: Color = rgb(120, 120, 120); // #787878, bright gray
 
-    // ── Accent colors (TokyoNight Night) ─────────────────────────────────
-    pub const BLUE: Color = rgb(122, 162, 247); // #7aa2f7
-    pub const BLUE0: Color = rgb(61, 89, 161); // #3d59a1
-    pub const BLUE1: Color = rgb(58, 149, 171); // #3A95AB
-    pub const CYAN: Color = rgb(125, 207, 255); // #7dcfff
-    pub const GREEN: Color = rgb(158, 206, 106); // #9ece6a
-    pub const GREEN1: Color = rgb(115, 218, 202); // #73daca
-    pub const MAGENTA: Color = rgb(187, 154, 247); // #bb9af7
-    pub const ORANGE: Color = rgb(255, 158, 100); // #ff9e64
-    pub const PURPLE: Color = rgb(157, 124, 216); // #9d7cd8
-    pub const RED: Color = rgb(247, 118, 142); // #f7768e
-    pub const RED1: Color = rgb(219, 75, 75); // #db4b4b
-    pub const TEAL: Color = rgb(26, 188, 156); // #1abc9c
-    pub const YELLOW: Color = rgb(224, 175, 104); // #e0af68
+    // ── BeeCode palette ──────────────────────────────────────────────────
+    pub const BLUE: Color = rgb(244, 185, 66); // #F4B942 honey gold
+    pub const BLUE0: Color = rgb(146, 94, 18);
+    pub const BLUE1: Color = rgb(255, 209, 102); // #FFD166 honey
+    pub const CYAN: Color = rgb(250, 204, 21); // #FACC15 active yellow
+    pub const GREEN: Color = rgb(74, 154, 104); // restrained success
+    pub const GREEN1: Color = rgb(104, 176, 128);
+    pub const MAGENTA: Color = rgb(245, 158, 11); // #F59E0B amber
+    pub const ORANGE: Color = rgb(244, 185, 66);
+    pub const PURPLE: Color = rgb(255, 209, 102);
+    pub const RED: Color = rgb(220, 100, 92); // restrained error
+    pub const RED1: Color = rgb(177, 66, 61);
+    pub const TEAL: Color = rgb(244, 185, 66);
+    pub const YELLOW: Color = rgb(245, 158, 11);
 
     pub const RED_DARK: Color = rgb(66, 14, 20); // #420e14, quantizes to 256-color red, not gray
     pub const GREEN_DARK: Color = rgb(6, 56, 6); // #063806, quantizes to 256-color green, not gray
@@ -58,15 +58,15 @@ use palette::*;
 impl Theme {
     pub const fn wimonight() -> Self {
         Self {
-            bg_base: BG_STORM,
+            bg_base: rgb(24, 24, 27), // #18181B charcoal
             bg_light: BG_HIGHLIGHT,
             bg_dark: rgb(28, 28, 28), // lighter than bg_base for visible code blocks
             bg_highlight: BG_HIGHLIGHT,
             bg_hover: rgb(44, 44, 44),
-            bg_terminal: BG,
+            bg_terminal: rgb(9, 9, 11), // #09090B hive black
 
             accent_user: FG_DARK,
-            accent_assistant: MAGENTA,
+            accent_assistant: BLUE,
             accent_thinking: MAGENTA,
             accent_tool: DARK5,
             accent_system: BLUE,

@@ -4,7 +4,7 @@ version = "1.0.16"
 edition.workspace = true
 license = "Apache-2.0"
 authors = ["wimo AI"]
-default-run = "wimoai-wimo-pager"
+default-run = "bee"
 
 # Composition-root binary for the wimo Build TUI. The artifact is still named
 # `wimoai-wimo-pager`. This package exists so the binary can link both the pager
@@ -13,6 +13,12 @@ default-run = "wimoai-wimo-pager"
 # (cargo cycle). The binary installs the minimal-mode IoC hooks at startup.
 [[bin]]
 name = "wimoai-wimo-pager"
+path = "src/main.rs"
+
+# Public BeeCode command. The historical binary remains available for tooling
+# that invokes it directly during the migration.
+[[bin]]
+name = "bee"
 path = "src/main.rs"
 
 [dependencies]

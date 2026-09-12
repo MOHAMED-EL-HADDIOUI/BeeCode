@@ -1,6 +1,6 @@
-# wimoai-wimo-pager
+# BeeCode Terminal UI
 
-Terminal UI (TUI) for wimo Build. Provides the interactive full-screen interface
+Terminal UI (TUI) for BeeCode. Provides the interactive full-screen interface
 including the scrollback view, prompt input, session management, and all modal
 dialogs.
 

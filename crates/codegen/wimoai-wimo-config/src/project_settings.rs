@@ -1,7 +1,7 @@
-//! Project-local settings: `<project>/.wimo/settings.json`.
+//! Project-local settings: `<project>/.beecode/settings.json`.
 //!
 //! Discovered by walking up from the process working directory (nearest
-//! `.wimo/settings.json` wins), so running from a subdirectory of a project
+//! `.beecode/settings.json` wins), so running from a subdirectory of a project
 //! still picks up the project settings. This is the home for per-project LLM
 //! provider configuration — OpenAI / Anthropic endpoints and keys:
 //!
@@ -25,22 +25,25 @@
 //! }
 //! ```
 //!
-//! The layer merges into the **user tier above `$wimo_HOME/config.toml`** and
-//! below the `wimo_CONFIG` overlay and `requirements.toml`, so enterprise pins
-//! still win. Unlike the confined `wimo_CONFIG` overlay (which drops the
+//! The layer merges into the **user tier above the BeeCode home config** and
+//! below the `BEECODE_CONFIG` overlay and `requirements.toml`, so enterprise pins
+//! still win. Unlike the confined `BEECODE_CONFIG` overlay (which drops the
 //! per-model `[model.*]` table), this layer is full-power like `config.toml`.
 //!
 //! Trust note: a cloned repo can plant this file, and `[model.*]` entries
 //! choose where prompts are sent (`base_url`) and with what credential.
-//! Only run wimo in projects you trust, and never commit real API keys —
+//! Only run BeeCode in projects you trust, and never commit real API keys —
 //! prefer `env_key` pointing at environment variables over inline `api_key`.
 
 use std::path::{Path, PathBuf};
 
 use crate::loader::{apply_version_overrides_with_registered, expand_env_vars_in_toml};
 
-/// Project settings directory name, resolved against the project root.
-pub const PROJECT_SETTINGS_DIRNAME: &str = ".wimo";
+/// Preferred project settings directory name, resolved against the project root.
+pub const PROJECT_SETTINGS_DIRNAME: &str = ".beecode";
+
+/// Historical project directory accepted during the Wimo → BeeCode migration.
+pub const LEGACY_PROJECT_SETTINGS_DIRNAME: &str = ".wimo";
 
 /// Project settings filename inside [`PROJECT_SETTINGS_DIRNAME`].
 pub const PROJECT_SETTINGS_FILENAME: &str = "settings.json";
@@ -54,17 +57,18 @@ const MAX_SETTINGS_BYTES: u64 = 4 * 1024 * 1024;
 /// Bound on the upward directory walk (filesystem root always terminates it).
 const MAX_WALK_DEPTH: usize = 64;
 
-/// Find the nearest `.wimo/settings.json` at or above `start`.
-/// Returns the first regular file found walking rootward, or `None`.
+/// Find the nearest BeeCode project settings file at or above `start`.
+/// At a given directory `.beecode/settings.json` wins over the legacy
+/// `.wimo/settings.json`; the legacy path is read only as a compatibility fallback.
 pub fn find_project_settings_file(start: &Path) -> Option<PathBuf> {
     let mut dir = start.to_path_buf();
     for _ in 0..MAX_WALK_DEPTH {
-        let candidate = dir
-            .join(PROJECT_SETTINGS_DIRNAME)
-            .join(PROJECT_SETTINGS_FILENAME);
-        match std::fs::symlink_metadata(&candidate) {
-            Ok(meta) if meta.file_type().is_file() => return Some(candidate),
-            _ => {}
+        for dirname in [PROJECT_SETTINGS_DIRNAME, LEGACY_PROJECT_SETTINGS_DIRNAME] {
+            let candidate = dir.join(dirname).join(PROJECT_SETTINGS_FILENAME);
+            match std::fs::symlink_metadata(&candidate) {
+                Ok(meta) if meta.file_type().is_file() => return Some(candidate),
+                _ => {}
+            }
         }
         if !dir.pop() {
             break;
@@ -91,7 +95,17 @@ pub fn load_project_settings_from(start: &Path) -> Option<toml::Value> {
     if value.as_table().is_some_and(|t| t.is_empty()) {
         return None;
     }
-    tracing::debug!(path = %path.display(), "loaded project .wimo/settings.json");
+    if path
+        .components()
+        .any(|component| {
+            component.as_os_str()
+                == std::ffi::OsStr::new(LEGACY_PROJECT_SETTINGS_DIRNAME)
+        })
+    {
+        tracing::warn!(path = %path.display(), "loaded deprecated .wimo/settings.json; move it to .beecode/settings.json");
+    } else {
+        tracing::debug!(path = %path.display(), "loaded project .beecode/settings.json");
+    }
     Some(value)
 }
 
@@ -160,17 +174,18 @@ mod tests {
     #[test]
     fn nearest_settings_wins_walking_up() {
         let dir = tempfile::TempDir::new().unwrap();
-        write_settings(
-            dir.path(),
-            r#"{"models": {"default": "outer"}}"#,
-        );
+        write_settings(dir.path(), r#"{"models": {"default": "outer"}}"#);
         let inner = dir.path().join("a").join("b");
         std::fs::create_dir_all(&inner).unwrap();
         write_settings(&inner, r#"{"models": {"default": "inner"}}"#);
 
         assert_eq!(
             find_project_settings_file(&inner),
-            Some(inner.join(PROJECT_SETTINGS_DIRNAME).join(PROJECT_SETTINGS_FILENAME))
+            Some(
+                inner
+                    .join(PROJECT_SETTINGS_DIRNAME)
+                    .join(PROJECT_SETTINGS_FILENAME)
+            )
         );
         let v = load_project_settings_from(&inner).unwrap();
         assert_eq!(
@@ -188,6 +203,29 @@ mod tests {
                 .and_then(|d| d.as_str()),
             Some("outer")
         );
+    }
+
+    #[test]
+    fn beecode_settings_win_over_legacy_wimo_settings() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let legacy = dir.path().join(LEGACY_PROJECT_SETTINGS_DIRNAME);
+        std::fs::create_dir_all(&legacy).unwrap();
+        std::fs::write(legacy.join(PROJECT_SETTINGS_FILENAME), r#"{"models":{"default":"legacy"}}"#).unwrap();
+        write_settings(dir.path(), r#"{"models":{"default":"beecode"}}"#);
+
+        let value = load_project_settings_from(dir.path()).unwrap();
+        assert_eq!(value["models"]["default"].as_str(), Some("beecode"));
+    }
+
+    #[test]
+    fn legacy_wimo_settings_remain_a_compatible_fallback() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let legacy = dir.path().join(LEGACY_PROJECT_SETTINGS_DIRNAME);
+        std::fs::create_dir_all(&legacy).unwrap();
+        let expected = legacy.join(PROJECT_SETTINGS_FILENAME);
+        std::fs::write(&expected, r#"{"models":{"default":"legacy"}}"#).unwrap();
+
+        assert_eq!(find_project_settings_file(dir.path()), Some(expected));
     }
 
     #[test]
@@ -228,11 +266,11 @@ mod tests {
         let v = load_project_settings_from(dir.path()).unwrap();
         unsafe { std::env::remove_var("wimo_TEST_MARKER") };
         let entry = &v["model"]["gpt-5"];
-        assert_eq!(entry["base_url"].as_str(), Some("https://api.openai.com/v1"));
-        assert_eq!(entry["api_backend"].as_str(), Some("responses"));
         assert_eq!(
-            entry["extra_headers"]["X-From"].as_str(),
-            Some("expanded")
+            entry["base_url"].as_str(),
+            Some("https://api.openai.com/v1")
         );
+        assert_eq!(entry["api_backend"].as_str(), Some("responses"));
+        assert_eq!(entry["extra_headers"]["X-From"].as_str(), Some("expanded"));
     }
 }

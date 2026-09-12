@@ -51,7 +51,8 @@ pub use config_layers::{
     load_dismissed_ids_from_home, load_effective_config_disk_only,
 };
 pub use env_overlay::{
-    wimo_CONFIG_ENV, wimo_CONFIG_PATH_ENV, OverlaySource, ResolvedOverlay, resolved_env_overlay,
+    BEECODE_CONFIG_ENV, BEECODE_CONFIG_PATH_ENV, OverlaySource, ResolvedOverlay,
+    resolved_env_overlay, wimo_CONFIG_ENV, wimo_CONFIG_PATH_ENV,
 };
 #[cfg(unix)]
 pub use global_hook_sources::{
@@ -78,8 +79,8 @@ pub use managed_cache::{
 pub use paths::{
     claude_managed_settings_path, claude_managed_settings_probe_path, create_dir_all_owner_only,
     decode_cwd_from_dirname, default_wimo_home, encode_cwd_dirname, ensure_sessions_cwd_dir,
-    ensure_sessions_cwd_dir_in, wimo_application, wimo_application_in, wimo_home, sessions_cwd_dir,
-    sessions_cwd_dir_in, set_dir_owner_only, system_config_dir, user_wimo_home,
+    ensure_sessions_cwd_dir_in, sessions_cwd_dir, sessions_cwd_dir_in, set_dir_owner_only,
+    system_config_dir, user_wimo_home, wimo_application, wimo_application_in, wimo_home,
 };
 pub use validation::{
     RequirementsError, RequirementsLayer, RequirementsSource, load_merged_requirements,

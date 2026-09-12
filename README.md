@@ -1,18 +1,23 @@
 <div align="center">
 
-<img src="assets/logo/wimo.svg" alt="WIMO logo" width="120">
+<img src="assets/logo/beecode.svg" alt="BeeCode hive mark" width="168">
 
-# WIMO
+# BeeCode
 
-**Your open-source AI developer workstation** — a full-screen TUI that
-understands your codebase, edits files, runs shell commands, searches the
-web, and manages long-running tasks.
+**The AI Coding Agent**
+
+Small agent. Big work.
+
+BeeCode is a terminal-native coding
+assistant that works with the AI model provider you choose. It understands
+your codebase, edits files, runs shell commands, searches the web, and
+manages long-running tasks.
 
 Interactively · Headlessly (scripting / CI) · Embedded via ACP
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.94-orange.svg)](rust-toolchain.toml)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](#building-from-source)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](#building-from-source)
 
 [Quickstart](#quickstart) · [Build from source](#building-from-source) ·
 [Development](#development) · [Docs](#documentation) · [Contact](#contact)
@@ -24,12 +29,13 @@ Interactively · Headlessly (scripting / CI) · Embedded via ACP
 ## Quickstart
 
 ```sh
-curl -fsSL https://x.ai/cli/install.sh | bash   # macOS / Linux / Git Bash
-irm https://x.ai/cli/install.ps1 | iex          # Windows PowerShell
-wimo --version
+bee --version
+bee
 ```
 
-On first launch your browser opens to authenticate.
+BeeCode uses the provider API key and model configured for your project. It is
+provider-neutral: BeeCode is not the CLI of any specific model or AI company.
+See [LLM providers](#llm-providers-no-login-required) for setup.
 
 ## Building from source
 
@@ -41,25 +47,27 @@ Requirements: pinned Rust toolchain (`rust-toolchain.toml`, auto-installed by
 cargo install dotslash
 dotslash --help                                  # sanity check
 cargo run -p "wimoai-wimo-pager-bin"            # build + launch the TUI
-cargo build -p "wimoai-wimo-pager-bin" --release # binary: target/release/wimoai-wimo-pager (ships as `wimo`)
+cargo build -p "wimoai-wimo-pager-bin" --release # binary: target/release/bee
 ```
 
-> macOS and Linux are supported. Windows builds are best-effort.
+> BeeCode supports Windows, macOS, and Linux. On Windows, install a real
+> `protoc` binary and place it on `PATH` before building.
 
 ## LLM providers (no login required)
 
-wimo authenticates with provider API keys — OpenAI, Anthropic, or any
+BeeCode authenticates with provider API keys — OpenAI, Anthropic, or any
 OpenAI-compatible endpoint. No account login, no OAuth.
 
-1. Copy `.wimo/settings.example.json` to `.wimo/settings.json` in your project
-   (nearest one walking up from where you run wins).
+1. Create `.beecode/settings.json` in your project (the nearest one walking up
+   from where you run wins).
 2. Set your key: `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` (or inline `api_key`,
    not recommended — never commit real keys).
-3. Run: `wimo -p "hello"`.
+3. Run: `bee -p "hello"`.
 
 `api_backend` selects the protocol: `responses` / `chat_completions` (OpenAI),
-`messages` (Anthropic). Settings merge above `~/.wimo/config.toml`, below
-`wimo_CONFIG` overlays and enterprise pins.
+`messages` (Anthropic). Settings merge above the BeeCode home config, below
+`BEECODE_CONFIG` overlays and enterprise pins. Existing `.wimo` settings and
+`wimo_CONFIG` remain supported during migration.
 
 ## Development
 
@@ -77,7 +85,7 @@ cargo fmt --all                     # format
 
 | Path | Contents |
 |------|----------|
-| `crates/codegen/wimoai-wimo-pager-bin/` | Composition root — builds the `wimo` binary |
+| `crates/codegen/wimoai-wimo-pager-bin/` | Composition root — builds the `bee` binary |
 | `crates/codegen/wimoai-wimo-pager/` | The TUI: scrollback, prompt, modals, rendering |
 | `crates/codegen/wimoai-wimo-shell/` | Agent runtime + headless / ACP entry points |
 | `crates/codegen/wimoai-wimo-tools/` | Tool implementations (terminal, edit, search, …) |
@@ -91,6 +99,13 @@ Full user guide ships in-crate:
 [`crates/codegen/wimoai-wimo-pager/docs/user-guide/`](crates/codegen/wimoai-wimo-pager/docs/user-guide/)
 — setup, shortcuts, slash commands, config, theming, MCP, skills, plugins,
 hooks, headless mode, sandboxing.
+
+## Migration from Wimo
+
+BeeCode was formerly known as Wimo. `bee` is the preferred command; existing
+`.wimo/settings.json`, `wimo_CONFIG`, and `wimo_CONFIG_PATH` inputs continue to
+work as compatibility fallbacks. Move project settings to `.beecode/settings.json`
+and use `BEECODE_CONFIG` / `BEECODE_CONFIG_PATH` in new automation.
 
 ## Contact
 

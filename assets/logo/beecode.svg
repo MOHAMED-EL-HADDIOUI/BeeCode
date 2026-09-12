@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">BeeCode hive mark</title>
+  <desc id="desc">A precise honey-gold bee in a dark hexagonal hive.</desc>
+  <defs>
+    <linearGradient id="honey" x1="52" y1="38" x2="204" y2="218" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD166"/>
+      <stop offset=".52" stop-color="#F4B942"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="54" fill="#09090B"/>
+  <path d="M128 27 215 77v102l-87 50-87-50V77l87-50Z" fill="#18181B" stroke="#F4B942" stroke-width="8"/>
+  <path d="m91 105-25-20c-8-6-18 4-12 12l21 29m90-21 25-20c8-6 18 4 12 12l-21 29" fill="none" stroke="#FFD166" stroke-linecap="round" stroke-width="9"/>
+  <path d="M84 121c0-22 18-40 40-40h8c22 0 40 18 40 40v23c0 26-21 47-47 47h-1c-26 0-47-21-47-47v-23h7Z" fill="url(#honey)"/>
+  <path d="M94 123h69M87 145h78M99 167h54" stroke="#09090B" stroke-linecap="round" stroke-width="9"/>
+  <circle cx="112" cy="107" r="5" fill="#09090B"/><circle cx="143" cy="107" r="5" fill="#09090B"/>
+</svg>
