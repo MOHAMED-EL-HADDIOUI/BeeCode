@@ -33,6 +33,8 @@ bee --version
 bee
 ```
 
+`bee`, `beecode`, and `beecode-pager` are the same binary — use whichever name you prefer.
+
 BeeCode uses the provider API key and model configured for your project. It is
 provider-neutral: BeeCode is not the CLI of any specific model or AI company.
 See [LLM providers](#llm-providers-no-login-required) for setup.
@@ -47,7 +49,7 @@ Requirements: pinned Rust toolchain (`rust-toolchain.toml`, auto-installed by
 cargo install dotslash
 dotslash --help                                  # sanity check
 cargo run -p beecode-pager-bin            # build + launch the TUI
-cargo build -p beecode-pager-bin --release # binary: target/release/bee
+cargo build -p beecode-pager-bin --release # binaries: target/release/bee, beecode, beecode-pager
 ```
 
 > BeeCode supports Windows, macOS, and Linux. On Windows, install a real
@@ -72,7 +74,7 @@ OpenAI-compatible endpoint. No account login, no OAuth.
 
 ```sh
 cargo check -p "<crate>"            # fast validation — always scope to one crate
-cargo test -p beecode-config # per-crate tests (never bare `cargo test`)
+cargo test -p beecode-config       # per-crate tests (never bare `cargo test`)
 cargo clippy -p "<crate>"           # lint rules: clippy.toml
 cargo fmt --all                     # format
 ```
@@ -84,7 +86,7 @@ cargo fmt --all                     # format
 
 | Path | Contents |
 |------|----------|
-| `crates/codegen/beecode-pager-bin/` | Composition root — builds the `bee` binary |
+| `crates/codegen/beecode-pager-bin/` | Composition root — builds the `bee` / `beecode` / `beecode-pager` binaries |
 | `crates/codegen/beecode-pager/` | The TUI: scrollback, prompt, modals, rendering |
 | `crates/codegen/beecode-shell/` | Agent runtime + headless / ACP entry points |
 | `crates/codegen/beecode-tools/` | Tool implementations (terminal, edit, search, …) |
