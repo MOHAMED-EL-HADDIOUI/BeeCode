@@ -1,5 +1,5 @@
 //! Multi-terminal framework — REAL terminal session management (Section 13 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub struct TerminalSession {
     pub id: u32,

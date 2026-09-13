@@ -1,5 +1,5 @@
 //! Remote / Container workspace abstraction — REAL abstraction framework (Section 31 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub trait WorkspaceBackend {
     fn name(&self) -> String;

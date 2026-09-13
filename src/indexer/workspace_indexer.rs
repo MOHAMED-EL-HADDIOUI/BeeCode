@@ -1,5 +1,5 @@
 //! WorkspaceIndexer — REAL implementation (Section 4 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 use std::fs;
 use std::path::Path;
 

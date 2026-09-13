@@ -24,9 +24,9 @@ use serde::{Deserialize, Serialize};
 /// v1.16: Added `team_id` field (OAuth team identity).
 /// v1.17: Added `input_tokens`, `cached_input_tokens`, `output_tokens` to
 ///        TurnResultMetadata for per-component token attribution.
-/// v1.18: Added `shell_version`: the wimo-shell agent binary version, distinct
+/// v1.18: Added `shell_version`: the beecode-shell agent binary version, distinct
 ///        from `client_version` (the UI client's version). They coincide for the
-///        TUI but differ for embedding clients like wimo-desktop.
+///        TUI but differ for embedding clients like beecode-desktop.
 /// v1.19: Added `workspace_type`: classifies the working directory as "git",
 ///        "project" (non-git project dir), or "non_project" (system/temp/home).
 /// v1.20: Added `sandbox`: resolved OS sandbox profile and whether enforcement is active.
@@ -38,7 +38,7 @@ use serde::{Deserialize, Serialize};
 ///        from metadata.json (prompt content is no longer uploaded in metadata).
 /// v1.24: Prompt metadata updates.
 pub const GCS_SCHEMA_VERSION: &str = "v1.24";
-/// OS-level sandbox state for a trace turn (local `wimoai-wimo-sandbox`, not cloud sandbox).
+/// OS-level sandbox state for a trace turn (local `beecode-sandbox`, not cloud sandbox).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LocalSandboxTelemetry {
     /// Resolved profile at process startup (e.g. "off", "workspace", "strict").
@@ -112,14 +112,14 @@ pub struct PromptMetadata {
     /// Current working directory of the session.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cwd: Option<String>,
-    /// The agent type / harness name for this session (e.g. "wimo", "codex").
+    /// The agent type / harness name for this session (e.g. "beecode", "codex").
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_type: Option<String>,
-    /// Version of the wimo-shell agent binary that handled this turn
-    /// (`wimoai_wimo_version::VERSION`). Self-reported by the agent, so it reflects
+    /// Version of the beecode-shell agent binary that handled this turn
+    /// (`beecode_version::VERSION`). Self-reported by the agent, so it reflects
     /// the binary actually running. Distinct from `client_version`, which is the
     /// UI client's version — for the TUI these coincide, but for embedding clients
-    /// like wimo-desktop the bundled shell differs from the app version.
+    /// like beecode-desktop the bundled shell differs from the app version.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shell_version: Option<String>,
     /// Resolved OS sandbox profile and whether enforcement is active.
@@ -204,7 +204,7 @@ mod tests {
             "turn_started_at": "2025-01-01T00:00:00Z",
             "user_id": null,
             "user_email": null,
-            "model": "wimo-3",
+            "model": "beecode-3",
             "host_os": "linux",
             "host_arch": "x86_64"
         }"#
@@ -227,7 +227,7 @@ mod tests {
             "turn_started_at": "2025-01-01T00:00:00Z",
             "user_id": null,
             "user_email": null,
-            "model": "wimo-3",
+            "model": "beecode-3",
             "host_os": "linux",
             "host_arch": "x86_64",
             "prompt_has_image": false,
@@ -261,10 +261,10 @@ mod tests {
     #[test]
     fn cwd_round_trips() {
         let mut meta: PromptMetadata = serde_json::from_str(minimal_json()).unwrap();
-        meta.cwd = Some("/root/code/wimoai".into());
+        meta.cwd = Some("/root/code/beecode".into());
         let json = serde_json::to_string(&meta).unwrap();
         let deserialized: PromptMetadata = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized.cwd.as_deref(), Some("/root/code/wimoai"));
+        assert_eq!(deserialized.cwd.as_deref(), Some("/root/code/beecode"));
     }
     #[test]
     fn sandbox_round_trips() {
@@ -291,12 +291,12 @@ mod tests {
             turn_number: 1,
             request_id: "req-1".into(),
             turn_started_at: "2025-01-01T00:00:00Z".into(),
-            model: "wimo-3".into(),
+            model: "beecode-3".into(),
             host_os: "linux".into(),
             host_arch: "x86_64".into(),
             ..Default::default()
         });
         assert_eq!(meta.session_id, "abc");
-        assert_eq!(meta.model, "wimo-3");
+        assert_eq!(meta.model, "beecode-3");
     }
 }

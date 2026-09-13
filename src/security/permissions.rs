@@ -1,5 +1,5 @@
 //! Security / Permissions — REAL classification (Section 22 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub enum ActionClass {
     READ,

@@ -46,8 +46,8 @@ Requirements: pinned Rust toolchain (`rust-toolchain.toml`, auto-installed by
 ```sh
 cargo install dotslash
 dotslash --help                                  # sanity check
-cargo run -p "wimoai-wimo-pager-bin"            # build + launch the TUI
-cargo build -p "wimoai-wimo-pager-bin" --release # binary: target/release/bee
+cargo run -p beecode-pager-bin            # build + launch the TUI
+cargo build -p beecode-pager-bin --release # binary: target/release/bee
 ```
 
 > BeeCode supports Windows, macOS, and Linux. On Windows, install a real
@@ -66,46 +66,38 @@ OpenAI-compatible endpoint. No account login, no OAuth.
 
 `api_backend` selects the protocol: `responses` / `chat_completions` (OpenAI),
 `messages` (Anthropic). Settings merge above the BeeCode home config, below
-`BEECODE_CONFIG` overlays and enterprise pins. Existing `.wimo` settings and
-`wimo_CONFIG` remain supported during migration.
+`BEECODE_CONFIG` overlays and enterprise pins.
 
 ## Development
 
 ```sh
 cargo check -p "<crate>"            # fast validation — always scope to one crate
-cargo test -p "wimoai-wimo-config" # per-crate tests (never bare `cargo test`)
+cargo test -p beecode-config # per-crate tests (never bare `cargo test`)
 cargo clippy -p "<crate>"           # lint rules: clippy.toml
 cargo fmt --all                     # format
 ```
 
 > Root `Cargo.toml` is generated — edit per-crate `Cargo.toml` files only.
-> Package names contain a space, so quote `-p` args. See [AGENTS.md](AGENTS.md).
+> Package names are `beecode-*` (no spaces, no quoting needed). See [AGENTS.md](AGENTS.md).
 
 ## Repository layout
 
 | Path | Contents |
 |------|----------|
-| `crates/codegen/wimoai-wimo-pager-bin/` | Composition root — builds the `bee` binary |
-| `crates/codegen/wimoai-wimo-pager/` | The TUI: scrollback, prompt, modals, rendering |
-| `crates/codegen/wimoai-wimo-shell/` | Agent runtime + headless / ACP entry points |
-| `crates/codegen/wimoai-wimo-tools/` | Tool implementations (terminal, edit, search, …) |
-| `crates/codegen/wimoai-wimo-workspace/` | Filesystem, VCS, execution, checkpoints |
+| `crates/codegen/beecode-pager-bin/` | Composition root — builds the `bee` binary |
+| `crates/codegen/beecode-pager/` | The TUI: scrollback, prompt, modals, rendering |
+| `crates/codegen/beecode-shell/` | Agent runtime + headless / ACP entry points |
+| `crates/codegen/beecode-tools/` | Tool implementations (terminal, edit, search, …) |
+| `crates/codegen/beecode-workspace/` | Filesystem, VCS, execution, checkpoints |
 | `crates/common/`, `crates/build/`, `prod/mc/` | Shared leaf crates |
 | `third_party/` | Vendored upstream sources (don't refactor) |
 
 ## Documentation
 
 Full user guide ships in-crate:
-[`crates/codegen/wimoai-wimo-pager/docs/user-guide/`](crates/codegen/wimoai-wimo-pager/docs/user-guide/)
+[`crates/codegen/beecode-pager/docs/user-guide/`](crates/codegen/beecode-pager/docs/user-guide/)
 — setup, shortcuts, slash commands, config, theming, MCP, skills, plugins,
 hooks, headless mode, sandboxing.
-
-## Migration from Wimo
-
-BeeCode was formerly known as Wimo. `bee` is the preferred command; existing
-`.wimo/settings.json`, `wimo_CONFIG`, and `wimo_CONFIG_PATH` inputs continue to
-work as compatibility fallbacks. Move project settings to `.beecode/settings.json`
-and use `BEECODE_CONFIG` / `BEECODE_CONFIG_PATH` in new automation.
 
 ## Contact
 

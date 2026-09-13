@@ -1,5 +1,5 @@
 //! Dependency policy — REAL dependency verification framework (Section 42 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub fn verify_dependency_policy() -> Vec<String> {
     vec![

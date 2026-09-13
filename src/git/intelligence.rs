@@ -1,5 +1,5 @@
 //! Git Intelligence — REAL basic git integration (Section 16 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 use std::process::Command;
 
 pub struct GitInfo {

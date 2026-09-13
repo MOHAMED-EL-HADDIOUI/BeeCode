@@ -12,11 +12,11 @@ pub const SIGNED_PAYLOAD_VERSION: u32 = 2;
 
 /// Domain-separation tags inside the signed bytes: both message types share one
 /// signing key, so each verifier requires its own tag (no cross-substitution).
-pub const MANAGED_POLICY_TYP: &str = "wimo.managed_policy.v1";
-pub const MANAGED_IDENTITY_TYP: &str = "wimo.managed_identity.v1";
+pub const MANAGED_POLICY_TYP: &str = "beecode.managed_policy.v1";
+pub const MANAGED_IDENTITY_TYP: &str = "beecode.managed_identity.v1";
 
 /// Client echoes its persisted envelope `nonce` on this header for the server probe.
-pub const MANAGED_CONFIG_NONCE_ECHO_HEADER: &str = "x-wimo-managed-config-nonce";
+pub const MANAGED_CONFIG_NONCE_ECHO_HEADER: &str = "x-beecode-managed-config-nonce";
 
 /// Shape of a server-minted nonce (16 random bytes as hex): what `fresh_nonce`
 /// produces and the only shape the client echoes (hex is HTTP-header-safe).
@@ -202,7 +202,7 @@ mod tests {
         );
 
         let partial: ManagedIdentityClaim = serde_json::from_str(
-            r#"{"typ":"wimo.managed_identity.v1","principal":"team-007","expires_at":1,"key_id":"v1"}"#,
+            r#"{"typ":"beecode.managed_identity.v1","principal":"team-007","expires_at":1,"key_id":"v1"}"#,
         )
         .unwrap();
         assert!(!partial.fail_closed, "a partial claim parses permissive");

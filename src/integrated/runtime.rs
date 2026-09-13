@@ -1,5 +1,5 @@
 //! Integrated runtime — REAL end-to-end execution (Section 3/4/5/6/7 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 use crate::agent::loop::{AgentLoop, AgentState};
 use crate::context::engine::ContextEngine;
@@ -31,7 +31,7 @@ pub fn run_full_integration(cmd: &str, root: &str) -> String {
     let mut workflow = Workflow::new(cmd.to_string());
     let mut terminal = TerminalManager::new();
     let mut workspace: Box<dyn WorkspaceBackend> = Box::new(LocalWorkspace);
-    let release = ReleaseInfo::new("1.0.0-wimo".to_string());
+    let release = ReleaseInfo::new("1.0.0-beecode".to_string());
 
     // 2. Load plugins
     plugin_reg.load_plugins_from_dir(".");
@@ -83,7 +83,7 @@ pub fn run_full_integration(cmd: &str, root: &str) -> String {
     let headless = HeadlessConfig::new(cmd.to_string());
 
     // 14. Process execution demonstration (real subprocess)
-    let process_result = run_command("echo", &["Wimo integration verified".to_string()], Some(root));
+    let process_result = run_command("echo", &["BeeCode integration verified".to_string()], Some(root));
 
     // 15. Workspace backend demonstration
     let workspace_files = workspace.list_files();
@@ -99,7 +99,7 @@ pub fn run_full_integration(cmd: &str, root: &str) -> String {
 
     // 19. Return fully integrated result
     format!(
-        "WIMO FULL INTEGRATION EXECUTION\nTask: {}\nIndexed files: {}\nGit branch: {}\nContext items: {}\nAgent state: {:?}\nPlugins loaded: {}\nSkills loaded: {}\nWorkflow steps: {} executed\nTerminal session: {} active\nHeadless config: interactive={:?}\nProcess result exit code: {} stdout: {}\nWorkspace backend: {} (local={:?})\nRelease: {}\nMemory (session/task/project): {}/{}/{}\nSecurity allowed: {:?}\nMetrics: startup={}ms model={}ms retries={} failures={}\nPlugins: {}\nSkills: {}\n=== ALL SUBSYSTEMS CONNECTED AND VERIFIED ===",
+        "BEECODE FULL INTEGRATION EXECUTION\nTask: {}\nIndexed files: {}\nGit branch: {}\nContext items: {}\nAgent state: {:?}\nPlugins loaded: {}\nSkills loaded: {}\nWorkflow steps: {} executed\nTerminal session: {} active\nHeadless config: interactive={:?}\nProcess result exit code: {} stdout: {}\nWorkspace backend: {} (local={:?})\nRelease: {}\nMemory (session/task/project): {}/{}/{}\nSecurity allowed: {:?}\nMetrics: startup={}ms model={}ms retries={} failures={}\nPlugins: {}\nSkills: {}\n=== ALL SUBSYSTEMS CONNECTED AND VERIFIED ===",
         cmd,
         indexer.file_list.len(),
         git_info.as_ref().map(|g| g.branch.clone()).unwrap_or_else(|| "unknown".to_string()),

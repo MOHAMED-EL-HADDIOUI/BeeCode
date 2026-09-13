@@ -1,5 +1,5 @@
 //! Release / Distribution framework — REAL release targets (Section 36 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub enum PlatformTarget {
     LinuxX86_64,
@@ -28,7 +28,7 @@ impl ReleaseInfo {
                 PlatformTarget::WindowsX86_64,
             ],
             checksums: Vec::new(),
-            binary_path: format!("wimo-{}", version),
+            binary_path: format!("beecode-{}", version),
         }
     }
 

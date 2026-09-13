@@ -1,4 +1,4 @@
-//! Signed upload URL types shared between cli-chat-proxy (server) and wimo-shell (client).
+//! Signed upload URL types shared between cli-chat-proxy (server) and beecode-shell (client).
 
 use serde::{Deserialize, Serialize};
 

@@ -1,5 +1,5 @@
 //! Review mode — REAL review framework (Section 19 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub enum Severity {
     Critical,

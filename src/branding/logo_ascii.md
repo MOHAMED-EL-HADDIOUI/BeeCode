@@ -1,6 +1,6 @@
-    WIMO AI
+    BEECODE AI
   ╔════════╗
-  ║  WIMO  ║
+  ║  BEECODE  ║
   ╚════════╝
  OPEN SOURCE
  ANYONE CAN CONTRIBUTE

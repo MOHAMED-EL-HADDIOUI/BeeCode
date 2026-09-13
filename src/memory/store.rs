@@ -1,5 +1,5 @@
 //! Agent memory — REAL session/project/task memory (Section 20 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub struct MemoryStore {
     pub session: Vec<String>,

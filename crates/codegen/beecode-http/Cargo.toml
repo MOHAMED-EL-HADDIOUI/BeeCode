@@ -1,0 +1,27 @@
+[package]
+license = "Apache-2.0"
+name = "beecode-http"
+version = "0.1.0"
+edition.workspace = true
+description = "Shared reqwest HTTP clients and User-Agent construction for the beecode CLI."
+
+[dependencies]
+reqwest = { workspace = true, features = ["blocking", "rustls-tls-native-roots"] }
+reqwest-middleware = { workspace = true }
+# Same 0.23 as reqwest's rustls, so the certificate classifier's downcast resolves.
+rustls = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+beecode-auth = { workspace = true, features = ["middleware"] }
+beecode-extra-ca = { workspace = true }
+beecode-sampler = { path = "../beecode-sampler" }
+beecode-telemetry = { workspace = true }
+beecode-version = { workspace = true }
+beecode-workspace = { workspace = true }
+
+[dev-dependencies]
+rcgen = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+
+[lints]
+workspace = true

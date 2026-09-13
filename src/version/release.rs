@@ -1,7 +1,7 @@
 //! Version / release info — REAL version tracking (Section 41/36 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
-pub const VERSION: &str = "1.0.0-wimo";
+pub const VERSION: &str = "1.0.0-beecode";
 pub const RELEASE_TARGETS: &[&str] = &[
     "linux-x86_64",
     "linux-arm64",
@@ -11,5 +11,5 @@ pub const RELEASE_TARGETS: &[&str] = &[
 ];
 
 pub fn version_string() -> String {
-    format!("wimo {} (wimoai open source)", VERSION)
+    format!("beecode {} (beecode open source)", VERSION)
 }

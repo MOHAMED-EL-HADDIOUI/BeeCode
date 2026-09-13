@@ -1,5 +1,5 @@
 //! Headless / CI mode — REAL non-interactive execution (Section 30 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub struct HeadlessConfig {
     pub non_interactive: bool,

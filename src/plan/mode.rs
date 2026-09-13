@@ -1,5 +1,5 @@
 //! Plan mode — REAL planning framework (Section 18 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub struct Plan {
     pub objective: String,

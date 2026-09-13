@@ -1,0 +1,41 @@
+{
+    "name": "@beecode-official/beecode",
+    "version": "0.1.220-alpha.4",
+    "description": "Bring beecode into your terminal",
+    "license": "Apache-2.0",
+    "bin": {
+        "beecode": "bin/beecode"
+    },
+    "files": [
+        "bin/"
+    ],
+    "os": [
+        "darwin",
+        "linux",
+        "win32"
+    ],
+    "cpu": [
+        "arm64",
+        "x64"
+    ],
+    "scripts": {
+        "postinstall": "node bin/postinstall.js"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "dependencies": {
+        "@iarna/toml": "^3.0.0"
+    },
+    "optionalDependencies": {
+        "@beecode-official/beecode-darwin-arm64": "0.1.220-alpha.4",
+        "@beecode-official/beecode-darwin-x64": "0.1.220-alpha.4",
+        "@beecode-official/beecode-linux-arm64": "0.1.220-alpha.4",
+        "@beecode-official/beecode-linux-x64": "0.1.220-alpha.4",
+        "@beecode-official/beecode-win32-arm64": "0.1.220-alpha.4",
+        "@beecode-official/beecode-win32-x64": "0.1.220-alpha.4"
+    }
+}

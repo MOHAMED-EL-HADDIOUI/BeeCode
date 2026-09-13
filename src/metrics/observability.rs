@@ -1,5 +1,5 @@
 //! Metrics / Observability — REAL tracking (Section 29 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub struct Metrics {
     pub startup_time_ms: u64,

@@ -1,0 +1,29 @@
+[package]
+license = "Apache-2.0"
+name = "beecode-workspace-client"
+version = "0.1.0"
+edition.workspace = true
+description = "Lightweight typed client for hub-proxied workspace.* RPCs (shared by beecode-shell proxy mode and other consumers)"
+
+[dependencies]
+semver = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["time"] }
+tracing = { workspace = true }
+beecode-computer-hub-sdk = { workspace = true }
+beecode-workspace-types = { workspace = true }
+beecode-tool-protocol = { workspace = true }
+beecode-tool-runtime = { workspace = true }
+
+[features]
+default = []
+default-bazel = []
+[dev-dependencies]
+schemars = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt", "test-util"] }
+beecode-tool-types = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,5 +1,5 @@
 //! Documentation framework — FULL docs structure (Section 39 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub fn generate_docs() -> Vec<String> {
     vec![

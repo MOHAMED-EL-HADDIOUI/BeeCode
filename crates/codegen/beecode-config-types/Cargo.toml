@@ -1,0 +1,24 @@
+[package]
+license = "Apache-2.0"
+name = "beecode-config-types"
+version = "0.1.0"
+edition.workspace = true
+description = "Leaf configuration value types for the beecode CLI, extracted from beecode-shell for dependency inversion."
+
+[dependencies]
+agent-client-protocol = { workspace = true }
+indexmap = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+strum = { workspace = true }
+toml = { workspace = true }
+tracing = { workspace = true }
+beecode-announcements = { workspace = true }
+beecode-config = { workspace = true }
+beecode-mcp = { workspace = true }
+
+[features]
+default-bazel = []
+
+[lints]
+workspace = true

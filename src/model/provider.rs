@@ -1,5 +1,5 @@
 //! Multi-provider model abstraction — REAL framework (Section 8 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub trait ModelProvider {
     fn provider_name(&self) -> String;
@@ -14,17 +14,17 @@ impl ModelProvider for OpenAIProvider {
     }
 }
 
-pub struct WimoProvider;
-impl ModelProvider for WimoProvider {
-    fn provider_name(&self) -> String { "wimoai".to_string() }
+pub struct BeeCodeProvider;
+impl ModelProvider for BeeCodeProvider {
+    fn provider_name(&self) -> String { "beecode".to_string() }
     fn stream_response(&self, prompt: &str) -> Vec<String> {
-        vec![format!("Wimo AI response: {}", prompt)]
+        vec![format!("BeeCode AI response: {}", prompt)]
     }
 }
 
 pub enum ProviderType {
     OpenAI,
-    Wimo,
+    BeeCode,
     Anthropic,
     Custom,
 }
@@ -32,8 +32,8 @@ pub enum ProviderType {
 pub fn select_provider(preference: ProviderType) -> Box<dyn ModelProvider> {
     match preference {
         ProviderType::OpenAI => Box::new(OpenAIProvider),
-        ProviderType::Wimo => Box::new(WimoProvider),
-        ProviderType::Anthropic => Box::new(WimoProvider),
-        ProviderType::Custom => Box::new(WimoProvider),
+        ProviderType::BeeCode => Box::new(BeeCodeProvider),
+        ProviderType::Anthropic => Box::new(BeeCodeProvider),
+        ProviderType::Custom => Box::new(BeeCodeProvider),
     }
 }

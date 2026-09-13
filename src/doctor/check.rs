@@ -1,5 +1,5 @@
 //! Doctor / Diagnostics — REAL check system (Section 28 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub struct DoctorCheck {
     pub name: String,

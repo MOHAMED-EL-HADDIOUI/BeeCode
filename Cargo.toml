@@ -6,98 +6,98 @@ async-openai = { git = "https://github.com/our-forks/async-openai.git", rev = "9
 [workspace]
 resolver = "2"
 members = [
-    "crates/build/wimoai-proto-build",
+    "crates/build/beecode-proto-build",
     "crates/codegen/ptyctl",
     "crates/codegen/ptyctl-cli",
-    "crates/codegen/wimoai-acp-lib",
-    "crates/codegen/wimoai-agent-lifecycle",
-    "crates/codegen/wimoai-chat-state",
-    "crates/codegen/wimoai-codebase-graph",
-    "crates/codegen/wimoai-compaction-transcript",
-    "crates/codegen/wimoai-crash-handler",
-    "crates/codegen/wimoai-dirs",
-    "crates/codegen/wimoai-fast-worktree",
-    "crates/codegen/wimoai-file-utils",
-    "crates/codegen/wimoai-fsnotify",
-    "crates/codegen/wimoai-fuzzy-file-search",
-    "crates/codegen/wimoai-gix-status",
-    "crates/codegen/wimoai-wimo-active-sessions",
-    "crates/codegen/wimoai-wimo-agent",
-    "crates/codegen/wimoai-wimo-announcements",
-    "crates/codegen/wimoai-wimo-auth",
-    "crates/codegen/wimoai-wimo-bundle",
-    "crates/codegen/wimoai-wimo-config",
-    "crates/codegen/wimoai-wimo-config-types",
-    "crates/codegen/wimoai-wimo-dashboard-store",
-    "crates/codegen/wimoai-wimo-diag-server",
-    "crates/codegen/wimoai-wimo-env",
-    "crates/codegen/wimoai-wimo-extra-ca",
-    "crates/codegen/wimoai-wimo-foreign-sessions",
-    "crates/codegen/wimoai-wimo-gboom",
-    "crates/codegen/wimoai-wimo-hooks",
-    "crates/codegen/wimoai-wimo-http",
-    "crates/codegen/wimoai-wimo-markdown",
-    "crates/codegen/wimoai-wimo-markdown-core",
-    "crates/codegen/wimoai-wimo-mcp",
-    "crates/codegen/wimoai-wimo-memory",
-    "crates/codegen/wimoai-wimo-mermaid",
-    "crates/codegen/wimoai-wimo-models",
-    "crates/codegen/wimoai-wimo-pager",
-    "crates/codegen/wimoai-wimo-pager-bin",
-    "crates/codegen/wimoai-wimo-pager-diff",
-    "crates/codegen/wimoai-wimo-pager-minimal",
-    "crates/codegen/wimoai-wimo-pager-pty-harness",
-    "crates/codegen/wimoai-wimo-pager-render",
-    "crates/codegen/wimoai-wimo-paths",
-    "crates/codegen/wimoai-wimo-plugin-marketplace",
-    "crates/codegen/wimoai-wimo-sampler",
-    "crates/codegen/wimoai-wimo-sampling-types",
-    "crates/codegen/wimoai-wimo-sandbox",
-    "crates/codegen/wimoai-wimo-secrets",
-    "crates/codegen/wimoai-wimo-session-events",
-    "crates/codegen/wimoai-wimo-session-search",
-    "crates/codegen/wimoai-wimo-shared",
-    "crates/codegen/wimoai-wimo-shell",
-    "crates/codegen/wimoai-wimo-shell-base",
-    "crates/codegen/wimoai-wimo-shell-session-support",
-    "crates/codegen/wimoai-wimo-shell-terminal",
-    "crates/codegen/wimoai-wimo-status-line",
-    "crates/codegen/wimoai-wimo-subagent-resolution",
-    "crates/codegen/wimoai-wimo-telemetry",
-    "crates/codegen/wimoai-wimo-test-support",
-    "crates/codegen/wimoai-wimo-tools",
-    "crates/codegen/wimoai-wimo-tools-api",
-    "crates/codegen/wimoai-wimo-update",
-    "crates/codegen/wimoai-wimo-version",
-    "crates/codegen/wimoai-wimo-voice",
-    "crates/codegen/wimoai-wimo-workspace",
-    "crates/codegen/wimoai-wimo-workspace-client",
-    "crates/codegen/wimoai-wimo-workspace-daemon",
-    "crates/codegen/wimoai-wimo-workspace-types",
-    "crates/codegen/wimoai-hooks-plugins-types",
-    "crates/codegen/wimoai-hunk-tracker",
-    "crates/codegen/wimoai-mixpanel",
-    "crates/codegen/wimoai-prompt-queue",
-    "crates/codegen/wimoai-ratatui-inline",
-    "crates/codegen/wimoai-ratatui-textarea",
-    "crates/codegen/wimoai-sqlite-journal",
-    "crates/codegen/wimoai-system-power",
-    "crates/codegen/wimoai-token-estimation",
-    "crates/codegen/wimoai-tracing-macros",
-    "crates/codegen/wimoai-tty-utils",
-    "crates/codegen/wimoai-workflow",
-    "crates/common/wimoai-circuit-breaker",
-    "crates/common/wimoai-computer-hub-core",
-    "crates/common/wimoai-computer-hub-mcp-adapter",
-    "crates/common/wimoai-computer-hub-sdk",
-    "crates/common/wimoai-wimo-compaction",
-    "crates/common/wimoai-interjection-core",
-    "crates/common/wimoai-message-delivery-core",
-    "crates/common/wimoai-test-utils",
-    "crates/common/wimoai-tool-protocol",
-    "crates/common/wimoai-tool-runtime",
-    "crates/common/wimoai-tool-types",
-    "crates/common/wimoai-tracing",
+    "crates/codegen/beecode-acp-lib",
+    "crates/codegen/beecode-agent-lifecycle",
+    "crates/codegen/beecode-chat-state",
+    "crates/codegen/beecode-codebase-graph",
+    "crates/codegen/beecode-compaction-transcript",
+    "crates/codegen/beecode-crash-handler",
+    "crates/codegen/beecode-dirs",
+    "crates/codegen/beecode-fast-worktree",
+    "crates/codegen/beecode-file-utils",
+    "crates/codegen/beecode-fsnotify",
+    "crates/codegen/beecode-fuzzy-file-search",
+    "crates/codegen/beecode-gix-status",
+    "crates/codegen/beecode-active-sessions",
+    "crates/codegen/beecode-agent",
+    "crates/codegen/beecode-announcements",
+    "crates/codegen/beecode-auth",
+    "crates/codegen/beecode-bundle",
+    "crates/codegen/beecode-config",
+    "crates/codegen/beecode-config-types",
+    "crates/codegen/beecode-dashboard-store",
+    "crates/codegen/beecode-diag-server",
+    "crates/codegen/beecode-env",
+    "crates/codegen/beecode-extra-ca",
+    "crates/codegen/beecode-foreign-sessions",
+    "crates/codegen/beecode-gboom",
+    "crates/codegen/beecode-hooks",
+    "crates/codegen/beecode-http",
+    "crates/codegen/beecode-markdown",
+    "crates/codegen/beecode-markdown-core",
+    "crates/codegen/beecode-mcp",
+    "crates/codegen/beecode-memory",
+    "crates/codegen/beecode-mermaid",
+    "crates/codegen/beecode-models",
+    "crates/codegen/beecode-pager",
+    "crates/codegen/beecode-pager-bin",
+    "crates/codegen/beecode-pager-diff",
+    "crates/codegen/beecode-pager-minimal",
+    "crates/codegen/beecode-pager-pty-harness",
+    "crates/codegen/beecode-pager-render",
+    "crates/codegen/beecode-paths",
+    "crates/codegen/beecode-plugin-marketplace",
+    "crates/codegen/beecode-sampler",
+    "crates/codegen/beecode-sampling-types",
+    "crates/codegen/beecode-sandbox",
+    "crates/codegen/beecode-secrets",
+    "crates/codegen/beecode-session-events",
+    "crates/codegen/beecode-session-search",
+    "crates/codegen/beecode-shared",
+    "crates/codegen/beecode-shell",
+    "crates/codegen/beecode-shell-base",
+    "crates/codegen/beecode-shell-session-support",
+    "crates/codegen/beecode-shell-terminal",
+    "crates/codegen/beecode-status-line",
+    "crates/codegen/beecode-subagent-resolution",
+    "crates/codegen/beecode-telemetry",
+    "crates/codegen/beecode-test-support",
+    "crates/codegen/beecode-tools",
+    "crates/codegen/beecode-tools-api",
+    "crates/codegen/beecode-update",
+    "crates/codegen/beecode-version",
+    "crates/codegen/beecode-voice",
+    "crates/codegen/beecode-workspace",
+    "crates/codegen/beecode-workspace-client",
+    "crates/codegen/beecode-workspace-daemon",
+    "crates/codegen/beecode-workspace-types",
+    "crates/codegen/beecode-hooks-plugins-types",
+    "crates/codegen/beecode-hunk-tracker",
+    "crates/codegen/beecode-mixpanel",
+    "crates/codegen/beecode-prompt-queue",
+    "crates/codegen/beecode-ratatui-inline",
+    "crates/codegen/beecode-ratatui-textarea",
+    "crates/codegen/beecode-sqlite-journal",
+    "crates/codegen/beecode-system-power",
+    "crates/codegen/beecode-token-estimation",
+    "crates/codegen/beecode-tracing-macros",
+    "crates/codegen/beecode-tty-utils",
+    "crates/codegen/beecode-workflow",
+    "crates/common/beecode-circuit-breaker",
+    "crates/common/beecode-computer-hub-core",
+    "crates/common/beecode-computer-hub-mcp-adapter",
+    "crates/common/beecode-computer-hub-sdk",
+    "crates/common/beecode-compaction",
+    "crates/common/beecode-interjection-core",
+    "crates/common/beecode-message-delivery-core",
+    "crates/common/beecode-test-utils",
+    "crates/common/beecode-tool-protocol",
+    "crates/common/beecode-tool-runtime",
+    "crates/common/beecode-tool-types",
+    "crates/common/beecode-tracing",
     "prod/mc/cli-chat-proxy-types",
     "third_party/dagre_rust",
     "third_party/graphlib_rust",
@@ -308,68 +308,68 @@ wildmatch = "2"
 windows = { version = "0.61", features = ["Win32_Security", "Win32_Security_Authorization", "Win32_Foundation", "Win32_System_Threading", "Win32_System_JobObjects", "Win32_System_Console", "Win32_System_Pipes"] }
 wiremock = "0.6"
 wl-clipboard-rs = "0.9"
-wimoai-acp-lib = { path = "crates/codegen/wimoai-acp-lib" }
-wimoai-agent-lifecycle = { path = "crates/codegen/wimoai-agent-lifecycle" }
-wimoai-circuit-breaker = { path = "crates/common/wimoai-circuit-breaker" }
-wimoai-compaction-transcript = { path = "crates/codegen/wimoai-compaction-transcript" }
-wimoai-computer-hub-core = { path = "crates/common/wimoai-computer-hub-core" }
-wimoai-computer-hub-sdk = { path = "crates/common/wimoai-computer-hub-sdk" }
-wimoai-dirs = { path = "crates/codegen/wimoai-dirs" }
-wimoai-fuzzy-file-search = { path = "crates/codegen/wimoai-fuzzy-file-search" }
-wimoai-gix-status = { path = "crates/codegen/wimoai-gix-status" }
-wimoai-wimo-active-sessions = { path = "crates/codegen/wimoai-wimo-active-sessions" }
-wimoai-wimo-agent = { path = "crates/codegen/wimoai-wimo-agent" }
-wimoai-wimo-announcements = { path = "crates/codegen/wimoai-wimo-announcements" }
-wimoai-wimo-auth = { path = "crates/codegen/wimoai-wimo-auth" }
-wimoai-wimo-bundle = { path = "crates/codegen/wimoai-wimo-bundle" }
-wimoai-wimo-config = { path = "crates/codegen/wimoai-wimo-config" }
-wimoai-wimo-config-types = { path = "crates/codegen/wimoai-wimo-config-types" }
-wimoai-wimo-dashboard-store = { path = "crates/codegen/wimoai-wimo-dashboard-store" }
-wimoai-wimo-diag-server = { path = "crates/codegen/wimoai-wimo-diag-server" }
-wimoai-wimo-env = { path = "crates/codegen/wimoai-wimo-env" }
-wimoai-wimo-extra-ca = { path = "crates/codegen/wimoai-wimo-extra-ca" }
-wimoai-wimo-foreign-sessions = { path = "crates/codegen/wimoai-wimo-foreign-sessions" }
-wimoai-wimo-http = { path = "crates/codegen/wimoai-wimo-http" }
-wimoai-wimo-markdown = { path = "crates/codegen/wimoai-wimo-markdown" }
-wimoai-wimo-markdown-core = { path = "crates/codegen/wimoai-wimo-markdown-core" }
-wimoai-wimo-mcp = { path = "crates/codegen/wimoai-wimo-mcp" }
-wimoai-wimo-memory = { path = "crates/codegen/wimoai-wimo-memory" }
-wimoai-wimo-mermaid = { path = "crates/codegen/wimoai-wimo-mermaid" }
-wimoai-wimo-models = { path = "crates/codegen/wimoai-wimo-models" }
-wimoai-wimo-sampler = { path = "crates/codegen/wimoai-wimo-sampler" }
-wimoai-wimo-secrets = { path = "crates/codegen/wimoai-wimo-secrets" }
-wimoai-wimo-session-events = { path = "crates/codegen/wimoai-wimo-session-events" }
-wimoai-wimo-session-search = { path = "crates/codegen/wimoai-wimo-session-search" }
-wimoai-wimo-shared = { path = "crates/codegen/wimoai-wimo-shared" }
-wimoai-wimo-shell = { path = "crates/codegen/wimoai-wimo-shell" }
-wimoai-wimo-shell-base = { path = "crates/codegen/wimoai-wimo-shell-base" }
-wimoai-wimo-shell-session-support = { path = "crates/codegen/wimoai-wimo-shell-session-support" }
-wimoai-wimo-shell-terminal = { path = "crates/codegen/wimoai-wimo-shell-terminal" }
-wimoai-wimo-status-line = { path = "crates/codegen/wimoai-wimo-status-line" }
-wimoai-wimo-telemetry = { path = "crates/codegen/wimoai-wimo-telemetry" }
-wimoai-wimo-test-support = { path = "crates/codegen/wimoai-wimo-test-support" }
-wimoai-wimo-tools = { path = "crates/codegen/wimoai-wimo-tools" }
-wimoai-wimo-tools-api = { path = "crates/codegen/wimoai-wimo-tools-api" }
-wimoai-wimo-version = { path = "crates/codegen/wimoai-wimo-version" }
-wimoai-wimo-workspace = { path = "crates/codegen/wimoai-wimo-workspace", default-features = false }
-wimoai-wimo-workspace-types = { path = "crates/codegen/wimoai-wimo-workspace-types" }
-wimoai-hooks-plugins-types = { path = "crates/codegen/wimoai-hooks-plugins-types" }
-wimoai-interjection-core = { path = "crates/common/wimoai-interjection-core" }
-wimoai-message-delivery-core = { path = "crates/common/wimoai-message-delivery-core" }
-wimoai-mixpanel = { path = "crates/codegen/wimoai-mixpanel" }
-wimoai-prompt-queue = { path = "crates/codegen/wimoai-prompt-queue" }
-wimoai-proto-build = { path = "crates/build/wimoai-proto-build" }
-wimoai-ratatui-inline = { path = "crates/codegen/wimoai-ratatui-inline" }
-wimoai-ratatui-textarea = { path = "crates/codegen/wimoai-ratatui-textarea" }
-wimoai-sqlite-journal = { path = "crates/codegen/wimoai-sqlite-journal" }
-wimoai-system-power = { path = "crates/codegen/wimoai-system-power" }
-wimoai-test-utils = { path = "crates/common/wimoai-test-utils" }
-wimoai-token-estimation = { path = "crates/codegen/wimoai-token-estimation" }
-wimoai-tool-protocol = { path = "crates/common/wimoai-tool-protocol" }
-wimoai-tool-runtime = { path = "crates/common/wimoai-tool-runtime" }
-wimoai-tool-types = { path = "crates/common/wimoai-tool-types" }
-wimoai-tracing = { path = "crates/common/wimoai-tracing" }
-wimoai-tty-utils = { path = "crates/codegen/wimoai-tty-utils" }
+beecode-acp-lib = { path = "crates/codegen/beecode-acp-lib" }
+beecode-agent-lifecycle = { path = "crates/codegen/beecode-agent-lifecycle" }
+beecode-circuit-breaker = { path = "crates/common/beecode-circuit-breaker" }
+beecode-compaction-transcript = { path = "crates/codegen/beecode-compaction-transcript" }
+beecode-computer-hub-core = { path = "crates/common/beecode-computer-hub-core" }
+beecode-computer-hub-sdk = { path = "crates/common/beecode-computer-hub-sdk" }
+beecode-dirs = { path = "crates/codegen/beecode-dirs" }
+beecode-fuzzy-file-search = { path = "crates/codegen/beecode-fuzzy-file-search" }
+beecode-gix-status = { path = "crates/codegen/beecode-gix-status" }
+beecode-active-sessions = { path = "crates/codegen/beecode-active-sessions" }
+beecode-agent = { path = "crates/codegen/beecode-agent" }
+beecode-announcements = { path = "crates/codegen/beecode-announcements" }
+beecode-auth = { path = "crates/codegen/beecode-auth" }
+beecode-bundle = { path = "crates/codegen/beecode-bundle" }
+beecode-config = { path = "crates/codegen/beecode-config" }
+beecode-config-types = { path = "crates/codegen/beecode-config-types" }
+beecode-dashboard-store = { path = "crates/codegen/beecode-dashboard-store" }
+beecode-diag-server = { path = "crates/codegen/beecode-diag-server" }
+beecode-env = { path = "crates/codegen/beecode-env" }
+beecode-extra-ca = { path = "crates/codegen/beecode-extra-ca" }
+beecode-foreign-sessions = { path = "crates/codegen/beecode-foreign-sessions" }
+beecode-http = { path = "crates/codegen/beecode-http" }
+beecode-markdown = { path = "crates/codegen/beecode-markdown" }
+beecode-markdown-core = { path = "crates/codegen/beecode-markdown-core" }
+beecode-mcp = { path = "crates/codegen/beecode-mcp" }
+beecode-memory = { path = "crates/codegen/beecode-memory" }
+beecode-mermaid = { path = "crates/codegen/beecode-mermaid" }
+beecode-models = { path = "crates/codegen/beecode-models" }
+beecode-sampler = { path = "crates/codegen/beecode-sampler" }
+beecode-secrets = { path = "crates/codegen/beecode-secrets" }
+beecode-session-events = { path = "crates/codegen/beecode-session-events" }
+beecode-session-search = { path = "crates/codegen/beecode-session-search" }
+beecode-shared = { path = "crates/codegen/beecode-shared" }
+beecode-shell = { path = "crates/codegen/beecode-shell" }
+beecode-shell-base = { path = "crates/codegen/beecode-shell-base" }
+beecode-shell-session-support = { path = "crates/codegen/beecode-shell-session-support" }
+beecode-shell-terminal = { path = "crates/codegen/beecode-shell-terminal" }
+beecode-status-line = { path = "crates/codegen/beecode-status-line" }
+beecode-telemetry = { path = "crates/codegen/beecode-telemetry" }
+beecode-test-support = { path = "crates/codegen/beecode-test-support" }
+beecode-tools = { path = "crates/codegen/beecode-tools" }
+beecode-tools-api = { path = "crates/codegen/beecode-tools-api" }
+beecode-version = { path = "crates/codegen/beecode-version" }
+beecode-workspace = { path = "crates/codegen/beecode-workspace", default-features = false }
+beecode-workspace-types = { path = "crates/codegen/beecode-workspace-types" }
+beecode-hooks-plugins-types = { path = "crates/codegen/beecode-hooks-plugins-types" }
+beecode-interjection-core = { path = "crates/common/beecode-interjection-core" }
+beecode-message-delivery-core = { path = "crates/common/beecode-message-delivery-core" }
+beecode-mixpanel = { path = "crates/codegen/beecode-mixpanel" }
+beecode-prompt-queue = { path = "crates/codegen/beecode-prompt-queue" }
+beecode-proto-build = { path = "crates/build/beecode-proto-build" }
+beecode-ratatui-inline = { path = "crates/codegen/beecode-ratatui-inline" }
+beecode-ratatui-textarea = { path = "crates/codegen/beecode-ratatui-textarea" }
+beecode-sqlite-journal = { path = "crates/codegen/beecode-sqlite-journal" }
+beecode-system-power = { path = "crates/codegen/beecode-system-power" }
+beecode-test-utils = { path = "crates/common/beecode-test-utils" }
+beecode-token-estimation = { path = "crates/codegen/beecode-token-estimation" }
+beecode-tool-protocol = { path = "crates/common/beecode-tool-protocol" }
+beecode-tool-runtime = { path = "crates/common/beecode-tool-runtime" }
+beecode-tool-types = { path = "crates/common/beecode-tool-types" }
+beecode-tracing = { path = "crates/common/beecode-tracing" }
+beecode-tty-utils = { path = "crates/codegen/beecode-tty-utils" }
 zbus = { version = "5" }
 zip = "3"
 zstd = "0.13"

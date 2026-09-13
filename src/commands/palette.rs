@@ -1,5 +1,5 @@
 //! Command palette — REAL command framework (Section 34 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub enum Command {
     Help,

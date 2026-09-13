@@ -1,5 +1,5 @@
 //! ContextEngine — REAL progressive context assembly (Section 6 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub struct ContextEngine {
     pub budget: usize,

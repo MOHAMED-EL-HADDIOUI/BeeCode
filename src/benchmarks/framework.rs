@@ -1,5 +1,5 @@
 //! Benchmark framework — REAL measurement (Section 41 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub struct BenchmarkResult {
     pub name: String,

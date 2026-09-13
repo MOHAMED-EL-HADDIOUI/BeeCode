@@ -1,5 +1,5 @@
 //! Main architecture connector — connects all framework modules (l.txt Sections 43-49)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub mod indexer;
 pub mod agent;
@@ -30,5 +30,5 @@ pub mod review;
 pub mod tui_layout;
 
 pub fn connect_all() -> String {
-    "Wimo architecture: all 38+ modules connected. Real framework implemented. Full 9-phase runtime remains incomplete per Section 46.".to_string()
+    "BeeCode architecture: all 38+ modules connected. Real framework implemented. Full 9-phase runtime remains incomplete per Section 46.".to_string()
 }

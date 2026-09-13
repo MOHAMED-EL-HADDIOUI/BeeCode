@@ -1,8 +1,8 @@
 //! Verification checklist — REAL verification framework (Section 47 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub fn check_startup() -> bool {
-    std::fs::metadata("/home/mohamed-el-haddioui/Downloads/WIMO/wimo/src/startup/optimization.rs").is_ok()
+    std::fs::metadata("/home/mohamed-el-haddioui/Downloads/BEECODE/beecode/src/startup/optimization.rs").is_ok()
 }
 pub fn check_tui() -> bool { true }
 pub fn check_model_streaming() -> bool { true }

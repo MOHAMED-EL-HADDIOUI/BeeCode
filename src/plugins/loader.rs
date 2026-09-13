@@ -1,5 +1,5 @@
 //! Plugin loader — REAL plugin architecture (Section 24 of l.txt)
-//! wimoai is open source (opensource). Anyone can contribute.
+//! beecode is open source (opensource). Anyone can contribute.
 
 pub struct Plugin {
     pub name: String,
